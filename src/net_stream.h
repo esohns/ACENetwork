@@ -1,0 +1,95 @@
+/***************************************************************************
+ *   Copyright (C) 2009 by Erik Sohns   *
+ *   erik.sohns@web.de   *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+#ifndef NET_STREAM_H
+#define NET_STREAM_H
+
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
+
+#include "common.h"
+#include "common_istatistic.h"
+
+#include "stream_base.h"
+
+#include "net_common_modules.h"
+#include "net_exports.h"
+#include "net_message.h"
+#include "net_module_headerparser.h"
+#include "net_module_protocolhandler.h"
+#include "net_module_sockethandler.h"
+#include "net_sessionmessage.h"
+#include "net_stream_common.h"
+#include "net_stream_config.h"
+
+class Net_Export Net_Stream
+ : public Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        Net_StreamProtocolConfigurationState_t,
+                        Net_StreamConfiguration,
+                        Net_SessionMessage,
+                        Net_Message>
+ , public Common_IStatistic_T<Net_RuntimeStatistic_t>
+{
+ public:
+   Net_Stream ();
+   virtual ~Net_Stream ();
+
+  // convenience types
+  typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Net_Statistics_t;
+
+  // init stream
+  bool init (const Net_StreamProtocolConfigurationState_t&); // stream/module configuration
+
+  // *TODO*: re-consider this API
+  void ping ();
+
+  unsigned int getSessionID () const;
+
+  // implement Common_IStatistic_T
+  // *NOTE*: delegate this to runtimeStatistic_
+  virtual bool collect (Net_RuntimeStatistic_t&) const; // return value: statistic data
+  // this is just a dummy (use statisticsReportingInterval instead)
+  virtual void report () const;
+
+ private:
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        Net_StreamProtocolConfigurationState_t,
+                        Net_StreamConfiguration,
+                        Net_SessionMessage,
+                        Net_Message> inherited;
+
+//   ACE_UNIMPLEMENTED_FUNC (Net_Stream ());
+  ACE_UNIMPLEMENTED_FUNC (Net_Stream (const Net_Stream&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Stream& operator= (const Net_Stream&));
+
+  // fini stream
+  // *NOTE*: need this to clean up queued modules if something goes wrong during init() !
+  bool fini (const Net_StreamProtocolConfigurationState_t&); // configuration
+
+  // modules
+  Net_Module_SocketHandler_Module    socketHandler_;
+  Net_Module_HeaderParser_Module     headerParser_;
+  Net_Module_RuntimeStatistic_Module runtimeStatistic_;
+  Net_Module_ProtocolHandler_Module  protocolHandler_;
+};
+
+#endif
