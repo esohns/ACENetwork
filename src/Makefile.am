@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 
 DEFS = \
-  -DLIBACENETWORK_BUILD_DLL=1 \
+  -DNET_BUILD_DLL=1 \
   -DMETA_PACKAGE=\"@META_PACKAGE@\"
 
 AM_CPPFLAGS = \
@@ -24,18 +24,20 @@ include_HEADERS = \
   net_exports.h \
   net_iconnection.h \
   net_iconnectionmanager.h \
-  net_icounter.h \
-  net_inotify.h \
   net_itransportlayer.h \
   net_macros.h \
   net_message.h \
   net_message_base.h \
   net_message_base.inl \
+  net_module_headerparser.h \
+  net_module_protocolhandler.h \
   net_module_runtimestatistic.h \
   net_module_runtimestatistic.inl \
+  net_module_sockethandler.h \
   net_packet_headers.h \
   net_protocol_layer.h \
   net_remote_comm.h \
+  net_sessionmessage.h \
   net_socket_common.h \
   net_socketconnection_base.h \
   net_socketconnection_base.inl \
@@ -85,8 +87,6 @@ libACENetwork_la_SOURCES = \
   net_exports.h \
   net_iconnection.h \
   net_iconnectionmanager.h \
-  net_icounter.h \
-  net_inotify.h \
   net_itransportlayer.h \
   net_macros.h \
   net_message.cpp \
@@ -94,13 +94,21 @@ libACENetwork_la_SOURCES = \
   net_message_base.cpp \
   net_message_base.h \
   net_message_base.inl \
+  net_module_headerparser.cpp \
+  net_module_headerparser.h \
+  net_module_protocolhandler.cpp \
+  net_module_protocolhandler.h \
   net_module_runtimestatistic.cpp \
   net_module_runtimestatistic.h \
   net_module_runtimestatistic.inl \
+  net_module_sockethandler.cpp \
+  net_module_sockethandler.h \
   net_packet_headers.h \
   net_protocol_layer.cpp \
   net_protocol_layer.h \
   net_remote_comm.h \
+  net_sessionmessage.cpp \
+  net_sessionmessage.h \
   net_socket_common.h \
   net_socketconnection_base.cpp \
   net_socketconnection_base.h \
@@ -141,4 +149,7 @@ libACENetwork_la_SOURCES = \
   net_udpsockethandler.h \
   stdafx.cpp \
   stdafx.h
+
+SUBDIRS = \
+  client
 

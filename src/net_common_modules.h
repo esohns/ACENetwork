@@ -30,27 +30,27 @@
 #include "net_common.h"
 #include "net_message.h"
 #include "net_module_runtimestatistic.h"
-#include "net_remote_comm.h"
+//#include "net_remote_comm.h"
 #include "net_sessionmessage.h"
-#include "net_stream_common.h"
+//#include "net_stream_common.h"
 
 // declare module(s)
-typedef Net_Module_StatisticReader_T<ACE_MT_SYNCH,
-                                     Common_TimePolicy_t,
-                                     Net_SessionMessage,
-                                     Net_Message,
-                                     Net_MessageType,
-                                     Net_RuntimeStatistic_t> Net_Module_StatisticReader_t;
-typedef RPG_Net_Module_Statistic_T<ACE_MT_SYNCH,
-                                   Common_TimePolicy_t,
-                                   Net_SessionMessage,
-                                   Net_Message,
-                                   Net_MessageType,
-                                   Net_RuntimeStatistic_t> Net_Module_Statistic_t;
-DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                 // task synch type
-                          Common_TimePolicy_t,          // time policy type
-                          Net_Module_StatisticReader_t, // reader type
-                          Net_Module_Statistic_t,       // writer type
-                          Net_Module_Statistic);        // name
+typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
+                                          Common_TimePolicy_t,
+                                          Net_SessionMessage,
+                                          Net_Message,
+                                          Net_MessageType_t,
+                                          Net_RuntimeStatistic_t> Net_Module_Statistic_ReaderTask_t;
+typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
+                                          Common_TimePolicy_t,
+                                          Net_SessionMessage,
+                                          Net_Message,
+                                          Net_MessageType_t,
+                                          Net_RuntimeStatistic_t> Net_Module_Statistic_WriterTask_t;
+DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                      // task synch type
+                          Common_TimePolicy_t,               // time policy type
+                          Net_Module_Statistic_ReaderTask_t, // reader type
+                          Net_Module_Statistic_WriterTask_t, // writer type
+                          Net_Module_RuntimeStatistic);      // name
 
 #endif

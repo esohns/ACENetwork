@@ -37,7 +37,7 @@
 #include "net_module_sockethandler.h"
 #include "net_sessionmessage.h"
 #include "net_stream_common.h"
-#include "net_stream_config.h"
+#include "net_stream_configuration.h"
 
 class Net_Export Net_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,

@@ -154,7 +154,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
       return;
     } // end IF
-    Net_Module_t* clone = NULL;
+    Common_Module_t* clone = NULL;
     try
     {
       clone = imodule_handle->clone ();
@@ -377,11 +377,11 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   if (!inherited::userData_.useThreadPerConnection)
   {
     Net_StreamIterator_t iterator (stream_);
-    const Net_Module_t* module = NULL;
+    const Common_Module_t* module = NULL;
     if (iterator.next (module) == 0)
     {
       ACE_ASSERT (module);
-      Common_Task_t* task = const_cast<Net_Module_t*> (module)->writer ();
+      Common_Task_t* task = const_cast<Common_Module_t*> (module)->writer ();
       ACE_ASSERT (task);
       if (task->msg_queue ()->flush () == -1)
         ACE_DEBUG ((LM_ERROR,

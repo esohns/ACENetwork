@@ -18,60 +18,53 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_MESSAGE_H
-#define NET_MESSAGE_H
+#ifndef NET_SESSIONMESSAGE_H
+#define NET_SESSIONMESSAGE_H
 
-#include <string>
+#include "ace/Global_Macros.h"
 
-#include "net_message_base.h"
-#include "net_remote_comm.h"
+#include "stream_session_message_base.h"
 
-// forward declaration(s)
-class ACE_Allocator;
-class ACE_Data_Block;
+#include "net_stream_configuration.h"
+
+// forward declarations
 class ACE_Message_Block;
-class Net_SessionMessage;
+class ACE_Allocator;
+class Net_Message;
 // class Net_StreamMessageAllocator;
-template <typename MessageType,
-          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
+// template <typename MessageType, typename SessionMessageType> class Stream_MessageAllocatorHeapBase;
 
-class Net_Message
- : public Net_MessageBase_T<Net_MessageType_t>
+class Net_SessionMessage
+ : public Stream_SessionMessageBase_T<Net_StreamConfiguration>
 {
-  // enable access to specific private ctors...
-  //   friend class RPG_Net_StreamMessageAllocator;
-  friend class Stream_MessageAllocatorHeapBase_T<Net_Message,
-                                                 Net_SessionMessage>;
-
+//   // enable access to private ctor(s)...
+//   friend class Net_StreamMessageAllocator;
+//   friend class Stream_MessageAllocatorHeapBase<Net_Message, Net_SessionMessage>;
  public:
-  virtual ~Net_Message ();
+  // *NOTE*: assume lifetime responsibility for the second argument !
+  Net_SessionMessage (unsigned int,                // session ID
+                      Stream_SessionMessageType_t, // session message type
+                      Net_StreamConfiguration*&);  // config handle
+    // *NOTE*: to be used by message allocators...
+  Net_SessionMessage (ACE_Allocator*); // message allocator
+  Net_SessionMessage (ACE_Data_Block*, // data block
+                      ACE_Allocator*); // message allocator
+  virtual ~Net_SessionMessage ();
 
-  virtual Net_MessageType_t getCommand () const; // return value: message type
-
-  // overrides from ACE_Message_Block
-  // --> create a "shallow" copy of ourselves that references the same packet
-  // *NOTE*: this uses our allocator (if any) to create a new message
+  // override from ACE_Message_Block
+  // *WARNING*: any children need to override this as well
   virtual ACE_Message_Block* duplicate (void) const;
 
   // implement Common_IDumpState
   virtual void dump_state () const;
 
-  static std::string CommandType2String (Net_MessageType_t);
-
- protected:
-  // copy ctor to be used by duplicate() and child classes
-  // --> uses an (incremented refcount of) the same datablock ("shallow copy")
-  Net_Message (const Net_Message&);
-
  private:
-  typedef Net_MessageBase_T<Net_MessageType_t> inherited;
+  typedef Stream_SessionMessageBase_T<Net_StreamConfiguration> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Message ());
-  // *NOTE*: to be used by allocators...
-  Net_Message (ACE_Data_Block*, // data block to use
-               ACE_Allocator*); // message allocator
-//   Net_Message (ACE_Allocator*); // message allocator
-  ACE_UNIMPLEMENTED_FUNC (Net_Message& operator= (const Net_Message&));
+  ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage ());
+  // copy ctor (to be used by duplicate())
+  Net_SessionMessage (const Net_SessionMessage&);
+  ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage& operator= (const Net_SessionMessage&));
 };
 
 #endif

@@ -22,21 +22,20 @@
 #include "net_transportlayer_base.h"
 
 #include "net_defines.h"
+#include "net_macros.h"
 
-#include "rpg_common_macros.h"
-
-Net_TransportLayer_Base::Net_TransportLayer_Base(Net_ClientServerRole_t role_in,
-                                                         Net_TransportLayer_t transportLayer_in)
- : myClientServerRole(role_in)
- , myTransportLayer(transportLayer_in)
- , myPort(Net_DEFAULT_PORT)
- , myUseLoopback(false)
+Net_TransportLayer_Base::Net_TransportLayer_Base (Net_ClientServerRole_t role_in,
+                                                  Net_TransportLayer_t transportLayer_in)
+ : clientServerRole_ (role_in)
+ , transportLayer_ (transportLayer_in)
+ , port_ (NET_DEFAULT_PORT)
+ , useLoopback_ (false)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_TransportLayer_Base::Net_TransportLayer_Base"));
+  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Base::Net_TransportLayer_Base"));
 
 }
 
-Net_TransportLayer_Base::~Net_TransportLayer_Base()
+Net_TransportLayer_Base::~Net_TransportLayer_Base ()
 {
   NETWORK_TRACE(ACE_TEXT("Net_TransportLayer_Base::~Net_TransportLayer_Base"));
 
@@ -44,22 +43,22 @@ Net_TransportLayer_Base::~Net_TransportLayer_Base()
 
 void
 Net_TransportLayer_Base::init (Net_ClientServerRole_t role_in,
-                                   unsigned short port_in,
-                                   bool useLoopback_in)
+                               unsigned short port_in,
+                               bool useLoopback_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_TransportLayer_Base::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Base::init"));
 
-  myClientServerRole = role_in;
-  myPort = port_in;
-  myUseLoopback = useLoopback_in;
+  clientServerRole_ = role_in;
+  port_ = port_in;
+  useLoopback_ = useLoopback_in;
 }
 
 void
 Net_TransportLayer_Base::info (ACE_HANDLE& handle_out,
-                                   ACE_INET_Addr& localSAP_out,
-                                   ACE_INET_Addr& remoteSAP_out) const
+                               ACE_INET_Addr& localSAP_out,
+                               ACE_INET_Addr& remoteSAP_out) const
 {
-  RPG_TRACE (ACE_TEXT ("Net_TransportLayer_Base::info"));
+  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Base::info"));
 
   // init return value(s)
   handle_out = ACE_INVALID_HANDLE;

@@ -52,7 +52,7 @@ class Net_StreamAsynchTCPSocketBase_T
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
 
 //  // *TODO*: (try to) handle short writes gracefully...
-//  ACE_Message_Block* myBuffer;
+//  ACE_Message_Block* buffer_;
   Net_StreamSocketConfiguration_t configuration_;
   StreamType                      stream_;
 

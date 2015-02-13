@@ -21,17 +21,17 @@
 
 #include "net_transportlayer_tcp.h"
 
-#include "rpg_common_macros.h"
+#include "net_macros.h"
 
-Net_TransportLayer_TCP::Net_TransportLayer_TCP()
+Net_TransportLayer_TCP::Net_TransportLayer_TCP ()
  : inherited (ROLE_INVALID,
               TRANSPORTLAYER_TCP)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_TransportLayer_TCP::Net_TransportLayer_TCP"));
+  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_TCP::Net_TransportLayer_TCP"));
 
 }
 
-Net_TransportLayer_TCP::~Net_TransportLayer_TCP()
+Net_TransportLayer_TCP::~Net_TransportLayer_TCP ()
 {
   NETWORK_TRACE(ACE_TEXT("Net_TransportLayer_TCP::~Net_TransportLayer_TCP"));
 

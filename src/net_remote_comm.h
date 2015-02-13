@@ -27,7 +27,7 @@ class Net_Remote_Comm
 {
  public:
   // define different types of messages
-  enum MessageType
+  enum MessageType_t
   {
     NET_INVALID = -1,
     NET_PING,
@@ -44,8 +44,8 @@ class Net_Remote_Comm
   {
     // *NOTE*: messageLength is (currently) defined as:
     // *PORTABILITY*: total message length - sizeof(unsigned int) !
-    unsigned int messageLength;
-    MessageType  messageType;
+    unsigned int  messageLength;
+    MessageType_t messageType;
 #ifdef __GNUC__
   } __attribute__ ((__packed__));
 #else
@@ -56,7 +56,7 @@ class Net_Remote_Comm
   struct PingMessage
   {
     MessageHeader messageHeader;
-    unsigned int counter;
+    unsigned int  counter;
 #ifdef __GNUC__
   } __attribute__ ((__packed__));
 #else
@@ -76,14 +76,14 @@ class Net_Remote_Comm
 #endif
 
  private:
-  ACE_UNIMPLEMENTED_FUNC(Net_Remote_Comm());
-  ACE_UNIMPLEMENTED_FUNC(virtual ~Net_Remote_Comm());
-  ACE_UNIMPLEMENTED_FUNC(Net_Remote_Comm(const Net_Remote_Comm&));
-  ACE_UNIMPLEMENTED_FUNC(Net_Remote_Comm& operator=(const Net_Remote_Comm&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Remote_Comm ());
+  ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Remote_Comm ());
+  ACE_UNIMPLEMENTED_FUNC (Net_Remote_Comm (const Net_Remote_Comm&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Remote_Comm& operator= (const Net_Remote_Comm&));
 };
 
 // convenient typedefs
-typedef Net_Remote_Comm::MessageType Net_MessageType;
-typedef Net_Remote_Comm::MessageHeader Net_MessageHeader;
+typedef Net_Remote_Comm::MessageType_t Net_MessageType_t;
+typedef Net_Remote_Comm::MessageHeader Net_MessageHeader_t;
 
 #endif

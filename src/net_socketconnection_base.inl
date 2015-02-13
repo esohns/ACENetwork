@@ -98,7 +98,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
     return -1;
   } // end catch
 
-  return reinterpret_cast<unsigned int> (handle);
+  return static_cast<unsigned int> (handle);
 }
 
 template <typename SocketHandlerType,

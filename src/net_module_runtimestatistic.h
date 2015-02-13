@@ -28,15 +28,16 @@
 #include "ace/Stream_Modules.h"
 #include "ace/Synch.h"
 
+#include "common_icounter.h"
 #include "common_istatistic.h"
 
+#include "stream_resetcounterhandler.h"
+#include "stream_statistichandler.h"
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
 #include "net_defines.h"
-#include "net_icounter.h"
-#include "net_resetcounterhandler.h"
-#include "net_statistichandler.h"
+#include "net_stream_common.h"
 
 // forward declaration(s)
 class ACE_Message_Block;
@@ -47,7 +48,7 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType> class Net_Module_Statistic_T;
+          typename StatisticsContainerType> class Net_Module_Statistic_WriterTask_T;
 
 template <typename TaskSynchType,
           typename TimePolicyType,
@@ -55,13 +56,13 @@ template <typename TaskSynchType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
-class Net_Module_StatisticReader_T
+class Net_Module_Statistic_ReaderTask_T
  : public ACE_Thru_Task<TaskSynchType,
                         TimePolicyType>
 {
  public:
-  Net_Module_StatisticReader_T ();
-  virtual ~Net_Module_StatisticReader_T ();
+  Net_Module_Statistic_ReaderTask_T ();
+  virtual ~Net_Module_Statistic_ReaderTask_T ();
 
   virtual int put (ACE_Message_Block*,      // message
                    ACE_Time_Value* = NULL); // time
@@ -69,17 +70,17 @@ class Net_Module_StatisticReader_T
  private:
   typedef ACE_Thru_Task<TaskSynchType,
                         TimePolicyType> inherited;
-  typedef Net_Module_Statistic_T<TaskSynchType,
-                                 TimePolicyType,
-                                 SessionMessageType,
-                                 ProtocolMessageType,
-                                 ProtocolCommandType,
-                                 StatisticsContainerType> Net_ModuleStatisticTask_t;
-  typedef ProtocolMessageType Net_Module;
-  typedef ProtocolCommandType COMMAND_TYPE;
+  typedef Net_Module_Statistic_WriterTask_T<TaskSynchType,
+                                            TimePolicyType,
+                                            SessionMessageType,
+                                            ProtocolMessageType,
+                                            ProtocolCommandType,
+                                            StatisticsContainerType> Net_Module_Statistic_WriterTask_t;
+  typedef ProtocolMessageType Net_MessageType_t;
+  typedef ProtocolCommandType Net_CommandType_t;
 
-  ACE_UNIMPLEMENTED_FUNC(RPG_Net_Module_RuntimeStatisticReader_t(const RPG_Net_Module_RuntimeStatisticReader_t&));
-  ACE_UNIMPLEMENTED_FUNC(RPG_Net_Module_RuntimeStatisticReader_t& operator=(const RPG_Net_Module_RuntimeStatisticReader_t&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T (const Net_Module_Statistic_ReaderTask_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T& operator= (const Net_Module_Statistic_ReaderTask_T&));
 };
 
 template <typename TaskSynchType,
@@ -88,108 +89,104 @@ template <typename TaskSynchType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
-class RPG_Net_Module_RuntimeStatistic_t
- : public RPG_Stream_TaskBaseSynch<TimePolicyType,
-                                   SessionMessageType,
-                                   ProtocolMessageType>,
-   public RPG_Net_ICounter,
-   public RPG_Common_IStatistic<StatisticsContainerType>
+class Net_Module_Statistic_WriterTask_T
+ : public Stream_TaskBaseSynch_T<TimePolicyType,
+                                 SessionMessageType,
+                                 ProtocolMessageType>
+ , public Common_ICounter
+ , public Common_IStatistic_T<StatisticsContainerType>
 {
- friend class RPG_Net_Module_RuntimeStatisticReader_t<TaskSynchType,
-                                                      TimePolicyType,
-                                                      SessionMessageType,
-                                                      ProtocolMessageType,
-                                                      ProtocolCommandType,
-                                                      StatisticsContainerType>;
+ friend class Net_Module_Statistic_ReaderTask_T<TaskSynchType,
+                                                TimePolicyType,
+                                                SessionMessageType,
+                                                ProtocolMessageType,
+                                                ProtocolCommandType,
+                                                StatisticsContainerType>;
  public:
-  RPG_Net_Module_RuntimeStatistic_t();
-  virtual ~RPG_Net_Module_RuntimeStatistic_t();
+  Net_Module_Statistic_WriterTask_T ();
+  virtual ~Net_Module_Statistic_WriterTask_T ();
 
   // initialization
-  bool init(const unsigned int& = RPG_NET_DEFAULT_STATISTICS_REPORTING_INTERVAL, // (local) reporting interval [seconds: 0 --> OFF]
-            const bool& = false,                                                 // print final report ?
-            const RPG_Stream_IAllocator* = NULL);                                // report cache usage ?
+  bool init (unsigned int = NET_DEFAULT_STATISTICS_REPORTING_INTERVAL, // (local) reporting interval [seconds: 0 --> OFF]
+             bool = false,                                             // print final report ?
+             const Stream_IAllocator* = NULL);                         // report cache usage ?
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage(ProtocolMessageType*&, // data message handle
-                                 bool&);            // return value: pass message downstream ?
+  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
 
   // implement this so we can print overall statistics after session completes...
-  virtual void handleSessionMessage(SessionMessageType*&, // session message handle
-                                    bool&);               // return value: pass message downstream ?
+  virtual void handleSessionMessage (SessionMessageType*&, // session message handle
+                                     bool&);               // return value: pass message downstream ?
 
-  // implement RPG_Net_ICounter
-  virtual void reset();
+  // implement Stream_ICounter
+  virtual void reset ();
 
-  // implement RPG_Common_IStatistic
-  virtual bool collect(StatisticsContainerType&) const; // return value: info
+  // implement Common_IStatistic
+  virtual bool collect (StatisticsContainerType&) const; // return value: info
   // *NOTE*: this also implements locally triggered reporting !
-  virtual void report() const;
+  virtual void report () const;
 
  private:
-  typedef RPG_Stream_TaskBaseSynch<TimePolicyType,
-                                   SessionMessageType,
-                                   ProtocolMessageType> inherited;
+  typedef Stream_TaskBaseSynch_T<TimePolicyType,
+                                 SessionMessageType,
+                                 ProtocolMessageType> inherited;
 
   // message type counters
-  typedef std::set<ProtocolCommandType> MESSAGETYPECONTAINER_TYPE;
-  typedef typename MESSAGETYPECONTAINER_TYPE::const_iterator MESSAGETYPECONTAINER_CONSTITERATOR_TYPE;
+//  typedef std::set<ProtocolCommandType> Net_Messages_t;
+//  typedef typename Net_Messages_t::const_iterator Net_MessagesIterator_t;
   typedef std::map<ProtocolCommandType,
-                   unsigned int> MESSAGETYPE2COUNT_TYPE;
+                   unsigned int> Net_MessageStatistic_t;
   typedef std::pair<ProtocolCommandType,
-                    unsigned int> MESSAGETYPE2COUNTPAIR_TYPE;
-  typedef typename MESSAGETYPE2COUNT_TYPE::const_iterator MESSAGETYPE2COUNT_CONSTITERATOR_TYPE;
+                    unsigned int> Net_MessageStatisticRecord_t;
+  typedef typename Net_MessageStatistic_t::const_iterator Net_MessageStatisticIterator_t;
 
-  // convenience types
-  typedef StatisticsContainerType STATISTICINTERFACE_TYPE;
-  typedef RPG_Net_StatisticHandler_Reactor<STATISTICINTERFACE_TYPE> STATISTICHANDLER_TYPE;
-
-  ACE_UNIMPLEMENTED_FUNC(RPG_Net_Module_RuntimeStatistic_t(const RPG_Net_Module_RuntimeStatistic_t&));
-  ACE_UNIMPLEMENTED_FUNC(RPG_Net_Module_RuntimeStatistic_t& operator=(const RPG_Net_Module_RuntimeStatistic_t&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_WriterTask_T (const Net_Module_Statistic_WriterTask_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_WriterTask_T& operator= (const Net_Module_Statistic_WriterTask_T&));
 
   // helper method(s)
-  void final_report() const;
-  void fini_timers(const bool& = true); // cancel both timers ? (false --> cancel only myLocalReportingHandlerID)
+  void final_report () const;
+  void fini_timers (bool = true); // cancel both timers ? (false --> cancel only myLocalReportingHandlerID)
 
-  bool                         myIsInitialized;
+  bool                           isInitialized_;
 
   // timer stuff
-//  RPG_Net_TimerQueue_t        myTimerQueue;
-  RPG_Net_ResetCounterHandler  myResetTimeoutHandler;
-  long                         myResetTimeoutHandlerID;
-  STATISTICHANDLER_TYPE        myLocalReportingHandler;
-  long                         myLocalReportingHandlerID;
-  unsigned int                 myReportingInterval; // second(s) {0 --> OFF}
-  bool                         myPrintFinalReport;
+//  Net_TimerQueue_t               timerQueue;
+  Stream_ResetCounterHandler     resetTimeoutHandler_;
+  long                           resetTimeoutHandlerID_;
+  Net_StatisticHandler_Reactor_t localReportingHandler_;
+  long                           localReportingHandlerID_;
+  unsigned int                   reportingInterval_; // second(s) {0 --> OFF}
+  bool                           printFinalReport_;
 
   // *GENERIC STATS*
-  mutable ACE_Thread_Mutex     myLock;
-  unsigned int                 mySessionID;
+  mutable ACE_Thread_Mutex       lock_;
+  unsigned int                   sessionID_;
 
   // *NOTE*: data messages == (myNumTotalMessages - myNumSessionMessages)
-  unsigned int                 myNumInboundMessages;
-  unsigned int                 myNumOutboundMessages;
-  unsigned int                 myNumSessionMessages;
+  unsigned int                   numInboundMessages_;
+  unsigned int                   numOutboundMessages_;
+  unsigned int                   numSessionMessages_;
   // used to compute message throughput...
-  unsigned int                 myMessageCounter;
+  unsigned int                   messageCounter_;
   // *NOTE: support asynchronous collecting/reporting of data...
-  unsigned int                 myLastMessagesPerSecondCount;
+  unsigned int                   lastMessagesPerSecondCount_;
 
-  float                        myNumInboundBytes;
-  float                        myNumOutboundBytes;
+  float                          numInboundBytes_;
+  float                          numOutboundBytes_;
   // used to compute data throughput...
-  unsigned int                 myByteCounter;
+  unsigned int                   byteCounter_;
   // *NOTE: support asynchronous collecting/reporting of data...
-  unsigned int                 myLastBytesPerSecondCount;
+  unsigned int                   lastBytesPerSecondCount_;
 
   // *MESSAGE TYPE STATS*
-  MESSAGETYPE2COUNT_TYPE       myMessageTypeStatistics;
+  Net_MessageStatistic_t         messageTypeStatistics_;
 
   // *CACHE STATS*
-  const RPG_Stream_IAllocator* myAllocator;
+  const Stream_IAllocator*       allocator_;
 };
 
 // include template implementation
-#include "rpg_net_module_runtimestatistic.inl"
+#include "net_module_runtimestatistic.inl"
 
 #endif

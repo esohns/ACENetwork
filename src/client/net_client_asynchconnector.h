@@ -18,43 +18,41 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_TRANSPORTLAYER_BASE_H
-#define Net_TRANSPORTLAYER_BASE_H
+#ifndef NET_CLIENT_ASYNCHCONNECTOR_H
+#define NET_CLIENT_ASYNCHCONNECTOR_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Asynch_Connector.h"
 
-#include "net_exports.h"
-#include "net_common.h"
-#include "net_itransportlayer.h"
+#include "net_tcpconnection.h"
 
-class Net_Export Net_TransportLayer_Base
- : virtual public Net_ITransportLayer
+#include "net_client_exports.h"
+#include "net_client_iconnector.h"
+
+class Net_Client_Export Net_Client_AsynchConnector
+ : public ACE_Asynch_Connector<Net_AsynchTCPConnection>
+ , public Net_Client_IConnector
 {
  public:
-  virtual ~Net_TransportLayer_Base ();
+  Net_Client_AsynchConnector ();
+  virtual ~Net_Client_AsynchConnector ();
 
-  virtual void init (Net_ClientServerRole_t, // role
-                     unsigned short,         // port number
-                     bool = false);          // use loopback device ?
+  // override default creation strategy
+  virtual Net_AsynchTCPConnection* make_handler (void);
+  // override default connect strategy
+  virtual int validate_connection (const ACE_Asynch_Connect::Result&, // result
+                                   const ACE_INET_Addr&,              // remote address
+                                   const ACE_INET_Addr&);             // local address
 
-  // implement (part of) Net_ITransportLayer
-  virtual void info (ACE_HANDLE&,           // return value: I/O handle
-                     ACE_INET_Addr&,        // return value: local SAP
-                     ACE_INET_Addr&) const; // return value: remote SAP
-
- protected:
-  Net_TransportLayer_Base (Net_ClientServerRole_t,
-                           Net_TransportLayer_t);
-
-  Net_ClientServerRole_t clientServerRole_;
-  Net_TransportLayer_t   transportLayer_;
-  unsigned short         port_;
-  bool                   useLoopback_;
+  // implement Net_Client_IConnector
+  virtual void abort ();
+  virtual void connect (const ACE_INET_Addr&);
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Base ());
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Base (const Net_TransportLayer_Base&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Base& operator= (const Net_TransportLayer_Base&));
+  typedef ACE_Asynch_Connector<Net_AsynchTCPConnection> inherited;
+
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector (const Net_Client_AsynchConnector&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector& operator= (const Net_Client_AsynchConnector&));
 };
 
 #endif

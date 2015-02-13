@@ -24,8 +24,6 @@
 #include "net_exports.h"
 #include "net_sockethandler_base.h"
 
-//#include "common_referencecounter_base.h"
-
 #include "ace/Global_Macros.h"
 #include "ace/Asynch_IO.h"
 #include "ace/Notification_Strategy.h"
@@ -35,51 +33,49 @@
 
 class Net_Export Net_AsynchTCPSocketHandler
  : public Net_SocketHandlerBase,
-   //public Common_ReferenceCounterBase,
    public ACE_Service_Handler,
    public ACE_Notification_Strategy
 {
  public:
-  virtual ~Net_AsynchTCPSocketHandler();
+  virtual ~Net_AsynchTCPSocketHandler ();
 
-  virtual void open(ACE_HANDLE,          // (socket) handle
-                    ACE_Message_Block&); // initial data (if any)
-  virtual void addresses(const ACE_INET_Addr&,  // remote address
-                         const ACE_INET_Addr&); // local address
-  virtual int handle_output(ACE_HANDLE) = 0; // (socket) handle
-  virtual int handle_close(ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
-                           ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+  virtual void open (ACE_HANDLE,          // (socket) handle
+                     ACE_Message_Block&); // initial data (if any)
+  virtual void addresses (const ACE_INET_Addr&,  // remote address
+                          const ACE_INET_Addr&); // local address
+  virtual int handle_output (ACE_HANDLE) = 0; // (socket) handle
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
   // implement ACE_Notification_Strategy
-  virtual int notify(void);
-  virtual int notify(ACE_Event_Handler*, // event handler handle
-                     ACE_Reactor_Mask);  // mask
+  virtual int notify (void);
+  virtual int notify (ACE_Event_Handler*, // event handler handle
+                      ACE_Reactor_Mask);  // mask
 
  protected:
-  Net_AsynchTCPSocketHandler();
+  Net_AsynchTCPSocketHandler ();
 
   // helper method(s)
-  void initiate_read_stream();
+  void initiate_read_stream ();
 
-  virtual void handle_write_stream(const ACE_Asynch_Write_Stream::Result&); // result
+  virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 
-  ACE_Asynch_Read_Stream  myInputStream;
-  ACE_Asynch_Write_Stream myOutputStream;
+  ACE_Asynch_Read_Stream  inputStream_;
+  ACE_Asynch_Write_Stream outputStream_;
 
  private:
   typedef Net_SocketHandlerBase inherited;
-  //typedef RPG_Common_ReferenceCounterBase inherited2;
   typedef ACE_Service_Handler inherited2;
   typedef ACE_Notification_Strategy inherited3;
 
-  ACE_UNIMPLEMENTED_FUNC(Net_AsynchTCPSocketHandler(const Net_AsynchTCPSocketHandler&));
-  ACE_UNIMPLEMENTED_FUNC(Net_AsynchTCPSocketHandler& operator=(const Net_AsynchTCPSocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPSocketHandler (const Net_AsynchTCPSocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPSocketHandler& operator= (const Net_AsynchTCPSocketHandler&));
 
   // helper method(s)
-  ACE_Message_Block* allocateMessage(unsigned int); // requested size
+  ACE_Message_Block* allocateMessage (unsigned int); // requested size
 
-  ACE_INET_Addr           myLocalSAP;
-  ACE_INET_Addr           myRemoteSAP;
+  ACE_INET_Addr           localSAP_;
+  ACE_INET_Addr           remoteSAP_;
 };
 
 #endif

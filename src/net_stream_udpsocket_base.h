@@ -40,8 +40,8 @@ class Net_StreamUDPSocketBase_T
  , public SocketHandlerType
 {
  public:
-  int open (const ConfigurationType&, // configuration
-            const ACE_INET_Addr&);    // peer address
+  int open (ConfigurationType&,    // configuration
+            const ACE_INET_Addr&); // peer address
   //virtual int close(u_long = 0); // args
 
   // *NOTE*: enqueue any received data onto our stream for further processing
@@ -60,15 +60,15 @@ class Net_StreamUDPSocketBase_T
   Net_StreamUDPSocketBase_T ();
   virtual ~Net_StreamUDPSocketBase_T ();
 
-  Net_StreamSocketConfiguration_t configuration_;
-  StreamType                      stream_;
-  ACE_Message_Block*              currentReadBuffer_;
-  ACE_Thread_Mutex                sendLock_;
-  ACE_Message_Block*              currentWriteBuffer_;
+  ConfigurationType  configuration_;
+  StreamType         stream_;
+  ACE_Message_Block* currentReadBuffer_;
+  ACE_Thread_Mutex   sendLock_;
+  ACE_Message_Block* currentWriteBuffer_;
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY
   // dispatch the reactor notification queue concurrently (most notably,
   // ACE_TP_Reactor) --> enforce proper serialization
-  bool                            serializeOutput_;
+  bool               serializeOutput_;
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
@@ -77,7 +77,7 @@ class Net_StreamUDPSocketBase_T
   typedef SocketType inherited;
   typedef SocketHandlerType inherited2;
 
-//  ACE_UNIMPLEMENTED_FUNC (Net_StreamSocketBase_T ());
+//  ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&));
 };

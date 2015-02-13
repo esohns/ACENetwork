@@ -18,34 +18,53 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_STREAM_CONFIGURATION_H
-#define NET_STREAM_CONFIGURATION_H
+#ifndef NET_MODULE_HEADERPARSER_H
+#define NET_MODULE_HEADERPARSER_H
 
-#include "ace/Global_Macros.h"
-#include "ace/Time_Value.h"
+#include "ace/Synch_Traits.h"
 
-#include "stream_session_configuration_base.h"
+#include "common.h"
 
-#include "net_stream_common.h"
+#include "stream_task_base_synch.h"
+#include "stream_streammodule_base.h"
 
-class Net_StreamConfiguration
- : public Stream_SessionConfigurationBase_T<Net_StreamProtocolConfigurationState_t>
+// forward declaration(s)
+class Net_Message;
+class Net_SessionMessage;
+
+class Net_Module_HeaderParser
+ : public Stream_TaskBaseSynch_T<Common_TimePolicy_t,
+                                 Net_SessionMessage,
+                                 Net_Message>
 {
  public:
-  Net_StreamConfiguration (const Net_StreamProtocolConfigurationState_t&,// user data
-                           const ACE_Time_Value& = ACE_Time_Value::zero, // "official" start of session
-                           bool = false);                                // session ended because of user abort ?
-  virtual ~Net_StreamConfiguration ();
+  Net_Module_HeaderParser ();
+  virtual ~Net_Module_HeaderParser ();
 
-  // override Common_IDumpState
+  // initialization
+  bool init ();
+
+  // implement (part of) Stream_ITaskBase
+  virtual void handleDataMessage (Net_Message*&, // data message handle
+                                  bool&);        // return value: pass message downstream ?
+
+  // implement Common_IDumpState
   virtual void dump_state () const;
 
  private:
-  typedef Stream_SessionConfigurationBase_T<Net_StreamProtocolConfigurationState_t> inherited;
+  typedef Stream_TaskBaseSynch_T<Common_TimePolicy_t,
+                                 Net_SessionMessage,
+                                 Net_Message> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamConfiguration ());
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamConfiguration (const Net_StreamConfiguration&));
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamConfiguration& operator=(const Net_StreamConfiguration&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_HeaderParser (const Net_Module_HeaderParser&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_HeaderParser& operator= (const Net_Module_HeaderParser&));
+
+  bool isInitialized_;
 };
+
+// declare module
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,             // task synch type
+                              Common_TimePolicy_t,      // time policy type
+                              Net_Module_HeaderParser); // writer type
 
 #endif

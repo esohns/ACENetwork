@@ -41,23 +41,23 @@ class Net_TCPSocketHandler
   //virtual ACE_Event_Handler::Reference_Count remove_reference (void);
 
   // override some task-based members
-  virtual int open(void* = NULL); // args
+  virtual int open (void* = NULL); // args
 
-  virtual int handle_close(ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
-                           ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
  protected:
   Net_TCPSocketHandler ();
   virtual ~Net_TCPSocketHandler ();
 
-  ACE_Reactor_Notification_Strategy myNotificationStrategy;
+  ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
   typedef ACE_Svc_Handler<ACE_SOCK_STREAM,
                           ACE_MT_SYNCH> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler (const Net_TCPSocketHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler& operator=(const Net_TCPSocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler& operator= (const Net_TCPSocketHandler&));
 };
 
 #endif

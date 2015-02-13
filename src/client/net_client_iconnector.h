@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Erik Sohns   *
+ *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,43 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_TRANSPORTLAYER_BASE_H
-#define Net_TRANSPORTLAYER_BASE_H
+#ifndef NET_CLIENT_ICONNECTOR_H
+#define NET_CLIENT_ICONNECTOR_H
 
-#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 
-#include "net_exports.h"
-#include "net_common.h"
-#include "net_itransportlayer.h"
-
-class Net_Export Net_TransportLayer_Base
- : virtual public Net_ITransportLayer
+class Net_Client_IConnector
 {
  public:
-  virtual ~Net_TransportLayer_Base ();
+  virtual ~Net_Client_IConnector () {}
 
-  virtual void init (Net_ClientServerRole_t, // role
-                     unsigned short,         // port number
-                     bool = false);          // use loopback device ?
-
-  // implement (part of) Net_ITransportLayer
-  virtual void info (ACE_HANDLE&,           // return value: I/O handle
-                     ACE_INET_Addr&,        // return value: local SAP
-                     ACE_INET_Addr&) const; // return value: remote SAP
-
- protected:
-  Net_TransportLayer_Base (Net_ClientServerRole_t,
-                           Net_TransportLayer_t);
-
-  Net_ClientServerRole_t clientServerRole_;
-  Net_TransportLayer_t   transportLayer_;
-  unsigned short         port_;
-  bool                   useLoopback_;
-
- private:
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Base ());
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Base (const Net_TransportLayer_Base&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Base& operator= (const Net_TransportLayer_Base&));
+  virtual void abort () = 0; // shutdown
+  virtual void connect (const ACE_INET_Addr&) = 0;
 };
 
 #endif

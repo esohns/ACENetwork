@@ -21,12 +21,12 @@
 #ifndef Net_CONNECTION_MANAGER_COMMON_H
 #define Net_CONNECTION_MANAGER_COMMON_H
 
-#include "net_exports.h"
-#include "net_stream_common.h"
-#include "net_connection_manager.h"
-
 #include "ace/Singleton.h"
 #include "ace/Synch.h"
+
+#include "net_connection_manager.h"
+#include "net_exports.h"
+#include "net_stream_common.h"
 
 typedef Net_Connection_Manager_T<Net_StreamProtocolConfigurationState_t,
                                  Net_RuntimeStatistic_t> Net_Connection_Manager_t;

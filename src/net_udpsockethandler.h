@@ -38,36 +38,36 @@ class Net_UDPSocketHandler
 {
  public:
   //// override some event handler methods
-  //virtual ACE_Event_Handler::Reference_Count add_reference(void);
+  //virtual ACE_Event_Handler::Reference_Count add_reference (void);
   //// *IMPORTANT NOTE*: this API works as long as the reactor doesn't manage
   //// the lifecycle of the event handler. To avoid unforseen behavior, make sure
   //// that the event handler has been properly deregistered from the reactor
   //// before removing the last reference (delete on zero).
-  //virtual ACE_Event_Handler::Reference_Count remove_reference(void);
+  //virtual ACE_Event_Handler::Reference_Count remove_reference (void);
 
-  virtual int open(void* = NULL); // args
+  virtual int open (void* = NULL); // args
 
-  virtual int handle_close(ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
-                           ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
 //  // implement (part of) Net_IConnection
-//  virtual void close();
-//  virtual void info(ACE_HANDLE&,           // return value: handle
-//                    ACE_INET_Addr&,        // return value: local SAP
-//                    ACE_INET_Addr&) const; // return value: remote SAP
-//  virtual unsigned int id() const;
+//  virtual void close ();
+//  virtual void info (ACE_HANDLE&,           // return value: handle
+//                     ACE_INET_Addr&,        // return value: local SAP
+//                     ACE_INET_Addr&) const; // return value: remote SAP
+//  virtual unsigned int id () const;
 
  protected:
 //  typedef Net_IConnectionManager<ConfigurationType,
-//                                     StatisticsContainerType> MANAGER_T;
-//  Net_UDPSocketHandler(MANAGER_T*);
+//                                 StatisticsContainerType> MANAGER_T;
+//  Net_UDPSocketHandler (MANAGER_T*);
   Net_UDPSocketHandler ();
   virtual ~Net_UDPSocketHandler ();
 
-  ACE_Reactor_Notification_Strategy myNotificationStrategy;
-//  MANAGER_T*                        myManager;
-  //ConfigurationType                 myUserData;
-//  bool                              myIsRegistered;
+  ACE_Reactor_Notification_Strategy notificationStrategy_;
+//  MANAGER_T*                        manager_;
+  //ConfigurationType                 userData_;
+//  bool                              isRegistered_;
 
  private:
   //typedef RPG_Common_IRefCount inherited;
@@ -75,7 +75,7 @@ class Net_UDPSocketHandler
 
 //  ACE_UNIMPLEMENTED_FUNC(Net_UDPSocketHandlerBase());
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler (const Net_UDPSocketHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler& operator=(const Net_UDPSocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler& operator= (const Net_UDPSocketHandler&));
 
   //// implement RPG_Common_IRefCount
   //virtual void increase ();

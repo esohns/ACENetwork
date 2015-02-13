@@ -33,8 +33,8 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
                           SocketType,
                           SocketHandlerType>::Net_StreamUDPSocketBase_T ()//MANAGER_T* manager_in)
  : inherited ()//manager_in)
- //, inherited2 ()
- //, userData_ ()
+// , inherited2 ()
+// , configuration_ ()
 // , stream_ ()
  , currentReadBuffer_ (NULL)
 // , sendLock_ ()
@@ -43,6 +43,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::Net_StreamUDPSocketBase_T"));
 
+  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
 template <typename ConfigurationType,
@@ -59,17 +60,18 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::~Net_StreamUDPSocketBase_T"));
 
   // clean up
-  if (configuration_.module)
+  if (configuration_.configuration.module)
   {
-    if (stream_.find (configuration_.module->name ()))
-      if (stream_.remove (configuration_.module->name (),
+    if (stream_.find (configuration_.configuration.module->name ()))
+      if (stream_.remove (configuration_.configuration.module->name (),
                           ACE_Module_Base::M_DELETE_NONE) == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    ACE_TEXT (configuration_.module->name ())));
+                    ACE_TEXT (configuration_.configuration.module->name ())));
 
-    if (configuration_.deleteModule)
-      delete configuration_.module;
+    if (configuration_.configuration.deleteModule)
+      delete configuration_.configuration.module;
+    configuration_.configuration.module = NULL;
   } // end IF
 
   if (currentReadBuffer_)
@@ -88,22 +90,23 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
                           StatisticsContainerType,
                           StreamType,
                           SocketType,
-                          SocketHandlerType>::open (const ConfigurationType& configuration_in,
+                          SocketHandlerType>::open (ConfigurationType& configuration_inout,
                                                     const ACE_INET_Addr& peerAddress_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::open"));
 
-  configuration_ = configuration_in.streamSocketConfiguration;
+  configuration_ = configuration_inout;
 
   // step0: init this
   // *TODO*
   serializeOutput_ = configuration_.serializeOutput;
 
   // step1: init/start stream
-  configuration_.sessionID = reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
+  configuration_.sessionID = static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
+  configuration_inout.sessionID = configuration_.sessionID;
   // step1a: connect stream head message queue with the reactor notification
   // pipe ?
-  if (!configuration_.useThreadPerConnection)
+  if (!configuration_.configuration.useThreadPerConnection)
   {
     // *IMPORTANT NOTE*: enable the reference counting policy, as this will
     // be registered with the reactor several times (1x READ_MASK, nx
@@ -121,24 +124,25 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     // this leads to a crash. (see code)
     // --> avoid invoking ACE_Svc_Handle::shutdown()
     // --> this means that "manual" cleanup is necessary (see handle_close())
-    //inherited2::closing_ = true;
+    inherited2::closing_ = true;
 
-    configuration_.notificationStrategy = &(inherited::myNotificationStrategy);
+    configuration_.configuration.notificationStrategy = &(inherited::notificationStrategy_);
   } // end IF
   // step1b: init final module (if any)
-  if (configuration_.module)
+  if (configuration_.configuration.module)
   {
     Net_IModule_t* imodule_handle = NULL;
     // need a downcast...
-    imodule_handle = dynamic_cast<Net_IModule_t*> (configuration_.module);
+    imodule_handle = dynamic_cast<Net_IModule_t*> (configuration_.configuration.module);
     if (!imodule_handle)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<RPG_Stream_IModule> failed, aborting\n"),
-                  ACE_TEXT (configuration_.module->name ())));
+                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
+                  ACE_TEXT (configuration_.configuration.module->name ())));
+
       return -1;
     } // end IF
-    Net_Module_t* clone = NULL;
+    Common_Module_t* clone = NULL;
     try
     {
       clone = imodule_handle->clone ();
@@ -146,29 +150,27 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: caught exception in RPG_Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (configuration_.module->name ())));
+                  ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
+                  ACE_TEXT (configuration_.configuration.module->name ())));
+
       return -1;
     }
     if (!clone)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to RPG_Stream_IModule::clone(), aborting\n"),
+                  ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
                   ACE_TEXT (configuration_.module->name ())));
+
       return -1;
     }
-    configuration_.module = clone;
+    configuration_.configuration.module = clone;
     configuration_.deleteModule = true;
   } // end IF
   // step1c: init stream
-  if (!stream_.init (configuration_in))
+  if (!stream_.init (configuration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to init processing stream, aborting\n")));
-
-    // clean up
-    delete configuration_.module;
-    configuration_.module = NULL;
 
     return -1;
   } // end IF
@@ -180,6 +182,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
+
     return -1;
   } // end IF
 
@@ -192,6 +195,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Dgram::open(): \"%m\", aborting\n")));
+
     return -1;
   } // end IF
   //// *NOTE*: as soon as this returns, data starts arriving at handle_input()
@@ -224,12 +228,12 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   ACE_ASSERT (currentReadBuffer_ == NULL);
 
   // read some data from the socket
-  currentReadBuffer_ = allocateMessage (configuration_.bufferSize);
+  currentReadBuffer_ = allocateMessage (configuration_.configuration.bufferSize);
   if (currentReadBuffer_ == NULL)
   {
-    ACE_DEBUG ((LM_ERROR,
+    ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                configuration_.bufferSize));
+                configuration_.configuration.bufferSize));
 
     return -1;
   } // end IF
@@ -342,7 +346,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
       // *IMPORTANT NOTE*: if called from a non-reactor context, or when using a
       // a multithreaded reactor, there may still be in-flight notifications
       // being dispatched at this stage, so this just speeds things up a little
-      if (!configuration_.useThreadPerConnection)
+      if (!configuration_.configuration.useThreadPerConnection)
         if (inherited2::reactor ()->purge_pending_notifications (this,
                                                                  ACE_Event_Handler::ALL_EVENTS_MASK) == -1)
           ACE_DEBUG ((LM_ERROR,
@@ -444,24 +448,25 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::allocateMessage"));
 
-  ACE_ASSERT (configuration_.messageAllocator);
+  ACE_ASSERT (configuration_.configuration.messageAllocator);
 
   // init return value(s)
   ACE_Message_Block* message_out = NULL;
 
   try
   {
-    message_out = static_cast<ACE_Message_Block*> (configuration_.messageAllocator->malloc (requestedSize_in));
+    message_out =
+        static_cast<ACE_Message_Block*> (configuration_.configuration.messageAllocator->malloc (requestedSize_in));
   }
   catch (...)
   {
-    ACE_DEBUG ((LM_ERROR,
+    ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
                 requestedSize_in));
   }
   if (!message_out)
   {
-    ACE_DEBUG ((LM_ERROR,
+    ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to Stream_IAllocator::malloc(%u), aborting\n"),
                 requestedSize_in));
   } // end IF

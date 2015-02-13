@@ -21,20 +21,20 @@
 #ifndef Net_UDPCONNECTION_H
 #define Net_UDPCONNECTION_H
 
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+
 #include "net_exports.h"
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
+#include "net_stream_common.h"
 #include "net_transportlayer_udp.h"
 
-//#include "ace/Task.h"
-#include "ace/INET_Addr.h"
-
 class Net_Export Net_UDPConnection
- : public Net_SocketConnectionBase<Net_UDPHandler,
-                                       Net_TransportLayer_UDP,
-                                       Net_ConfigPOD,
-                                       Net_RuntimeStatistic>
-   //public ACE_Task<ACE_MT_SYNCH>
+ : public Net_SocketConnectionBase_T<Net_UDPHandler_t,
+                                     Net_TransportLayer_UDP,
+                                     Net_StreamProtocolConfigurationState_t,
+                                     Net_RuntimeStatistic_t>
 {
  public:
   Net_UDPConnection (const ACE_INET_Addr&); // peer address
@@ -48,8 +48,8 @@ class Net_Export Net_UDPConnection
 
   // override some transport layer-based members
   virtual void init (Net_ClientServerRole_t, // role
-                    unsigned short,              // port number
-                    bool = false);               // use loopback device ?
+                     unsigned short,              // port number
+                     bool = false);               // use loopback device ?
 
   // override some task-based members
   //virtual int svc (void);
@@ -66,11 +66,10 @@ class Net_Export Net_UDPConnection
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef Net_SocketConnectionBase<Net_UDPHandler,
-                                       Net_TransportLayer_UDP,
-                                       Net_ConfigPOD,
-                                       Net_RuntimeStatistic> inherited;
-  //typedef ACE_Task<ACE_MT_SYNCH> inherited2;
+  typedef Net_SocketConnectionBase_T<Net_UDPHandler_t,
+                                     Net_TransportLayer_UDP,
+                                     Net_StreamProtocolConfigurationState_t,
+                                     Net_RuntimeStatistic_t> inherited;
 
   //// stop worker, if any
   //void shutdown ();
@@ -101,7 +100,7 @@ class Net_Export Net_UDPConnection
 //  virtual int close (u_long = 0); // args
 //
 //  //  // *NOTE*: enqueue any received data onto our stream for further processing
-//  //   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
+//  //   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
 //  // *NOTE*: this is called when:
 //  // - handle_xxx() returns -1
 //  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
@@ -138,7 +137,7 @@ class Net_Export Net_UDPConnection
 //  virtual int close (u_long = 0); // args
 //
 //  //  // *NOTE*: enqueue any received data onto our stream for further processing
-//  //   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
+//  //   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
 //  // *NOTE*: this is called when:
 //  // - handle_xxx() returns -1
 //  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,

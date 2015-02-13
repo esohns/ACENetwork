@@ -53,11 +53,11 @@ class Net_StreamTCPSocketBase_T
   Net_StreamTCPSocketBase_T ();
   virtual ~Net_StreamTCPSocketBase_T ();
 
-  Net_StreamSocketConfiguration_t configuration_;
-  StreamType                      stream_;
-  ACE_Message_Block*              currentReadBuffer_;
-  ACE_Thread_Mutex                sendLock_;
-  ACE_Message_Block*              currentWriteBuffer_;
+  ConfigurationType  configuration_;
+  StreamType         stream_;
+  ACE_Message_Block* currentReadBuffer_;
+  ACE_Thread_Mutex   sendLock_;
+  ACE_Message_Block* currentWriteBuffer_;
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
@@ -65,13 +65,14 @@ class Net_StreamTCPSocketBase_T
  private:
   typedef SocketHandlerType inherited;
 
+//  ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T (const Net_StreamTCPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T& operator= (const Net_StreamTCPSocketBase_T&));
 
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY
   // dispatch the reactor notification queue concurrently (most notably,
   // ACE_TP_Reactor) --> enforce proper serialization
-  bool                            serializeOutput_;
+  bool               serializeOutput_;
 };
 
 // include template implementation

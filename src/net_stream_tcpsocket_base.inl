@@ -31,7 +31,7 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
                           StreamType,
                           SocketHandlerType>::Net_StreamTCPSocketBase_T ()//MANAGER_T* manager_in)
  : inherited ()//manager_in)
- //, configuration_ ()
+// , configuration_ ()
 // , stream_ ()
  , currentReadBuffer_ (NULL)
 // , sendLock_ ()
@@ -40,6 +40,7 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::Net_StreamTCPSocketBase_T"));
 
+  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
 template <typename ConfigurationType,
@@ -54,17 +55,17 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::~Net_StreamTCPSocketBase_T"));
 
   // clean up
-  if (configuration_.module)
+  if (configuration_.configuration.module)
   {
-    if (stream_.find (configuration_.module->name ()))
-      if (stream_.remove (configuration_.module->name (),
+    if (stream_.find (configuration_.configuration.module->name ()))
+      if (stream_.remove (configuration_.configuration.module->name (),
                           ACE_Module_Base::M_DELETE_NONE) == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    ACE_TEXT (configuration_.module->name ())));
+                    ACE_TEXT (configuration_.configuration.module->name ())));
 
-    if (configuration_.deleteModule)
-      delete configuration_.module;
+    if (configuration_.configuration.deleteModule)
+      delete configuration_.configuration.module;
   } // end IF
 
   if (currentReadBuffer_)
@@ -86,17 +87,18 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::open"));
 
   ConfigurationType* configuration_p = reinterpret_cast<ConfigurationType*> (arg_in);
-  configuration_ = configuration_p->streamSocketConfiguration;
+  configuration_ = *configuration_p;
 
   // step0: init this
   // *TODO*
-  serializeOutput_ = configuration_.serializeOutput;
+  serializeOutput_ = configuration_.configuration.serializeOutput;
 
   // step1: init/start stream
-  configuration_.sessionID = reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
+  configuration_.sessionID = static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
+  configuration_p->sessionID = configuration_.sessionID;
   // step1a: connect stream head message queue with the reactor notification
   // pipe ?
-  if (!configuration_.useThreadPerConnection)
+  if (!configuration_.configuration.useThreadPerConnection)
   {
     // *IMPORTANT NOTE*: enable the reference counting policy, as this will
     // be registered with the reactor several times (1x READ_MASK, nx
@@ -116,23 +118,23 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
     // --> this means that "manual" cleanup is necessary (see handle_close())
     inherited::closing_ = true;
 
-    configuration_.notificationStrategy = &(inherited::myNotificationStrategy);
+    configuration_.configuration.notificationStrategy = &(inherited::notificationStrategy_);
   } // end IF
   // step1b: init final module (if any)
-  if (configuration_.module)
+  if (configuration_.configuration.module)
   {
     Net_IModule_t* imodule_handle = NULL;
     // need a downcast...
-    imodule_handle = dynamic_cast<Net_IModule_t*> (configuration_.module);
+    imodule_handle = dynamic_cast<Net_IModule_t*> (configuration_.configuration.module);
     if (!imodule_handle)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Net_IModule_t*> failed, aborting\n"),
-                  ACE_TEXT (configuration_.module->name ())));
+                  ACE_TEXT (configuration_.configuration.module->name ())));
 
       return -1;
     } // end IF
-    Net_Module_t* clone = NULL;
+    Common_Module_t* clone = NULL;
     try
     {
       clone = imodule_handle->clone ();
@@ -141,30 +143,26 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (configuration_.module->name ())));
+                  ACE_TEXT (configuration_.configuration.module->name ())));
 
       return -1;
     }
     if (!clone)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to RPG_Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (configuration_.module->name ())));
+                  ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
+                  ACE_TEXT (configuration_.configuration.module->name ())));
 
       return -1;
     }
-    configuration_.module = clone;
-    configuration_.deleteModule = true;
+    configuration_.configuration.module = clone;
+    configuration_.configuration.deleteModule = true;
   } // end IF
   // step1c: init stream
   if (!stream_.init (configuration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to init processing stream, aborting\n")));
-
-    // clean up
-    delete configuration_.module;
-    configuration_.module = NULL;
 
     return -1;
   } // end IF
@@ -193,7 +191,7 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
-  if (!configuration_.useThreadPerConnection)
+  if (!configuration_.configuration.useThreadPerConnection)
     inherited::remove_reference ();
 
   return 0;
@@ -217,12 +215,12 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
   ACE_ASSERT (currentReadBuffer_ == NULL);
 
   // read some data from the socket
-  currentReadBuffer_ = allocateMessage (configuration_.bufferSize);
+  currentReadBuffer_ = allocateMessage (configuration_.configuration.bufferSize);
   if (currentReadBuffer_ == NULL)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                configuration_.bufferSize));
+                configuration_.configuration.bufferSize));
 
     return -1;
   } // end IF
@@ -324,7 +322,7 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
     // been notified to the reactor
     int result = -1;
-    if (!configuration_.useThreadPerConnection)
+    if (!configuration_.configuration.useThreadPerConnection)
       result = stream_.get (currentWriteBuffer_,
                             const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
     else
@@ -339,8 +337,8 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
       if ((error != EAGAIN) ||  // <-- connection has been closed in the meantime
           (error != ESHUTDOWN)) // <-- queue has been deactivated
         ACE_DEBUG ((LM_ERROR,
-                    (configuration_.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
-                                                           : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
+                    (configuration_.configuration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
+                                                                         : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
 
       // clean up
       if (serializeOutput_)
@@ -352,7 +350,7 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
   ACE_ASSERT (currentWriteBuffer_);
 
   // finished ?
-  if (configuration_.useThreadPerConnection &&
+  if (configuration_.configuration.useThreadPerConnection &&
       currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
   {
     currentWriteBuffer_->release ();
@@ -493,7 +491,7 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
       // *IMPORTANT NOTE*: if called from a non-reactor context, or when using a
       // a multithreaded reactor, there may still be in-flight notifications
       // being dispatched at this stage, so this just speeds things up a little
-      if (!configuration_.useThreadPerConnection)
+      if (!configuration_.configuration.useThreadPerConnection)
         if (inherited::reactor ()->purge_pending_notifications (this,
                                                                 ACE_Event_Handler::ALL_EVENTS_MASK) == -1)
           ACE_DEBUG ((LM_ERROR,
@@ -545,7 +543,7 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 
   try
   {
-    message_out = static_cast<ACE_Message_Block*> (configuration_.messageAllocator->malloc (requestedSize_in));
+    message_out = static_cast<ACE_Message_Block*> (configuration_.configuration.messageAllocator->malloc (requestedSize_in));
   }
   catch (...)
   {

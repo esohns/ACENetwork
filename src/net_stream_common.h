@@ -34,7 +34,7 @@
 
 #include "net_common.h"
 
-typedef Common_Module_t Net_Module_t;
+//typedef Common_Module_t Net_Module_t;
 typedef Stream_IModule<ACE_MT_SYNCH,
                        Common_TimePolicy_t> Net_IModule_t;
 typedef ACE_Stream_Iterator<ACE_MT_SYNCH,
@@ -68,9 +68,8 @@ struct Net_StreamSocketConfiguration_t
   // ACE_TP_Reactor) --> enforce proper serialization
   bool                       serializeOutput;
   ACE_Notification_Strategy* notificationStrategy;
-  Net_Module_t*              module;
+  Common_Module_t*           module;
   bool                       deleteModule;
-  unsigned int               sessionID; // (== socket handle !)
   unsigned int               statisticsReportingInterval;
   bool                       printFinalReport;
 };
@@ -78,8 +77,13 @@ struct Net_StreamSocketConfiguration_t
 struct Net_StreamProtocolConfigurationState_t
 {
   // *********************** stream / socket data ******************************
-  Net_StreamSocketConfiguration_t streamSocketConfiguration;
+  Net_StreamSocketConfiguration_t configuration;
+  // *************************** protocol data *********************************
+  unsigned int                    peerPingInterval; // ms {0 --> OFF}
+  bool                            pingAutoAnswer;
+  bool                            printPongMessages;
   // **************************** runtime data *********************************
+  unsigned int                    sessionID; // (== socket handle !)
   Net_RuntimeStatistic_t          currentStatistics;
   ACE_Time_Value                  lastCollectionTimestamp;
 };

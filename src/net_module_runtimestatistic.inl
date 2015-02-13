@@ -18,16 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Time_Value.h>
+#include "ace/Guard_T.h"
+#include "ace/Log_Msg.h"
+#include "ace/Time_Value.h"
 
-#include "rpg_common_macros.h"
-#include "rpg_common.h"
-#include "rpg_common_timer_manager.h"
+#include "common.h"
+#include "common_timer_manager.h"
 
-#include "rpg_stream_message_base.h"
-#include "rpg_stream_iallocator.h"
+#include "stream_message_base.h"
+#include "stream_iallocator.h"
 
-#include "rpg_net_common_tools.h"
+#include "net_common_tools.h"
+#include "net_macros.h"
 
 template <typename TaskSynchType,
           typename TimePolicyType,
@@ -35,34 +37,34 @@ template <typename TaskSynchType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
-RPG_Net_Module_RuntimeStatistic_t<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::RPG_Net_Module_RuntimeStatistic_t()
- : inherited(),
-   myIsInitialized(false),
-   myResetTimeoutHandler(this),
-   myResetTimeoutHandlerID(-1),
-   myLocalReportingHandler(this,
-                           STATISTICHANDLER_TYPE::ACTION_REPORT),
-   myLocalReportingHandlerID(-1),
-	 myReportingInterval(0),
-   mySessionID(0),
-   myNumInboundMessages(0),
-   myNumOutboundMessages(0),
-   myNumSessionMessages(0),
-   myMessageCounter(0),
-   myLastMessagesPerSecondCount(0),
-   myNumInboundBytes(0.0F),
-	 myNumOutboundBytes(0.0F),
-   myByteCounter(0),
-   myLastBytesPerSecondCount(0),
-// myMessageTypeStatistics.clear(),
-   myAllocator(NULL)
+                                  StatisticsContainerType>::Net_Module_Statistic_WriterTask_T ()
+ : inherited ()
+ , isInitialized_ (false)
+ , resetTimeoutHandler_ (this)
+ , resetTimeoutHandlerID_ (-1)
+ , localReportingHandler_ (this,
+                           ACTION_REPORT)
+ , localReportingHandlerID_ (-1)
+ , reportingInterval_ (0)
+ , sessionID_ (0)
+ , numInboundMessages_ (0)
+ , numOutboundMessages_ (0)
+ , numSessionMessages_ (0)
+ , messageCounter_ (0)
+ , lastMessagesPerSecondCount_ (0)
+ , numInboundBytes_ (0.0F)
+ , numOutboundBytes_ (0.0F)
+ , byteCounter_ (0)
+ , lastBytesPerSecondCount_ (0)
+// , messageTypeStatistics_.clear()
+ , allocator_ (NULL)
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatistic_t::RPG_Net_Module_RuntimeStatistic_t"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::Net_Module_Statistic_WriterTask_T"));
 
 }
 
@@ -72,17 +74,17 @@ template <typename TaskSynchType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
-RPG_Net_Module_RuntimeStatistic_t<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::~RPG_Net_Module_RuntimeStatistic_t()
+                                  StatisticsContainerType>::~Net_Module_Statistic_WriterTask_T ()
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatistic_t::~RPG_Net_Module_RuntimeStatistic_t"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::~Net_Module_Statistic_WriterTask_T"));
 
   // clean up
-  fini_timers(true);
+  fini_timers (true);
 }
 
 template <typename TaskSynchType,
@@ -92,85 +94,85 @@ template <typename TaskSynchType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
 bool
-RPG_Net_Module_RuntimeStatistic_t<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::init(const unsigned int& reportingInterval_in,
-                                                                 const bool& printFinalReport_in,
-                                                                 const RPG_Stream_IAllocator* allocator_in)
+                                  StatisticsContainerType>::init (unsigned int reportingInterval_in,
+                                                                  bool printFinalReport_in,
+                                                                  const Stream_IAllocator* allocator_in)
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatistic_t::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::init"));
 
   // sanity check(s)
-  if (myIsInitialized)
+  if (isInitialized_)
   {
-    ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("re-initializing...\n")));
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("re-initializing...\n")));
 
     // stop timers
-    fini_timers(true);
+    fini_timers (true);
 
-    myReportingInterval = 0;
-    myPrintFinalReport = false;
-    mySessionID = 0;
+    reportingInterval_ = 0;
+    printFinalReport_ = false;
+    sessionID_ = 0;
     // reset various counters...
     {
-      ACE_Guard<ACE_Thread_Mutex> aGuard(myLock);
+      ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
-      myNumInboundMessages = 0;
-      myNumOutboundMessages = 0;
-      myNumSessionMessages = 0;
-      myMessageCounter = 0;
-      myLastMessagesPerSecondCount = 0;
+      numInboundMessages_ = 0;
+      numOutboundMessages_ = 0;
+      numSessionMessages_ = 0;
+      messageCounter_ = 0;
+      lastMessagesPerSecondCount_ = 0;
 
-      myNumInboundBytes = 0.0F;
-      myNumOutboundBytes = 0.0F;
-      myByteCounter = 0;
-      myLastBytesPerSecondCount = 0;
+      numInboundBytes_ = 0.0F;
+      numOutboundBytes_ = 0.0F;
+      byteCounter_ = 0;
+      lastBytesPerSecondCount_ = 0;
 
-      myMessageTypeStatistics.clear();
+      messageTypeStatistics_.clear ();
     } // end lock scope
-    myAllocator = NULL;
+    allocator_ = NULL;
 
-    myIsInitialized = false;
+    isInitialized_ = false;
   } // end IF
 
-  myReportingInterval = reportingInterval_in;
-  if (myReportingInterval)
+  reportingInterval_ = reportingInterval_in;
+  if (reportingInterval_)
   {
     // schedule the second-granularity timer
-    ACE_Time_Value interval(1, 0); // one second interval
-    ACE_Event_Handler* eh = &myResetTimeoutHandler;
-    myResetTimeoutHandlerID =
-      RPG_COMMON_TIMERMANAGER_SINGLETON::instance()->schedule(eh,                                  // event handler
-                                                              NULL,                                // ACT
-                                                              RPG_COMMON_TIME_POLICY() + interval, // first wakeup time
-                                                              interval);                           // interval
-    if (myResetTimeoutHandlerID == -1)
+    ACE_Time_Value interval (1, 0); // one second interval
+    ACE_Event_Handler* eh = &resetTimeoutHandler_;
+    resetTimeoutHandlerID_ =
+      COMMON_TIMERMANAGER_SINGLETON::instance()->schedule (eh,                               // event handler
+                                                           NULL,                             // ACT
+                                                           COMMON_TIME_POLICY () + interval, // first wakeup time
+                                                           interval);                        // interval
+    if (resetTimeoutHandlerID_ == -1)
     {
-      ACE_DEBUG((LM_ERROR,
-                 ACE_TEXT("failed to RPG_Common_Timer_Manager::schedule(), aborting\n")));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to RPG_Common_Timer_Manager::schedule(), aborting\n")));
 
       return false;
     } // end IF
-//   ACE_DEBUG((LM_DEBUG,
-//              ACE_TEXT("scheduled second-interval timer (ID: %d)...\n"),
-//              myResetTimeoutHandlerID));
+//   ACE_DEBUG ((LM_DEBUG,
+//               ACE_TEXT ("scheduled second-interval timer (ID: %d)...\n"),
+//               resetTimeoutHandlerID_));
   } // end IF
-  myPrintFinalReport = printFinalReport_in;
-  myAllocator = allocator_in;
+  printFinalReport_ = printFinalReport_in;
+  allocator_ = allocator_in;
 //   // sanity check(s)
-//   if (!myAllocator)
+//   if (!allocator_)
 //   {
-//     ACE_DEBUG((LM_ERROR,
-//                ACE_TEXT("invalid argument (was NULL), aborting\n")));
+//     ACE_DEBUG ((LM_ERROR,
+//                 ACE_TEXT ("invalid argument (was NULL), aborting\n")));
 //
 //     return false;
 //   } // end IF
 
-  myIsInitialized = true;
+  isInitialized_ = true;
 
   return true;
 }
@@ -182,34 +184,34 @@ template <typename TaskSynchType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
 void
-RPG_Net_Module_RuntimeStatistic_t<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::handleDataMessage(ProtocolMessageType*& message_inout,
-                                                                              bool& passMessageDownstream_out)
+                                  StatisticsContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                                                                               bool& passMessageDownstream_out)
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatistic_t::handleDataMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::handleDataMessage"));
 
   // don't care (implies yes per default, if part of a stream)
-  ACE_UNUSED_ARG(passMessageDownstream_out);
+  ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
-  ACE_ASSERT(message_inout);
+  ACE_ASSERT (message_inout);
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard(myLock);
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
     // update counters...
-    myNumInboundMessages++;
-    myNumInboundBytes += message_inout->total_length();
-    myByteCounter += message_inout->total_length();
+    numInboundMessages_++;
+    numInboundBytes_ += message_inout->total_length ();
+    byteCounter_ += message_inout->total_length ();
 
-    myMessageCounter++;
+    messageCounter_++;
 
-	  // add message to statistic...
-    myMessageTypeStatistics[static_cast<ProtocolCommandType>(message_inout->getCommand())]++;
+    // add message to statistic...
+    messageTypeStatistics_[static_cast<ProtocolCommandType> (message_inout->getCommand ())]++;
   } // end lock scope
 }
 
@@ -220,97 +222,97 @@ template <typename TaskSynchType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
 void
-RPG_Net_Module_RuntimeStatistic_t<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::handleSessionMessage(SessionMessageType*& message_inout,
-                                                                                 bool& passMessageDownstream_out)
+                                  StatisticsContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                                  bool& passMessageDownstream_out)
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatistic_t::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::handleSessionMessage"));
 
   // don't care (implies yes per default, if part of a stream)
-  ACE_UNUSED_ARG(passMessageDownstream_out);
+  ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
-  ACE_ASSERT(message_inout);
-  ACE_ASSERT(myIsInitialized);
+  ACE_ASSERT (message_inout);
+  ACE_ASSERT (isInitialized_);
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard(myLock);
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
     // update our counters...
     // *NOTE*: currently, session messages travel only downstream...
-    //myNumInboundMessages++;
-    myNumSessionMessages++;
-    //myMessageCounter++;
+    //numInboundMessages_++;
+    numSessionMessages_++;
+    //messageCounter_++;
   } // end lock scope
 
-  switch (message_inout->getType())
+  switch (message_inout->getType ())
   {
-    case RPG_Stream_SessionMessage::MB_STREAM_SESSION_BEGIN:
+    case SESSION_BEGIN:
     {
       // retain session ID for reporting...
-      mySessionID = message_inout->getConfig()->getUserData().streamSocketConfiguration.sessionID;
+      sessionID_ = message_inout->getConfiguration ()->getUserData ().sessionID;
 
       // statistics reporting
-      if (myReportingInterval)
+      if (reportingInterval_)
       {
         // schedule the reporting interval timer
-        ACE_Time_Value interval(myReportingInterval, 0);
-        ACE_ASSERT(myLocalReportingHandlerID == -1);
-        ACE_Event_Handler* eh = &myLocalReportingHandler;
-        myLocalReportingHandlerID =
-          RPG_COMMON_TIMERMANAGER_SINGLETON::instance()->schedule(eh,                                  // event handler
-                                                                  NULL,                                // act
-                                                                  RPG_COMMON_TIME_POLICY() + interval, // first wakeup time
-                                                                  interval);                           // interval
-        if (myLocalReportingHandlerID == -1)
+        ACE_Time_Value interval (reportingInterval_, 0);
+        ACE_ASSERT (localReportingHandlerID_ == -1);
+        ACE_Event_Handler* eh = &localReportingHandler_;
+        localReportingHandlerID_ =
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
+                                                                NULL,                             // act
+                                                                COMMON_TIME_POLICY () + interval, // first wakeup time
+                                                                interval);                        // interval
+        if (localReportingHandlerID_ == -1)
         {
-          ACE_DEBUG((LM_ERROR,
-                     ACE_TEXT("failed to RPG_Common_Timer_Manager::schedule(), aborting\n")));
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to RPG_Common_Timer_Manager::schedule(), aborting\n")));
 
           return;
         } // end IF
-        //     ACE_DEBUG((LM_DEBUG,
-        //                ACE_TEXT("scheduled (local) reporting timer (ID: %d) for intervals of %u second(s)...\n"),
-        //                myLocalReportingHandlerID,
-        //                reportingInterval_in));
+        //     ACE_DEBUG ((LM_DEBUG,
+        //                 ACE_TEXT ("scheduled (local) reporting timer (ID: %d) for intervals of %u second(s)...\n"),
+        //                 localReportingHandlerID_,
+        //                 reportingInterval_in));
       } // end IF
       else
       {
         // *NOTE*: even if this doesn't report, it might still be triggered from outside...
-        //     ACE_DEBUG((LM_DEBUG,
-        //                ACE_TEXT("(local) statistics reporting has been disabled...\n")));
+        //     ACE_DEBUG ((LM_DEBUG,
+        //                 ACE_TEXT ("(local) statistics reporting has been disabled...\n")));
       } // end IF
 
       break;
     }
-    case RPG_Stream_SessionMessage::MB_STREAM_SESSION_END:
+    case SESSION_END:
     {
-			// stop reporting timer
-			fini_timers(false);
+      // stop reporting timer
+      fini_timers (false);
 
       // session finished --> print overall statistics ?
-			if (myPrintFinalReport)
-        final_report();
+      if (printFinalReport_)
+        final_report ();
 
       break;
     }
-    case RPG_Stream_SessionMessage::MB_STREAM_SESSION_STATISTICS:
+    case SESSION_STATISTICS:
     {
 //       // *NOTE*: protect access to statistics data
 //       // from asynchronous API calls (as well as local reporting)...
 //       {
-//         ACE_Guard<ACE_Thread_Mutex> aGuard(myStatsLock);
+//         ACE_Guard<ACE_Thread_Mutex> aGuard (statsLock_);
 //
-//         myCurrentStats = message_inout->getConfig()->getStats();
+//         currentStats_ = message_inout->getConfiguration ()->getStats ();
 //
 //         // remember previous timestamp (so we can satisfy our asynchronous API)...
-//         myLastStatsTimestamp = myCurrentStatsTimestamp;
+//         lastStatsTimestamp_ = currentStatsTimestamp_;
 //
-//         myCurrentStatsTimestamp = message_inout->getConfig()->getStatGenerationTime();
+//         currentStatsTimestamp_ = message_inout->getConfiguration ()->getStatGenerationTime ();
 //       } // end lock scope
 
       break;
@@ -327,26 +329,26 @@ template <typename TaskSynchType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
 void
-RPG_Net_Module_RuntimeStatistic_t<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::reset()
+                                  StatisticsContainerType>::reset ()
 {
-//   RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatistic_t::reset"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::reset"));
 
   // this should happen every second (roughly)...
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard(myLock);
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
     // remember this result (satisfies an asynchronous API)...
-    myLastMessagesPerSecondCount = myMessageCounter;
-    myLastBytesPerSecondCount = myByteCounter;
+    lastMessagesPerSecondCount_ = messageCounter_;
+    lastBytesPerSecondCount_ = byteCounter_;
 
     // reset counters
-    myMessageCounter = 0;
-    myByteCounter = 0;
+    messageCounter_ = 0;
+    byteCounter_ = 0;
   } // end lock scope
 }
 
@@ -357,25 +359,25 @@ template <typename TaskSynchType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
 bool
-RPG_Net_Module_RuntimeStatistic_t<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::collect(StatisticsContainerType& data_out) const
+                                  StatisticsContainerType>::collect (StatisticsContainerType& data_out) const
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatistic_t::collect"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::collect"));
 
   // *NOTE*: external call, fill the argument with meaningful values
 
   // init return value(s)
-  ACE_OS::memset(&data_out, 0, sizeof(StatisticsContainerType));
+  ACE_OS::memset (&data_out, 0, sizeof (StatisticsContainerType));
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard(myLock);
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
-    data_out.numDataMessages = (myNumInboundMessages + myNumOutboundMessages);
-		data_out.numBytes = (myNumInboundBytes + myNumOutboundBytes);
+    data_out.numDataMessages = (numInboundMessages_ + numOutboundMessages_);
+    data_out.numBytes = (numInboundBytes_ + numOutboundBytes_);
   } // end lock scope
 
   return true;
@@ -388,14 +390,14 @@ template <typename TaskSynchType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
 void
-RPG_Net_Module_RuntimeStatistic_t<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::report() const
+                                  StatisticsContainerType>::report () const
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatistic_t::report"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::report"));
 
   // compute cache usage...
 //   unsigned int cache_used = 0;
@@ -403,29 +405,29 @@ RPG_Net_Module_RuntimeStatistic_t<TaskSynchType,
 //   double        cache_used_relative = 0.0;
   unsigned int numMessagesOnline = 0;
   unsigned int totalHeapBytesAllocated = 0;
-  if (myAllocator)
+  if (allocator_)
   {
-    numMessagesOnline = myAllocator->cache_depth();
-    totalHeapBytesAllocated = myAllocator->cache_size();
-//    ACE_ASSERT(cache_size);
+    numMessagesOnline = allocator_->cache_depth ();
+    totalHeapBytesAllocated = allocator_->cache_size ();
+//    ACE_ASSERT (cache_size);
 //     cache_used_relative = cache_used / ((cache_size ?
 //                                          cache_size : 1) * 100.0);
   } // end IF
 
   // ...write some output
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard(myLock);
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
-    ACE_DEBUG((LM_INFO,
-               ACE_TEXT("*** [session: %u] RUNTIME STATISTICS ***\n--> Stream Statistics <--\nmessages seen (last second): %u\nmessages seen (total [in/out]): %u/%u (data: %.2f %%)\n data seen (last second): %u bytes\n data seen (total): %.0f bytes\n current cache usage [%u messages / %u total allocated heap]\n*** RUNTIME STATISTICS ***\\END\n"),
-               mySessionID,
-               myLastMessagesPerSecondCount,
-               myNumInboundMessages, myNumOutboundMessages,
-               (((myNumInboundMessages + myNumOutboundMessages) - myNumSessionMessages) / 100.0),
-               myLastBytesPerSecondCount,
-               (myNumInboundBytes + myNumOutboundBytes),
-               numMessagesOnline,
-               totalHeapBytesAllocated));
+    ACE_DEBUG ((LM_INFO,
+                ACE_TEXT ("*** [session: %u] RUNTIME STATISTICS ***\n--> Stream Statistics <--\nmessages seen (last second): %u\nmessages seen (total [in/out]): %u/%u (data: %.2f %%)\n data seen (last second): %u bytes\n data seen (total): %.0f bytes\n current cache usage [%u messages / %u total allocated heap]\n*** RUNTIME STATISTICS ***\\END\n"),
+                sessionID_,
+                lastMessagesPerSecondCount_,
+                numInboundMessages_, numOutboundMessages_,
+                (((numInboundMessages_ + numOutboundMessages_) - numSessionMessages_) / 100.0),
+                lastBytesPerSecondCount_,
+                (numInboundBytes_ + numOutboundBytes_),
+                numMessagesOnline,
+                totalHeapBytesAllocated));
 //                cache_used,
 //                cache_size,
 //                cache_used_relative));
@@ -439,37 +441,37 @@ template <typename TaskSynchType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
 void
-RPG_Net_Module_RuntimeStatistic_t<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::final_report() const
+                                  StatisticsContainerType>::final_report () const
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatistic_t::final_report"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::final_report"));
 
   {
     // synchronize access to statistics data
-    ACE_Guard<ACE_Thread_Mutex> aGuard(myLock);
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
-    if ((myNumInboundMessages + myNumOutboundMessages))
+    if ((numInboundMessages_ + numOutboundMessages_))
     {
       // write some output
-      ACE_DEBUG((LM_INFO,
-                 ACE_TEXT("*** [session: %u] SESSION STATISTICS ***\ntotal # data message(s) (as seen [in/out]): %u/%u\n --> Protocol Info <--\n"),
-                 mySessionID,
-                 myNumInboundMessages,
-                 myNumOutboundMessages));
+      ACE_DEBUG ((LM_INFO,
+                  ACE_TEXT ("*** [session: %u] SESSION STATISTICS ***\ntotal # data message(s) (as seen [in/out]): %u/%u\n --> Protocol Info <--\n"),
+                  sessionID_,
+                  numInboundMessages_,
+                  numOutboundMessages_));
 
       std::string protocol_string;
-      for (MESSAGETYPE2COUNT_CONSTITERATOR_TYPE iterator = myMessageTypeStatistics.begin();
-           iterator != myMessageTypeStatistics.end();
+      for (Net_MessageStatisticIterator_t iterator = messageTypeStatistics_.begin ();
+           iterator != messageTypeStatistics_.end ();
            iterator++)
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("\"%s\": %u --> %.2f %%\n"),
-                   ProtocolMessageType::commandType2String(iterator->first).c_str(),
-                   iterator->second,
-                   static_cast<double>(((iterator->second * 100.0) / (myNumInboundMessages + myNumOutboundMessages)))));
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("\"%s\": %u --> %.2f %%\n"),
+                    ACE_TEXT (ProtocolMessageType::CommandType2String (iterator->first).c_str ()),
+                    iterator->second,
+                    static_cast<double> (((iterator->second * 100.0) / (numInboundMessages_ + numOutboundMessages_)))));
     } // end IF
 
 //     double messages_per_sec = double (message_count) / et.real_time;
@@ -490,136 +492,137 @@ template <typename TaskSynchType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
 void
-RPG_Net_Module_RuntimeStatistic_t<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::fini_timers(const bool& cancelAllTimers_in)
+                                  StatisticsContainerType>::fini_timers (bool cancelAllTimers_in)
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatistic_t::fini_timers"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::fini_timers"));
 
-	const void* act = NULL;
+  const void* act = NULL;
   if (cancelAllTimers_in)
   {
-    if (myResetTimeoutHandlerID != -1)
+    if (resetTimeoutHandlerID_ != -1)
     {
-      if (RPG_COMMON_TIMERMANAGER_SINGLETON::instance()->cancel(myResetTimeoutHandlerID,
-				                                                        &act) == -1)
-        ACE_DEBUG((LM_ERROR,
-                   ACE_TEXT("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                   myResetTimeoutHandlerID));
-      myResetTimeoutHandlerID = -1;
+      if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (resetTimeoutHandlerID_,
+                                                              &act) == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
+                    resetTimeoutHandlerID_));
+      resetTimeoutHandlerID_ = -1;
     } // end IF
   } // end IF
 
-  if (myLocalReportingHandlerID != -1)
+  if (localReportingHandlerID_ != -1)
   {
-		act = NULL;
-    if (RPG_COMMON_TIMERMANAGER_SINGLETON::instance()->cancel(myLocalReportingHandlerID,
-			                                                        &act) == -1)
-      ACE_DEBUG((LM_ERROR,
-                 ACE_TEXT("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                 myLocalReportingHandlerID));
-    myLocalReportingHandlerID = -1;
+    act = NULL;
+    if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (localReportingHandlerID_,
+                                                            &act) == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
+                  localReportingHandlerID_));
+    localReportingHandlerID_ = -1;
   } // end IF
 }
 
 // ----------------------------------------------------------------------------
 
 template <typename TaskSynchType,
-					typename TimePolicyType,
-	        typename SessionMessageType,
+          typename TimePolicyType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticsContainerType>
-RPG_Net_Module_RuntimeStatisticReader_t<TaskSynchType,
-                                        TimePolicyType,
-                                        SessionMessageType,
-                                        ProtocolMessageType,
-                                        ProtocolCommandType,
-                                        StatisticsContainerType>::RPG_Net_Module_RuntimeStatisticReader_t()
- : inherited()
+Net_Module_Statistic_ReaderTask_T<TaskSynchType,
+                                  TimePolicyType,
+                                  SessionMessageType,
+                                  ProtocolMessageType,
+                                  ProtocolCommandType,
+                                  StatisticsContainerType>::Net_Module_Statistic_ReaderTask_T ()
+// : inherited ()
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatisticReader_t::RPG_Net_Module_RuntimeStatisticReader_t"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_ReaderTask_T::Net_Module_Statistic_ReaderTask_T"));
 
   inherited::flags_ |= ACE_Task_Flags::ACE_READER;
 }
 
 template <typename TaskSynchType,
-					typename TimePolicyType,
-					typename SessionMessageType,
-					typename ProtocolMessageType,
-					typename ProtocolCommandType,
-					typename StatisticsContainerType>
-RPG_Net_Module_RuntimeStatisticReader_t<TaskSynchType,
-                                        TimePolicyType,
-                                        SessionMessageType,
-                                        ProtocolMessageType,
-                                        ProtocolCommandType,
-                                        StatisticsContainerType>::~RPG_Net_Module_RuntimeStatisticReader_t()
+          typename TimePolicyType,
+          typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename ProtocolCommandType,
+          typename StatisticsContainerType>
+Net_Module_Statistic_ReaderTask_T<TaskSynchType,
+                                   TimePolicyType,
+                                   SessionMessageType,
+                                   ProtocolMessageType,
+                                   ProtocolCommandType,
+                                   StatisticsContainerType>::~Net_Module_Statistic_ReaderTask_T ()
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatisticReader_t::~RPG_Net_Module_RuntimeStatisticReader_t"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_ReaderTask_T::~Net_Module_Statistic_ReaderTask_T"));
 
 }
 
 template <typename TaskSynchType,
-					typename TimePolicyType,
-					typename SessionMessageType,
-					typename ProtocolMessageType,
-					typename ProtocolCommandType,
-					typename StatisticsContainerType>
+          typename TimePolicyType,
+          typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename ProtocolCommandType,
+          typename StatisticsContainerType>
 int
-RPG_Net_Module_RuntimeStatisticReader_t<TaskSynchType,
-                                        TimePolicyType,
-                                        SessionMessageType,
-                                        ProtocolMessageType,
-                                        ProtocolCommandType,
-                                        StatisticsContainerType>::put(ACE_Message_Block* mb_in,
-                                                                      ACE_Time_Value* tv_in)
+Net_Module_Statistic_ReaderTask_T<TaskSynchType,
+                                  TimePolicyType,
+                                  SessionMessageType,
+                                  ProtocolMessageType,
+                                  ProtocolCommandType,
+                                  StatisticsContainerType>::put (ACE_Message_Block* mb_in,
+                                                                 ACE_Time_Value* tv_in)
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Module_RuntimeStatisticReader_t::put"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_ReaderTask_T::put"));
 
   // pass the message to the sibling
-  ACE_Task_Base* sibling_task = inherited::sibling();
+  ACE_Task_Base* sibling_task = inherited::sibling ();
   if (!sibling_task)
   {
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("no sibling task: \"%m\", aborting\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("no sibling task: \"%m\", aborting\n")));
 
     return -1;
   } // end IF
-  TASK_TYPE* stream_task = dynamic_cast<TASK_TYPE*>(sibling_task);
+  Net_Module_Statistic_WriterTask_t* stream_task =
+      dynamic_cast<Net_Module_Statistic_WriterTask_t*> (sibling_task);
   if (!stream_task)
   {
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("failed to dynamic_cast<RPG_Net_Module_RuntimeStatistic_t>: \"%m\", aborting\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<Net_Module_Statistic_WriterTask_t>: \"%m\", aborting\n")));
 
     return -1;
   } // end IF
-  ProtocolMessageType* message = dynamic_cast<MESSAGE_TYPE*>(mb_in);
+  ProtocolMessageType* message = dynamic_cast<ProtocolMessageType*> (mb_in);
   if (!message)
   {
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("failed to dynamic_cast<RPG_Net_Message>: \"%m\", aborting\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<ProtocolMessageType>: \"%m\", aborting\n")));
 
     return -1;
   } // end IF
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard(stream_task->myLock);
+    ACE_Guard<ACE_Thread_Mutex> aGuard (stream_task->lock_);
 
     // update counters...
-    stream_task->myNumOutboundMessages++;
-		stream_task->myNumOutboundBytes += mb_in->total_length();
+    stream_task->numOutboundMessages_++;
+    stream_task->numOutboundBytes_ += mb_in->total_length ();
 
-		stream_task->myByteCounter += mb_in->total_length();
+    stream_task->byteCounter_ += mb_in->total_length ();
 
-		stream_task->myMessageCounter++;
+    stream_task->messageCounter_++;
 
     // add message to statistic...
-    stream_task->myMessageTypeStatistics[message->getCommand()]++;
+    stream_task->messageTypeStatistics_[message->getCommand ()]++;
   } // end lock scope
 
-  return inherited::put(mb_in, tv_in);
+  return inherited::put (mb_in, tv_in);
 }

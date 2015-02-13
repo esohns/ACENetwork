@@ -18,15 +18,15 @@ AC_CANONICAL_TARGET
 AC_LANG([C++])
 
 # Checks for programs.
-AC_PROG_CXX
-AC_PROG_CC
-AC_PROG_CPP
-AC_PROG_INSTALL
-AC_PROG_LN_S
-AC_PROG_MAKE_SET
-#AC_PROG_RANLIB
-AC_PROG_LEX
-AC_PROG_YACC
+#AC_PROG_CXX
+#AC_PROG_CC
+#AC_PROG_CPP
+#AC_PROG_INSTALL
+#AC_PROG_LN_S
+#AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+#AC_PROG_LEX
+#AC_PROG_YACC
 AM_PROG_AR
 AM_PROG_LIBTOOL
 
@@ -99,33 +99,34 @@ AC_CHECK_LIB([ACE], [main])
 AC_CHECK_LIB([pthread], [main])
 
 # Checks for header files.
-#AC_HEADER_STDBOOL
+AC_HEADER_STDBOOL
 #AC_CHECK_HEADERS([libintl.h])
-#AC_CHECK_HEADERS([netinet/in.h])
+AC_CHECK_HEADERS([netinet/in.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-#AC_C_INLINE
-#AC_TYPE_SIZE_T
-#AC_TYPE_SSIZE_T
+AC_C_INLINE
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
 #AC_TYPE_INT8_T
 #AC_TYPE_INT16_T
 #AC_TYPE_INT32_T
-#AC_TYPE_UINT8_T
-#AC_TYPE_UINT16_T
-#AC_TYPE_UINT32_T
+AC_TYPE_UINT8_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
 
 # Checks for library functions.
-#AC_FUNC_ERROR_AT_LINE
-#AC_FUNC_MALLOC
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_MALLOC
 #AC_FUNC_REALLOC
-#AC_CHECK_FUNCS([strerror])
-#AC_CHECK_FUNCS([gettimeofday])
-#AC_CHECK_FUNCS([memmove])
+AC_CHECK_FUNCS([memset])
+AC_CHECK_FUNCS([socket])
+AC_CHECK_FUNCS([strerror])
 #AC_CHECK_FUNCS([memset])
 
 AC_CONFIG_FILES([Makefile
                  scripts/Makefile
-                 src/Makefile])
+                 src/Makefile
+                 src/client/Makefile])
 
 AC_OUTPUT
 

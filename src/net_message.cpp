@@ -22,46 +22,46 @@
 #include "net_message.h"
 
 // *NOTE*: this is implicitly invoked by duplicate() as well...
-Net_Message::Net_Message(const Net_Message& message_in)
+Net_Message::Net_Message (const Net_Message& message_in)
  : inherited (message_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Message::Net_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Message::Net_Message"));
 
 }
 
-Net_Message::Net_Message(ACE_Data_Block* dataBlock_in,
-                                 ACE_Allocator* messageAllocator_in)
- : inherited(dataBlock_in,        // use (don't own !) this data block
-             messageAllocator_in) // use this when destruction is imminent...
+Net_Message::Net_Message (ACE_Data_Block* dataBlock_in,
+                          ACE_Allocator* messageAllocator_in)
+ : inherited (dataBlock_in,        // use (don't own !) this data block
+              messageAllocator_in) // use this when destruction is imminent...
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Message::Net_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Message::Net_Message"));
 
 }
 
-Net_Message::~Net_Message()
+Net_Message::~Net_Message ()
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Message::~Net_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Message::~Net_Message"));
 
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
-Net_MessageType
-Net_Message::getCommand() const
+Net_MessageType_t
+Net_Message::getCommand () const
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Message::getCommand"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Message::getCommand"));
 
   // sanity check(s)
-  ACE_ASSERT(length() >= sizeof(Net_MessageHeader));
+  ACE_ASSERT (inherited::length () >= sizeof (Net_MessageHeader_t));
 
-  Net_MessageHeader* message_header = reinterpret_cast<Net_MessageHeader*>(rd_ptr());
+  Net_MessageHeader_t* message_header = reinterpret_cast<Net_MessageHeader_t*> (inherited::rd_ptr ());
 
   return message_header->messageType;
 }
 
 ACE_Message_Block*
-Net_Message::duplicate(void) const
+Net_Message::duplicate (void) const
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Message::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Message::duplicate"));
 
   Net_Message* new_message = NULL;
 
@@ -72,9 +72,9 @@ Net_Message::duplicate(void) const
   // if there is no allocator, use the standard new and delete calls.
   if (message_block_allocator_ == NULL)
   {
-    ACE_NEW_RETURN(new_message,
-                   Net_Message(*this),
-                   NULL);
+    ACE_NEW_RETURN (new_message,
+                    Net_Message (*this),
+                    NULL);
   } // end IF
   else // otherwise, use the existing message_block_allocator
   {
@@ -82,21 +82,21 @@ Net_Message::duplicate(void) const
     // a "shallow" copy which just references our data block...
     // *TODO*: (depending on the allocator) we senselessly allocate a datablock
     // anyway, only to immediately release it again...
-    ACE_NEW_MALLOC_RETURN(new_message,
-                          static_cast<Net_Message*>(message_block_allocator_->malloc(capacity())),
-                          Net_Message(*this),
-                          NULL);
+    ACE_NEW_MALLOC_RETURN (new_message,
+                           static_cast<Net_Message*> (message_block_allocator_->malloc (inherited::capacity ())),
+                           Net_Message (*this),
+                           NULL);
   } // end ELSE
 
   // increment the reference counts of all the continuation messages
   if (cont_)
   {
-    new_message->cont_ = cont_->duplicate();
+    new_message->cont_ = cont_->duplicate ();
 
     // when things go wrong, release all resources and return
     if (new_message->cont_ == NULL)
     {
-      new_message->release();
+      new_message->release ();
       new_message = NULL;
     } // end IF
   } // end IF
@@ -107,33 +107,33 @@ Net_Message::duplicate(void) const
 }
 
 void
-Net_Message::dump_state() const
+Net_Message::dump_state () const
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Message::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Message::dump_state"));
 
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("***** Message (ID: %u) *****\n"),
-             getID()));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("***** Message (ID: %u) *****\n"),
+              inherited::getID ()));
 
 //   // step1: dump individual header types & offsets
 //   std::string protocol_layer;
-//   for (HEADERCONTAINER_CONSTITERATOR_TYPE iter = myHeaders.begin();
-//        iter != myHeaders.end();
+//   for (HEADERCONTAINER_CONSTITERATOR_TYPE iter = myHeaders.begin ();
+//        iter != myHeaders.end ();
 //        iter++)
 //   {
 //     RPG_Net_Protocol_Layer::ProtocolLayer2String(iter->first,
 //                                                         protocol_layer);
 //
-//     ACE_DEBUG((LM_INFO,
-//                ACE_TEXT("--> header type: \"%s\" @ offset: %u\n"),
-//                protocol_layer.c_str(),
-//                iter->second));
+//     ACE_DEBUG ((LM_INFO,
+//                 ACE_TEXT ("--> header type: \"%s\" @ offset: %u\n"),
+//                 protocol_layer.c_str (),
+//                 iter->second));
 //   } // end FOR
 //
 //   // step2: dump individual headers, top-down (collect sizes)
 //   unsigned long sum_header_size = 0;
-//   for (HEADERCONTAINER_CONSTITERATOR_TYPE iter = myHeaders.begin();
-//        iter != myHeaders.end();
+//   for (HEADERCONTAINER_CONSTITERATOR_TYPE iter = myHeaders.begin ();
+//        iter != myHeaders.end ();
 //        iter++)
 //   {
 //     switch (iter->first)
@@ -144,7 +144,7 @@ Net_Message::dump_state() const
 // //                                     iter->second);
 // //
 // //         // remember size
-// //         sum_header_size += header.length();
+// //         sum_header_size += header.length ();
 // //
 // //         header.dump_state();
 // //
@@ -156,9 +156,9 @@ Net_Message::dump_state() const
 // //         sum_header_size += FLB_RPS_ASTERIX_RESILIENCE_BYTES;
 // //
 // //         // don't have a header class for this...
-// //         ACE_DEBUG((LM_INFO,
-// //                    ACE_TEXT(" *** ASTERIX_offset (%u bytes) ***\n"),
-// //                    FLB_RPS_ASTERIX_RESILIENCE_BYTES));
+// //         ACE_DEBUG ((LM_INFO,
+// //                     ACE_TEXT (" *** ASTERIX_offset (%u bytes) ***\n"),
+// //                     FLB_RPS_ASTERIX_RESILIENCE_BYTES));
 // //
 // //         break;
 // //       }
@@ -172,27 +172,27 @@ Net_Message::dump_state() const
 //         sum_header_size += (header->doff * 4);
 //
 //         // debug info
-//         ACE_DEBUG((LM_DEBUG,
-//                    ACE_TEXT("*** TCP (%u bytes) ***\nSource#: %u --> %u\nDestination#: %u --> %u\nSequence#: %u --> %u (swapped)\nAcknowledgement#: %u --> %u (swapped)\nReserved: %u\nData Offset: %u --> %u bytes\nFlags: %u\nWindow: %u --> %u (swapped)\nChecksum: %u --> %u (swapped)\nUrgent Pointer: %u --> %u (swapped)\n"),
-//                    (header->doff * 4),
-//                    header->source,
-//                    ACE_NTOHS(header->source), // byte swapping
-//                    header->dest,
-//                    ACE_NTOHS(header->dest), // byte swapping
-//                    header->seq,
-//                    ACE_NTOHL(header->seq), // byte swapping
-//                    header->ack_seq,
-//                    ACE_NTOHL(header->ack_seq), // byte swapping
-//                    header->res1,
-//                    header->doff,
-//                    (header->doff * 4), // convert to bytes (value is in 32 bit words)
-//                    0, // *TODO*
-//                    header->window,
-//                    ACE_NTOHS(header->window), // byte swapping
-//                    header->check,
-//                    ACE_NTOHS(header->check), // byte swapping
-//                    header->urg_ptr,
-//                    ACE_NTOHS(header->urg_ptr))); // byte swapping
+//         ACE_DEBUG ((LM_DEBUG,
+//                     ACE_TEXT ("*** TCP (%u bytes) ***\nSource#: %u --> %u\nDestination#: %u --> %u\nSequence#: %u --> %u (swapped)\nAcknowledgement#: %u --> %u (swapped)\nReserved: %u\nData Offset: %u --> %u bytes\nFlags: %u\nWindow: %u --> %u (swapped)\nChecksum: %u --> %u (swapped)\nUrgent Pointer: %u --> %u (swapped)\n"),
+//                     (header->doff * 4),
+//                     header->source,
+//                     ACE_NTOHS (header->source), // byte swapping
+//                     header->dest,
+//                     ACE_NTOHS (header->dest), // byte swapping
+//                     header->seq,
+//                     ACE_NTOHL (header->seq), // byte swapping
+//                     header->ack_seq,
+//                     ACE_NTOHL (header->ack_seq), // byte swapping
+//                     header->res1,
+//                     header->doff,
+//                     (header->doff * 4), // convert to bytes (value is in 32 bit words)
+//                     0, // *TODO*
+//                     header->window,
+//                     ACE_NTOHS (header->window), // byte swapping
+//                     header->check,
+//                     ACE_NTOHS (header->check), // byte swapping
+//                     header->urg_ptr,
+//                     ACE_NTOHS (header->urg_ptr))); // byte swapping
 //
 //         break;
 //       }
@@ -202,19 +202,19 @@ Net_Message::dump_state() const
 //
 //         // remember size
 //         // *NOTE*: UDP headers are 8 bytes long...
-//         sum_header_size += sizeof(struct udphdr);
+//         sum_header_size += sizeof (struct udphdr);
 //
-//         ACE_DEBUG((LM_DEBUG,
-//                    ACE_TEXT("*** UDP (%u bytes) ***\nSource#: %u --> %u\nDestination#: %u --> %u\nLength: %u --> %u bytes\nChecksum: %u --> %u (swapped)\n"),
-//                    sizeof(struct udphdr),
-//                    header->source,
-//                    ACE_NTOHS(header->source), // byte swapping
-//                    header->dest,
-//                    ACE_NTOHS(header->dest), // byte swapping
-//                    header->len,
-//                    ACE_NTOHS(header->len), // byte swapping
-//                    header->check,
-//                    ACE_NTOHS(header->check))); // byte swapping
+//         ACE_DEBUG ((LM_DEBUG,
+//                     ACE_TEXT("*** UDP (%u bytes) ***\nSource#: %u --> %u\nDestination#: %u --> %u\nLength: %u --> %u bytes\nChecksum: %u --> %u (swapped)\n"),
+//                     sizeof (struct udphdr),
+//                     header->source,
+//                     ACE_NTOHS (header->source), // byte swapping
+//                     header->dest,
+//                     ACE_NTOHS (header->dest), // byte swapping
+//                     header->len,
+//                     ACE_NTOHS (header->len), // byte swapping
+//                     header->check,
+//                     ACE_NTOHS (header->check))); // byte swapping
 //
 //         break;
 //       }
@@ -227,29 +227,29 @@ Net_Message::dump_state() const
 //         // IP header in 32 bit words...
 //         sum_header_size += (header->ihl * 4);
 //
-//         ACE_DEBUG((LM_DEBUG,
-//                    ACE_TEXT("*** IP (%u bytes) ***\nVersion: %u\nHeader Length: %u --> %u bytes\nType-of-Service Flags: %u\nTotal Packet Length: %u --> %u bytes\nFragment Identifier: %u --> %u (swapped)\nFragmentation Flags: %u (3 LSBits)\nFragmentation Offset: %u\nTime-to-Live: %u\nProtocol Identifier: %u --> \"%s\"\nHeader Checksum: %u --> %u (swapped)\nSource#: %u --> \"%s\"\nDestination#: %u --> \"%s\"\nOptions: %u byte(s)\n"),
-//                    (header->ihl * 4),
-//                    header->version,
-//                    header->ihl,
-//                    (header->ihl * 4), // <-- Header Length is in in multiples of 32 bits
-//                    header->tos,
-//                    header->tot_len,
-//                    ACE_NTOHS(header->tot_len), // byte swapping
-//                    header->id,
-//                    ACE_NTOHS(header->id), // byte swapping
-//                    (ACE_NTOHS(header->frag_off) >> 13), // consider the head three bits...
-//                    (ACE_NTOHS(header->frag_off) & IP_OFFMASK),
-//                    header->ttl,
-//                    header->protocol,
-//                    RPG_Net_Common_Tools::IPProtocol2String(header->protocol).c_str(),
-//                    header->check,
-//                    ACE_NTOHS(header->check), // byte swapping
-//                    header->saddr,
-//                    RPG_Net_Common_Tools::IPAddress2String(header->saddr, 0).c_str(), // no port
-//                    header->daddr,
-//                    RPG_Net_Common_Tools::IPAddress2String(header->daddr, 0).c_str(), // no port
-//                    (header->ihl - 5)));
+//         ACE_DEBUG ((LM_DEBUG,
+//                     ACE_TEXT("*** IP (%u bytes) ***\nVersion: %u\nHeader Length: %u --> %u bytes\nType-of-Service Flags: %u\nTotal Packet Length: %u --> %u bytes\nFragment Identifier: %u --> %u (swapped)\nFragmentation Flags: %u (3 LSBits)\nFragmentation Offset: %u\nTime-to-Live: %u\nProtocol Identifier: %u --> \"%s\"\nHeader Checksum: %u --> %u (swapped)\nSource#: %u --> \"%s\"\nDestination#: %u --> \"%s\"\nOptions: %u byte(s)\n"),
+//                     (header->ihl * 4),
+//                     header->version,
+//                     header->ihl,
+//                     (header->ihl * 4), // <-- Header Length is in in multiples of 32 bits
+//                     header->tos,
+//                     header->tot_len,
+//                     ACE_NTOHS (header->tot_len), // byte swapping
+//                     header->id,
+//                     ACE_NTOHS (header->id), // byte swapping
+//                     (ACE_NTOHS (header->frag_off) >> 13), // consider the head three bits...
+//                     (ACE_NTOHS (header->frag_off) & IP_OFFMASK),
+//                     header->ttl,
+//                     header->protocol,
+//                     Net_Common_Tools::IPProtocol2String (header->protocol).c_str (),
+//                     header->check,
+//                     ACE_NTOHS (header->check), // byte swapping
+//                     header->saddr,
+//                     Net_Common_Tools::IPAddress2String (header->saddr, 0).c_str (), // no port
+//                     header->daddr,
+//                     Net_Common_Tools::IPAddress2String (header->daddr, 0).c_str (), // no port
+//                     (header->ihl - 5)));
 //
 //         break;
 //       }
@@ -262,18 +262,18 @@ Net_Message::dump_state() const
 //         sum_header_size += FDDI_K_SNAP_HLEN;
 //
 //         // *TODO*: add Organization Code
-//         ACE_DEBUG((LM_DEBUG,
-//                    ACE_TEXT("*** FDDI_LLC_SNAP (%u bytes) ***\nFrame Control: %u\nDestination MAC#: \"%s\"\nSource MAC#: \"%s\"\nDSAP: %u\nSSAP: %u\nControl Field: %u\nPacket Type ID: %u --> %u (swapped) --> \"%s\"\n"),
-//                    FDDI_K_SNAP_HLEN,
-//                    header->fc,
-//                    RPG_Net_Common_Tools::MACAddress2String((rd_ptr() + iter->second) + 1).c_str(),
-//                    RPG_Net_Common_Tools::MACAddress2String((rd_ptr() + iter->second) + 1 + FDDI_K_ALEN).c_str(),
-//                    header->hdr.llc_snap.dsap,
-//                    header->hdr.llc_snap.ssap,
-//                    header->hdr.llc_snap.ctrl,
-//                    header->hdr.llc_snap.ethertype,
-//                    ACE_NTOHS(header->hdr.llc_snap.ethertype), // byte swapping
-//                    RPG_Net_Common_Tools::EthernetProtocolTypeID2String(header->hdr.llc_snap.ethertype).c_str()));
+//         ACE_DEBUG ((LM_DEBUG,
+//                     ACE_TEXT ("*** FDDI_LLC_SNAP (%u bytes) ***\nFrame Control: %u\nDestination MAC#: \"%s\"\nSource MAC#: \"%s\"\nDSAP: %u\nSSAP: %u\nControl Field: %u\nPacket Type ID: %u --> %u (swapped) --> \"%s\"\n"),
+//                     FDDI_K_SNAP_HLEN,
+//                     header->fc,
+//                     RPG_Net_Common_Tools::MACAddress2String ((inherited::rd_ptr () + iter->second) + 1).c_str (),
+//                     Net_Common_Tools::MACAddress2String ((inherited::rd_ptr () + iter->second) + 1 + FDDI_K_ALEN).c_str (),
+//                     header->hdr.llc_snap.dsap,
+//                     header->hdr.llc_snap.ssap,
+//                     header->hdr.llc_snap.ctrl,
+//                     header->hdr.llc_snap.ethertype,
+//                     ACE_NTOHS (header->hdr.llc_snap.ethertype), // byte swapping
+//                     Net_Common_Tools::EthernetProtocolTypeID2String (header->hdr.llc_snap.ethertype).c_str ()));
 //
 //         break;
 //       }
@@ -285,28 +285,28 @@ Net_Message::dump_state() const
 //         // *NOTE*: Ethernet headers are 14 bytes long...
 //         sum_header_size += ETH_HLEN;
 //
-//         ACE_DEBUG((LM_DEBUG,
-//                    ACE_TEXT("*** ETHERNET (%u bytes) ***\nDestination MAC#: \"%s\"\nSource MAC#: \"%s\"\nProtocol Type/Length: %u --> %u (swapped) --> \"%s\"\n"),
-//                    ETH_HLEN,
-//                    RPG_Net_Common_Tools::MACAddress2String((rd_ptr() + iter->second)).c_str(),
-//                    RPG_Net_Common_Tools::MACAddress2String((rd_ptr() + iter->second) + ETH_ALEN).c_str(),
-//                    header->ether_type,
-//                    ACE_NTOHS(header->ether_type), // byte swapping
-//                    RPG_Net_Common_Tools::EthernetProtocolTypeID2String(header->ether_type).c_str()));
+//         ACE_DEBUG ((LM_DEBUG,
+//                     ACE_TEXT ("*** ETHERNET (%u bytes) ***\nDestination MAC#: \"%s\"\nSource MAC#: \"%s\"\nProtocol Type/Length: %u --> %u (swapped) --> \"%s\"\n"),
+//                     ETH_HLEN,
+//                     Net_Common_Tools::MACAddress2String ((inherited::rd_ptr () + iter->second)).c_str (),
+//                     Net_Common_Tools::MACAddress2String ((inherited::rd_ptr () + iter->second) + ETH_ALEN).c_str (),
+//                     header->ether_type,
+//                     ACE_NTOHS(header->ether_type), // byte swapping
+//                     Net_Common_Tools::EthernetProtocolTypeID2String (header->ether_type).c_str ()));
 //
 //         break;
 //       }
 //       default:
 //       {
 //         // debug info
-//         RPG_Net_Protocol_Layer::ProtocolLayer2String(iter->first,
+//         Net_Protocol_Layer::ProtocolLayer2String (iter->first,
 //                                                      protocol_layer);
 //
-//         ACE_DEBUG((LM_ERROR,
-//                    ACE_TEXT("message (ID: %u) contains unknown protocol header type \"%s\" at offset: %u --> check implementation, continuing\n"),
-//                    getID(),
-//                    protocol_layer.c_str(),
-//                    iter->second));
+//         ACE_DEBUG ((LM_ERROR,
+//                     ACE_TEXT ("message (ID: %u) contains unknown protocol header type \"%s\" at offset: %u --> check implementation, continuing\n"),
+//                     inherited::getID (),
+//                     protocol_layer.c_str (),
+//                     iter->second));
 //
 //         break;
 //       }
@@ -314,17 +314,17 @@ Net_Message::dump_state() const
 //   } // end FOR
 //
 //   // step3: dump total size
-//   ACE_DEBUG((LM_DEBUG,
-//              ACE_TEXT("--> total message (ID: %u) size: %u byte(s) (%u header byte(s))\n"),
-//              getID(),
-//              (length() + sum_header_size),
-//              sum_header_size));
+//   ACE_DEBUG ((LM_DEBUG,
+//               ACE_TEXT ("--> total message (ID: %u) size: %u byte(s) (%u header byte(s))\n"),
+//               inherited::getID (),
+//               (inherited::length () + sum_header_size),
+//               sum_header_size));
 }
 
 std::string
-Net_Message::commandType2String(const Net_MessageType& messageType_in)
+Net_Message::CommandType2String (Net_MessageType_t messageType_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Message::commandType2String"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Message::CommandType2String"));
 
   std::string result = ACE_TEXT ("INVALID");
 

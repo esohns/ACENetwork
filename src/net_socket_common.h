@@ -59,21 +59,21 @@ typedef Net_StreamAsynchUDPSocketBase_T<Net_StreamProtocolConfigurationState_t,
 typedef Net_StreamTCPSocketBase_T<Net_StreamProtocolConfigurationState_t,
                                   Net_RuntimeStatistic_t,
                                   Net_Stream,
-                                  Net_TCPSocketHandler> Net_TCPHandler;
+                                  Net_TCPSocketHandler> Net_TCPHandler_t;
 typedef Net_StreamUDPSocketBase_T<Net_StreamProtocolConfigurationState_t,
                                   Net_RuntimeStatistic_t,
                                   Net_Stream,
                                   ACE_SOCK_Dgram,
-                                  Net_UDPSocketHandler> Net_UDPHandler;
+                                  Net_UDPSocketHandler> Net_UDPHandler_t;
 typedef Net_StreamUDPSocketBase_T<Net_StreamProtocolConfigurationState_t,
                                   Net_RuntimeStatistic_t,
                                   Net_Stream,
                                   ACE_SOCK_Dgram_Mcast,
-                                  Net_UDPSocketHandler> Net_IPMulticastHandler;
+                                  Net_UDPSocketHandler> Net_IPMulticastHandler_t;
 typedef Net_StreamUDPSocketBase_T<Net_StreamProtocolConfigurationState_t,
                                   Net_RuntimeStatistic_t,
                                   Net_Stream,
                                   ACE_SOCK_Dgram_Bcast,
-                                  Net_UDPSocketHandler> Net_IPBroadcastHandler;
+                                  Net_UDPSocketHandler> Net_IPBroadcastHandler_t;
 
 #endif
