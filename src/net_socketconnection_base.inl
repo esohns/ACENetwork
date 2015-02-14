@@ -18,7 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "net_connection_manager_common.h"
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -29,10 +28,10 @@ template <typename SocketHandlerType,
 Net_SocketConnectionBase_T<SocketHandlerType,
                            TransportLayerType,
                            ConfigurationType,
-                           StatisticsContainerType>::Net_SocketConnectionBase_T ()
+                           StatisticsContainerType>::Net_SocketConnectionBase_T (Net_IConnectionManager_t* interfaceHandle_in)
  : inherited ()
  //, inherited2 ()
- , inherited3 (NET_CONNECTIONMANAGER_SINGLETON::instance ())
+ , inherited3 (interfaceHandle_in)
 {
   NETWORK_TRACE(ACE_TEXT("Net_SocketConnectionBase_T::Net_SocketConnectionBase_T"));
 

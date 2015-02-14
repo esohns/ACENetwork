@@ -28,24 +28,23 @@
 #include "common.h"
 #include "common_istatistic.h"
 
+#include "stream_common.h"
 #include "stream_iallocator.h"
 #include "stream_headmoduletask_base.h"
 #include "stream_streammodule_base.h"
 
-#include "net_stream_common.h"
-#include "net_stream_configuration.h"
 #include "net_sessionmessage.h"
 #include "net_message.h"
 
 class Net_Module_SocketHandler
  : public Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      Net_StreamProtocolConfigurationState_t,
-                                      Net_StreamConfiguration,
+                                      Stream_State_t,
+                                      Stream_SessionData_t,
                                       Net_SessionMessage,
                                       Net_Message>
    // callback to trigger statistics collection...
- , public Common_IStatistic_T<Net_RuntimeStatistic_t>
+ , public Common_IStatistic_T<Stream_Statistic_t>
 {
  public:
   Net_Module_SocketHandler ();
@@ -73,14 +72,14 @@ class Net_Module_SocketHandler
 
   // implement Common_IStatistic
   // *NOTE*: implements regular (timer-based) statistics collection
-  virtual bool collect (Net_RuntimeStatistic_t&) const; // return value: (currently unused !)
+  virtual bool collect (Stream_Statistic_t&) const; // return value: (currently unused !)
   virtual void report () const;
 
  private:
   typedef Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      Net_StreamProtocolConfigurationState_t,
-                                      Net_StreamConfiguration,
+                                      Stream_State_t,
+                                      Stream_SessionData_t,
                                       Net_SessionMessage,
                                       Net_Message> inherited;
 
@@ -90,20 +89,20 @@ class Net_Module_SocketHandler
   // helper methods
   bool bisectMessages (Net_Message*&); // return value: complete message (chain)
 //   Net_Message* allocateMessage(const unsigned int&); // requested size
-  bool putStatisticsMessage (const Net_RuntimeStatistic_t&, // statistics info
+  bool putStatisticsMessage (const Stream_Statistic_t&, // statistics info
                              const ACE_Time_Value&) const;  // statistics generation time
 
-  bool                           isInitialized_;
+  bool                              isInitialized_;
 
   // timer stuff
-  unsigned int                   statCollectionInterval_; // seconds
-  Net_StatisticHandler_Reactor_t statCollectHandler_;
-  long                           statCollectHandlerID_;
+  unsigned int                      statCollectionInterval_; // seconds
+  Stream_StatisticHandler_Reactor_t statCollectHandler_;
+  long                              statCollectHandlerID_;
 
   // protocol stuff
-  unsigned int                   currentMessageLength_;
-  Net_Message*                   currentMessage_;
-  Net_Message*                   currentBuffer_;
+  unsigned int                      currentMessageLength_;
+  Net_Message*                      currentMessage_;
+  Net_Message*                      currentBuffer_;
 };
 
 // declare module

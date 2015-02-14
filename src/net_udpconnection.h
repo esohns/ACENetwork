@@ -24,6 +24,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
+#include "net_connection_manager_common.h"
 #include "net_exports.h"
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
@@ -37,7 +38,8 @@ class Net_Export Net_UDPConnection
                                      Net_RuntimeStatistic_t>
 {
  public:
-  Net_UDPConnection (const ACE_INET_Addr&); // peer address
+  Net_UDPConnection (Net_IConnectionManager_t*,
+                     const ACE_INET_Addr&); // peer address
 
   // implement (part of) Net_ITransportLayer
   //virtual bool open (const ACE_INET_Addr&, // peer address

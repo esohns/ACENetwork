@@ -28,10 +28,10 @@
 
 Net_SessionMessage::Net_SessionMessage (unsigned int sessionID_in,
                                         Stream_SessionMessageType_t messageType_in,
-                                        Net_StreamConfiguration*& configuration_inout)
+                                        Net_StreamSessionData_t*& sessionData_inout)
  : inherited (sessionID_in,
               messageType_in,
-              configuration_inout)
+              sessionData_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionMessage::Net_SessionMessage"));
 

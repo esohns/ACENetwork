@@ -53,7 +53,7 @@ class Net_StreamTCPSocketBase_T
   Net_StreamTCPSocketBase_T ();
   virtual ~Net_StreamTCPSocketBase_T ();
 
-  ConfigurationType  configuration_;
+  ConfigurationType* configuration_;
   StreamType         stream_;
   ACE_Message_Block* currentReadBuffer_;
   ACE_Thread_Mutex   sendLock_;
@@ -73,6 +73,8 @@ class Net_StreamTCPSocketBase_T
   // dispatch the reactor notification queue concurrently (most notably,
   // ACE_TP_Reactor) --> enforce proper serialization
   bool               serializeOutput_;
+  // *NOTE*: this is a transient handle, used only to initialize the session ID
+  Net_StreamState_t* state_;
 };
 
 // include template implementation

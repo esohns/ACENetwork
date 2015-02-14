@@ -23,9 +23,10 @@
 
 #include "ace/Global_Macros.h"
 
+#include "stream_common.h"
 #include "stream_session_message_base.h"
 
-#include "net_stream_configuration.h"
+#include "net_exports.h"
 
 // forward declarations
 class ACE_Message_Block;
@@ -34,8 +35,8 @@ class Net_Message;
 // class Net_StreamMessageAllocator;
 // template <typename MessageType, typename SessionMessageType> class Stream_MessageAllocatorHeapBase;
 
-class Net_SessionMessage
- : public Stream_SessionMessageBase_T<Net_StreamConfiguration>
+class Net_Export Net_SessionMessage
+ : public Stream_SessionMessageBase_T<Stream_SessionData_t>
 {
 //   // enable access to private ctor(s)...
 //   friend class Net_StreamMessageAllocator;
@@ -44,7 +45,7 @@ class Net_SessionMessage
   // *NOTE*: assume lifetime responsibility for the second argument !
   Net_SessionMessage (unsigned int,                // session ID
                       Stream_SessionMessageType_t, // session message type
-                      Net_StreamConfiguration*&);  // config handle
+                      Stream_SessionData_t*&);  // session data handle
     // *NOTE*: to be used by message allocators...
   Net_SessionMessage (ACE_Allocator*); // message allocator
   Net_SessionMessage (ACE_Data_Block*, // data block
@@ -55,11 +56,8 @@ class Net_SessionMessage
   // *WARNING*: any children need to override this as well
   virtual ACE_Message_Block* duplicate (void) const;
 
-  // implement Common_IDumpState
-  virtual void dump_state () const;
-
  private:
-  typedef Stream_SessionMessageBase_T<Net_StreamConfiguration> inherited;
+  typedef Stream_SessionMessageBase_T<Stream_SessionData_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage ());
   // copy ctor (to be used by duplicate())

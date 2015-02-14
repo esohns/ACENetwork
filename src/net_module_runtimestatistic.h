@@ -37,7 +37,7 @@
 #include "stream_task_base_synch.h"
 
 #include "net_defines.h"
-#include "net_stream_common.h"
+//#include "net_stream_common.h"
 
 // forward declaration(s)
 class ACE_Message_Block;

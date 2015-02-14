@@ -23,13 +23,10 @@
 
 #include "ace/Log_Msg.h"
 
-//#include "common_defines.h"
-
-//#include "net_connection_manager_common.h"
 #include "net_macros.h"
 
-Net_Client_AsynchConnector::Net_Client_AsynchConnector ()
-// : inherited ()
+Net_Client_AsynchConnector::Net_Client_AsynchConnector (Net_IConnectionManager_t* interfaceHandle_in)
+ : interfaceHandle_ (interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector::Net_Client_AsynchConnector"));
 
@@ -56,10 +53,8 @@ Net_Client_AsynchConnector::make_handler (void)
   Net_AsynchTCPConnection* result = NULL;
 
   // default behavior
-//  ACE_NEW_NORETURN(result,
-//                   Net_AsynchTCPConnection (NET_CONNECTIONMANAGER_SINGLETON::instance ()));
   ACE_NEW_NORETURN (result,
-                    Net_AsynchTCPConnection ());
+                    Net_AsynchTCPConnection (interfaceHandle_));
   if (!result)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

@@ -28,7 +28,7 @@
 #include "net_sessionmessage.h"
 #include "net_message.h"
 #include "net_remote_comm.h"
-#include "net_stream_configuration.h"
+#include "net_stream_common.h"
 
 Net_Module_SocketHandler::Net_Module_SocketHandler ()
  : inherited (false, // inactive by default
@@ -189,7 +189,9 @@ Net_Module_SocketHandler::handleSessionMessage (Net_SessionMessage*& message_ino
     case SESSION_BEGIN:
     {
       // retain the session ID for reporting...
-      inherited::sessionID_ = message_inout->getConfiguration ()->getUserData ().sessionID;
+      ACE_ASSERT (message_inout->getData ());
+      ACE_ASSERT (message_inout->getData ()->getUserData ());
+      inherited::sessionID_ = message_inout->getData ()->getUserData ()->sessionID;
 
       if (statCollectionInterval_)
       {
@@ -237,9 +239,9 @@ Net_Module_SocketHandler::handleSessionMessage (Net_SessionMessage*& message_ino
 }
 
 bool
-Net_Module_SocketHandler::collect (Net_RuntimeStatistic_t& data_out) const
+Net_Module_SocketHandler::collect (Net_StreamStatistic_t& data_out) const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler::collect"));
 
   // just a dummy...
   ACE_UNUSED_ARG (data_out);
@@ -248,7 +250,7 @@ Net_Module_SocketHandler::collect (Net_RuntimeStatistic_t& data_out) const
   ACE_ASSERT (isInitialized_);
 
   // step0: init info container POD
-  ACE_OS::memset (&data_out, 0, sizeof (Net_RuntimeStatistic_t));
+  ACE_OS::memset (&data_out, 0, sizeof (Net_StreamStatistic_t));
 
   // *IMPORTANT NOTE*: information is collected by the statistic module
   //                   (if any)
@@ -445,34 +447,31 @@ Net_Module_SocketHandler::bisectMessages (Net_Message*& message_out)
 // }
 
 bool
-Net_Module_SocketHandler::putStatisticsMessage (const Net_RuntimeStatistic_t& info_in,
+Net_Module_SocketHandler::putStatisticsMessage (const Net_StreamStatistic_t& statistic_in,
                                                 const ACE_Time_Value& collectionTime_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler::putStatisticsMessage"));
 
-  // step1: init info POD
-  Net_StreamProtocolConfigurationState_t data;
-  ACE_OS::memset (&data, 0, sizeof (Net_StreamProtocolConfigurationState_t));
-  data.currentStatistics = info_in;
-  data.lastCollectionTimestamp = collectionTime_in;
+  // step1: init information object
+  inherited::userData_->currentStatistics = statistic_in;
+  inherited::userData_->lastCollectionTimestamp = collectionTime_in;
 
-  // step2: allocate config container
-  Net_StreamConfiguration* configuration_p = NULL;
-  ACE_NEW_NORETURN (configuration_p,
-                    Net_StreamConfiguration (data));
-  if (!configuration_p)
+  // step2: allocate data container
+  Net_StreamSessionData_t* data_p = NULL;
+  ACE_NEW_NORETURN (data_p,
+                    Net_StreamSessionData_t (inherited::userData_));
+  if (!data_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate Net_StreamConfiguration: \"%m\", aborting\n")));
+                ACE_TEXT ("failed to allocate Net_StreamSessionData_t: \"%m\", aborting\n")));
 
     return false;
   } // end IF
 
   // step3: send the data downstream...
-  // *NOTE*: this is a "fire-and-forget" API, so we don't need to
-  // worry about config any longer !
+  // *NOTE*: this is a "fire-and-forget" API, so don't worry about data_p !
   return inherited::putSessionMessage (inherited::sessionID_,
                                        SESSION_STATISTICS,
-                                       configuration_p,
+                                       data_p,
                                        inherited::allocator_);
 }

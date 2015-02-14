@@ -1,6 +1,8 @@
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = \
+  -I m4
 
 DEFS = \
+  -DCOMMON_HAS_DLL \
   -DNET_BUILD_DLL=1 \
   -DMETA_PACKAGE=\"@META_PACKAGE@\"
 
@@ -15,6 +17,7 @@ include_HEADERS = \
   net_asynch_udpsockethandler.h \
   net_common_modules.h \
   net_common_tools.h \
+  net_configuration.h \
   net_connection_base.h \
   net_connection_common.h \
   net_connection_manager_common.h \
@@ -46,8 +49,6 @@ include_HEADERS = \
   net_stream_asynch_tcpsocket_base.inl \
   net_stream_asynch_udpsocket_base.h \
   net_stream_asynch_udpsocket_base.inl \
-  net_stream_common.h \
-  net_stream_configuration.h \
   net_stream_tcpsocket_base.h \
   net_stream_tcpsocket_base.inl \
   net_stream_udpsocket_base.h \
@@ -73,6 +74,7 @@ libACENetwork_la_SOURCES = \
   net_common_tools.cpp \
   net_common_tools.h \
   net_common.h \
+  net_configuration.h \
   net_connection_base.cpp \
   net_connection_base.h \
   net_connection_base.inl \
@@ -122,7 +124,6 @@ libACENetwork_la_SOURCES = \
   net_stream_asynch_udpsocket_base.h \
   net_stream_asynch_udpsocket_base.inl \
   net_stream_common.h \
-  net_stream_configuration.h \
   net_stream_tcpsocket_base.cpp \
   net_stream_tcpsocket_base.h \
   net_stream_tcpsocket_base.inl \
@@ -152,4 +153,3 @@ libACENetwork_la_SOURCES = \
 
 SUBDIRS = \
   client
-

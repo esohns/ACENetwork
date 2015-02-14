@@ -28,10 +28,11 @@
 #include "net_common.h"
 #include "net_macros.h"
 
-Net_Client_Connector::Net_Client_Connector ()
+Net_Client_Connector::Net_Client_Connector (Net_IConnectionManager_t* interfaceHandle_in)
  : inherited (ACE_Reactor::instance (), // default reactor
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
+ , interfaceHandle_ (interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector::Net_Client_Connector"));
 
@@ -53,7 +54,7 @@ Net_Client_Connector::make_svc_handler (Net_TCPConnection*& handler_inout)
 
   // default behavior
   ACE_NEW_NORETURN (handler_inout,
-                    Net_TCPConnection ());
+                    Net_TCPConnection (interfaceHandle_));
   if (!handler_inout)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

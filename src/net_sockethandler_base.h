@@ -21,22 +21,29 @@
 #ifndef Net_SOCKETHANDLER_BASE_H
 #define Net_SOCKETHANDLER_BASE_H
 
-#include "ace/Malloc_Base.h"
+#include "ace/Global_Macros.h"
+
+#include "net_configuration.h"
+
+// forward declarations
+class ACE_Allocator;
 
 class Net_SocketHandlerBase
 {
  public:
   virtual ~Net_SocketHandlerBase ();
 
-  void init (ACE_Allocator*); // message allocator handle
+  void init (Net_SocketConfiguration_t, // socket / stream configuration
+             ACE_Allocator*);           // message allocator handle
 
  protected:
   Net_SocketHandlerBase ();
 
-  ACE_Allocator* allocator_;
+  ACE_Allocator*            allocator_;
+  Net_SocketConfiguration_t socketConfiguration_;
 
  private:
-//  ACE_UNIMPLEMENTED_FUNC(Net_SocketHandlerBase());
+//  ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase ());
   ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase (const Net_SocketHandlerBase&));
   ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase& operator= (const Net_SocketHandlerBase&));
 };

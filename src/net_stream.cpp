@@ -66,7 +66,7 @@ Net_Stream::~Net_Stream ()
 }
 
 bool
-Net_Stream::init (const Net_StreamProtocolConfigurationState_t& configuration_in)
+Net_Stream::init (const Net_StreamConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::init"));
 
@@ -82,7 +82,7 @@ Net_Stream::init (const Net_StreamProtocolConfigurationState_t& configuration_in
   // - push them onto the stream (tail-first) !
   // -------------------------------------------------------------
 
-  if (configuration_in.configuration.notificationStrategy)
+  if (configuration_in.notificationStrategy)
   {
     Stream_Module_t* module = inherited::head ();
     if (!module)
@@ -100,17 +100,17 @@ Net_Stream::init (const Net_StreamProtocolConfigurationState_t& configuration_in
 
       return false;
     } // end IF
-    task->msg_queue ()->notification_strategy (configuration_in.configuration.notificationStrategy);
+    task->msg_queue ()->notification_strategy (configuration_in.notificationStrategy);
   } // end IF
 
   // ---------------------------------------------------------------------------
 
-  if (configuration_in.configuration.module)
-    if (inherited::push (configuration_in.configuration.module) == -1)
+  if (configuration_in.module)
+    if (inherited::push (configuration_in.module) == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                  configuration_in.configuration.module->name ()));
+                  configuration_in.module->name ()));
 
       return false;
     } // end IF
@@ -127,8 +127,8 @@ Net_Stream::init (const Net_StreamProtocolConfigurationState_t& configuration_in
 
     return false;
   } // end IF
-  if (!protocolHandler_impl->init (configuration_in.configuration.messageAllocator,
-                                   configuration_in.sessionID,
+  if (!protocolHandler_impl->init (configuration_in.messageAllocator,
+//                                   configuration_in.sessionID,
                                    configuration_in.peerPingInterval,
                                    configuration_in.pingAutoAnswer,
                                    configuration_in.printPongMessages)) // print ('.') for received "pong"s...
@@ -160,9 +160,9 @@ Net_Stream::init (const Net_StreamProtocolConfigurationState_t& configuration_in
 
     return false;
   } // end IF
-  if (!runtimeStatistic_impl->init (configuration_in.configuration.statisticsReportingInterval, // reporting interval (seconds)
-                                    configuration_in.configuration.printFinalReport,            // print final report ?
-                                    configuration_in.configuration.messageAllocator))           // message allocator handle
+  if (!runtimeStatistic_impl->init (configuration_in.statisticsReportingInterval, // reporting interval (seconds)
+                                    configuration_in.printFinalReport,            // print final report ?
+                                    configuration_in.messageAllocator))           // message allocator handle
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -220,9 +220,8 @@ Net_Stream::init (const Net_StreamProtocolConfigurationState_t& configuration_in
 
     return false;
   } // end IF
-  if (!socketHandler_impl->init (configuration_in.configuration.messageAllocator,
-                                 configuration_in.sessionID,
-                                 configuration_in.configuration.useThreadPerConnection,
+  if (!socketHandler_impl->init (configuration_in.messageAllocator,
+                                 configuration_in.useThreadPerConnection,
                                  NET_STATISTICS_COLLECTION_INTERVAL))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -235,12 +234,12 @@ Net_Stream::init (const Net_StreamProtocolConfigurationState_t& configuration_in
   // enqueue the module...
   // *NOTE*: push()ing the module will open() it
   // --> set the argument that is passed along
-  socketHandler_.arg (&const_cast<Net_StreamProtocolConfigurationState_t&> (configuration_in));
+  socketHandler_.arg (&const_cast<Net_StreamConfiguration_t&> (configuration_in));
   if (inherited::push (&socketHandler_) == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT(socketHandler_.name ())));
+                ACE_TEXT (socketHandler_.name ())));
 
     return false;
   } // end IF
@@ -248,7 +247,7 @@ Net_Stream::init (const Net_StreamProtocolConfigurationState_t& configuration_in
   // -------------------------------------------------------------
 
   // set (session) message allocator
-  inherited::allocator_ = configuration_in.configuration.messageAllocator;
+  inherited::allocator_ = configuration_in.messageAllocator;
 
   // OK: all went well
   inherited::isInitialized_ = true;
@@ -296,7 +295,7 @@ Net_Stream::getSessionID () const
 }
 
 bool
-Net_Stream::collect (Net_RuntimeStatistic_t& data_out) const
+Net_Stream::collect (Net_StreamStatistic_t& data_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::collect"));
 

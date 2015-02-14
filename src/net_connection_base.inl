@@ -26,10 +26,10 @@
 template <typename ConfigurationType,
           typename StatisticsContainerType>
 Net_ConnectionBase_T<ConfigurationType,
-                     StatisticsContainerType>::Net_ConnectionBase_T (Net_Manager_t* manager_in)
+                     StatisticsContainerType>::Net_ConnectionBase_T (Net_IConnectionManager_t* interfaceHandle_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
- , manager_ (manager_in)
+ , manager_ (interfaceHandle_in)
 // , userData_ ()
  , isRegistered_ (false)
 {

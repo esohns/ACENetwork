@@ -24,11 +24,11 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-Net_UDPConnection::Net_UDPConnection (const ACE_INET_Addr& peerAddress_in)
-//: inherited (Net_CONNECTIONMANAGER_SINGLETON::instance())
- : inherited ()
- //, inherited2 (NULL, // default thread manager
- //              NULL) // default message queue
+Net_UDPConnection::Net_UDPConnection (Net_IConnectionManager_t* interfaceHandle_in,
+                                      const ACE_INET_Addr& peerAddress_in)
+ : inherited (interfaceHandle_in)
+// , inherited2 (NULL, // default thread manager
+//               NULL) // default message queue
  , peerAddress_ (peerAddress_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection::Net_UDPConnection"));

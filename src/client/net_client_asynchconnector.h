@@ -24,6 +24,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/Asynch_Connector.h"
 
+#include "net_connection_manager_common.h"
 #include "net_tcpconnection.h"
 
 #include "net_client_exports.h"
@@ -34,7 +35,7 @@ class Net_Client_Export Net_Client_AsynchConnector
  , public Net_Client_IConnector
 {
  public:
-  Net_Client_AsynchConnector ();
+  Net_Client_AsynchConnector (Net_IConnectionManager_t*);
   virtual ~Net_Client_AsynchConnector ();
 
   // override default creation strategy
@@ -51,8 +52,11 @@ class Net_Client_Export Net_Client_AsynchConnector
  private:
   typedef ACE_Asynch_Connector<Net_AsynchTCPConnection> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector (const Net_Client_AsynchConnector&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector& operator= (const Net_Client_AsynchConnector&));
+
+  Net_IConnectionManager_t* interfaceHandle_;
 };
 
 #endif

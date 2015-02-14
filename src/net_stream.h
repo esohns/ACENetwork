@@ -28,35 +28,35 @@
 #include "common_istatistic.h"
 
 #include "stream_base.h"
+#include "stream_common.h"
 
 #include "net_common_modules.h"
+#include "net_configuration.h"
 #include "net_exports.h"
 #include "net_message.h"
 #include "net_module_headerparser.h"
 #include "net_module_protocolhandler.h"
 #include "net_module_sockethandler.h"
 #include "net_sessionmessage.h"
-#include "net_stream_common.h"
-#include "net_stream_configuration.h"
 
 class Net_Export Net_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        Net_StreamProtocolConfigurationState_t,
-                        Net_StreamConfiguration,
+                        Stream_State_t,
+                        Net_StreamConfiguration_t,
                         Net_SessionMessage,
                         Net_Message>
- , public Common_IStatistic_T<Net_RuntimeStatistic_t>
+ , public Common_IStatistic_T<Stream_Statistic_t>
 {
  public:
    Net_Stream ();
    virtual ~Net_Stream ();
 
   // convenience types
-  typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Net_Statistics_t;
+  typedef Common_IStatistic_T<Stream_Statistic_t> Net_Statistic_t;
 
   // init stream
-  bool init (const Net_StreamProtocolConfigurationState_t&); // stream/module configuration
+  bool init (const Net_StreamConfiguration_t&); // stream/module configuration
 
   // *TODO*: re-consider this API
   void ping ();
@@ -65,15 +65,15 @@ class Net_Export Net_Stream
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to runtimeStatistic_
-  virtual bool collect (Net_RuntimeStatistic_t&) const; // return value: statistic data
+  virtual bool collect (Stream_Statistic_t&) const; // return value: statistic data
   // this is just a dummy (use statisticsReportingInterval instead)
   virtual void report () const;
 
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        Net_StreamProtocolConfigurationState_t,
-                        Net_StreamConfiguration,
+                        Stream_State_t,
+                        Net_StreamConfiguration_t,
                         Net_SessionMessage,
                         Net_Message> inherited;
 
@@ -83,7 +83,7 @@ class Net_Export Net_Stream
 
   // fini stream
   // *NOTE*: need this to clean up queued modules if something goes wrong during init() !
-  bool fini (const Net_StreamProtocolConfigurationState_t&); // configuration
+  bool fini (const Net_StreamConfiguration_t&); // configuration
 
   // modules
   Net_Module_SocketHandler_Module    socketHandler_;

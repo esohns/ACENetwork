@@ -17,40 +17,31 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "stdafx.h"
 
-#include "rpg_net_stream_config.h"
+#ifndef Net_CONFIGURATION_H
+#define Net_CONFIGURATION_H
 
-#include "rpg_common_macros.h"
+#include "stream_common.h"
 
-RPG_Net_StreamConfig::RPG_Net_StreamConfig(const RPG_Net_ConfigPOD& config_in,
-                                           const ACE_Time_Value& startOfSession_in,
-                                           const bool& userAbort_in)
- : inherited(config_in,
-             startOfSession_in,
-             userAbort_in)
+struct Net_SocketConfiguration_t
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_StreamConfig::RPG_Net_StreamConfig"));
+  int bufferSize;
+};
 
-}
-
-RPG_Net_StreamConfig::~RPG_Net_StreamConfig()
+struct Net_StreamConfiguration_t
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_StreamConfig::~RPG_Net_StreamConfig"));
+  // ************************** connection data ********************************
+  Net_SocketConfiguration_t socketConfiguration;
+  // **************************** stream data **********************************
+  Stream_Configuration_t    streamConfiguration;
+};
 
-}
-
-void
-RPG_Net_StreamConfig::dump_state() const
+struct Net_ProtocolConfiguration_t
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_StreamConfig::dump_state"));
+  // *************************** protocol data *********************************
+  unsigned int peerPingInterval; // ms {0 --> OFF}
+  bool         pingAutoAnswer;
+  bool         printPongMessages;
+};
 
-  // *TODO*
-  ACE_ASSERT(false);
-//   ACE_DEBUG((LM_DEBUG,
-//              ACE_TEXT("start of session: %d\n%s"),
-//              myStartOfSession,
-//              (myUserAbort ? ACE_TEXT("user abort !")
-//                           : ACE_TEXT(""))));
-  inherited::dump_state();
-}
+#endif

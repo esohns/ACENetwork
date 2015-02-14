@@ -18,8 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "ace/Log_Msg.h"
+
+//#include "stream_common.h"
+
 #include "net_macros.h"
-#include "net_stream_common.h"
 
 template <typename ConfigurationType,
           typename StatisticsContainerType,
@@ -30,13 +33,12 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
                                 StreamType,
                                 SocketHandlerType>::Net_StreamAsynchTCPSocketBase_T ()
  : inherited ()
-// , configuration_ ()
+ , configuration_ (NULL)
 // , stream_ ()
- , userData_ (NULL)
+ , state_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::Net_StreamAsynchTCPSocketBase_T"));
 
-  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
 template <typename ConfigurationType,
@@ -50,18 +52,23 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::~Net_StreamAsynchTCPSocketBase_T"));
 
+  // sanity check
+  if (!configuration_)
+    return; // done
+
   // step1: remove enqueued module (if any)
-  if (configuration_.module)
+
+  if (configuration_->module)
   {
-    if (stream_.find (configuration_.module->name ()))
-      if (stream_.remove (configuration_.module->name (),
+    if (stream_.find (configuration_->module->name ()))
+      if (stream_.remove (configuration_->module->name (),
                           ACE_Module_Base::M_DELETE_NONE) == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    configuration_.module->name ()));
+                    configuration_->module->name ()));
 
-    if (configuration_.deleteModule)
-      delete configuration_.module;
+    if (configuration_->deleteModule)
+      delete configuration_->module;
   } // end IF
 }
 
@@ -79,31 +86,30 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::open"));
 
   // sanity check(s)
-  ACE_ASSERT (userData_);
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (state_);
 
-  configuration_ = userData_->configuration;
-
-  // step0: init user data
-  userData_->sessionID = static_cast<unsigned int> (handle_in); // (== socket handle)
+  // step0: init this
+  state_->sessionID = static_cast<unsigned int> (handle_in); // (== socket handle)
 
   // step1: tweak socket, init I/O
   inherited::open (handle_in, messageBlock_in);
 
   // step2: init/start stream
   // step2a: connect stream head message queue with a notification pipe/queue ?
-  if (!configuration_.useThreadPerConnection)
-    configuration_.notificationStrategy = this;
+  if (!configuration_->useThreadPerConnection)
+    configuration_->notificationStrategy = this;
   // step2b: init final module (if any)
-  if (configuration_.module)
+  if (configuration_->module)
   {
     Net_IModule_t* imodule_handle = NULL;
     // need a downcast...
-    imodule_handle = dynamic_cast<Net_IModule_t*> (configuration_.module);
+    imodule_handle = dynamic_cast<Net_IModule_t*> (configuration_->module);
     if (!imodule_handle)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<RPG_Stream_IModule> failed, aborting\n"),
-                  configuration_.module->name ()));
+                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
+                  ACE_TEXT (configuration_->module->name ())));
 
       // clean up
       handle_close (handle_in,
@@ -119,8 +125,8 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: caught exception in RPG_Stream_IModule::clone(), aborting\n"),
-                  configuration_.module->name ()));
+                  ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
+                  ACE_TEXT (configuration_->module->name ())));
 
       // clean up
       handle_close (handle_in,
@@ -131,8 +137,8 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
     if (!clone)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to RPG_Stream_IModule::clone(), aborting\n"),
-                  configuration_.module->name ()));
+                  ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
+                  ACE_TEXT (configuration_->module->name ())));
 
       // clean up
       handle_close (handle_in,
@@ -140,10 +146,10 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
       return;
     }
-    configuration_.module = clone;
-    configuration_.deleteModule = true;
+    configuration_->module = clone;
+    configuration_->deleteModule = true;
   } // end IF
-  if (!stream_.init (*userData_))
+  if (!stream_.init (*configuration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to init processing stream, aborting\n")));
@@ -298,7 +304,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
-  if (!configuration_.useThreadPerConnection)
+  if (!configuration_->useThreadPerConnection)
   {
     Net_StreamIterator_t iterator (stream_);
     const Common_Module_t* module = NULL;
@@ -351,7 +357,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::act"));
 
-  userData_ = reinterpret_cast<ConfigurationType*> (const_cast<void*> (act_in));
+  configuration_ = reinterpret_cast<ConfigurationType*> (const_cast<void*> (act_in));
 }
 
 template <typename ConfigurationType,

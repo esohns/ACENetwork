@@ -25,6 +25,7 @@
 #include "ace/Connector.h"
 #include "ace/SOCK_Connector.h"
 
+#include "net_connection_manager_common.h"
 #include "net_tcpconnection.h"
 
 #include "net_client_exports.h"
@@ -36,7 +37,7 @@ class Net_Client_Export Net_Client_Connector
  , public Net_Client_IConnector
 {
  public:
-  Net_Client_Connector ();
+  Net_Client_Connector (Net_IConnectionManager_t*);
   virtual ~Net_Client_Connector ();
 
   // override default creation strategy
@@ -50,8 +51,11 @@ class Net_Client_Export Net_Client_Connector
   typedef ACE_Connector<Net_TCPConnection,
                         ACE_SOCK_CONNECTOR> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector (const Net_Client_Connector&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector& operator= (const Net_Client_Connector&));
+
+  Net_IConnectionManager_t* interfaceHandle_;
 };
 
 #endif

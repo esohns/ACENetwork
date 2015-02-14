@@ -21,12 +21,13 @@
 #ifndef Net_STREAM_ASYNCH_TCPSOCKET_BASE_H
 #define Net_STREAM_ASYNCH_TCPSOCKET_BASE_H
 
-#include "ace/config-lite.h"
+#include "ace/Global_Macros.h"
 #include "ace/Event_Handler.h"
 #include "ace/Message_Block.h"
 #include "ace/Asynch_IO.h"
 
-#include "net_stream_common.h"
+// forward declarations
+struct Stream_State_t;
 
 template <typename ConfigurationType,
           typename StatisticsContainerType,
@@ -46,15 +47,15 @@ class Net_StreamAsynchTCPSocketBase_T
   virtual int handle_output (ACE_HANDLE); // (socket) handle
   virtual int handle_close (ACE_HANDLE,        // (socket) handle
                             ACE_Reactor_Mask); // (select) mask
-  virtual void act (const void*);
+  virtual void act (const void*); // (user) data handle
 
  protected:
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
 
+  ConfigurationType* configuration_;
+  StreamType         stream_;
 //  // *TODO*: (try to) handle short writes gracefully...
 //  ACE_Message_Block* buffer_;
-  Net_StreamSocketConfiguration_t configuration_;
-  StreamType                      stream_;
 
  private:
   typedef SocketHandlerType inherited;
@@ -62,7 +63,8 @@ class Net_StreamAsynchTCPSocketBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T& operator= (const Net_StreamAsynchTCPSocketBase_T&));
 
-  ConfigurationType*              userData_;
+  // *NOTE*: this is a transient handle, used only to initialize the session ID
+  Stream_State_t* state_;
 };
 
 // include template definition

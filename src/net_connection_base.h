@@ -42,13 +42,14 @@ class Net_ConnectionBase_T
 
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
-                                   StatisticsContainerType> Net_Manager_t;
-  Net_ConnectionBase_T (Net_Manager_t*);
+                                   StatisticsContainerType> Net_IConnectionManager_t;
+
+  Net_ConnectionBase_T (Net_IConnectionManager_t*);
   virtual ~Net_ConnectionBase_T ();
 
-  Net_Manager_t*    manager_;
-  ConfigurationType userData_;
-  bool              isRegistered_;
+  Net_IConnectionManager_t* manager_;
+  ConfigurationType         userData_;
+  bool                      isRegistered_;
 
  private:
   typedef Common_ReferenceCounterBase inherited;
