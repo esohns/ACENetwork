@@ -26,14 +26,17 @@
 
 #include "stream_common.h"
 
+#include "net_configuration.h"
 #include "net_connection_manager.h"
 #include "net_exports.h"
 #include "net_iconnectionmanager.h"
 
-typedef Net_IConnectionManager_T<Stream_State_t,
+typedef Net_IConnectionManager_T<Net_Configuration_t,
+                                 Stream_SessionData_t,
                                  Stream_Statistic_t> Net_IConnectionManager_t;
 
-typedef Net_Connection_Manager_T<Stream_State_t,
+typedef Net_Connection_Manager_T<Net_Configuration_t,
+                                 Stream_SessionData_t,
                                  Stream_Statistic_t> Net_Connection_Manager_t;
 typedef ACE_Singleton<Net_Connection_Manager_t,
                       ACE_Recursive_Thread_Mutex> NET_CONNECTIONMANAGER_SINGLETON;

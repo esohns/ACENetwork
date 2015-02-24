@@ -250,8 +250,9 @@ Net_AsynchTCPSocketHandler::allocateMessage (unsigned int requestedSize_in)
   // init return value(s)
   ACE_Message_Block* message_out = NULL;
 
-  if (allocator_)
-    message_out = static_cast<ACE_Message_Block*> (inherited::allocator_->malloc (requestedSize_in));
+  if (inherited::configuration_.messageAllocator)
+    message_out =
+        static_cast<ACE_Message_Block*> (inherited::configuration_.messageAllocator->malloc (requestedSize_in));
   else
     ACE_NEW_NORETURN (message_out,
                       ACE_Message_Block (requestedSize_in,

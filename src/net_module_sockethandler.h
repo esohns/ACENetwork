@@ -33,26 +33,26 @@
 #include "stream_headmoduletask_base.h"
 #include "stream_streammodule_base.h"
 
-#include "net_sessionmessage.h"
 #include "net_message.h"
+#include "net_sessionmessage.h"
+#include "net_stream_common.h"
 
 class Net_Module_SocketHandler
  : public Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      Stream_State_t,
-                                      Stream_SessionData_t,
+                                      Net_SessionData_t,
+                                      Net_StreamSessionData_t,
                                       Net_SessionMessage,
                                       Net_Message>
-   // callback to trigger statistics collection...
  , public Common_IStatistic_T<Stream_Statistic_t>
 {
  public:
   Net_Module_SocketHandler ();
   virtual ~Net_Module_SocketHandler ();
 
-  // configuration / initialization
+  // initialization
+  // *TODO*: implement generic initialization (override Stream_TaskBase_T::initialize)
   bool init (Stream_IAllocator*, // message allocator
-             unsigned int,       // session id
              bool = false,       // active object ?
              unsigned int = 0);  // statistics collecting interval (second(s))
                                  // 0 --> DON'T collect statistics
@@ -60,13 +60,11 @@ class Net_Module_SocketHandler
   // user interface
   // info
   bool isInitialized () const;
-  unsigned int getSessionID () const;
+//  unsigned int getSessionID () const;
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Net_Message*&, // data message handle
                                   bool&);        // return value: pass message downstream ?
-
-  // catch the session ID...
   virtual void handleSessionMessage (Net_SessionMessage*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
@@ -78,8 +76,8 @@ class Net_Module_SocketHandler
  private:
   typedef Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      Stream_State_t,
-                                      Stream_SessionData_t,
+                                      Net_SessionData_t,
+                                      Net_StreamSessionData_t,
                                       Net_SessionMessage,
                                       Net_Message> inherited;
 

@@ -31,13 +31,13 @@
 #include "common_icounter.h"
 #include "common_istatistic.h"
 
+#include "stream_common.h"
 #include "stream_resetcounterhandler.h"
 #include "stream_statistichandler.h"
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
 #include "net_defines.h"
-//#include "net_stream_common.h"
 
 // forward declaration(s)
 class ACE_Message_Block;
@@ -148,42 +148,42 @@ class Net_Module_Statistic_WriterTask_T
   void final_report () const;
   void fini_timers (bool = true); // cancel both timers ? (false --> cancel only myLocalReportingHandlerID)
 
-  bool                           isInitialized_;
+  bool                              isInitialized_;
 
   // timer stuff
-//  Net_TimerQueue_t               timerQueue;
-  Stream_ResetCounterHandler     resetTimeoutHandler_;
-  long                           resetTimeoutHandlerID_;
-  Net_StatisticHandler_Reactor_t localReportingHandler_;
-  long                           localReportingHandlerID_;
-  unsigned int                   reportingInterval_; // second(s) {0 --> OFF}
-  bool                           printFinalReport_;
+//  Net_TimerQueue_t                  timerQueue;
+  Stream_ResetCounterHandler        resetTimeoutHandler_;
+  long                              resetTimeoutHandlerID_;
+  Stream_StatisticHandler_Reactor_t localReportingHandler_;
+  long                              localReportingHandlerID_;
+  unsigned int                      reportingInterval_; // second(s) {0 --> OFF}
+  bool                              printFinalReport_;
 
   // *GENERIC STATS*
-  mutable ACE_Thread_Mutex       lock_;
-  unsigned int                   sessionID_;
+  mutable ACE_Thread_Mutex          lock_;
+  unsigned int                      sessionID_;
 
   // *NOTE*: data messages == (myNumTotalMessages - myNumSessionMessages)
-  unsigned int                   numInboundMessages_;
-  unsigned int                   numOutboundMessages_;
-  unsigned int                   numSessionMessages_;
+  unsigned int                      numInboundMessages_;
+  unsigned int                      numOutboundMessages_;
+  unsigned int                      numSessionMessages_;
   // used to compute message throughput...
-  unsigned int                   messageCounter_;
+  unsigned int                      messageCounter_;
   // *NOTE: support asynchronous collecting/reporting of data...
-  unsigned int                   lastMessagesPerSecondCount_;
+  unsigned int                      lastMessagesPerSecondCount_;
 
-  float                          numInboundBytes_;
-  float                          numOutboundBytes_;
+  float                             numInboundBytes_;
+  float                             numOutboundBytes_;
   // used to compute data throughput...
-  unsigned int                   byteCounter_;
+  unsigned int                      byteCounter_;
   // *NOTE: support asynchronous collecting/reporting of data...
-  unsigned int                   lastBytesPerSecondCount_;
+  unsigned int                      lastBytesPerSecondCount_;
 
   // *MESSAGE TYPE STATS*
-  Net_MessageStatistic_t         messageTypeStatistics_;
+  Net_MessageStatistic_t            messageTypeStatistics_;
 
   // *CACHE STATS*
-  const Stream_IAllocator*       allocator_;
+  const Stream_IAllocator*          allocator_;
 };
 
 // include template implementation

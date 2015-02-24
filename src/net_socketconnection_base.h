@@ -24,21 +24,25 @@
 #include "ace/Event_Handler.h"
 
 #include "net_connection_base.h"
+#include "net_connection_manager_common.h"
 #include "net_iconnectionmanager.h"
 
 template <typename SocketHandlerType,
           typename TransportLayerType,
           typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 class Net_SocketConnectionBase_T
  : public SocketHandlerType
  , public TransportLayerType
- , public Net_ConnectionBase_T<ConfigurationType,
-                               StatisticsContainerType>
+ //, public Net_ConnectionBase_T<ConfigurationType,
+ //                              SessionDataType,
+ //                              StatisticsContainerType>
 {
  public:
-  typedef Net_IConnectionManager_T<ConfigurationType,
-                                   StatisticsContainerType> Net_IConnectionManager_t;
+  //typedef Net_IConnectionManager_T<ConfigurationType,
+  //                                 SessionDataType,
+  //                                 StatisticsContainerType> Net_IConnectionManager_t;
 
   virtual ~Net_SocketConnectionBase_T ();
 
@@ -69,8 +73,9 @@ class Net_SocketConnectionBase_T
  private:
   typedef SocketHandlerType inherited;
   typedef TransportLayerType inherited2;
-  typedef Net_ConnectionBase_T<ConfigurationType,
-                               StatisticsContainerType> inherited3;
+  //typedef Net_ConnectionBase_T<ConfigurationType,
+  //                             SessionDataType,
+  //                             StatisticsContainerType> inherited3;
 
   //// override some task-based members
   //virtual int svc (void);

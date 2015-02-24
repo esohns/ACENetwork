@@ -19,17 +19,17 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "rpg_net_client_sockethandler.h"
-
-#include "rpg_net_remote_comm.h"
-#include "rpg_net_common_tools.h"
-
-#include "rpg_common_macros.h"
-
-#include "ace/Reactor.h"
+#include "net_client_sockethandler.h"
 
 #include <string>
 #include <iostream>
+
+#include "ace/Reactor.h"
+
+#include "common_macros.h"
+
+#include "net_remote_comm.h"
+#include "net_common_tools.h"
 
 RPG_Net_Client_SocketHandler::RPG_Net_Client_SocketHandler()
 // : inherited(NULL)

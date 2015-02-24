@@ -25,6 +25,7 @@
 
 #include "common.h"
 
+#include "stream_common.h"
 #include "stream_streammodule_base.h"
 
 #include "net_common.h"
@@ -38,13 +39,13 @@ typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           Net_SessionMessage,
                                           Net_Message,
                                           Net_MessageType_t,
-                                          Net_StreamStatistic_t> Net_Module_Statistic_ReaderTask_t;
+                                          Stream_Statistic_t> Net_Module_Statistic_ReaderTask_t;
 typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
                                           Net_SessionMessage,
                                           Net_Message,
                                           Net_MessageType_t,
-                                          Net_StreamStatistic_t> Net_Module_Statistic_WriterTask_t;
+                                          Stream_Statistic_t> Net_Module_Statistic_WriterTask_t;
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                      // task synch type
                           Common_TimePolicy_t,               // time policy type
                           Net_Module_Statistic_ReaderTask_t, // reader type

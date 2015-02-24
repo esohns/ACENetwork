@@ -34,20 +34,24 @@
 #include "net_iconnectionmanager.h"
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 class Net_Connection_Manager_T
  : public Net_IConnectionManager_T<ConfigurationType,
+                                   SessionDataType,
                                    StatisticsContainerType>
  , public Common_IStatistic_T<StatisticsContainerType>
  , public Common_IDumpState
 {
   // singleton needs access to the ctor/dtors
   friend class ACE_Singleton<Net_Connection_Manager_T<ConfigurationType,
+                                                      SessionDataType,
                                                       StatisticsContainerType>,
                              ACE_Recursive_Thread_Mutex>;
 
   //// needs access to (de-)register itself with the singleton
   //friend class Net_SocketHandlerBase_T<ConfigurationType,
+  //                                     SessionDataType,
   //                                     StatisticsContainerType>;
 
  public:
@@ -56,9 +60,10 @@ class Net_Connection_Manager_T
   // configuration / initialization
   void init (unsigned int); // maximum number of concurrent connections
   // *NOTE*: argument is passed in init() to EVERY new connection during registration
-  void set (const ConfigurationType&); // (user) data
+  void set (const ConfigurationType&, // (connection) handler configuration
+            const SessionDataType&);  // stream session data
 
-  // implement RPG_Common_IControl
+  // implement Common_IControl
   virtual void start ();
   virtual void stop (bool = true); // locked access ?
   virtual bool isRunning () const;
@@ -87,7 +92,8 @@ class Net_Connection_Manager_T
   typedef ACE_DLList_Reverse_Iterator<Connection_t> ConnectionsReverseIterator_t;
 
   // implement Net_IConnectionManager
-  virtual void getConfiguration (ConfigurationType&); // return value: configuration
+  virtual void getData (ConfigurationType&, // return value: (connection) handler configuration
+                        SessionDataType&);  // return value: stream session data
   virtual bool registerConnection (Connection_t*); // connection
   virtual void deregisterConnection (const Connection_t*); // connection
 
@@ -107,7 +113,8 @@ class Net_Connection_Manager_T
 
   unsigned int                                      maxNumConnections_;
   Connections_t                                     connections_;
-  ConfigurationType                                 userData_; // handler data
+  ConfigurationType                                 configuration_; // (connection) handler configuration
+  SessionDataType                                   sessionData_; // stream session data
   bool                                              isInitialized_;
   bool                                              isActive_;
 };

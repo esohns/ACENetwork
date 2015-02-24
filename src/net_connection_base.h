@@ -29,6 +29,7 @@
 #include "net_iconnectionmanager.h"
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 class Net_ConnectionBase_T
  : public Common_ReferenceCounterBase
@@ -42,13 +43,15 @@ class Net_ConnectionBase_T
 
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
+                                   SessionDataType,
                                    StatisticsContainerType> Net_IConnectionManager_t;
 
   Net_ConnectionBase_T (Net_IConnectionManager_t*);
   virtual ~Net_ConnectionBase_T ();
 
   Net_IConnectionManager_t* manager_;
-  ConfigurationType         userData_;
+  ConfigurationType         configuration_;
+  SessionDataType           sessionData_;
   bool                      isRegistered_;
 
  private:

@@ -21,19 +21,26 @@
 #ifndef Net_STREAM_TCPSOCKET_BASE_H
 #define Net_STREAM_TCPSOCKET_BASE_H
 
-#include "net_stream_common.h"
-
 #include "ace/Global_Macros.h"
 #include "ace/Event_Handler.h"
 #include "ace/Message_Block.h"
 #include "ace/Synch.h"
 
+#include "net_connection_base.h"
+
+// forward declarations
+struct Stream_State_t;
+
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 class Net_StreamTCPSocketBase_T
  : public SocketHandlerType
+ , public Net_ConnectionBase_T<ConfigurationType,
+                               SessionDataType,
+                               StatisticsContainerType>
 {
  public:
   // override some task-based members
@@ -53,7 +60,7 @@ class Net_StreamTCPSocketBase_T
   Net_StreamTCPSocketBase_T ();
   virtual ~Net_StreamTCPSocketBase_T ();
 
-  ConfigurationType* configuration_;
+  //ConfigurationType* configuration_;
   StreamType         stream_;
   ACE_Message_Block* currentReadBuffer_;
   ACE_Thread_Mutex   sendLock_;
@@ -64,6 +71,9 @@ class Net_StreamTCPSocketBase_T
 
  private:
   typedef SocketHandlerType inherited;
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               SessionDataType,
+                               StatisticsContainerType> inherited2;
 
 //  ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T (const Net_StreamTCPSocketBase_T&));
@@ -74,7 +84,7 @@ class Net_StreamTCPSocketBase_T
   // ACE_TP_Reactor) --> enforce proper serialization
   bool               serializeOutput_;
   // *NOTE*: this is a transient handle, used only to initialize the session ID
-  Net_StreamState_t* state_;
+  Stream_State_t*    state_;
 };
 
 // include template implementation

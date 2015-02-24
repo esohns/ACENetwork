@@ -21,9 +21,6 @@
 #ifndef Net_ASYNCH_TCP_SOCKETHANDLER_T_H
 #define Net_ASYNCH_TCP_SOCKETHANDLER_T_H
 
-#include "net_exports.h"
-#include "net_sockethandler_base.h"
-
 #include "ace/Global_Macros.h"
 #include "ace/Asynch_IO.h"
 #include "ace/Notification_Strategy.h"
@@ -31,10 +28,14 @@
 #include "ace/INET_Addr.h"
 #include "ace/Event_Handler.h"
 
+#include "net_configuration.h"
+#include "net_exports.h"
+#include "net_sockethandler_base.h"
+
 class Net_Export Net_AsynchTCPSocketHandler
- : public Net_SocketHandlerBase,
-   public ACE_Service_Handler,
-   public ACE_Notification_Strategy
+ : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t>
+ , public ACE_Service_Handler
+ , public ACE_Notification_Strategy
 {
  public:
   virtual ~Net_AsynchTCPSocketHandler ();
@@ -64,7 +65,7 @@ class Net_Export Net_AsynchTCPSocketHandler
   ACE_Asynch_Write_Stream outputStream_;
 
  private:
-  typedef Net_SocketHandlerBase inherited;
+  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
   typedef ACE_Service_Handler inherited2;
   typedef ACE_Notification_Strategy inherited3;
 

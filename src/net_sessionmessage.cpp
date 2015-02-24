@@ -26,11 +26,9 @@
 
 #include "net_macros.h"
 
-Net_SessionMessage::Net_SessionMessage (unsigned int sessionID_in,
-                                        Stream_SessionMessageType_t messageType_in,
+Net_SessionMessage::Net_SessionMessage (Stream_SessionMessageType_t messageType_in,
                                         Net_StreamSessionData_t*& sessionData_inout)
- : inherited (sessionID_in,
-              messageType_in,
+ : inherited (messageType_in,
               sessionData_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionMessage::Net_SessionMessage"));

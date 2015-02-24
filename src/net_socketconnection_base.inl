@@ -24,29 +24,33 @@
 template <typename SocketHandlerType,
           typename TransportLayerType,
           typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 Net_SocketConnectionBase_T<SocketHandlerType,
                            TransportLayerType,
                            ConfigurationType,
+                           SessionDataType,
                            StatisticsContainerType>::Net_SocketConnectionBase_T (Net_IConnectionManager_t* interfaceHandle_in)
  : inherited ()
  //, inherited2 ()
  , inherited3 (interfaceHandle_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_SocketConnectionBase_T::Net_SocketConnectionBase_T"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::Net_SocketConnectionBase_T"));
 
 }
 
 template <typename SocketHandlerType,
           typename TransportLayerType,
           typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 Net_SocketConnectionBase_T<SocketHandlerType,
                            TransportLayerType,
                            ConfigurationType,
+                           SessionDataType,
                            StatisticsContainerType>::~Net_SocketConnectionBase_T ()
 {
-  NETWORK_TRACE(ACE_TEXT("Net_SocketConnectionBase_T::~Net_SocketConnectionBase_T"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::~Net_SocketConnectionBase_T"));
 
   //// wait for our worker (if any)
   //if (inherited::myUserData.useThreadPerConnection)
@@ -58,14 +62,16 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename TransportLayerType,
           typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_SocketConnectionBase_T<SocketHandlerType,
                            TransportLayerType,
                            ConfigurationType,
+                           SessionDataType,
                            StatisticsContainerType>::ping ()
 {
-  NETWORK_TRACE(ACE_TEXT("Net_SocketConnectionBase_T::ping"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::ping"));
 
   inherited::stream_.ping ();
 }
@@ -73,14 +79,16 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename TransportLayerType,
           typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 unsigned int
 Net_SocketConnectionBase_T<SocketHandlerType,
                            TransportLayerType,
                            ConfigurationType,
+                           SessionDataType,
                            StatisticsContainerType>::id () const
 {
-  NETWORK_TRACE(ACE_TEXT("Net_SocketConnectionBase_T::id"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::id"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   ACE_INET_Addr local_inet_address, peer_inet_address;
@@ -97,20 +105,26 @@ Net_SocketConnectionBase_T<SocketHandlerType,
     return -1;
   } // end catch
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return *static_cast<unsigned int*> (handle);
+#else
   return static_cast<unsigned int> (handle);
+#endif
 }
 
 template <typename SocketHandlerType,
           typename TransportLayerType,
           typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_SocketConnectionBase_T<SocketHandlerType,
                            TransportLayerType,
                            ConfigurationType,
+                           SessionDataType,
                            StatisticsContainerType>::dump_state () const
 {
-  NETWORK_TRACE(ACE_TEXT("Net_SocketConnectionBase_T::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::dump_state"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   ACE_INET_Addr local_inet_address, peer_inet_address;
@@ -155,14 +169,16 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename TransportLayerType,
           typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 bool
 Net_SocketConnectionBase_T<SocketHandlerType,
                            TransportLayerType,
                            ConfigurationType,
+                           SessionDataType,
                            StatisticsContainerType>::collect (StatisticsContainerType& data_out) const
 {
-  NETWORK_TRACE(ACE_TEXT("Net_SocketConnectionBase_T::collect"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::collect"));
 
   try
   {
@@ -180,14 +196,16 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename TransportLayerType,
           typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_SocketConnectionBase_T<SocketHandlerType,
                            TransportLayerType,
                            ConfigurationType,
+                           SessionDataType,
                            StatisticsContainerType>::report () const
 {
-  NETWORK_TRACE(ACE_TEXT("Net_SocketConnectionBase_T::report"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::report"));
 
   try
   {
@@ -445,11 +463,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename TransportLayerType,
           typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 int
 Net_SocketConnectionBase_T<SocketHandlerType,
                            TransportLayerType,
                            ConfigurationType,
+                           SessionDataType,
                            StatisticsContainerType>::handle_close (ACE_HANDLE handle_in,
                                                                    ACE_Reactor_Mask mask_in)
 {
