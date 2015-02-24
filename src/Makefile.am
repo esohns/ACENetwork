@@ -45,10 +45,12 @@ include_HEADERS = \
   net_socketconnection_base.h \
   net_socketconnection_base.inl \
   net_sockethandler_base.h \
+  net_sockethandler_base.inl \
   net_stream_asynch_tcpsocket_base.h \
   net_stream_asynch_tcpsocket_base.inl \
   net_stream_asynch_udpsocket_base.h \
   net_stream_asynch_udpsocket_base.inl \
+  net_stream_common.h \
   net_stream_tcpsocket_base.h \
   net_stream_tcpsocket_base.inl \
   net_stream_udpsocket_base.h \
@@ -117,6 +119,7 @@ libACENetwork_la_SOURCES = \
   net_socketconnection_base.inl \
   net_sockethandler_base.cpp \
   net_sockethandler_base.h \
+  net_sockethandler_base.inl \
   net_stream_asynch_tcpsocket_base.cpp \
   net_stream_asynch_tcpsocket_base.h \
   net_stream_asynch_tcpsocket_base.inl \

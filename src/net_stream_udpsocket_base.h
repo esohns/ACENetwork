@@ -21,16 +21,19 @@
 #ifndef Net_STREAM_UDPSOCKET_BASE_H
 #define Net_STREAM_UDPSOCKET_BASE_H
 
-#include "net_stream_common.h"
-#include "net_sockethandler_base.h"
-
 #include "ace/config-lite.h"
 #include "ace/INET_Addr.h"
 #include "ace/Event_Handler.h"
 #include "ace/Message_Block.h"
 #include "ace/Synch.h"
 
+#include "net_connection_base.h"
+
+// forward declarations
+struct Stream_State_t;
+
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
@@ -38,11 +41,13 @@ template <typename ConfigurationType,
 class Net_StreamUDPSocketBase_T
  : public SocketType
  , public SocketHandlerType
+ , public Net_ConnectionBase_T<ConfigurationType,
+                               SessionDataType,
+                               StatisticsContainerType>
 {
  public:
-  int open (ConfigurationType&,    // configuration
-            const ACE_INET_Addr&); // peer address
-  //virtual int close(u_long = 0); // args
+  int open (const ACE_INET_Addr&); // peer address
+  //virtual int close (u_long = 0); // args
 
   // *NOTE*: enqueue any received data onto our stream for further processing
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
@@ -60,7 +65,8 @@ class Net_StreamUDPSocketBase_T
   Net_StreamUDPSocketBase_T ();
   virtual ~Net_StreamUDPSocketBase_T ();
 
-  ConfigurationType  configuration_;
+  //ConfigurationType  configuration_;
+  //SessionDataType    sessionData_;
   StreamType         stream_;
   ACE_Message_Block* currentReadBuffer_;
   ACE_Thread_Mutex   sendLock_;
@@ -76,10 +82,16 @@ class Net_StreamUDPSocketBase_T
  private:
   typedef SocketType inherited;
   typedef SocketHandlerType inherited2;
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               SessionDataType,
+                               StatisticsContainerType> inherited3;
 
 //  ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&));
+
+  // *NOTE*: this is a transient handle, used only to initialize the session ID
+  Stream_State_t*    state_;
 };
 
 // include template implementation

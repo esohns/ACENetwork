@@ -28,24 +28,31 @@
 #include "net_macros.h"
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::Net_Connection_Manager_T ()
  : condition_ (lock_)
  , maxNumConnections_ (NET_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS)
-// , userData_ ()
+ //, connections_ ()
+ //, configuration_ ()
+ //, sessionData ()
  , isInitialized_ (false)
  , isActive_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::Net_Connection_Manager_T"));
 
-  // init user data
-  ACE_OS::memset (&userData_, 0, sizeof (userData_));
+  // init configuration data
+  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
+  ACE_OS::memset (&sessionData_, 0, sizeof (sessionData_));
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::~Net_Connection_Manager_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::~Net_Connection_Manager_T"));
@@ -68,9 +75,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::init (unsigned int maxNumConnections_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::init"));
@@ -83,22 +92,28 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         StatisticsContainerType>::set (const ConfigurationType& userData_in)
+                         SessionDataType,
+                         StatisticsContainerType>::set (const ConfigurationType& configuration_in,
+                                                        const SessionDataType& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::set"));
 
-  userData_ = userData_in;
+  configuration_ = configuration_in;
+  sessionData_ = sessionData_in;
 
   isInitialized_ = true;
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
@@ -109,9 +124,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::stop (bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
@@ -124,9 +141,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 bool
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::isRunning () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
@@ -137,22 +156,28 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         StatisticsContainerType>::getConfiguration (ConfigurationType& configuration_out)
+                         SessionDataType,
+                         StatisticsContainerType>::getData (ConfigurationType& configuration_out,
+                                                            SessionDataType& sessionData_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::getConfiguration"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::getData"));
 
   ACE_ASSERT (isInitialized_);
 
-  configuration_out = userData_;
+  configuration_out = configuration_;
+  sessionData_out = sessionData_;
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 bool
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::registerConnection (Connection_t* connection_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::registerConnection"));
@@ -230,9 +255,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::deregisterConnection (const Connection_t* connection_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::deregisterConnection"));
@@ -302,9 +329,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::abortConnections ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortConnections"));
@@ -361,9 +390,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::waitConnections () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::waitConnections"));
@@ -387,9 +418,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 unsigned int
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::numConnections () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::numConnections"));
@@ -422,10 +455,13 @@ Net_Connection_Manager_T<ConfigurationType,
 //}
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 const typename Net_Connection_Manager_T<ConfigurationType,
+                                        SessionDataType,
                                         StatisticsContainerType>::Connection_t*
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::operator[] (unsigned int index_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::operator[]"));
@@ -459,9 +495,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::abortOldestConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortOldestConnection"));
@@ -492,9 +530,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::abortNewestConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortNewestConnection"));
@@ -525,9 +565,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 bool
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::collect (StatisticsContainerType& data_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::collect"));
@@ -561,9 +603,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::report"));
@@ -596,9 +640,11 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
+                         SessionDataType,
                          StatisticsContainerType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::dump_state"));

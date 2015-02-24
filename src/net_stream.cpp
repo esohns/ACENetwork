@@ -32,10 +32,10 @@ Net_Stream::Net_Stream ()
                    NULL)
  , headerParser_ (std::string("HeaderParser"),
                   NULL)
- , runtimeStatistic_ (std::string("RuntimeStatistic"),
-                      NULL)
  , protocolHandler_ (std::string("ProtocolHandler"),
                      NULL)
+ , runtimeStatistic_ (std::string("RuntimeStatistic"),
+                      NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::Net_Stream"));
 
@@ -66,7 +66,10 @@ Net_Stream::~Net_Stream ()
 }
 
 bool
-Net_Stream::init (const Net_StreamConfiguration_t& configuration_in)
+Net_Stream::init (unsigned int sessionID_in,
+                  const Stream_Configuration_t& configuration_in,
+                  const Net_ProtocolConfiguration_t& protocolConfiguration_in,
+                  const Net_UserData_t& userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::init"));
 
@@ -74,13 +77,18 @@ Net_Stream::init (const Net_StreamConfiguration_t& configuration_in)
   ACE_ASSERT (!isInitialized_);
 
   // things to be done here:
+  // [- init base class]
+  // ------------------------------------
   // - init notification strategy (if any)
-  // -------------------------------------------------------------
+  // ------------------------------------
   // - push the final module onto the stream (if any)
-  // -------------------------------------------------------------
+  // ------------------------------------
   // - init modules (done for the ones "owned" by the stream)
   // - push them onto the stream (tail-first) !
-  // -------------------------------------------------------------
+  // ------------------------------------
+
+//  ACE_OS::memset (&inherited::state_, 0, sizeof (inherited::state_));
+  inherited::state_.sessionID = sessionID_in;
 
   if (configuration_in.notificationStrategy)
   {
@@ -128,10 +136,9 @@ Net_Stream::init (const Net_StreamConfiguration_t& configuration_in)
     return false;
   } // end IF
   if (!protocolHandler_impl->init (configuration_in.messageAllocator,
-//                                   configuration_in.sessionID,
-                                   configuration_in.peerPingInterval,
-                                   configuration_in.pingAutoAnswer,
-                                   configuration_in.printPongMessages)) // print ('.') for received "pong"s...
+                                   protocolConfiguration_in.peerPingInterval,
+                                   protocolConfiguration_in.pingAutoAnswer,
+                                   protocolConfiguration_in.printPongMessages)) // print ('.') for received "pong"s...
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -234,7 +241,7 @@ Net_Stream::init (const Net_StreamConfiguration_t& configuration_in)
   // enqueue the module...
   // *NOTE*: push()ing the module will open() it
   // --> set the argument that is passed along
-  socketHandler_.arg (&const_cast<Net_StreamConfiguration_t&> (configuration_in));
+  socketHandler_.arg (&const_cast<Net_UserData_t&> (userData_in));
   if (inherited::push (&socketHandler_) == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -275,27 +282,27 @@ Net_Stream::ping ()
   protocolHandler_impl->handleTimeout (NULL);
 }
 
-unsigned int
-Net_Stream::getSessionID () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Stream::getSessionID"));
+//unsigned int
+//Net_Stream::getSessionID () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Stream::getSessionID"));
 
-  Stream_Module_t* module = &const_cast<Net_Module_SocketHandler_Module&> (socketHandler_);
-  Net_Module_SocketHandler* socketHandler_impl = NULL;
-  socketHandler_impl = dynamic_cast<Net_Module_SocketHandler*> (module->writer ());
-  if (!socketHandler_impl)
-  {
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT ("dynamic_cast<Net_Module_SocketHandler> failed, aborting\n")));
+//  Stream_Module_t* module = &const_cast<Net_Module_SocketHandler_Module&> (socketHandler_);
+//  Net_Module_SocketHandler* socketHandler_impl = NULL;
+//  socketHandler_impl = dynamic_cast<Net_Module_SocketHandler*> (module->writer ());
+//  if (!socketHandler_impl)
+//  {
+//    ACE_DEBUG((LM_ERROR,
+//               ACE_TEXT ("dynamic_cast<Net_Module_SocketHandler> failed, aborting\n")));
 
-    return 0;
-  } // end IF
+//    return 0;
+//  } // end IF
 
-  return socketHandler_impl->getSessionID ();
-}
+//  return socketHandler_impl->getSessionID ();
+//}
 
 bool
-Net_Stream::collect (Net_StreamStatistic_t& data_out) const
+Net_Stream::collect (Stream_Statistic_t& data_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::collect"));
 

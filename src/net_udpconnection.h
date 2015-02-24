@@ -34,8 +34,9 @@
 class Net_Export Net_UDPConnection
  : public Net_SocketConnectionBase_T<Net_UDPHandler_t,
                                      Net_TransportLayer_UDP,
-                                     Net_StreamProtocolConfigurationState_t,
-                                     Net_RuntimeStatistic_t>
+                                     Net_Configuration_t,
+                                     Stream_SessionData_t,
+                                     Stream_Statistic_t>
 {
  public:
   Net_UDPConnection (Net_IConnectionManager_t*,
@@ -50,8 +51,8 @@ class Net_Export Net_UDPConnection
 
   // override some transport layer-based members
   virtual void init (Net_ClientServerRole_t, // role
-                     unsigned short,              // port number
-                     bool = false);               // use loopback device ?
+                     unsigned short,         // port number
+                     bool = false);          // use loopback device ?
 
   // override some task-based members
   //virtual int svc (void);
@@ -70,8 +71,9 @@ class Net_Export Net_UDPConnection
  private:
   typedef Net_SocketConnectionBase_T<Net_UDPHandler_t,
                                      Net_TransportLayer_UDP,
-                                     Net_StreamProtocolConfigurationState_t,
-                                     Net_RuntimeStatistic_t> inherited;
+                                     Net_Configuration_t,
+                                     Stream_SessionData_t,
+                                     Stream_Statistic_t> inherited;
 
   //// stop worker, if any
   //void shutdown ();

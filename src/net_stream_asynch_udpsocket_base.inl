@@ -20,10 +20,9 @@
 
 #include "ace/Log_Msg.h"
 
-//#include "rpg_common_timer_manager.h"
+#include "stream_common.h"
 
 #include "net_macros.h"
-//#include "net_stream_common.h"
 
 //template <typename ConfigurationType,
 //          typename StatisticsContainerType,
@@ -45,11 +44,13 @@
 //}
 
 template <typename ConfigurationType,
+          typename SessonDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                SessonDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -64,11 +65,13 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessonDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                SessonDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -95,12 +98,14 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessonDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                SessonDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -112,12 +117,14 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessonDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                SessonDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -141,13 +148,13 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   // step2b: init final module (if any)
   if (inherited::userData_.module)
   {
-    Net_IModule_t* imodule_handle = NULL;
+    Stream_IModule_t* imodule_handle = NULL;
     // need a downcast...
-    imodule_handle = dynamic_cast<Net_IModule_t*> (inherited::userData_.module);
+    imodule_handle = dynamic_cast<Stream_IModule_t*> (inherited::userData_.module);
     if (!imodule_handle)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<RPG_Stream_IModule> failed, aborting\n"),
+                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
                   ACE_TEXT (inherited::userData_.module->name ())));
 
       // clean up
@@ -164,7 +171,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: caught exception in RPG_Stream_IModule::clone(), aborting\n"),
+                  ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
                   ACE_TEXT (inherited::userData_.module->name ())));
 
       // clean up
@@ -176,7 +183,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
     if (!clone)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to RPG_Stream_IModule::clone(), aborting\n"),
+                  ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
                   ACE_TEXT (inherited::userData_.module->name ())));
 
       // clean up
@@ -293,12 +300,14 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessonDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 int
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                SessonDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -351,12 +360,14 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessonDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 int
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                SessonDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -378,7 +389,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   // *WARNING: do this here, while still holding on to the current write buffer
   if (!inherited::userData_.useThreadPerConnection)
   {
-    Net_StreamIterator_t iterator (stream_);
+    Stream_Iterator_t iterator (stream_);
     const Common_Module_t* module = NULL;
     if (iterator.next (module) == 0)
     {
@@ -418,12 +429,14 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessonDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 bool
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                SessonDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -445,12 +458,14 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessonDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                SessonDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -470,12 +485,14 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessonDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                SessonDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,

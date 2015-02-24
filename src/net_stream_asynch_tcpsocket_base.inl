@@ -20,15 +20,17 @@
 
 #include "ace/Log_Msg.h"
 
-//#include "stream_common.h"
+#include "stream_common.h"
 
 #include "net_macros.h"
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                SessionDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::Net_StreamAsynchTCPSocketBase_T ()
@@ -42,10 +44,12 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                SessionDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::~Net_StreamAsynchTCPSocketBase_T ()
@@ -58,26 +62,28 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
   // step1: remove enqueued module (if any)
 
-  if (configuration_->module)
+  if (configuration_->streamConfiguration.module)
   {
-    if (stream_.find (configuration_->module->name ()))
-      if (stream_.remove (configuration_->module->name (),
+    if (stream_.find (configuration_->streamConfiguration.module->name ()))
+      if (stream_.remove (configuration_->streamConfiguration.module->name (),
                           ACE_Module_Base::M_DELETE_NONE) == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    configuration_->module->name ()));
+                    configuration_->streamConfiguration.module->name ()));
 
-    if (configuration_->deleteModule)
-      delete configuration_->module;
+    if (configuration_->streamConfiguration.deleteModule)
+      delete configuration_->streamConfiguration.module;
   } // end IF
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                SessionDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::open (ACE_HANDLE handle_in,
@@ -90,26 +96,33 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   ACE_ASSERT (state_);
 
   // step0: init this
-  state_->sessionID = static_cast<unsigned int> (handle_in); // (== socket handle)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  state_->sessionID =
+      *static_cast<unsigned int*> (handle_in); // (== socket handle)
+#else
+  state_->sessionID =
+    static_cast<unsigned int> (handle_in); // (== socket handle)
+#endif
 
   // step1: tweak socket, init I/O
   inherited::open (handle_in, messageBlock_in);
 
   // step2: init/start stream
   // step2a: connect stream head message queue with a notification pipe/queue ?
-  if (!configuration_->useThreadPerConnection)
-    configuration_->notificationStrategy = this;
+  if (!configuration_->streamConfiguration.useThreadPerConnection)
+    configuration_->streamConfiguration.notificationStrategy = this;
   // step2b: init final module (if any)
-  if (configuration_->module)
+  if (configuration_->streamConfiguration.module)
   {
-    Net_IModule_t* imodule_handle = NULL;
+    Stream_IModule_t* imodule_handle = NULL;
     // need a downcast...
-    imodule_handle = dynamic_cast<Net_IModule_t*> (configuration_->module);
+    imodule_handle =
+        dynamic_cast<Stream_IModule_t*> (configuration_->streamConfiguration.module);
     if (!imodule_handle)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-                  ACE_TEXT (configuration_->module->name ())));
+                  ACE_TEXT (configuration_->streamConfiguration.module->name ())));
 
       // clean up
       handle_close (handle_in,
@@ -126,7 +139,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (configuration_->module->name ())));
+                  ACE_TEXT (configuration_->streamConfiguration.module->name ())));
 
       // clean up
       handle_close (handle_in,
@@ -138,7 +151,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (configuration_->module->name ())));
+                  ACE_TEXT (configuration_->streamConfiguration.module->name ())));
 
       // clean up
       handle_close (handle_in,
@@ -146,10 +159,13 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
       return;
     }
-    configuration_->module = clone;
-    configuration_->deleteModule = true;
+    configuration_->streamConfiguration.module = clone;
+    configuration_->streamConfiguration.deleteModule = true;
   } // end IF
-  if (!stream_.init (*configuration_))
+  if (!stream_.init (state_->sessionID,
+                     configuration_->streamConfiguration,
+                     configuration_->protocolConfiguration,
+                     configuration_->streamUserData))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to init processing stream, aborting\n")));
@@ -229,11 +245,13 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                SessionDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::handle_output (ACE_HANDLE handle_in)
@@ -283,11 +301,13 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                SessionDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::handle_close (ACE_HANDLE handle_in,
@@ -304,9 +324,9 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
-  if (!configuration_->useThreadPerConnection)
+  if (!configuration_->streamConfiguration.useThreadPerConnection)
   {
-    Net_StreamIterator_t iterator (stream_);
+    Stream_Iterator_t iterator (stream_);
     const Common_Module_t* module = NULL;
     if (iterator.next (module) == 0)
     {
@@ -346,11 +366,13 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                SessionDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType >::act (const void* act_in)
@@ -361,11 +383,13 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                SessionDataType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::handle_read_stream (const ACE_Asynch_Read_Stream::Result& result)

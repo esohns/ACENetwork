@@ -385,8 +385,8 @@ Net_UDPConnection::handle_output (ACE_HANDLE handle_in)
       if ((error != EAGAIN) ||  // <-- connection has been closed in the meantime
           (error != ESHUTDOWN)) // <-- queue has been deactivated
         ACE_DEBUG ((LM_ERROR,
-                    (inherited::configuration_.configuration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
-                                                                                    : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
+                    (inherited::configuration_.streamConfiguration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
+                                                                                          : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
 
       // clean up
       if (inherited::serializeOutput_)
@@ -398,7 +398,7 @@ Net_UDPConnection::handle_output (ACE_HANDLE handle_in)
   ACE_ASSERT (inherited::currentWriteBuffer_);
 
   // finished ?
-  if (inherited::configuration_.configuration.useThreadPerConnection &&
+  if (inherited::configuration_.streamConfiguration.useThreadPerConnection &&
       inherited::currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
   {
     inherited::currentWriteBuffer_->release ();
@@ -554,7 +554,7 @@ Net_UDPConnection::handle_close (ACE_HANDLE handle_in,
   } // end SWITCH
 
   //// step1: connection shutting down --> signal any worker(s)
-  //if (inherited::myUserData.useThreadPerConnection)
+  //if (inherited::configuration_.streamConfiguration.useThreadPerConnection)
   //  shutdown ();
 
   //  // step2: de-register this connection

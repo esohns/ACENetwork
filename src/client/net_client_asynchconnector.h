@@ -24,11 +24,11 @@
 #include "ace/Global_Macros.h"
 #include "ace/Asynch_Connector.h"
 
-#include "net_connection_manager_common.h"
 #include "net_tcpconnection.h"
 
 #include "net_client_exports.h"
 #include "net_client_iconnector.h"
+#include "net_connection_manager_common.h"
 
 class Net_Client_Export Net_Client_AsynchConnector
  : public ACE_Asynch_Connector<Net_AsynchTCPConnection>

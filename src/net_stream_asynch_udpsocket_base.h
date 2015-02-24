@@ -26,7 +26,13 @@
 #include "ace/Message_Block.h"
 #include "ace/Asynch_IO.h"
 
+#include "net_connection_base.h"
+
+// forward declarations
+struct Stream_State_t;
+
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
@@ -35,6 +41,9 @@ class Net_StreamAsynchUDPSocketBase_T
  : public SocketHandlerType
  , public SocketType
  , public ACE_Event_Handler
+ , public Net_ConnectionBase_T<ConfigurationType,
+                               SessionDataType,
+                               StatisticsContainerType>
 {
  public:
   //  // *TODO*: remove this stub
@@ -61,8 +70,8 @@ class Net_StreamAsynchUDPSocketBase_T
 
 //  // *TODO*: (try to) handle short writes gracefully...
 //  ACE_Message_Block* buffer_;
-  ConfigurationType  userData_;
-  StreamType         stream_;
+  //ConfigurationType  userData_;
+  StreamType      stream_;
 
  private:
   typedef SocketHandlerType inherited;
@@ -72,6 +81,9 @@ class Net_StreamAsynchUDPSocketBase_T
   //ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&));
+
+  // *NOTE*: this is a transient handle, used only to initialize the session ID
+  Stream_State_t* state_;
 };
 
 // include template definition

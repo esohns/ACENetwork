@@ -21,12 +21,12 @@
 #ifndef NET_ASYNCHUDPSOCKETHANDLER_H
 #define NET_ASYNCHUDPSOCKETHANDLER_H
 
-#include "net_exports.h"
-#include "net_common.h"
-
 #include "ace/Asynch_IO.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
+
+#include "net_common.h"
+#include "net_exports.h"
 
 class Net_Export Net_AsynchUDPSocketHandler
  : public ACE_Handler

@@ -23,6 +23,7 @@
 
 #include "ace/Log_Msg.h"
 
+#include "net_connection_manager_common.h"
 #include "net_macros.h"
 
 Net_Client_AsynchConnector::Net_Client_AsynchConnector (Net_IConnectionManager_t* interfaceHandle_in)

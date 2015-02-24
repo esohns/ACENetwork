@@ -24,36 +24,43 @@
 #include "net_macros.h"
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 Net_ConnectionBase_T<ConfigurationType,
+                     SessionDataType,
                      StatisticsContainerType>::Net_ConnectionBase_T (Net_IConnectionManager_t* interfaceHandle_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
  , manager_ (interfaceHandle_in)
-// , userData_ ()
+ //, configuration_ ()
+ , sessionData ()
  , isRegistered_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
 
   // init user data
-  ACE_OS::memset (&userData_, 0, sizeof (userData_));
+  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
+  //ACE_OS::memset (&sessionData_, 0, sizeof (sessionData_));
   if (manager_)
   {
     try
     { // (try to) get user data from the connection manager
-      manager_->getConfiguration (userData_);
+      manager_->getData (configuration_,
+                         sessionData_);
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnectionManager::getConfiguration(), continuing\n")));
+                  ACE_TEXT ("caught exception in Net_IConnectionManager::getData(), continuing\n")));
     }
   } // end IF
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 Net_ConnectionBase_T<ConfigurationType,
+                     SessionDataType,
                      StatisticsContainerType>::~Net_ConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
@@ -62,9 +69,11 @@ Net_ConnectionBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 bool
 Net_ConnectionBase_T<ConfigurationType,
+                     SessionDataType,
                      StatisticsContainerType>::init (const ACE_INET_Addr& peerAddress_in,
                                                      unsigned short portNumber_in)
 {
@@ -98,9 +107,11 @@ Net_ConnectionBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_ConnectionBase_T<ConfigurationType,
+                     SessionDataType,
                      StatisticsContainerType>::fini ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::fini"));

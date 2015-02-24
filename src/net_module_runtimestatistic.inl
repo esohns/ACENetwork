@@ -254,7 +254,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     case SESSION_BEGIN:
     {
       // retain session ID for reporting...
-      sessionID_ = message_inout->getConfiguration ()->getUserData ().sessionID;
+      sessionID_ = message_inout->getData ()->getState ()->sessionID;
 
       // statistics reporting
       if (reportingInterval_)

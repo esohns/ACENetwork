@@ -27,8 +27,12 @@
 #include "ace/Event_Handler.h"
 #include "ace/Reactor_Notification_Strategy.h"
 
+#include "net_configuration.h"
+#include "net_sockethandler_base.h"
+
 class Net_TCPSocketHandler
- : public ACE_Svc_Handler<ACE_SOCK_STREAM,
+ : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t>
+ , public ACE_Svc_Handler<ACE_SOCK_STREAM,
                           ACE_MT_SYNCH>
 {
  public:
@@ -53,8 +57,9 @@ class Net_TCPSocketHandler
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
+  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
   typedef ACE_Svc_Handler<ACE_SOCK_STREAM,
-                          ACE_MT_SYNCH> inherited;
+                          ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler (const Net_TCPSocketHandler&));
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler& operator= (const Net_TCPSocketHandler&));

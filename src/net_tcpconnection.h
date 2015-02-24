@@ -39,8 +39,9 @@ template <class HANDLER> class ACE_Asynch_Connector;
 class Net_Export Net_TCPConnection
  : public Net_SocketConnectionBase_T<Net_TCPHandler_t,
                                      Net_TransportLayer_TCP,
-                                     Net_StreamState_t,
-                                     Net_StreamStatistic_t>
+                                     Net_Configuration_t,
+                                     Stream_SessionData_t,
+                                     Stream_Statistic_t>
 {
   friend class ACE_Connector<Net_TCPConnection,
                              ACE_SOCK_CONNECTOR>;
@@ -67,8 +68,9 @@ class Net_Export Net_TCPConnection
  private:
   typedef Net_SocketConnectionBase_T<Net_TCPHandler_t,
                                      Net_TransportLayer_TCP,
-                                     Net_StreamState_t,
-                                     Net_StreamStatistic_t> inherited;
+                                     Net_Configuration_t,
+                                     Stream_SessionData_t,
+                                     Stream_Statistic_t> inherited;
 
   //// override some task-based members
   //virtual int svc (void);
@@ -88,8 +90,9 @@ class Net_Export Net_TCPConnection
 class Net_Export Net_AsynchTCPConnection
  : public Net_SocketConnectionBase_T<Net_AsynchTCPHandler_t,
                                      Net_TransportLayer_TCP,
-                                     Net_StreamState_t,
-                                     Net_StreamStatistic_t>
+                                     Net_Configuration_t,
+                                     Stream_SessionData_t,
+                                     Stream_Statistic_t>
 {
  friend class ACE_Asynch_Connector<Net_AsynchTCPConnection>;
 
@@ -110,8 +113,9 @@ class Net_Export Net_AsynchTCPConnection
  private:
   typedef Net_SocketConnectionBase_T<Net_AsynchTCPHandler_t,
                                      Net_TransportLayer_TCP,
-                                     Net_StreamState_t,
-                                     Net_StreamStatistic_t> inherited;
+                                     Net_Configuration_t,
+                                     Stream_SessionData_t,
+                                     Stream_Statistic_t> inherited;
 
   //// override some task-based members
   //virtual int svc (void);
@@ -120,7 +124,8 @@ class Net_Export Net_AsynchTCPConnection
   //void shutdown ();
 
   virtual ~Net_AsynchTCPConnection ();
-  // *WARNING*: need to make this available to Asynch_Connector (see: ace/Asynch_Connector.cpp:239)
+  // *WARNING*: need to make this available to Asynch_Connector
+  //            (see: ace/Asynch_Connector.cpp:239)
   Net_AsynchTCPConnection ();
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection (const Net_AsynchTCPConnection&));
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection& operator= (const Net_AsynchTCPConnection&));

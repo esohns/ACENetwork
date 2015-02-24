@@ -23,25 +23,38 @@
 
 #include "stream_common.h"
 
+#include "net_stream_common.h"
+
+// forward declarations
+class ACE_Allocator;
+
 struct Net_SocketConfiguration_t
 {
   int bufferSize;
 };
 
-struct Net_StreamConfiguration_t
+struct Net_SocketHandlerConfiguration_t
 {
-  // ************************** connection data ********************************
   Net_SocketConfiguration_t socketConfiguration;
-  // **************************** stream data **********************************
-  Stream_Configuration_t    streamConfiguration;
+  ACE_Allocator*            messageAllocator;
 };
 
 struct Net_ProtocolConfiguration_t
 {
-  // *************************** protocol data *********************************
   unsigned int peerPingInterval; // ms {0 --> OFF}
   bool         pingAutoAnswer;
   bool         printPongMessages;
+};
+
+struct Net_Configuration_t
+{
+  // **************************** socket data **********************************
+  Net_SocketConfiguration_t   socketConfiguration;
+  // **************************** stream data **********************************
+  Stream_Configuration_t      streamConfiguration;
+  Net_UserData_t              streamUserData;
+  // *************************** protocol data *********************************
+  Net_ProtocolConfiguration_t protocolConfiguration;
 };
 
 #endif

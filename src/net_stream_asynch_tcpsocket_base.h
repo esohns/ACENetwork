@@ -26,16 +26,22 @@
 #include "ace/Message_Block.h"
 #include "ace/Asynch_IO.h"
 
+#include "net_connection_base.h"
+
 // forward declarations
 struct Stream_State_t;
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 class Net_StreamAsynchTCPSocketBase_T
  : public SocketHandlerType
  , public ACE_Event_Handler
+ , public Net_ConnectionBase_T<ConfigurationType,
+                               SessionDataType,
+                               StatisticsContainerType>
 {
  public:
   Net_StreamAsynchTCPSocketBase_T ();
@@ -52,13 +58,16 @@ class Net_StreamAsynchTCPSocketBase_T
  protected:
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
 
-  ConfigurationType* configuration_;
-  StreamType         stream_;
+  //ConfigurationType* configuration_;
+  StreamType      stream_;
 //  // *TODO*: (try to) handle short writes gracefully...
 //  ACE_Message_Block* buffer_;
 
  private:
   typedef SocketHandlerType inherited;
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               SessionDataType,
+                               StatisticsContainerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T& operator= (const Net_StreamAsynchTCPSocketBase_T&));

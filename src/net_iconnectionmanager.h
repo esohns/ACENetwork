@@ -26,6 +26,7 @@
 #include "common_icontrol.h"
 
 template <typename ConfigurationType,
+          typename SessionDataType,
           typename StatisticsContainerType>
 class Net_IConnectionManager_T
  : public Common_IControl
@@ -34,7 +35,8 @@ class Net_IConnectionManager_T
   virtual ~Net_IConnectionManager_T () {};
 
   // API
-  virtual void getConfiguration (ConfigurationType&) = 0; // return value: configuration
+  virtual void getData (ConfigurationType&,    // return value: (connection) handler configuration
+                        SessionDataType&) = 0; // return value: stream session data
   virtual bool registerConnection (Net_IConnection_T<StatisticsContainerType>*) = 0; // connection
   virtual void deregisterConnection (const Net_IConnection_T<StatisticsContainerType>*) = 0; // connection
 };

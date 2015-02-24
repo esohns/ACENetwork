@@ -33,9 +33,9 @@
 Net_TCPSocketHandler::Net_TCPSocketHandler ()//MANAGER_T* manager_in)
  //: inherited (1,    // initial count
  //             true) // delete on zero ?
- : inherited (NULL,                     // no specific thread manager
-              NULL,                     // no specific message queue
-              ACE_Reactor::instance ()) // default reactor
+ : inherited2 (NULL,                     // no specific thread manager
+               NULL,                     // no specific message queue
+               ACE_Reactor::instance ()) // default reactor
  , notificationStrategy_ (ACE_Reactor::instance (),      // reactor
                           this,                          // event handler
                           ACE_Event_Handler::WRITE_MASK) // handle output only
@@ -92,9 +92,9 @@ Net_TCPSocketHandler::~Net_TCPSocketHandler ()
 //                this));
 
   // need to close the socket (see handle_close() below) ?
-  if (inherited::reference_counting_policy ().value () ==
+  if (inherited2::reference_counting_policy ().value () ==
       ACE_Event_Handler::Reference_Counting_Policy::ENABLED)
-    if (inherited::peer_.close () == -1)
+    if (inherited2::peer_.close () == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_IO::close(): \"%m\", continuing\n")));
 }
@@ -182,7 +182,7 @@ Net_TCPSocketHandler::open (void* arg_in)
   } // end IF
 
   // register with the reactor
-  if (inherited::open (arg_in) == -1)
+  if (inherited2::open (arg_in) == -1)
   {
     // *IMPORTANT NOTE*: this can happen when the connection handle is still
     // registered with the reactor (i.e. the reactor is still processing events
@@ -235,9 +235,9 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
   // *IMPORTANT NOTE*: handle failed connects (e.g. connection refused)
   // as well... (see below). This may change in the future, so keep the
   // alternate implementation
-  if (inherited::reference_counting_policy ().value () ==
+  if (inherited2::reference_counting_policy ().value () ==
       ACE_Event_Handler::Reference_Counting_Policy::DISABLED)
-    return inherited::handle_close (); // --> shortcut
+    return inherited2::handle_close (); // --> shortcut
 
   // init return value
   int result = 0;
@@ -306,10 +306,10 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
 
       // (failed) accept / asynch abort case
 
-      ACE_ASSERT (inherited::reactor ());
-      result = inherited::reactor ()->remove_handler (this,
-                                                      (mask_in |
-                                                       ACE_Event_Handler::DONT_CALL));
+      ACE_ASSERT (inherited2::reactor ());
+      result = inherited2::reactor ()->remove_handler (this,
+                                                       (mask_in |
+                                                        ACE_Event_Handler::DONT_CALL));
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d), continuing\n"),

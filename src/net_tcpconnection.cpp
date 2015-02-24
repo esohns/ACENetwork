@@ -41,7 +41,7 @@ Net_TCPConnection::Net_TCPConnection ()
   ACE_ASSERT (false);
   ACE_NOTSUP;
 
-  ACE_NOTREACHED ();
+  ACE_NOTREACHED (true);
 }
 
 Net_TCPConnection::~Net_TCPConnection ()
@@ -420,6 +420,13 @@ Net_TCPConnection::handle_close (ACE_HANDLE handle_in,
 
 /////////////////////////////////////////
 
+Net_AsynchTCPConnection::Net_AsynchTCPConnection ()
+  : inherited (NULL)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
+
+}
+
 Net_AsynchTCPConnection::Net_AsynchTCPConnection (Net_IConnectionManager_t* interfaceHandle_in)
  : inherited (interfaceHandle_in)
 {
@@ -673,9 +680,9 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 
 int
 Net_AsynchTCPConnection::handle_close (ACE_HANDLE handle_in,
-                                           ACE_Reactor_Mask mask_in)
+                                       ACE_Reactor_Mask mask_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_AsynchTCPConnection::handle_close"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::handle_close"));
 
   switch (mask_in)
   {

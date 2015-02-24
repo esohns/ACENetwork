@@ -23,29 +23,29 @@
 
 #include "ace/Global_Macros.h"
 
-#include "net_configuration.h"
+#include "common_iinitialize.h"
 
-// forward declarations
-class ACE_Allocator;
-
+template <typename ConfigurationType>
 class Net_SocketHandlerBase
+ : public Common_IInitialize_T<ConfigurationType>
 {
  public:
   virtual ~Net_SocketHandlerBase ();
 
-  void init (Net_SocketConfiguration_t, // socket / stream configuration
-             ACE_Allocator*);           // message allocator handle
+  virtual bool initialize (const ConfigurationType&); // configuration
 
  protected:
   Net_SocketHandlerBase ();
 
-  ACE_Allocator*            allocator_;
-  Net_SocketConfiguration_t socketConfiguration_;
+  ConfigurationType configuration_;
+  bool              isInitialized_;
 
  private:
 //  ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase ());
   ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase (const Net_SocketHandlerBase&));
   ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase& operator= (const Net_SocketHandlerBase&));
 };
+
+#include "net_sockethandler_base.inl"
 
 #endif

@@ -20,32 +20,3 @@
 #include "stdafx.h"
 
 #include "net_sockethandler_base.h"
-
-//#include "ace/Log_Msg.h"
-
-#include "net_macros.h"
-
-Net_SocketHandlerBase::Net_SocketHandlerBase ()
- : allocator_ (NULL)
-// , socketConfiguration_ ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase::Net_SocketHandlerBase"));
-
-  ACE_OS::memset (&socketConfiguration_, 0, sizeof (socketConfiguration_));
-}
-
-Net_SocketHandlerBase::~Net_SocketHandlerBase ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase::~Net_SocketHandlerBase"));
-
-}
-
-void
-Net_SocketHandlerBase::init (Net_SocketConfiguration_t socketConfiguration_in,
-                             ACE_Allocator* allocator_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase::init"));
-
-  allocator_ = allocator_in;
-  socketConfiguration_ = socketConfiguration_in;
-}

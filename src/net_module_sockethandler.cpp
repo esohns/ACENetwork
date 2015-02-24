@@ -71,7 +71,6 @@ Net_Module_SocketHandler::~Net_Module_SocketHandler ()
 
 bool
 Net_Module_SocketHandler::init (Stream_IAllocator* allocator_in,
-                                unsigned int sessionID_in,
                                 bool isActive_in,
                                 unsigned int statisticsCollectionInterval_in)
 {
@@ -107,7 +106,6 @@ Net_Module_SocketHandler::init (Stream_IAllocator* allocator_in,
   statCollectionInterval_ = statisticsCollectionInterval_in;
 
   inherited::allocator_ = allocator_in;
-  inherited::sessionID_ = sessionID_in;
   inherited::isActive_ = isActive_in;
 
   // OK: all's well...
@@ -116,13 +114,13 @@ Net_Module_SocketHandler::init (Stream_IAllocator* allocator_in,
   return isInitialized_;
 }
 
-unsigned int
-Net_Module_SocketHandler::getSessionID () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler::getSessionID"));
+//unsigned int
+//Net_Module_SocketHandler::getSessionID () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler::getSessionID"));
 
-  return inherited::sessionID_;
-}
+//  return inherited::sessionID_;
+//}
 
 void
 Net_Module_SocketHandler::handleDataMessage (Net_Message*& message_inout,
@@ -188,11 +186,6 @@ Net_Module_SocketHandler::handleSessionMessage (Net_SessionMessage*& message_ino
   {
     case SESSION_BEGIN:
     {
-      // retain the session ID for reporting...
-      ACE_ASSERT (message_inout->getData ());
-      ACE_ASSERT (message_inout->getData ()->getUserData ());
-      inherited::sessionID_ = message_inout->getData ()->getUserData ()->sessionID;
-
       if (statCollectionInterval_)
       {
         // schedule regular statistics collection...
@@ -239,21 +232,18 @@ Net_Module_SocketHandler::handleSessionMessage (Net_SessionMessage*& message_ino
 }
 
 bool
-Net_Module_SocketHandler::collect (Net_StreamStatistic_t& data_out) const
+Net_Module_SocketHandler::collect (Stream_Statistic_t& data_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler::collect"));
-
-  // just a dummy...
-  ACE_UNUSED_ARG (data_out);
 
   // sanity check(s)
   ACE_ASSERT (isInitialized_);
 
-  // step0: init info container POD
-  ACE_OS::memset (&data_out, 0, sizeof (Net_StreamStatistic_t));
+  // step0: init container
+  ACE_OS::memset (&data_out, 0, sizeof (data_out));
 
-  // *IMPORTANT NOTE*: information is collected by the statistic module
-  //                   (if any)
+  // *TODO*: collect socket statistics information
+  //         (and propagate it downstream ?)
 
   // step1: send the container downstream
   if (!putStatisticsMessage (data_out,               // data container
@@ -274,6 +264,9 @@ Net_Module_SocketHandler::report () const
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler::report"));
 
   ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+  ACE_NOTREACHED (true);
 }
 
 bool
@@ -447,31 +440,36 @@ Net_Module_SocketHandler::bisectMessages (Net_Message*& message_out)
 // }
 
 bool
-Net_Module_SocketHandler::putStatisticsMessage (const Net_StreamStatistic_t& statistic_in,
+Net_Module_SocketHandler::putStatisticsMessage (const Stream_Statistic_t& statistic_in,
                                                 const ACE_Time_Value& collectionTime_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler::putStatisticsMessage"));
 
   // step1: init information object
-  inherited::userData_->currentStatistics = statistic_in;
-  inherited::userData_->lastCollectionTimestamp = collectionTime_in;
+  inherited::state_->currentStatistics = statistic_in;
+  inherited::state_->lastCollectionTimestamp = collectionTime_in;
 
-  // step2: allocate data container
-  Net_StreamSessionData_t* data_p = NULL;
-  ACE_NEW_NORETURN (data_p,
-                    Net_StreamSessionData_t (inherited::userData_));
-  if (!data_p)
+  // *TODO*: attach stream state information to the session data
+
+  // step2: create session data object container
+  Net_StreamSessionData_t* session_data_container_p = NULL;
+  ACE_NEW_NORETURN (session_data_container_p,
+                    Net_StreamSessionData_t (inherited::sessionData_,
+                                             false,
+                                             inherited::state_,
+                                             ACE_Time_Value::zero,
+                                             false));
+  if (!session_data_container_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate Net_StreamSessionData_t: \"%m\", aborting\n")));
+                ACE_TEXT ("failed to allocate SessionDataContainerType: \"%m\", aborting\n")));
 
     return false;
   } // end IF
 
-  // step3: send the data downstream...
-  // *NOTE*: this is a "fire-and-forget" API, so don't worry about data_p !
-  return inherited::putSessionMessage (inherited::sessionID_,
-                                       SESSION_STATISTICS,
-                                       data_p,
+  // step3: send the data downstream
+  // *NOTE*: this is a "fire-and-forget" API, so don't worry about session_data_container_p !
+  return inherited::putSessionMessage (SESSION_STATISTICS,
+                                       session_data_container_p,
                                        inherited::allocator_);
 }
