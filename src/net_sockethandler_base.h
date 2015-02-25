@@ -25,20 +25,23 @@
 
 #include "common_iinitialize.h"
 
-template <typename ConfigurationType>
+template <typename ConfigurationType/*,
+          typename SessionDataType*/>
 class Net_SocketHandlerBase
  : public Common_IInitialize_T<ConfigurationType>
 {
  public:
   virtual ~Net_SocketHandlerBase ();
 
-  virtual bool initialize (const ConfigurationType&); // configuration
+  // implement Common_IInitialize_T
+  virtual bool initialize (const ConfigurationType&); // handler configuration
 
  protected:
   Net_SocketHandlerBase ();
 
   ConfigurationType configuration_;
   bool              isInitialized_;
+  //SessionDataType   sessionData_;
 
  private:
 //  ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase ());

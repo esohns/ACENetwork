@@ -27,13 +27,12 @@
 
 #include "net_tcpconnection.h"
 
-#include "net_client_exports.h"
 #include "net_client_iconnector.h"
 #include "net_connection_manager_common.h"
 
 template <typename ConfigurationType,
           typename SessionDataType>
-class Net_Client_Export Net_Client_Connector
+class Net_Client_Connector
  : public ACE_Connector<Net_TCPConnection,
                         ACE_SOCK_CONNECTOR>
  , public Net_Client_IConnector

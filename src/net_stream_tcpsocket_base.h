@@ -61,10 +61,10 @@ class Net_StreamTCPSocketBase_T
   virtual ~Net_StreamTCPSocketBase_T ();
 
   //ConfigurationType* configuration_;
-  StreamType         stream_;
   ACE_Message_Block* currentReadBuffer_;
-  ACE_Thread_Mutex   sendLock_;
   ACE_Message_Block* currentWriteBuffer_;
+  ACE_Thread_Mutex   sendLock_;
+  StreamType         stream_;
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
@@ -82,7 +82,7 @@ class Net_StreamTCPSocketBase_T
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY
   // dispatch the reactor notification queue concurrently (most notably,
   // ACE_TP_Reactor) --> enforce proper serialization
-  bool               serializeOutput_;
+  //bool               serializeOutput_;
   // *NOTE*: this is a transient handle, used only to initialize the session ID
   Stream_State_t*    state_;
 };

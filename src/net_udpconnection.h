@@ -39,8 +39,8 @@ class Net_Export Net_UDPConnection
                                      Stream_Statistic_t>
 {
  public:
-  Net_UDPConnection (Net_IConnectionManager_t*,
-                     const ACE_INET_Addr&); // peer address
+  //Net_UDPConnection (Net_IConnectionManager_t*,
+  Net_UDPConnection (const ACE_INET_Addr&); // peer address
 
   // implement (part of) Net_ITransportLayer
   //virtual bool open (const ACE_INET_Addr&, // peer address

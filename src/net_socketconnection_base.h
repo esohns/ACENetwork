@@ -21,11 +21,12 @@
 #ifndef Net_SOCKETCONNECTION_BASE_H
 #define Net_SOCKETCONNECTION_BASE_H
 
+#include "ace/config-macros.h"
 #include "ace/Event_Handler.h"
 
-#include "net_connection_base.h"
-#include "net_connection_manager_common.h"
-#include "net_iconnectionmanager.h"
+//#include "net_connection_base.h"
+//#include "net_connection_manager_common.h"
+//#include "net_iconnectionmanager.h"
 
 template <typename SocketHandlerType,
           typename TransportLayerType,
@@ -68,7 +69,7 @@ class Net_SocketConnectionBase_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  protected:
-  Net_SocketConnectionBase_T (Net_IConnectionManager_t*);
+  Net_SocketConnectionBase_T ();
 
  private:
   typedef SocketHandlerType inherited;
@@ -83,7 +84,6 @@ class Net_SocketConnectionBase_T
   //// stop worker, if any
   //void shutdown ();
 
-  ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T& operator= (const Net_SocketConnectionBase_T&));
 };

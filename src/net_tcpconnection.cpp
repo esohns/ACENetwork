@@ -26,22 +26,22 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-Net_TCPConnection::Net_TCPConnection (Net_IConnectionManager_t* interfaceHandle_in)
- : inherited (interfaceHandle_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
-
-}
+//Net_TCPConnection::Net_TCPConnection (Net_IConnectionManager_t* interfaceHandle_in)
+// : inherited (interfaceHandle_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
+//
+//}
 
 Net_TCPConnection::Net_TCPConnection ()
- : inherited (NULL)
+ //: inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
+  //ACE_ASSERT (false);
+  //ACE_NOTSUP;
 
-  ACE_NOTREACHED (true);
+  //ACE_NOTREACHED (true);
 }
 
 Net_TCPConnection::~Net_TCPConnection ()
@@ -421,18 +421,18 @@ Net_TCPConnection::handle_close (ACE_HANDLE handle_in,
 /////////////////////////////////////////
 
 Net_AsynchTCPConnection::Net_AsynchTCPConnection ()
-  : inherited (NULL)
+  //: inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
 
 }
 
-Net_AsynchTCPConnection::Net_AsynchTCPConnection (Net_IConnectionManager_t* interfaceHandle_in)
- : inherited (interfaceHandle_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
-
-}
+//Net_AsynchTCPConnection::Net_AsynchTCPConnection (Net_IConnectionManager_t* interfaceHandle_in)
+// : inherited (interfaceHandle_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
+//
+//}
 
 Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 {
@@ -518,9 +518,9 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 //      default:
 //      {
 ////         ACE_DEBUG ((LM_DEBUG,
-////                    ACE_TEXT ("[%u]: sent %u bytes...\n"),
-////                    peer_.get_handle (),
-////                    bytes_sent));
+////                     ACE_TEXT ("[%u]: sent %u bytes...\n"),
+////                     peer_.get_handle (),
+////                     bytes_sent));
 //
 //        // finished with this buffer ?
 //        if (static_cast<size_t> (bytes_sent) == inherited::currentWriteBuffer_->length ())
@@ -548,17 +548,17 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 //}
 
 //int
-//Net_AsynchTCPConnection::open(void* arg_in)
+//Net_AsynchTCPConnection::open (void* arg_in)
 //{
-//  NETWORK_TRACE(ACE_TEXT("Net_AsynchTCPConnection::open"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::open"));
 //
 //  // step1: init/start stream, tweak socket, register reading data with reactor
 //  // , ...
-//  int result = inherited::open(arg_in);
+//  int result = inherited::open (arg_in);
 //  if (result == -1)
 //  {
-//    ACE_DEBUG((LM_DEBUG,
-//               ACE_TEXT("failed to Net_StreamSocketBase::open(): \"%m\", aborting\n")));
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("failed to Net_StreamSocketBase::open(): \"%m\", aborting\n")));
 //    return -1;
 //  } // end IF
 //
@@ -570,27 +570,27 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 //    ACE_hthread_t thread_handles[1];
 //    thread_handles[0] = 0;
 //    char thread_name[RPG_COMMON_BUFSIZE];
-//    ACE_OS::memset(thread_name, 0, sizeof(thread_name));
-//    ACE_OS::strcpy(thread_name,
-//                   Net_CONNECTION_HANDLER_THREAD_NAME);
+//    ACE_OS::memset (thread_name, 0, sizeof(thread_name));
+//    ACE_OS::strcpy (thread_name,
+//                    Net_CONNECTION_HANDLER_THREAD_NAME);
 //    const char* thread_names[1];
 //    thread_names[0] = thread_name;
-//    if (inherited::activate((THR_NEW_LWP |
-//                             THR_JOINABLE |
-//                             THR_INHERIT_SCHED),                        // flags
-//                            1,                                          // # threads
-//                            0,                                          // force spawning
-//                            ACE_DEFAULT_THREAD_PRIORITY,                // priority
-//                            Net_CONNECTION_HANDLER_THREAD_GROUP_ID, // group id
-//                            NULL,                                       // corresp. task --> use 'this'
-//                            thread_handles,                             // thread handle(s)
-//                            NULL,                                       // thread stack(s)
-//                            NULL,                                       // thread stack size(s)
-//                            thread_ids,                                 // thread id(s)
-//                            thread_names) == -1)                        // thread name(s)
+//    if (inherited::activate ((THR_NEW_LWP      |
+//                              THR_JOINABLE     |
+//                              THR_INHERIT_SCHED),                    // flags
+//                             1,                                      // # threads
+//                             0,                                      // force spawning
+//                             ACE_DEFAULT_THREAD_PRIORITY,            // priority
+//                             Net_CONNECTION_HANDLER_THREAD_GROUP_ID, // group id
+//                             NULL,                                   // corresp. task --> use 'this'
+//                             thread_handles,                         // thread handle(s)
+//                             NULL,                                   // thread stack(s)
+//                             NULL,                                   // thread stack size(s)
+//                             thread_ids,                             // thread id(s)
+//                             thread_names) == -1)                    // thread name(s)
 //    {
-//      ACE_DEBUG((LM_ERROR,
-//                 ACE_TEXT("failed to ACE_Task_Base::activate(): \"%m\", aborting\n")));
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_Task_Base::activate(): \"%m\", aborting\n")));
 //      return -1;
 //    } // end IF
 //  } // end IF
@@ -601,17 +601,17 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 ////    // (try to) register with the connection manager...
 ////    try
 ////    {
-////      inherited::myIsRegistered = inherited::myManager->registerConnection(this);
+////      inherited::myIsRegistered = inherited::myManager->registerConnection (this);
 ////    }
 ////    catch (...)
 ////    {
-////      ACE_DEBUG((LM_ERROR,
-////                 ACE_TEXT("caught exception in Net_IConnectionManager::registerConnection(), continuing\n")));
+////      ACE_DEBUG ((LM_ERROR,
+////                  ACE_TEXT ("caught exception in Net_IConnectionManager::registerConnection(), continuing\n")));
 ////    }
 ////    if (!inherited::myIsRegistered)
 ////    {
 ////      // (most probably) too many connections...
-////      ACE_OS::last_error(EBUSY);
+////      ACE_OS::last_error (EBUSY);
 ////      return -1;
 ////    } // end IF
 ////  } // end IF
@@ -620,9 +620,9 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 //}
 //
 //int
-//Net_AsynchTCPConnection::close(u_long arg_in)
+//Net_AsynchTCPConnection::close (u_long arg_in)
 //{
-//  NETWORK_TRACE(ACE_TEXT("Net_AsynchTCPConnection::close"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::close"));
 //  // [*NOTE*: hereby we override the default behavior of a ACE_Svc_Handler,
 //  // which would call handle_close() AGAIN]
 //
@@ -643,16 +643,16 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 //    case NORMAL_CLOSE_OPERATION:
 //    {
 //      // check specifically for the first case...
-//      if (ACE_OS::thr_equal(ACE_Thread::self(),
-//                            inherited::last_thread()))
+//      if (ACE_OS::thr_equal (ACE_Thread::self (),
+//                             inherited::last_thread ()))
 //      {
-////       if (module())
-////         ACE_DEBUG((LM_DEBUG,
-////                    ACE_TEXT("\"%s\" worker thread (ID: %t) leaving...\n"),
-////                    ACE_TEXT_ALWAYS_CHAR(name())));
+////       if (module ())
+////         ACE_DEBUG ((LM_DEBUG,
+////                     ACE_TEXT ("\"%s\" worker thread (ID: %t) leaving...\n"),
+////                     ACE_TEXT_ALWAYS_CHAR (name ())));
 ////       else
-////         ACE_DEBUG((LM_DEBUG,
-////                    ACE_TEXT("worker thread (ID: %t) leaving...\n")));
+////         ACE_DEBUG ((LM_DEBUG,
+////                     ACE_TEXT ("worker thread (ID: %t) leaving...\n")));
 //
 //        break;
 //      } // end IF
@@ -664,12 +664,12 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 //    // (e.g. too many connections)
 //    // *NOTE*: this eventually calls handle_close() (see below)
 //    case CLOSE_DURING_NEW_CONNECTION:
-//      return inherited::close(arg_in);
+//      return inherited::close (arg_in);
 //    default:
 //    {
-//      ACE_DEBUG((LM_ERROR,
-//                 ACE_TEXT("invalid argument: %u, returning\n"),
-//                 arg_in));
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("invalid argument: %u, returning\n"),
+//                  arg_in));
 //
 //      break;
 //    }
@@ -708,7 +708,7 @@ Net_AsynchTCPConnection::handle_close (ACE_HANDLE handle_in,
       return 0;
     default:
       // *PORTABILITY*: this isn't entirely portable...
-#if defined(ACE_WIN32) || defined(ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("handle_close called for unknown reasons (handle: %@, mask: %u) --> check implementation !, continuing\n"),
                   handle_in,
@@ -746,7 +746,7 @@ Net_AsynchTCPConnection::handle_close (ACE_HANDLE handle_in,
                                         mask_in);  // event mask
   if (result == -1)
     // *PORTABILITY*: this isn't entirely portable...
-#if defined(ACE_WIN32) || defined(ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamSocketBase::handle_close(%@, %d): \"%m\", continuing\n"),
                 handle_in,

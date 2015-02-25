@@ -55,7 +55,8 @@ Net_Client_AsynchConnector::make_handler (void)
 
   // default behavior
   ACE_NEW_NORETURN (result,
-                    Net_AsynchTCPConnection (interfaceHandle_));
+                    Net_AsynchTCPConnection ());
+                    //Net_AsynchTCPConnection (interfaceHandle_));
   if (!result)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

@@ -25,8 +25,10 @@
 #include "net_common.h"
 #include "net_macros.h"
 
-template <typename ConfigurationType>
-Net_Client_Connector<ConfigurationType>::Net_Client_Connector (ICONNECTION_MANAGER_T* interfaceHandle_in)
+template <typename ConfigurationType,
+          typename SessionDataType>
+Net_Client_Connector<ConfigurationType,
+                     SessionDataType>::Net_Client_Connector (ICONNECTION_MANAGER_T* interfaceHandle_in)
  : inherited (ACE_Reactor::instance (), // default reactor
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
@@ -36,16 +38,20 @@ Net_Client_Connector<ConfigurationType>::Net_Client_Connector (ICONNECTION_MANAG
 
 }
 
-template <typename ConfigurationType>
-Net_Client_Connector<ConfigurationType>::~Net_Client_Connector ()
+template <typename ConfigurationType,
+          typename SessionDataType>
+Net_Client_Connector<ConfigurationType,
+                     SessionDataType>::~Net_Client_Connector ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector::~Net_Client_Connector"));
 
 }
 
-template <typename ConfigurationType>
+template <typename ConfigurationType,
+          typename SessionDataType>
 int
-Net_Client_Connector<ConfigurationType>::make_svc_handler (Net_TCPConnection*& handler_inout)
+Net_Client_Connector<ConfigurationType,
+                     SessionDataType>::make_svc_handler (Net_TCPConnection*& handler_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector::make_svc_handler"));
 
@@ -54,7 +60,8 @@ Net_Client_Connector<ConfigurationType>::make_svc_handler (Net_TCPConnection*& h
 
   // default behavior
   ACE_NEW_NORETURN (handler_inout,
-                    Net_TCPConnection (interfaceHandle_));
+                    Net_TCPConnection ());
+                    //Net_TCPConnection (interfaceHandle_));
   if (!handler_inout)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -62,9 +69,11 @@ Net_Client_Connector<ConfigurationType>::make_svc_handler (Net_TCPConnection*& h
   return ((handler_inout == NULL) ? -1 : 0);
 }
 
-template <typename ConfigurationType>
+template <typename ConfigurationType,
+          typename SessionDataType>
 void
-Net_Client_Connector<ConfigurationType>::abort ()
+Net_Client_Connector<ConfigurationType,
+                     SessionDataType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector::abort"));
 
@@ -73,9 +82,11 @@ Net_Client_Connector<ConfigurationType>::abort ()
                 ACE_TEXT ("failed to ACE_Connector::close(): \"%m\", continuing\n")));
 }
 
-template <typename ConfigurationType>
+template <typename ConfigurationType,
+          typename SessionDataType>
 void
-Net_Client_Connector<ConfigurationType>::connect (const ACE_INET_Addr& peer_address)
+Net_Client_Connector<ConfigurationType,
+                     SessionDataType>::connect (const ACE_INET_Addr& peer_address)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector::connect"));
 

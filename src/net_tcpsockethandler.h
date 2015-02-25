@@ -31,9 +31,9 @@
 #include "net_sockethandler_base.h"
 
 class Net_TCPSocketHandler
- : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t>
- , public ACE_Svc_Handler<ACE_SOCK_STREAM,
-                          ACE_MT_SYNCH>
+ //: public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t,
+ //                               Net_SessionData_t>,
+ : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
 {
  public:
   //// override some event handler methods
@@ -57,9 +57,8 @@ class Net_TCPSocketHandler
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
-  typedef ACE_Svc_Handler<ACE_SOCK_STREAM,
-                          ACE_MT_SYNCH> inherited2;
+  //typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
+  typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler (const Net_TCPSocketHandler&));
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler& operator= (const Net_TCPSocketHandler&));

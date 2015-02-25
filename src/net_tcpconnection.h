@@ -25,7 +25,7 @@
 #include "ace/Event_Handler.h"
 #include "ace/SOCK_Connector.h"
 
-#include "net_connection_manager_common.h"
+//#include "net_connection_manager_common.h"
 #include "net_exports.h"
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
@@ -43,11 +43,13 @@ class Net_Export Net_TCPConnection
                                      Stream_SessionData_t,
                                      Stream_Statistic_t>
 {
-  friend class ACE_Connector<Net_TCPConnection,
-                             ACE_SOCK_CONNECTOR>;
+  //friend class ACE_Connector<Net_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-  Net_TCPConnection (Net_IConnectionManager_t*);
+   // *NOTE*: consider encapsulating this (need to grant access to
+   //         ACE_Connector however (see: ace/Connector.cpp:239))
+   Net_TCPConnection ();
+   //Net_TCPConnection (Net_IConnectionManager_t*);
 
   // implement (part of) Net_ITransportLayer
   virtual void info (ACE_HANDLE&,           // return value: handle
@@ -79,10 +81,8 @@ class Net_Export Net_TCPConnection
   //void shutdown ();
 
   virtual ~Net_TCPConnection ();
-  // *WARNING*: need to make this available to ACE_Connector (see: ace/Connector.cpp:239)
-  Net_TCPConnection ();
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection (const Net_TCPConnection&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection& operator= (const Net_TCPConnection&));
+  //ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection (const Net_TCPConnection&));
+  //ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection& operator= (const Net_TCPConnection&));
 };
 
 /////////////////////////////////////////
@@ -97,7 +97,10 @@ class Net_Export Net_AsynchTCPConnection
  friend class ACE_Asynch_Connector<Net_AsynchTCPConnection>;
 
  public:
-  Net_AsynchTCPConnection (Net_IConnectionManager_t*);
+   // *WARNING*: need to make this available to Asynch_Connector
+   //            (see: ace/Asynch_Connector.cpp:239)
+   Net_AsynchTCPConnection ();
+  //Net_AsynchTCPConnection (Net_IConnectionManager_t*);
 
   //// override some task-based members
   //virtual int open (void* = NULL); // args
@@ -124,9 +127,6 @@ class Net_Export Net_AsynchTCPConnection
   //void shutdown ();
 
   virtual ~Net_AsynchTCPConnection ();
-  // *WARNING*: need to make this available to Asynch_Connector
-  //            (see: ace/Asynch_Connector.cpp:239)
-  Net_AsynchTCPConnection ();
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection (const Net_AsynchTCPConnection&));
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection& operator= (const Net_AsynchTCPConnection&));
 };

@@ -36,10 +36,10 @@
 #include "net_macros.h"
 
 Net_AsynchTCPSocketHandler::Net_AsynchTCPSocketHandler ()
- : inherited ()
+ //: inherited ()
  //, inherited2(0,    // initial count
  //             true) // delete on zero ?
- , inherited2 ()
+ : inherited2 ()
  , inherited3 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
 // , myInputStream()

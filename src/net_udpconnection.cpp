@@ -24,9 +24,10 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-Net_UDPConnection::Net_UDPConnection (Net_IConnectionManager_t* interfaceHandle_in,
-                                      const ACE_INET_Addr& peerAddress_in)
- : inherited (interfaceHandle_in)
+//Net_UDPConnection::Net_UDPConnection (Net_IConnectionManager_t* interfaceHandle_in,
+Net_UDPConnection::Net_UDPConnection (const ACE_INET_Addr& peerAddress_in)
+ : inherited ()
+ //: inherited (interfaceHandle_in)
 // , inherited2 (NULL, // default thread manager
 //               NULL) // default message queue
  , peerAddress_ (peerAddress_in)

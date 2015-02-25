@@ -28,12 +28,32 @@ template <typename ConfigurationType,
           typename StatisticsContainerType>
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
+                     StatisticsContainerType>::Net_ConnectionBase_T ()
+ : inherited (1,    // initial count
+              true) // delete on zero ?
+ , manager_ (NULL)
+ //, configuration_ ()
+ , sessionData_ ()
+ , isRegistered_ (false)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
+
+  // init user data
+  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
+  //ACE_OS::memset (&sessionData_, 0, sizeof (sessionData_));
+}
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename StatisticsContainerType>
+Net_ConnectionBase_T<ConfigurationType,
+                     SessionDataType,
                      StatisticsContainerType>::Net_ConnectionBase_T (Net_IConnectionManager_t* interfaceHandle_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
  , manager_ (interfaceHandle_in)
  //, configuration_ ()
- , sessionData ()
+ , sessionData_ ()
  , isRegistered_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
@@ -141,4 +161,19 @@ Net_ConnectionBase_T<ConfigurationType,
 
     isRegistered_ = false;
   } // end IF
+}
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename StatisticsContainerType>
+bool
+Net_ConnectionBase_T<ConfigurationType,
+                     SessionDataType,
+                     StatisticsContainerType>::initialize (const ConfigurationType& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));
+
+  configuration_ = configuration_in;
+
+  return true;
 }

@@ -30,10 +30,11 @@ Net_SocketConnectionBase_T<SocketHandlerType,
                            TransportLayerType,
                            ConfigurationType,
                            SessionDataType,
-                           StatisticsContainerType>::Net_SocketConnectionBase_T (Net_IConnectionManager_t* interfaceHandle_in)
+                           StatisticsContainerType>::Net_SocketConnectionBase_T ()
+                           //StatisticsContainerType>::Net_SocketConnectionBase_T (Net_IConnectionManager_t* interfaceHandle_in)
  : inherited ()
  //, inherited2 ()
- , inherited3 (interfaceHandle_in)
+ //, inherited3 (interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::Net_SocketConnectionBase_T"));
 
@@ -53,7 +54,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::~Net_SocketConnectionBase_T"));
 
   //// wait for our worker (if any)
-  //if (inherited::myUserData.useThreadPerConnection)
+  //if (inherited::userData_.useThreadPerConnection)
   //  if (inherited::wait() == -1)
   //    ACE_DEBUG((LM_ERROR,
   //               ACE_TEXT("failed to ACE_Task_Base::wait(): \"%m\", continuing\n")));
