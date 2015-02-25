@@ -37,7 +37,7 @@ Net_Connection_Manager_T<ConfigurationType,
  , maxNumConnections_ (NET_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS)
  //, connections_ ()
  //, configuration_ ()
- //, sessionData ()
+ , sessionData_ ()
  , isInitialized_ (false)
  , isActive_ (true)
 {
@@ -45,7 +45,7 @@ Net_Connection_Manager_T<ConfigurationType,
 
   // init configuration data
   ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
-  ACE_OS::memset (&sessionData_, 0, sizeof (sessionData_));
+  //ACE_OS::memset (&sessionData_, 0, sizeof (sessionData_));
 }
 
 template <typename ConfigurationType,

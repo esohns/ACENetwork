@@ -50,7 +50,7 @@ class Net_Client_Connector
 
   // implement Net_Client_IConnector
   virtual void abort ();
-  virtual void connect (const ACE_INET_Addr&);
+  virtual bool connect (const ACE_INET_Addr&);
 
  private:
   typedef ACE_Connector<Net_TCPConnection,

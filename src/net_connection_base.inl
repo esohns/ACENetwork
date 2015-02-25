@@ -105,9 +105,9 @@ Net_ConnectionBase_T<ConfigurationType,
   // sanity check(s)
   if (!manager_)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("invalid connection manager, aborting\n")));
-    return false;
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("no connection manager, continuing\n")));
+    return true;
   } // end if
 
   // (try to) register with the connection manager...
@@ -139,8 +139,8 @@ Net_ConnectionBase_T<ConfigurationType,
   // sanity check(s)
   if (!manager_)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("invalid connection manager, returning\n")));
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("no connection manager, returning\n")));
     return;
   } // end IF
 

@@ -29,7 +29,16 @@ class Net_Client_IConnector
   virtual ~Net_Client_IConnector () {}
 
   virtual void abort () = 0; // shutdown
-  virtual void connect (const ACE_INET_Addr&) = 0;
+  virtual bool connect (const ACE_INET_Addr&) = 0;
 };
+
+//class Net_Client_IAsynchConnector
+//{
+// public:
+//  virtual ~Net_Client_IAsynchConnector () {}
+//
+//  virtual void abort () = 0; // shutdown
+//  virtual void connect (const ACE_INET_Addr&) = 0;
+//};
 
 #endif

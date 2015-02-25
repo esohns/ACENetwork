@@ -114,6 +114,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\src\client\net_client_asynchconnector.inl" />
     <None Include="..\..\src\client\net_client_connector.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

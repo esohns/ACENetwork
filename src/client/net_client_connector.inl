@@ -84,7 +84,7 @@ Net_Client_Connector<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType>
-void
+bool
 Net_Client_Connector<ConfigurationType,
                      SessionDataType>::connect (const ACE_INET_Addr& peer_address)
 {
@@ -108,5 +108,9 @@ Net_Client_Connector<ConfigurationType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Connector::connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));
+
+    return false;
   } // end IF
+
+  return true;
 }

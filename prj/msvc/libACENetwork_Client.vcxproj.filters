@@ -55,5 +55,8 @@
     <None Include="..\..\src\client\net_client_connector.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="..\..\src\client\net_client_asynchconnector.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

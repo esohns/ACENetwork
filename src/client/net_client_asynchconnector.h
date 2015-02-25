@@ -26,16 +26,21 @@
 
 #include "net_tcpconnection.h"
 
-#include "net_client_exports.h"
 #include "net_client_iconnector.h"
 #include "net_connection_manager_common.h"
 
-class Net_Client_Export Net_Client_AsynchConnector
+template <typename ConfigurationType,
+          typename SessionDataType>
+class Net_Client_AsynchConnector
  : public ACE_Asynch_Connector<Net_AsynchTCPConnection>
  , public Net_Client_IConnector
 {
  public:
-  Net_Client_AsynchConnector (Net_IConnectionManager_t*);
+   typedef Net_IConnectionManager_T<ConfigurationType,
+                                    SessionDataType,
+                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
+
+  Net_Client_AsynchConnector (ICONNECTION_MANAGER_T*);
   virtual ~Net_Client_AsynchConnector ();
 
   // override default creation strategy
@@ -47,7 +52,7 @@ class Net_Client_Export Net_Client_AsynchConnector
 
   // implement Net_Client_IConnector
   virtual void abort ();
-  virtual void connect (const ACE_INET_Addr&);
+  virtual bool connect (const ACE_INET_Addr&);
 
  private:
   typedef ACE_Asynch_Connector<Net_AsynchTCPConnection> inherited;
@@ -56,7 +61,10 @@ class Net_Client_Export Net_Client_AsynchConnector
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector (const Net_Client_AsynchConnector&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector& operator= (const Net_Client_AsynchConnector&));
 
-  Net_IConnectionManager_t* interfaceHandle_;
+  ICONNECTION_MANAGER_T* interfaceHandle_;
 };
+
+// include template implementation
+#include "net_client_asynchconnector.inl"
 
 #endif
