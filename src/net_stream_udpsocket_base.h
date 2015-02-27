@@ -34,6 +34,7 @@ struct Stream_State_t;
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
@@ -43,6 +44,7 @@ class Net_StreamUDPSocketBase_T
  , public SocketHandlerType
  , public Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
+                               TransportLayerType,
                                StatisticsContainerType>
 {
  public:
@@ -84,6 +86,7 @@ class Net_StreamUDPSocketBase_T
   typedef SocketHandlerType inherited2;
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
+                               TransportLayerType,
                                StatisticsContainerType> inherited3;
 
 //  ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());

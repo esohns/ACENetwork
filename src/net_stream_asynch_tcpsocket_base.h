@@ -33,6 +33,7 @@ struct Stream_State_t;
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
@@ -41,6 +42,7 @@ class Net_StreamAsynchTCPSocketBase_T
  , public ACE_Event_Handler
  , public Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
+                               TransportLayerType,
                                StatisticsContainerType>
 {
  public:
@@ -67,6 +69,7 @@ class Net_StreamAsynchTCPSocketBase_T
   typedef SocketHandlerType inherited;
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
+                               TransportLayerType,
                                StatisticsContainerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&));

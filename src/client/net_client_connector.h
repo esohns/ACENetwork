@@ -25,35 +25,36 @@
 #include "ace/Connector.h"
 #include "ace/SOCK_Connector.h"
 
-#include "net_tcpconnection.h"
-
 #include "net_client_iconnector.h"
 #include "net_connection_manager_common.h"
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 class Net_Client_Connector
- : public ACE_Connector<Net_TCPConnection,
+ : public ACE_Connector<ConnectionType,
                         ACE_SOCK_CONNECTOR>
  , public Net_Client_IConnector
 {
  public:
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
+                                   TransportLayerType,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
   Net_Client_Connector (ICONNECTION_MANAGER_T*);
   virtual ~Net_Client_Connector ();
 
   // override default creation strategy
-  virtual int make_svc_handler (Net_TCPConnection*&);
+  virtual int make_svc_handler (ConnectionType*&);
 
   // implement Net_Client_IConnector
   virtual void abort ();
   virtual bool connect (const ACE_INET_Addr&);
 
  private:
-  typedef ACE_Connector<Net_TCPConnection,
+  typedef ACE_Connector<ConnectionType,
                         ACE_SOCK_CONNECTOR> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector ());

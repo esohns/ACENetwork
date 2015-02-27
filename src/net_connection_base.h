@@ -26,24 +26,26 @@
 #include "common_iinitialize.h"
 #include "common_referencecounter_base.h"
 
+#include "net_configuration.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 class Net_ConnectionBase_T
  : public Common_ReferenceCounterBase
- , public Net_IConnection_T<StatisticsContainerType>
+ , public Net_IConnection_T<TransportLayerType,
+                            StatisticsContainerType>
  , public Common_IInitialize_T<ConfigurationType>
 {
  public:
   Net_ConnectionBase_T ();
 
-  // implement (part of) Net_ITransportLayer
-  virtual bool init (const ACE_INET_Addr&, // peer address
-                     unsigned short);      // port number
-  virtual void fini ();
+  // implement (part of) Net_ITransportLayer_T
+  virtual bool initialize (const Net_SocketConfiguration_t&); // socket configuration
+  virtual void finalize ();
 
   // implement Common_IInitialize_T
   virtual bool initialize (const ConfigurationType&); // handler configuration
@@ -51,6 +53,7 @@ class Net_ConnectionBase_T
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
+                                   TransportLayerType,
                                    StatisticsContainerType> Net_IConnectionManager_t;
 
   Net_ConnectionBase_T (Net_IConnectionManager_t*);
@@ -63,6 +66,8 @@ class Net_ConnectionBase_T
 
  private:
   typedef Common_ReferenceCounterBase inherited;
+  typedef Net_IConnection_T<TransportLayerType,
+                            StatisticsContainerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&));

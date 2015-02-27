@@ -37,6 +37,7 @@ include_HEADERS = \
   net_module_runtimestatistic.h \
   net_module_runtimestatistic.inl \
   net_module_sockethandler.h \
+  net_netlinkconnection.h \
   net_packet_headers.h \
   net_protocol_layer.h \
   net_remote_comm.h \
@@ -60,6 +61,7 @@ include_HEADERS = \
   net_tcpsockethandler.h \
   net_transportlayer_base.h \
   net_transportlayer_ip_cast.h \
+  net_transportlayer_netlink.h \
   net_transportlayer_tcp.h \
   net_transportlayer_udp.h \
   net_udpconnection.h \
@@ -107,6 +109,8 @@ libACENetwork_la_SOURCES = \
   net_module_runtimestatistic.inl \
   net_module_sockethandler.cpp \
   net_module_sockethandler.h \
+  net_netlinkconnection.cpp \
+  net_netlinkconnection.h \
   net_packet_headers.h \
   net_protocol_layer.cpp \
   net_protocol_layer.h \
@@ -143,6 +147,8 @@ libACENetwork_la_SOURCES = \
   net_transportlayer_base.h \
   net_transportlayer_ip_cast.cpp \
   net_transportlayer_ip_cast.h \
+  net_transportlayer_netlink.cpp \
+  net_transportlayer_netlink.h \
   net_transportlayer_tcp.cpp \
   net_transportlayer_tcp.h \
   net_transportlayer_udp.cpp \

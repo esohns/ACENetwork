@@ -25,7 +25,8 @@
 #include "ace/Event_Handler.h"
 #include "ace/SOCK_Connector.h"
 
-//#include "net_connection_manager_common.h"
+#include "stream_common.h"
+
 #include "net_exports.h"
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
@@ -46,15 +47,17 @@ class Net_Export Net_TCPConnection
   //friend class ACE_Connector<Net_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-   // *NOTE*: consider encapsulating this (need to grant access to
-   //         ACE_Connector however (see: ace/Connector.cpp:239))
-   Net_TCPConnection ();
-   //Net_TCPConnection (Net_IConnectionManager_t*);
+  // *NOTE*: consider encapsulating this (need to grant access to
+  //         ACE_Connector however (see: ace/Connector.cpp:239))
+  Net_TCPConnection ();
+  //Net_TCPConnection (Net_IConnectionManager_t*);
 
-  // implement (part of) Net_ITransportLayer
+  // implement (part of) Net_IInetTransportLayer
   virtual void info (ACE_HANDLE&,           // return value: handle
                      ACE_INET_Addr&,        // return value: local SAP
                      ACE_INET_Addr&) const; // return value: remote SAP
+  virtual unsigned int id () const;
+  virtual void dump_state () const;
 
   //// override some task-based members
   //virtual int open (void* = NULL); // args
@@ -101,6 +104,13 @@ class Net_Export Net_AsynchTCPConnection
    //            (see: ace/Asynch_Connector.cpp:239)
    Net_AsynchTCPConnection ();
   //Net_AsynchTCPConnection (Net_IConnectionManager_t*);
+
+   // implement (part of) Net_IInetTransportLayer
+   virtual void info (ACE_HANDLE&,           // return value: handle
+                      ACE_INET_Addr&,        // return value: local SAP
+                      ACE_INET_Addr&) const; // return value: remote SAP
+   virtual unsigned int id () const;
+   virtual void dump_state () const;
 
   //// override some task-based members
   //virtual int open (void* = NULL); // args

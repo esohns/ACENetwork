@@ -33,6 +33,7 @@ struct Stream_State_t;
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
@@ -43,6 +44,7 @@ class Net_StreamAsynchUDPSocketBase_T
  , public ACE_Event_Handler
  , public Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
+                               TransportLayerType,
                                StatisticsContainerType>
 {
  public:
@@ -77,6 +79,10 @@ class Net_StreamAsynchUDPSocketBase_T
   typedef SocketHandlerType inherited;
   typedef SocketType inherited2;
   typedef ACE_Event_Handler inherited3;
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               SessionDataType,
+                               TransportLayerType,
+                               StatisticsContainerType> inherited4;
 
   //ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));

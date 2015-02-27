@@ -27,6 +27,7 @@
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 class Net_IConnectionManager_T
  : public Common_IControl
@@ -37,8 +38,13 @@ class Net_IConnectionManager_T
   // API
   virtual void getData (ConfigurationType&,    // return value: (connection) handler configuration
                         SessionDataType&) = 0; // return value: stream session data
-  virtual bool registerConnection (Net_IConnection_T<StatisticsContainerType>*) = 0; // connection
-  virtual void deregisterConnection (const Net_IConnection_T<StatisticsContainerType>*) = 0; // connection
+
+  virtual bool registerConnection (Net_IConnection_T<TransportLayerType,
+                                                     StatisticsContainerType>*) = 0; // connection
+  virtual void deregisterConnection (const Net_IConnection_T<TransportLayerType,
+                                                             StatisticsContainerType>*) = 0; // connection
+
+  virtual unsigned int numConnections () const = 0; // return value: (current) number of connections
 };
 
 #endif

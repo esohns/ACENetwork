@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "ace/Guard_T.h"
+#include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
@@ -29,17 +30,19 @@
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::Net_Connection_Manager_T ()
  : condition_ (lock_)
- , maxNumConnections_ (NET_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS)
  //, connections_ ()
  //, configuration_ ()
- , sessionData_ ()
- , isInitialized_ (false)
  , isActive_ (true)
+ , isInitialized_ (false)
+ , maxNumConnections_ (NET_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS)
+ , sessionData_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::Net_Connection_Manager_T"));
 
@@ -50,9 +53,11 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::~Net_Connection_Manager_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::~Net_Connection_Manager_T"));
@@ -76,13 +81,15 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
-                         StatisticsContainerType>::init (unsigned int maxNumConnections_in)
+                         TransportLayerType,
+                         StatisticsContainerType>::initialize (unsigned int maxNumConnections_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::initialize"));
 
   maxNumConnections_ = maxNumConnections_in;
 
@@ -93,10 +100,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::set (const ConfigurationType& configuration_in,
                                                         const SessionDataType& sessionData_in)
 {
@@ -110,10 +119,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
@@ -125,10 +136,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::stop (bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
@@ -142,10 +155,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 bool
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::isRunning () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
@@ -157,10 +172,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::getData (ConfigurationType& configuration_out,
                                                             SessionDataType& sessionData_out)
 {
@@ -174,10 +191,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 bool
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::registerConnection (Connection_t* connection_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::registerConnection"));
@@ -203,52 +222,6 @@ Net_Connection_Manager_T<ConfigurationType,
 
     connection_in->increase ();
     connections_.insert_tail (connection_in);
-
-    ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof(buffer));
-    std::string localAddress;
-    ACE_INET_Addr local_SAP, remote_SAP;
-    try
-    {
-      connection_in->info (handle,
-                           local_SAP,
-                           remote_SAP);
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection::info(), aborting")));
-
-      return false;
-    }
-    if (local_SAP.addr_to_string (buffer,
-                                  sizeof (buffer)) == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-    localAddress = buffer;
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    if (remote_SAP.addr_to_string (buffer,
-                                   sizeof (buffer)) == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
-    // *PORTABILITY*: this isn't entirely portable...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %u)...\n"),
-                connection_in, reinterpret_cast<unsigned int> (handle),
-                ACE_TEXT (localAddress.c_str ()),
-                ACE_TEXT (buffer),
-                connections_.size ()));
-#else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %u)...\n"),
-                connection_in, handle,
-                ACE_TEXT (localAddress.c_str ()),
-                ACE_TEXT (buffer),
-                connections_.size ()));
-#endif
   } // end lock scope
 
   return true;
@@ -256,55 +229,29 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::deregisterConnection (const Connection_t* connection_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::deregisterConnection"));
 
   bool found = false;
-
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr address1, address2;
-  try
-  {
-    connection_in->info (handle,
-                         address1,
-                         address2);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection::info(), continuing\n")));
-  }
+  Connection_t* connection = NULL;
 
   // synch access to myConnections
   ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
 
-  Connection_t* connection = NULL;
   for (ConnectionsIterator_t iterator (connections_);
        iterator.next (connection);
        iterator.advance ())
     if (connection == connection_in)
     {
       found = true;
-
       iterator.remove ();
-
-      // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
-                  connection_in, reinterpret_cast<unsigned int> (handle),
-                  connections_.size ()));
-#else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("deregistered connection [%@/%d] (total: %u)\n"),
-                  connection_in, handle,
-                  connections_.size ()));
-#endif
 
       break;
     } // end IF
@@ -330,10 +277,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::abortConnections ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortConnections"));
@@ -374,12 +323,12 @@ Net_Connection_Manager_T<ConfigurationType,
     try
     {
       // *IMPORTANT NOTE*: implicitly invokes deregisterConnection
-      connection->fini ();
+      connection->finalize ();
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection::fini(), continuing")));
+                  ACE_TEXT ("caught exception in Net_IConnection::finalize(), continuing")));
     }
   } while (true);
   ACE_ASSERT (connections_.is_empty ());
@@ -391,10 +340,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::waitConnections () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::waitConnections"));
@@ -419,10 +370,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 unsigned int
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::numConnections () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::numConnections"));
@@ -456,12 +409,15 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 const typename Net_Connection_Manager_T<ConfigurationType,
                                         SessionDataType,
+                                        TransportLayerType,
                                         StatisticsContainerType>::Connection_t*
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::operator[] (unsigned int index_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::operator[]"));
@@ -496,10 +452,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::abortOldestConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortOldestConnection"));
@@ -519,22 +477,24 @@ Net_Connection_Manager_T<ConfigurationType,
     {
       // *IMPORTANT NOTE*: implicitly invokes deregisterConnection from a
       // reactor thread, if any
-      connection->fini ();
+      connection->finalize ();
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection::fini(), continuing")));
+                  ACE_TEXT ("caught exception in Net_IConnection::finalize(), continuing")));
     }
   } // end IF
 }
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::abortNewestConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortNewestConnection"));
@@ -566,10 +526,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 bool
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::collect (StatisticsContainerType& data_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::collect"));
@@ -604,10 +566,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::report"));
@@ -641,10 +605,12 @@ Net_Connection_Manager_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
                          SessionDataType,
+                         TransportLayerType,
                          StatisticsContainerType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::dump_state"));

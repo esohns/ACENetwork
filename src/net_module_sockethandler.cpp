@@ -266,7 +266,9 @@ Net_Module_SocketHandler::report () const
   ACE_ASSERT (false);
   ACE_NOTSUP;
 
+#if defined (_MSC_VER)
   ACE_NOTREACHED (true);
+#endif
 }
 
 bool

@@ -38,16 +38,87 @@ Net_TCPConnection::Net_TCPConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
 
-  //ACE_ASSERT (false);
-  //ACE_NOTSUP;
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  ACE_INET_Addr local_SAP, remote_SAP;
+  try
+  {
+    Net_IInetTransportLayer_t::info (handle,
+                                     local_SAP,
+                                     remote_SAP);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnection_T::info(), returning")));
 
-  //ACE_NOTREACHED (true);
+    return;
+  }
+  if (local_SAP.addr_to_string (buffer,
+                                sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  if (remote_SAP.addr_to_string (buffer,
+                                 sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+
+  // *PORTABILITY*: this isn't entirely portable...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              this, reinterpret_cast<unsigned int> (handle),
+              ACE_TEXT (localAddress.c_str ()),
+              ACE_TEXT (buffer),
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              this, handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (buffer),
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#endif
 }
 
 Net_TCPConnection::~Net_TCPConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::~Net_TCPConnection"));
 
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr address1, address2;
+  try
+  {
+    Net_IInetTransportLayer_t::info (handle,
+                                     address1,
+                                     address2);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
+  }
+
+  // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
+              this, reinterpret_cast<unsigned int> (handle),
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("deregistered connection [%@/%d] (total: %u)\n"),
+              this, handle,
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#endif
 }
 
 void
@@ -64,6 +135,60 @@ Net_TCPConnection::info (ACE_HANDLE& handle_out,
   if (inherited::peer_.get_remote_addr (remoteSAP_out) == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK::get_remote_addr(): \"%m\", continuing\n")));
+}
+
+unsigned int
+Net_TCPConnection::id () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::id"));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return *static_cast<unsigned int*> (handle);
+#else
+  return static_cast<unsigned int> (handle);
+#endif
+}
+
+void
+Net_TCPConnection::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::dump_state"));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  if (local_inet_address.addr_to_string (buffer,
+                                         sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string peer_address;
+  if (peer_inet_address.addr_to_string (buffer,
+                                        sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    peer_address = buffer;
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
+              id (), handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (peer_address.c_str ())));
 }
 
 //int
@@ -546,6 +671,72 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 //
 //  return 0;
 //}
+
+void
+Net_AsynchTCPConnection::info (ACE_HANDLE& handle_out,
+                               ACE_INET_Addr& localSAP_out,
+                               ACE_INET_Addr& remoteSAP_out) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::info"));
+
+  handle_out = ACE_Event_Handler::get_handle ();
+  localSAP_out = inherited::localSAP_;
+  remoteSAP_out = inherited::remoteSAP_;
+}
+
+unsigned int
+Net_AsynchTCPConnection::id () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::id"));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return *static_cast<unsigned int*> (handle);
+#else
+  return static_cast<unsigned int> (handle);
+#endif
+}
+
+void
+Net_AsynchTCPConnection::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::dump_state"));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  if (local_inet_address.addr_to_string (buffer,
+                                         sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string peer_address;
+  if (peer_inet_address.addr_to_string (buffer,
+                                        sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    peer_address = buffer;
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
+              id (), handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (peer_address.c_str ())));
+}
 
 //int
 //Net_AsynchTCPConnection::open (void* arg_in)

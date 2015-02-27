@@ -21,22 +21,22 @@
 #ifndef Net_TRANSPORTLAYER_TCP_H
 #define Net_TRANSPORTLAYER_TCP_H
 
-#include "net_exports.h"
 #include "net_common.h"
+#include "net_exports.h"
 #include "net_transportlayer_base.h"
 
 class Net_Export Net_TransportLayer_TCP
- : public Net_TransportLayer_Base
+ : public Net_InetTransportLayer_Base
 {
  public:
-  Net_TransportLayer_TCP();
-  virtual ~Net_TransportLayer_TCP();
+  Net_TransportLayer_TCP ();
+  virtual ~Net_TransportLayer_TCP ();
 
  private:
-  typedef Net_TransportLayer_Base inherited;
+  typedef Net_InetTransportLayer_Base inherited;
 
-  ACE_UNIMPLEMENTED_FUNC(Net_TransportLayer_TCP(const Net_TransportLayer_TCP&));
-  ACE_UNIMPLEMENTED_FUNC(Net_TransportLayer_TCP& operator=(const Net_TransportLayer_TCP&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_TCP (const Net_TransportLayer_TCP&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_TCP& operator= (const Net_TransportLayer_TCP&));
 };
 
 #endif

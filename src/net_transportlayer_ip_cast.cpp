@@ -62,28 +62,27 @@ Net_TransportLayer_IP_Broadcast::~Net_TransportLayer_IP_Broadcast ()
 }
 
 void
-Net_TransportLayer_IP_Broadcast::init (unsigned short port_in,
-                                       bool useLoopback_in)
+Net_TransportLayer_IP_Broadcast::initialize (const ACE_INET_Addr& address_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Broadcast::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Broadcast::initialize"));
 
-  port_ = port_in;
-  useLoopback_ = useLoopback_in;
-
-  if (address_.get_port_number () != port_)
+  u_short port_number = address_in.get_port_number ();
+  if (address_.get_port_number () != port_number)
   {
     if (inherited2::close () == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram_Bcast::close(): \"%m\", continuing\n")));
-    address_.set_port_number (port_, 1);
   } // end IF
+  address_ = address_in;
   if (inherited2::open (address_,
                         PF_INET,
                         0,
                         0,
                         NULL) == -1)
+  {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Dgram_Bcast::open(): \"%m\", continuing\n")));
+  } // end IF
 }
 
 /////////////////////////////////////////
@@ -127,15 +126,12 @@ Net_TransportLayer_IP_Multicast::~Net_TransportLayer_IP_Multicast ()
 }
 
 void
-Net_TransportLayer_IP_Multicast::init (unsigned short port_in,
-                                       bool useLoopback_in)
+Net_TransportLayer_IP_Multicast::initialize (const ACE_INET_Addr& address_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Multicast::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Multicast::initialize"));
 
-  port_ = port_in;
-  useLoopback_ = useLoopback_in;
-
-  if (address_.get_port_number () != port_)
+  u_short port_number = address_in.get_port_number ();
+  if (address_.get_port_number () != port_number)
   {
     if (joined_)
     {
@@ -148,8 +144,8 @@ Net_TransportLayer_IP_Multicast::init (unsigned short port_in,
     if (inherited2::close () == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::close(): \"%m\", continuing\n")));
-    address_.set_port_number (port_, 1);
   } // end IF
+  address_ = address_in;
   if (inherited2::open (address_,
                         NULL,
                         1) == -1)
@@ -158,8 +154,10 @@ Net_TransportLayer_IP_Multicast::init (unsigned short port_in,
   if (inherited2::join (address_,
                         1,
                         NULL) == -1)
+  {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::join(): \"%m\", continuing\n")));
+  } // end IF
   else
     joined_ = true;
 }

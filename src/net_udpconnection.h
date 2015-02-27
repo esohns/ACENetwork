@@ -40,19 +40,17 @@ class Net_Export Net_UDPConnection
 {
  public:
   //Net_UDPConnection (Net_IConnectionManager_t*,
-  Net_UDPConnection (const ACE_INET_Addr&); // peer address
+  Net_UDPConnection ();
 
-  // implement (part of) Net_ITransportLayer
-  //virtual bool open (const ACE_INET_Addr&, // peer address
-  //                   unsigned short);      // port number
+  // implement (part of) Net_IInetTransportLayer
   virtual void info (ACE_HANDLE&,           // return value: handle
                      ACE_INET_Addr&,        // return value: local SAP
                      ACE_INET_Addr&) const; // return value: remote SAP
+  virtual unsigned int id () const;
+  virtual void dump_state () const;
 
   // override some transport layer-based members
-  virtual void init (Net_ClientServerRole_t, // role
-                     unsigned short,         // port number
-                     bool = false);          // use loopback device ?
+  virtual void initialize (const ACE_INET_Addr&); // target address
 
   // override some task-based members
   //virtual int svc (void);
@@ -79,11 +77,8 @@ class Net_Export Net_UDPConnection
   //void shutdown ();
 
   virtual ~Net_UDPConnection ();
-  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection ());
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection (const Net_UDPConnection&));
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection& operator= (const Net_UDPConnection&));
-
-  ACE_INET_Addr peerAddress_;
 };
 
 ///////////////////////////////////////////
@@ -96,7 +91,7 @@ class Net_Export Net_UDPConnection
 //  Net_IPMulticastConnection (const ACE_INET_Addr&); // peer address
 //
 //  //  // implement (part of) Net_IConnection
-//  //  virtual void ping();
+//  //  virtual void ping ();
 //
 //  // override some task-based members
 //  virtual int svc (void);
@@ -120,7 +115,7 @@ class Net_Export Net_UDPConnection
 //  virtual ~Net_IPMulticastConnection ();
 //  ACE_UNIMPLEMENTED_FUNC (Net_IPMulticastConnection ());
 //  ACE_UNIMPLEMENTED_FUNC (Net_IPMulticastConnection (const Net_IPMulticastConnection&));
-//  ACE_UNIMPLEMENTED_FUNC (Net_IPMulticastConnection& operator=(const Net_IPMulticastConnection&));
+//  ACE_UNIMPLEMENTED_FUNC (Net_IPMulticastConnection& operator= (const Net_IPMulticastConnection&));
 //};
 //
 ///////////////////////////////////////////
@@ -133,7 +128,7 @@ class Net_Export Net_UDPConnection
 //  Net_IPBroadcastConnection (const ACE_INET_Addr&); // peer address
 //
 //  //  // implement (part of) Net_IConnection
-//  //  virtual void ping();
+//  //  virtual void ping ();
 //
 //  // override some task-based members
 //  virtual int svc (void);
@@ -157,7 +152,7 @@ class Net_Export Net_UDPConnection
 //  virtual ~Net_IPBroadcastConnection ();
 //  ACE_UNIMPLEMENTED_FUNC (Net_IPBroadcastConnection ());
 //  ACE_UNIMPLEMENTED_FUNC (Net_IPBroadcastConnection (const Net_IPBroadcastConnection&));
-//  ACE_UNIMPLEMENTED_FUNC (Net_IPBroadcastConnection& operator=(const Net_IPBroadcastConnection&));
+//  ACE_UNIMPLEMENTED_FUNC (Net_IPBroadcastConnection& operator= (const Net_IPBroadcastConnection&));
 //};
 
 #endif

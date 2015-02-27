@@ -18,6 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "ace/INET_Addr.h"
+#include "ace/Netlink_Addr.h"
+
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -75,96 +78,6 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::ping"));
 
   inherited::stream_.ping ();
-}
-
-template <typename SocketHandlerType,
-          typename TransportLayerType,
-          typename ConfigurationType,
-          typename SessionDataType,
-          typename StatisticsContainerType>
-unsigned int
-Net_SocketConnectionBase_T<SocketHandlerType,
-                           TransportLayerType,
-                           ConfigurationType,
-                           SessionDataType,
-                           StatisticsContainerType>::id () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::id"));
-
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
-  try
-  {
-    inherited2::info (handle,
-                      local_inet_address,
-                      peer_inet_address);
-  } // end try
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ITransportLayer::info(), aborting\n")));
-    return -1;
-  } // end catch
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return *static_cast<unsigned int*> (handle);
-#else
-  return static_cast<unsigned int> (handle);
-#endif
-}
-
-template <typename SocketHandlerType,
-          typename TransportLayerType,
-          typename ConfigurationType,
-          typename SessionDataType,
-          typename StatisticsContainerType>
-void
-Net_SocketConnectionBase_T<SocketHandlerType,
-                           TransportLayerType,
-                           ConfigurationType,
-                           SessionDataType,
-                           StatisticsContainerType>::dump_state () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::dump_state"));
-
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
-  try
-  {
-    inherited2::info (handle,
-                      local_inet_address,
-                      peer_inet_address);
-  } // end try
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ITransportLayer::info(), returning\n")));
-    return;
-  } // end catch
-
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  if (local_inet_address.addr_to_string (buffer,
-                                         sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-  if (peer_inet_address.addr_to_string (buffer,
-                                        sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address = buffer;
-
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
-              id (), handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
 }
 
 template <typename SocketHandlerType,

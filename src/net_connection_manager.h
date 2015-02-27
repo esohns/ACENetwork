@@ -35,10 +35,12 @@
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 class Net_Connection_Manager_T
  : public Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
+                                   TransportLayerType,
                                    StatisticsContainerType>
  , public Common_IStatistic_T<StatisticsContainerType>
  , public Common_IDumpState
@@ -46,6 +48,7 @@ class Net_Connection_Manager_T
   // singleton needs access to the ctor/dtors
   friend class ACE_Singleton<Net_Connection_Manager_T<ConfigurationType,
                                                       SessionDataType,
+                                                      TransportLayerType,
                                                       StatisticsContainerType>,
                              ACE_Recursive_Thread_Mutex>;
 
@@ -55,13 +58,18 @@ class Net_Connection_Manager_T
   //                                     StatisticsContainerType>;
 
  public:
-  typedef Net_IConnection_T<StatisticsContainerType> Connection_t;
+  typedef Net_IConnection_T<TransportLayerType,
+                            StatisticsContainerType> Connection_t;
 
   // configuration / initialization
-  void init (unsigned int); // maximum number of concurrent connections
-  // *NOTE*: argument is passed in init() to EVERY new connection during registration
+  void initialize (unsigned int); // maximum number of concurrent connections
+  // *NOTE*: argument is passed in init() to EVERY new connection during
+  //         registration
   void set (const ConfigurationType&, // (connection) handler configuration
             const SessionDataType&);  // stream session data
+
+  // implement Net_IConnectionManager_T
+  virtual unsigned int numConnections () const;
 
   // implement Common_IControl
   virtual void start ();
@@ -70,7 +78,6 @@ class Net_Connection_Manager_T
 
   void abortConnections ();
   void waitConnections () const;
-  unsigned int numConnections () const;
 
   // *TODO*: used for unit testing purposes ONLY !
   //void lock();
@@ -106,17 +113,16 @@ class Net_Connection_Manager_T
   ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T& operator= (const Net_Connection_Manager_T&));
   virtual ~Net_Connection_Manager_T ();
 
-  // *NOTE*: MUST be recursive, otherwise asynch abort is not feasible
-  mutable ACE_Recursive_Thread_Mutex                lock_;
   // implement blocking wait...
   mutable ACE_Condition<ACE_Recursive_Thread_Mutex> condition_;
-
-  unsigned int                                      maxNumConnections_;
   Connections_t                                     connections_;
   ConfigurationType                                 configuration_; // (connection) handler configuration
-  SessionDataType                                   sessionData_; // stream session data
-  bool                                              isInitialized_;
   bool                                              isActive_;
+  bool                                              isInitialized_;
+  // *NOTE*: MUST be recursive, otherwise asynch abort is not feasible
+  mutable ACE_Recursive_Thread_Mutex                lock_;
+  unsigned int                                      maxNumConnections_;
+  SessionDataType                                   sessionData_; // stream session data
 };
 
 // include template implementation

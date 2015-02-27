@@ -25,9 +25,11 @@
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
+                     TransportLayerType,
                      StatisticsContainerType>::Net_ConnectionBase_T ()
  : inherited (1,    // initial count
               true) // delete on zero ?
@@ -45,9 +47,11 @@ Net_ConnectionBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
+                     TransportLayerType,
                      StatisticsContainerType>::Net_ConnectionBase_T (Net_IConnectionManager_t* interfaceHandle_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
@@ -78,63 +82,74 @@ Net_ConnectionBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
+                     TransportLayerType,
                      StatisticsContainerType>::~Net_ConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
 
-  fini ();
+  finalize ();
 }
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 bool
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
-                     StatisticsContainerType>::init (const ACE_INET_Addr& peerAddress_in,
-                                                     unsigned short portNumber_in)
+                     TransportLayerType,
+                     StatisticsContainerType>::initialize (const Net_SocketConfiguration_t& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));
 
-  ACE_UNUSED_ARG (peerAddress_in);
-  ACE_UNUSED_ARG (portNumber_in);
+  ACE_UNUSED_ARG (configuration_in);
 
   // sanity check(s)
+  ACE_ASSERT (!isRegistered_);
   if (!manager_)
   {
-    //ACE_DEBUG ((LM_DEBUG,
-    //            ACE_TEXT ("no connection manager, continuing\n")));
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("no connection manager, continuing\n")));
+
     return true;
-  } // end if
+  } // end IF
 
   // (try to) register with the connection manager...
-  // *warning*: as we register before the connection has fully opened, there
-  // is a small window for races...
-  try
+  // *NOTE*: as the connection has not fully open()ed, there is a small window
+  //         for races here...
+  if (manager_)
   {
-    isRegistered_ = manager_->registerConnection (this);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnectionManager::egisterConnection(), continuing\n")));
-  }
+    try
+    {
+      isRegistered_ = manager_->registerConnection (this);
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Net_IConnectionManager::registerConnection(), aborting\n")));
+    }
+
+    return isRegistered_;
+  } // end IF
 
   return true;
 }
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 void
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
-                     StatisticsContainerType>::fini ()
+                     TransportLayerType,
+                     StatisticsContainerType>::finalize ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::fini"));
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::finalize"));
 
   // sanity check(s)
   if (!manager_)
@@ -165,10 +180,12 @@ Net_ConnectionBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType>
 bool
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
+                     TransportLayerType,
                      StatisticsContainerType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));

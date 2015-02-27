@@ -21,8 +21,12 @@
 #ifndef Net_CONFIGURATION_H
 #define Net_CONFIGURATION_H
 
+#include "ace/INET_Addr.h"
+#include "ace/Netlink_Addr.h"
+
 #include "stream_common.h"
 
+#include "net_common.h"
 #include "net_stream_common.h"
 
 // forward declarations
@@ -30,13 +34,19 @@ class ACE_Allocator;
 
 struct Net_SocketConfiguration_t
 {
-  int bufferSize;
+  int                  bufferSize;
+//  ACE_INET_Addr        peerAddress;
+//  ACE_Netlink_Addr     peerNetlinkAddress;
+//  unsigned int         portNumber;
+//  Net_TransportLayer_t type;
+  bool                 useLoopbackDevice;
+  // *TODO*: add network interface specifier
 };
 
 struct Net_SocketHandlerConfiguration_t
 {
-  Net_SocketConfiguration_t socketConfiguration;
   ACE_Allocator*            messageAllocator;
+  Net_SocketConfiguration_t socketConfiguration;
 };
 
 struct Net_ProtocolConfiguration_t

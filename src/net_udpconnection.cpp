@@ -25,18 +25,65 @@
 #include "net_macros.h"
 
 //Net_UDPConnection::Net_UDPConnection (Net_IConnectionManager_t* interfaceHandle_in,
-Net_UDPConnection::Net_UDPConnection (const ACE_INET_Addr& peerAddress_in)
- : inherited ()
+Net_UDPConnection::Net_UDPConnection ()
  //: inherited (interfaceHandle_in)
+// : inherited ()
 // , inherited2 (NULL, // default thread manager
 //               NULL) // default message queue
- , peerAddress_ (peerAddress_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection::Net_UDPConnection"));
 
   //if (inherited::open () == -1)
   //  ACE_DEBUG ((LM_ERROR,
   //              ACE_TEXT ("failed to ACE_SOCK_Dgram::open(): \"%m\", continuing\n")));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  ACE_INET_Addr local_SAP, remote_SAP;
+  try
+  {
+    inherited::info (handle,
+                     local_SAP,
+                     remote_SAP);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnection_T::info(), returning")));
+
+    return;
+  }
+  if (local_SAP.addr_to_string (buffer,
+                                sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  if (remote_SAP.addr_to_string (buffer,
+                                 sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+
+  // *PORTABILITY*: this isn't entirely portable...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              this, reinterpret_cast<unsigned int> (handle),
+              ACE_TEXT (localAddress.c_str ()),
+              ACE_TEXT (buffer),
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              this, handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (buffer),
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#endif
 }
 
 Net_UDPConnection::~Net_UDPConnection ()
@@ -52,6 +99,35 @@ Net_UDPConnection::~Net_UDPConnection ()
   //  if (inherited2::wait () == -1)
   //    ACE_DEBUG ((LM_ERROR,
   //                ACE_TEXT ("failed to ACE_Task_Base::wait(): \"%m\", continuing\n")));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr address1, address2;
+  try
+  {
+    Net_IInetTransportLayer_t::info (handle,
+                                     address1,
+                                     address2);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
+  }
+
+  // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
+              this, reinterpret_cast<unsigned int> (handle),
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("deregistered connection [%@/%d] (total: %u)\n"),
+              this, handle,
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#endif
 }
 
 void
@@ -67,33 +143,84 @@ Net_UDPConnection::info (ACE_HANDLE& handle_out,
                 ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
   //localSAP_out = inherited::myAddress;
   //remoteSAP_out = ACE_sap_any_cast(ACE_INET_Addr&);
-  remoteSAP_out = peerAddress_;
+  remoteSAP_out = inherited::address_;
+}
+
+unsigned int
+Net_UDPConnection::id () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection::id"));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return *static_cast<unsigned int*> (handle);
+#else
+  return static_cast<unsigned int> (handle);
+#endif
 }
 
 void
-Net_UDPConnection::init (Net_ClientServerRole_t role_in,
-                         unsigned short port_in,
-                         bool useLoopback_in)
+Net_UDPConnection::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection::dump_state"));
 
-  Net_TransportLayer_Base::init (role_in,
-                                 port_in,
-                                 useLoopback_in);
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
 
-  if (peerAddress_.get_port_number () != inherited::port_)
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  if (local_inet_address.addr_to_string (buffer,
+                                         sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string peer_address;
+  if (peer_inet_address.addr_to_string (buffer,
+                                        sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    peer_address = buffer;
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
+              id (), handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (peer_address.c_str ())));
+}
+
+void
+Net_UDPConnection::initialize (const ACE_INET_Addr& address_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection::initialize"));
+
+  u_short port_number = address_in.get_port_number ();
+  if (inherited::address_.get_port_number () != port_number)
   {
     if (ACE_SOCK_Dgram::close () == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::close(): \"%m\", continuing\n")));
-    peerAddress_.set_port_number (inherited::port_, 1);
   } // end IF
-  if (ACE_SOCK_Dgram::open (peerAddress_,
+  inherited::address_ = address_in;
+  if (ACE_SOCK_Dgram::open (address_,
                             ACE_PROTOCOL_FAMILY_INET,
                             0,
                             0) == -1)
+  {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Dgram::open(): \"%m\", continuing\n")));
+  } // end IF
 }
 
 //int
@@ -209,10 +336,10 @@ Net_UDPConnection::open (void* arg_in)
   std::ostringstream converter;
   converter << NET_DEFAULT_PORT;
   address += converter.str ();
-  if (peerAddress_.set (ACE_TEXT (address.c_str ()), AF_INET) == -1)
+  if (inherited::address_.set (ACE_TEXT (address.c_str ()), AF_INET) == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-  if (ACE_SOCK_Dgram::open (peerAddress_,
+  if (ACE_SOCK_Dgram::open (inherited::address_,
                             ACE_PROTOCOL_FAMILY_INET,
                             0,
                             0) == -1)
@@ -221,7 +348,7 @@ Net_UDPConnection::open (void* arg_in)
 
   //// step1: init/start stream, tweak socket, register reading data with reactor
   //// , ...
-  //int result = inherited::open (peerAddress_);
+  //int result = inherited::open (inherited::address_);
   //if (result == -1)
   //{
   //  ACE_TCHAR buffer[BUFSIZ];
@@ -419,7 +546,7 @@ Net_UDPConnection::handle_output (ACE_HANDLE handle_in)
   // put some data into the socket...
   ssize_t bytes_sent = inherited::send (inherited::currentWriteBuffer_->rd_ptr (),
                                         inherited::currentWriteBuffer_->length (),
-                                        peerAddress_,
+                                        inherited::address_,
                                         0);
   switch (bytes_sent)
   {

@@ -63,6 +63,8 @@ class Net_Export Net_AsynchTCPSocketHandler
 
   ACE_Asynch_Read_Stream  inputStream_;
   ACE_Asynch_Write_Stream outputStream_;
+  ACE_INET_Addr           localSAP_;
+  ACE_INET_Addr           remoteSAP_;
 
  private:
   typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
@@ -74,9 +76,6 @@ class Net_Export Net_AsynchTCPSocketHandler
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
-
-  ACE_INET_Addr           localSAP_;
-  ACE_INET_Addr           remoteSAP_;
 };
 
 #endif

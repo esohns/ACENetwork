@@ -21,30 +21,29 @@
 #ifndef Net_TRANSPORTLAYER_UDP_H
 #define Net_TRANSPORTLAYER_UDP_H
 
-#include "net_exports.h"
+#include "ace/INET_Addr.h"
+
 #include "net_common.h"
+#include "net_exports.h"
 #include "net_transportlayer_base.h"
 
-#include "ace/INET_Addr.h"
-//#include "ace/SOCK_Dgram.h"
-
 class Net_Export Net_TransportLayer_UDP
- : public Net_TransportLayer_Base
+ : public Net_InetTransportLayer_Base
  //, public ACE_SOCK_Dgram
 {
  public:
-  Net_TransportLayer_UDP();
-  virtual ~Net_TransportLayer_UDP();
+  Net_TransportLayer_UDP ();
+  virtual ~Net_TransportLayer_UDP ();
 
  protected:
-  ACE_INET_Addr myAddress;
+  ACE_INET_Addr address_;
 
  private:
-  typedef Net_TransportLayer_Base inherited;
+  typedef Net_InetTransportLayer_Base inherited;
   //typedef ACE_SOCK_Dgram inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC(Net_TransportLayer_UDP(const Net_TransportLayer_UDP&));
-  ACE_UNIMPLEMENTED_FUNC(Net_TransportLayer_UDP& operator=(const Net_TransportLayer_UDP&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_UDP (const Net_TransportLayer_UDP&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_UDP& operator= (const Net_TransportLayer_UDP&));
 };
 
 #endif

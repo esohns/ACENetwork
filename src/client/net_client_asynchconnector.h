@@ -24,27 +24,28 @@
 #include "ace/Global_Macros.h"
 #include "ace/Asynch_Connector.h"
 
-#include "net_tcpconnection.h"
-
 #include "net_client_iconnector.h"
 #include "net_connection_manager_common.h"
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 class Net_Client_AsynchConnector
- : public ACE_Asynch_Connector<Net_AsynchTCPConnection>
+ : public ACE_Asynch_Connector<ConnectionType>
  , public Net_Client_IConnector
 {
  public:
    typedef Net_IConnectionManager_T<ConfigurationType,
                                     SessionDataType,
+                                    TransportLayerType,
                                     Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
   Net_Client_AsynchConnector (ICONNECTION_MANAGER_T*);
   virtual ~Net_Client_AsynchConnector ();
 
   // override default creation strategy
-  virtual Net_AsynchTCPConnection* make_handler (void);
+  virtual ConnectionType* make_handler (void);
   // override default connect strategy
   virtual int validate_connection (const ACE_Asynch_Connect::Result&, // result
                                    const ACE_INET_Addr&,              // remote address
@@ -55,7 +56,7 @@ class Net_Client_AsynchConnector
   virtual bool connect (const ACE_INET_Addr&);
 
  private:
-  typedef ACE_Asynch_Connector<Net_AsynchTCPConnection> inherited;
+  typedef ACE_Asynch_Connector<ConnectionType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector (const Net_Client_AsynchConnector&));

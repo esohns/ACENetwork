@@ -24,10 +24,6 @@
 #include "ace/config-macros.h"
 #include "ace/Event_Handler.h"
 
-//#include "net_connection_base.h"
-//#include "net_connection_manager_common.h"
-//#include "net_iconnectionmanager.h"
-
 template <typename SocketHandlerType,
           typename TransportLayerType,
           typename ConfigurationType,
@@ -47,10 +43,8 @@ class Net_SocketConnectionBase_T
 
   virtual ~Net_SocketConnectionBase_T ();
 
-  // implement (part of) Net_ITransportLayer
+  // implement (part of) Net_IInetTransportLayer
   virtual void ping (); // ping the peer !
-  virtual unsigned int id () const;
-  virtual void dump_state () const;
 
   // implement Common_IStatistic
   // *NOTE*: delegate these to the stream

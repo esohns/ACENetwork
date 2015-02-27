@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Erik Sohns   *
+ *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,43 +17,21 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "stdafx.h"
 
-#ifndef Net_ITRANSPORTLAYER_H
-#define Net_ITRANSPORTLAYER_H
+#include "net_transportlayer_netlink.h"
 
-#include "ace/config-macros.h"
-#include "ace/INET_Addr.h"
-#include "ace/Netlink_Addr.h"
+#include "net_macros.h"
 
-#include "common_idumpstate.h"
-#include "common_iinitialize.h"
-
-#include "net_configuration.h"
-#include "net_exports.h"
-
-template <typename AddressType,
-          typename ConfigurationType>
-class Net_ITransportLayer_T
- : public Common_IInitialize_T<ConfigurationType>
- , public Common_IDumpState
+Net_TransportLayer_Netlink::Net_TransportLayer_Netlink ()
+// : inherited ()
 {
- public:
-  virtual ~Net_ITransportLayer_T () {};
+  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Netlink::Net_TransportLayer_Netlink"));
 
-  virtual void finalize () = 0;
+}
 
-  virtual void ping () = 0; // ping the peer !
+Net_TransportLayer_Netlink::~Net_TransportLayer_Netlink ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Netlink::~Net_TransportLayer_Netlink"));
 
-  virtual void info (ACE_HANDLE&,             // return value: I/O handle
-                     AddressType&,            // return value: local SAP
-                     AddressType&) const = 0; // return value: remote SAP
-  virtual unsigned int id () const = 0;
-};
-
-typedef Net_ITransportLayer_T<ACE_INET_Addr,
-                              Net_SocketConfiguration_t> Net_IInetTransportLayer_t;
-
-typedef Net_ITransportLayer_T<ACE_Netlink_Addr,
-                              Net_SocketConfiguration_t> Net_INetlinkTransportLayer_t;
-
-#endif
+}

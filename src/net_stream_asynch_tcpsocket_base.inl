@@ -26,11 +26,13 @@
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
                                 SessionDataType,
+                                TransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::Net_StreamAsynchTCPSocketBase_T ()
@@ -45,11 +47,13 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
                                 SessionDataType,
+                                TransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::~Net_StreamAsynchTCPSocketBase_T ()
@@ -78,12 +82,14 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
                                 SessionDataType,
+                                TransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::open (ACE_HANDLE handle_in,
@@ -246,12 +252,14 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
                                 SessionDataType,
+                                TransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::handle_output (ACE_HANDLE handle_in)
@@ -302,12 +310,14 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
                                 SessionDataType,
+                                TransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::handle_close (ACE_HANDLE handle_in,
@@ -367,12 +377,14 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
                                 SessionDataType,
+                                TransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType >::act (const void* act_in)
@@ -384,12 +396,14 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
+          typename TransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
                                 SessionDataType,
+                                TransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketHandlerType>::handle_read_stream (const ACE_Asynch_Read_Stream::Result& result)

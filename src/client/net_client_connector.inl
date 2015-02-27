@@ -26,9 +26,13 @@
 #include "net_macros.h"
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 Net_Client_Connector<ConfigurationType,
-                     SessionDataType>::Net_Client_Connector (ICONNECTION_MANAGER_T* interfaceHandle_in)
+                     SessionDataType,
+                     TransportLayerType,
+                     ConnectionType>::Net_Client_Connector (ICONNECTION_MANAGER_T* interfaceHandle_in)
  : inherited (ACE_Reactor::instance (), // default reactor
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
@@ -39,19 +43,27 @@ Net_Client_Connector<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 Net_Client_Connector<ConfigurationType,
-                     SessionDataType>::~Net_Client_Connector ()
+                     SessionDataType,
+                     TransportLayerType,
+                     ConnectionType>::~Net_Client_Connector ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector::~Net_Client_Connector"));
 
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 int
 Net_Client_Connector<ConfigurationType,
-                     SessionDataType>::make_svc_handler (Net_TCPConnection*& handler_inout)
+                     SessionDataType,
+                     TransportLayerType,
+                     ConnectionType>::make_svc_handler (ConnectionType*& handler_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector::make_svc_handler"));
 
@@ -60,7 +72,7 @@ Net_Client_Connector<ConfigurationType,
 
   // default behavior
   ACE_NEW_NORETURN (handler_inout,
-                    Net_TCPConnection ());
+                    ConnectionType ());
                     //Net_TCPConnection (interfaceHandle_));
   if (!handler_inout)
     ACE_DEBUG ((LM_CRITICAL,
@@ -70,10 +82,14 @@ Net_Client_Connector<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 void
 Net_Client_Connector<ConfigurationType,
-                     SessionDataType>::abort ()
+                     SessionDataType,
+                     TransportLayerType,
+                     ConnectionType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector::abort"));
 
@@ -83,14 +99,18 @@ Net_Client_Connector<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 bool
 Net_Client_Connector<ConfigurationType,
-                     SessionDataType>::connect (const ACE_INET_Addr& peer_address)
+                     SessionDataType,
+                     TransportLayerType,
+                     ConnectionType>::connect (const ACE_INET_Addr& peer_address)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector::connect"));
 
-  Net_TCPConnection* handler = NULL;
+  ConnectionType* handler = NULL;
   int result = inherited::connect (handler,                           // service handler
                                    peer_address,                      // remote SAP
                                    ACE_Synch_Options::defaults,       // synch options

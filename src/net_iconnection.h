@@ -21,18 +21,15 @@
 #ifndef Net_ICONNECTION_H
 #define Net_ICONNECTION_H
 
-#include "ace/INET_Addr.h"
-
 #include "common_istatistic.h"
 #include "common_irefcount.h"
 
-#include "net_itransportlayer.h"
-
-template <typename StatisticsContainerType>
+template <typename TransportLayerType,
+          typename StatisticsContainerType>
 class Net_IConnection_T
  : public Common_IStatistic_T<StatisticsContainerType>
  , virtual public Common_IRefCount
- , virtual public Net_ITransportLayer
+ , virtual public TransportLayerType
 {
  public:
   virtual ~Net_IConnection_T () {};

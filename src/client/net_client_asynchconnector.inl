@@ -24,9 +24,13 @@
 #include "net_macros.h"
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 Net_Client_AsynchConnector<ConfigurationType,
-                           SessionDataType>::Net_Client_AsynchConnector (ICONNECTION_MANAGER_T* interfaceHandle_in)
+                           SessionDataType,
+                           TransportLayerType,
+                           ConnectionType>::Net_Client_AsynchConnector (ICONNECTION_MANAGER_T* interfaceHandle_in)
  : interfaceHandle_ (interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector::Net_Client_AsynchConnector"));
@@ -40,28 +44,36 @@ Net_Client_AsynchConnector<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 Net_Client_AsynchConnector<ConfigurationType,
-                           SessionDataType>::~Net_Client_AsynchConnector ()
+                           SessionDataType,
+                           TransportLayerType,
+                           ConnectionType>::~Net_Client_AsynchConnector ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector::~Net_Client_AsynchConnector"));
 
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType>
-Net_AsynchTCPConnection*
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
+ConnectionType*
 Net_Client_AsynchConnector<ConfigurationType,
-                           SessionDataType>::make_handler (void)
+                           SessionDataType,
+                           TransportLayerType,
+                           ConnectionType>::make_handler (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector::make_handler"));
 
   // init return value(s)
-  Net_AsynchTCPConnection* result = NULL;
+  ConnectionType* result = NULL;
 
   // default behavior
   ACE_NEW_NORETURN (result,
-                    Net_AsynchTCPConnection ());
+                    ConnectionType ());
                     //Net_AsynchTCPConnection (interfaceHandle_));
   if (!result)
     ACE_DEBUG ((LM_CRITICAL,
@@ -71,10 +83,14 @@ Net_Client_AsynchConnector<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 void
 Net_Client_AsynchConnector<ConfigurationType,
-                           SessionDataType>::abort ()
+                           SessionDataType,
+                           TransportLayerType,
+                           ConnectionType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector::abort"));
 
@@ -84,10 +100,14 @@ Net_Client_AsynchConnector<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 bool
 Net_Client_AsynchConnector<ConfigurationType,
-                           SessionDataType>::connect (const ACE_INET_Addr& peer_address)
+                           SessionDataType,
+                           TransportLayerType,
+                           ConnectionType>::connect (const ACE_INET_Addr& peer_address)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector::connect"));
 
@@ -115,12 +135,16 @@ Net_Client_AsynchConnector<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename ConnectionType>
 int
 Net_Client_AsynchConnector<ConfigurationType,
-                           SessionDataType>::validate_connection (const ACE_Asynch_Connect::Result& result_in,
-                                                                  const ACE_INET_Addr& remoteSAP_in,
-                                                                  const ACE_INET_Addr& localSAP_in)
+                           SessionDataType,
+                           TransportLayerType,
+                           ConnectionType>::validate_connection (const ACE_Asynch_Connect::Result& result_in,
+                                                                 const ACE_INET_Addr& remoteSAP_in,
+                                                                 const ACE_INET_Addr& localSAP_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector::validate_connection"));
 

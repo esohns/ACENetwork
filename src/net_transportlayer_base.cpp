@@ -21,49 +21,62 @@
 
 #include "net_transportlayer_base.h"
 
-#include "net_defines.h"
 #include "net_macros.h"
 
-Net_TransportLayer_Base::Net_TransportLayer_Base (Net_ClientServerRole_t role_in,
-                                                  Net_TransportLayer_t transportLayer_in)
+Net_InetTransportLayer_Base::Net_InetTransportLayer_Base (Net_ClientServerRole_t role_in,
+                                                          Net_TransportLayer_t transportLayer_in)
  : clientServerRole_ (role_in)
  , transportLayer_ (transportLayer_in)
- , port_ (NET_DEFAULT_PORT)
- , useLoopback_ (false)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Base::Net_TransportLayer_Base"));
+  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::Net_InetTransportLayer_Base"));
 
 }
 
-Net_TransportLayer_Base::~Net_TransportLayer_Base ()
+Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base ()
 {
-  NETWORK_TRACE(ACE_TEXT("Net_TransportLayer_Base::~Net_TransportLayer_Base"));
+  NETWORK_TRACE(ACE_TEXT("Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base"));
 
 }
 
 void
-Net_TransportLayer_Base::init (Net_ClientServerRole_t role_in,
-                               unsigned short port_in,
-                               bool useLoopback_in)
+Net_InetTransportLayer_Base::initialize (Net_ClientServerRole_t role_in,
+                                         const ACE_INET_Addr& address_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Base::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::initialize"));
 
   clientServerRole_ = role_in;
-  port_ = port_in;
-  useLoopback_ = useLoopback_in;
+
+  initialize (address_in);
 }
 
 void
-Net_TransportLayer_Base::info (ACE_HANDLE& handle_out,
-                               ACE_INET_Addr& localSAP_out,
-                               ACE_INET_Addr& remoteSAP_out) const
+Net_InetTransportLayer_Base::initialize (const ACE_INET_Addr& address_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Base::info"));
+  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::initialize"));
 
-  // init return value(s)
-  handle_out = ACE_INVALID_HANDLE;
-  localSAP_out = ACE_sap_any_cast (ACE_INET_Addr&);
-  remoteSAP_out = ACE_sap_any_cast (ACE_INET_Addr&);
+  ACE_UNUSED_ARG (address_in);
+}
 
-  ACE_ASSERT (false);
+/////////////////////////////////////////
+
+Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
+ : clientServerRole_ (ROLE_INVALID)
+ , transportLayer_ (TRANSPORTLAYER_NETLINK)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base"));
+
+}
+
+Net_NetlinkTransportLayer_Base::~Net_NetlinkTransportLayer_Base ()
+{
+  NETWORK_TRACE(ACE_TEXT("Net_NetlinkTransportLayer_Base::~Net_NetlinkTransportLayer_Base"));
+
+}
+
+void
+Net_NetlinkTransportLayer_Base::initialize (const ACE_INET_Addr& address_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::initialize"));
+
+  ACE_UNUSED_ARG (address_in);
 }

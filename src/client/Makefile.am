@@ -23,10 +23,13 @@ lib_LTLIBRARIES = libACENetwork_Client.la
 libACENetwork_Client_la_SOURCES = \
   net_client_asynchconnector.cpp \
   net_client_asynchconnector.h \
+  net_client_asynchconnector.inl \
   net_client_common.h \
   net_client_connector.cpp \
   net_client_connector.h \
+  net_client_connector.inl \
   net_client_defines.h \
   net_client_exports.h \
-  net_client_iconnector.h
-
+  net_client_iconnector.h \
+  stdafx.cpp \
+  stdafx.h

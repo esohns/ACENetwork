@@ -30,6 +30,7 @@
 #include "net_asynch_tcpsockethandler.h"
 #include "net_asynch_udpsockethandler.h"
 #include "net_configuration.h"
+#include "net_itransportlayer.h"
 #include "net_stream.h"
 #include "net_stream_asynch_tcpsocket_base.h"
 #include "net_stream_asynch_udpsocket_base.h"
@@ -40,23 +41,34 @@
 
 typedef Net_StreamAsynchTCPSocketBase_T<Net_Configuration_t,
                                         Stream_SessionData_t,
+                                        Net_IInetTransportLayer_t,
                                         Stream_Statistic_t,
                                         Net_Stream,
                                         Net_AsynchTCPSocketHandler> Net_AsynchTCPHandler_t;
+//typedef Net_StreamAsynchTCPSocketBase_T<Net_Configuration_t,
+//                                        Stream_SessionData_t,
+//                                        Net_INetlinkTransportLayer_t,
+//                                        Stream_Statistic_t,
+//                                        Net_Stream,
+//                                        Net_AsynchTCPSocketHandler> Net_AsynchNetlinkHandler_t;
+
 typedef Net_StreamAsynchUDPSocketBase_T<Net_Configuration_t,
                                         Stream_SessionData_t,
+                                        Net_IInetTransportLayer_t,
                                         Stream_Statistic_t,
                                         Net_Stream,
                                         ACE_SOCK_Dgram,
                                         Net_AsynchUDPSocketHandler> Net_AsynchUDPHandler;
 typedef Net_StreamAsynchUDPSocketBase_T<Net_Configuration_t,
                                         Stream_SessionData_t,
+                                        Net_IInetTransportLayer_t,
                                         Stream_Statistic_t,
                                         Net_Stream,
                                         ACE_SOCK_Dgram_Mcast,
                                         Net_AsynchUDPSocketHandler> Net_AsynchIPMulticastHandler;
 typedef Net_StreamAsynchUDPSocketBase_T<Net_Configuration_t,
                                         Stream_SessionData_t,
+                                        Net_IInetTransportLayer_t,
                                         Stream_Statistic_t,
                                         Net_Stream,
                                         ACE_SOCK_Dgram_Bcast,
@@ -64,23 +76,34 @@ typedef Net_StreamAsynchUDPSocketBase_T<Net_Configuration_t,
 
 typedef Net_StreamTCPSocketBase_T<Net_Configuration_t,
                                   Stream_SessionData_t,
+                                  Net_IInetTransportLayer_t,
                                   Stream_Statistic_t,
                                   Net_Stream,
                                   Net_TCPSocketHandler> Net_TCPHandler_t;
+typedef Net_StreamTCPSocketBase_T<Net_Configuration_t,
+                                  Stream_SessionData_t,
+                                  Net_INetlinkTransportLayer_t,
+                                  Stream_Statistic_t,
+                                  Net_Stream,
+                                  Net_TCPSocketHandler> Net_NetlinkHandler_t;
+
 typedef Net_StreamUDPSocketBase_T<Net_Configuration_t,
                                   Stream_SessionData_t,
+                                  Net_IInetTransportLayer_t,
                                   Stream_Statistic_t,
                                   Net_Stream,
                                   ACE_SOCK_Dgram,
                                   Net_UDPSocketHandler> Net_UDPHandler_t;
 typedef Net_StreamUDPSocketBase_T<Net_Configuration_t,
                                   Stream_SessionData_t,
+                                  Net_IInetTransportLayer_t,
                                   Stream_Statistic_t,
                                   Net_Stream,
                                   ACE_SOCK_Dgram_Mcast,
                                   Net_UDPSocketHandler> Net_IPMulticastHandler_t;
 typedef Net_StreamUDPSocketBase_T<Net_Configuration_t,
                                   Stream_SessionData_t,
+                                  Net_IInetTransportLayer_t,
                                   Stream_Statistic_t,
                                   Net_Stream,
                                   ACE_SOCK_Dgram_Bcast,
