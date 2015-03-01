@@ -39,7 +39,7 @@ class Net_Export Net_TransportLayer_IP_Broadcast
   virtual ~Net_TransportLayer_IP_Broadcast ();
 
   // override some transport layer-based members
-  virtual void initialize (const ACE_INET_Addr&); // target address
+  virtual bool initialize (const Net_SocketConfiguration_t&); // configuration
 
  private:
   typedef Net_InetTransportLayer_Base inherited;
@@ -63,7 +63,7 @@ class Net_Export Net_TransportLayer_IP_Multicast
   virtual ~Net_TransportLayer_IP_Multicast ();
 
   // override some transport layer-based members
-  virtual void initialize (const ACE_INET_Addr&); // target address
+  virtual bool initialize (const Net_SocketConfiguration_t&); // configuration
 
  private:
   typedef Net_InetTransportLayer_Base inherited;

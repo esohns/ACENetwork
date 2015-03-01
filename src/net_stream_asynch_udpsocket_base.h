@@ -48,12 +48,9 @@ class Net_StreamAsynchUDPSocketBase_T
                                StatisticsContainerType>
 {
  public:
-  //  // *TODO*: remove this stub
+  // *TODO*: remove this stub
   Net_StreamAsynchUDPSocketBase_T ();
   virtual ~Net_StreamAsynchUDPSocketBase_T ();
-
-  // implement (part of) Net_IConnection
-  virtual void ping ();
 
   // override some service methods
   virtual void open (ACE_HANDLE,          // (socket) handle
@@ -70,10 +67,9 @@ class Net_StreamAsynchUDPSocketBase_T
  protected:
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
 
-//  // *TODO*: (try to) handle short writes gracefully...
-//  ACE_Message_Block* buffer_;
-  //ConfigurationType  userData_;
   StreamType      stream_;
+  // *TODO*: (try to) handle short writes gracefully...
+//  ACE_Message_Block* buffer_;
 
  private:
   typedef SocketHandlerType inherited;
@@ -84,7 +80,6 @@ class Net_StreamAsynchUDPSocketBase_T
                                TransportLayerType,
                                StatisticsContainerType> inherited4;
 
-  //ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&));
 

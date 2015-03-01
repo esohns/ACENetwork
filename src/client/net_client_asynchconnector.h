@@ -21,19 +21,24 @@
 #ifndef NET_CLIENT_ASYNCHCONNECTOR_H
 #define NET_CLIENT_ASYNCHCONNECTOR_H
 
-#include "ace/Global_Macros.h"
 #include "ace/Asynch_Connector.h"
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+
+#include "stream_common.h"
 
 #include "net_client_iconnector.h"
 #include "net_connection_manager_common.h"
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename ConfigurationType,
           typename SessionDataType,
           typename TransportLayerType,
           typename ConnectionType>
-class Net_Client_AsynchConnector
+class Net_Client_AsynchConnector_T
  : public ACE_Asynch_Connector<ConnectionType>
- , public Net_Client_IConnector
+ , public Net_Client_IConnector_T<AddressType,
+                                  ConfigurationType>
 {
  public:
    typedef Net_IConnectionManager_T<ConfigurationType,
@@ -41,8 +46,9 @@ class Net_Client_AsynchConnector
                                     TransportLayerType,
                                     Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
-  Net_Client_AsynchConnector (ICONNECTION_MANAGER_T*);
-  virtual ~Net_Client_AsynchConnector ();
+  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*,
+                                const ConfigurationType*);
+  virtual ~Net_Client_AsynchConnector_T ();
 
   // override default creation strategy
   virtual ConnectionType* make_handler (void);
@@ -51,17 +57,20 @@ class Net_Client_AsynchConnector
                                    const ACE_INET_Addr&,              // remote address
                                    const ACE_INET_Addr&);             // local address
 
-  // implement Net_Client_IConnector
+  // implement Net_Client_IConnector_T
+  virtual const ConfigurationType* getConfiguration () const;
+
   virtual void abort ();
-  virtual bool connect (const ACE_INET_Addr&);
+  virtual bool connect (const AddressType&);
 
  private:
   typedef ACE_Asynch_Connector<ConnectionType> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector ());
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector (const Net_Client_AsynchConnector&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector& operator= (const Net_Client_AsynchConnector&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&));
 
+  const ConfigurationType* configuration_;
   ICONNECTION_MANAGER_T* interfaceHandle_;
 };
 

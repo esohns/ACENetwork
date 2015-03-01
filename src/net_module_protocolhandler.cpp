@@ -70,16 +70,12 @@ Net_Module_ProtocolHandler::~Net_Module_ProtocolHandler ()
 }
 
 bool
-Net_Module_ProtocolHandler::init(Stream_IAllocator* allocator_in,
-                                 unsigned int sessionID_in,
-                                 unsigned int pingInterval_in,
-                                 bool autoAnswerPings_in,
-                                 bool printPongDot_in)
+Net_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
+                                        unsigned int pingInterval_in,
+                                        bool autoAnswerPings_in,
+                                        bool printPongDot_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_ProtocolHandler::init"));
-
-  // sanity check(s)
-  ACE_ASSERT (allocator_in && sessionID_in);
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_ProtocolHandler::initialize"));
 
   if (isInitialized_)
   {
@@ -114,7 +110,6 @@ Net_Module_ProtocolHandler::init(Stream_IAllocator* allocator_in,
   } // end IF
 
   allocator_ = allocator_in;
-  sessionID_ = sessionID_in;
   pingInterval_ = pingInterval_in;
   automaticPong_ = autoAnswerPings_in;
   //if (automaticPong)
@@ -137,7 +132,8 @@ Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // retrieve type of message and other details...
-  Net_MessageHeader_t* message_header = reinterpret_cast<Net_MessageHeader_t*> (message_inout->rd_ptr ());
+  Net_MessageHeader_t* message_header =
+      reinterpret_cast<Net_MessageHeader_t*> (message_inout->rd_ptr ());
   switch (message_header->messageType)
   {
     case Net_Remote_Comm::NET_PING:
@@ -149,7 +145,8 @@ Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
 
         // step0: create reply structure
         // --> get a message buffer
-        Net_Message* reply_message = allocateMessage (sizeof (Net_Remote_Comm::PongMessage));
+        Net_Message* reply_message =
+            allocateMessage (sizeof (Net_Remote_Comm::PongMessage));
         if (reply_message == NULL)
         {
           ACE_DEBUG ((LM_ERROR,
@@ -159,9 +156,11 @@ Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
           return;
         } // end IF
         // step1: init reply
-        Net_Remote_Comm::PongMessage* reply_struct = reinterpret_cast<Net_Remote_Comm::PongMessage*> (reply_message->wr_ptr());
+        Net_Remote_Comm::PongMessage* reply_struct =
+            reinterpret_cast<Net_Remote_Comm::PongMessage*> (reply_message->wr_ptr());
         ACE_OS::memset (reply_struct, 0, sizeof (Net_Remote_Comm::PongMessage));
-        reply_struct->messageHeader.messageLength = sizeof (Net_Remote_Comm::PongMessage) - sizeof (unsigned int);
+        reply_struct->messageHeader.messageLength =
+            sizeof (Net_Remote_Comm::PongMessage) - sizeof (unsigned int);
         reply_struct->messageHeader.messageType = Net_Remote_Comm::NET_PONG;
         reply_message->wr_ptr (sizeof (Net_Remote_Comm::PongMessage));
         // step2: send it upstream
@@ -238,13 +237,17 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
 
            return;
         } // end IF
-
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("scheduled \"ping\" timer (ID: %d), interval: %u second(s)...\n"),
-  //            pingTimerID_,
-  //            pingInterval_in));
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("scheduled \"ping\" timer (id: %d), interval: %u second(s)...\n"),
+                    pingTimerID_,
+                    pingInterval_));
       } // end IF
 
+      const Net_StreamSessionData_t* session_data_p = message_inout->getData ();
+      ACE_ASSERT (session_data_p);
+      Stream_State_t* state_p = session_data_p->getState ();
+      ACE_ASSERT (state_p);
+      sessionID_ = state_p->sessionID;
       break;
     }
     case SESSION_END:
@@ -255,14 +258,14 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
         if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (pingTimerID_,
                                                                 &act) == -1)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("session %u: failed to cancel \"ping\" timer (ID: %d): \"%m\", continuing\n"),
+                      ACE_TEXT ("session %u: failed to cancel \"ping\" timer (id: %d): \"%m\", continuing\n"),
                       sessionID_,
                       pingTimerID_));
-        //else
-        //	ACE_DEBUG ((LM_DEBUG,
-        //						  ACE_TEXT ("session %u: cancelled \"ping\" timer (ID: %d)\n"),
-        //						  sessionID_,
-        //						  pingTimerID_));
+        else
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("session %u: cancelled \"ping\" timer (id: %d)\n"),
+                      sessionID_,
+                      pingTimerID_));
         pingTimerID_ = -1;
       } // end IF
 
@@ -285,7 +288,8 @@ Net_Module_ProtocolHandler::handleTimeout (const void* arg_in)
 //               timerID_));
 
   // step0: create ping structure --> get a message buffer
-  Net_Message* ping_message = allocateMessage (sizeof (Net_Remote_Comm::PingMessage));
+  Net_Message* ping_message =
+      allocateMessage (sizeof (Net_Remote_Comm::PingMessage));
   if (ping_message == NULL)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -338,6 +342,9 @@ Net_Message*
 Net_Module_ProtocolHandler::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_ProtocolHandler::allocateMessage"));
+
+  // sanity check(s)
+  ACE_ASSERT (allocator_);
 
   // init return value(s)
   Net_Message* message_out = NULL;

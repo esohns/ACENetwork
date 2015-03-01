@@ -21,12 +21,12 @@
 #ifndef Net_ASYNCH_TCP_SOCKETHANDLER_T_H
 #define Net_ASYNCH_TCP_SOCKETHANDLER_T_H
 
-#include "ace/Global_Macros.h"
 #include "ace/Asynch_IO.h"
-#include "ace/Notification_Strategy.h"
-#include "ace/Message_Block.h"
-#include "ace/INET_Addr.h"
 #include "ace/Event_Handler.h"
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/Message_Block.h"
+#include "ace/Notification_Strategy.h"
 
 #include "net_configuration.h"
 #include "net_exports.h"

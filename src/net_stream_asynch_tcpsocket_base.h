@@ -46,6 +46,7 @@ class Net_StreamAsynchTCPSocketBase_T
                                StatisticsContainerType>
 {
  public:
+  // *TODO*: remove this stub
   Net_StreamAsynchTCPSocketBase_T ();
   virtual ~Net_StreamAsynchTCPSocketBase_T ();
 
@@ -60,9 +61,8 @@ class Net_StreamAsynchTCPSocketBase_T
  protected:
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
 
-  //ConfigurationType* configuration_;
   StreamType      stream_;
-//  // *TODO*: (try to) handle short writes gracefully...
+  // *TODO*: (try to) handle short writes gracefully...
 //  ACE_Message_Block* buffer_;
 
  private:

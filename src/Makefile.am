@@ -65,7 +65,8 @@ include_HEADERS = \
   net_transportlayer_tcp.h \
   net_transportlayer_udp.h \
   net_udpconnection.h \
-  net_udpsockethandler.h
+  net_udpsockethandler.h \
+  net_udpsockethandler.inl
 
 lib_LTLIBRARIES = libACENetwork.la
 
@@ -157,6 +158,7 @@ libACENetwork_la_SOURCES = \
   net_udpconnection.h \
   net_udpsockethandler.cpp \
   net_udpsockethandler.h \
+  net_udpsockethandler.inl \
   stdafx.cpp \
   stdafx.h
 

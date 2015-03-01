@@ -38,6 +38,27 @@ Net_NetlinkConnection::Net_NetlinkConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection::Net_NetlinkConnection"));
 
+}
+
+Net_NetlinkConnection::~Net_NetlinkConnection ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection::~Net_NetlinkConnection"));
+
+}
+
+bool
+Net_NetlinkConnection::initialize (const Net_SocketConfiguration_t& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection::initialize"));
+
+  if (!Net_ConnectionBase_T::initialize (configuration_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
+
+    return false;
+  } // end IF
+
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
@@ -45,16 +66,16 @@ Net_NetlinkConnection::Net_NetlinkConnection ()
   ACE_Netlink_Addr local_SAP, remote_SAP;
   try
   {
-    Net_INetlinkTransportLayer_t::info (handle,
-                                        local_SAP,
-                                        remote_SAP);
+    info (handle,
+          local_SAP,
+          remote_SAP);
   }
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::info(), returning")));
+                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting")));
 
-    return;
+    return false;
   }
   // *TODO*: retrieve netlink socket information
 //  if (local_SAP.addr_to_string (buffer,
@@ -79,32 +100,37 @@ Net_NetlinkConnection::Net_NetlinkConnection ()
                                    : -1)));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, handle,
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
 #endif
+
+  return true;
 }
 
-Net_NetlinkConnection::~Net_NetlinkConnection ()
+void
+Net_NetlinkConnection::finalize ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection::~Net_NetlinkConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection::finalize"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   ACE_Netlink_Addr address1, address2;
   try
   {
-    Net_INetlinkTransportLayer_t::info (handle,
-                                        address1,
-                                        address2);
+    info (handle,
+          address1,
+          address2);
   }
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
+                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
   }
+
+  Net_ConnectionBase_T::finalize ();
 
   // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

@@ -42,17 +42,16 @@ class Net_Export Net_UDPConnection
   //Net_UDPConnection (Net_IConnectionManager_t*,
   Net_UDPConnection ();
 
-  // implement (part of) Net_IInetTransportLayer
+  // override / implement (part of) Net_IInetTransportLayer
+  virtual bool initialize (const Net_SocketConfiguration_t&); // socket configuration
+  virtual void finalize ();
   virtual void info (ACE_HANDLE&,           // return value: handle
                      ACE_INET_Addr&,        // return value: local SAP
                      ACE_INET_Addr&) const; // return value: remote SAP
   virtual unsigned int id () const;
   virtual void dump_state () const;
 
-  // override some transport layer-based members
-  virtual void initialize (const ACE_INET_Addr&); // target address
-
-  // override some task-based members
+  // override some ACE_Svc_Handler members
   //virtual int svc (void);
   virtual int open (void* = NULL); // args
   virtual int close (u_long = 0); // args
@@ -65,6 +64,12 @@ class Net_Export Net_UDPConnection
   // - handle_xxx() returns -1
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+
+  // resolve ambiguity between ACE_Event_Handler and ACE_Svc_Handler
+  using ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH>::get_handle;
+//  using ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>::get_handle;
+  using ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH>::set_handle;
+//  using ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>::set_handle;
 
  private:
   typedef Net_SocketConnectionBase_T<Net_UDPHandler_t,
@@ -82,77 +87,54 @@ class Net_Export Net_UDPConnection
 };
 
 ///////////////////////////////////////////
-//
-//class Net_Export Net_IPMulticastConnection
-// : public Net_IPMulticastHandler,
-//   public ACE_Task<ACE_MT_SYNCH>
-//{
-// public:
-//  Net_IPMulticastConnection (const ACE_INET_Addr&); // peer address
-//
-//  //  // implement (part of) Net_IConnection
-//  //  virtual void ping ();
-//
+
+class Net_Export Net_AsynchUDPConnection
+ : public Net_AsynchSocketConnectionBase_T<Net_AsynchUDPHandler_t,
+                                           Net_TransportLayer_UDP,
+                                           Net_Configuration_t,
+                                           Stream_SessionData_t,
+                                           Stream_Statistic_t>
+{
+ public:
+  //Net_AsynchUDPConnection (Net_IConnectionManager_t*,
+  Net_AsynchUDPConnection ();
+
+  // override / implement (part of) Net_IInetTransportLayer
+  virtual bool initialize (const Net_SocketConfiguration_t&); // socket configuration
+  virtual void finalize ();
+  virtual void info (ACE_HANDLE&,           // return value: handle
+                     ACE_INET_Addr&,        // return value: local SAP
+                     ACE_INET_Addr&) const; // return value: remote SAP
+  virtual unsigned int id () const;
+  virtual void dump_state () const;
+
 //  // override some task-based members
-//  virtual int svc (void);
+//  //virtual int svc (void);
 //  virtual int open (void* = NULL); // args
 //  virtual int close (u_long = 0); // args
-//
-//  //  // *NOTE*: enqueue any received data onto our stream for further processing
-//  //   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
-//  // *NOTE*: this is called when:
-//  // - handle_xxx() returns -1
-//  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-//                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
-//
-// private:
-//  typedef Net_IPMulticastHandler inherited;
-//  typedef ACE_Task<ACE_MT_SYNCH> inherited2;
-//
-//  // stop worker, if any
-//  void shutdown ();
-//
-//  virtual ~Net_IPMulticastConnection ();
-//  ACE_UNIMPLEMENTED_FUNC (Net_IPMulticastConnection ());
-//  ACE_UNIMPLEMENTED_FUNC (Net_IPMulticastConnection (const Net_IPMulticastConnection&));
-//  ACE_UNIMPLEMENTED_FUNC (Net_IPMulticastConnection& operator= (const Net_IPMulticastConnection&));
-//};
-//
-///////////////////////////////////////////
-//
-//class Net_Export Net_IPBroadcastConnection
-// : public Net_IPBroadcastHandler,
-//   public ACE_Task<ACE_MT_SYNCH>
-//{
-// public:
-//  Net_IPBroadcastConnection (const ACE_INET_Addr&); // peer address
-//
-//  //  // implement (part of) Net_IConnection
-//  //  virtual void ping ();
-//
-//  // override some task-based members
-//  virtual int svc (void);
-//  virtual int open (void* = NULL); // args
-//  virtual int close (u_long = 0); // args
-//
-//  //  // *NOTE*: enqueue any received data onto our stream for further processing
-//  //   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
-//  // *NOTE*: this is called when:
-//  // - handle_xxx() returns -1
-//  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-//                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
-//
-//  private:
-//  typedef Net_IPBroadcastHandler inherited;
-//  typedef ACE_Task<ACE_MT_SYNCH> inherited2;
-//
-//  // stop worker, if any
-//  void shutdown ();
-//
-//  virtual ~Net_IPBroadcastConnection ();
-//  ACE_UNIMPLEMENTED_FUNC (Net_IPBroadcastConnection ());
-//  ACE_UNIMPLEMENTED_FUNC (Net_IPBroadcastConnection (const Net_IPBroadcastConnection&));
-//  ACE_UNIMPLEMENTED_FUNC (Net_IPBroadcastConnection& operator= (const Net_IPBroadcastConnection&));
-//};
+
+//  // *NOTE*: enqueue any received data onto our stream for further processing
+//   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
+//  // *NOTE*: send any enqueued data back to the client...
+//  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
+  // *NOTE*: this is called when:
+  // - handle_xxx() returns -1
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+
+ private:
+  typedef Net_AsynchSocketConnectionBase_T<Net_AsynchUDPHandler_t,
+                                           Net_TransportLayer_UDP,
+                                           Net_Configuration_t,
+                                           Stream_SessionData_t,
+                                           Stream_Statistic_t> inherited;
+
+  //// stop worker, if any
+  //void shutdown ();
+
+  virtual ~Net_AsynchUDPConnection ();
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection (const Net_AsynchUDPConnection&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection& operator= (const Net_AsynchUDPConnection&));
+};
 
 #endif

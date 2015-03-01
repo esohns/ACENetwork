@@ -28,13 +28,17 @@
 #include "net_itransportlayer.h"
 
 class Net_Export Net_InetTransportLayer_Base
- : virtual public Net_IInetTransportLayer_t
+// : virtual public Net_IInetTransportLayer_t
+ : public Net_IInetTransportLayer_t
 {
  public:
   virtual ~Net_InetTransportLayer_Base ();
 
-  virtual void initialize (Net_ClientServerRole_t, // role
-                           const ACE_INET_Addr&);  // target address
+  virtual bool initialize (Net_ClientServerRole_t,            // role
+                           const Net_SocketConfiguration_t&); // configuration
+
+  // implement (part of) Net_ITransportLayer_T
+  virtual void finalize ();
 
  protected:
   Net_InetTransportLayer_Base (Net_ClientServerRole_t,
@@ -49,17 +53,21 @@ class Net_Export Net_InetTransportLayer_Base
   ACE_UNIMPLEMENTED_FUNC (Net_InetTransportLayer_Base& operator= (const Net_InetTransportLayer_Base&));
 
   // implement (part of) Net_ITransportLayer_T
-  virtual void initialize (const ACE_INET_Addr&); // target address
+  virtual bool initialize (const Net_SocketConfiguration_t&); // configuration
 };
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 class Net_Export Net_NetlinkTransportLayer_Base
  : virtual public Net_INetlinkTransportLayer_t
 {
  public:
   virtual ~Net_NetlinkTransportLayer_Base ();
 
+  virtual bool initialize (Net_ClientServerRole_t,            // role
+                           const Net_SocketConfiguration_t&); // configuration
+
   // implement (part of) Net_ITransportLayer_T
-  virtual void initialize (const ACE_INET_Addr&); // target address
+  virtual void finalize ();
 
  protected:
   Net_NetlinkTransportLayer_Base ();
@@ -70,6 +78,10 @@ class Net_Export Net_NetlinkTransportLayer_Base
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base (const Net_NetlinkTransportLayer_Base&));
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base& operator= (const Net_NetlinkTransportLayer_Base&));
+
+  // implement (part of) Net_ITransportLayer_T
+  virtual bool initialize (const Net_SocketConfiguration_t&); // configuration
 };
+#endif
 
 #endif

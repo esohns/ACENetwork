@@ -37,19 +37,19 @@ template <typename ConfigurationType,
           typename TransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
-          typename SocketType,
+//          typename SocketType,
           typename SocketHandlerType>
 class Net_StreamUDPSocketBase_T
- : public SocketType
- , public SocketHandlerType
+ : /*public SocketType
+ ,*/ public SocketHandlerType
  , public Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                TransportLayerType,
                                StatisticsContainerType>
 {
  public:
-  int open (const ACE_INET_Addr&); // peer address
-  //virtual int close (u_long = 0); // args
+  virtual int open (void* = NULL); // args
+  //virtual int close (u_long = 0); // flags
 
   // *NOTE*: enqueue any received data onto our stream for further processing
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
@@ -82,7 +82,7 @@ class Net_StreamUDPSocketBase_T
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
 
  private:
-  typedef SocketType inherited;
+//  typedef SocketType inherited;
   typedef SocketHandlerType inherited2;
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,

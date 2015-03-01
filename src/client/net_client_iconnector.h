@@ -21,24 +21,30 @@
 #ifndef NET_CLIENT_ICONNECTOR_H
 #define NET_CLIENT_ICONNECTOR_H
 
-#include "ace/INET_Addr.h"
-
-class Net_Client_IConnector
+template <typename AddressType,
+          typename ConfigurationType>
+class Net_Client_IConnector_T
 {
  public:
-  virtual ~Net_Client_IConnector () {}
+  virtual ~Net_Client_IConnector_T () {}
+
+  virtual const ConfigurationType* getConfiguration () const = 0;
 
   virtual void abort () = 0; // shutdown
-  virtual bool connect (const ACE_INET_Addr&) = 0;
+  virtual bool connect (const AddressType&) = 0;
 };
 
-//class Net_Client_IAsynchConnector
+//template <typename AddressType,
+//          typename ConfigurationType>
+//class Net_Client_IAsynchConnector_T
 //{
 // public:
-//  virtual ~Net_Client_IAsynchConnector () {}
+//  virtual ~Net_Client_IAsynchConnector_T () {}
+//
+//  virtual const ConfigurationType* getConfiguration () const = 0;
 //
 //  virtual void abort () = 0; // shutdown
-//  virtual void connect (const ACE_INET_Addr&) = 0;
+//  virtual void connect (const AddressType&) = 0;
 //};
 
 #endif

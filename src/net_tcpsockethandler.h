@@ -21,14 +21,15 @@
 #ifndef Net_TCPSOCKETHANDLER_H
 #define Net_TCPSOCKETHANDLER_H
 
-#include "ace/Svc_Handler.h"
-#include "ace/SOCK_Stream.h"
-#include "ace/Synch.h"
 #include "ace/Event_Handler.h"
+#include "ace/Global_Macros.h"
+#include "ace/SOCK_Stream.h"
+#include "ace/Svc_Handler.h"
+#include "ace/Synch_Traits.h"
 #include "ace/Reactor_Notification_Strategy.h"
 
-#include "net_configuration.h"
-#include "net_sockethandler_base.h"
+//#include "net_configuration.h"
+//#include "net_sockethandler_base.h"
 
 class Net_TCPSocketHandler
  //: public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t,

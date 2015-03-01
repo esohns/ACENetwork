@@ -48,11 +48,10 @@ class Net_Module_ProtocolHandler
   virtual ~Net_Module_ProtocolHandler ();
 
   // initialization
-  bool init (Stream_IAllocator*,  // message allocator
-             unsigned int,     // session ID
-             unsigned int = 0, // peer "ping" interval (ms) [0 --> OFF]
-             bool = true,      // automatically reply to "ping" messages (auto-"pong")
-             bool = false);    // print dot ('.') for every received "pong" to stdlog
+  bool initialize (Stream_IAllocator*,  // message allocator
+                   unsigned int = 0, // peer "ping" interval (ms) [0 --> OFF]
+                   bool = true,      // automatically reply to "ping" messages (auto-"pong")
+                   bool = false);    // print dot ('.') for every received "pong" to stdlog
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Net_Message*&, // data message handle

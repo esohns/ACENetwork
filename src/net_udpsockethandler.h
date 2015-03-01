@@ -21,20 +21,27 @@
 #ifndef Net_UDPSOCKETHANDLER_H
 #define Net_UDPSOCKETHANDLER_H
 
-//#include "rpg_common_referencecounter_base.h"
-//#include "rpg_common_irefcount.h"
+#include "ace/Event_Handler.h"
+#include "ace/Global_Macros.h"
+#include "ace/SOCK_Dgram.h"
+//#include "ace/SOCK_Stream.h"
+#include "ace/Svc_Handler.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Reactor_Notification_Strategy.h"
+
+//#include "common_referencecounter_base.h"
+//#include "common_irefcount.h"
 
 //#include "net_iconnection.h"
 //#include "net_iconnectionmanager.h"
 
-#include "ace/Event_Handler.h"
-//#include "ace/SOCK_Stream.h"
-#include "ace/Synch.h"
-#include "ace/Reactor_Notification_Strategy.h"
-
-class Net_UDPSocketHandler
- //: public RPG_Common_IRefCount
- : public ACE_Event_Handler
+template <typename SocketType>
+class Net_UDPSocketHandler_T
+ : public SocketType
+ //: public Common_IRefCount
+// : public ACE_Event_Handler
+ , public ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH>
+// : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
 {
  public:
   //// override some event handler methods
@@ -58,11 +65,13 @@ class Net_UDPSocketHandler
 //  virtual unsigned int id () const;
 
  protected:
+  typedef ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH> SVC_HANDLER_T;
+
 //  typedef Net_IConnectionManager<ConfigurationType,
 //                                 StatisticsContainerType> MANAGER_T;
 //  Net_UDPSocketHandler (MANAGER_T*);
-  Net_UDPSocketHandler ();
-  virtual ~Net_UDPSocketHandler ();
+  Net_UDPSocketHandler_T ();
+  virtual ~Net_UDPSocketHandler_T ();
 
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 //  MANAGER_T*                        manager_;
@@ -70,14 +79,16 @@ class Net_UDPSocketHandler
 //  bool                              isRegistered_;
 
  private:
-  //typedef RPG_Common_IRefCount inherited;
-  typedef ACE_Event_Handler inherited;
+  typedef SocketType inherited;
+  //typedef Common_IRefCount inherited;
+//  typedef ACE_Event_Handler inherited;
+  typedef ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH> inherited2;
+//  typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH> inherited2;
 
-//  ACE_UNIMPLEMENTED_FUNC(Net_UDPSocketHandlerBase());
-  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler (const Net_UDPSocketHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler& operator= (const Net_UDPSocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&));
 
-  //// implement RPG_Common_IRefCount
+  //// implement Common_IRefCount
   //virtual void increase ();
   //virtual void decrease ();
   //virtual unsigned int count ();
@@ -86,7 +97,7 @@ class Net_UDPSocketHandler
   //virtual void wait_zero ();
 };
 
-//// include template implementation
-//#include "net_tcpsockethandler_base.inl"
+// include template implementation
+#include "net_udpsockethandler.inl"
 
 #endif

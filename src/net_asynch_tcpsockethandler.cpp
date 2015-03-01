@@ -21,13 +21,11 @@
 
 #include "net_asynch_tcpsockethandler.h"
 
+#include "ace/OS.h"
 #include "ace/OS_Memory.h"
 #include "ace/Proactor.h"
-#include "ace/Message_Block.h"
-#include "ace/INET_Addr.h"
-#include "ace/Time_Value.h"
 
-#include "common_defines.h"
+//#include "common_defines.h"
 
 #include "stream_defines.h"
 
@@ -39,13 +37,13 @@ Net_AsynchTCPSocketHandler::Net_AsynchTCPSocketHandler ()
  //: inherited ()
  //, inherited2(0,    // initial count
  //             true) // delete on zero ?
- : inherited2 ()
- , inherited3 (NULL,                          // event handler handle
+ : /*inherited2 ()
+ ,*/ inherited3 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
-// , myInputStream()
-// , myOutputStream()
-// , myLocalSAP()
-// , myRemoteSAP()
+// , inputStream_ ()
+// , outputStream_ ()
+// , localSAP_ ()
+// , remoteSAP_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler::Net_AsynchTCPSocketHandler"));
 
@@ -64,24 +62,22 @@ Net_AsynchTCPSocketHandler::open (ACE_HANDLE handle_in,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler::open"));
 
   // step1: tweak socket
-  // *TODO*: there is a design glitch here: this class SHOULD NOT make
-  // assumptions about ConfigType !
-  //if (myUserData.socketBufferSize)
-  //  if (!Net_Common_Tools::setSocketBuffer (handle_in,
-  //                                          SO_RCVBUF,
-  //                                          userData_.socketBufferSize))
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
-  //                userData_.socketBufferSize,
-  //                handle_in));
+  if (inherited::configuration_.socketConfiguration.bufferSize)
+    if (!Net_Common_Tools::setSocketBuffer (handle_in,
+                                            SO_RCVBUF,
+                                            inherited::configuration_.socketConfiguration.bufferSize))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
+                  inherited::configuration_.socketConfiguration.bufferSize,
+                  handle_in));
 
-  //    // clean up
-  //    handle_close (handle_in,
-  //                  ACE_Event_Handler::ALL_EVENTS_MASK);
+      // clean up
+      handle_close (handle_in,
+                    ACE_Event_Handler::ALL_EVENTS_MASK);
 
-  //    return;
-  //  } // end IF
+      return;
+    } // end IF
   if (!Net_Common_Tools::setNoDelay (handle_in,
                                      NET_DEFAULT_TCP_NODELAY))
   {
@@ -372,60 +368,10 @@ Net_AsynchTCPSocketHandler::initiate_read_stream ()
 }
 
 //void
-//Net_AsynchTCPSocketHandler::info (ACE_HANDLE& handle_out,
-//                                  ACE_INET_Addr& localSAP_out,
-//                                  ACE_INET_Addr& remoteSAP_out) const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler::info"));
-
-//  handle_out = inherited::handle ();
-//  localSAP_out = localSAP_;
-//  remoteSAP_out = remoteSAP_;
-//}
-
-//void
 //Net_AsynchTCPSocketHandler::abort ()
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler::abort"));
 
 //  handle_close (inherited::handle (),
 //                ACE_Event_Handler::ALL_EVENTS_MASK);
-//}
-
-//unsigned int
-//Net_AsynchTCPSocketHandler::id () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler::id"));
-
-//  // *PORTABILITY*: this isn't entirely portable...
-//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-//  return static_cast<unsigned int>(handle ());
-//#else
-//  return reinterpret_cast<unsigned int>(handle ());
-//#endif
-//}
-
-//void
-//Net_AsynchTCPSocketHandler::dump_state () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler::dump_state"));
-
-//  ACE_TCHAR buffer[BUFSIZ];
-//  ACE_OS::memset (buffer, 0, sizeof (buffer));
-//  std::string localAddress;
-//  ACE_INET_Addr address;
-//  if (localSAP_.addr_to_string (buffer, sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-//  localAddress = buffer;
-//  ACE_OS::memset (buffer, 0, sizeof (buffer));
-//  if (remoteSAP_.addr_to_string (buffer, sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("connection [%u]: (\"%s\") <--> (\"%s\")\n"),
-//              id (),
-//              localAddress.c_str (),
-//              buffer));
 //}

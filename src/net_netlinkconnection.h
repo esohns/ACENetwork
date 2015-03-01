@@ -39,6 +39,7 @@ template <typename SVC_HANDLER,
           typename PEER_CONNECTOR> class ACE_Connector;
 template <class HANDLER> class ACE_Asynch_Connector;
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 class Net_Export Net_NetlinkConnection
  : public Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
                                      Net_TransportLayer_Netlink,
@@ -54,7 +55,9 @@ class Net_Export Net_NetlinkConnection
    Net_NetlinkConnection ();
    //Net_NetlinkConnection (Net_IConnectionManager_t*);
 
-   // implement (part of) Net_INetlinkTransportLayer
+   // override / implement (part of) Net_INetlinkTransportLayer
+   virtual bool initialize (const Net_SocketConfiguration_t&); // socket configuration
+   virtual void finalize ();
    virtual void info (ACE_HANDLE&,              // return value: handle
                       ACE_Netlink_Addr&,        // return value: local SAP
                       ACE_Netlink_Addr&) const; // return value: remote SAP
@@ -89,6 +92,7 @@ class Net_Export Net_NetlinkConnection
   //ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection (const Net_NetlinkConnection&));
   //ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection& operator= (const Net_NetlinkConnection&));
 };
+#endif
 
 /////////////////////////////////////////
 

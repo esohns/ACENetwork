@@ -38,6 +38,27 @@ Net_TCPConnection::Net_TCPConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
 
+}
+
+Net_TCPConnection::~Net_TCPConnection ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::~Net_TCPConnection"));
+
+}
+
+bool
+Net_TCPConnection::initialize (const Net_SocketConfiguration_t& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::initialize"));
+
+  if (!Net_ConnectionBase_T::initialize (configuration_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
+
+    return false;
+  } // end IF
+
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
@@ -45,27 +66,28 @@ Net_TCPConnection::Net_TCPConnection ()
   ACE_INET_Addr local_SAP, remote_SAP;
   try
   {
-    Net_IInetTransportLayer_t::info (handle,
-                                     local_SAP,
-                                     remote_SAP);
+    info (handle,
+          local_SAP,
+          remote_SAP);
   }
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::info(), returning")));
+                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting")));
 
-    return;
+    return false;
   }
-  if (local_SAP.addr_to_string (buffer,
-                                sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  // *TODO*: retrieve netlink socket information
+//  if (local_SAP.addr_to_string (buffer,
+//                                sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
   local_address = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-  if (remote_SAP.addr_to_string (buffer,
-                                 sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+//  if (remote_SAP.addr_to_string (buffer,
+//                                 sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
 
   // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -78,32 +100,37 @@ Net_TCPConnection::Net_TCPConnection ()
                                    : -1)));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, handle,
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
 #endif
+
+  return true;
 }
 
-Net_TCPConnection::~Net_TCPConnection ()
+void
+Net_TCPConnection::finalize ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::~Net_TCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::finalize"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   ACE_INET_Addr address1, address2;
   try
   {
-    Net_IInetTransportLayer_t::info (handle,
-                                     address1,
-                                     address2);
+    info (handle,
+          address1,
+          address2);
   }
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
+                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
   }
+
+  Net_ConnectionBase_T::finalize ();
 
   // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -114,7 +141,7 @@ Net_TCPConnection::~Net_TCPConnection ()
                                    : -1)));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered connection [%@/%d] (total: %u)\n"),
+              ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
               this, handle,
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
@@ -292,7 +319,7 @@ Net_TCPConnection::dump_state () const
 //
 //  return 0;
 //}
-//
+
 //int
 //Net_TCPConnection::open (void* arg_in)
 //{
@@ -672,6 +699,108 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 //  return 0;
 //}
 
+bool
+Net_AsynchTCPConnection::initialize (const Net_SocketConfiguration_t& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::initialize"));
+
+  if (!Net_ConnectionBase_T::initialize (configuration_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
+
+    return false;
+  } // end IF
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  ACE_INET_Addr local_SAP, remote_SAP;
+  try
+  {
+    info (handle,
+          local_SAP,
+          remote_SAP);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting")));
+
+    return false;
+  }
+  // *TODO*: retrieve netlink socket information
+//  if (local_SAP.addr_to_string (buffer,
+//                                sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+  local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+//  if (remote_SAP.addr_to_string (buffer,
+//                                 sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+
+  // *PORTABILITY*: this isn't entirely portable...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              this, reinterpret_cast<unsigned int> (handle),
+              ACE_TEXT (localAddress.c_str ()),
+              ACE_TEXT (buffer),
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              this, handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (buffer),
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#endif
+
+  return true;
+}
+
+void
+Net_AsynchTCPConnection::finalize ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::finalize"));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr address1, address2;
+  try
+  {
+    info (handle,
+          address1,
+          address2);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
+  }
+
+  Net_ConnectionBase_T::finalize ();
+
+  // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
+              this, reinterpret_cast<unsigned int> (handle),
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
+              this, handle,
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#endif
+}
+
 void
 Net_AsynchTCPConnection::info (ACE_HANDLE& handle_out,
                                ACE_INET_Addr& localSAP_out,
@@ -732,7 +861,7 @@ Net_AsynchTCPConnection::dump_state () const
     peer_address = buffer;
 
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
+              ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (peer_address.c_str ())));

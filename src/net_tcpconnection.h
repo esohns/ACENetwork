@@ -52,7 +52,9 @@ class Net_Export Net_TCPConnection
   Net_TCPConnection ();
   //Net_TCPConnection (Net_IConnectionManager_t*);
 
-  // implement (part of) Net_IInetTransportLayer
+  // override / implement (part of) Net_IInetTransportLayer
+  virtual bool initialize (const Net_SocketConfiguration_t&); // socket configuration
+  virtual void finalize ();
   virtual void info (ACE_HANDLE&,           // return value: handle
                      ACE_INET_Addr&,        // return value: local SAP
                      ACE_INET_Addr&) const; // return value: remote SAP
@@ -91,11 +93,11 @@ class Net_Export Net_TCPConnection
 /////////////////////////////////////////
 
 class Net_Export Net_AsynchTCPConnection
- : public Net_SocketConnectionBase_T<Net_AsynchTCPHandler_t,
-                                     Net_TransportLayer_TCP,
-                                     Net_Configuration_t,
-                                     Stream_SessionData_t,
-                                     Stream_Statistic_t>
+ : public Net_AsynchSocketConnectionBase_T<Net_AsynchTCPHandler_t,
+                                           Net_TransportLayer_TCP,
+                                           Net_Configuration_t,
+                                           Stream_SessionData_t,
+                                           Stream_Statistic_t>
 {
  friend class ACE_Asynch_Connector<Net_AsynchTCPConnection>;
 
@@ -105,7 +107,9 @@ class Net_Export Net_AsynchTCPConnection
    Net_AsynchTCPConnection ();
   //Net_AsynchTCPConnection (Net_IConnectionManager_t*);
 
-   // implement (part of) Net_IInetTransportLayer
+   // override / implement (part of) Net_IInetTransportLayer
+   virtual bool initialize (const Net_SocketConfiguration_t&); // socket configuration
+   virtual void finalize ();
    virtual void info (ACE_HANDLE&,           // return value: handle
                       ACE_INET_Addr&,        // return value: local SAP
                       ACE_INET_Addr&) const; // return value: remote SAP
@@ -124,11 +128,11 @@ class Net_Export Net_AsynchTCPConnection
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef Net_SocketConnectionBase_T<Net_AsynchTCPHandler_t,
-                                     Net_TransportLayer_TCP,
-                                     Net_Configuration_t,
-                                     Stream_SessionData_t,
-                                     Stream_Statistic_t> inherited;
+  typedef Net_AsynchSocketConnectionBase_T<Net_AsynchTCPHandler_t,
+                                           Net_TransportLayer_TCP,
+                                           Net_Configuration_t,
+                                           Stream_SessionData_t,
+                                           Stream_Statistic_t> inherited;
 
   //// override some task-based members
   //virtual int svc (void);

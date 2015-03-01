@@ -32,15 +32,8 @@ template <typename SocketHandlerType,
 class Net_SocketConnectionBase_T
  : public SocketHandlerType
  , public TransportLayerType
- //, public Net_ConnectionBase_T<ConfigurationType,
- //                              SessionDataType,
- //                              StatisticsContainerType>
 {
  public:
-  //typedef Net_IConnectionManager_T<ConfigurationType,
-  //                                 SessionDataType,
-  //                                 StatisticsContainerType> Net_IConnectionManager_t;
-
   virtual ~Net_SocketConnectionBase_T ();
 
   // implement (part of) Net_IInetTransportLayer
@@ -51,9 +44,9 @@ class Net_SocketConnectionBase_T
   virtual bool collect (StatisticsContainerType&) const; // return value: statistic data
   virtual void report () const;
 
-  //// override some task-based members
-  //virtual int open (void* = NULL); // args
-  //virtual int close (u_long = 0); // args
+  // override some task-based members
+  virtual int open (void* = NULL); // args
+  virtual int close (u_long = 0); // args
 
 //  // *NOTE*: enqueue any received data onto our stream for further processing
 //   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
@@ -68,9 +61,6 @@ class Net_SocketConnectionBase_T
  private:
   typedef SocketHandlerType inherited;
   typedef TransportLayerType inherited2;
-  //typedef Net_ConnectionBase_T<ConfigurationType,
-  //                             SessionDataType,
-  //                             StatisticsContainerType> inherited3;
 
   //// override some task-based members
   //virtual int svc (void);
@@ -80,6 +70,57 @@ class Net_SocketConnectionBase_T
 
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T& operator= (const Net_SocketConnectionBase_T&));
+};
+
+template <typename SocketHandlerType,
+          typename TransportLayerType,
+          typename ConfigurationType,
+          typename SessionDataType,
+          typename StatisticsContainerType>
+class Net_AsynchSocketConnectionBase_T
+ : public SocketHandlerType
+ , public TransportLayerType
+{
+ public:
+  virtual ~Net_AsynchSocketConnectionBase_T ();
+
+  // implement (part of) Net_IInetTransportLayer
+  virtual void ping (); // ping the peer !
+
+  // implement Common_IStatistic
+  // *NOTE*: delegate these to the stream
+  virtual bool collect (StatisticsContainerType&) const; // return value: statistic data
+  virtual void report () const;
+
+  // override some ACE_Service_Handler members
+  virtual void open (ACE_HANDLE,          // handle
+                     ACE_Message_Block&); // (initial) data (if any)
+  virtual void act (const void*); // (user) data handle
+
+//  // *NOTE*: enqueue any received data onto our stream for further processing
+//   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
+  // *NOTE*: this is called when:
+  // - handle_xxx() returns -1
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+
+ protected:
+  Net_AsynchSocketConnectionBase_T ();
+
+  const ConfigurationType* configuration_;
+
+ private:
+  typedef SocketHandlerType inherited;
+  typedef TransportLayerType inherited2;
+
+  //// override some task-based members
+  //virtual int svc (void);
+
+  //// stop worker, if any
+  //void shutdown ();
+
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T (const Net_AsynchSocketConnectionBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T& operator= (const Net_AsynchSocketConnectionBase_T&));
 };
 
 #include "net_socketconnection_base.inl"

@@ -91,7 +91,6 @@ Net_ConnectionBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
 
-  finalize ();
 }
 
 template <typename ConfigurationType,
@@ -113,7 +112,7 @@ Net_ConnectionBase_T<ConfigurationType,
   if (!manager_)
   {
 //    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("no connection manager, continuing\n")));
+//                ACE_TEXT ("no connection manager, returning\n")));
 
     return true;
   } // end IF
@@ -132,8 +131,13 @@ Net_ConnectionBase_T<ConfigurationType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnectionManager::registerConnection(), aborting\n")));
     }
+    if (!isRegistered_)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_IConnectionManager::registerConnection(), aborting\n")));
 
-    return isRegistered_;
+      return false;
+    } // end IF
   } // end IF
 
   return true;
@@ -156,6 +160,7 @@ Net_ConnectionBase_T<ConfigurationType,
   {
     //ACE_DEBUG ((LM_DEBUG,
     //            ACE_TEXT ("no connection manager, returning\n")));
+
     return;
   } // end IF
 
@@ -173,7 +178,6 @@ Net_ConnectionBase_T<ConfigurationType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnectionManager::deregisterConnection(), continuing\n")));
     }
-
     isRegistered_ = false;
   } // end IF
 }

@@ -35,10 +35,11 @@ class ACE_Allocator;
 struct Net_SocketConfiguration_t
 {
   int                  bufferSize;
-//  ACE_INET_Addr        peerAddress;
-//  ACE_Netlink_Addr     peerNetlinkAddress;
-//  unsigned int         portNumber;
-//  Net_TransportLayer_t type;
+  // *TODO*: remove address information (pass as AddressType in open() instead)
+  ACE_INET_Addr        peerAddress;
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+  ACE_Netlink_Addr     peerNetlinkAddress;
+#endif
   bool                 useLoopbackDevice;
   // *TODO*: add network interface specifier
 };

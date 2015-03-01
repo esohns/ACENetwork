@@ -60,12 +60,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::~Net_StreamAsynchTCPSocketBase_T"));
 
-  //// sanity check
-  //if (!configuration_)
-  //  return; // done
-
   // step1: remove enqueued module (if any)
-
   if (inherited2::configuration_.streamConfiguration.module)
   {
     if (stream_.find (inherited2::configuration_.streamConfiguration.module->name ()))
@@ -98,7 +93,6 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::open"));
 
   // sanity check(s)
-  //ACE_ASSERT (configuration_);
   ACE_ASSERT (state_);
 
   // step0: init this
@@ -387,7 +381,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
                                 TransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
-                                SocketHandlerType >::act (const void* act_in)
+                                SocketHandlerType>::act (const void* act_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::act"));
 

@@ -53,7 +53,8 @@ class Net_ITransportLayer_T
 typedef Net_ITransportLayer_T<ACE_INET_Addr,
                               Net_SocketConfiguration_t> Net_IInetTransportLayer_t;
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 typedef Net_ITransportLayer_T<ACE_Netlink_Addr,
                               Net_SocketConfiguration_t> Net_INetlinkTransportLayer_t;
-
+#endif
 #endif

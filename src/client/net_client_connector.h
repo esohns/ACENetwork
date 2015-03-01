@@ -23,19 +23,24 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/Connector.h"
+#include "ace/INET_Addr.h"
 #include "ace/SOCK_Connector.h"
+
+#include "net_udpconnection.h"
 
 #include "net_client_iconnector.h"
 #include "net_connection_manager_common.h"
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename ConfigurationType,
           typename SessionDataType,
           typename TransportLayerType,
           typename ConnectionType>
-class Net_Client_Connector
+class Net_Client_Connector_T
  : public ACE_Connector<ConnectionType,
                         ACE_SOCK_CONNECTOR>
- , public Net_Client_IConnector
+ , public Net_Client_IConnector_T<AddressType,
+                                  ConfigurationType>
 {
  public:
   typedef Net_IConnectionManager_T<ConfigurationType,
@@ -43,24 +48,72 @@ class Net_Client_Connector
                                    TransportLayerType,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
-  Net_Client_Connector (ICONNECTION_MANAGER_T*);
-  virtual ~Net_Client_Connector ();
+  Net_Client_Connector_T (ICONNECTION_MANAGER_T*,
+                          const ConfigurationType*);
+  virtual ~Net_Client_Connector_T ();
 
-  // override default creation strategy
+  // override default instantiation strategy
   virtual int make_svc_handler (ConnectionType*&);
 
-  // implement Net_Client_IConnector
+  // implement Net_Client_IConnector_T
   virtual void abort ();
-  virtual bool connect (const ACE_INET_Addr&);
+  virtual bool connect (const AddressType&);
+
+  virtual const ConfigurationType* getConfiguration () const;
 
  private:
   typedef ACE_Connector<ConnectionType,
                         ACE_SOCK_CONNECTOR> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector ());
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector (const Net_Client_Connector&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector& operator= (const Net_Client_Connector&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&));
 
+  const ConfigurationType* configuration_;
+  ICONNECTION_MANAGER_T* interfaceHandle_;
+};
+
+// partial specialization (for UDP)
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename TransportLayerType>
+class Net_Client_Connector_T<ACE_INET_Addr,
+                             ConfigurationType,
+                             SessionDataType,
+                             TransportLayerType,
+                             Net_UDPConnection>
+ : public Net_Client_IConnector_T<ACE_INET_Addr,
+                                  ConfigurationType>
+{
+ public:
+  typedef Net_IConnectionManager_T<ConfigurationType,
+                                   SessionDataType,
+                                   TransportLayerType,
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+
+  Net_Client_Connector_T (ICONNECTION_MANAGER_T*,
+                          const ConfigurationType*);
+  virtual ~Net_Client_Connector_T ();
+
+  // override default instantiation strategy
+  virtual int make_svc_handler (Net_UDPConnection*&);
+
+  // implement Net_Client_IConnector_T
+  // *TODO*: why is it necessary to provide an implementation when there is a
+  //         more generic one available ? (gcc complains about abort() and
+  //         getConfiguration())
+  virtual void abort ();
+  // specialize (part of) Net_Client_IConnector_T
+  virtual bool connect (const ACE_INET_Addr&);
+
+  virtual const ConfigurationType* getConfiguration () const;
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&));
+
+  const ConfigurationType* configuration_;
   ICONNECTION_MANAGER_T* interfaceHandle_;
 };
 

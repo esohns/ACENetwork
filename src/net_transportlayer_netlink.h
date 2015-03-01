@@ -25,6 +25,7 @@
 #include "net_exports.h"
 #include "net_transportlayer_base.h"
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 class Net_Export Net_TransportLayer_Netlink
  : public Net_NetlinkTransportLayer_Base
 {
@@ -38,5 +39,6 @@ class Net_Export Net_TransportLayer_Netlink
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Netlink (const Net_TransportLayer_Netlink&));
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Netlink& operator= (const Net_TransportLayer_Netlink&));
 };
+#endif
 
 #endif

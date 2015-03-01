@@ -38,27 +38,38 @@ Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base ()
 
 }
 
-void
+bool
 Net_InetTransportLayer_Base::initialize (Net_ClientServerRole_t role_in,
-                                         const ACE_INET_Addr& address_in)
+                                         const Net_SocketConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::initialize"));
 
   clientServerRole_ = role_in;
 
-  initialize (address_in);
+  return initialize (configuration_in);
 }
 
 void
-Net_InetTransportLayer_Base::initialize (const ACE_INET_Addr& address_in)
+Net_InetTransportLayer_Base::finalize ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::finalize"));
+
+  ACE_ASSERT (false);
+}
+
+bool
+Net_InetTransportLayer_Base::initialize (const Net_SocketConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::initialize"));
 
-  ACE_UNUSED_ARG (address_in);
+  ACE_UNUSED_ARG (configuration_in);
+
+  return true;
 }
 
 /////////////////////////////////////////
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
  : clientServerRole_ (ROLE_INVALID)
  , transportLayer_ (TRANSPORTLAYER_NETLINK)
@@ -73,10 +84,33 @@ Net_NetlinkTransportLayer_Base::~Net_NetlinkTransportLayer_Base ()
 
 }
 
-void
-Net_NetlinkTransportLayer_Base::initialize (const ACE_INET_Addr& address_in)
+bool
+Net_NetlinkTransportLayer_Base::initialize (Net_ClientServerRole_t role_in,
+                                            const Net_SocketConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::initialize"));
 
-  ACE_UNUSED_ARG (address_in);
+  clientServerRole_ = role_in;
+
+  return initialize (configuration_in);
 }
+
+bool
+Net_NetlinkTransportLayer_Base::initialize (const Net_SocketConfiguration_t& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::initialize"));
+
+  ACE_UNUSED_ARG (configuration_in);
+
+  return true;
+}
+
+void
+Net_NetlinkTransportLayer_Base::finalize ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::finalize"));
+
+  ACE_ASSERT (false);
+}
+
+#endif

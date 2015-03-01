@@ -29,7 +29,8 @@ template <typename TransportLayerType,
 class Net_IConnection_T
  : public Common_IStatistic_T<StatisticsContainerType>
  , virtual public Common_IRefCount
- , virtual public TransportLayerType
+// , virtual public TransportLayerType
+ , public TransportLayerType
 {
  public:
   virtual ~Net_IConnection_T () {};

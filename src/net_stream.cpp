@@ -135,10 +135,10 @@ Net_Stream::init (unsigned int sessionID_in,
 
     return false;
   } // end IF
-  if (!protocolHandler_impl->init (configuration_in.messageAllocator,
-                                   protocolConfiguration_in.peerPingInterval,
-                                   protocolConfiguration_in.pingAutoAnswer,
-                                   protocolConfiguration_in.printPongMessages)) // print ('.') for received "pong"s...
+  if (!protocolHandler_impl->initialize (configuration_in.messageAllocator,
+                                         protocolConfiguration_in.peerPingInterval,
+                                         protocolConfiguration_in.pingAutoAnswer,
+                                         protocolConfiguration_in.printPongMessages)) // print ('.') for received "pong"s...
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
