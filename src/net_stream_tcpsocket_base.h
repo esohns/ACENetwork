@@ -27,6 +27,7 @@
 #include "ace/Synch.h"
 
 #include "net_connection_base.h"
+#include "net_connection_manager.h"
 
 // forward declarations
 struct Stream_State_t;
@@ -59,7 +60,12 @@ class Net_StreamTCPSocketBase_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  protected:
-  Net_StreamTCPSocketBase_T ();
+  typedef Net_IConnectionManager_T<ConfigurationType,
+                                   SessionDataType,
+                                   TransportLayerType,
+                                   StatisticsContainerType> ICONNECTION_MANAGER_T;
+
+  Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T*);
   virtual ~Net_StreamTCPSocketBase_T ();
 
   //ConfigurationType* configuration_;
@@ -78,7 +84,7 @@ class Net_StreamTCPSocketBase_T
                                TransportLayerType,
                                StatisticsContainerType> inherited2;
 
-//  ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T (const Net_StreamTCPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T& operator= (const Net_StreamTCPSocketBase_T&));
 

@@ -28,12 +28,12 @@
 template <typename AddressType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConnectionType>
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
+                       ITransportLayerType,
                        ConnectionType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                 const ConfigurationType* configuration_in)
  : inherited (ACE_Reactor::instance (), // default reactor
@@ -49,12 +49,12 @@ Net_Client_Connector_T<AddressType,
 template <typename AddressType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConnectionType>
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
+                       ITransportLayerType,
                        ConnectionType>::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
@@ -64,13 +64,13 @@ Net_Client_Connector_T<AddressType,
 template <typename AddressType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConnectionType>
 int
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
+                       ITransportLayerType,
                        ConnectionType>::make_svc_handler (ConnectionType*& handler_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
@@ -80,8 +80,7 @@ Net_Client_Connector_T<AddressType,
 
   // default behavior
   ACE_NEW_NORETURN (handler_inout,
-                    ConnectionType ());
-                    //Net_TCPConnection (interfaceHandle_));
+                    ConnectionType (interfaceHandle_));
   if (!handler_inout)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -92,13 +91,13 @@ Net_Client_Connector_T<AddressType,
 template <typename AddressType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConnectionType>
 void
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
+                       ITransportLayerType,
                        ConnectionType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
@@ -111,21 +110,21 @@ Net_Client_Connector_T<AddressType,
 template <typename AddressType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConnectionType>
 bool
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
+                       ITransportLayerType,
                        ConnectionType>::connect (const AddressType& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
 
-  ConnectionType* handler = NULL;
+  ConnectionType* handler_p = NULL;
   int result = -1;
 
-  result = inherited::connect (handler,                         // service handler
+  result = inherited::connect (handler_p,                       // service handler
                                address_in,                      // remote SAP
                                ACE_Synch_Options::defaults,     // synch options
                                ACE_sap_any_cast (AddressType&), // local SAP
@@ -153,13 +152,13 @@ Net_Client_Connector_T<AddressType,
 template <typename AddressType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConnectionType>
 const ConfigurationType*
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
+                       ITransportLayerType,
                        ConnectionType>::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
@@ -171,13 +170,13 @@ Net_Client_Connector_T<AddressType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType>
+          typename ITransportLayerType>
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
-                       Net_UDPConnection>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                   const ConfigurationType* configuration_in)
+                       ITransportLayerType,
+                       Net_UDPConnection_T<SessionDataType> >::Net_Client_Connector_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                       const ConfigurationType* configuration_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
 {
@@ -187,12 +186,12 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType>
+          typename ITransportLayerType>
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
-                       Net_UDPConnection>::~Net_Client_Connector_T ()
+                       ITransportLayerType,
+                       Net_UDPConnection_T<SessionDataType> >::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
 
@@ -200,23 +199,21 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType>
+          typename ITransportLayerType>
 int
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
-                       Net_UDPConnection>::make_svc_handler (Net_UDPConnection*& handler_inout)
+                       ITransportLayerType,
+                       Net_UDPConnection_T<SessionDataType> >::make_svc_handler (CONNECTION_T*& handler_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
 
   // init return value(s)
   handler_inout = NULL;
 
-  // default behavior
   ACE_NEW_NORETURN (handler_inout,
-                    Net_UDPConnection ());
-                    //Net_TCPConnection (interfaceHandle_));
+                    CONNECTION_T (interfaceHandle_));
   if (!handler_inout)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -226,13 +223,13 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType>
+          typename ITransportLayerType>
 void
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
-                       Net_UDPConnection>::abort ()
+                       ITransportLayerType,
+                       Net_UDPConnection_T<SessionDataType> >::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
 
@@ -244,20 +241,20 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType>
+          typename ITransportLayerType>
 bool
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
-                       Net_UDPConnection>::connect (const ACE_INET_Addr& address_in)
+                       ITransportLayerType,
+                       Net_UDPConnection_T<SessionDataType> >::connect (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
 
   int result = -1;
 
-  Net_UDPConnection* handler = NULL;
-  result = make_svc_handler (handler);
+  CONNECTION_T* handler_p = NULL;
+  result = make_svc_handler (handler_p);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -265,10 +262,12 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
     return false;
   } // end IF
-  ACE_ASSERT (handler);
+  ACE_ASSERT (handler_p);
 
+  // *NOTE*: the handler registers with the reactor and will be freed (or
+  //         recycled) automatically
   result =
-      handler->open (const_cast<ConfigurationType*> (this->getConfiguration ()));
+      handler_p->open (const_cast<ConfigurationType*> (this->getConfiguration ()));
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
@@ -289,13 +288,13 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType>
+          typename ITransportLayerType>
 const ConfigurationType*
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
                        SessionDataType,
-                       TransportLayerType,
-                       Net_UDPConnection>::getConfiguration () const
+                       ITransportLayerType,
+                       Net_UDPConnection_T<SessionDataType> >::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
 

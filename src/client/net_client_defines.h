@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef RPG_NET_CLIENT_DEFINES_H
-#define RPG_NET_CLIENT_DEFINES_H
+#ifndef NET_CLIENT_DEFINES_H
+#define NET_CLIENT_DEFINES_H
 
-#define RPG_NET_CLIENT_DEF_NUM_DISPATCH_THREADS 3
+#define NET_CLIENT_DEF_NUM_DISPATCH_THREADS 3
 
 #endif

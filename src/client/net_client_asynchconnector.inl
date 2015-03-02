@@ -26,12 +26,12 @@
 template <typename AddressType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConnectionType>
 Net_Client_AsynchConnector_T<AddressType,
                              ConfigurationType,
                              SessionDataType,
-                             TransportLayerType,
+                             ITransportLayerType,
                              ConnectionType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                             const ConfigurationType* configuration_in)
  : configuration_ (configuration_in)
@@ -53,12 +53,12 @@ Net_Client_AsynchConnector_T<AddressType,
 template <typename AddressType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConnectionType>
 Net_Client_AsynchConnector_T<AddressType,
                              ConfigurationType,
                              SessionDataType,
-                             TransportLayerType,
+                             ITransportLayerType,
                              ConnectionType>::~Net_Client_AsynchConnector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::~Net_Client_AsynchConnector_T"));
@@ -68,114 +68,13 @@ Net_Client_AsynchConnector_T<AddressType,
 template <typename AddressType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
-          typename ConnectionType>
-ConnectionType*
-Net_Client_AsynchConnector_T<AddressType,
-                             ConfigurationType,
-                             SessionDataType,
-                             TransportLayerType,
-                             ConnectionType>::make_handler (void)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::make_handler"));
-
-  // init return value(s)
-  ConnectionType* result = NULL;
-
-  // default behavior
-  ACE_NEW_NORETURN (result,
-                    ConnectionType ());
-                    //Net_AsynchTCPConnection (interfaceHandle_));
-  if (!result)
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-
-  return result;
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename SessionDataType,
-          typename TransportLayerType,
-          typename ConnectionType>
-const ConfigurationType*
-Net_Client_AsynchConnector_T<AddressType,
-                             ConfigurationType,
-                             SessionDataType,
-                             TransportLayerType,
-                             ConnectionType>::getConfiguration () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::getConfiguration"));
-
-  return configuration_;
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename SessionDataType,
-          typename TransportLayerType,
-          typename ConnectionType>
-void
-Net_Client_AsynchConnector_T<AddressType,
-                             ConfigurationType,
-                             SessionDataType,
-                             TransportLayerType,
-                             ConnectionType>::abort ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::abort"));
-
-  if (inherited::cancel () == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Connector::cancel(): \"%m\", continuing\n")));
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename SessionDataType,
-          typename TransportLayerType,
-          typename ConnectionType>
-bool
-Net_Client_AsynchConnector_T<AddressType,
-                             ConfigurationType,
-                             SessionDataType,
-                             TransportLayerType,
-                             ConnectionType>::connect (const AddressType& address_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
-
-  int result =
-    inherited::connect (address_in,                            // remote SAP
-                        ACE_sap_any_cast (const AddressType&), // local SAP
-                        1,                                     // re-use address (SO_REUSEADDR) ?
-                        NULL);                                 // ACT
-  if (result == -1)
-  {
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    if (address_in.addr_to_string (buffer,
-                                   sizeof (buffer)) == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT("failed to ACE_Asynch_Connector::connect(\"%s\"): \"%m\", aborting\n"),
-                buffer));
-
-    return false;
-  } // end IF
-
-  return true;
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConnectionType>
 int
 Net_Client_AsynchConnector_T<AddressType,
                              ConfigurationType,
                              SessionDataType,
-                             TransportLayerType,
+                             ITransportLayerType,
                              ConnectionType>::validate_connection (const ACE_Asynch_Connect::Result& result_in,
                                                                    const ACE_INET_Addr& remoteSAP_in,
                                                                    const ACE_INET_Addr& localSAP_in)
@@ -197,4 +96,270 @@ Net_Client_AsynchConnector_T<AddressType,
   } // end IF
 
   return ((result_in.success () == 1) ? 0 : -1);
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename ConnectionType>
+const ConfigurationType*
+Net_Client_AsynchConnector_T<AddressType,
+                             ConfigurationType,
+                             SessionDataType,
+                             ITransportLayerType,
+                             ConnectionType>::getConfiguration () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::getConfiguration"));
+
+  return configuration_;
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename ConnectionType>
+bool
+Net_Client_AsynchConnector_T<AddressType,
+                             ConfigurationType,
+                             SessionDataType,
+                             ITransportLayerType,
+                             ConnectionType>::connect (const AddressType& address_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
+
+  int result = -1;
+
+  result = inherited::connect (address_in,                            // remote SAP
+                               ACE_sap_any_cast (const AddressType&), // local SAP
+                               1,                                     // re-use address (SO_REUSEADDR) ?
+                               NULL);                                 // ACT
+  if (result == -1)
+  {
+    ACE_TCHAR buffer[BUFSIZ];
+    ACE_OS::memset (buffer, 0, sizeof (buffer));
+    if (address_in.addr_to_string (buffer,
+                                   sizeof (buffer)) == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Connector::connect(\"%s\"): \"%m\", aborting\n"),
+                buffer));
+
+    return false;
+  } // end IF
+
+  return true;
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename ConnectionType>
+void
+Net_Client_AsynchConnector_T<AddressType,
+                             ConfigurationType,
+                             SessionDataType,
+                             ITransportLayerType,
+                             ConnectionType>::abort ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::abort"));
+
+  int result = -1;
+
+  result = inherited::cancel ();
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Connector::cancel(): \"%m\", continuing\n")));
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename ConnectionType>
+ConnectionType*
+Net_Client_AsynchConnector_T<AddressType,
+                             ConfigurationType,
+                             SessionDataType,
+                             ITransportLayerType,
+                             ConnectionType>::make_handler (void)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::make_handler"));
+
+  // init return value(s)
+  ConnectionType* handler_p = NULL;
+
+  ACE_NEW_NORETURN (handler_p,
+                    ConnectionType (interfaceHandle_));
+  if (!handler_p)
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+
+  return handler_p;
+}
+
+/////////////////////////////////////////
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType>
+Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                             ConfigurationType,
+                             SessionDataType,
+                             ITransportLayerType,
+                             Net_AsynchUDPConnection_T<SessionDataType> >::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                                         const ConfigurationType* configuration_in)
+ : configuration_ (configuration_in)
+ , interfaceHandle_ (interfaceHandle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
+
+  int result = -1;
+
+  // init base class
+  result = inherited::open (false, // pass addresses ?
+                            NULL,  // default proactor
+                            true); // validate new connections ?
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Connector::open(): \"%m\", continuing\n")));
+}
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType>
+Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                             ConfigurationType,
+                             SessionDataType,
+                             ITransportLayerType,
+                             Net_AsynchUDPConnection_T<SessionDataType> >::~Net_Client_AsynchConnector_T ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::~Net_Client_AsynchConnector_T"));
+
+}
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType>
+int
+Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                             ConfigurationType,
+                             SessionDataType,
+                             ITransportLayerType,
+                             Net_AsynchUDPConnection_T<SessionDataType> >::validate_connection (const ACE_Asynch_Connect::Result& result_in,
+                                                                                                const ACE_INET_Addr& remoteSAP_in,
+                                                                                                const ACE_INET_Addr& localSAP_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
+
+  // success ?
+  if (result_in.success () == 0)
+  {
+    ACE_TCHAR buffer[BUFSIZ];
+    ACE_OS::memset (buffer, 0, sizeof (buffer));
+    if (remoteSAP_in.addr_to_string (buffer, sizeof (buffer)) == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
+                buffer,
+                ACE_OS::strerror (result_in.error ())));
+  } // end IF
+
+  return ((result_in.success () == 1) ? 0 : -1);
+}
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType>
+const ConfigurationType*
+Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                             ConfigurationType,
+                             SessionDataType,
+                             ITransportLayerType,
+                             Net_AsynchUDPConnection_T<SessionDataType> >::getConfiguration () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::getConfiguration"));
+
+  return configuration_;
+}
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType>
+void
+Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                             ConfigurationType,
+                             SessionDataType,
+                             ITransportLayerType,
+                             Net_AsynchUDPConnection_T<SessionDataType> >::abort ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::abort"));
+
+  int result = -1;
+
+  result = inherited::cancel ();
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Connector::cancel(): \"%m\", continuing\n")));
+}
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType>
+bool
+Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                             ConfigurationType,
+                             SessionDataType,
+                             ITransportLayerType,
+                             Net_AsynchUDPConnection_T<SessionDataType> >::connect (const ACE_INET_Addr& address_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
+
+  CONNECTION_T* handler_p = NULL;
+  handler_p = make_handler ();
+  if (!handler_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Client_AsynchConnector_T<Net_AsynchUDPConnection>::make_handler(): \"%m\", aborting\n")));
+
+    return false;
+  } // end IF
+  ACE_ASSERT (handler_p);
+  handler_p->act (const_cast<ConfigurationType*> (this->getConfiguration ()));
+
+  // *NOTE*: the handler registers with the reactor and will be freed (or
+  //         recycled) automatically
+  ACE_Message_Block message_block;
+  handler_p->open (ACE_INVALID_HANDLE,
+                   message_block);
+
+  return true;
+}
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType>
+Net_AsynchUDPConnection_T<SessionDataType>*
+Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                             ConfigurationType,
+                             SessionDataType,
+                             ITransportLayerType,
+                             Net_AsynchUDPConnection_T<SessionDataType> >::make_handler (void)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::make_handler"));
+
+  // init return value(s)
+  CONNECTION_T* handler_p = NULL;
+
+  ACE_NEW_NORETURN (handler_p,
+                    CONNECTION_T (interfaceHandle_));
+  if (!handler_p)
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+
+  return handler_p;
 }

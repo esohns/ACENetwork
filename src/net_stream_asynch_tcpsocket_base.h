@@ -27,13 +27,14 @@
 #include "ace/Asynch_IO.h"
 
 #include "net_connection_base.h"
+//#include "net_exports.h"
 
 // forward declarations
 struct Stream_State_t;
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketHandlerType>
@@ -42,12 +43,15 @@ class Net_StreamAsynchTCPSocketBase_T
  , public ACE_Event_Handler
  , public Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
-                               TransportLayerType,
+                               ITransportLayerType,
                                StatisticsContainerType>
 {
  public:
-  // *TODO*: remove this stub
-  Net_StreamAsynchTCPSocketBase_T ();
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               SessionDataType,
+                               ITransportLayerType,
+                               StatisticsContainerType> CONNECTION_BASE_T;
+
   virtual ~Net_StreamAsynchTCPSocketBase_T ();
 
   // override some service methods
@@ -59,6 +63,13 @@ class Net_StreamAsynchTCPSocketBase_T
   virtual void act (const void*); // (user) data handle
 
  protected:
+  typedef Net_IConnectionManager_T<ConfigurationType,
+                                   SessionDataType,
+                                   ITransportLayerType,
+                                   StatisticsContainerType> ICONNECTION_MANAGER_T;
+
+  Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*);
+
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
 
   StreamType      stream_;
@@ -69,9 +80,10 @@ class Net_StreamAsynchTCPSocketBase_T
   typedef SocketHandlerType inherited;
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
-                               TransportLayerType,
+                               ITransportLayerType,
                                StatisticsContainerType> inherited2;
 
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T& operator= (const Net_StreamAsynchTCPSocketBase_T&));
 

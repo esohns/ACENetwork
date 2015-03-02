@@ -24,14 +24,18 @@
 #include "ace/config-macros.h"
 #include "ace/Event_Handler.h"
 
+#include "net_connection_base.h"
+#include "net_connection_manager.h"
+//#include "net_exports.h"
+
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 class Net_SocketConnectionBase_T
  : public SocketHandlerType
- , public TransportLayerType
+// , virtual public ITransportLayerType
 {
  public:
   virtual ~Net_SocketConnectionBase_T ();
@@ -56,30 +60,30 @@ class Net_SocketConnectionBase_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  protected:
-  Net_SocketConnectionBase_T ();
+  typedef Net_IConnectionManager_T<ConfigurationType,
+                                   SessionDataType,
+                                   ITransportLayerType,
+                                   StatisticsContainerType> ICONNECTION_MANAGER_T;
+
+  Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T*);
 
  private:
   typedef SocketHandlerType inherited;
-  typedef TransportLayerType inherited2;
+//  typedef TransportLayerType inherited2;
 
-  //// override some task-based members
-  //virtual int svc (void);
-
-  //// stop worker, if any
-  //void shutdown ();
-
+  ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T& operator= (const Net_SocketConnectionBase_T&));
 };
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 class Net_AsynchSocketConnectionBase_T
  : public SocketHandlerType
- , public TransportLayerType
+// , public ITransportLayerType
 {
  public:
   virtual ~Net_AsynchSocketConnectionBase_T ();
@@ -105,20 +109,25 @@ class Net_AsynchSocketConnectionBase_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  protected:
-  Net_AsynchSocketConnectionBase_T ();
+  typedef Net_IConnectionManager_T<ConfigurationType,
+                                   SessionDataType,
+                                   ITransportLayerType,
+                                   StatisticsContainerType> ICONNECTION_MANAGER_T;
+
+  Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*);
 
   const ConfigurationType* configuration_;
 
  private:
   typedef SocketHandlerType inherited;
-  typedef TransportLayerType inherited2;
+//  typedef ITransportLayerType inherited2;
 
-  //// override some task-based members
-  //virtual int svc (void);
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               SessionDataType,
+                               ITransportLayerType,
+                               StatisticsContainerType> CONNECTION_BASE_T;
 
-  //// stop worker, if any
-  //void shutdown ();
-
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T (const Net_AsynchSocketConnectionBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T& operator= (const Net_AsynchSocketConnectionBase_T&));
 };

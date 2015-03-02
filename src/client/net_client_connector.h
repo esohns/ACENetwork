@@ -34,7 +34,7 @@
 template <typename AddressType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConnectionType>
 class Net_Client_Connector_T
  : public ACE_Connector<ConnectionType,
@@ -45,7 +45,7 @@ class Net_Client_Connector_T
  public:
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
-                                   TransportLayerType,
+                                   ITransportLayerType,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T*,
@@ -76,27 +76,28 @@ class Net_Client_Connector_T
 // partial specialization (for UDP)
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType>
+          typename ITransportLayerType>
 class Net_Client_Connector_T<ACE_INET_Addr,
                              ConfigurationType,
                              SessionDataType,
-                             TransportLayerType,
-                             Net_UDPConnection>
+                             ITransportLayerType,
+                             Net_UDPConnection_T<SessionDataType> >
  : public Net_Client_IConnector_T<ACE_INET_Addr,
                                   ConfigurationType>
 {
  public:
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
-                                   TransportLayerType,
+                                   ITransportLayerType,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
+  typedef Net_UDPConnection_T<SessionDataType> CONNECTION_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T*,
                           const ConfigurationType*);
   virtual ~Net_Client_Connector_T ();
 
   // override default instantiation strategy
-  virtual int make_svc_handler (Net_UDPConnection*&);
+  virtual int make_svc_handler (CONNECTION_T*&);
 
   // implement Net_Client_IConnector_T
   // *TODO*: why is it necessary to provide an implementation when there is a

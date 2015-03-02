@@ -36,8 +36,8 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
                           TransportLayerType,
                           StatisticsContainerType,
                           StreamType,
-                          SocketHandlerType>::Net_StreamTCPSocketBase_T ()//MANAGER_T* manager_in)
- : inherited ()//manager_in)
+                          SocketHandlerType>::Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
+ : inherited2 (interfaceHandle_in)
  //, configuration_ (NULL)
 // , stream_ ()
  , currentReadBuffer_ (NULL)

@@ -35,150 +35,48 @@ Net_TransportLayer_IP_Broadcast::Net_TransportLayer_IP_Broadcast (Net_ClientServ
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Broadcast::Net_TransportLayer_IP_Broadcast"));
 
-  std::string address = ACE_TEXT_ALWAYS_CHAR (NET_DEFAULT_IP_BROADCAST_ADDRESS);
-  address += ':';
-  std::ostringstream converter;
-  converter << NET_DEFAULT_PORT;
-  address += converter.str();
-  if (address_.set (ACE_TEXT(address.c_str ()), AF_INET) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-  if (inherited2::open (address_,
-                        PF_INET,
-                        0,
-                        0,
-                        NULL) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Dgram_Bcast::open(): \"%m\", continuing\n")));
 }
 
 Net_TransportLayer_IP_Broadcast::~Net_TransportLayer_IP_Broadcast ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Broadcast::~Net_TransportLayer_IP_Broadcast"));
 
-  if (inherited2::close () == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Dgram_Bcast::close(): \"%m\", continuing\n")));
+//  if (inherited2::close () == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_SOCK_Dgram_Bcast::close(): \"%m\", continuing\n")));
 }
 
-bool
-Net_TransportLayer_IP_Broadcast::initialize (const Net_SocketConfiguration_t& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Broadcast::initialize"));
+//bool
+//Net_TransportLayer_IP_Broadcast::initialize (const Net_SocketConfiguration_t& configuration_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Broadcast::initialize"));
 
-  int result = -1;
-
-  u_short port_number = configuration_in.peerAddress.get_port_number ();
-  if (address_.get_port_number () != port_number)
-  {
-    result = inherited2::close ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Dgram_Bcast::close(): \"%m\", continuing\n")));
-  } // end IF
-  address_ = configuration_in.peerAddress;
-  result = inherited2::open (address_,
-                             PF_INET,
-                             0,
-                             0,
-                             NULL);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Dgram_Bcast::open(): \"%m\", aborting\n")));
-
-    return false;
-  } // end IF
-
-  return true;
-}
+//  return true;
+//}
 
 /////////////////////////////////////////
 
 Net_TransportLayer_IP_Multicast::Net_TransportLayer_IP_Multicast (Net_ClientServerRole_t clientServerRole_in)
  : inherited (clientServerRole_in,
               TRANSPORTLAYER_IP_MULTICAST)
- , inherited2 (ACE_SOCK_Dgram_Mcast::DEFOPTS)
- , joined_ (false)
+// , inherited2 (ACE_SOCK_Dgram_Mcast::DEFOPTS)
+// , joined_ (false)
 // , address_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Multicast::Net_TransportLayer_IP_Multicast"));
 
-  std::string address = ACE_TEXT_ALWAYS_CHAR (NET_DEFAULT_IP_MULTICAST_ADDRESS);
-  address += ':';
-  std::ostringstream converter;
-  converter << NET_DEFAULT_PORT;
-  address += converter.str ();
-  if (address_.set (ACE_TEXT (address.c_str ()), AF_INET) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-  if (inherited2::open (address_,
-                        NULL,
-                        1) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::open(): \"%m\", continuing\n")));
 }
 
 Net_TransportLayer_IP_Multicast::~Net_TransportLayer_IP_Multicast ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Multicast::~Net_TransportLayer_IP_Multicast"));
 
-  if (joined_)
-    if (inherited2::leave (address_,
-                           NULL) == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::leave(): \"%m\", continuing\n")));
-  if (inherited2::close () == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::close(): \"%m\", continuing\n")));
 }
 
-bool
-Net_TransportLayer_IP_Multicast::initialize (const Net_SocketConfiguration_t& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Multicast::initialize"));
+//bool
+//Net_TransportLayer_IP_Multicast::initialize (const Net_SocketConfiguration_t& configuration_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Multicast::initialize"));
 
-  int result = -1;
-
-  u_short port_number = configuration_in.peerAddress.get_port_number ();
-  if (address_.get_port_number () != port_number)
-  {
-    if (joined_)
-    {
-      result = leave (address_,
-                      NULL);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::leave(): \"%m\", continuing\n")));
-      joined_ = false;
-    } // end IF
-    result = inherited2::close ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::close(): \"%m\", continuing\n")));
-  } // end IF
-  address_ = configuration_in.peerAddress;
-  result = inherited2::open (address_,
-                             NULL,
-                             1);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::open(): \"%m\", aborting\n")));
-
-    return false;
-  } // end IF
-  result = inherited2::join (address_,
-                             1,
-                             NULL);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::join(): \"%m\", aborting\n")));
-
-    return false;
-  } // end IF
-  joined_ = true;
-
-  return true;
-}
+//  return true;
+//}

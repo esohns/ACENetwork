@@ -26,43 +26,24 @@
 
 template <typename ConfigurationType,
           typename SessonDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
-                                TransportLayerType,
+                                ITransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
-                                SocketHandlerType>::Net_StreamAsynchUDPSocketBase_T ()//MANAGER_T* manager_in)
-// : inherited (manager_in)
+                                SocketHandlerType>::Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
+ : inherited4 (interfaceHandle_in)
 // , buffer_ (NULL)
  //, userData_ ()
  //, stream_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
-
-}
-
-template <typename ConfigurationType,
-          typename SessonDataType,
-          typename TransportLayerType,
-          typename StatisticsContainerType,
-          typename StreamType,
-          typename SocketType,
-          typename SocketHandlerType>
-Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
-                                SessonDataType,
-                                TransportLayerType,
-                                StatisticsContainerType,
-                                StreamType,
-                                SocketType,
-                                SocketHandlerType>::~Net_StreamAsynchUDPSocketBase_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
 
   // step1: remove enqueued module (if any)
   if (inherited4::configuration_.streamConfiguration.module)
@@ -84,7 +65,26 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessonDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
+          typename StatisticsContainerType,
+          typename StreamType,
+          typename SocketType,
+          typename SocketHandlerType>
+Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                SessonDataType,
+                                ITransportLayerType,
+                                StatisticsContainerType,
+                                StreamType,
+                                SocketType,
+                                SocketHandlerType>::~Net_StreamAsynchUDPSocketBase_T ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
+
+}
+
+template <typename ConfigurationType,
+          typename SessonDataType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
@@ -92,7 +92,7 @@ template <typename ConfigurationType,
 void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
-                                TransportLayerType,
+                                ITransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -255,7 +255,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessonDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
@@ -263,7 +263,7 @@ template <typename ConfigurationType,
 int
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
-                                TransportLayerType,
+                                ITransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -317,7 +317,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessonDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
@@ -325,7 +325,7 @@ template <typename ConfigurationType,
 int
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
-                                TransportLayerType,
+                                ITransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -388,7 +388,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessonDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
@@ -396,7 +396,7 @@ template <typename ConfigurationType,
 bool
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
-                                TransportLayerType,
+                                ITransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -419,7 +419,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessonDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
@@ -427,7 +427,7 @@ template <typename ConfigurationType,
 void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
-                                TransportLayerType,
+                                ITransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,
@@ -448,7 +448,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessonDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
           typename SocketType,
@@ -456,7 +456,7 @@ template <typename ConfigurationType,
 void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
-                                TransportLayerType,
+                                ITransportLayerType,
                                 StatisticsContainerType,
                                 StreamType,
                                 SocketType,

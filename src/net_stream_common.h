@@ -21,6 +21,7 @@
 #ifndef NET_STREAM_COMMON_H
 #define NET_STREAM_COMMON_H
 
+#include "stream_common.h"
 #include "stream_session_data_base.h"
 
 // *NOTE*: I speculate that this is the main reason that C# was ever invented !
@@ -31,6 +32,7 @@ struct Net_UserData_t
 
 struct Net_SessionData_t
 {
+  Stream_State_t streamState;
   Net_UserData_t* userData;
 };
 

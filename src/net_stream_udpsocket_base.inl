@@ -21,34 +21,34 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
-#include "stream_common.h"
+//#include "stream_common.h"
 
 #include "net_macros.h"
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticsContainerType,
                           StreamType,
 //                          SocketType,
-                          SocketHandlerType>::Net_StreamUDPSocketBase_T ()//MANAGER_T* manager_in)
+                          SocketHandlerType>::Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
  : //inherited ()//manager_in)
 // , inherited2 ()
-   inherited3 ()
+   inherited3 (interfaceHandle_in)
 // , configuration_ ()
 // , stream_ ()
  , currentReadBuffer_ (NULL)
 // , sendLock_ ()
  , currentWriteBuffer_ (NULL)
  , serializeOutput_ (false)
- , state_ (NULL)
+// , state_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::Net_StreamUDPSocketBase_T"));
 
@@ -57,14 +57,14 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticsContainerType,
                           StreamType,
 //                          SocketType,
@@ -95,7 +95,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
 //          typename SocketType,
@@ -103,7 +103,7 @@ template <typename ConfigurationType,
 int
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticsContainerType,
                           StreamType,
 //                          SocketType,
@@ -113,19 +113,19 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
   int result = -1;
 
-  // sanity check(s)
-  ACE_ASSERT (state_);
+//  // sanity check(s)
+//  ACE_ASSERT (state_);
 
   // step0: init this
   // *TODO*: find a better way to do this
   serializeOutput_ = inherited3::configuration_.streamConfiguration.serializeOutput;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  state_->sessionID =
-      *static_cast<unsigned int*> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-#else
-  state_->sessionID =
-      static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-#endif
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  state_->sessionID =
+//      *static_cast<unsigned int*> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+//#else
+//  state_->sessionID =
+//      static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+//#endif
 
   // step1: init/start stream
   // step1a: connect stream head message queue with the reactor notification
@@ -183,7 +183,21 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     inherited3::configuration_.streamConfiguration.deleteModule = true;
   } // end IF
   // step1c: init stream
-  if (!stream_.init (state_->sessionID,
+  //#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  //  state_->sessionID =
+  //      *static_cast<unsigned int*> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+  //#else
+  //  state_->sessionID =
+  //      static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+  //#endif
+
+  unsigned int session_id = 0;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  session_id = *static_cast<unsigned int*> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+#else
+  session_id = static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+#endif
+  if (!stream_.init (session_id,
                      inherited3::configuration_.streamConfiguration,
                      inherited3::configuration_.protocolConfiguration,
                      inherited3::configuration_.streamUserData))
@@ -226,7 +240,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
 //          typename SocketType,
@@ -234,7 +248,7 @@ template <typename ConfigurationType,
 int
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticsContainerType,
                           StreamType,
 //                          SocketType,
@@ -260,11 +274,13 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   } // end IF
 
   // read some data from the socket...
-  ACE_INET_Addr peer_address;
-  size_t bytes_received = inherited2::recv (currentReadBuffer_->wr_ptr (),
-                                            currentReadBuffer_->size (),
-                                            peer_address,
-                                            0);
+  ssize_t bytes_received = -1;
+  bytes_received = inherited2::recv (currentReadBuffer_->wr_ptr (), // buf
+                                     currentReadBuffer_->size (),   // n
+                                     inherited3::configuration_.socketConfiguration.peerAddress, // addr
+                                     0,                             // flags
+                                     NULL,                          // overlapped
+                                     NULL);                         // func
   switch (bytes_received)
   {
     case -1:
@@ -335,7 +351,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
 //          typename SocketType,
@@ -343,7 +359,7 @@ template <typename ConfigurationType,
 int
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticsContainerType,
                           StreamType,
 //                          SocketType,
@@ -409,7 +425,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
 //          typename SocketType,
@@ -417,7 +433,7 @@ template <typename ConfigurationType,
 bool
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticsContainerType,
                           StreamType,
 //                          SocketType,
@@ -440,7 +456,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
 //          typename SocketType,
@@ -448,7 +464,7 @@ template <typename ConfigurationType,
 void
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticsContainerType,
                           StreamType,
 //                          SocketType,
@@ -469,7 +485,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
 //          typename SocketType,
@@ -477,7 +493,7 @@ template <typename ConfigurationType,
 ACE_Message_Block*
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticsContainerType,
                           StreamType,
 //                          SocketType,

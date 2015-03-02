@@ -29,12 +29,12 @@
 
 #include "net_connection_base.h"
 
-// forward declarations
-struct Stream_State_t;
+//// forward declarations
+//struct Stream_State_t;
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType,
           typename StreamType,
 //          typename SocketType,
@@ -44,10 +44,12 @@ class Net_StreamUDPSocketBase_T
  ,*/ public SocketHandlerType
  , public Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
-                               TransportLayerType,
+                               ITransportLayerType,
                                StatisticsContainerType>
 {
  public:
+  virtual ~Net_StreamUDPSocketBase_T ();
+
   virtual int open (void* = NULL); // args
   //virtual int close (u_long = 0); // flags
 
@@ -64,8 +66,12 @@ class Net_StreamUDPSocketBase_T
   virtual void report () const;
 
  protected:
-  Net_StreamUDPSocketBase_T ();
-  virtual ~Net_StreamUDPSocketBase_T ();
+ typedef Net_IConnectionManager_T<ConfigurationType,
+                                  SessionDataType,
+                                  ITransportLayerType,
+                                  StatisticsContainerType> ICONNECTION_MANAGER_T;
+
+  Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*);
 
   //ConfigurationType  configuration_;
   //SessionDataType    sessionData_;
@@ -86,15 +92,15 @@ class Net_StreamUDPSocketBase_T
   typedef SocketHandlerType inherited2;
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
-                               TransportLayerType,
+                               ITransportLayerType,
                                StatisticsContainerType> inherited3;
 
-//  ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&));
 
-  // *NOTE*: this is a transient handle, used only to initialize the session ID
-  Stream_State_t*    state_;
+//  // *NOTE*: this is a transient handle, used only to initialize the session ID
+//  Stream_State_t*    state_;
 };
 
 // include template implementation

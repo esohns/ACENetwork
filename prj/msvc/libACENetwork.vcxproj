@@ -108,6 +108,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\net_ipconnection.cpp" />
     <ClCompile Include="..\..\src\net_message.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
@@ -221,6 +222,7 @@
     <ClInclude Include="..\..\src\net_exports.h" />
     <ClInclude Include="..\..\src\net_iconnection.h" />
     <ClInclude Include="..\..\src\net_iconnectionmanager.h" />
+    <ClInclude Include="..\..\src\net_ipconnection.h" />
     <ClInclude Include="..\..\src\net_itransportlayer.h" />
     <ClInclude Include="..\..\src\net_macros.h" />
     <ClInclude Include="..\..\src\net_message.h" />
@@ -263,6 +265,8 @@
     <None Include="..\..\src\net_stream_asynch_udpsocket_base.inl" />
     <None Include="..\..\src\net_stream_tcpsocket_base.inl" />
     <None Include="..\..\src\net_stream_udpsocket_base.inl" />
+    <None Include="..\..\src\net_udpconnection.inl" />
+    <None Include="..\..\src\net_udpsockethandler.inl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\libACEStream\prj\msvc\libACEStream.vcxproj">

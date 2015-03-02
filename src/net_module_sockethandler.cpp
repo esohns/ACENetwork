@@ -76,9 +76,6 @@ Net_Module_SocketHandler::init (Stream_IAllocator* allocator_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler::init"));
 
-  // sanity check(s)
-  ACE_ASSERT (allocator_in);
-
   if (isInitialized_)
   {
     ACE_DEBUG ((LM_WARNING,

@@ -26,15 +26,8 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-//Net_NetlinkConnection::Net_NetlinkConnection (Net_IConnectionManager_t* interfaceHandle_in)
-// : inherited (interfaceHandle_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection::Net_NetlinkConnection"));
-//
-//}
-
-Net_NetlinkConnection::Net_NetlinkConnection ()
- //: inherited ()
+Net_NetlinkConnection::Net_NetlinkConnection (Net_INetlinkConnectionManager_t* interfaceHandle_in)
+ : inherited (interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection::Net_NetlinkConnection"));
 
@@ -47,11 +40,13 @@ Net_NetlinkConnection::~Net_NetlinkConnection ()
 }
 
 bool
-Net_NetlinkConnection::initialize (const Net_SocketConfiguration_t& configuration_in)
+Net_NetlinkConnection::initialize (Net_ClientServerRole_t role_in,
+                                   const Net_SocketConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection::initialize"));
 
-  if (!Net_ConnectionBase_T::initialize (configuration_in))
+  if (!Net_ConnectionBase_T::initialize (role_in,
+                                         configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));

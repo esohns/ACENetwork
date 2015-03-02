@@ -45,8 +45,9 @@ Net_InetTransportLayer_Base::initialize (Net_ClientServerRole_t role_in,
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::initialize"));
 
   clientServerRole_ = role_in;
+  ACE_UNUSED_ARG (configuration_in);
 
-  return initialize (configuration_in);
+  return true;
 }
 
 void
@@ -55,16 +56,6 @@ Net_InetTransportLayer_Base::finalize ()
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::finalize"));
 
   ACE_ASSERT (false);
-}
-
-bool
-Net_InetTransportLayer_Base::initialize (const Net_SocketConfiguration_t& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::initialize"));
-
-  ACE_UNUSED_ARG (configuration_in);
-
-  return true;
 }
 
 /////////////////////////////////////////
@@ -91,14 +82,6 @@ Net_NetlinkTransportLayer_Base::initialize (Net_ClientServerRole_t role_in,
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::initialize"));
 
   clientServerRole_ = role_in;
-
-  return initialize (configuration_in);
-}
-
-bool
-Net_NetlinkTransportLayer_Base::initialize (const Net_SocketConfiguration_t& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::initialize"));
 
   ACE_UNUSED_ARG (configuration_in);
 

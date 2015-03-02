@@ -30,50 +30,48 @@
 #include "net_connection_manager.h"
 #include "net_exports.h"
 #include "net_iconnectionmanager.h"
-#include "net_transportlayer_ip_cast.h"
-#include "net_transportlayer_netlink.h"
-#include "net_transportlayer_tcp.h"
-#include "net_transportlayer_udp.h"
+#include "net_itransportlayer.h"
+#include "net_stream_common.h"
 
 typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                 Stream_SessionData_t,
-                                 Net_TransportLayer_IP_Broadcast,
-                                 Stream_Statistic_t> Net_IIPBroadcastConnectionManager_t;
+                                 Net_StreamSessionData_t,
+                                 Net_IInetTransportLayer_t,
+                                 Stream_Statistic_t> Net_IIPConnectionManager_t;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                 Stream_SessionData_t,
-                                 Net_TransportLayer_Netlink,
+                                 Net_StreamSessionData_t,
+                                 Net_INetlinkTransportLayer_t,
                                  Stream_Statistic_t> Net_INetlinkConnectionManager_t;
 #endif
 typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                 Stream_SessionData_t,
-                                 Net_TransportLayer_TCP,
+                                 Net_StreamSessionData_t,
+                                 Net_IInetTransportLayer_t,
                                  Stream_Statistic_t> Net_ITCPConnectionManager_t;
 typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                 Stream_SessionData_t,
-                                 Net_TransportLayer_UDP,
+                                 Net_StreamSessionData_t,
+                                 Net_IInetTransportLayer_t,
                                  Stream_Statistic_t> Net_IUDPConnectionManager_t;
 
 typedef Net_Connection_Manager_T<Net_Configuration_t,
-                                 Stream_SessionData_t,
-                                 Net_TransportLayer_IP_Broadcast,
-                                 Stream_Statistic_t> Net_IPBroadcastConnection_Manager_t;
+                                 Net_StreamSessionData_t,
+                                 Net_IInetTransportLayer_t,
+                                 Stream_Statistic_t> Net_IPConnection_Manager_t;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 typedef Net_Connection_Manager_T<Net_Configuration_t,
-                                 Stream_SessionData_t,
-                                 Net_TransportLayer_Netlink,
+                                 Net_StreamSessionData_t,
+                                 Net_INetlinkTransportLayer_t,
                                  Stream_Statistic_t> Net_NetlinkConnection_Manager_t;
 #endif
 typedef Net_Connection_Manager_T<Net_Configuration_t,
-                                 Stream_SessionData_t,
-                                 Net_TransportLayer_TCP,
+                                 Net_StreamSessionData_t,
+                                 Net_IInetTransportLayer_t,
                                  Stream_Statistic_t> Net_TCPConnection_Manager_t;
 typedef Net_Connection_Manager_T<Net_Configuration_t,
-                                 Stream_SessionData_t,
-                                 Net_TransportLayer_UDP,
+                                 Net_StreamSessionData_t,
+                                 Net_IInetTransportLayer_t,
                                  Stream_Statistic_t> Net_UDPConnection_Manager_t;
 
-typedef ACE_Singleton<Net_IPBroadcastConnection_Manager_t,
+typedef ACE_Singleton<Net_IPConnection_Manager_t,
                       ACE_Recursive_Thread_Mutex> NET_IPBROADCASTCONNECTIONMANAGER_SINGLETON;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 typedef ACE_Singleton<Net_NetlinkConnection_Manager_t,
@@ -84,17 +82,17 @@ typedef ACE_Singleton<Net_TCPConnection_Manager_t,
 typedef ACE_Singleton<Net_UDPConnection_Manager_t,
                       ACE_Recursive_Thread_Mutex> NET_UDPCONNECTIONMANAGER_SINGLETON;
 
-NET_SINGLETON_DECLARE (ACE_Singleton,
-                       Net_IPBroadcastConnection_Manager_t,
-                       ACE_Recursive_Thread_Mutex);
+//NET_SINGLETON_DECLARE (ACE_Singleton,
+//                       Net_IPConnection_Manager_t,
+//                       ACE_Recursive_Thread_Mutex);
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 NET_SINGLETON_DECLARE (ACE_Singleton,
                        Net_NetlinkConnection_Manager_t,
                        ACE_Recursive_Thread_Mutex);
 #endif
-NET_SINGLETON_DECLARE (ACE_Singleton,
-                       Net_TCPConnection_Manager_t,
-                       ACE_Recursive_Thread_Mutex);
+//NET_SINGLETON_DECLARE (ACE_Singleton,
+//                       Net_TCPConnection_Manager_t,
+//                       ACE_Recursive_Thread_Mutex);
 NET_SINGLETON_DECLARE (ACE_Singleton,
                        Net_UDPConnection_Manager_t,
                        ACE_Recursive_Thread_Mutex);

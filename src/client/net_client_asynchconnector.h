@@ -29,11 +29,12 @@
 
 #include "net_client_iconnector.h"
 #include "net_connection_manager_common.h"
+#include "net_udpconnection.h"
 
 template <typename AddressType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConnectionType>
 class Net_Client_AsynchConnector_T
  : public ACE_Asynch_Connector<ConnectionType>
@@ -43,15 +44,13 @@ class Net_Client_AsynchConnector_T
  public:
    typedef Net_IConnectionManager_T<ConfigurationType,
                                     SessionDataType,
-                                    TransportLayerType,
+                                    ITransportLayerType,
                                     Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*,
                                 const ConfigurationType*);
   virtual ~Net_Client_AsynchConnector_T ();
 
-  // override default creation strategy
-  virtual ConnectionType* make_handler (void);
   // override default connect strategy
   virtual int validate_connection (const ACE_Asynch_Connect::Result&, // result
                                    const ACE_INET_Addr&,              // remote address
@@ -63,8 +62,65 @@ class Net_Client_AsynchConnector_T
   virtual void abort ();
   virtual bool connect (const AddressType&);
 
+ protected:
+  // override default creation strategy
+  // *TODO*: why isn't this being picked up ?
+  virtual ConnectionType* make_handler (void);
+
  private:
   typedef ACE_Asynch_Connector<ConnectionType> inherited;
+
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&));
+
+  const ConfigurationType* configuration_;
+  ICONNECTION_MANAGER_T* interfaceHandle_;
+};
+
+// partial specialization (for UDP)
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType>
+class Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                                   ConfigurationType,
+                                   SessionDataType,
+                                   ITransportLayerType,
+                                   Net_AsynchUDPConnection_T<SessionDataType> >
+ : public ACE_Asynch_Connector<Net_AsynchUDPConnection_T<SessionDataType> >
+ , public Net_Client_IConnector_T<ACE_INET_Addr,
+                                  ConfigurationType>
+{
+ public:
+  typedef Net_IConnectionManager_T<ConfigurationType,
+                                   SessionDataType,
+                                   ITransportLayerType,
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+  typedef Net_AsynchUDPConnection_T<SessionDataType> CONNECTION_T;
+
+  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*,
+                                const ConfigurationType*);
+  virtual ~Net_Client_AsynchConnector_T ();
+
+  // override default connect strategy
+  virtual int validate_connection (const ACE_Asynch_Connect::Result&, // result
+                                   const ACE_INET_Addr&,              // remote address
+                                   const ACE_INET_Addr&);             // local address
+
+  // implement Net_Client_IConnector_T
+  virtual const ConfigurationType* getConfiguration () const;
+
+  virtual void abort ();
+  virtual bool connect (const ACE_INET_Addr&);
+
+ protected:
+  // override default creation strategy
+  // *TODO*: why isn't this being picked up ?
+  //virtual CONNECTION_T* make_handler (void);
+   virtual Net_AsynchUDPConnection_T<SessionDataType>* make_handler (void);
+
+ private:
+  typedef ACE_Asynch_Connector<Net_AsynchUDPConnection_T<SessionDataType> > inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));

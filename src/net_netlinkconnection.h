@@ -29,6 +29,7 @@
 
 #include "stream_common.h"
 
+#include "net_connection_manager_common.h"
 #include "net_exports.h"
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
@@ -42,7 +43,7 @@ template <class HANDLER> class ACE_Asynch_Connector;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 class Net_Export Net_NetlinkConnection
  : public Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
-                                     Net_TransportLayer_Netlink,
+                                     Net_INetlinkTransportLayer_t,
                                      Net_Configuration_t,
                                      Stream_SessionData_t,
                                      Stream_Statistic_t>
@@ -52,11 +53,12 @@ class Net_Export Net_NetlinkConnection
  public:
    // *NOTE*: consider encapsulating this (need to grant access to
    //         ACE_Connector however (see: ace/Connector.cpp:239))
-   Net_NetlinkConnection ();
-   //Net_NetlinkConnection (Net_IConnectionManager_t*);
+//   Net_NetlinkConnection ();
+   Net_NetlinkConnection (Net_INetlinkConnectionManager_t*);
 
    // override / implement (part of) Net_INetlinkTransportLayer
-   virtual bool initialize (const Net_SocketConfiguration_t&); // socket configuration
+   virtual bool initialize (Net_ClientServerRole_t,            // role
+                            const Net_SocketConfiguration_t&); // socket configuration
    virtual void finalize ();
    virtual void info (ACE_HANDLE&,              // return value: handle
                       ACE_Netlink_Addr&,        // return value: local SAP
@@ -77,7 +79,7 @@ class Net_Export Net_NetlinkConnection
 
  private:
   typedef Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
-                                     Net_TransportLayer_Netlink,
+                                     Net_INetlinkTransportLayer_t,
                                      Net_Configuration_t,
                                      Stream_SessionData_t,
                                      Stream_Statistic_t> inherited;
@@ -89,8 +91,9 @@ class Net_Export Net_NetlinkConnection
   //void shutdown ();
 
   virtual ~Net_NetlinkConnection ();
-  //ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection (const Net_NetlinkConnection&));
-  //ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection& operator= (const Net_NetlinkConnection&));
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection ());
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection (const Net_NetlinkConnection&));
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection& operator= (const Net_NetlinkConnection&));
 };
 #endif
 

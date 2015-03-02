@@ -26,116 +26,76 @@
 
 #include "ace/Reactor.h"
 
-#include "common_macros.h"
-
-#include "net_remote_comm.h"
 #include "net_common_tools.h"
+#include "net_macros.h"
+#include "net_remote_comm.h"
 
-RPG_Net_Client_SocketHandler::RPG_Net_Client_SocketHandler()
+Net_Client_SocketHandler::Net_Client_SocketHandler ()
 // : inherited(NULL)
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Client_SocketHandler::RPG_Net_Client_SocketHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_SocketHandler::Net_Client_SocketHandler"));
 
   // *TODO*: clean this up !!!
-  ACE_ASSERT(false);
+  ACE_ASSERT (false);
 }
 
-//RPG_Net_Client_SocketHandler::RPG_Net_Client_SocketHandler(MANAGER_t* manager_in)
-// : inherited(manager_in)
-//{
-//  RPG_TRACE(ACE_TEXT("RPG_Net_Client_SocketHandler::RPG_Net_Client_SocketHandler"));
-
-//}
-
-RPG_Net_Client_SocketHandler::~RPG_Net_Client_SocketHandler()
+Net_Client_SocketHandler::~Net_Client_SocketHandler ()
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Client_SocketHandler::~RPG_Net_Client_SocketHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_SocketHandler::~Net_Client_SocketHandler"));
 
 }
 
 int
-RPG_Net_Client_SocketHandler::open(void* arg_in)
+Net_Client_SocketHandler::open (void* arg_in)
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Client_SocketHandler::open"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_SocketHandler::open"));
+
+  int result = -1;
 
   // call baseclass...
   // *NOTE*: this registers this instance with the reactor (READ_MASK)
-  int result = inherited::open(arg_in);
+  result = inherited::open (arg_in);
   if (result == -1)
   {
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("failed to RPG_Net_SocketHandlerBase::open(): \"%m\", aborting\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_TCPSocketHandler::open(): \"%m\", aborting\n")));
 
     return -1;
   } // end IF
-//  // register with reactor...
-//  if (reactor()->register_handler(this,
-//                                  READ_MASK) == -1)
-//  {
-//    ACE_DEBUG((LM_ERROR,
-//               ACE_TEXT("failed to ACE_Reactor::register_handler(): \"%m\", aborting\n")));
-
-//    return -1;
-//  } // end IF
-
-//  // debug info
-//  ACE_INET_Addr localAddress;
-//  if (peer().get_local_addr(localAddress) == -1)
-//  {
-//    ACE_DEBUG((LM_ERROR,
-//               ACE_TEXT("failed to ACE_SOCK_Stream::get_local_addr(): \"%m\", aborting\n")));
-
-//    return -1;
-//  } // end IF
-//  ACE_INET_Addr remoteAddress;
-//  if (peer().get_remote_addr(remoteAddress) == -1)
-//  {
-//    ACE_DEBUG((LM_ERROR,
-//               ACE_TEXT("failed to ACE_SOCK_Stream::get_remote_addr(): \"%m\", aborting\n")));
-
-//    return -1;
-//  } // end IF
-//  ACE_DEBUG((LM_DEBUG,
-//             ACE_TEXT("connected (handle: %d) \"%s\" | \"%s:%u\" <--> \"%s:%u\"\n"),
-//             peer().get_handle(),
-//             localAddress.get_host_name(),
-//             localAddress.get_host_addr(),
-//             localAddress.get_port_number(),
-//             remoteAddress.get_host_name(),
-//             remoteAddress.get_port_number()));
 
   return 0;
 }
 
 int
-RPG_Net_Client_SocketHandler::handle_input(ACE_HANDLE handle_in)
+Net_Client_SocketHandler::handle_input (ACE_HANDLE handle_in)
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Client_SocketHandler::handle_input"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_SocketHandler::handle_input"));
 
-  ACE_UNUSED_ARG(handle_in);
+  int result = -1;
+
+  ACE_UNUSED_ARG (handle_in);
 
   // step0: init buffer
-  RPG_Net_Remote_Comm::PingMessage data;
-  ACE_OS::memset(&data,
-                 0,
-                 sizeof(RPG_Net_Remote_Comm::PingMessage));
+  Net_Remote_Comm::PingMessage data;
+  ACE_OS::memset (&data,
+                  0,
+                  sizeof (Net_Remote_Comm::PingMessage));
 
   // step1: read data
   size_t bytes_received = 0;
   // *TODO*: do blocking IO until further notice...
-  if (peer().recv_n(static_cast<void*>(&data),                // buffer
-                    sizeof(RPG_Net_Remote_Comm::PingMessage), // length
-                    NULL,                                     // timeout --> block
-                    &bytes_received) == -1)                   // number of recieved bytes
+  result = peer ().recv_n (static_cast<void*> (&data),            // buffer
+                           sizeof (Net_Remote_Comm::PingMessage), // length
+                           NULL,                                  // timeout --> block
+                           &bytes_received);                      // number of recieved bytes
+  if (result == -1)
   {
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("failed to ACE_SOCK_Stream::recv_n(): \"%s\", aborting\n"),
-               ACE_OS::strerror(ACE_OS::last_error())));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SOCK_Stream::recv_n(): \"%m\", aborting\n")));
 
     // --> reactor will invoke handle_close() --> close the socket
     return -1;
   } // end IF
-
   switch (bytes_received)
   {
     // *NOTE*: peer MAY only close this socket for system shutdown/application restart !!!
@@ -148,8 +108,8 @@ RPG_Net_Client_SocketHandler::handle_input(ACE_HANDLE handle_in)
     }
     case -1:
     {
-      ACE_DEBUG((LM_ERROR,
-                 ACE_TEXT("failed to ACE_SOCK_Stream::recv_n(): \"%m\", aborting\n")));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK_Stream::recv_n(): \"%m\", aborting\n")));
 
       // --> reactor will invoke handle_close() --> close the socket
       return -1;
@@ -157,12 +117,12 @@ RPG_Net_Client_SocketHandler::handle_input(ACE_HANDLE handle_in)
     default:
     {
       // --> socket is probably non-blocking...
-      if (bytes_received != sizeof(RPG_Net_Remote_Comm::PingMessage))
+      if (bytes_received != sizeof (Net_Remote_Comm::PingMessage))
       {
-        ACE_DEBUG((LM_ERROR,
-                   ACE_TEXT("only managed to read %u/%u bytes, aborting\n"),
-                   bytes_received,
-                   sizeof(RPG_Net_Remote_Comm::PingMessage)));
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("only managed to read %u/%u bytes, aborting\n"),
+                    bytes_received,
+                    sizeof (Net_Remote_Comm::PingMessage)));
 
         // --> reactor will invoke handle_close() --> close the socket
         return -1;
@@ -173,39 +133,40 @@ RPG_Net_Client_SocketHandler::handle_input(ACE_HANDLE handle_in)
   } // end SWITCH
 
 //   // step2: print data
-//   ACE_DEBUG((LM_DEBUG,
-//              ACE_TEXT("[%u]: received %u bytes [length: %u; type: \"%s\"; counter: %u]\n"),
-//              handle_in,
-//              bytes_received,
-//              data.messageHeader.messageLength,
-//              RPG_Net_Common_Tools::messageType2String(data.messageHeader.messageType).c_str(),
-//              data.counter));
+//   ACE_DEBUG ((LM_DEBUG,
+//               ACE_TEXT ("[%u]: received %u bytes [length: %u; type: \"%s\"; counter: %u]\n"),
+//               handle_in,
+//               bytes_received,
+//               data.messageHeader.messageLength,
+//               Net_Common_Tools::messageType2String (data.messageHeader.messageType).c_str (),
+//               data.counter));
 
   switch (data.messageHeader.messageType)
   {
-    case RPG_Net_Remote_Comm::RPG_NET_PING:
+    case Net_Remote_Comm::NET_PING:
     {
       // reply with a "PONG"
-      RPG_Net_Remote_Comm::PongMessage reply;
-      ACE_OS::memset(&reply,
-                     0,
-                     sizeof(RPG_Net_Remote_Comm::PongMessage));
-      reply.messageHeader.messageLength = sizeof(RPG_Net_Remote_Comm::PongMessage) - sizeof(unsigned long);
-      reply.messageHeader.messageType = RPG_Net_Remote_Comm::RPG_NET_PONG;
+      Net_Remote_Comm::PongMessage reply;
+      ACE_OS::memset (&reply,
+                      0,
+                      sizeof (Net_Remote_Comm::PongMessage));
+      reply.messageHeader.messageLength = sizeof (Net_Remote_Comm::PongMessage) - sizeof(unsigned long);
+      reply.messageHeader.messageType = Net_Remote_Comm::NET_PONG;
 
       // step2: send it over the net...
-      size_t bytes_sent = peer().send_n(static_cast<const void*>(&reply),         // buffer
-                                        sizeof(RPG_Net_Remote_Comm::PongMessage), // length
-                                        NULL,                                     // timeout --> block
-                                        &bytes_sent);                             // number of sent bytes
+      size_t bytes_sent = -1;
+      bytes_sent = peer ().send_n (static_cast<const void*> (&reply),     // buffer
+                                   sizeof (Net_Remote_Comm::PongMessage), // length
+                                   NULL,                                  // timeout --> block
+                                   &bytes_sent);                          // number of sent bytes
       // *NOTE*: we'll ALSO get here when the client has closed the socket
       // in a well-behaved way... --> don't treat this as an error !
       switch (bytes_sent)
       {
         case -1:
         {
-          ACE_DEBUG((LM_ERROR,
-                     ACE_TEXT("failed to ACE_SOCK_Stream::send_n(): \"%m\", aborting\n")));
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SOCK_Stream::send_n(): \"%m\", aborting\n")));
 
           // --> reactor will invoke handle_close() --> close the socket
           return -1;
@@ -213,11 +174,10 @@ RPG_Net_Client_SocketHandler::handle_input(ACE_HANDLE handle_in)
         case 0:
         default:
         {
-          if (bytes_sent == sizeof(RPG_Net_Remote_Comm::PongMessage))
+          if (bytes_sent == sizeof (Net_Remote_Comm::PongMessage))
           {
             // *** GOOD CASE ***
 
-            // debug info
             std::cerr << '.';
 
             break;
@@ -225,10 +185,10 @@ RPG_Net_Client_SocketHandler::handle_input(ACE_HANDLE handle_in)
 
           // --> socket is probably non-blocking...
           // *TODO*: support/use non-blocking sockets !
-          ACE_DEBUG((LM_ERROR,
-                     ACE_TEXT("only managed to send %u/%u bytes, aborting\n"),
-                     bytes_sent,
-                     sizeof(RPG_Net_Remote_Comm::PongMessage)));
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("only managed to send %u/%u bytes, aborting\n"),
+                      bytes_sent,
+                      sizeof (Net_Remote_Comm::PongMessage)));
 
           // --> reactor will invoke handle_close() --> close the socket
           return -1;
@@ -237,11 +197,11 @@ RPG_Net_Client_SocketHandler::handle_input(ACE_HANDLE handle_in)
 
       break;
     }
-    case RPG_Net_Remote_Comm::RPG_NET_PONG:
+    case Net_Remote_Comm::NET_PONG:
     default:
     {
-      ACE_DEBUG((LM_ERROR,
-                 ACE_TEXT("protocol error, aborting\n")));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("protocol error, aborting\n")));
 
       // --> reactor will invoke handle_close() --> close the socket
       return -1;
@@ -252,41 +212,20 @@ RPG_Net_Client_SocketHandler::handle_input(ACE_HANDLE handle_in)
 }
 
 int
-RPG_Net_Client_SocketHandler::handle_close(ACE_HANDLE handle_in,
-                                           ACE_Reactor_Mask mask_in)
+Net_Client_SocketHandler::handle_close (ACE_HANDLE handle_in,
+                                        ACE_Reactor_Mask mask_in)
 {
-  RPG_TRACE(ACE_TEXT("RPG_Net_Client_SocketHandler::handle_close"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_SocketHandler::handle_close"));
 
   // *NOTE*: this is called when:
   // - the server closes the socket
   // - client closed() handler itself (failure to connect ?)
 
-  // debug info
   if (handle_in != ACE_INVALID_HANDLE)
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("lost connection %d to server...\n"),
-               handle_in));
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("lost connection %d to server...\n"),
+                handle_in));
 
-  return inherited::handle_close(handle_in,
-                                 mask_in);
-}
-
-bool
-RPG_Net_Client_SocketHandler::collect(RPG_Net_RuntimeStatistic& data_out) const
-{
-  RPG_TRACE(ACE_TEXT("RPG_Net_Client_SocketHandler::collect"));
-
-  // *TODO*
-  ACE_ASSERT(false);
-
-  return false;
-}
-
-void
-RPG_Net_Client_SocketHandler::report() const
-{
-  RPG_TRACE(ACE_TEXT("RPG_Net_Client_SocketHandler::report"));
-
-  // *TODO*
-  ACE_ASSERT(false);
+  return inherited::handle_close (handle_in,
+                                  mask_in);
 }

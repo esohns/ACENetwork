@@ -29,17 +29,11 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Reactor_Notification_Strategy.h"
 
-//#include "common_referencecounter_base.h"
-//#include "common_irefcount.h"
-
-//#include "net_iconnection.h"
-//#include "net_iconnectionmanager.h"
+//#include "net_exports.h"
 
 template <typename SocketType>
 class Net_UDPSocketHandler_T
  : public SocketType
- //: public Common_IRefCount
-// : public ACE_Event_Handler
  , public ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH>
 // : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
 {
@@ -57,44 +51,27 @@ class Net_UDPSocketHandler_T
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
-//  // implement (part of) Net_IConnection
-//  virtual void close ();
-//  virtual void info (ACE_HANDLE&,           // return value: handle
-//                     ACE_INET_Addr&,        // return value: local SAP
-//                     ACE_INET_Addr&) const; // return value: remote SAP
-//  virtual unsigned int id () const;
+  // resolve ambiguity between ACE_Event_Handler and ACE_Svc_Handler
+  using ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH>::get_handle;
+  //  using ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>::get_handle;
+  using ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH>::set_handle;
+  //  using ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>::set_handle;
 
  protected:
   typedef ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH> SVC_HANDLER_T;
 
-//  typedef Net_IConnectionManager<ConfigurationType,
-//                                 StatisticsContainerType> MANAGER_T;
-//  Net_UDPSocketHandler (MANAGER_T*);
   Net_UDPSocketHandler_T ();
   virtual ~Net_UDPSocketHandler_T ();
 
   ACE_Reactor_Notification_Strategy notificationStrategy_;
-//  MANAGER_T*                        manager_;
-  //ConfigurationType                 userData_;
-//  bool                              isRegistered_;
 
  private:
   typedef SocketType inherited;
-  //typedef Common_IRefCount inherited;
-//  typedef ACE_Event_Handler inherited;
   typedef ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH> inherited2;
 //  typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&));
-
-  //// implement Common_IRefCount
-  //virtual void increase ();
-  //virtual void decrease ();
-  //virtual unsigned int count ();
-  //// *NOTE*: this call should block IF the count is > 0 and wait
-  //// until the count reaches 0 the next time
-  //virtual void wait_zero ();
 };
 
 // include template implementation

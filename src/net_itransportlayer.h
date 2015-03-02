@@ -26,20 +26,21 @@
 #include "ace/Netlink_Addr.h"
 
 #include "common_idumpstate.h"
-#include "common_iinitialize.h"
 
+#include "net_common.h"
 #include "net_configuration.h"
 #include "net_exports.h"
 
 template <typename AddressType,
           typename ConfigurationType>
 class Net_ITransportLayer_T
- : public Common_IInitialize_T<ConfigurationType>
- , public Common_IDumpState
+ : public Common_IDumpState
 {
  public:
   virtual ~Net_ITransportLayer_T () {};
 
+  virtual bool initialize (Net_ClientServerRole_t,        // role
+                           const ConfigurationType&) = 0; // configuration
   virtual void finalize () = 0;
 
   virtual void ping () = 0; // ping the peer !

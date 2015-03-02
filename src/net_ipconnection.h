@@ -21,28 +21,27 @@
 #ifndef Net_IPCONNECTION_H
 #define Net_IPCONNECTION_H
 
-#include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
+//#include "ace/Global_Macros.h"
+//#include "ace/INET_Addr.h"
 
-#include "net_connection_manager_common.h"
-#include "net_exports.h"
-#include "net_socket_common.h"
-#include "net_socketconnection_base.h"
-#include "net_stream_common.h"
-#include "net_transportlayer_udp.h"
+//#include "net_connection_manager_common.h"
+//#include "net_exports.h"
+//#include "net_socket_common.h"
+//#include "net_socketconnection_base.h"
+//#include "net_stream_common.h"
+//#include "net_transportlayer_udp.h"
 
 //class Net_Export Net_IPMulticastConnection
 // : public Net_IPMulticastHandler,
 //   public ACE_Task<ACE_MT_SYNCH>
 //{
 // public:
-//  Net_IPMulticastConnection (const ACE_INET_Addr&); // peer address
+//  Net_IPMulticastConnection (Net_IIPConnectionManager_t*); // connection manager handle
 //
 //  //  // implement (part of) Net_IConnection
 //  //  virtual void ping ();
 //
 //  // override some task-based members
-//  virtual int svc (void);
 //  virtual int open (void* = NULL); // args
 //  virtual int close (u_long = 0); // args
 //
@@ -57,23 +56,22 @@
 //  typedef Net_IPMulticastHandler inherited;
 //  typedef ACE_Task<ACE_MT_SYNCH> inherited2;
 //
-//  // stop worker, if any
-//  void shutdown ();
-//
 //  virtual ~Net_IPMulticastConnection ();
 //  ACE_UNIMPLEMENTED_FUNC (Net_IPMulticastConnection ());
 //  ACE_UNIMPLEMENTED_FUNC (Net_IPMulticastConnection (const Net_IPMulticastConnection&));
 //  ACE_UNIMPLEMENTED_FUNC (Net_IPMulticastConnection& operator= (const Net_IPMulticastConnection&));
+//
+//  bool joined_;
 //};
-//
+
 ///////////////////////////////////////////
-//
+
 //class Net_Export Net_IPBroadcastConnection
 // : public Net_IPBroadcastHandler,
 //   public ACE_Task<ACE_MT_SYNCH>
 //{
 // public:
-//  Net_IPBroadcastConnection (const ACE_INET_Addr&); // peer address
+//  Net_IPBroadcastConnection (Net_IIPConnectionManager_t*); // connection manager handle
 //
 //  //  // implement (part of) Net_IConnection
 //  //  virtual void ping ();

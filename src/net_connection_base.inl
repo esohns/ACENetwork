@@ -23,42 +23,42 @@
 
 #include "net_macros.h"
 
+//template <typename ConfigurationType,
+//          typename SessionDataType,
+//          typename ITransportLayerType,
+//          typename StatisticsContainerType>
+//Net_ConnectionBase_T<ConfigurationType,
+//                     SessionDataType,
+//                     ITransportLayerType,
+//                     StatisticsContainerType>::Net_ConnectionBase_T ()
+// : inherited (1,    // initial count
+//              true) // delete on zero ?
+// , manager_ (NULL)
+// //, configuration_ ()
+// , sessionData_ ()
+// , isRegistered_ (false)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
+
+//  // init user data
+//  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
+//  //ACE_OS::memset (&sessionData_, 0, sizeof (sessionData_));
+//}
+
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType>
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
-                     TransportLayerType,
-                     StatisticsContainerType>::Net_ConnectionBase_T ()
+                     ITransportLayerType,
+                     StatisticsContainerType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
- , manager_ (NULL)
  //, configuration_ ()
- , sessionData_ ()
  , isRegistered_ (false)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
-
-  // init user data
-  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
-  //ACE_OS::memset (&sessionData_, 0, sizeof (sessionData_));
-}
-
-template <typename ConfigurationType,
-          typename SessionDataType,
-          typename TransportLayerType,
-          typename StatisticsContainerType>
-Net_ConnectionBase_T<ConfigurationType,
-                     SessionDataType,
-                     TransportLayerType,
-                     StatisticsContainerType>::Net_ConnectionBase_T (Net_IConnectionManager_t* interfaceHandle_in)
- : inherited (1,    // initial count
-              true) // delete on zero ?
  , manager_ (interfaceHandle_in)
- //, configuration_ ()
  , sessionData_ ()
- , isRegistered_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
 
@@ -82,11 +82,11 @@ Net_ConnectionBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType>
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
-                     TransportLayerType,
+                     ITransportLayerType,
                      StatisticsContainerType>::~Net_ConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
@@ -95,16 +95,18 @@ Net_ConnectionBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType>
 bool
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
-                     TransportLayerType,
-                     StatisticsContainerType>::initialize (const Net_SocketConfiguration_t& configuration_in)
+                     ITransportLayerType,
+                     StatisticsContainerType>::initialize (Net_ClientServerRole_t role_in,
+                                                           const Net_SocketConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));
 
+  ACE_UNUSED_ARG (role_in);
   ACE_UNUSED_ARG (configuration_in);
 
   // sanity check(s)
@@ -145,12 +147,12 @@ Net_ConnectionBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType>
 void
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
-                     TransportLayerType,
+                     ITransportLayerType,
                      StatisticsContainerType>::finalize ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::finalize"));
@@ -184,12 +186,12 @@ Net_ConnectionBase_T<ConfigurationType,
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType>
 bool
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
-                     TransportLayerType,
+                     ITransportLayerType,
                      StatisticsContainerType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));

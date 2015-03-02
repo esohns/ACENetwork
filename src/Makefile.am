@@ -27,6 +27,7 @@ include_HEADERS = \
   net_exports.h \
   net_iconnection.h \
   net_iconnectionmanager.h \
+  net_ipconnection.h \
   net_itransportlayer.h \
   net_macros.h \
   net_message.h \
@@ -65,6 +66,7 @@ include_HEADERS = \
   net_transportlayer_tcp.h \
   net_transportlayer_udp.h \
   net_udpconnection.h \
+  net_udpconnection.inl \
   net_udpsockethandler.h \
   net_udpsockethandler.inl
 
@@ -94,6 +96,8 @@ libACENetwork_la_SOURCES = \
   net_exports.h \
   net_iconnection.h \
   net_iconnectionmanager.h \
+  net_ipconnection.cpp \
+  net_ipconnection.h \
   net_itransportlayer.h \
   net_macros.h \
   net_message.cpp \
@@ -156,6 +160,7 @@ libACENetwork_la_SOURCES = \
   net_transportlayer_udp.h \
   net_udpconnection.cpp \
   net_udpconnection.h \
+  net_udpconnection.inl \
   net_udpsockethandler.cpp \
   net_udpsockethandler.h \
   net_udpsockethandler.inl \

@@ -24,6 +24,9 @@
     <ClCompile Include="..\..\src\client\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\client\net_client_sockethandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\client\net_client_asynchconnector.h">

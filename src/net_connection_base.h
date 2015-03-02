@@ -32,19 +32,20 @@
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType>
 class Net_ConnectionBase_T
  : public Common_ReferenceCounterBase
- , public Net_IConnection_T<TransportLayerType,
+ , public Net_IConnection_T<ITransportLayerType,
                             StatisticsContainerType>
  , public Common_IInitialize_T<ConfigurationType>
 {
  public:
-  Net_ConnectionBase_T ();
+//  Net_ConnectionBase_T ();
 
   // implement (part of) Net_ITransportLayer_T
-  virtual bool initialize (const Net_SocketConfiguration_t&); // socket configuration
+  virtual bool initialize (Net_ClientServerRole_t,            // role
+                           const Net_SocketConfiguration_t&); // socket configuration
   virtual void finalize ();
 
   // implement Common_IInitialize_T
@@ -53,22 +54,23 @@ class Net_ConnectionBase_T
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
-                                   TransportLayerType,
-                                   StatisticsContainerType> Net_IConnectionManager_t;
+                                   ITransportLayerType,
+                                   StatisticsContainerType> ICONNECTION_MANAGER_T;
 
-  Net_ConnectionBase_T (Net_IConnectionManager_t*);
+  Net_ConnectionBase_T (ICONNECTION_MANAGER_T*);
   virtual ~Net_ConnectionBase_T ();
 
-  Net_IConnectionManager_t* manager_;
-  ConfigurationType         configuration_;
-  SessionDataType           sessionData_;
-  bool                      isRegistered_;
+  ConfigurationType      configuration_;
+  bool                   isRegistered_;
+  ICONNECTION_MANAGER_T* manager_;
+  SessionDataType        sessionData_;
 
  private:
   typedef Common_ReferenceCounterBase inherited;
-  typedef Net_IConnection_T<TransportLayerType,
+  typedef Net_IConnection_T<ITransportLayerType,
                             StatisticsContainerType> inherited2;
 
+  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&));
 };

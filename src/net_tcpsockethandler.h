@@ -28,10 +28,11 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Reactor_Notification_Strategy.h"
 
+#include "net_exports.h"
 //#include "net_configuration.h"
 //#include "net_sockethandler_base.h"
 
-class Net_TCPSocketHandler
+class Net_Export Net_TCPSocketHandler
  //: public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t,
  //                               Net_SessionData_t>,
  : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>

@@ -24,13 +24,12 @@
 #include "common_istatistic.h"
 #include "common_irefcount.h"
 
-template <typename TransportLayerType,
+template <typename ITransportLayerType,
           typename StatisticsContainerType>
 class Net_IConnection_T
  : public Common_IStatistic_T<StatisticsContainerType>
  , virtual public Common_IRefCount
-// , virtual public TransportLayerType
- , public TransportLayerType
+ , virtual public ITransportLayerType
 {
  public:
   virtual ~Net_IConnection_T () {};

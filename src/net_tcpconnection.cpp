@@ -26,19 +26,19 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-//Net_TCPConnection::Net_TCPConnection (Net_IConnectionManager_t* interfaceHandle_in)
-// : inherited (interfaceHandle_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
-//
-//}
-
-Net_TCPConnection::Net_TCPConnection ()
- //: inherited ()
+Net_TCPConnection::Net_TCPConnection (Net_ITCPConnectionManager_t* interfaceHandle_in)
+ : inherited (interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
 
 }
+
+//Net_TCPConnection::Net_TCPConnection ()
+// //: inherited ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
+
+//}
 
 Net_TCPConnection::~Net_TCPConnection ()
 {
@@ -47,11 +47,13 @@ Net_TCPConnection::~Net_TCPConnection ()
 }
 
 bool
-Net_TCPConnection::initialize (const Net_SocketConfiguration_t& configuration_in)
+Net_TCPConnection::initialize (Net_ClientServerRole_t role_in,
+                               const Net_SocketConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::initialize"));
 
-  if (!Net_ConnectionBase_T::initialize (configuration_in))
+  if (!Net_ConnectionBase_T::initialize (role_in,
+                                         configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
@@ -94,7 +96,7 @@ Net_TCPConnection::initialize (const Net_SocketConfiguration_t& configuration_in
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, reinterpret_cast<unsigned int> (handle),
-              ACE_TEXT (localAddress.c_str ()),
+              ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
@@ -572,19 +574,19 @@ Net_TCPConnection::handle_close (ACE_HANDLE handle_in,
 
 /////////////////////////////////////////
 
-Net_AsynchTCPConnection::Net_AsynchTCPConnection ()
-  //: inherited ()
+//Net_AsynchTCPConnection::Net_AsynchTCPConnection ()
+//  //: inherited ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
+
+//}
+
+Net_AsynchTCPConnection::Net_AsynchTCPConnection (Net_ITCPConnectionManager_t* interfaceHandle_in)
+ : inherited (interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
 
 }
-
-//Net_AsynchTCPConnection::Net_AsynchTCPConnection (Net_IConnectionManager_t* interfaceHandle_in)
-// : inherited (interfaceHandle_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
-//
-//}
 
 Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 {
@@ -700,11 +702,13 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 //}
 
 bool
-Net_AsynchTCPConnection::initialize (const Net_SocketConfiguration_t& configuration_in)
+Net_AsynchTCPConnection::initialize (Net_ClientServerRole_t role_in,
+                                     const Net_SocketConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::initialize"));
 
-  if (!Net_ConnectionBase_T::initialize (configuration_in))
+  if (!Net_ConnectionBase_T::initialize (role_in,
+                                         configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
@@ -747,7 +751,7 @@ Net_AsynchTCPConnection::initialize (const Net_SocketConfiguration_t& configurat
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, reinterpret_cast<unsigned int> (handle),
-              ACE_TEXT (localAddress.c_str ()),
+              ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));

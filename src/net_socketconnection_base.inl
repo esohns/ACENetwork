@@ -28,17 +28,16 @@
 #include "net_macros.h"
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 Net_SocketConnectionBase_T<SocketHandlerType,
-                           TransportLayerType,
+                           ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
-                           StatisticsContainerType>::Net_SocketConnectionBase_T ()
-                           //StatisticsContainerType>::Net_SocketConnectionBase_T (Net_IConnectionManager_t* interfaceHandle_in)
- : inherited ()
+                           StatisticsContainerType>::Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
+ : inherited (interfaceHandle_in)
  //, inherited2 ()
  //, inherited3 (interfaceHandle_in)
 {
@@ -47,12 +46,12 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 Net_SocketConnectionBase_T<SocketHandlerType,
-                           TransportLayerType,
+                           ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
                            StatisticsContainerType>::~Net_SocketConnectionBase_T ()
@@ -69,13 +68,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_SocketConnectionBase_T<SocketHandlerType,
-                           TransportLayerType,
+                           ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
                            StatisticsContainerType>::ping ()
@@ -86,13 +85,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 bool
 Net_SocketConnectionBase_T<SocketHandlerType,
-                           TransportLayerType,
+                           ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
                            StatisticsContainerType>::collect (StatisticsContainerType& data_out) const
@@ -113,13 +112,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_SocketConnectionBase_T<SocketHandlerType,
-                           TransportLayerType,
+                           ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
                            StatisticsContainerType>::report () const
@@ -243,13 +242,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 //}
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 int
 Net_SocketConnectionBase_T<SocketHandlerType,
-                           TransportLayerType,
+                           ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
                            StatisticsContainerType>::open (void* arg_in)
@@ -313,8 +312,8 @@ Net_SocketConnectionBase_T<SocketHandlerType,
     // *TODO*: this clearly is a design glitch; parametrize the socket
     //         configuration
     // *TODO*: find a way to pass role information (acceptor / connector)
-    if (!inherited2::initialize (ROLE_INVALID,
-                                 configuration_p->socketConfiguration))
+    if (!inherited::initialize (ROLE_INVALID,
+                                configuration_p->socketConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(): \"%m\", aborting\n")));
@@ -327,13 +326,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 int
 Net_SocketConnectionBase_T<SocketHandlerType,
-                           TransportLayerType,
+                           ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
                            StatisticsContainerType>::close (u_long arg_in)
@@ -395,13 +394,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 int
 Net_SocketConnectionBase_T<SocketHandlerType,
-                           TransportLayerType,
+                           ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
                            StatisticsContainerType>::handle_close (ACE_HANDLE handle_in,
@@ -530,17 +529,16 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 /////////////////////////////////////////
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 TransportLayerType,
+                                 ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
-                                 StatisticsContainerType>::Net_AsynchSocketConnectionBase_T ()
-                           //StatisticsContainerType>::Net_SocketConnectionBase_T (Net_IConnectionManager_t* interfaceHandle_in)
- : inherited ()
+                                 StatisticsContainerType>::Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
+ : inherited (interfaceHandle_in)
  //, inherited2 ()
  //, inherited3 (interfaceHandle_in)
  , configuration_ (NULL)
@@ -550,35 +548,28 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 TransportLayerType,
+                                 ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
                                  StatisticsContainerType>::~Net_AsynchSocketConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::~Net_AsynchSocketConnectionBase_T"));
 
-  //// wait for our worker (if any)
-  //if (inherited::userData_.useThreadPerConnection)
-  //  if (inherited::wait() == -1)
-  //    ACE_DEBUG((LM_ERROR,
-  //               ACE_TEXT("failed to ACE_Task_Base::wait(): \"%m\", continuing\n")));
-
-  inherited::finalize ();
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 TransportLayerType,
+                                 ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
                                  StatisticsContainerType>::ping ()
@@ -589,13 +580,13 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 bool
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 TransportLayerType,
+                                 ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
                                  StatisticsContainerType>::collect (StatisticsContainerType& data_out) const
@@ -616,13 +607,13 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 TransportLayerType,
+                                 ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
                                  StatisticsContainerType>::report () const
@@ -746,13 +737,13 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 //}
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 TransportLayerType,
+                                 ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
                                  StatisticsContainerType>::open (ACE_HANDLE handle_in,
@@ -772,11 +763,13 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
     // *TODO*: this clearly is a design glitch; parametrize the socket
     //         configuration
     // *TODO*: find a way to pass role information (acceptor / connector)
-    if (!inherited2::initialize (ROLE_INVALID,
-                                 configuration_->socketConfiguration))
+    SocketHandlerType* socket_handler_p = this;
+    SocketHandlerType::CONNECTION_BASE_T* connection_base_p = socket_handler_p;
+    if (!connection_base_p->initialize (ROLE_INVALID,
+                                        configuration_->socketConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(): \"%m\", returning\n")));
+                  ACE_TEXT ("failed to ITransportLayerType::initialize(): \"%m\", returning\n")));
 
       return;
     } // end IF
@@ -784,13 +777,13 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 TransportLayerType,
+                                 ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
                                  StatisticsContainerType>::act (const void* act_in)
@@ -802,13 +795,13 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 }
 
 template <typename SocketHandlerType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
           typename StatisticsContainerType>
 int
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 TransportLayerType,
+                                 ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
                                  StatisticsContainerType>::handle_close (ACE_HANDLE handle_in,

@@ -21,47 +21,34 @@
 #ifndef RPG_NET_CLIENT_SOCKETHANDLER_H
 #define RPG_NET_CLIENT_SOCKETHANDLER_H
 
-#include "rpg_net_client_exports.h"
-#include "rpg_net_stream_common.h"
-#include "rpg_net_sockethandler_base.h"
-//#include "rpg_net_iconnectionmanager.h"
-
 #include "ace/Global_Macros.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Svc_Handler.h"
-#include "ace/SOCK_Stream.h"
+#include "ace/Event_Handler.h"
 
-class RPG_Net_Client_Export RPG_Net_Client_SocketHandler
- : public RPG_Net_SocketHandlerBase<RPG_Net_ConfigPOD,
-                                    RPG_Net_RuntimeStatistic>
+#include "stream_common.h"
+
+#include "net_client_exports.h"
+#include "net_tcpsockethandler.h"
+
+class Net_Client_Export Net_Client_SocketHandler
+ : public Net_TCPSocketHandler
 {
  public:
-//  typedef RPG_Net_IConnectionManager<RPG_Net_ConfigPOD,
-//                                     RPG_Net_RuntimeStatistic> MANAGER_t;
-//  RPG_Net_Client_SocketHandler(MANAGER_t*);
-//  // *TODO*: make this private !!!
-  RPG_Net_Client_SocketHandler();
-  virtual ~RPG_Net_Client_SocketHandler();
+  Net_Client_SocketHandler ();
+  virtual ~Net_Client_SocketHandler ();
 
-  virtual int open(void* = NULL); // args
-  virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
+  virtual int open (void* = NULL); // args
+  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() returns -1
-  virtual int handle_close(ACE_HANDLE = ACE_INVALID_HANDLE,
-                           ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
-
-  // implement RPG_Common_IStatistic
-  // *NOTE*: delegate these to our stream
-  virtual bool collect(RPG_Net_RuntimeStatistic&) const; // return value: statistic data
-  virtual void report() const;
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef RPG_Net_SocketHandlerBase<RPG_Net_ConfigPOD,
-                                    RPG_Net_RuntimeStatistic> inherited;
+  typedef Net_TCPSocketHandler inherited;
 
-  //ACE_UNIMPLEMENTED_FUNC(RPG_Net_Client_SocketHandler());
-  ACE_UNIMPLEMENTED_FUNC(RPG_Net_Client_SocketHandler(const RPG_Net_Client_SocketHandler&));
-  ACE_UNIMPLEMENTED_FUNC(RPG_Net_Client_SocketHandler& operator=(const RPG_Net_Client_SocketHandler&));
+  //ACE_UNIMPLEMENTED_FUNC (Net_Client_SocketHandler ());
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_SocketHandler (const Net_Client_SocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_SocketHandler& operator= (const Net_Client_SocketHandler&));
 };
 
 #endif

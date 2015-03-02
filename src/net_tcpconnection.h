@@ -27,6 +27,7 @@
 
 #include "stream_common.h"
 
+#include "net_connection_manager_common.h"
 #include "net_exports.h"
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
@@ -39,9 +40,9 @@ template <class HANDLER> class ACE_Asynch_Connector;
 
 class Net_Export Net_TCPConnection
  : public Net_SocketConnectionBase_T<Net_TCPHandler_t,
-                                     Net_TransportLayer_TCP,
+                                     Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
-                                     Stream_SessionData_t,
+                                     Net_StreamSessionData_t,
                                      Stream_Statistic_t>
 {
   //friend class ACE_Connector<Net_TCPConnection, ACE_SOCK_CONNECTOR>;
@@ -49,11 +50,12 @@ class Net_Export Net_TCPConnection
  public:
   // *NOTE*: consider encapsulating this (need to grant access to
   //         ACE_Connector however (see: ace/Connector.cpp:239))
-  Net_TCPConnection ();
-  //Net_TCPConnection (Net_IConnectionManager_t*);
+//  Net_TCPConnection ();
+  Net_TCPConnection (Net_ITCPConnectionManager_t*);
 
   // override / implement (part of) Net_IInetTransportLayer
-  virtual bool initialize (const Net_SocketConfiguration_t&); // socket configuration
+  virtual bool initialize (Net_ClientServerRole_t,            // role
+                           const Net_SocketConfiguration_t&); // socket configuration
   virtual void finalize ();
   virtual void info (ACE_HANDLE&,           // return value: handle
                      ACE_INET_Addr&,        // return value: local SAP
@@ -74,9 +76,9 @@ class Net_Export Net_TCPConnection
 
  private:
   typedef Net_SocketConnectionBase_T<Net_TCPHandler_t,
-                                     Net_TransportLayer_TCP,
+                                     Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
-                                     Stream_SessionData_t,
+                                     Net_StreamSessionData_t,
                                      Stream_Statistic_t> inherited;
 
   //// override some task-based members
@@ -94,9 +96,9 @@ class Net_Export Net_TCPConnection
 
 class Net_Export Net_AsynchTCPConnection
  : public Net_AsynchSocketConnectionBase_T<Net_AsynchTCPHandler_t,
-                                           Net_TransportLayer_TCP,
+                                           Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
-                                           Stream_SessionData_t,
+                                           Net_StreamSessionData_t,
                                            Stream_Statistic_t>
 {
  friend class ACE_Asynch_Connector<Net_AsynchTCPConnection>;
@@ -104,17 +106,18 @@ class Net_Export Net_AsynchTCPConnection
  public:
    // *WARNING*: need to make this available to Asynch_Connector
    //            (see: ace/Asynch_Connector.cpp:239)
-   Net_AsynchTCPConnection ();
-  //Net_AsynchTCPConnection (Net_IConnectionManager_t*);
+//   Net_AsynchTCPConnection ();
+  Net_AsynchTCPConnection (Net_ITCPConnectionManager_t*);
 
-   // override / implement (part of) Net_IInetTransportLayer
-   virtual bool initialize (const Net_SocketConfiguration_t&); // socket configuration
-   virtual void finalize ();
-   virtual void info (ACE_HANDLE&,           // return value: handle
-                      ACE_INET_Addr&,        // return value: local SAP
-                      ACE_INET_Addr&) const; // return value: remote SAP
-   virtual unsigned int id () const;
-   virtual void dump_state () const;
+  // override / implement (part of) Net_IInetTransportLayer
+  virtual bool initialize (Net_ClientServerRole_t,            // role
+                           const Net_SocketConfiguration_t&); // socket configuration
+  virtual void finalize ();
+  virtual void info (ACE_HANDLE&,           // return value: handle
+                     ACE_INET_Addr&,        // return value: local SAP
+                     ACE_INET_Addr&) const; // return value: remote SAP
+  virtual unsigned int id () const;
+  virtual void dump_state () const;
 
   //// override some task-based members
   //virtual int open (void* = NULL); // args
@@ -129,9 +132,9 @@ class Net_Export Net_AsynchTCPConnection
 
  private:
   typedef Net_AsynchSocketConnectionBase_T<Net_AsynchTCPHandler_t,
-                                           Net_TransportLayer_TCP,
+                                           Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
-                                           Stream_SessionData_t,
+                                           Net_StreamSessionData_t,
                                            Stream_Statistic_t> inherited;
 
   //// override some task-based members
@@ -141,6 +144,7 @@ class Net_Export Net_AsynchTCPConnection
   //void shutdown ();
 
   virtual ~Net_AsynchTCPConnection ();
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection ());
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection (const Net_AsynchTCPConnection&));
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection& operator= (const Net_AsynchTCPConnection&));
 };
