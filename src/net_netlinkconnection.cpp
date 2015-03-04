@@ -26,7 +26,7 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-Net_NetlinkConnection::Net_NetlinkConnection (Net_INetlinkConnectionManager_t* interfaceHandle_in)
+Net_NetlinkConnection::Net_NetlinkConnection (ICONNECTION_MANAGER_T* interfaceHandle_in)
  : inherited (interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection::Net_NetlinkConnection"));

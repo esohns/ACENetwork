@@ -31,21 +31,23 @@
 
 #include "net_connection_manager_common.h"
 //#include "net_exports.h"
-#include "net_socket_common.h"
+//#include "net_socket_common.h"
 #include "net_socketconnection_base.h"
 #include "net_stream_common.h"
 #include "net_transportlayer_udp.h"
 
-template <typename SessionDataType>
+template <typename SessionDataType,
+          typename HandlerType>
 class Net_UDPConnection_T
- : public Net_SocketConnectionBase_T<Net_UDPHandler_t,
+ : public Net_SocketConnectionBase_T<HandlerType,
                                      Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
                                      SessionDataType,
                                      Stream_Statistic_t>
  , public Net_TransportLayer_UDP
 {
-  friend class ACE_Connector<Net_UDPConnection_T<SessionDataType>,
+  friend class ACE_Connector<Net_UDPConnection_T<SessionDataType,
+                                                 HandlerType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
@@ -88,7 +90,7 @@ class Net_UDPConnection_T
 ////  using ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>::set_handle;
 
  private:
-  typedef Net_SocketConnectionBase_T<Net_UDPHandler_t,
+  typedef Net_SocketConnectionBase_T<HandlerType,
                                      Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
                                      SessionDataType,
@@ -106,16 +108,18 @@ class Net_UDPConnection_T
 
 ///////////////////////////////////////////
 
-template <typename SessionDataType>
+template <typename SessionDataType,
+          typename HandlerType>
 class Net_AsynchUDPConnection_T
- : public Net_AsynchSocketConnectionBase_T<Net_AsynchUDPHandler_t,
+ : public Net_AsynchSocketConnectionBase_T<HandlerType,
                                            Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
                                            SessionDataType,
                                            Stream_Statistic_t>
  , public Net_TransportLayer_UDP
 {
-  friend class ACE_Asynch_Connector<Net_AsynchUDPConnection_T<SessionDataType> >;
+  friend class ACE_Asynch_Connector<Net_AsynchUDPConnection_T<SessionDataType,
+                                                              HandlerType> >;
 
  public:
   virtual ~Net_AsynchUDPConnection_T ();
@@ -150,7 +154,7 @@ class Net_AsynchUDPConnection_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef Net_AsynchSocketConnectionBase_T<Net_AsynchUDPHandler_t,
+  typedef Net_AsynchSocketConnectionBase_T<HandlerType,
                                            Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
                                            SessionDataType,

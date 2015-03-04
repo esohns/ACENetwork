@@ -18,12 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef RPG_NET_MESSAGE_BASE_H
-#define RPG_NET_MESSAGE_BASE_H
+#ifndef NET_MESSAGE_BASE_H
+#define NET_MESSAGE_BASE_H
+
+#include <string>
 
 #include "ace/Global_Macros.h"
-
-//#include "rpg_net_remote_comm.h"
 
 #include "stream_message_base.h"
 
@@ -39,10 +39,11 @@ class Net_MessageBase_T
   virtual ~Net_MessageBase_T ();
 
   // used for pre-allocated messages...
-  virtual void init (// Stream_MessageBase members
-                     ACE_Data_Block*); // data block to use
+  virtual void initialize (// Stream_MessageBase members
+                           ACE_Data_Block*); // data block to use
 
   virtual ProtocolCommandType getCommand () const = 0; // return value: message type
+//  static std::string CommandType2String (ProtocolCommandType);
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -67,7 +68,7 @@ class Net_MessageBase_T
   typedef Stream_MessageBase inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_MessageBase_T ());
-//   RPG_Net_MessageBase (ACE_Allocator*); // message allocator
+//  Net_MessageBase (ACE_Allocator*); // message allocator
   ACE_UNIMPLEMENTED_FUNC (Net_MessageBase_T& operator= (const Net_MessageBase_T&));
 
   bool isInitialized_;

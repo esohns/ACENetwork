@@ -19,12 +19,8 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Message_Block.h"
 #include "ace/Log_Msg.h"
-
-//#include "net_message.h"
-
-//#include "rpg_net_remote_comm.h"
+#include "ace/Message_Block.h"
 
 #include "net_macros.h"
 
@@ -62,15 +58,15 @@ Net_MessageBase_T<ProtocolCommandType>::~Net_MessageBase_T ()
 
 template <typename ProtocolCommandType>
 void
-Net_MessageBase_T<ProtocolCommandType>::init (ACE_Data_Block* dataBlock_in)
+Net_MessageBase_T<ProtocolCommandType>::initialize (ACE_Data_Block* dataBlock_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_MessageBase_T::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_MessageBase_T::initialize"));
 
   // sanity check: shouldn't be initialized...
   ACE_ASSERT (!isInitialized_);
 
   // init base class...
-  inherited::init (dataBlock_in);
+  inherited::initialize (dataBlock_in);
 
   isInitialized_ = true;
 }

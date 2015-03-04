@@ -21,6 +21,10 @@
 
 #include "net_message.h"
 
+#include "ace/Log_Msg.h"
+
+#include "net_macros.h"
+
 // *NOTE*: this is implicitly invoked by duplicate() as well...
 Net_Message::Net_Message (const Net_Message& message_in)
  : inherited (message_in)
@@ -53,9 +57,36 @@ Net_Message::getCommand () const
   // sanity check(s)
   ACE_ASSERT (inherited::length () >= sizeof (Net_MessageHeader_t));
 
-  Net_MessageHeader_t* message_header = reinterpret_cast<Net_MessageHeader_t*> (inherited::rd_ptr ());
+  Net_MessageHeader_t* message_header =
+      reinterpret_cast<Net_MessageHeader_t*> (inherited::rd_ptr ());
 
   return message_header->messageType;
+}
+
+std::string
+Net_Message::CommandType2String (Net_MessageType_t messageType_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Message::CommandType2String"));
+
+  std::string result = ACE_TEXT ("INVALID");
+
+  switch (messageType_in)
+  {
+    case Net_Remote_Comm::NET_PING:
+      result = ACE_TEXT ("NET_PING"); break;
+    case Net_Remote_Comm::NET_PONG:
+      result = ACE_TEXT ("NET_PONG"); break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid message type (was %d), aborting\n"),
+                  messageType_in));
+
+      break;
+    }
+  } // end SWITCH
+
+  return result;
 }
 
 ACE_Message_Block*
@@ -319,30 +350,4 @@ Net_Message::dump_state () const
 //               inherited::getID (),
 //               (inherited::length () + sum_header_size),
 //               sum_header_size));
-}
-
-std::string
-Net_Message::CommandType2String (Net_MessageType_t messageType_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Message::CommandType2String"));
-
-  std::string result = ACE_TEXT ("INVALID");
-
-  switch (messageType_in)
-  {
-    case Net_Remote_Comm::NET_PING:
-      result = ACE_TEXT ("NET_PING"); break;
-    case Net_Remote_Comm::NET_PONG:
-      result = ACE_TEXT ("NET_PONG"); break;
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid message type (was %d), aborting\n"),
-                  messageType_in));
-
-      break;
-    }
-  } // end SWITCH
-
-  return result;
 }

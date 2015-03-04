@@ -23,6 +23,8 @@
 
 #include <string>
 
+#include "ace/Log_Msg.h"
+
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -50,8 +52,8 @@ Net_Stream::Net_Stream ()
   inherited::availableModules_.insert_tail (&protocolHandler_);
 
   // *CHECK* fix ACE bug: modules should initialize their "next" member to NULL !
-  inherited::Stream_Module_t* module = NULL;
-  for (ACE_DLList_Iterator<inherited::Stream_Module_t> iterator (inherited::availableModules_);
+  inherited::MODULE_T* module = NULL;
+  for (ACE_DLList_Iterator<inherited::MODULE_T> iterator (inherited::availableModules_);
        iterator.next (module);
        iterator.advance ())
     module->next (NULL);
@@ -66,12 +68,12 @@ Net_Stream::~Net_Stream ()
 }
 
 bool
-Net_Stream::init (unsigned int sessionID_in,
-                  const Stream_Configuration_t& configuration_in,
-                  const Net_ProtocolConfiguration_t& protocolConfiguration_in,
-                  const Net_UserData_t& userData_in)
+Net_Stream::initialize (unsigned int sessionID_in,
+                        const Stream_Configuration_t& configuration_in,
+                        const Net_ProtocolConfiguration_t& protocolConfiguration_in,
+                        const Net_UserData_t& userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Stream::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Stream::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!isInitialized_);
@@ -92,7 +94,7 @@ Net_Stream::init (unsigned int sessionID_in,
 
   if (configuration_in.notificationStrategy)
   {
-    Stream_Module_t* module = inherited::head ();
+    inherited::MODULE_T* module = inherited::head ();
     if (!module)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -100,7 +102,7 @@ Net_Stream::init (unsigned int sessionID_in,
 
       return false;
     } // end IF
-    Stream_Task_t* task = module->reader ();
+    inherited::TASK_T* task = module->reader ();
     if (!task)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -118,7 +120,7 @@ Net_Stream::init (unsigned int sessionID_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                  configuration_in.module->name ()));
+                  ACE_TEXT (configuration_in.module->name ())));
 
       return false;
     } // end IF
@@ -127,7 +129,8 @@ Net_Stream::init (unsigned int sessionID_in,
 
   // ******************* Protocol Handler ************************
   Net_Module_ProtocolHandler* protocolHandler_impl = NULL;
-  protocolHandler_impl = dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
+  protocolHandler_impl =
+      dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
   if (!protocolHandler_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -159,11 +162,12 @@ Net_Stream::init (unsigned int sessionID_in,
 
   // ******************* Runtime Statistics ************************
   Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl = NULL;
-  runtimeStatistic_impl = dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
+  runtimeStatistic_impl =
+      dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
   if (!runtimeStatistic_impl)
   {
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("dynamic_cast<RPG_Net_Module_RuntimeStatistic> failed, aborting\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("dynamic_cast<Net_Module_RuntimeStatistic> failed, aborting\n")));
 
     return false;
   } // end IF
@@ -190,7 +194,8 @@ Net_Stream::init (unsigned int sessionID_in,
 
   // ******************* Header Parser ************************
   Net_Module_HeaderParser* headerParser_impl = NULL;
-  headerParser_impl = dynamic_cast<Net_Module_HeaderParser*> (headerParser_.writer ());
+  headerParser_impl =
+      dynamic_cast<Net_Module_HeaderParser*> (headerParser_.writer ());
   if (!headerParser_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -198,7 +203,7 @@ Net_Stream::init (unsigned int sessionID_in,
 
     return false;
   } // end IF
-  if (!headerParser_impl->init ())
+  if (!headerParser_impl->initialize ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -219,17 +224,19 @@ Net_Stream::init (unsigned int sessionID_in,
 
   // ******************* Socket Handler ************************
   Net_Module_SocketHandler* socketHandler_impl = NULL;
-  socketHandler_impl = dynamic_cast<Net_Module_SocketHandler*> (socketHandler_.writer ());
+  socketHandler_impl =
+      dynamic_cast<Net_Module_SocketHandler*> (socketHandler_.writer ());
   if (!socketHandler_impl)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<RPG_Net_Module_SocketHandler> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Net_Module_SocketHandler> failed, aborting\n")));
 
     return false;
   } // end IF
-  if (!socketHandler_impl->init (configuration_in.messageAllocator,
-                                 configuration_in.useThreadPerConnection,
-                                 NET_STATISTICS_COLLECTION_INTERVAL))
+  if (!socketHandler_impl->initialize (state_,
+                                       configuration_in.messageAllocator,
+                                       configuration_in.useThreadPerConnection,
+                                       NET_STATISTICS_COLLECTION_INTERVAL))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),

@@ -76,47 +76,47 @@ Net_AsynchUDPSocketHandler::open (ACE_HANDLE handle_in,
 
       return;
     } // end IF
-  if (!Net_Common_Tools::setNoDelay (handle_in,
-                                     NET_DEFAULT_TCP_NODELAY))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
-                (NET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
-                                         : ACE_TEXT ("false")),
-                handle_in));
+//  if (!Net_Common_Tools::setNoDelay (handle_in,
+//                                     NET_DEFAULT_SOCKET_TCP_NODELAY))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
+//                (NET_DEFAULT_SOCKET_TCP_NODELAY ? ACE_TEXT ("true")
+//                                                : ACE_TEXT ("false")),
+//                handle_in));
 
-    // clean up
-    handle_close (handle_in,
-                  ACE_Event_Handler::ALL_EVENTS_MASK);
+//    // clean up
+//    handle_close (handle_in,
+//                  ACE_Event_Handler::ALL_EVENTS_MASK);
 
-    return;
-  } // end IF
-  if (!Net_Common_Tools::setKeepAlive (handle_in,
-                                       NET_DEFAULT_TCP_KEEPALIVE))
-  {
-    int error = ACE_OS::last_error ();
-    if (error != ENOTSOCK) // <-- socket has been closed asynchronously
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
-                  (NET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true")
-                                             : ACE_TEXT ("false")),
-                  handle_in));
+//    return;
+//  } // end IF
+//  if (!Net_Common_Tools::setKeepAlive (handle_in,
+//                                       NET_DEFAULT_SOCKET_TCP_KEEPALIVE))
+//  {
+//    int error = ACE_OS::last_error ();
+//    if (error != ENOTSOCK) // <-- socket has been closed asynchronously
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
+//                  (NET_DEFAULT_SOCKET_TCP_KEEPALIVE ? ACE_TEXT ("true")
+//                                                    : ACE_TEXT ("false")),
+//                  handle_in));
 
-    // clean up
-    handle_close (handle_in,
-                  ACE_Event_Handler::ALL_EVENTS_MASK);
+//    // clean up
+//    handle_close (handle_in,
+//                  ACE_Event_Handler::ALL_EVENTS_MASK);
 
-    return;
-  } // end IF
+//    return;
+//  } // end IF
   if (!Net_Common_Tools::setLinger (handle_in,
-                                    NET_DEFAULT_TCP_LINGER))
+                                    NET_DEFAULT_SOCKET_LINGER))
   {
     int error = ACE_OS::last_error ();
     if (error != ENOTSOCK) // <-- socket has been closed asynchronously
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s) (handle was: %d), aborting\n"),
-                  ((NET_DEFAULT_TCP_LINGER > 0) ? ACE_TEXT ("true")
-                                                : ACE_TEXT ("false")),
+                  ((NET_DEFAULT_SOCKET_LINGER > 0) ? ACE_TEXT ("true")
+                                                   : ACE_TEXT ("false")),
                   handle_in));
 
     // clean up

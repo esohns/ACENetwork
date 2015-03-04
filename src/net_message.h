@@ -47,6 +47,7 @@ class Net_Message
   virtual ~Net_Message ();
 
   virtual Net_MessageType_t getCommand () const; // return value: message type
+  static std::string CommandType2String (Net_MessageType_t);
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -55,8 +56,6 @@ class Net_Message
 
   // implement Common_IDumpState
   virtual void dump_state () const;
-
-  static std::string CommandType2String (Net_MessageType_t);
 
  protected:
   // copy ctor to be used by duplicate() and child classes

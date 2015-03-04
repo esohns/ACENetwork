@@ -78,6 +78,13 @@ Net_ConnectionBase_T<ConfigurationType,
                   ACE_TEXT ("caught exception in Net_IConnectionManager::getData(), continuing\n")));
     }
   } // end IF
+
+  // initialize: register with the connection manager, ...
+  // *TODO*: find a way to pass role information (acceptor / connector)
+  if (!initialize (ROLE_INVALID,
+                   configuration_.socketConfiguration))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), continuing\n")));
 }
 
 template <typename ConfigurationType,
@@ -169,8 +176,8 @@ Net_ConnectionBase_T<ConfigurationType,
   if (isRegistered_)
   {
     // (try to) de-register with the connection manager...
-    // *WARNING*: as we register BEFORE the connection has fully opened, there
-    // is a small window for races...
+    // *WARNING*: as registration happens BEFORE the connection has open()ed,
+    //            there is a small window for races here...
     try
     {
       manager_->deregisterConnection (this);

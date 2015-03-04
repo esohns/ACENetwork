@@ -21,8 +21,6 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
-//#include "stream_common.h"
-
 #include "net_macros.h"
 
 template <typename ConfigurationType,
@@ -127,8 +125,19 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 //      static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
 //#endif
 
-  // step1: init/start stream
-  // step1a: connect stream head message queue with the reactor notification
+  // step1: open / tweak socket, ...
+  result = inherited2::open (args_in);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_UDPSocketHandler::open(): \"%m\", aborting\n")));
+
+    return -1;
+  } // end IF
+  //// *NOTE*: as soon as this returns, data starts arriving at handle_input()
+
+  // step2: init/start stream
+  // step2a: connect stream head message queue with the reactor notification
   // pipe ?
   if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
   {
@@ -144,7 +153,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
     inherited3::configuration_.streamConfiguration.notificationStrategy = &(inherited2::notificationStrategy_);
   } // end IF
-  // step1b: init final module (if any)
+  // step2b: init final module (if any)
   if (inherited3::configuration_.streamConfiguration.module)
   {
     Stream_IModule_t* imodule_handle = NULL;
@@ -182,7 +191,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     inherited3::configuration_.streamConfiguration.module = clone;
     inherited3::configuration_.streamConfiguration.deleteModule = true;
   } // end IF
-  // step1c: init stream
+  // step2c: init stream
   //#if defined (ACE_WIN32) || defined (ACE_WIN64)
   //  state_->sessionID =
   //      *static_cast<unsigned int*> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
@@ -197,13 +206,14 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 #else
   session_id = static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
 #endif
-  if (!stream_.init (session_id,
-                     inherited3::configuration_.streamConfiguration,
-                     inherited3::configuration_.protocolConfiguration,
-                     inherited3::configuration_.streamUserData))
+  // *TODO*: this clearly is a design glitch
+  if (!stream_.initialize (session_id,
+                           inherited3::configuration_.streamConfiguration,
+                           inherited3::configuration_.protocolConfiguration,
+                           inherited3::configuration_.streamUserData))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to init processing stream, aborting\n")));
+                ACE_TEXT ("failed to initialize processing stream, aborting\n")));
 
     return -1;
   } // end IF
@@ -219,16 +229,27 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     return -1;
   } // end IF
 
-  // step2: tweak socket, register I/O handle with the reactor, ...
-  result = inherited2::open (args_in);
-  if (result == -1)
+  // step3: register with the reactor
+  if (inherited2::reactor ()->register_handler (this,
+                                                ACE_Event_Handler::READ_MASK) == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_UDPSocketHandler::open(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to ACE_Reactor::register_handler(READ_MASK): \"%m\", aborting\n")));
 
     return -1;
   } // end IF
-  //// *NOTE*: as soon as this returns, data starts arriving at handle_input()
+
+  // *NOTE*: we're registered with the reactor (READ_MASK) at this point
+
+//   // ...register for writes (WRITE_MASK) as well
+//   if (reactor ()->register_handler (this,
+//                                     ACE_Event_Handler::WRITE_MASK) == -1)
+//   {
+//     ACE_DEBUG ((LM_ERROR,
+//                 ACE_TEXT ("failed to ACE_Reactor::register_handler(WRITE_MASK): \"%m\", aborting\n")));
+//
+//     return -1;
+//   } // end IF
 
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
@@ -273,14 +294,15 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     return -1;
   } // end IF
 
-  // read some data from the socket...
+  // read a datagram from the socket...
   ssize_t bytes_received = -1;
-  bytes_received = inherited2::recv (currentReadBuffer_->wr_ptr (), // buf
-                                     currentReadBuffer_->size (),   // n
-                                     inherited3::configuration_.socketConfiguration.peerAddress, // addr
-                                     0,                             // flags
-                                     NULL,                          // overlapped
-                                     NULL);                         // func
+  ACE_INET_Addr peer_address;
+  bytes_received =
+      inherited2::peer_.recv (currentReadBuffer_->wr_ptr (),                              // buf
+                              currentReadBuffer_->size (),                                // n
+                              peer_address,
+//                              inherited3::configuration_.socketConfiguration.peerAddress, // addr
+                              0);                                                         // flags
   switch (bytes_received)
   {
     case -1:
@@ -296,7 +318,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
           (error != ENOTSOCK) &&
           (error != ECONNABORTED)) // <-- connection abort()ed locally
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Stream::recv(): \"%m\", returning\n")));
+                    ACE_TEXT ("failed to SocketType::recv(): \"%m\", returning\n")));
 
       // clean up
       currentReadBuffer_->release ();

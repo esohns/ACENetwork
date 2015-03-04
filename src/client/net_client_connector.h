@@ -74,14 +74,16 @@ class Net_Client_Connector_T
 };
 
 // partial specialization (for UDP)
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType>
 class Net_Client_Connector_T<ACE_INET_Addr,
                              ConfigurationType,
                              SessionDataType,
                              ITransportLayerType,
-                             Net_UDPConnection_T<SessionDataType> >
+                             Net_UDPConnection_T<SessionDataType,
+                                                 HandlerType> >
  : public Net_Client_IConnector_T<ACE_INET_Addr,
                                   ConfigurationType>
 {
@@ -90,7 +92,8 @@ class Net_Client_Connector_T<ACE_INET_Addr,
                                    SessionDataType,
                                    ITransportLayerType,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
-  typedef Net_UDPConnection_T<SessionDataType> CONNECTION_T;
+  typedef Net_UDPConnection_T<SessionDataType,
+                              HandlerType> CONNECTION_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T*,
                           const ConfigurationType*);

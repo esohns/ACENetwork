@@ -24,15 +24,15 @@
 #include "ace/Default_Constants.h"
 
 // *** network-related ***
-// *PORTABILITY*: interface names are not portable, so we let the
-// user choose the interface from a list on Windows (see select_Interface())...
+// *PORTABILITY*: interface names are not portable, so let the user choose the
+//                interface from a list on Windows (see select_interface())...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define NET_DEFAULT_NETWORK_INTERFACE             ""
 #else
 #define NET_DEFAULT_NETWORK_INTERFACE             "eth0"
 #endif
 
-#define NET_DEFAULT_PORT                          32767
+#define NET_DEFAULT_PORT                          10001
 #define NET_DEFAULT_IP_MULTICAST_ADDRESS          "224.0.0.1"
 #define NET_DEFAULT_IP_BROADCAST_ADDRESS          "255.255.255.255"
 
@@ -42,9 +42,9 @@
 #define NET_CONNECTION_HANDLER_THREAD_GROUP_ID    2
 
 #define NET_DEFAULT_SOCKET_RECEIVE_BUFFER_SIZE    ACE_DEFAULT_MAX_SOCKET_BUFSIZ
-#define NET_DEFAULT_TCP_NODELAY                   true
-#define NET_DEFAULT_TCP_KEEPALIVE                 false
-#define NET_DEFAULT_TCP_LINGER                    10 // seconds {0 --> off}
+#define NET_DEFAULT_SOCKET_LINGER                 10 // seconds {0 --> off}
+#define NET_DEFAULT_SOCKET_TCP_NODELAY            true
+#define NET_DEFAULT_SOCKET_TCP_KEEPALIVE          false
 
 #define NET_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS    10
 

@@ -43,6 +43,7 @@
 class Net_Export Net_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        Stream_State_t,
                         Net_SessionData_t,
                         Net_StreamSessionData_t,
                         Net_SessionMessage,
@@ -53,20 +54,18 @@ class Net_Export Net_Stream
    Net_Stream ();
    virtual ~Net_Stream ();
 
-  // convenience types
-  typedef Common_IStatistic_T<Stream_Statistic_t> Net_Statistic_t;
+//  // convenience types
+//  typedef Common_IStatistic_T<Stream_Statistic_t> Net_Statistic_t;
 
-  // init stream
-  bool init (const unsigned int,                  // session ID
-             const Stream_Configuration_t&,       // configuration
-             // *TODO*: implement a generic module initialization method
-             const Net_ProtocolConfiguration_t&,  // protocol configuration
-             const Net_UserData_t&);              // user data handle
+  // initialize stream
+  bool initialize (unsigned int,                       // session ID
+                   const Stream_Configuration_t&,      // configuration
+                   // *TODO*: implement a generic module initialization method
+                   const Net_ProtocolConfiguration_t&, // protocol configuration
+                   const Net_UserData_t&);             // user data handle
 
   // *TODO*: re-consider this API
   void ping ();
-
-//  unsigned int getSessionID () const;
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to runtimeStatistic_
@@ -77,6 +76,7 @@ class Net_Export Net_Stream
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        Stream_State_t,
                         Net_SessionData_t,
                         Net_StreamSessionData_t,
                         Net_SessionMessage,
@@ -86,10 +86,10 @@ class Net_Export Net_Stream
   ACE_UNIMPLEMENTED_FUNC (Net_Stream (const Net_Stream&));
   ACE_UNIMPLEMENTED_FUNC (Net_Stream& operator= (const Net_Stream&));
 
-  // fini stream
+  // finalize stream
   // *NOTE*: need this to clean up queued modules if something goes wrong during
-  //         init() !
-  bool fini (const Stream_Configuration_t&); // configuration
+  //         initialize () !
+  bool finalize (const Stream_Configuration_t&); // configuration
 
   // modules
   Net_Module_SocketHandler_Module    socketHandler_;

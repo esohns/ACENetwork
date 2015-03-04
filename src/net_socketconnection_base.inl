@@ -309,14 +309,10 @@ Net_SocketConnectionBase_T<SocketHandlerType,
     ConfigurationType* configuration_p =
         reinterpret_cast<ConfigurationType*> (arg_in);
     ACE_ASSERT (configuration_p);
-    // *TODO*: this clearly is a design glitch; parametrize the socket
-    //         configuration
-    // *TODO*: find a way to pass role information (acceptor / connector)
-    if (!inherited::initialize (ROLE_INVALID,
-                                configuration_p->socketConfiguration))
+    if (!inherited::initialize (*configuration_p))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", aborting\n")));
 
       return -1;
     } // end IF
@@ -760,16 +756,12 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
   if (!inherited::manager_)
   {
     ACE_ASSERT (configuration_);
-    // *TODO*: this clearly is a design glitch; parametrize the socket
-    //         configuration
-    // *TODO*: find a way to pass role information (acceptor / connector)
     SocketHandlerType* socket_handler_p = this;
-    SocketHandlerType::CONNECTION_BASE_T* connection_base_p = socket_handler_p;
-    if (!connection_base_p->initialize (ROLE_INVALID,
-                                        configuration_->socketConfiguration))
+    typename SocketHandlerType::CONNECTION_BASE_T* connection_base_p = socket_handler_p;
+    if (!connection_base_p->initialize (*configuration_))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ITransportLayerType::initialize(): \"%m\", returning\n")));
+                  ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", returning\n")));
 
       return;
     } // end IF

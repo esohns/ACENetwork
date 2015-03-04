@@ -31,9 +31,22 @@
 #include "net_common.h"
 #include "net_message.h"
 #include "net_module_runtimestatistic.h"
+#include "net_module_sockethandler.h"
+#include "net_remote_comm.h"
 #include "net_sessionmessage.h"
+#include "net_stream_common.h"
 
 // declare module(s)
+typedef Net_Module_SocketHandler_T<Stream_State_t,
+                                   Net_SessionData_t,
+                                   Net_StreamSessionData_t,
+                                   Net_SessionMessage,
+                                   Net_Message,
+                                   Net_Remote_Comm::MessageHeader> Net_Module_SocketHandler;
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,              // task synch type
+                              Common_TimePolicy_t,       // time policy type
+                              Net_Module_SocketHandler); // writer type
+
 typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
                                           Net_SessionMessage,

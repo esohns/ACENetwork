@@ -27,11 +27,13 @@
 
 #include "stream_common.h"
 
-#include "net_connection_manager_common.h"
+#include "net_configuration.h"
 #include "net_exports.h"
+#include "net_iconnectionmanager.h"
+#include "net_itransportlayer.h"
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
-#include "net_transportlayer_tcp.h"
+#include "net_stream_common.h"
 
 // forward declarations
 template <typename SVC_HANDLER,
@@ -48,10 +50,15 @@ class Net_Export Net_TCPConnection
   //friend class ACE_Connector<Net_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
+  typedef Net_IConnectionManager_T<Net_Configuration_t,
+                                   Net_StreamSessionData_t,
+                                   Net_IInetTransportLayer_t,
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+
   // *NOTE*: consider encapsulating this (need to grant access to
   //         ACE_Connector however (see: ace/Connector.cpp:239))
 //  Net_TCPConnection ();
-  Net_TCPConnection (Net_ITCPConnectionManager_t*);
+  Net_TCPConnection (ICONNECTION_MANAGER_T*);
 
   // override / implement (part of) Net_IInetTransportLayer
   virtual bool initialize (Net_ClientServerRole_t,            // role
@@ -104,10 +111,15 @@ class Net_Export Net_AsynchTCPConnection
  friend class ACE_Asynch_Connector<Net_AsynchTCPConnection>;
 
  public:
-   // *WARNING*: need to make this available to Asynch_Connector
+  typedef Net_IConnectionManager_T<Net_Configuration_t,
+                                   Net_StreamSessionData_t,
+                                   Net_IInetTransportLayer_t,
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+
+ // *WARNING*: need to make this available to Asynch_Connector
    //            (see: ace/Asynch_Connector.cpp:239)
 //   Net_AsynchTCPConnection ();
-  Net_AsynchTCPConnection (Net_ITCPConnectionManager_t*);
+  Net_AsynchTCPConnection (ICONNECTION_MANAGER_T*);
 
   // override / implement (part of) Net_IInetTransportLayer
   virtual bool initialize (Net_ClientServerRole_t,            // role

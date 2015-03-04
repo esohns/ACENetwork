@@ -29,33 +29,36 @@
 #include "common_istatistic.h"
 
 #include "stream_common.h"
-#include "stream_iallocator.h"
 #include "stream_headmoduletask_base.h"
-#include "stream_streammodule_base.h"
+#include "stream_iallocator.h"
 
-#include "net_message.h"
-#include "net_sessionmessage.h"
-#include "net_stream_common.h"
-
-class Net_Module_SocketHandler
+template <typename StreamStateType,
+          typename SessionDataType,          // session data
+          typename SessionDataContainerType, // (reference counted)
+          typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename ProtocolHeaderType>
+class Net_Module_SocketHandler_T
  : public Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      Net_SessionData_t,
-                                      Net_StreamSessionData_t,
-                                      Net_SessionMessage,
-                                      Net_Message>
+                                      StreamStateType,
+                                      SessionDataType,
+                                      SessionDataContainerType,
+                                      SessionMessageType,
+                                      ProtocolMessageType>
  , public Common_IStatistic_T<Stream_Statistic_t>
 {
  public:
-  Net_Module_SocketHandler ();
-  virtual ~Net_Module_SocketHandler ();
+  Net_Module_SocketHandler_T ();
+  virtual ~Net_Module_SocketHandler_T ();
 
   // initialization
   // *TODO*: implement generic initialization (override Stream_TaskBase_T::initialize)
-  bool init (Stream_IAllocator*, // message allocator
-             bool = false,       // active object ?
-             unsigned int = 0);  // statistics collecting interval (second(s))
-                                 // 0 --> DON'T collect statistics
+  bool initialize (const StreamStateType&, // state
+                   Stream_IAllocator*,     // message allocator
+                   bool = false,           // active object ?
+                   unsigned int = 0);      // statistics collecting interval (second(s))
+                                           // 0 --> DON'T collect statistics
 
   // user interface
   // info
@@ -63,9 +66,9 @@ class Net_Module_SocketHandler
 //  unsigned int getSessionID () const;
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (Net_Message*&, // data message handle
-                                  bool&);        // return value: pass message downstream ?
-  virtual void handleSessionMessage (Net_SessionMessage*&, // session message handle
+  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
+                                  bool&);                // return value: pass message downstream ?
+  virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
   // implement Common_IStatistic
@@ -76,16 +79,17 @@ class Net_Module_SocketHandler
  private:
   typedef Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      Net_SessionData_t,
-                                      Net_StreamSessionData_t,
-                                      Net_SessionMessage,
-                                      Net_Message> inherited;
+                                      StreamStateType,
+                                      SessionDataType,
+                                      SessionDataContainerType,
+                                      SessionMessageType,
+                                      ProtocolMessageType> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_SocketHandler (const Net_Module_SocketHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_SocketHandler& operator= (const Net_Module_SocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_SocketHandler_T (const Net_Module_SocketHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_SocketHandler_T& operator= (const Net_Module_SocketHandler_T&));
 
   // helper methods
-  bool bisectMessages (Net_Message*&); // return value: complete message (chain)
+  bool bisectMessages (ProtocolMessageType*&); // return value: complete message (chain)
 //   Net_Message* allocateMessage(const unsigned int&); // requested size
   bool putStatisticsMessage (const Stream_Statistic_t&, // statistics info
                              const ACE_Time_Value&) const;  // statistics generation time
@@ -99,13 +103,80 @@ class Net_Module_SocketHandler
 
   // protocol stuff
   unsigned int                      currentMessageLength_;
-  Net_Message*                      currentMessage_;
-  Net_Message*                      currentBuffer_;
+  ProtocolMessageType*              currentMessage_;
+  ProtocolMessageType*              currentBuffer_;
 };
 
-// declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,              // task synch type
-                              Common_TimePolicy_t,       // time policy type
-                              Net_Module_SocketHandler); // writer type
+/////////////////////////////////////////
+
+template <typename StreamStateType,
+          typename SessionDataType,          // session data
+          typename SessionDataContainerType, // (reference counted)
+          typename SessionMessageType,
+          typename ProtocolMessageType>
+class Net_Module_UDPSocketHandler_T
+ : public Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
+                                      Common_TimePolicy_t,
+                                      StreamStateType,
+                                      SessionDataType,
+                                      SessionDataContainerType,
+                                      SessionMessageType,
+                                      ProtocolMessageType>
+ , public Common_IStatistic_T<Stream_Statistic_t>
+{
+ public:
+  Net_Module_UDPSocketHandler_T ();
+  virtual ~Net_Module_UDPSocketHandler_T ();
+
+  // initialization
+  // *TODO*: implement generic initialization (override Stream_TaskBase_T::initialize)
+  bool initialize (const StreamStateType&, // state
+                   Stream_IAllocator*,     // message allocator
+                   bool = false,           // active object ?
+                   unsigned int = 0);      // statistics collecting interval (second(s))
+                                           // 0 --> DON'T collect statistics
+
+  // user interface
+  // info
+  bool isInitialized () const;
+//  unsigned int getSessionID () const;
+
+  // implement (part of) Stream_ITaskBase
+  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
+                                  bool&);                // return value: pass message downstream ?
+  virtual void handleSessionMessage (SessionMessageType*&, // session message handle
+                                     bool&);               // return value: pass message downstream ?
+
+  // implement Common_IStatistic
+  // *NOTE*: implements regular (timer-based) statistics collection
+  virtual bool collect (Stream_Statistic_t&) const; // return value: (currently unused !)
+  virtual void report () const;
+
+ private:
+  typedef Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
+                                      Common_TimePolicy_t,
+                                      StreamStateType,
+                                      SessionDataType,
+                                      SessionDataContainerType,
+                                      SessionMessageType,
+                                      ProtocolMessageType> inherited;
+
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T (const Net_Module_UDPSocketHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T& operator= (const Net_Module_UDPSocketHandler_T&));
+
+  // helper methods
+  bool putStatisticsMessage (const Stream_Statistic_t&, // statistics info
+                             const ACE_Time_Value&) const;  // statistics generation time
+
+  bool                              isInitialized_;
+
+  // timer stuff
+  unsigned int                      statCollectionInterval_; // seconds
+  Stream_StatisticHandler_Reactor_t statCollectHandler_;
+  long                              statCollectHandlerID_;
+};
+
+// include template implementation
+#include "net_module_sockethandler.inl"
 
 #endif

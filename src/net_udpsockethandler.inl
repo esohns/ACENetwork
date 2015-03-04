@@ -146,7 +146,32 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
   Net_SocketConfiguration_t* configuration_p =
       reinterpret_cast<Net_SocketConfiguration_t*> (arg_in);
 
-  // step1: tweak socket
+  // step1: open socket
+  ACE_INET_Addr local_SAP (configuration_p->peerAddress.get_port_number (),
+                           (configuration_p->useLoopbackDevice ? INADDR_LOOPBACK
+                                                               : INADDR_ANY));
+  result = inherited2::peer_.open (local_SAP,                // local SAP
+                                   ACE_PROTOCOL_FAMILY_INET, // protocol family
+                                   0,                        // protocol
+                                   1);                       // reuse_addr
+  if (result == -1)
+  {
+    ACE_TCHAR buffer[BUFSIZ];
+    ACE_OS::memset (buffer, 0, sizeof (buffer));
+    std::string local_address;
+    if (local_SAP.addr_to_string (buffer,
+                                  sizeof (buffer)) == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+    local_address = buffer;
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (local_address.c_str ())));
+
+    return -1;
+  } // end IF
+
+  // step2: tweak socket
   if (configuration_p->bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (SVC_HANDLER_T::get_handle (),
                                             SO_RCVBUF,
@@ -158,56 +183,36 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
                   SVC_HANDLER_T::get_handle ()));
       return -1;
     } // end IF
-  if (!Net_Common_Tools::setNoDelay (SVC_HANDLER_T::get_handle (),
-                                     NET_DEFAULT_TCP_NODELAY))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
-                (NET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
-                                         : ACE_TEXT ("false")),
-                SVC_HANDLER_T::get_handle ()));
-    return -1;
-  } // end IF
-  if (!Net_Common_Tools::setKeepAlive (SVC_HANDLER_T::get_handle (),
-                                       NET_DEFAULT_TCP_KEEPALIVE))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
-                (NET_DEFAULT_TCP_LINGER ? ACE_TEXT ("true")
-                                        : ACE_TEXT ("false")),
-                SVC_HANDLER_T::get_handle ()));
-    return -1;
-  } // end IF
+//  if (!Net_Common_Tools::setNoDelay (SVC_HANDLER_T::get_handle (),
+//                                     NET_DEFAULT_TCP_NODELAY))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
+//                (NET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
+//                                         : ACE_TEXT ("false")),
+//                SVC_HANDLER_T::get_handle ()));
+//    return -1;
+//  } // end IF
+//  if (!Net_Common_Tools::setKeepAlive (SVC_HANDLER_T::get_handle (),
+//                                       NET_DEFAULT_TCP_KEEPALIVE))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
+//                (NET_DEFAULT_TCP_LINGER ? ACE_TEXT ("true")
+//                                        : ACE_TEXT ("false")),
+//                SVC_HANDLER_T::get_handle ()));
+//    return -1;
+//  } // end IF
   if (!Net_Common_Tools::setLinger (SVC_HANDLER_T::get_handle (),
-                                    NET_DEFAULT_TCP_LINGER))
+                                    NET_DEFAULT_SOCKET_LINGER))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s) (handle was: %d), aborting\n"),
-                ((NET_DEFAULT_TCP_LINGER > 0) ? ACE_TEXT ("true")
-                                              : ACE_TEXT ("false")),
+                ((NET_DEFAULT_SOCKET_LINGER > 0) ? ACE_TEXT ("true")
+                                                 : ACE_TEXT ("false")),
                 SVC_HANDLER_T::get_handle ()));
     return -1;
   } // end IF
-
-  // step2: register with the reactor
-  if (reactor ()->register_handler (this,
-                                    ACE_Event_Handler::READ_MASK) == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Reactor::register_handler(READ_MASK): \"%m\", aborting\n")));
-    return -1;
-  } // end IF
-
-  // *NOTE*: we're registered with the reactor (READ_MASK) at this point
-
-//   // ...register for writes (WRITE_MASK) as well
-//   if (reactor ()->register_handler (this,
-//                                     ACE_Event_Handler::WRITE_MASK) == -1)
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("failed to ACE_Reactor::register_handler(WRITE_MASK): \"%m\", aborting\n")));
-//     return -1;
-//   } // end IF
 
 //  if (manager_)
 //  {
@@ -224,18 +229,6 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
 //                  ACE_TEXT ("caught exception in Net_IConnectionManager::registerConnection(), continuing\n")));
 //    }
 //  } // end IF
-
-  result = inherited::open (ACE_Addr::sap_any,        // local
-                            ACE_PROTOCOL_FAMILY_INET, // protocol family
-                            0,                        // protocol
-                            0);                       // reuse_addr
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Dgram::open(): \"%m\", aborting\n")));
-
-    return -1;
-  } // end IF
 
   return 0;
 }

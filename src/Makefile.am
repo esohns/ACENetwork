@@ -38,6 +38,7 @@ include_HEADERS = \
   net_module_runtimestatistic.h \
   net_module_runtimestatistic.inl \
   net_module_sockethandler.h \
+  net_module_sockethandler.inl \
   net_netlinkconnection.h \
   net_packet_headers.h \
   net_protocol_layer.h \
@@ -114,6 +115,7 @@ libACENetwork_la_SOURCES = \
   net_module_runtimestatistic.inl \
   net_module_sockethandler.cpp \
   net_module_sockethandler.h \
+  net_module_sockethandler.inl \
   net_netlinkconnection.cpp \
   net_netlinkconnection.h \
   net_packet_headers.h \

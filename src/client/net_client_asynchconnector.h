@@ -79,15 +79,18 @@ class Net_Client_AsynchConnector_T
 };
 
 // partial specialization (for UDP)
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType>
 class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    SessionDataType,
                                    ITransportLayerType,
-                                   Net_AsynchUDPConnection_T<SessionDataType> >
- : public ACE_Asynch_Connector<Net_AsynchUDPConnection_T<SessionDataType> >
+                                   Net_AsynchUDPConnection_T<SessionDataType,
+                                                             HandlerType> >
+ : public ACE_Asynch_Connector<Net_AsynchUDPConnection_T<SessionDataType,
+                                                         HandlerType> >
  , public Net_Client_IConnector_T<ACE_INET_Addr,
                                   ConfigurationType>
 {
@@ -96,7 +99,8 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                    SessionDataType,
                                    ITransportLayerType,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
-  typedef Net_AsynchUDPConnection_T<SessionDataType> CONNECTION_T;
+  typedef Net_AsynchUDPConnection_T<SessionDataType,
+                                    HandlerType> CONNECTION_T;
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*,
                                 const ConfigurationType*);
@@ -117,10 +121,12 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
   // override default creation strategy
   // *TODO*: why isn't this being picked up ?
   //virtual CONNECTION_T* make_handler (void);
-   virtual Net_AsynchUDPConnection_T<SessionDataType>* make_handler (void);
+   virtual Net_AsynchUDPConnection_T<SessionDataType,
+                                     HandlerType>* make_handler (void);
 
  private:
-  typedef ACE_Asynch_Connector<Net_AsynchUDPConnection_T<SessionDataType> > inherited;
+  typedef ACE_Asynch_Connector<Net_AsynchUDPConnection_T<SessionDataType,
+                                                         HandlerType> > inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));

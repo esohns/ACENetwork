@@ -113,6 +113,10 @@ class Net_AsynchSocketConnectionBase_T
                                    SessionDataType,
                                    ITransportLayerType,
                                    StatisticsContainerType> ICONNECTION_MANAGER_T;
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               SessionDataType,
+                               ITransportLayerType,
+                               StatisticsContainerType> CONNECTION_BASE_T;
 
   Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*);
 
@@ -121,11 +125,6 @@ class Net_AsynchSocketConnectionBase_T
  private:
   typedef SocketHandlerType inherited;
 //  typedef ITransportLayerType inherited2;
-
-  typedef Net_ConnectionBase_T<ConfigurationType,
-                               SessionDataType,
-                               ITransportLayerType,
-                               StatisticsContainerType> CONNECTION_BASE_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T (const Net_AsynchSocketConnectionBase_T&));

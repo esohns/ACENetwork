@@ -154,32 +154,32 @@ Net_TCPSocketHandler::open (void* arg_in)
       return -1;
     } // end IF
   if (!Net_Common_Tools::setNoDelay (get_handle (),
-                                     NET_DEFAULT_TCP_NODELAY))
+                                     NET_DEFAULT_SOCKET_TCP_NODELAY))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
-                (NET_DEFAULT_TCP_NODELAY ? ACE_TEXT("true")
-                                         : ACE_TEXT("false")),
+                (NET_DEFAULT_SOCKET_TCP_NODELAY ? ACE_TEXT ("true")
+                                                : ACE_TEXT ("false")),
                 get_handle ()));
     return -1;
   } // end IF
   if (!Net_Common_Tools::setKeepAlive (get_handle (),
-                                       NET_DEFAULT_TCP_KEEPALIVE))
+                                       NET_DEFAULT_SOCKET_TCP_KEEPALIVE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
-                (NET_DEFAULT_TCP_LINGER ? ACE_TEXT("true")
-                                        : ACE_TEXT("false")),
+                (NET_DEFAULT_SOCKET_TCP_KEEPALIVE ? ACE_TEXT ("true")
+                                                  : ACE_TEXT ("false")),
                 get_handle ()));
     return -1;
   } // end IF
   if (!Net_Common_Tools::setLinger (get_handle (),
-                                    NET_DEFAULT_TCP_LINGER))
+                                    NET_DEFAULT_SOCKET_LINGER))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s) (handle was: %d), aborting\n"),
-                ((NET_DEFAULT_TCP_LINGER > 0) ? ACE_TEXT("true")
-                                              : ACE_TEXT("false")),
+                ((NET_DEFAULT_SOCKET_LINGER > 0) ? ACE_TEXT ("true")
+                                                 : ACE_TEXT ("false")),
                 get_handle ()));
     return -1;
   } // end IF

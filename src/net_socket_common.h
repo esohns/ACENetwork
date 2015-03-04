@@ -21,7 +21,9 @@
 #ifndef Net_SOCKET_COMMON_H
 #define Net_SOCKET_COMMON_H
 
+#include "ace/Global_Macros.h"
 #include "ace/SOCK_Dgram.h"
+//#include "ace/SOCK_Stream.h"
 #include "ace/SOCK_Dgram_Bcast.h"
 #include "ace/SOCK_Dgram_Mcast.h"
 
@@ -58,21 +60,21 @@ typedef Net_StreamAsynchUDPSocketBase_T<Net_Configuration_t,
                                         Net_IInetTransportLayer_t,
                                         Stream_Statistic_t,
                                         Net_Stream,
-                                        ACE_SOCK_Dgram,
+                                        ACE_SOCK_DGRAM,
                                         Net_AsynchUDPSocketHandler> Net_AsynchUDPHandler_t;
 typedef Net_StreamAsynchUDPSocketBase_T<Net_Configuration_t,
                                         Net_StreamSessionData_t,
                                         Net_IInetTransportLayer_t,
                                         Stream_Statistic_t,
                                         Net_Stream,
-                                        ACE_SOCK_Dgram_Mcast,
+                                        ACE_SOCK_DGRAM_MCAST,
                                         Net_AsynchUDPSocketHandler> Net_AsynchIPMulticastHandler_t;
 typedef Net_StreamAsynchUDPSocketBase_T<Net_Configuration_t,
                                         Net_StreamSessionData_t,
                                         Net_IInetTransportLayer_t,
                                         Stream_Statistic_t,
                                         Net_Stream,
-                                        ACE_SOCK_Dgram_Bcast,
+                                        ACE_SOCK_DGRAM_BCAST,
                                         Net_AsynchUDPSocketHandler> Net_AsynchIPBroadcastHandler_t;
 
 typedef Net_StreamTCPSocketBase_T<Net_Configuration_t,
@@ -94,18 +96,18 @@ typedef Net_StreamUDPSocketBase_T<Net_Configuration_t,
                                   Net_IInetTransportLayer_t,
                                   Stream_Statistic_t,
                                   Net_Stream,
-                                  Net_UDPSocketHandler_T<ACE_SOCK_Dgram> > Net_UDPHandler_t;
+                                  Net_UDPSocketHandler_T<ACE_SOCK_DGRAM> > Net_UDPHandler_t;
 typedef Net_StreamUDPSocketBase_T<Net_Configuration_t,
                                   Net_StreamSessionData_t,
                                   Net_IInetTransportLayer_t,
                                   Stream_Statistic_t,
                                   Net_Stream,
-                                  Net_UDPSocketHandler_T<ACE_SOCK_Dgram_Mcast> > Net_IPMulticastHandler_t;
+                                  Net_UDPSocketHandler_T<ACE_SOCK_DGRAM_MCAST> > Net_IPMulticastHandler_t;
 typedef Net_StreamUDPSocketBase_T<Net_Configuration_t,
                                   Net_StreamSessionData_t,
                                   Net_IInetTransportLayer_t,
                                   Stream_Statistic_t,
                                   Net_Stream,
-                                  Net_UDPSocketHandler_T<ACE_SOCK_Dgram_Bcast> > Net_IPBroadcastHandler_t;
+                                  Net_UDPSocketHandler_T<ACE_SOCK_DGRAM_BCAST> > Net_IPBroadcastHandler_t;
 
 #endif

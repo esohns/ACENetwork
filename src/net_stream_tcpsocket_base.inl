@@ -181,13 +181,13 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
     inherited2::configuration_.streamConfiguration.deleteModule = true;
   } // end IF
   // step1c: init stream
-  if (!stream_.init (state_->sessionID,
-                     inherited2::configuration_.streamConfiguration,
-                     inherited2::configuration_.protocolConfiguration,
-                     inherited2::configuration_.streamUserData))
+  if (!stream_.initialize (state_->sessionID,
+                           inherited2::configuration_.streamConfiguration,
+                           inherited2::configuration_.protocolConfiguration,
+                           inherited2::configuration_.streamUserData))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to init processing stream, aborting\n")));
+                ACE_TEXT ("failed to initialize processing stream, aborting\n")));
 
     return -1;
   } // end IF

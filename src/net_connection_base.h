@@ -43,11 +43,6 @@ class Net_ConnectionBase_T
  public:
 //  Net_ConnectionBase_T ();
 
-  // implement (part of) Net_ITransportLayer_T
-  virtual bool initialize (Net_ClientServerRole_t,            // role
-                           const Net_SocketConfiguration_t&); // socket configuration
-  virtual void finalize ();
-
   // implement Common_IInitialize_T
   virtual bool initialize (const ConfigurationType&); // handler configuration
 
@@ -59,6 +54,12 @@ class Net_ConnectionBase_T
 
   Net_ConnectionBase_T (ICONNECTION_MANAGER_T*);
   virtual ~Net_ConnectionBase_T ();
+
+  // implement (part of) Net_ITransportLayer_T
+  // *NOTE*: (de-)registers connection with the connection manager (if any)
+  virtual bool initialize (Net_ClientServerRole_t,            // role
+                           const Net_SocketConfiguration_t&); // socket configuration
+  virtual void finalize ();
 
   ConfigurationType      configuration_;
   bool                   isRegistered_;

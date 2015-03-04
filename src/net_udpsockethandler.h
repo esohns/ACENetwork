@@ -23,8 +23,6 @@
 
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
-#include "ace/SOCK_Dgram.h"
-//#include "ace/SOCK_Stream.h"
 #include "ace/Svc_Handler.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Reactor_Notification_Strategy.h"
@@ -33,8 +31,8 @@
 
 template <typename SocketType>
 class Net_UDPSocketHandler_T
- : public SocketType
- , public ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH>
+// : public SocketType
+ : public ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>
 // : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
 {
  public:
@@ -52,13 +50,13 @@ class Net_UDPSocketHandler_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
   // resolve ambiguity between ACE_Event_Handler and ACE_Svc_Handler
-  using ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH>::get_handle;
+  using ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>::get_handle;
   //  using ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>::get_handle;
-  using ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH>::set_handle;
+  using ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>::set_handle;
   //  using ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>::set_handle;
 
  protected:
-  typedef ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH> SVC_HANDLER_T;
+  typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> SVC_HANDLER_T;
 
   Net_UDPSocketHandler_T ();
   virtual ~Net_UDPSocketHandler_T ();
@@ -66,8 +64,8 @@ class Net_UDPSocketHandler_T
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef SocketType inherited;
-  typedef ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH> inherited2;
+//  typedef SocketType inherited;
+  typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> inherited2;
 //  typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&));

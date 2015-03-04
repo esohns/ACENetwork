@@ -26,7 +26,7 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-Net_TCPConnection::Net_TCPConnection (Net_ITCPConnectionManager_t* interfaceHandle_in)
+Net_TCPConnection::Net_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in)
  : inherited (interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
@@ -581,7 +581,7 @@ Net_TCPConnection::handle_close (ACE_HANDLE handle_in,
 
 //}
 
-Net_AsynchTCPConnection::Net_AsynchTCPConnection (Net_ITCPConnectionManager_t* interfaceHandle_in)
+Net_AsynchTCPConnection::Net_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in)
  : inherited (interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));

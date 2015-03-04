@@ -29,11 +29,12 @@
 
 #include "stream_common.h"
 
-#include "net_connection_manager_common.h"
+#include "net_configuration.h"
 #include "net_exports.h"
+#include "net_itransportlayer.h"
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
-#include "net_transportlayer_netlink.h"
+#include "net_stream_common.h"
 
 // forward declarations
 template <typename SVC_HANDLER,
@@ -45,16 +46,21 @@ class Net_Export Net_NetlinkConnection
  : public Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
                                      Net_INetlinkTransportLayer_t,
                                      Net_Configuration_t,
-                                     Stream_SessionData_t,
+                                     Net_StreamSessionData_t,
                                      Stream_Statistic_t>
 {
   //friend class ACE_Connector<Net_NetlinkConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-   // *NOTE*: consider encapsulating this (need to grant access to
+  typedef Net_IConnectionManager_T<Net_Configuration_t,
+                                   Net_StreamSessionData_t,
+                                   Net_INetlinkTransportLayer_t,
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+
+  // *NOTE*: consider encapsulating this (need to grant access to
    //         ACE_Connector however (see: ace/Connector.cpp:239))
 //   Net_NetlinkConnection ();
-   Net_NetlinkConnection (Net_INetlinkConnectionManager_t*);
+   Net_NetlinkConnection (ICONNECTION_MANAGER_T*);
 
    // override / implement (part of) Net_INetlinkTransportLayer
    virtual bool initialize (Net_ClientServerRole_t,            // role
@@ -81,7 +87,7 @@ class Net_Export Net_NetlinkConnection
   typedef Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
                                      Net_INetlinkTransportLayer_t,
                                      Net_Configuration_t,
-                                     Stream_SessionData_t,
+                                     Net_StreamSessionData_t,
                                      Stream_Statistic_t> inherited;
 
   //// override some task-based members

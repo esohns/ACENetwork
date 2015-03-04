@@ -42,7 +42,7 @@ class Net_Module_HeaderParser
   virtual ~Net_Module_HeaderParser ();
 
   // initialization
-  bool init ();
+  bool initialize ();
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Net_Message*&, // data message handle

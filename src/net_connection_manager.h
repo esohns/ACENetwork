@@ -35,12 +35,12 @@
 
 template <typename ConfigurationType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticsContainerType>
 class Net_Connection_Manager_T
  : public Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
-                                   TransportLayerType,
+                                   ITransportLayerType,
                                    StatisticsContainerType>
  , public Common_IStatistic_T<StatisticsContainerType>
  , public Common_IDumpState
@@ -48,7 +48,7 @@ class Net_Connection_Manager_T
   // singleton needs access to the ctor/dtors
   friend class ACE_Singleton<Net_Connection_Manager_T<ConfigurationType,
                                                       SessionDataType,
-                                                      TransportLayerType,
+                                                      ITransportLayerType,
                                                       StatisticsContainerType>,
                              ACE_Recursive_Thread_Mutex>;
 
@@ -58,8 +58,9 @@ class Net_Connection_Manager_T
   //                                     StatisticsContainerType>;
 
  public:
-  typedef Net_IConnection_T<TransportLayerType,
-                            StatisticsContainerType> Connection_t;
+  // convenience types
+  typedef Net_IConnection_T<ITransportLayerType,
+                            StatisticsContainerType> CONNECTION_T;
 
   // configuration / initialization
   void initialize (unsigned int); // maximum number of concurrent connections
@@ -79,10 +80,10 @@ class Net_Connection_Manager_T
   void abortConnections ();
   void waitConnections () const;
 
-  // *TODO*: used for unit testing purposes ONLY !
   //void lock();
   //void unlock();
-  const Connection_t* operator[] (unsigned int) const;
+  // *WARNING*: if (!= NULL) callers must decrease() the returned value !
+  const CONNECTION_T* operator[] (unsigned int) const;
   // --------------------------------------------------------------------------
   void abortOldestConnection ();
   void abortNewestConnection ();
@@ -94,18 +95,19 @@ class Net_Connection_Manager_T
   virtual void dump_state () const;
 
  private:
-  typedef ACE_DLList<Connection_t> Connections_t;
-  typedef ACE_DLList_Iterator<Connection_t> ConnectionsIterator_t;
-  typedef ACE_DLList_Reverse_Iterator<Connection_t> ConnectionsReverseIterator_t;
+  // convenience types
+  typedef ACE_DLList<CONNECTION_T> CONNECTION_CONTAINER_T;
+  typedef ACE_DLList_Iterator<CONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;
+  typedef ACE_DLList_Reverse_Iterator<CONNECTION_T> CONNECTION_CONTAINER_REVERSEITERATOR_T;
 
-  // implement Net_IConnectionManager
+  // implement Net_IConnectionManager_T
   virtual void getData (ConfigurationType&, // return value: (connection) handler configuration
                         SessionDataType&);  // return value: stream session data
-  virtual bool registerConnection (Connection_t*); // connection
-  virtual void deregisterConnection (const Connection_t*); // connection
+  virtual bool registerConnection (CONNECTION_T*); // connection
+  virtual void deregisterConnection (const CONNECTION_T*); // connection
 
   // implement Common_IStatistic
-  // *WARNING*: this assumes myLock is being held !
+  // *WARNING*: this assumes lock_ is being held !
   virtual bool collect (StatisticsContainerType&) const; // return value: statistic data
 
   Net_Connection_Manager_T ();
@@ -115,7 +117,7 @@ class Net_Connection_Manager_T
 
   // implement blocking wait...
   mutable ACE_Condition<ACE_Recursive_Thread_Mutex> condition_;
-  Connections_t                                     connections_;
+  CONNECTION_CONTAINER_T                            connections_;
   ConfigurationType                                 configuration_; // (connection) handler configuration
   bool                                              isActive_;
   bool                                              isInitialized_;

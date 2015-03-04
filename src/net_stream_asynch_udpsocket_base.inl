@@ -171,13 +171,13 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
     inherited4::configuration_.streamConfiguration.module = clone;
     inherited4::configuration_.streamConfiguration.deleteModule = true;
   } // end IF
-  if (!stream_.init (state_->sessionID,
-                     inherited4::configuration_.streamConfiguration,
-                     inherited4::configuration_.protocolConfiguration,
-                     inherited4::configuration_.streamUserData))
+  if (!stream_.initialize (state_->sessionID,
+                           inherited4::configuration_.streamConfiguration,
+                           inherited4::configuration_.protocolConfiguration,
+                           inherited4::configuration_.streamUserData))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to init processing stream, aborting\n")));
+                ACE_TEXT ("failed to initialize processing stream, aborting\n")));
 
     // clean up
     handle_close (handle_in,

@@ -42,9 +42,9 @@ Net_Module_HeaderParser::~Net_Module_HeaderParser()
 }
 
 bool
-Net_Module_HeaderParser::init ()
+Net_Module_HeaderParser::initialize ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_HeaderParser::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_HeaderParser::initialize"));
 
   // sanity check(s)
   if (isInitialized_)
@@ -76,7 +76,7 @@ Net_Module_HeaderParser::handleDataMessage (Net_Message*& message_inout,
     if (!message_inout->crunchForHeader (sizeof (Net_MessageHeader_t)))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("[%u]: failed to RPG_Net_Message::crunchForHeader(%u), aborting\n"),
+                  ACE_TEXT ("[%u]: failed to Net_Message::crunchForHeader(%u), aborting\n"),
                   message_inout->getID (),
                   sizeof (Net_MessageHeader_t)));
 

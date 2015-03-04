@@ -22,8 +22,11 @@
 #include "net_udpconnection.h"
 
 #include "net_exports.h"
+#include "net_socket_common.h"
 #include "net_stream_common.h"
 
 // export (common) template instances
-template Net_Export class Net_UDPConnection_T<Net_StreamSessionData_t>;
-template Net_Export class Net_AsynchUDPConnection_T<Net_StreamSessionData_t>;
+template Net_Export class Net_UDPConnection_T<Net_StreamSessionData_t,
+                                              Net_UDPHandler_t>;
+template Net_Export class Net_AsynchUDPConnection_T<Net_StreamSessionData_t,
+                                                    Net_AsynchUDPHandler_t>;

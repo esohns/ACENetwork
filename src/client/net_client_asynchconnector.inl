@@ -203,14 +203,16 @@ Net_Client_AsynchConnector_T<AddressType,
 
 /////////////////////////////////////////
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType>
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
                              SessionDataType,
                              ITransportLayerType,
-                             Net_AsynchUDPConnection_T<SessionDataType> >::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                             Net_AsynchUDPConnection_T<SessionDataType,
+                                                       HandlerType> >::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                                                          const ConfigurationType* configuration_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
@@ -228,20 +230,23 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                 ACE_TEXT ("failed to ACE_Asynch_Connector::open(): \"%m\", continuing\n")));
 }
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType>
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
                              SessionDataType,
                              ITransportLayerType,
-                             Net_AsynchUDPConnection_T<SessionDataType> >::~Net_Client_AsynchConnector_T ()
+                             Net_AsynchUDPConnection_T<SessionDataType,
+                                                       HandlerType> >::~Net_Client_AsynchConnector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::~Net_Client_AsynchConnector_T"));
 
 }
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType>
 int
@@ -249,9 +254,10 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
                              SessionDataType,
                              ITransportLayerType,
-                             Net_AsynchUDPConnection_T<SessionDataType> >::validate_connection (const ACE_Asynch_Connect::Result& result_in,
-                                                                                                const ACE_INET_Addr& remoteSAP_in,
-                                                                                                const ACE_INET_Addr& localSAP_in)
+                             Net_AsynchUDPConnection_T<SessionDataType,
+                                                       HandlerType> >::validate_connection (const ACE_Asynch_Connect::Result& result_in,
+                                                                                            const ACE_INET_Addr& remoteSAP_in,
+                                                                                            const ACE_INET_Addr& localSAP_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
@@ -272,7 +278,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
   return ((result_in.success () == 1) ? 0 : -1);
 }
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType>
 const ConfigurationType*
@@ -280,14 +287,16 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
                              SessionDataType,
                              ITransportLayerType,
-                             Net_AsynchUDPConnection_T<SessionDataType> >::getConfiguration () const
+                             Net_AsynchUDPConnection_T<SessionDataType,
+                                                       HandlerType> >::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::getConfiguration"));
 
   return configuration_;
 }
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType>
 void
@@ -295,7 +304,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
                              SessionDataType,
                              ITransportLayerType,
-                             Net_AsynchUDPConnection_T<SessionDataType> >::abort ()
+                             Net_AsynchUDPConnection_T<SessionDataType,
+                                                       HandlerType> >::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::abort"));
 
@@ -307,7 +317,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                 ACE_TEXT ("failed to ACE_Asynch_Connector::cancel(): \"%m\", continuing\n")));
 }
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType>
 bool
@@ -315,7 +326,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
                              SessionDataType,
                              ITransportLayerType,
-                             Net_AsynchUDPConnection_T<SessionDataType> >::connect (const ACE_INET_Addr& address_in)
+                             Net_AsynchUDPConnection_T<SessionDataType,
+                                                       HandlerType> >::connect (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
@@ -340,15 +352,18 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
   return true;
 }
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType>
-Net_AsynchUDPConnection_T<SessionDataType>*
+Net_AsynchUDPConnection_T<SessionDataType,
+                          HandlerType>*
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
                              SessionDataType,
                              ITransportLayerType,
-                             Net_AsynchUDPConnection_T<SessionDataType> >::make_handler (void)
+                             Net_AsynchUDPConnection_T<SessionDataType,
+                                                       HandlerType> >::make_handler (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::make_handler"));
 
