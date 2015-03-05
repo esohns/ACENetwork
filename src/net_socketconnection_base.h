@@ -26,7 +26,6 @@
 
 #include "net_connection_base.h"
 #include "net_connection_manager.h"
-//#include "net_exports.h"
 
 template <typename SocketHandlerType,
           typename ITransportLayerType,
@@ -51,13 +50,14 @@ class Net_SocketConnectionBase_T
   // override some task-based members
   virtual int open (void* = NULL); // args
   virtual int close (u_long = 0); // args
+//  virtual int svc (void);
 
 //  // *NOTE*: enqueue any received data onto our stream for further processing
 //   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() returns -1
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+//  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+//                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
@@ -74,6 +74,9 @@ class Net_SocketConnectionBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T& operator= (const Net_SocketConnectionBase_T&));
+
+//  // helper methods
+//  void shutdown ();
 };
 
 template <typename SocketHandlerType,

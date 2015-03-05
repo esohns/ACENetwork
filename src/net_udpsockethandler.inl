@@ -313,7 +313,7 @@ Net_UDPSocketHandler_T<SocketType>::handle_close (ACE_HANDLE handle_in,
 //        // - close the socket (--> done in dtor (see above))
 //      } // end ELSE IF
 
-      // (failed) accept / asynch abort case
+      // asynch abort case
 
       ACE_ASSERT (inherited2::reactor ());
       result = inherited2::reactor ()->remove_handler (this,

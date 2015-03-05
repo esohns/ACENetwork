@@ -286,5 +286,8 @@
     <None Include="..\..\src\net_udpsockethandler.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="..\..\src\net_module_sockethandler.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

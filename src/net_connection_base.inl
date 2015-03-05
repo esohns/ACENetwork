@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "ace/OS.h"
 #include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "net_macros.h"
 
@@ -98,6 +98,7 @@ Net_ConnectionBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
 
+  finalize ();
 }
 
 template <typename ConfigurationType,

@@ -38,7 +38,8 @@ template <typename ProtocolCommandType>
 Net_MessageBase_T<ProtocolCommandType>::Net_MessageBase_T (ACE_Data_Block* dataBlock_in,
                                                            ACE_Allocator* messageAllocator_in)
  : inherited (dataBlock_in,        // use (don't own !) this data block
-              messageAllocator_in) // use this when destruction is imminent...
+              messageAllocator_in, // use this when destruction is imminent...
+              true)                // increment the message ID ?
  , isInitialized_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_MessageBase_T::Net_MessageBase_T"));

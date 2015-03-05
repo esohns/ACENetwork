@@ -51,7 +51,7 @@ class Net_StreamUDPSocketBase_T
   virtual ~Net_StreamUDPSocketBase_T ();
 
   virtual int open (void* = NULL); // args
-  //virtual int close (u_long = 0); // flags
+  virtual int close (u_long = 0); // flags
 
   // *NOTE*: enqueue any received data onto our stream for further processing
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);

@@ -328,13 +328,13 @@ Net_Connection_Manager_T<ConfigurationType,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection::finalize(), continuing")));
+                  ACE_TEXT ("caught exception in Net_IConnection_T::finalize(), continuing")));
     }
   } while (true);
   ACE_ASSERT (connections_.is_empty ());
 
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("aborted %u connection(s)\n"),
+              ACE_TEXT ("closed %u connection(s)\n"),
               num_connections));
 }
 

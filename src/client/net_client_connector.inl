@@ -241,10 +241,6 @@ Net_Client_Connector_T<ACE_INET_Addr,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return);
 }
 
 template <typename HandlerType,

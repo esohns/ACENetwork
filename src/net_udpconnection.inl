@@ -114,7 +114,7 @@ Net_UDPConnection_T<SessionDataType,
                                    : -1)));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              ACE_TEXT ("opened connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, handle,
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
@@ -135,15 +135,6 @@ Net_UDPConnection_T<SessionDataType,
 
   int result = -1;
 
-  result = inherited::close (flags_in);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_SocketConnectionBase_T::close(): \"%m\", aborting\n")));
-
-    return -1;
-  } // end IF
-
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   ACE_INET_Addr address1, address2;
   try
@@ -158,21 +149,31 @@ Net_UDPConnection_T<SessionDataType,
                 ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
   }
 
-  inherited::finalize ();
+  void* this_p = this;
+  int num_connections =
+      (inherited::manager_ ? (inherited::manager_->numConnections () - 1)
+                           : -1);
+  // *WARNING*: this invokes 'delete this' !
+  result = inherited::close ();
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_SocketConnectionBase_T::close(): \"%m\", aborting\n")));
+
+    return -1;
+  } // end IF
 
   // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
-              this, reinterpret_cast<unsigned int> (handle),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
+              this_p, reinterpret_cast<unsigned int> (handle),
+              num_connections));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
-              this, handle,
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
+              ACE_TEXT ("closed connection [%@/%d] (total: %d)\n"),
+              this_p, handle,
+              num_connections));
 #endif
 
   return 0;

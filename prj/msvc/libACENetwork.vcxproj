@@ -259,6 +259,7 @@
     <None Include="..\..\src\net_connection_manager.inl" />
     <None Include="..\..\src\net_message_base.inl" />
     <None Include="..\..\src\net_module_runtimestatistic.inl" />
+    <None Include="..\..\src\net_module_sockethandler.inl" />
     <None Include="..\..\src\net_socketconnection_base.inl" />
     <None Include="..\..\src\net_sockethandler_base.inl" />
     <None Include="..\..\src\net_stream_asynch_tcpsocket_base.inl" />

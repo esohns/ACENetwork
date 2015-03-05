@@ -94,47 +94,53 @@ Net_Message::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Message::duplicate"));
 
-  Net_Message* new_message = NULL;
+  Net_Message* message_p = NULL;
 
-  // create a new Net_Message that contains unique copies of
-  // the message block fields, but a (reference counted) shallow duplicate of
-  // the ACE_Data_Block.
+  // create a new Olimex_Mod_MPU6050_Message that contains unique copies of
+  // the message block fields, but a (reference counted) "shallow" duplicate of
+  // the same datablock
 
   // if there is no allocator, use the standard new and delete calls.
-  if (message_block_allocator_ == NULL)
-  {
-    ACE_NEW_RETURN (new_message,
+  if (!inherited::message_block_allocator_)
+    ACE_NEW_RETURN (message_p,
                     Net_Message (*this),
                     NULL);
-  } // end IF
   else // otherwise, use the existing message_block_allocator
   {
     // *NOTE*: the argument to malloc SHOULDN'T really matter, as this will be
-    // a "shallow" copy which just references our data block...
-    // *TODO*: (depending on the allocator) we senselessly allocate a datablock
-    // anyway, only to immediately release it again...
-    ACE_NEW_MALLOC_RETURN (new_message,
-                           static_cast<Net_Message*> (message_block_allocator_->malloc (inherited::capacity ())),
+    // a "shallow" copy referencing the same datablock...
+    ACE_NEW_MALLOC_RETURN (message_p,
+                           static_cast<Net_Message*> (inherited::message_block_allocator_->calloc (inherited::capacity ())),
                            Net_Message (*this),
                            NULL);
   } // end ELSE
-
-  // increment the reference counts of all the continuation messages
-  if (cont_)
+  if (!message_p)
   {
-    new_message->cont_ = cont_->duplicate ();
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate Net_Message: \"%m\", aborting\n")));
 
-    // when things go wrong, release all resources and return
-    if (new_message->cont_ == NULL)
+    return NULL;
+  } // end IF
+
+  // increment the reference counts of any continuation messages
+  if (inherited::cont_)
+  {
+    message_p->cont_ = cont_->duplicate ();
+    if (!message_p->cont_)
     {
-      new_message->release ();
-      new_message = NULL;
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Message::duplicate(): \"%m\", aborting\n")));
+
+      // clean up
+      message_p->release ();
+
+      return NULL;
     } // end IF
   } // end IF
 
   // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
 
-  return new_message;
+  return message_p;
 }
 
 void

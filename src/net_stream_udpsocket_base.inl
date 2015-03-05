@@ -20,6 +20,7 @@
 
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
+#include "ace/Svc_Handler.h"
 
 #include "net_macros.h"
 
@@ -130,7 +131,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_UDPSocketHandler::open(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
 
     return -1;
   } // end IF
@@ -151,14 +152,16 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     // last active notification has been dispatched, it will be safely deleted
     inherited2::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 
-    inherited3::configuration_.streamConfiguration.notificationStrategy = &(inherited2::notificationStrategy_);
+    inherited3::configuration_.streamConfiguration.notificationStrategy =
+        &(inherited2::notificationStrategy_);
   } // end IF
   // step2b: init final module (if any)
   if (inherited3::configuration_.streamConfiguration.module)
   {
     Stream_IModule_t* imodule_handle = NULL;
     // need a downcast...
-    imodule_handle = dynamic_cast<Stream_IModule_t*> (inherited3::configuration_.streamConfiguration.module);
+    imodule_handle =
+        dynamic_cast<Stream_IModule_t*> (inherited3::configuration_.streamConfiguration.module);
     if (!imodule_handle)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -255,6 +258,90 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   // *WARNING*: this has some implications (see close() below)
   if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
     inherited2::remove_reference ();
+
+  return 0;
+}
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticsContainerType,
+          typename StreamType,
+//          typename SocketType,
+          typename SocketHandlerType>
+int
+Net_StreamUDPSocketBase_T<ConfigurationType,
+                          SessionDataType,
+                          ITransportLayerType,
+                          StatisticsContainerType,
+                          StreamType,
+//                          SocketType,
+                          SocketHandlerType>::close (u_long arg_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::close"));
+  // [*NOTE*: hereby we override the default behavior of a ACE_Svc_Handler,
+  // which would call handle_close() AGAIN]
+
+  // *NOTE*: this method will be invoked
+  // - by any worker after returning from svc()
+  //    --> in this case, this should be a NOP (triggered from handle_close(),
+  //        which was invoked by the reactor) - we override the default
+  //        behavior of a ACE_Svc_Handler, which would call handle_close() AGAIN
+  // - by the connector/acceptor when open() fails (e.g. too many connections !)
+  //    --> shutdown
+
+  switch (arg_in)
+  {
+    // called by:
+    // - any worker from ACE_Task_Base on clean-up
+    // - acceptor/connector if there are too many connections (i.e. open()
+    //   returned -1)
+    case NORMAL_CLOSE_OPERATION:
+    {
+      // check specifically for the first case...
+      if (ACE_OS::thr_equal (ACE_Thread::self (),
+                             inherited2::last_thread ()))
+      {
+//       if (inherited::module ())
+//         ACE_DEBUG ((LM_DEBUG,
+//                     ACE_TEXT ("\"%s\" worker thread (ID: %t) leaving...\n"),
+//                     ACE_TEXT (inherited::name ())));
+//       else
+//         ACE_DEBUG ((LM_DEBUG,
+//                     ACE_TEXT ("worker thread (ID: %t) leaving...\n")));
+
+        break;
+      } // end IF
+
+      // too many connections: invoke inherited default behavior
+      // --> simply fall through to the next case
+    }
+    // called by external (e.g. reactor) thread wanting to close the connection
+    // (e.g. too many connections)
+    // *NOTE*: this eventually calls handle_close() (see below)
+    case CLOSE_DURING_NEW_CONNECTION:
+    {
+      int result = -1;
+      result = inherited2::close ();
+      if (result == -1)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to SocketHandlerType::close(): \"%m\", aborting\n")));
+
+        return -1;
+      } // end IF
+
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid argument: %u, returning\n"),
+                  arg_in));
+
+      break;
+    }
+  } // end SWITCH
 
   return 0;
 }
@@ -439,10 +526,9 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
       break;
   } // end SWITCH
 
-  //// invoke base-class maintenance
-  //return inherited2::handle_close (handle_in,
-  //                                 mask_in);
-  return 0;
+  // invoke base-class maintenance
+  return inherited2::handle_close (handle_in,
+                                   mask_in);
 }
 
 template <typename ConfigurationType,
@@ -470,7 +556,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in RPG_Common_IStatistic::collect(), aborting\n")));
+                ACE_TEXT ("caught exception in Common_IStatistic::collect(), aborting\n")));
   }
 
   return false;

@@ -25,8 +25,6 @@
 
 #include "common_iinitialize.h"
 
-//#include "net_exports.h"
-
 template <typename ConfigurationType/*,
           typename SessionDataType*/>
 class Net_SocketHandlerBase

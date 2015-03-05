@@ -70,7 +70,7 @@ class Net_Client_Connector_T
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&));
 
   const ConfigurationType* configuration_;
-  ICONNECTION_MANAGER_T* interfaceHandle_;
+  ICONNECTION_MANAGER_T*   interfaceHandle_;
 };
 
 // partial specialization (for UDP)
@@ -103,9 +103,10 @@ class Net_Client_Connector_T<ACE_INET_Addr,
   virtual int make_svc_handler (CONNECTION_T*&);
 
   // implement Net_Client_IConnector_T
-  // *TODO*: why is it necessary to provide an implementation when there is a
-  //         more generic one available ? (gcc complains about abort() and
+  // *TODO*: why is it necessary to provide an implementation when there is (a
+  //         more generic) one available ? (gcc complains about abort() and
   //         getConfiguration())
+  // *NOTE*: this is just a stub
   virtual void abort ();
   // specialize (part of) Net_Client_IConnector_T
   virtual bool connect (const ACE_INET_Addr&);
@@ -118,7 +119,7 @@ class Net_Client_Connector_T<ACE_INET_Addr,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&));
 
   const ConfigurationType* configuration_;
-  ICONNECTION_MANAGER_T* interfaceHandle_;
+  ICONNECTION_MANAGER_T*   interfaceHandle_;
 };
 
 // include template implementation

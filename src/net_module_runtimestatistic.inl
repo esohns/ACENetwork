@@ -22,7 +22,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/Time_Value.h"
 
-#include "common.h"
+//#include "common.h"
 #include "common_timer_manager.h"
 
 #include "stream_message_base.h"
