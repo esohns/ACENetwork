@@ -348,6 +348,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
                            StatisticsContainerType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::close"));
+
   // [*NOTE*: hereby we override the default behavior of a ACE_Svc_Handler,
   // which would call handle_close() AGAIN]
 
@@ -777,7 +778,8 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
   {
     ACE_ASSERT (configuration_);
     SocketHandlerType* socket_handler_p = this;
-    typename SocketHandlerType::CONNECTION_BASE_T* connection_base_p = socket_handler_p;
+    typename SocketHandlerType::CONNECTION_BASE_T* connection_base_p =
+     socket_handler_p;
     if (!connection_base_p->initialize (*configuration_))
     {
       ACE_DEBUG ((LM_ERROR,

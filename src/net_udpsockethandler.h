@@ -27,13 +27,9 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Reactor_Notification_Strategy.h"
 
-//#include "net_exports.h"
-
 template <typename SocketType>
 class Net_UDPSocketHandler_T
-// : public SocketType
  : public ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>
-// : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
 {
  public:
   //// override some event handler methods
@@ -64,9 +60,7 @@ class Net_UDPSocketHandler_T
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-//  typedef SocketType inherited;
-  typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> inherited2;
-//  typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH> inherited2;
+  typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&));

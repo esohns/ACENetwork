@@ -21,10 +21,10 @@
     <ClCompile Include="..\..\src\client\net_client_connector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\client\stdafx.cpp">
+    <ClCompile Include="..\..\src\client\net_client_sockethandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\client\net_client_sockethandler.cpp">
+    <ClCompile Include="..\..\src\client\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

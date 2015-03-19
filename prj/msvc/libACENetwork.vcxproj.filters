@@ -102,10 +102,10 @@
     <ClCompile Include="..\..\src\net_udpsockethandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\stdafx.cpp">
+    <ClCompile Include="..\..\src\net_ipconnection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\net_ipconnection.cpp">
+    <ClCompile Include="..\..\src\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -289,5 +289,6 @@
     <None Include="..\..\src\net_module_sockethandler.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

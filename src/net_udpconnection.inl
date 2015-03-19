@@ -70,7 +70,6 @@ Net_UDPConnection_T<SessionDataType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SocketConnectionBase_T::open(): \"%m\", aborting\n")));
-
     return -1;
   } // end IF
 
@@ -89,7 +88,6 @@ Net_UDPConnection_T<SessionDataType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting\n")));
-
     return -1;
   }
   if (local_SAP.addr_to_string (buffer,
@@ -151,15 +149,13 @@ Net_UDPConnection_T<SessionDataType,
 
   void* this_p = this;
   int num_connections =
-      (inherited::manager_ ? (inherited::manager_->numConnections () - 1)
-                           : -1);
+      (inherited::manager_ ? (inherited::manager_->numConnections () - 1) : -1);
   // *WARNING*: this invokes 'delete this' !
   result = inherited::close ();
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SocketConnectionBase_T::close(): \"%m\", aborting\n")));
-
     return -1;
   } // end IF
 

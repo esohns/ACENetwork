@@ -117,7 +117,8 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
   // step0: init this
   // *TODO*: find a better way to do this
-  serializeOutput_ = inherited3::configuration_.streamConfiguration.serializeOutput;
+  serializeOutput_ =
+   inherited3::configuration_.streamConfiguration.serializeOutput;
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  state_->sessionID =
 //      *static_cast<unsigned int*> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
@@ -132,7 +133,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
-
     return -1;
   } // end IF
   //// *NOTE*: as soon as this returns, data starts arriving at handle_input()
@@ -167,7 +167,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
                   ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
-
       return -1;
     } // end IF
     Common_Module_t* clone = NULL;
@@ -180,7 +179,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
                   ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
-
       return -1;
     }
     if (!clone)
@@ -188,7 +186,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
                   ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
-
       return -1;
     }
     inherited3::configuration_.streamConfiguration.module = clone;
@@ -197,18 +194,15 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   // step2c: init stream
   //#if defined (ACE_WIN32) || defined (ACE_WIN64)
   //  state_->sessionID =
-  //      *static_cast<unsigned int*> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+  //      reinterpret_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
   //#else
   //  state_->sessionID =
   //      static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
   //#endif
 
   unsigned int session_id = 0;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  session_id = *static_cast<unsigned int*> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-#else
-  session_id = static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-#endif
+  session_id =
+   reinterpret_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
   // *TODO*: this clearly is a design glitch
   if (!stream_.initialize (session_id,
                            inherited3::configuration_.streamConfiguration,
@@ -217,7 +211,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
-
     return -1;
   } // end IF
   //stream_.dump_state ();
@@ -228,7 +221,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
-
     return -1;
   } // end IF
 
@@ -238,7 +230,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Reactor::register_handler(READ_MASK): \"%m\", aborting\n")));
-
     return -1;
   } // end IF
 
@@ -250,7 +241,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 //   {
 //     ACE_DEBUG ((LM_ERROR,
 //                 ACE_TEXT ("failed to ACE_Reactor::register_handler(WRITE_MASK): \"%m\", aborting\n")));
-//
 //     return -1;
 //   } // end IF
 
@@ -279,6 +269,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
                           SocketHandlerType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::close"));
+
   // [*NOTE*: hereby we override the default behavior of a ACE_Svc_Handler,
   // which would call handle_close() AGAIN]
 
@@ -309,7 +300,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 //       else
 //         ACE_DEBUG ((LM_DEBUG,
 //                     ACE_TEXT ("worker thread (ID: %t) leaving...\n")));
-
         break;
       } // end IF
 
@@ -327,7 +317,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to SocketHandlerType::close(): \"%m\", aborting\n")));
-
         return -1;
       } // end IF
 
@@ -338,7 +327,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid argument: %u, returning\n"),
                   arg_in));
-
       break;
     }
   } // end SWITCH
@@ -447,7 +435,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
 
-      // clean up
+    // clean up
     currentReadBuffer_->release ();
     currentReadBuffer_ = NULL;
 
@@ -502,7 +490,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@): \"%m\", continuing\n"),
                       this));
-
       break;
     }
     case ACE_Event_Handler::EXCEPT_MASK:
@@ -527,7 +514,8 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   } // end SWITCH
 
   // invoke base-class maintenance
-  return inherited2::handle_close (handle_in,
+  return inherited2::handle_close (((handle_in != ACE_INVALID_HANDLE) ? handle_in 
+                                                                      : inherited::get_handle ()),
                                    mask_in);
 }
 
@@ -587,7 +575,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in RPG_Common_IStatistic::report(), aborting\n")));
+                ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
   }
 }
 

@@ -32,18 +32,12 @@
 
 template <typename SocketType>
 Net_UDPSocketHandler_T<SocketType>::Net_UDPSocketHandler_T ()//MANAGER_T* manager_in)
- //: inherited ()
-// : inherited (ACE_Reactor::instance (),       // default reactor
-//              ACE_Event_Handler::LO_PRIORITY) // default priority
- : inherited2 (NULL,                     // no specific thread manager
-               NULL,                     // no specific message queue
-               ACE_Reactor::instance ()) // default reactor
+ : inherited (NULL,                     // no specific thread manager
+              NULL,                     // no specific message queue
+              ACE_Reactor::instance ()) // default reactor
  , notificationStrategy_ (ACE_Reactor::instance (),      // reactor
                           this,                          // event handler
                           ACE_Event_Handler::WRITE_MASK) // handle output only
-// , manager_ (manager_in)
-// , userData_ ()
-// , isRegistered_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::Net_UDPSocketHandler_T"));
 
@@ -150,10 +144,10 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
   ACE_INET_Addr local_SAP (configuration_p->peerAddress.get_port_number (),
                            (configuration_p->useLoopbackDevice ? INADDR_LOOPBACK
                                                                : INADDR_ANY));
-  result = inherited2::peer_.open (local_SAP,                // local SAP
-                                   ACE_PROTOCOL_FAMILY_INET, // protocol family
-                                   0,                        // protocol
-                                   1);                       // reuse_addr
+  result = inherited::peer_.open (local_SAP,                // local SAP
+                                  ACE_PROTOCOL_FAMILY_INET, // protocol family
+                                  0,                        // protocol
+                                  1);                       // reuse_addr
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
@@ -167,7 +161,6 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (local_address.c_str ())));
-
     return -1;
   } // end IF
 
@@ -203,6 +196,8 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
 //                SVC_HANDLER_T::get_handle ()));
 //    return -1;
 //  } // end IF
+// *CHECK*
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
   if (!Net_Common_Tools::setLinger (SVC_HANDLER_T::get_handle (),
                                     NET_DEFAULT_SOCKET_LINGER))
   {
@@ -213,6 +208,7 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
                 SVC_HANDLER_T::get_handle ()));
     return -1;
   } // end IF
+#endif
 
 //  if (manager_)
 //  {
@@ -281,13 +277,8 @@ Net_UDPSocketHandler_T<SocketType>::handle_close (ACE_HANDLE handle_in,
                                              // - asynch abort
                                              // - ... ?
     {
-      if (handle_in != ACE_INVALID_HANDLE)
-      {
-        // *TODO*: select case ?
-        break;
-      } // end IF
       // *TODO*: validate (failed) connect/accept case
-//      else if (!myIsRegistered)
+//      if (!isRegistered_)
 //      {
 //        // (failed) connect/accept case
 
@@ -315,10 +306,23 @@ Net_UDPSocketHandler_T<SocketType>::handle_close (ACE_HANDLE handle_in,
 
       // asynch abort case
 
-      ACE_ASSERT (inherited2::reactor ());
-      result = inherited2::reactor ()->remove_handler (this,
-                                                       (mask_in |
-                                                        ACE_Event_Handler::DONT_CALL));
+      if (handle_in != ACE_INVALID_HANDLE)
+      {
+        result = inherited::peer_.close ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SOCK_IO::close (): %d, continuing\n")));
+      } // end IF
+
+      ACE_ASSERT (inherited::reactor ());
+      //result =
+      // inherited::reactor ()->remove_handler (this,
+      //                                        (mask_in |
+      //                                         ACE_Event_Handler::DONT_CALL));
+      result =
+        inherited::reactor ()->remove_handler (handle_in,
+                                               (mask_in |
+                                                ACE_Event_Handler::DONT_CALL));
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d), continuing\n"),
@@ -345,129 +349,3 @@ Net_UDPSocketHandler_T<SocketType>::handle_close (ACE_HANDLE handle_in,
 
   return result;
 }
-
-//void
-//Net_UDPSocketHandler_T::info(ACE_HANDLE& handle_out,
-//                               ACE_INET_Addr& localSAP_out,
-//                               ACE_INET_Addr& remoteSAP_out) const
-//{
-//  NETWORK_TRACE(ACE_TEXT("Net_UDPSocketHandler_T::info"));
-
-//  //handle_out = reinterpret_cast<ACE_HANDLE>(myUserData.sessionID);
-//  handle_out = peer_.get_handle();
-//  if (inherited::peer_.get_local_addr(localSAP_out) == -1)
-//  {
-//    // *NOTE*: socket already closed ? --> not an error
-//    int error = ACE_OS::last_error();
-//    if ((error != EBADF) &&
-//        (error != ENOTSOCK))
-//      ACE_DEBUG((LM_ERROR,
-//                 ACE_TEXT("failed to ACE_SOCK_Stream::get_local_addr(): \"%m\", continuing\n")));
-//  } // end IF
-//  if (inherited::peer_.get_remote_addr(remoteSAP_out) == -1)
-//  {
-//    // *NOTE*: socket already closed ? --> not an error
-//    int error = ACE_OS::last_error();
-//    if ((error != ENOTCONN) &&
-//        (error != EBADF) &&
-//        (error != ENOTSOCK))
-//      ACE_DEBUG((LM_ERROR,
-//                 ACE_TEXT("failed to ACE_SOCK_Stream::get_remote_addr(): \"%m\", continuing\n")));
-//  } // end IF
-//}
-
-//void
-//Net_UDPSocketHandler_T::close()
-//{
-//  NETWORK_TRACE(ACE_TEXT("Net_UDPSocketHandler_T::close"));
-
-//  // *NOTE*: do NOT simply close the underlying socket
-
-//  // de-register from the manager, close the stream, de-register from the
-//  // reactor[, delete this]
-//  close(NORMAL_CLOSE_OPERATION);
-
-//  // *IMPORTANT NOTE*: if called from a non-reactor context, or when using a
-//  // a multithreaded reactor, there may still be in-flight notifications and/or
-//  // socket events being dispatched at this stage...
-//}
-
-//unsigned int
-//Net_UDPSocketHandler_T::id() const
-//{
-//  NETWORK_TRACE(ACE_TEXT("Net_UDPSocketHandler_T::id"));
-
-//  // *PORTABILITY*: this isn't entirely portable...
-//#if !defined(ACE_WIN32) && !defined(ACE_WIN64)
-//  return peer_.get_handle();
-//#else
-//  return reinterpret_cast<unsigned int>(peer_.get_handle());
-//#endif
-//}
-
-//void
-//Net_UDPSocketHandler_T::increase()
-//{
-//  NETWORK_TRACE(ACE_TEXT("Net_UDPSocketHandler_T::increase"));
-//
-//  inherited2::increase();
-//  //inherited::add_reference();
-//}
-//
-//void
-//Net_UDPSocketHandler_T::decrease()
-//{
-//  NETWORK_TRACE(ACE_TEXT("Net_UDPSocketHandler_T::decrease"));
-//
-//  // *NOTE*: may "delete this"
-//  inherited2::decrease();
-//  //// *NOTE*: may "delete this"
-//  //inherited::remove_reference();
-//}
-
-//void
-//Net_UDPSocketHandler_T::dump_state() const
-//{
-//  NETWORK_TRACE(ACE_TEXT("Net_UDPSocketHandler_T::dump_state"));
-//
-//  ACE_TCHAR buffer[RPG_COMMON_BUFSIZE];
-//  ACE_OS::memset(buffer, 0, sizeof(buffer));
-//  ACE_INET_Addr address;
-//  if (inherited::peer_.get_local_addr(address) == -1)
-//  {
-//    // *NOTE*: socket already closed ? --> not an error
-//    int error = ACE_OS::last_error();
-//    if ((error != EBADF) &&
-//        (error != ENOTSOCK))
-//      ACE_DEBUG((LM_ERROR,
-//                 ACE_TEXT("failed to ACE_SOCK_Stream::get_local_addr(): \"%m\", continuing\n")));
-//  } // end IF
-//  else if (address.addr_to_string(buffer,
-//                                  sizeof(buffer)) == -1)
-//    ACE_DEBUG((LM_ERROR,
-//               ACE_TEXT("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-//  std::string local_address = buffer;
-//
-//  ACE_OS::memset(buffer, 0, sizeof(buffer));
-//  if (inherited::peer_.get_remote_addr(address) == -1)
-//  {
-//    // *NOTE*: socket already closed ? --> not an error
-//    int error = ACE_OS::last_error();
-//    if ((error != ENOTCONN) &&
-//        (error != EBADF) &&
-//        (error != ENOTSOCK))
-//      ACE_DEBUG((LM_ERROR,
-//                 ACE_TEXT("failed to ACE_SOCK_Stream::get_remote_addr(): \"%m\", continuing\n")));
-//  } // end IF
-//  else if (address.addr_to_string(buffer,
-//                                  sizeof(buffer)) == -1)
-//    ACE_DEBUG((LM_ERROR,
-//               ACE_TEXT("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-//  std::string peer_address = buffer;
-//
-//  ACE_DEBUG((LM_DEBUG,
-//             ACE_TEXT("socket [%d]: \"%s\" <--> \"%s\"\n"),
-//             get_handle(),
-//             ACE_TEXT(local_address.c_str()),
-//             ACE_TEXT(peer_address.c_str())));
-//}
