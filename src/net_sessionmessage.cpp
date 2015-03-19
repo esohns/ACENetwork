@@ -84,8 +84,8 @@ Net_SessionMessage::duplicate (void) const
                     NULL);
   } // end IF
 
-  // *WARNING*:we tell the allocator to return a Net_SessionMessage
-  // by passing a 0 as argument to malloc()...
+  // *NOTE*: instruct the allocator to return a session message by passing 0 as
+  //         argument to malloc()...
   ACE_NEW_MALLOC_RETURN (nb,
                          static_cast<Net_SessionMessage*> (message_block_allocator_->malloc (0)),
                          Net_SessionMessage (*this),
@@ -96,7 +96,7 @@ Net_SessionMessage::duplicate (void) const
   {
     nb->cont_ = cont_->duplicate ();
 
-    // If things go wrong, release all of our resources and return
+    // clean up
     if (nb->cont_ == 0)
     {
       nb->release ();

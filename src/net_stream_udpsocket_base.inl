@@ -201,8 +201,13 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   //#endif
 
   unsigned int session_id = 0;
+#if defined (_MSC_VER)
   session_id =
-   reinterpret_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+    reinterpret_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+#else
+  session_id =
+   static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+#endif
   // *TODO*: this clearly is a design glitch
   if (!stream_.initialize (session_id,
                            inherited3::configuration_.streamConfiguration,
@@ -515,7 +520,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
   // invoke base-class maintenance
   return inherited2::handle_close (((handle_in != ACE_INVALID_HANDLE) ? handle_in 
-                                                                      : inherited::get_handle ()),
+                                                                      : inherited2::get_handle ()),
                                    mask_in);
 }
 
