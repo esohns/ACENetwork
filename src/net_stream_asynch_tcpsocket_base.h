@@ -21,21 +21,17 @@
 #ifndef Net_STREAM_ASYNCH_TCPSOCKET_BASE_H
 #define Net_STREAM_ASYNCH_TCPSOCKET_BASE_H
 
-#include "ace/Global_Macros.h"
-#include "ace/Event_Handler.h"
-#include "ace/Message_Block.h"
 #include "ace/Asynch_IO.h"
+#include "ace/Event_Handler.h"
+#include "ace/Global_Macros.h"
+#include "ace/Message_Block.h"
 
 #include "net_connection_base.h"
-//#include "net_exports.h"
-
-// forward declarations
-struct Stream_State_t;
 
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 class Net_StreamAsynchTCPSocketBase_T
@@ -44,13 +40,13 @@ class Net_StreamAsynchTCPSocketBase_T
  , public Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                ITransportLayerType,
-                               StatisticsContainerType>
+                               StatisticContainerType>
 {
  public:
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                ITransportLayerType,
-                               StatisticsContainerType> CONNECTION_BASE_T;
+                               StatisticContainerType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchTCPSocketBase_T ();
 
@@ -62,13 +58,20 @@ class Net_StreamAsynchTCPSocketBase_T
                             ACE_Reactor_Mask); // (select) mask
   virtual void act (const void*); // (user) data handle
 
+  // implement Common_IStatistic
+  // *NOTE*: delegate these to the stream
+  virtual bool collect (StatisticContainerType&); // return value: statistic data
+  virtual void report () const;
+
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
                                    ITransportLayerType,
-                                   StatisticsContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
 
-  Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*);
+  Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                                   unsigned int = 0);      // statistics collecting interval (second(s))
+                                                           // 0 --> DON'T collect statistics
 
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
 
@@ -81,14 +84,11 @@ class Net_StreamAsynchTCPSocketBase_T
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                ITransportLayerType,
-                               StatisticsContainerType> inherited2;
+                               StatisticContainerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T& operator= (const Net_StreamAsynchTCPSocketBase_T&));
-
-  // *NOTE*: this is a transient handle, used only to initialize the session ID
-  Stream_State_t* state_;
 };
 
 // include template definition

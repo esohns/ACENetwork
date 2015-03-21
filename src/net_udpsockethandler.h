@@ -47,9 +47,7 @@ class Net_UDPSocketHandler_T
 
   // resolve ambiguity between ACE_Event_Handler and ACE_Svc_Handler
   using ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>::get_handle;
-  //  using ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>::get_handle;
   using ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>::set_handle;
-  //  using ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>::set_handle;
 
  protected:
   typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> SVC_HANDLER_T;

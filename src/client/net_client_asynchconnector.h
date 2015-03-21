@@ -47,9 +47,11 @@ class Net_Client_AsynchConnector_T
                                     ITransportLayerType,
                                     Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
-  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*,
-                                const ConfigurationType*);
-  virtual ~Net_Client_AsynchConnector_T ();
+   Net_Client_AsynchConnector_T (const ConfigurationType*, // configuration handle
+                                 ICONNECTION_MANAGER_T*,   // connection manager handle
+                                 unsigned int = 0);        // statistics collecting interval (second(s))
+                                                           // 0 --> DON'T collect statistics
+   virtual ~Net_Client_AsynchConnector_T ();
 
   // override default connect strategy
   virtual int validate_connection (const ACE_Asynch_Connect::Result&, // result
@@ -75,7 +77,8 @@ class Net_Client_AsynchConnector_T
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&));
 
   const ConfigurationType* configuration_;
-  ICONNECTION_MANAGER_T* interfaceHandle_;
+  ICONNECTION_MANAGER_T*   interfaceHandle_;
+  unsigned int             statCollectionInterval_; // seconds
 };
 
 // partial specialization (for UDP)
@@ -102,8 +105,10 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
   typedef Net_AsynchUDPConnection_T<SessionDataType,
                                     HandlerType> CONNECTION_T;
 
-  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*,
-                                const ConfigurationType*);
+  Net_Client_AsynchConnector_T (const ConfigurationType*, // configuration handle
+                                ICONNECTION_MANAGER_T*,   // connection manager handle
+                                unsigned int = 0);        // statistics collecting interval (second(s))
+                                                          // 0 --> DON'T collect statistics
   virtual ~Net_Client_AsynchConnector_T ();
 
   // override default connect strategy
@@ -133,7 +138,8 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&));
 
   const ConfigurationType* configuration_;
-  ICONNECTION_MANAGER_T* interfaceHandle_;
+  ICONNECTION_MANAGER_T*   interfaceHandle_;
+  unsigned int             statCollectionInterval_; // seconds
 };
 
 // include template implementation

@@ -30,23 +30,24 @@
 template <typename ConfigurationType,
           typename SessionDataType,
           typename TransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 Net_StreamTCPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           TransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
- : inherited2 (interfaceHandle_in)
- //, configuration_ (NULL)
+                          SocketHandlerType>::Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                         unsigned int statisticsCollectionInterval_in)
+ : inherited2 (interfaceHandle_in,
+               statisticsCollectionInterval_in)
+// , configuration_ (NULL)
 // , stream_ ()
  , currentReadBuffer_ (NULL)
 // , sendLock_ ()
  , currentWriteBuffer_ (NULL)
- //, serializeOutput_ (false)
- , state_ (NULL)
+// , serializeOutput_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::Net_StreamTCPSocketBase_T"));
 
@@ -55,13 +56,13 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename TransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 Net_StreamTCPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           TransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::~Net_StreamTCPSocketBase_T ()
 {
@@ -89,32 +90,22 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename TransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamTCPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           TransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::open"));
 
-  // sanity check(s)
-  ACE_ASSERT (state_);
-
   // step0: init this
   //// *TODO*: find a better way to do this
   //serializeOutput_ = configuration_->streamConfiguration.serializeOutput;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  state_->sessionID =
-      *static_cast<unsigned int*> (inherited::get_handle ()); // (== socket handle)
-#else
-  state_->sessionID =
-      static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
-#endif
 
   // step1: init/start stream
   // step1a: connect stream head message queue with the reactor notification
@@ -154,7 +145,6 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Stream_IModule_t*> failed, aborting\n"),
                   ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-
       return -1;
     } // end IF
     Common_Module_t* clone = NULL;
@@ -167,7 +157,6 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
                   ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-
       return -1;
     }
     if (!clone)
@@ -175,21 +164,36 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
                   ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-
       return -1;
     }
     inherited2::configuration_.streamConfiguration.module = clone;
     inherited2::configuration_.streamConfiguration.deleteModule = true;
   } // end IF
   // step1c: init stream
-  if (!stream_.initialize (state_->sessionID,
+  //#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  //  state_->sessionID =
+  //      reinterpret_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+  //#else
+  //  state_->sessionID =
+  //      static_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+  //#endif
+
+  unsigned int session_id = 0;
+#if defined (_MSC_VER)
+  session_id =
+    reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
+#else
+  session_id =
+    static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
+#endif
+  // *TODO*: this clearly is a design glitch
+  if (!stream_.initialize (session_id,
                            inherited2::configuration_.streamConfiguration,
                            inherited2::configuration_.protocolConfiguration,
-                           inherited2::configuration_.streamUserData))
+                           inherited2::configuration_.streamSessionData))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
-
     return -1;
   } // end IF
   //stream_.dump_state ();
@@ -200,7 +204,6 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
-
     return -1;
   } // end IF
 
@@ -212,7 +215,6 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
-
     return -1;
   } // end IF
 
@@ -227,14 +229,14 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename TransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamTCPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           TransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::close (u_long arg_in)
 {
@@ -315,14 +317,14 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename TransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamTCPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           TransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::handle_input (ACE_HANDLE handle_in)
 {
@@ -419,14 +421,14 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename TransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamTCPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           TransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::handle_output (ACE_HANDLE handle_in)
 {
@@ -586,14 +588,14 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename TransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamTCPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           TransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::handle_close (ACE_HANDLE handle_in,
                                                             ACE_Reactor_Mask mask_in)
@@ -657,14 +659,70 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename TransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+bool
+Net_StreamTCPSocketBase_T<ConfigurationType,
+                          SessionDataType,
+                          TransportLayerType,
+                          StatisticContainerType,
+                          StreamType,
+                          SocketHandlerType>::collect (StatisticContainerType& data_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::collect"));
+
+  try
+  {
+    return stream_.collect (data_out);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IStatistic::collect(), aborting\n")));
+  }
+
+  return false;
+}
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+void
+Net_StreamTCPSocketBase_T<ConfigurationType,
+                          SessionDataType,
+                          TransportLayerType,
+                          StatisticContainerType,
+                          StreamType,
+                          SocketHandlerType>::report () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::report"));
+
+  try
+  {
+    return stream_.report ();
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
+  }
+}
+
+template <typename ConfigurationType,
+          typename SessionDataType,
+          typename TransportLayerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 ACE_Message_Block*
 Net_StreamTCPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           TransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::allocateMessage (unsigned int requestedSize_in)
 {

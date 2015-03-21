@@ -54,11 +54,11 @@ class Net_Module_SocketHandler_T
 
   // initialization
   // *TODO*: implement generic initialization (override Stream_TaskBase_T::initialize)
-  bool initialize (const StreamStateType&, // state
-                   Stream_IAllocator*,     // message allocator
-                   bool = false,           // active object ?
-                   unsigned int = 0);      // statistics collecting interval (second(s))
-                                           // 0 --> DON'T collect statistics
+  bool initialize (StreamStateType*,   // stream state handle
+                   Stream_IAllocator*, // message allocator handle
+                   bool = false,       // active object ?
+                   unsigned int = 0);  // statistics collecting interval (second(s))
+                                       // 0 --> DON'T collect statistics
 
   // user interface
   // info
@@ -73,7 +73,7 @@ class Net_Module_SocketHandler_T
 
   // implement Common_IStatistic
   // *NOTE*: implements regular (timer-based) statistics collection
-  virtual bool collect (Stream_Statistic_t&) const; // return value: (currently unused !)
+  virtual bool collect (Stream_Statistic_t&); // return value: (currently unused !)
   virtual void report () const;
 
  private:
@@ -94,17 +94,17 @@ class Net_Module_SocketHandler_T
   bool putStatisticsMessage (const Stream_Statistic_t&, // statistics info
                              const ACE_Time_Value&) const;  // statistics generation time
 
+  // protocol stuff
+  unsigned int                      currentMessageLength_;
+  ProtocolMessageType*              currentMessage_;
+  ProtocolMessageType*              currentBuffer_;
+
   bool                              isInitialized_;
 
   // timer stuff
   unsigned int                      statCollectionInterval_; // seconds
   Stream_StatisticHandler_Reactor_t statCollectHandler_;
   long                              statCollectHandlerID_;
-
-  // protocol stuff
-  unsigned int                      currentMessageLength_;
-  ProtocolMessageType*              currentMessage_;
-  ProtocolMessageType*              currentBuffer_;
 };
 
 /////////////////////////////////////////
@@ -130,11 +130,11 @@ class Net_Module_UDPSocketHandler_T
 
   // initialization
   // *TODO*: implement generic initialization (override Stream_TaskBase_T::initialize)
-  bool initialize (const StreamStateType&, // state
-                   Stream_IAllocator*,     // message allocator
-                   bool = false,           // active object ?
-                   unsigned int = 0);      // statistics collecting interval (second(s))
-                                           // 0 --> DON'T collect statistics
+  bool initialize (StreamStateType*,    // stream state handle
+                   Stream_IAllocator*,  // message allocator handle
+                   bool = false,        // active object ?
+                   unsigned int = 0);   // statistics collecting interval (second(s))
+                                        // 0 --> DON'T collect statistics
 
   // user interface
   // info
@@ -149,7 +149,7 @@ class Net_Module_UDPSocketHandler_T
 
   // implement Common_IStatistic
   // *NOTE*: implements regular (timer-based) statistics collection
-  virtual bool collect (Stream_Statistic_t&) const; // return value: (currently unused !)
+  virtual bool collect (Stream_Statistic_t&); // return value: (currently unused !)
   virtual void report () const;
 
  private:

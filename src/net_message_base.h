@@ -21,7 +21,7 @@
 #ifndef NET_MESSAGE_BASE_H
 #define NET_MESSAGE_BASE_H
 
-#include <string>
+//#include <string>
 
 #include "ace/Global_Macros.h"
 
@@ -68,7 +68,6 @@ class Net_MessageBase_T
   typedef Stream_MessageBase inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_MessageBase_T ());
-//  Net_MessageBase (ACE_Allocator*); // message allocator
   ACE_UNIMPLEMENTED_FUNC (Net_MessageBase_T& operator= (const Net_MessageBase_T&));
 
   bool isInitialized_;

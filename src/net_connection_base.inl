@@ -21,46 +21,53 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
+#include "common_timer_manager.h"
+
 #include "net_macros.h"
-
-//template <typename ConfigurationType,
-//          typename SessionDataType,
-//          typename ITransportLayerType,
-//          typename StatisticsContainerType>
-//Net_ConnectionBase_T<ConfigurationType,
-//                     SessionDataType,
-//                     ITransportLayerType,
-//                     StatisticsContainerType>::Net_ConnectionBase_T ()
-// : inherited (1,    // initial count
-//              true) // delete on zero ?
-// , manager_ (NULL)
-// //, configuration_ ()
-// , sessionData_ ()
-// , isRegistered_ (false)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
-
-//  // init user data
-//  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
-//  //ACE_OS::memset (&sessionData_, 0, sizeof (sessionData_));
-//}
 
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
                      ITransportLayerType,
-                     StatisticsContainerType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
+                     StatisticContainerType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                    unsigned int statisticsCollectionInterval_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
  //, configuration_ ()
  , isRegistered_ (false)
  , manager_ (interfaceHandle_in)
- , sessionData_ ()
+ //, sessionData_ ()
+ , statCollectionInterval_ (statisticsCollectionInterval_in)
+ , statCollectHandler_ (ACTION_COLLECT,
+                        this,
+                        true)
+ , statCollectHandlerID_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
+
+  if (statCollectionInterval_)
+  {
+    // schedule regular statistics collection...
+    ACE_Time_Value interval (statCollectionInterval_, 0);
+    ACE_ASSERT (statCollectHandlerID_ == -1);
+    ACE_Event_Handler* eh = &statCollectHandler_;
+    statCollectHandlerID_ =
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
+                                                            NULL,                             // argument
+                                                            COMMON_TIME_POLICY () + interval, // first wakeup time
+                                                            interval);                        // interval
+    if (statCollectHandlerID_ == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_Timer_Manager::schedule(), continuing\n")));
+    //else
+    //        ACE_DEBUG ((LM_DEBUG,
+    //                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
+    //                    statCollectHandlerID_,
+    //                    statCollectionInterval_));
+  } // end IF
 
   // init user data
   ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
@@ -90,13 +97,28 @@ Net_ConnectionBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
                      ITransportLayerType,
-                     StatisticsContainerType>::~Net_ConnectionBase_T ()
+                     StatisticContainerType>::~Net_ConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
+
+  // clean up timer if necessary
+  if (statCollectHandlerID_ != -1)
+  {
+    const void* act = NULL;
+    if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statCollectHandlerID_,
+                                                            &act) == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
+                  statCollectHandlerID_));
+    else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("cancelled timer (ID: %d)\n"),
+                  statCollectHandlerID_));
+  } // end IF
 
   finalize ();
 }
@@ -104,13 +126,13 @@ Net_ConnectionBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 bool
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
                      ITransportLayerType,
-                     StatisticsContainerType>::initialize (Net_ClientServerRole_t role_in,
-                                                           const Net_SocketConfiguration_t& configuration_in)
+                     StatisticContainerType>::initialize (Net_ClientServerRole_t role_in,
+                                                          const Net_SocketConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));
 
@@ -123,7 +145,6 @@ Net_ConnectionBase_T<ConfigurationType,
   {
 //    ACE_DEBUG ((LM_DEBUG,
 //                ACE_TEXT ("no connection manager, returning\n")));
-
     return true;
   } // end IF
 
@@ -145,7 +166,6 @@ Net_ConnectionBase_T<ConfigurationType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IConnectionManager::registerConnection(), aborting\n")));
-
       return false;
     } // end IF
   } // end IF
@@ -156,21 +176,19 @@ Net_ConnectionBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 void
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
                      ITransportLayerType,
-                     StatisticsContainerType>::finalize ()
+                     StatisticContainerType>::finalize ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::finalize"));
 
-  // sanity check(s)
   if (!manager_)
   {
     //ACE_DEBUG ((LM_DEBUG,
     //            ACE_TEXT ("no connection manager, returning\n")));
-
     return;
   } // end IF
 
@@ -195,12 +213,12 @@ Net_ConnectionBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 bool
 Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
                      ITransportLayerType,
-                     StatisticsContainerType>::initialize (const ConfigurationType& configuration_in)
+                     StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));
 

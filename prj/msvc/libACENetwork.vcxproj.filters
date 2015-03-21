@@ -289,6 +289,5 @@
     <None Include="..\..\src\net_module_sockethandler.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

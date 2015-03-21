@@ -35,7 +35,7 @@ struct Stream_State_t;
 template <typename ConfigurationType,
           typename SessionDataType,
           typename TransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 class Net_StreamTCPSocketBase_T
@@ -43,9 +43,11 @@ class Net_StreamTCPSocketBase_T
  , public Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                TransportLayerType,
-                               StatisticsContainerType>
+                               StatisticContainerType>
 {
  public:
+  virtual ~Net_StreamTCPSocketBase_T ();
+
   // override some task-based members
   virtual int open (void* = NULL); // args
   virtual int close (u_long = 0); // args
@@ -59,14 +61,20 @@ class Net_StreamTCPSocketBase_T
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
+  // implement Common_IStatistic
+  // *NOTE*: delegate these to the stream
+  virtual bool collect (StatisticContainerType&); // return value: statistic data
+  virtual void report () const;
+
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
                                    TransportLayerType,
-                                   StatisticsContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
 
-  Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T*);
-  virtual ~Net_StreamTCPSocketBase_T ();
+  Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                             unsigned int = 0);      // statistics collecting interval (second(s))
+                                                     // 0 --> DON'T collect statistics
 
   //ConfigurationType* configuration_;
   ACE_Message_Block* currentReadBuffer_;
@@ -82,7 +90,7 @@ class Net_StreamTCPSocketBase_T
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                TransportLayerType,
-                               StatisticsContainerType> inherited2;
+                               StatisticContainerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T (const Net_StreamTCPSocketBase_T&));
@@ -92,8 +100,6 @@ class Net_StreamTCPSocketBase_T
   // dispatch the reactor notification queue concurrently (most notably,
   // ACE_TP_Reactor) --> enforce proper serialization
   //bool               serializeOutput_;
-  // *NOTE*: this is a transient handle, used only to initialize the session ID
-  Stream_State_t*    state_;
 };
 
 // include template implementation

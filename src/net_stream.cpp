@@ -233,7 +233,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
 
     return false;
   } // end IF
-  if (!socketHandler_impl->initialize (state_,
+  if (!socketHandler_impl->initialize (&state_,
                                        configuration_in.messageAllocator,
                                        configuration_in.useThreadPerConnection,
                                        NET_STATISTICS_COLLECTION_INTERVAL))
@@ -309,22 +309,30 @@ Net_Stream::ping ()
 //}
 
 bool
-Net_Stream::collect (Stream_Statistic_t& data_out) const
+Net_Stream::collect (Stream_Statistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::collect"));
 
   Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl = NULL;
-  runtimeStatistic_impl = dynamic_cast<Net_Module_Statistic_WriterTask_t*> (const_cast<Net_Module_RuntimeStatistic_Module&> (runtimeStatistic_).writer ());
+  runtimeStatistic_impl =
+   dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
   if (!runtimeStatistic_impl)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_t> failed, aborting\n")));
-
     return false;
   } // end IF
 
-  // delegate to this module...
-  return runtimeStatistic_impl->collect (data_out);
+  // delegate to the statistics module...
+  if (!runtimeStatistic_impl->collect (data_out))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Module_Statistic_WriterTask_t::collect(), aborting\n")));
+    return false;
+  } // end IF
+  data_out = inherited::state_.currentStatistics;
+
+  return true;
 }
 
 void

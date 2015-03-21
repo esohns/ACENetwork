@@ -48,14 +48,14 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType> class Net_Module_Statistic_WriterTask_T;
+          typename StatisticContainerType> class Net_Module_Statistic_WriterTask_T;
 
 template <typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 class Net_Module_Statistic_ReaderTask_T
  : public ACE_Thru_Task<TaskSynchType,
                         TimePolicyType>
@@ -75,7 +75,7 @@ class Net_Module_Statistic_ReaderTask_T
                                             SessionMessageType,
                                             ProtocolMessageType,
                                             ProtocolCommandType,
-                                            StatisticsContainerType> Net_Module_Statistic_WriterTask_t;
+                                            StatisticContainerType> Net_Module_Statistic_WriterTask_t;
   typedef ProtocolMessageType Net_MessageType_t;
   typedef ProtocolCommandType Net_CommandType_t;
 
@@ -88,20 +88,20 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 class Net_Module_Statistic_WriterTask_T
  : public Stream_TaskBaseSynch_T<TimePolicyType,
                                  SessionMessageType,
                                  ProtocolMessageType>
  , public Common_ICounter
- , public Common_IStatistic_T<StatisticsContainerType>
+ , public Common_IStatistic_T<StatisticContainerType>
 {
  friend class Net_Module_Statistic_ReaderTask_T<TaskSynchType,
                                                 TimePolicyType,
                                                 SessionMessageType,
                                                 ProtocolMessageType,
                                                 ProtocolCommandType,
-                                                StatisticsContainerType>;
+                                                StatisticContainerType>;
  public:
   Net_Module_Statistic_WriterTask_T ();
   virtual ~Net_Module_Statistic_WriterTask_T ();
@@ -123,7 +123,7 @@ class Net_Module_Statistic_WriterTask_T
   virtual void reset ();
 
   // implement Common_IStatistic
-  virtual bool collect (StatisticsContainerType&) const; // return value: info
+  virtual bool collect (StatisticContainerType&); // return value: info
   // *NOTE*: this also implements locally triggered reporting !
   virtual void report () const;
 
@@ -151,7 +151,6 @@ class Net_Module_Statistic_WriterTask_T
   bool                              isInitialized_;
 
   // timer stuff
-//  Net_TimerQueue_t                  timerQueue;
   Stream_ResetCounterHandler        resetTimeoutHandler_;
   long                              resetTimeoutHandlerID_;
   Stream_StatisticHandler_Reactor_t localReportingHandler_;

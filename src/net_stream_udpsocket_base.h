@@ -29,13 +29,10 @@
 
 #include "net_connection_base.h"
 
-//// forward declarations
-//struct Stream_State_t;
-
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
@@ -45,7 +42,7 @@ class Net_StreamUDPSocketBase_T
  , public Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                ITransportLayerType,
-                               StatisticsContainerType>
+                               StatisticContainerType>
 {
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
@@ -61,28 +58,27 @@ class Net_StreamUDPSocketBase_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
   // implement Common_IStatistic
-  // *NOTE*: delegate these to our stream
-  virtual bool collect (StatisticsContainerType&) const; // return value: statistic data
+  // *NOTE*: delegate these to the stream
+  virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;
 
  protected:
  typedef Net_IConnectionManager_T<ConfigurationType,
                                   SessionDataType,
                                   ITransportLayerType,
-                                  StatisticsContainerType> ICONNECTION_MANAGER_T;
+                                  StatisticContainerType> ICONNECTION_MANAGER_T;
 
-  Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*);
+  Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                             unsigned int = 0);      // statistics collecting interval (second(s))
+                                                     // 0 --> DON'T collect statistics
 
-  //ConfigurationType  configuration_;
-  //SessionDataType    sessionData_;
-  StreamType         stream_;
-  ACE_Message_Block* currentReadBuffer_;
-  ACE_Thread_Mutex   sendLock_;
   ACE_Message_Block* currentWriteBuffer_;
+  ACE_Thread_Mutex   sendLock_;
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY
   // dispatch the reactor notification queue concurrently (most notably,
   // ACE_TP_Reactor) --> enforce proper serialization
   bool               serializeOutput_;
+  StreamType         stream_;
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
@@ -93,14 +89,11 @@ class Net_StreamUDPSocketBase_T
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                ITransportLayerType,
-                               StatisticsContainerType> inherited3;
+                               StatisticContainerType> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&));
-
-//  // *NOTE*: this is a transient handle, used only to initialize the session ID
-//  Stream_State_t*    state_;
 };
 
 // include template implementation

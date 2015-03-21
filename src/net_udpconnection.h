@@ -30,8 +30,6 @@
 #include "stream_common.h"
 
 #include "net_connection_manager_common.h"
-//#include "net_exports.h"
-//#include "net_socket_common.h"
 #include "net_socketconnection_base.h"
 #include "net_stream_common.h"
 #include "net_transportlayer_udp.h"
@@ -51,14 +49,15 @@ class Net_UDPConnection_T
                              ACE_SOCK_CONNECTOR>;
 
  public:
-  virtual ~Net_UDPConnection_T ();
-
   typedef Net_IConnectionManager_T<Net_Configuration_t,
                                    SessionDataType,
                                    Net_IInetTransportLayer_t,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
-  Net_UDPConnection_T (ICONNECTION_MANAGER_T*);
+  Net_UDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                       unsigned int = 0);      // statistics collecting interval (second(s))
+                                               // 0 --> DON'T collect statistics
+  virtual ~Net_UDPConnection_T ();
 
   // override some task-based members
   virtual int open (void* = NULL); // args
@@ -100,8 +99,8 @@ class Net_UDPConnection_T
   // *NOTE*: this is required due to compiler issues and probable incomplete
   //         ACE (Asynch_)Connector implementation
   // *TODO*: remove this ASAP
-  Net_UDPConnection_T ();
-  //ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T ());
+  //Net_UDPConnection_T ();
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T (const Net_UDPConnection_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T& operator= (const Net_UDPConnection_T&));
 };
@@ -122,14 +121,15 @@ class Net_AsynchUDPConnection_T
                                                               HandlerType> >;
 
  public:
-  virtual ~Net_AsynchUDPConnection_T ();
-
   typedef Net_IConnectionManager_T<Net_Configuration_t,
                                    SessionDataType,
                                    Net_IInetTransportLayer_t,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
-  Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T*);
+  Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                             unsigned int = 0);      // statistics collecting interval (second(s))
+                                                     // 0 --> DON'T collect statistics
+  virtual ~Net_AsynchUDPConnection_T ();
 
   // override / implement (part of) Net_IInetTransportLayer
   virtual bool initialize (Net_ClientServerRole_t,            // role
@@ -165,7 +165,7 @@ class Net_AsynchUDPConnection_T
   //         ACE (Asynch_)Connector implementation
   // *TODO*: remove this ASAP
   Net_AsynchUDPConnection_T ();
-  //ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T (const Net_AsynchUDPConnection_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T& operator= (const Net_AsynchUDPConnection_T&));
 };

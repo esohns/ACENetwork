@@ -21,13 +21,13 @@
 #ifndef Net_ICONNECTION_H
 #define Net_ICONNECTION_H
 
-#include "common_istatistic.h"
 #include "common_irefcount.h"
+#include "common_istatistic.h"
 
 template <typename ITransportLayerType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 class Net_IConnection_T
- : public Common_IStatistic_T<StatisticsContainerType>
+ : public Common_IStatistic_T<StatisticContainerType>
  , virtual public Common_IRefCount
  , virtual public ITransportLayerType
 {

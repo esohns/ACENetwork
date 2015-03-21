@@ -36,31 +36,31 @@
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 class Net_Connection_Manager_T
  : public Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
                                    ITransportLayerType,
-                                   StatisticsContainerType>
- , public Common_IStatistic_T<StatisticsContainerType>
+                                   StatisticContainerType>
+ , public Common_IStatistic_T<StatisticContainerType>
  , public Common_IDumpState
 {
   // singleton needs access to the ctor/dtors
   friend class ACE_Singleton<Net_Connection_Manager_T<ConfigurationType,
                                                       SessionDataType,
                                                       ITransportLayerType,
-                                                      StatisticsContainerType>,
+                                                      StatisticContainerType>,
                              ACE_Recursive_Thread_Mutex>;
 
   //// needs access to (de-)register itself with the singleton
   //friend class Net_SocketHandlerBase_T<ConfigurationType,
   //                                     SessionDataType,
-  //                                     StatisticsContainerType>;
+  //                                     StatisticContainerType>;
 
  public:
   // convenience types
   typedef Net_IConnection_T<ITransportLayerType,
-                            StatisticsContainerType> CONNECTION_T;
+                            StatisticContainerType> CONNECTION_T;
 
   // configuration / initialization
   void initialize (unsigned int); // maximum number of concurrent connections
@@ -96,6 +96,10 @@ class Net_Connection_Manager_T
 
  private:
   // convenience types
+  typedef Net_Connection_Manager_T<ConfigurationType,
+                                   SessionDataType,
+                                   ITransportLayerType,
+                                   StatisticContainerType> SELF_T;
   typedef ACE_DLList<CONNECTION_T> CONNECTION_CONTAINER_T;
   typedef ACE_DLList_Iterator<CONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;
   typedef ACE_DLList_Reverse_Iterator<CONNECTION_T> CONNECTION_CONTAINER_REVERSEITERATOR_T;
@@ -108,7 +112,7 @@ class Net_Connection_Manager_T
 
   // implement Common_IStatistic
   // *WARNING*: this assumes lock_ is being held !
-  virtual bool collect (StatisticsContainerType&) const; // return value: statistic data
+  virtual bool collect (StatisticContainerType&); // return value: statistic data
 
   Net_Connection_Manager_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T (const Net_Connection_Manager_T&));

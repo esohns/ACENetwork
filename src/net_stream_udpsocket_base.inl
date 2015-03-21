@@ -27,44 +27,42 @@
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           ITransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
 //                          SocketType,
-                          SocketHandlerType>::Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
+                          SocketHandlerType>::Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                         unsigned int statisticsCollectionInterval_in)
  : //inherited ()//manager_in)
 // , inherited2 ()
-   inherited3 (interfaceHandle_in)
-// , configuration_ ()
-// , stream_ ()
- , currentReadBuffer_ (NULL)
-// , sendLock_ ()
+   inherited3 (interfaceHandle_in,
+               statisticsCollectionInterval_in)
  , currentWriteBuffer_ (NULL)
+// , sendLock_ ()
  , serializeOutput_ (false)
-// , state_ (NULL)
+ // , stream_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::Net_StreamUDPSocketBase_T"));
 
-//  ACE_OS::memset (&inherited2::configuration_, 0, sizeof (inherited2::configuration_));
 }
 
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           ITransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
 //                          SocketType,
                           SocketHandlerType>::~Net_StreamUDPSocketBase_T ()
@@ -86,8 +84,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     inherited3::configuration_.streamConfiguration.module = NULL;
   } // end IF
 
-  if (currentReadBuffer_)
-    currentReadBuffer_->release ();
   if (currentWriteBuffer_)
     currentWriteBuffer_->release ();
 }
@@ -95,7 +91,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
@@ -103,7 +99,7 @@ int
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           ITransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
 //                          SocketType,
                           SocketHandlerType>::open (void* args_in)
@@ -111,9 +107,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::open"));
 
   int result = -1;
-
-//  // sanity check(s)
-//  ACE_ASSERT (state_);
 
   // step0: init this
   // *TODO*: find a better way to do this
@@ -212,7 +205,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   if (!stream_.initialize (session_id,
                            inherited3::configuration_.streamConfiguration,
                            inherited3::configuration_.protocolConfiguration,
-                           inherited3::configuration_.streamUserData))
+                           inherited3::configuration_.streamSessionData))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -260,7 +253,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
@@ -268,7 +261,7 @@ int
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           ITransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
 //                          SocketType,
                           SocketHandlerType>::close (u_long arg_in)
@@ -342,7 +335,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
@@ -350,7 +343,7 @@ int
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           ITransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
 //                          SocketType,
                           SocketHandlerType>::handle_input (ACE_HANDLE handle_in)
@@ -359,30 +352,51 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
   ACE_UNUSED_ARG (handle_in);
 
-  // sanity check
-  ACE_ASSERT (currentReadBuffer_ == NULL);
-
-  // read some data from the socket
-  currentReadBuffer_ =
-      allocateMessage (inherited3::configuration_.streamConfiguration.bufferSize);
-  if (currentReadBuffer_ == NULL)
+  // read a datagram from the socket
+  bool enqueue = true;
+  ACE_Message_Block* buffer_p =
+   allocateMessage (inherited3::configuration_.streamConfiguration.bufferSize);
+  if (!buffer_p)
   {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                inherited3::configuration_.streamConfiguration.bufferSize));
+    if (inherited3::configuration_.streamConfiguration.messageAllocator->block ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
+                  inherited3::configuration_.streamConfiguration.bufferSize));
+      return -1;
+    } // end IF
 
-    return -1;
+    // no buffer available --> drop datagram and continue
+    enqueue = false;
+    ACE_NEW_NORETURN (buffer_p,
+                      ACE_Message_Block (inherited3::configuration_.streamConfiguration.bufferSize,
+                                         ACE_Message_Block::MB_DATA,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                         ACE_Time_Value::zero,
+                                         ACE_Time_Value::max_time,
+                                         NULL,
+                                         NULL));
+    if (!buffer_p)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate ACE_Message_Block(%u), aborting\n"),
+                  inherited3::configuration_.streamConfiguration.bufferSize));
+      return -1;
+    } // end IF
   } // end IF
+  ACE_ASSERT (buffer_p);
 
   // read a datagram from the socket...
   ssize_t bytes_received = -1;
   ACE_INET_Addr peer_address;
-  bytes_received =
-      inherited2::peer_.recv (currentReadBuffer_->wr_ptr (),                              // buf
-                              currentReadBuffer_->size (),                                // n
-                              peer_address,
-//                              inherited3::configuration_.socketConfiguration.peerAddress, // addr
-                              0);                                                         // flags
+  bytes_received = inherited2::peer_.recv (buffer_p->wr_ptr (), // buf
+                                           buffer_p->size (),   // n
+                                           peer_address,        // addr
+                                           0);                  // flags
   switch (bytes_received)
   {
     case -1:
@@ -401,8 +415,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
                     ACE_TEXT ("failed to SocketType::recv(): \"%m\", returning\n")));
 
       // clean up
-      currentReadBuffer_->release ();
-      currentReadBuffer_ = NULL;
+      buffer_p->release ();
 
       return -1;
     }
@@ -414,8 +427,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 //                   handle_in));
 
       // clean up
-      currentReadBuffer_->release ();
-      currentReadBuffer_ = NULL;
+      buffer_p->release ();
 
       return -1;
     }
@@ -427,7 +439,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 //                   bytes_received));
 
       // adjust write pointer
-      currentReadBuffer_->wr_ptr (bytes_received);
+      buffer_p->wr_ptr (bytes_received);
 
       break;
     }
@@ -435,18 +447,28 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
   // push the buffer onto our stream for processing
   // *NOTE*: the stream assumes ownership of the buffer
-  if (stream_.put (currentReadBuffer_) == -1)
+  int result = -1;
+  if (enqueue)
+    result = stream_.put (buffer_p);
+  else
+  {
+    const_cast<StreamType::STATE_T*> (stream_.getState ())->currentStatistics.numDroppedMessages++;
+
+    // clean up
+    buffer_p->release ();
+
+    result = 0;
+  } // end ELSE
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
 
     // clean up
-    currentReadBuffer_->release ();
-    currentReadBuffer_ = NULL;
+    buffer_p->release ();
 
     return -1;
   } // end IF
-  currentReadBuffer_ = NULL;
 
   return 0;
 }
@@ -454,7 +476,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
@@ -462,7 +484,7 @@ int
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           ITransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
 //                          SocketType,
                           SocketHandlerType>::handle_close (ACE_HANDLE handle_in,
@@ -527,7 +549,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
@@ -535,10 +557,10 @@ bool
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           ITransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
 //                          SocketType,
-                          SocketHandlerType>::collect (StatisticsContainerType& data_out) const
+                          SocketHandlerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::collect"));
 
@@ -558,7 +580,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
@@ -566,7 +588,7 @@ void
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           ITransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
 //                          SocketType,
                           SocketHandlerType>::report () const
@@ -587,7 +609,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
@@ -595,7 +617,7 @@ ACE_Message_Block*
 Net_StreamUDPSocketBase_T<ConfigurationType,
                           SessionDataType,
                           ITransportLayerType,
-                          StatisticsContainerType,
+                          StatisticContainerType,
                           StreamType,
 //                          SocketType,
                           SocketHandlerType>::allocateMessage (unsigned int requestedSize_in)
@@ -605,11 +627,11 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   ACE_ASSERT (inherited3::configuration_.streamConfiguration.messageAllocator);
 
   // init return value(s)
-  ACE_Message_Block* message_out = NULL;
+  ACE_Message_Block* message_p = NULL;
 
   try
   {
-    message_out =
+    message_p =
         static_cast<ACE_Message_Block*> (inherited3::configuration_.streamConfiguration.messageAllocator->malloc (requestedSize_in));
   }
   catch (...)
@@ -618,12 +640,13 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
                 ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
                 requestedSize_in));
   }
-  if (!message_out)
+  if (!message_p)
   {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to Stream_IAllocator::malloc(%u), aborting\n"),
-                requestedSize_in));
+    if (inherited3::configuration_.streamConfiguration.messageAllocator->block ())
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to Stream_IAllocator::malloc(%u): \"%m\", aborting\n"),
+                  requestedSize_in));
   } // end IF
 
-  return message_out;
+  return message_p;
 }

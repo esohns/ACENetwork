@@ -27,18 +27,20 @@
 template <typename ConfigurationType,
           typename SessonDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
                                 ITransportLayerType,
-                                StatisticsContainerType,
+                                StatisticContainerType,
                                 StreamType,
                                 SocketType,
-                                SocketHandlerType>::Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
- : inherited4 (interfaceHandle_in)
+                                SocketHandlerType>::Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                     unsigned int statisticsCollectionInterval_in)
+ : inherited4 (interfaceHandle_in,
+               statisticsCollectionInterval_in)
 // , buffer_ (NULL)
  //, userData_ ()
  //, stream_ ()
@@ -66,14 +68,14 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessonDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
                                 ITransportLayerType,
-                                StatisticsContainerType,
+                                StatisticContainerType,
                                 StreamType,
                                 SocketType,
                                 SocketHandlerType>::~Net_StreamAsynchUDPSocketBase_T ()
@@ -85,7 +87,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessonDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
@@ -93,25 +95,13 @@ void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
                                 ITransportLayerType,
-                                StatisticsContainerType,
+                                StatisticContainerType,
                                 StreamType,
                                 SocketType,
                                 SocketHandlerType>::open (ACE_HANDLE handle_in,
                                                           ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::open"));
-
-  // sanity check(s)
-  ACE_ASSERT (state_);
-
-  // step0: init this
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  state_->sessionID =
-      *static_cast<unsigned int*> (handle_in); // (== socket handle)
-#else
-  state_->sessionID =
-    static_cast<unsigned int> (handle_in); // (== socket handle)
-#endif
 
   // step1: tweak socket, init I/O
   inherited::open (handle_in, messageBlock_in);
@@ -171,10 +161,19 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
     inherited4::configuration_.streamConfiguration.module = clone;
     inherited4::configuration_.streamConfiguration.deleteModule = true;
   } // end IF
-  if (!stream_.initialize (state_->sessionID,
+  unsigned int session_id = 0;
+#if defined (_MSC_VER)
+  session_id =
+    reinterpret_cast<unsigned int> (handle_in); // (== socket handle)
+#else
+  session_id =
+    static_cast<unsigned int> (handle_in); // (== socket handle)
+#endif
+  // *TODO*: this clearly is a design glitch
+  if (!stream_.initialize (session_id,
                            inherited4::configuration_.streamConfiguration,
                            inherited4::configuration_.protocolConfiguration,
-                           inherited4::configuration_.streamUserData))
+                           inherited4::configuration_.streamSessionData))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -256,7 +255,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessonDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
@@ -264,7 +263,7 @@ int
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
                                 ITransportLayerType,
-                                StatisticsContainerType,
+                                StatisticContainerType,
                                 StreamType,
                                 SocketType,
                                 SocketHandlerType>::handle_output (ACE_HANDLE handle_in)
@@ -318,7 +317,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessonDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
@@ -326,7 +325,7 @@ int
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
                                 ITransportLayerType,
-                                StatisticsContainerType,
+                                StatisticContainerType,
                                 StreamType,
                                 SocketType,
                                 SocketHandlerType>::handle_close (ACE_HANDLE handle_in,
@@ -389,7 +388,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessonDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
@@ -397,10 +396,10 @@ bool
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
                                 ITransportLayerType,
-                                StatisticsContainerType,
+                                StatisticContainerType,
                                 StreamType,
                                 SocketType,
-                                SocketHandlerType>::collect (StatisticsContainerType& data_out) const
+                                SocketHandlerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::collect"));
 
@@ -420,7 +419,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessonDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
@@ -428,7 +427,7 @@ void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
                                 ITransportLayerType,
-                                StatisticsContainerType,
+                                StatisticContainerType,
                                 StreamType,
                                 SocketType,
                                 SocketHandlerType>::report () const
@@ -449,7 +448,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SessonDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
@@ -457,7 +456,7 @@ void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 SessonDataType,
                                 ITransportLayerType,
-                                StatisticsContainerType,
+                                StatisticContainerType,
                                 StreamType,
                                 SocketType,
                                 SocketHandlerType>::handle_read_stream (const ACE_Asynch_Read_Stream::Result& result)

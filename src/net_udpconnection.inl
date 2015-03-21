@@ -27,22 +27,24 @@
 template <typename SessionDataType,
           typename HandlerType>
 Net_UDPConnection_T<SessionDataType,
-                    HandlerType>::Net_UDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
- : inherited (interfaceHandle_in)
+                    HandlerType>::Net_UDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                       unsigned int statisticsCollectionInterval_in)
+ : inherited (interfaceHandle_in,
+              statisticsCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::Net_UDPConnection_T"));
 
 }
 
-template <typename SessionDataType,
-          typename HandlerType>
-Net_UDPConnection_T<SessionDataType,
-                    HandlerType>::Net_UDPConnection_T ()
- : inherited (NULL)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::Net_UDPConnection_T"));
-
-}
+//template <typename SessionDataType,
+//          typename HandlerType>
+//Net_UDPConnection_T<SessionDataType,
+//                    HandlerType>::Net_UDPConnection_T ()
+// : inherited (NULL)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::Net_UDPConnection_T"));
+//
+//}
 
 template <typename SessionDataType,
           typename HandlerType>
@@ -536,8 +538,10 @@ Net_UDPConnection_T<SessionDataType,
 template <typename SessionDataType,
           typename HandlerType>
 Net_AsynchUDPConnection_T<SessionDataType,
-                          HandlerType>::Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
- : inherited (interfaceHandle_in)
+                          HandlerType>::Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                   unsigned int statisticsCollectionInterval_in)
+ : inherited (interfaceHandle_in,
+              statisticsCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnection_T::Net_AsynchUDPConnection_T"));
 

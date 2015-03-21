@@ -55,10 +55,10 @@ class Net_Export Net_TCPConnection
                                    Net_IInetTransportLayer_t,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
-  // *NOTE*: consider encapsulating this (need to grant access to
-  //         ACE_Connector however (see: ace/Connector.cpp:239))
-//  Net_TCPConnection ();
-  Net_TCPConnection (ICONNECTION_MANAGER_T*);
+  Net_TCPConnection (ICONNECTION_MANAGER_T*, // connection manager handle
+                     unsigned int = 0);      // statistics collecting interval (second(s))
+                                             // 0 --> DON'T collect statistics
+  virtual ~Net_TCPConnection ();
 
   // override / implement (part of) Net_IInetTransportLayer
   virtual bool initialize (Net_ClientServerRole_t,            // role
@@ -94,9 +94,9 @@ class Net_Export Net_TCPConnection
   //// stop worker, if any
   //void shutdown ();
 
-  virtual ~Net_TCPConnection ();
-  //ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection (const Net_TCPConnection&));
-  //ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection& operator= (const Net_TCPConnection&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection ());
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection (const Net_TCPConnection&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection& operator= (const Net_TCPConnection&));
 };
 
 /////////////////////////////////////////

@@ -30,12 +30,6 @@ struct Net_UserData_t
   void* userData;
 };
 
-struct Net_SessionData_t
-{
-  Stream_State_t streamState;
-  Net_UserData_t* userData;
-};
-
-typedef Stream_SessionDataBase_T<Net_SessionData_t> Net_StreamSessionData_t;
+typedef Stream_SessionDataBase_T<Net_UserData_t> Net_StreamSessionData_t;
 
 #endif

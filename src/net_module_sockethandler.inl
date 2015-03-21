@@ -40,13 +40,15 @@ Net_Module_SocketHandler_T<StreamStateType,
                            ProtocolHeaderType>::Net_Module_SocketHandler_T ()
  : inherited (false, // inactive by default
               false) // DON'T auto-start !
- , isInitialized_ (false)
- , statCollectHandler_ (this,
-                        ACTION_COLLECT)
- , statCollectHandlerID_ (-1)
  , currentMessageLength_ (0)
  , currentMessage_ (NULL)
  , currentBuffer_ (NULL)
+ , isInitialized_ (false)
+ , statCollectionInterval_ (0)
+ , statCollectHandler_ (ACTION_COLLECT,
+                        this,
+                        false)
+ , statCollectHandlerID_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::Net_Module_SocketHandler_T"));
 
@@ -77,7 +79,7 @@ Net_Module_SocketHandler_T<StreamStateType,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
                   statCollectHandlerID_));
     else
-      ACE_DEBUG ((LM_WARNING,
+      ACE_DEBUG ((LM_WARNING, // this should happen in END_SESSION
                   ACE_TEXT ("cancelled timer (ID: %d)\n"),
                   statCollectHandlerID_));
   } // end IF
@@ -99,7 +101,7 @@ Net_Module_SocketHandler_T<StreamStateType,
                            SessionDataContainerType,
                            SessionMessageType,
                            ProtocolMessageType,
-                           ProtocolHeaderType>::initialize (const StreamStateType& state_in,
+                           ProtocolHeaderType>::initialize (StreamStateType* state_in,
                                                             Stream_IAllocator* allocator_in,
                                                             bool isActive_in,
                                                             unsigned int statisticsCollectionInterval_in)
@@ -134,7 +136,7 @@ Net_Module_SocketHandler_T<StreamStateType,
 
   inherited::allocator_ = allocator_in;
   inherited::isActive_ = isActive_in;
-  inherited::state_ = &const_cast<StreamStateType&> (state_in);
+  inherited::state_ = state_in;
 
   // OK: all's well...
   isInitialized_ = true;
@@ -300,7 +302,7 @@ Net_Module_SocketHandler_T<StreamStateType,
                            SessionDataContainerType,
                            SessionMessageType,
                            ProtocolMessageType,
-                           ProtocolHeaderType>::collect (Stream_Statistic_t& data_out) const
+                           ProtocolHeaderType>::collect (Stream_Statistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::collect"));
 
@@ -560,14 +562,11 @@ Net_Module_SocketHandler_T<StreamStateType,
   // *TODO*: attach stream state information to the session data
 
   // step2: create session data object container
-  SessionDataContainerType* session_data_container_p = NULL;
-  ACE_NEW_NORETURN (session_data_container_p,
+  SessionDataContainerType* session_data_p = NULL;
+  ACE_NEW_NORETURN (session_data_p,
                     SessionDataContainerType (inherited::sessionData_,
-                                              false,
-                                              inherited::state_,
-                                              ACE_Time_Value::zero,
                                               false));
-  if (!session_data_container_p)
+  if (!session_data_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate SessionDataContainerType: \"%m\", aborting\n")));
@@ -576,9 +575,9 @@ Net_Module_SocketHandler_T<StreamStateType,
   } // end IF
 
   // step3: send the data downstream
-  // *NOTE*: this is a "fire-and-forget" API, so don't worry about session_data_container_p !
+  // *NOTE*: this is a "fire-and-forget" API, so don't worry about session_data_p
   return inherited::putSessionMessage (SESSION_STATISTICS,
-                                       session_data_container_p,
+                                       session_data_p,
                                        inherited::allocator_);
 }
 
@@ -597,8 +596,9 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
  : inherited (false, // inactive by default
               false) // DON'T auto-start !
  , isInitialized_ (false)
- , statCollectHandler_ (this,
-                        ACTION_COLLECT)
+ , statCollectHandler_ (ACTION_COLLECT,
+                        this,
+                        false)
  , statCollectHandlerID_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::Net_Module_UDPSocketHandler_T"));
@@ -647,7 +647,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
                               SessionDataType,
                               SessionDataContainerType,
                               SessionMessageType,
-                              ProtocolMessageType>::initialize (const StreamStateType& state_in,
+                              ProtocolMessageType>::initialize (StreamStateType* state_in,
                                                                 Stream_IAllocator* allocator_in,
                                                                 bool isActive_in,
                                                                 unsigned int statisticsCollectionInterval_in)
@@ -680,7 +680,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
 
   inherited::allocator_ = allocator_in;
   inherited::isActive_ = isActive_in;
-  inherited::state_ = &const_cast<StreamStateType&> (state_in);
+  inherited::state_ = state_in;
 
   // OK: all's well...
   isInitialized_ = true;
@@ -821,7 +821,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
                               SessionDataType,
                               SessionDataContainerType,
                               SessionMessageType,
-                              ProtocolMessageType>::collect (Stream_Statistic_t& data_out) const
+                              ProtocolMessageType>::collect (Stream_Statistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::collect"));
 
@@ -840,7 +840,6 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to putSessionMessage(SESSION_STATISTICS), aborting\n")));
-
     return false;
   } // end IF
 
@@ -924,24 +923,21 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
   // *TODO*: attach stream state information to the session data
 
   // step2: create session data object container
-  SessionDataContainerType* session_data_container_p = NULL;
-  ACE_NEW_NORETURN (session_data_container_p,
+  SessionDataContainerType* session_data_p = NULL;
+  ACE_NEW_NORETURN (session_data_p,
                     SessionDataContainerType (inherited::sessionData_,
-                                              false,
-                                              inherited::state_,
-                                              ACE_Time_Value::zero,
                                               false));
-  if (!session_data_container_p)
+  if (!session_data_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate SessionDataContainerType: \"%m\", aborting\n")));
-
     return false;
   } // end IF
 
   // step3: send the data downstream
-  // *NOTE*: this is a "fire-and-forget" API, so don't worry about session_data_container_p !
+  // *NOTE*: this is a "fire-and-forget" API, so don't worry about
+  //         session_data_p
   return inherited::putSessionMessage (SESSION_STATISTICS,
-                                       session_data_container_p,
+                                       session_data_p,
                                        inherited::allocator_);
 }

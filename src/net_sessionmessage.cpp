@@ -27,8 +27,10 @@
 #include "net_macros.h"
 
 Net_SessionMessage::Net_SessionMessage (Stream_SessionMessageType_t messageType_in,
+                                        Stream_State_t* streamState_in,
                                         Net_StreamSessionData_t*& sessionData_inout)
  : inherited (messageType_in,
+              streamState_in,
               sessionData_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionMessage::Net_SessionMessage"));
@@ -69,42 +71,39 @@ Net_SessionMessage::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionMessage::duplicate"));
 
-  Net_SessionMessage* nb = NULL;
+  Net_SessionMessage* message_p = NULL;
 
   // *NOTE*: create a new Net_SessionMessage that contains unique copies of
   // the message block fields, but a reference counted duplicate of
   // the ACE_Data_Block
 
   // if there is no allocator, use the standard new and delete calls.
-  if (message_block_allocator_ == NULL)
+  if (inherited::message_block_allocator_ == NULL)
   {
     // uses the copy ctor
-    ACE_NEW_RETURN (nb,
-                    Net_SessionMessage (*this),
-                    NULL);
+    ACE_NEW_NORETURN (message_p,
+                      Net_SessionMessage (*this));
   } // end IF
-
-  // *NOTE*: instruct the allocator to return a session message by passing 0 as
-  //         argument to malloc()...
-  ACE_NEW_MALLOC_RETURN (nb,
-                         static_cast<Net_SessionMessage*> (message_block_allocator_->malloc (0)),
-                         Net_SessionMessage (*this),
-                         NULL);
-
-  // increment the reference counts of all the continuation messages
-  if (cont_)
+  else
   {
-    nb->cont_ = cont_->duplicate ();
-
-    // clean up
-    if (nb->cont_ == 0)
-    {
-      nb->release ();
-      nb = NULL;
-    } // end IF
+    // *NOTE*: instruct the allocator to return a session message by passing 0 as
+    //         argument to malloc()...
+    ACE_NEW_MALLOC_NORETURN (message_p,
+                             static_cast<Net_SessionMessage*> (inherited::message_block_allocator_->malloc (0)),
+                             Net_SessionMessage (*this));
+  } // end ELSE
+  if (!message_p)
+  {
+    Stream_IAllocator* allocator_p =
+      dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
+    ACE_ASSERT (allocator_p);
+    if (allocator_p->block ())
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate Net_SessionMessage: \"%m\", aborting\n")));
+    return NULL;
   } // end IF
 
   // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
 
-  return nb;
+  return message_p;
 }

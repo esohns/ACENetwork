@@ -31,7 +31,7 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 class Net_SocketConnectionBase_T
  : public SocketHandlerType
 // , virtual public ITransportLayerType
@@ -42,10 +42,10 @@ class Net_SocketConnectionBase_T
   // implement (part of) Net_IInetTransportLayer
   virtual void ping (); // ping the peer !
 
-  // implement Common_IStatistic
-  // *NOTE*: delegate these to the stream
-  virtual bool collect (StatisticsContainerType&) const; // return value: statistic data
-  virtual void report () const;
+  //// implement Common_IStatistic
+  //// *NOTE*: delegate these to the stream
+  //virtual bool collect (StatisticContainerType&); // return value: statistic data
+  //virtual void report () const;
 
   // override some task-based members
   virtual int open (void* = NULL); // args
@@ -63,9 +63,11 @@ class Net_SocketConnectionBase_T
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
                                    ITransportLayerType,
-                                   StatisticsContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
 
-  Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T*);
+  Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                              unsigned int = 0);      // statistics collecting interval (second(s))
+                                                      // 0 --> DON'T collect statistics
 
  private:
   typedef SocketHandlerType inherited;
@@ -83,7 +85,7 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 class Net_AsynchSocketConnectionBase_T
  : public SocketHandlerType
 // , public ITransportLayerType
@@ -94,10 +96,10 @@ class Net_AsynchSocketConnectionBase_T
   // implement (part of) Net_IInetTransportLayer
   virtual void ping (); // ping the peer !
 
-  // implement Common_IStatistic
-  // *NOTE*: delegate these to the stream
-  virtual bool collect (StatisticsContainerType&) const; // return value: statistic data
-  virtual void report () const;
+  //// implement Common_IStatistic
+  //// *NOTE*: delegate these to the stream
+  //virtual bool collect (StatisticContainerType&); // return value: statistic data
+  //virtual void report () const;
 
   // override some ACE_Service_Handler members
   virtual void open (ACE_HANDLE,          // handle
@@ -115,13 +117,15 @@ class Net_AsynchSocketConnectionBase_T
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
                                    ITransportLayerType,
-                                   StatisticsContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                ITransportLayerType,
-                               StatisticsContainerType> CONNECTION_BASE_T;
+                               StatisticContainerType> CONNECTION_BASE_T;
 
-  Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*);
+  Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                                    unsigned int = 0);      // statistics collecting interval (second(s))
+                                                            // 0 --> DON'T collect statistics
 
   const ConfigurationType* configuration_;
 

@@ -48,8 +48,10 @@ class Net_Client_Connector_T
                                    ITransportLayerType,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
-  Net_Client_Connector_T (ICONNECTION_MANAGER_T*,
-                          const ConfigurationType*);
+  Net_Client_Connector_T (const ConfigurationType*, // configuration handle
+                          ICONNECTION_MANAGER_T*,   // connection manager handle
+                          unsigned int = 0);        // statistics collecting interval (second(s))
+                                                    // 0 --> DON'T collect statistics
   virtual ~Net_Client_Connector_T ();
 
   // override default instantiation strategy
@@ -71,6 +73,7 @@ class Net_Client_Connector_T
 
   const ConfigurationType* configuration_;
   ICONNECTION_MANAGER_T*   interfaceHandle_;
+  unsigned int             statCollectionInterval_; // seconds
 };
 
 // partial specialization (for UDP)
@@ -95,8 +98,10 @@ class Net_Client_Connector_T<ACE_INET_Addr,
   typedef Net_UDPConnection_T<SessionDataType,
                               HandlerType> CONNECTION_T;
 
-  Net_Client_Connector_T (ICONNECTION_MANAGER_T*,
-                          const ConfigurationType*);
+  Net_Client_Connector_T (const ConfigurationType*, // configuration handle
+                          ICONNECTION_MANAGER_T*,   // connection manager handle
+                          unsigned int = 0);        // statistics collecting interval (second(s))
+                                                    // 0 --> DON'T collect statistics
   virtual ~Net_Client_Connector_T ();
 
   // override default instantiation strategy
@@ -120,6 +125,7 @@ class Net_Client_Connector_T<ACE_INET_Addr,
 
   const ConfigurationType* configuration_;
   ICONNECTION_MANAGER_T*   interfaceHandle_;
+  unsigned int             statCollectionInterval_; // seconds
 };
 
 // include template implementation

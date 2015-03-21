@@ -22,20 +22,16 @@
 #define Net_STREAM_ASYNCH_UDPSOCKET_BASE_H
 
 #include "ace/config-lite.h"
+#include "ace/Asynch_IO.h"
 #include "ace/Event_Handler.h"
 #include "ace/Message_Block.h"
-#include "ace/Asynch_IO.h"
 
 #include "net_connection_base.h"
-//#include "net_exports.h"
-
-// forward declarations
-struct Stream_State_t;
 
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType,
+          typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
@@ -46,13 +42,13 @@ class Net_StreamAsynchUDPSocketBase_T
  , public Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                ITransportLayerType,
-                               StatisticsContainerType>
+                               StatisticContainerType>
 {
  public:
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                ITransportLayerType,
-                               StatisticsContainerType> CONNECTION_BASE_T;
+                               StatisticContainerType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchUDPSocketBase_T ();
 
@@ -64,17 +60,19 @@ class Net_StreamAsynchUDPSocketBase_T
                             ACE_Reactor_Mask); // (select) mask
 
   // implement Common_IStatistic
-  // *NOTE*: delegate these to our stream
-  virtual bool collect (StatisticsContainerType&) const; // return value: statistic data
+  // *NOTE*: delegate these to the stream
+  virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;
 
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
                                    ITransportLayerType,
-                                   StatisticsContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
 
-  Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*);
+  Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                                   unsigned int = 0);      // statistics collecting interval (second(s))
+                                                           // 0 --> DON'T collect statistics
 
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
 
@@ -89,14 +87,11 @@ class Net_StreamAsynchUDPSocketBase_T
   typedef Net_ConnectionBase_T<ConfigurationType,
                                SessionDataType,
                                ITransportLayerType,
-                               StatisticsContainerType> inherited4;
+                               StatisticContainerType> inherited4;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&));
-
-  // *NOTE*: this is a transient handle, used only to initialize the session ID
-  Stream_State_t* state_;
 };
 
 // include template definition

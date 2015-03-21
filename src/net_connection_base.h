@@ -26,6 +26,8 @@
 #include "common_iinitialize.h"
 #include "common_referencecounter_base.h"
 
+#include "stream_common.h"
+
 #include "net_configuration.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
@@ -33,16 +35,14 @@
 template <typename ConfigurationType,
           typename SessionDataType,
           typename ITransportLayerType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 class Net_ConnectionBase_T
  : public Common_ReferenceCounterBase
  , public Net_IConnection_T<ITransportLayerType,
-                            StatisticsContainerType>
+                            StatisticContainerType>
  , public Common_IInitialize_T<ConfigurationType>
 {
  public:
-//  Net_ConnectionBase_T ();
-
   // implement Common_IInitialize_T
   virtual bool initialize (const ConfigurationType&); // handler configuration
 
@@ -50,9 +50,11 @@ class Net_ConnectionBase_T
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    SessionDataType,
                                    ITransportLayerType,
-                                   StatisticsContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
 
-  Net_ConnectionBase_T (ICONNECTION_MANAGER_T*);
+  Net_ConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                        unsigned int = 0);      // statistics collecting interval (second(s))
+                                                // 0 --> DON'T collect statistics
   virtual ~Net_ConnectionBase_T ();
 
   // implement (part of) Net_ITransportLayer_T
@@ -69,11 +71,16 @@ class Net_ConnectionBase_T
  private:
   typedef Common_ReferenceCounterBase inherited;
   typedef Net_IConnection_T<ITransportLayerType,
-                            StatisticsContainerType> inherited2;
+                            StatisticContainerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&));
+
+  // timer stuff
+  unsigned int                      statCollectionInterval_; // seconds
+  Stream_StatisticHandler_Reactor_t statCollectHandler_;
+  long                              statCollectHandlerID_;
 };
 
 // include template implementation

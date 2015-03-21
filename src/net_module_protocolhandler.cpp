@@ -243,9 +243,7 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
                     pingInterval_));
       } // end IF
 
-      const Net_StreamSessionData_t* session_data_p = message_inout->getData ();
-      ACE_ASSERT (session_data_p);
-      Stream_State_t* state_p = session_data_p->getState ();
+      const Stream_State_t* state_p = message_inout->getState ();
       ACE_ASSERT (state_p);
       sessionID_ = state_p->sessionID;
       break;

@@ -34,13 +34,13 @@ class ACE_Allocator;
 
 struct Net_SocketConfiguration_t
 {
-  int                  bufferSize;
+  int              bufferSize;
   // *TODO*: remove address information (pass as AddressType in open() instead)
-  ACE_INET_Addr        peerAddress;
+  ACE_INET_Addr    peerAddress;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  ACE_Netlink_Addr     peerNetlinkAddress;
+  ACE_Netlink_Addr peerNetlinkAddress;
 #endif
-  bool                 useLoopbackDevice;
+  bool             useLoopbackDevice;
   // *TODO*: add network interface specifier
 };
 
@@ -63,7 +63,7 @@ struct Net_Configuration_t
   Net_SocketConfiguration_t   socketConfiguration;
   // **************************** stream data **********************************
   Stream_Configuration_t      streamConfiguration;
-  Net_UserData_t              streamUserData;
+  Net_UserData_t              streamSessionData;
   // *************************** protocol data *********************************
   Net_ProtocolConfiguration_t protocolConfiguration;
 };

@@ -32,10 +32,12 @@ Net_Client_AsynchConnector_T<AddressType,
                              ConfigurationType,
                              SessionDataType,
                              ITransportLayerType,
-                             ConnectionType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                            const ConfigurationType* configuration_in)
+                             ConnectionType>::Net_Client_AsynchConnector_T (const ConfigurationType* configuration_in,
+                                                                            ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                            unsigned int statisticsCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
+ , statCollectionInterval_ (statisticsCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
@@ -193,7 +195,8 @@ Net_Client_AsynchConnector_T<AddressType,
   ConnectionType* handler_p = NULL;
 
   ACE_NEW_NORETURN (handler_p,
-                    ConnectionType (interfaceHandle_));
+                    ConnectionType (interfaceHandle_,
+                                    statCollectionInterval_));
   if (!handler_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -212,10 +215,12 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              SessionDataType,
                              ITransportLayerType,
                              Net_AsynchUDPConnection_T<SessionDataType,
-                                                       HandlerType> >::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                                         const ConfigurationType* configuration_in)
+                             HandlerType> >::Net_Client_AsynchConnector_T (const ConfigurationType* configuration_in,
+                                                                           ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                           unsigned int statisticsCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
+ , statCollectionInterval_ (statisticsCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
@@ -371,7 +376,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
   CONNECTION_T* handler_p = NULL;
 
   ACE_NEW_NORETURN (handler_p,
-                    CONNECTION_T (interfaceHandle_));
+                    CONNECTION_T (interfaceHandle_,
+                                  statCollectionInterval_));
   if (!handler_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

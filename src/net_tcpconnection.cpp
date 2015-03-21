@@ -26,19 +26,14 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-Net_TCPConnection::Net_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in)
- : inherited (interfaceHandle_in)
+Net_TCPConnection::Net_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                      unsigned int statisticsCollectionInterval_in)
+ : inherited (interfaceHandle_in,
+              statisticsCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
 
 }
-
-//Net_TCPConnection::Net_TCPConnection ()
-// //: inherited ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
-
-//}
 
 Net_TCPConnection::~Net_TCPConnection ()
 {

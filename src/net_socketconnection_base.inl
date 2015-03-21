@@ -31,13 +31,15 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
-                           StatisticsContainerType>::Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
- : inherited (interfaceHandle_in)
+                           StatisticContainerType>::Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                unsigned int statisticsCollectionInterval_in)
+ : inherited (interfaceHandle_in,
+              statisticsCollectionInterval_in)
  //, inherited2 ()
  //, inherited3 (interfaceHandle_in)
 {
@@ -49,12 +51,12 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
-                           StatisticsContainerType>::~Net_SocketConnectionBase_T ()
+                           StatisticContainerType>::~Net_SocketConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::~Net_SocketConnectionBase_T"));
 
@@ -69,82 +71,30 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 void
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
-                           StatisticsContainerType>::ping ()
+                           StatisticContainerType>::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::ping"));
 
   inherited::stream_.ping ();
 }
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
-          typename ConfigurationType,
-          typename SessionDataType,
-          typename StatisticsContainerType>
-bool
-Net_SocketConnectionBase_T<SocketHandlerType,
-                           ITransportLayerType,
-                           ConfigurationType,
-                           SessionDataType,
-                           StatisticsContainerType>::collect (StatisticsContainerType& data_out) const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::collect"));
-
-  try
-  {
-    return inherited::stream_.collect (data_out);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic::collect(), aborting\n")));
-  }
-
-  return false;
-}
-
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
-          typename ConfigurationType,
-          typename SessionDataType,
-          typename StatisticsContainerType>
-void
-Net_SocketConnectionBase_T<SocketHandlerType,
-                           ITransportLayerType,
-                           ConfigurationType,
-                           SessionDataType,
-                           StatisticsContainerType>::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::report"));
-
-  try
-  {
-    return inherited::stream_.report ();
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic::report(), continuing\n")));
-  }
-}
-
 //template <typename SocketHandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
 //          typename SessionDataType,
-//          typename StatisticsContainerType>
+//          typename StatisticContainerType>
 //int
 //Net_SocketConnectionBase_T<SocketHandlerType,
 //                           ITransportLayerType,
 //                           ConfigurationType,
 //                           SessionDataType,
-//                           StatisticsContainerType>::svc (void)
+//                           StatisticContainerType>::svc (void)
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::svc"));
 
@@ -259,13 +209,13 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 int
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
-                           StatisticsContainerType>::open (void* arg_in)
+                           StatisticContainerType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::open"));
 
@@ -339,13 +289,13 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 int
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
                            SessionDataType,
-                           StatisticsContainerType>::close (u_long arg_in)
+                           StatisticContainerType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::close"));
 
@@ -408,13 +358,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
 //          typename SessionDataType,
-//          typename StatisticsContainerType>
+//          typename StatisticContainerType>
 //int
 //Net_SocketConnectionBase_T<SocketHandlerType,
 //                           ITransportLayerType,
 //                           ConfigurationType,
 //                           SessionDataType,
-//                           StatisticsContainerType>::handle_close (ACE_HANDLE handle_in,
+//                           StatisticContainerType>::handle_close (ACE_HANDLE handle_in,
 //                                                                   ACE_Reactor_Mask mask_in)
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::handle_close"));
@@ -502,13 +452,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
 //          typename SessionDataType,
-//          typename StatisticsContainerType>
+//          typename StatisticContainerType>
 //void
 //Net_SocketConnectionBase_T<SocketHandlerType,
 //                           ITransportLayerType,
 //                           ConfigurationType,
 //                           SessionDataType,
-//                           StatisticsContainerType>::shutdown ()
+//                           StatisticContainerType>::shutdown ()
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::shutdown"));
 
@@ -549,13 +499,15 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
-                                 StatisticsContainerType>::Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in)
- : inherited (interfaceHandle_in)
+                                 StatisticContainerType>::Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                            unsigned int statisticsCollectionInterval_in)
+ : inherited (interfaceHandle_in,
+              statisticsCollectionInterval_in)
  //, inherited2 ()
  //, inherited3 (interfaceHandle_in)
  , configuration_ (NULL)
@@ -568,12 +520,12 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
-                                 StatisticsContainerType>::~Net_AsynchSocketConnectionBase_T ()
+                                 StatisticContainerType>::~Net_AsynchSocketConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::~Net_AsynchSocketConnectionBase_T"));
 
@@ -583,74 +535,74 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
-                                 StatisticsContainerType>::ping ()
+                                 StatisticContainerType>::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::ping"));
 
   inherited::stream_.ping ();
 }
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
-          typename ConfigurationType,
-          typename SessionDataType,
-          typename StatisticsContainerType>
-bool
-Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 ITransportLayerType,
-                                 ConfigurationType,
-                                 SessionDataType,
-                                 StatisticsContainerType>::collect (StatisticsContainerType& data_out) const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::collect"));
-
-  try
-  {
-    return inherited::stream_.collect (data_out);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic::collect(), aborting\n")));
-  }
-
-  return false;
-}
-
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
-          typename ConfigurationType,
-          typename SessionDataType,
-          typename StatisticsContainerType>
-void
-Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 ITransportLayerType,
-                                 ConfigurationType,
-                                 SessionDataType,
-                                 StatisticsContainerType>::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::report"));
-
-  try
-  {
-    return inherited::stream_.report ();
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic::report(), continuing\n")));
-  }
-}
+//template <typename SocketHandlerType,
+//          typename ITransportLayerType,
+//          typename ConfigurationType,
+//          typename SessionDataType,
+//          typename StatisticContainerType>
+//bool
+//Net_AsynchSocketConnectionBase_T<SocketHandlerType,
+//                                 ITransportLayerType,
+//                                 ConfigurationType,
+//                                 SessionDataType,
+//                                 StatisticContainerType>::collect (StatisticContainerType& data_out)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::collect"));
+//
+//  try
+//  {
+//    return inherited::stream_.collect (data_out);
+//  }
+//  catch (...)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("caught exception in Common_IStatistic::collect(), aborting\n")));
+//  }
+//
+//  return false;
+//}
+//
+//template <typename SocketHandlerType,
+//          typename ITransportLayerType,
+//          typename ConfigurationType,
+//          typename SessionDataType,
+//          typename StatisticContainerType>
+//void
+//Net_AsynchSocketConnectionBase_T<SocketHandlerType,
+//                                 ITransportLayerType,
+//                                 ConfigurationType,
+//                                 SessionDataType,
+//                                 StatisticContainerType>::report () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::report"));
+//
+//  try
+//  {
+//    return inherited::stream_.report ();
+//  }
+//  catch (...)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("caught exception in Common_IStatistic::report(), continuing\n")));
+//  }
+//}
 
 //template <typename SocketHandlerType,
 //          typename ConfigurationType,
-//          typename StatisticsContainerType>
+//          typename StatisticContainerType>
 //int
 //Net_AsynchSocketConnectionBase_T::svc (void)
 //{
@@ -757,13 +709,13 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
-                                 StatisticsContainerType>::open (ACE_HANDLE handle_in,
+                                 StatisticContainerType>::open (ACE_HANDLE handle_in,
                                                                  ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::open"));
@@ -794,13 +746,13 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
-                                 StatisticsContainerType>::act (const void* act_in)
+                                 StatisticContainerType>::act (const void* act_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::act"));
 
@@ -812,13 +764,13 @@ template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
           typename SessionDataType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 int
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
                                  SessionDataType,
-                                 StatisticsContainerType>::handle_close (ACE_HANDLE handle_in,
+                                 StatisticContainerType>::handle_close (ACE_HANDLE handle_in,
                                                                          ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::handle_close"));
@@ -904,7 +856,7 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 
 //template <typename SocketHandlerType,
 //          typename ConfigurationType,
-//          typename StatisticsContainerType>
+//          typename StatisticContainerType>
 //void
 //Net_AsynchSocketConnectionBase_T::shutdown ()
 //{

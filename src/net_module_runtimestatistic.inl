@@ -22,7 +22,6 @@
 #include "ace/Log_Msg.h"
 #include "ace/Time_Value.h"
 
-//#include "common.h"
 #include "common_timer_manager.h"
 
 #include "stream_message_base.h"
@@ -36,19 +35,20 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::Net_Module_Statistic_WriterTask_T ()
+                                  StatisticContainerType>::Net_Module_Statistic_WriterTask_T ()
  : inherited ()
  , isInitialized_ (false)
  , resetTimeoutHandler_ (this)
  , resetTimeoutHandlerID_ (-1)
- , localReportingHandler_ (this,
-                           ACTION_REPORT)
+ , localReportingHandler_ (ACTION_REPORT,
+                           this,
+                           false)
  , localReportingHandlerID_ (-1)
  , reportingInterval_ (0)
  , sessionID_ (0)
@@ -73,13 +73,13 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::~Net_Module_Statistic_WriterTask_T ()
+                                  StatisticContainerType>::~Net_Module_Statistic_WriterTask_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::~Net_Module_Statistic_WriterTask_T"));
 
@@ -92,14 +92,14 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 bool
 Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::init (unsigned int reportingInterval_in,
+                                  StatisticContainerType>::init (unsigned int reportingInterval_in,
                                                                   bool printFinalReport_in,
                                                                   const Stream_IAllocator* allocator_in)
 {
@@ -144,12 +144,12 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   {
     // schedule the second-granularity timer
     ACE_Time_Value interval (1, 0); // one second interval
-    ACE_Event_Handler* eh = &resetTimeoutHandler_;
+    ACE_Event_Handler* event_handler_p = &resetTimeoutHandler_;
     resetTimeoutHandlerID_ =
-      COMMON_TIMERMANAGER_SINGLETON::instance()->schedule (eh,                               // event handler
-                                                           NULL,                             // ACT
-                                                           COMMON_TIME_POLICY () + interval, // first wakeup time
-                                                           interval);                        // interval
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (event_handler_p,                  // event handler
+                                                            NULL,                             // ACT
+                                                            COMMON_TIME_POLICY () + interval, // first wakeup time
+                                                            interval);                        // interval
     if (resetTimeoutHandlerID_ == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -182,14 +182,14 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 void
 Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                                  StatisticContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
                                                                                bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::handleDataMessage"));
@@ -220,15 +220,15 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 void
 Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                                  bool& passMessageDownstream_out)
+                                  StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                                 bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::handleSessionMessage"));
 
@@ -254,7 +254,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     case SESSION_BEGIN:
     {
       // retain session ID for reporting...
-      sessionID_ = message_inout->getData ()->getState ()->sessionID;
+      sessionID_ = message_inout->getState ()->sessionID;
 
       // statistics reporting
       if (reportingInterval_)
@@ -262,9 +262,9 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
         // schedule the reporting interval timer
         ACE_Time_Value interval (reportingInterval_, 0);
         ACE_ASSERT (localReportingHandlerID_ == -1);
-        ACE_Event_Handler* eh = &localReportingHandler_;
+        ACE_Event_Handler* event_handler_p = &localReportingHandler_;
         localReportingHandlerID_ =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (event_handler_p,                  // event handler
                                                                 NULL,                             // act
                                                                 COMMON_TIME_POLICY () + interval, // first wakeup time
                                                                 interval);                        // interval
@@ -327,14 +327,14 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 void
 Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::reset ()
+                                  StatisticContainerType>::reset ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::reset"));
 
@@ -357,26 +357,29 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 bool
 Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::collect (StatisticsContainerType& data_out) const
+                                  StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::collect"));
 
   // *NOTE*: external call, fill the argument with meaningful values
+  // *TODO*: the temaplate does not know about StatisticContainerType
+  //         --> must be overriden by a (specialized) child class
 
   // init return value(s)
-  ACE_OS::memset (&data_out, 0, sizeof (StatisticsContainerType));
+  ACE_OS::memset (&data_out, 0, sizeof (StatisticContainerType));
 
   {
     ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
     data_out.numDataMessages = (numInboundMessages_ + numOutboundMessages_);
+    data_out.numDroppedMessages = 0;
     data_out.numBytes = (numInboundBytes_ + numOutboundBytes_);
   } // end lock scope
 
@@ -388,50 +391,31 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 void
 Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::report () const
+                                  StatisticContainerType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::report"));
 
-  // compute cache usage...
-//   unsigned int cache_used = 0;
-//   unsigned int cache_size = 0;
-//   double        cache_used_relative = 0.0;
-  unsigned int numMessagesOnline = 0;
-  unsigned int totalHeapBytesAllocated = 0;
-  if (allocator_)
-  {
-    numMessagesOnline = allocator_->cache_depth ();
-    totalHeapBytesAllocated = allocator_->cache_size ();
-//    ACE_ASSERT (cache_size);
-//     cache_used_relative = cache_used / ((cache_size ?
-//                                          cache_size : 1) * 100.0);
-  } // end IF
+  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
-  // ...write some output
-  {
-    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
-
-    ACE_DEBUG ((LM_INFO,
-                ACE_TEXT ("*** [session: %u] RUNTIME STATISTICS ***\n--> Stream Statistics <--\nmessages seen (last second): %u\nmessages seen (total [in/out]): %u/%u (data: %.2f %%)\n data seen (last second): %u bytes\n data seen (total): %.0f bytes\n current cache usage [%u messages / %u total allocated heap]\n*** RUNTIME STATISTICS ***\\END\n"),
-                sessionID_,
-                lastMessagesPerSecondCount_,
-                numInboundMessages_, numOutboundMessages_,
-                (((numInboundMessages_ + numOutboundMessages_) - numSessionMessages_) / 100.0),
-                lastBytesPerSecondCount_,
-                (numInboundBytes_ + numOutboundBytes_),
-                numMessagesOnline,
-                totalHeapBytesAllocated));
-//                cache_used,
-//                cache_size,
-//                cache_used_relative));
-  } // end lock scope
+  ACE_DEBUG ((LM_INFO,
+              ACE_TEXT ("*** [session: %u] RUNTIME STATISTICS ***\n--> Stream Statistics <--\n messages/sec: %u\n messages total [in/out]): %u/%u (data: %.2f%%)\n bytes/sec: %u\n bytes total: %.0f\n--> Cache Statistics <--\n current cache usage [%u messages / %u byte(s) allocated]\n*** RUNTIME STATISTICS ***\\END\n"),
+              sessionID_,
+              lastMessagesPerSecondCount_,
+              numInboundMessages_, numOutboundMessages_,
+              (static_cast<float> ((numInboundMessages_ + numOutboundMessages_) - numSessionMessages_) /
+               static_cast<float> (numInboundMessages_ + numOutboundMessages_) *
+               100.0F),
+              lastBytesPerSecondCount_,
+              (numInboundBytes_ + numOutboundBytes_),
+              (allocator_ ? allocator_->cache_size () : 0),
+              (allocator_ ? allocator_->cache_depth () : 0)));
 }
 
 template <typename TaskSynchType,
@@ -439,14 +423,14 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 void
 Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::final_report () const
+                                  StatisticContainerType>::final_report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::final_report"));
 
@@ -490,14 +474,14 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 void
 Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::fini_timers (bool cancelAllTimers_in)
+                                  StatisticContainerType>::fini_timers (bool cancelAllTimers_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::fini_timers"));
 
@@ -534,13 +518,13 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 Net_Module_Statistic_ReaderTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::Net_Module_Statistic_ReaderTask_T ()
+                                  StatisticContainerType>::Net_Module_Statistic_ReaderTask_T ()
 // : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_ReaderTask_T::Net_Module_Statistic_ReaderTask_T"));
@@ -553,13 +537,13 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 Net_Module_Statistic_ReaderTask_T<TaskSynchType,
                                    TimePolicyType,
                                    SessionMessageType,
                                    ProtocolMessageType,
                                    ProtocolCommandType,
-                                   StatisticsContainerType>::~Net_Module_Statistic_ReaderTask_T ()
+                                   StatisticContainerType>::~Net_Module_Statistic_ReaderTask_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_ReaderTask_T::~Net_Module_Statistic_ReaderTask_T"));
 
@@ -570,14 +554,14 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ProtocolCommandType,
-          typename StatisticsContainerType>
+          typename StatisticContainerType>
 int
 Net_Module_Statistic_ReaderTask_T<TaskSynchType,
                                   TimePolicyType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticsContainerType>::put (ACE_Message_Block* mb_in,
+                                  StatisticContainerType>::put (ACE_Message_Block* mb_in,
                                                                  ACE_Time_Value* tv_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_ReaderTask_T::put"));
