@@ -23,24 +23,25 @@
 
 #include "ace/INET_Addr.h"
 
-#include "common_iinitialize.h"
 #include "common_referencecounter_base.h"
 
 #include "stream_common.h"
+#include "stream_statistichandler.h"
 
 #include "net_configuration.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 class Net_ConnectionBase_T
  : public Common_ReferenceCounterBase
- , public Net_IConnection_T<ITransportLayerType,
-                            StatisticContainerType>
- , public Common_IInitialize_T<ConfigurationType>
+ , public Net_IConnection_T<ConfigurationType,
+                            StatisticContainerType,
+                            ITransportLayerType>
 {
  public:
   // implement Common_IInitialize_T
@@ -48,9 +49,9 @@ class Net_ConnectionBase_T
 
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
-                                   SessionDataType,
-                                   ITransportLayerType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   UserDataType,
+                                   StatisticContainerType,
+                                   ITransportLayerType> ICONNECTION_MANAGER_T;
 
   Net_ConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                         unsigned int = 0);      // statistics collecting interval (second(s))
@@ -66,12 +67,13 @@ class Net_ConnectionBase_T
   ConfigurationType      configuration_;
   bool                   isRegistered_;
   ICONNECTION_MANAGER_T* manager_;
-  SessionDataType        sessionData_;
+  SessionDataType*       sessionData_;
 
  private:
   typedef Common_ReferenceCounterBase inherited;
-  typedef Net_IConnection_T<ITransportLayerType,
-                            StatisticContainerType> inherited2;
+//  typedef Net_IConnection_T<ConfigurationType,
+//                            StatisticContainerType,
+//                            ITransportLayerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&));

@@ -28,14 +28,16 @@
 #include "net_macros.h"
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
@@ -54,14 +56,16 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::~Net_StreamTCPSocketBase_T ()
@@ -88,15 +92,17 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::open (void* arg_in)
@@ -227,15 +233,17 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::close (u_long arg_in)
@@ -315,15 +323,17 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::handle_input (ACE_HANDLE handle_in)
@@ -419,15 +429,17 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::handle_output (ACE_HANDLE handle_in)
@@ -586,15 +598,17 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
 Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::handle_close (ACE_HANDLE handle_in,
@@ -657,15 +671,17 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 bool
 Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::collect (StatisticContainerType& data_out)
@@ -686,15 +702,17 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
 Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::report () const
@@ -713,15 +731,17 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 ACE_Message_Block*
 Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
-                          TransportLayerType,
+                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
                           SocketHandlerType>::allocateMessage (unsigned int requestedSize_in)

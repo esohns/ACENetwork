@@ -18,32 +18,31 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_STREAM_TCPSOCKET_BASE_H
-#define Net_STREAM_TCPSOCKET_BASE_H
+#ifndef NET_STREAM_TCPSOCKET_BASE_H
+#define NET_STREAM_TCPSOCKET_BASE_H
 
-#include "ace/Global_Macros.h"
 #include "ace/Event_Handler.h"
+#include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
 #include "ace/Synch.h"
 
 #include "net_connection_base.h"
 #include "net_connection_manager.h"
 
-// forward declarations
-struct Stream_State_t;
-
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
-          typename TransportLayerType,
+          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 class Net_StreamTCPSocketBase_T
  : public SocketHandlerType
  , public Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
                                SessionDataType,
-                               TransportLayerType,
-                               StatisticContainerType>
+                               StatisticContainerType,
+                               ITransportLayerType>
 {
  public:
   virtual ~Net_StreamTCPSocketBase_T ();
@@ -68,15 +67,14 @@ class Net_StreamTCPSocketBase_T
 
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
-                                   SessionDataType,
-                                   TransportLayerType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   UserDataType,
+                                   StatisticContainerType,
+                                   ITransportLayerType> ICONNECTION_MANAGER_T;
 
   Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
                                                      // 0 --> DON'T collect statistics
 
-  //ConfigurationType* configuration_;
   ACE_Message_Block* currentReadBuffer_;
   ACE_Message_Block* currentWriteBuffer_;
   ACE_Thread_Mutex   sendLock_;
@@ -88,9 +86,10 @@ class Net_StreamTCPSocketBase_T
  private:
   typedef SocketHandlerType inherited;
   typedef Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
                                SessionDataType,
-                               TransportLayerType,
-                               StatisticContainerType> inherited2;
+                               StatisticContainerType,
+                               ITransportLayerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T (const Net_StreamTCPSocketBase_T&));

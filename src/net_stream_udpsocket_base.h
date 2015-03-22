@@ -18,18 +18,19 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_STREAM_UDPSOCKET_BASE_H
-#define Net_STREAM_UDPSOCKET_BASE_H
+#ifndef NET_STREAM_UDPSOCKET_BASE_H
+#define NET_STREAM_UDPSOCKET_BASE_H
 
 #include "ace/config-lite.h"
-#include "ace/INET_Addr.h"
 #include "ace/Event_Handler.h"
+#include "ace/INET_Addr.h"
 #include "ace/Message_Block.h"
 #include "ace/Synch.h"
 
 #include "net_connection_base.h"
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -40,9 +41,10 @@ class Net_StreamUDPSocketBase_T
  : /*public SocketType
  ,*/ public SocketHandlerType
  , public Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
                                SessionDataType,
-                               ITransportLayerType,
-                               StatisticContainerType>
+                               StatisticContainerType,
+                               ITransportLayerType>
 {
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
@@ -64,9 +66,9 @@ class Net_StreamUDPSocketBase_T
 
  protected:
  typedef Net_IConnectionManager_T<ConfigurationType,
-                                  SessionDataType,
-                                  ITransportLayerType,
-                                  StatisticContainerType> ICONNECTION_MANAGER_T;
+                                  UserDataType,
+                                  StatisticContainerType,
+                                  ITransportLayerType> ICONNECTION_MANAGER_T;
 
   Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
@@ -87,9 +89,10 @@ class Net_StreamUDPSocketBase_T
 //  typedef SocketType inherited;
   typedef SocketHandlerType inherited2;
   typedef Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
                                SessionDataType,
-                               ITransportLayerType,
-                               StatisticContainerType> inherited3;
+                               StatisticContainerType,
+                               ITransportLayerType> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));

@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_UDPCONNECTION_H
-#define Net_UDPCONNECTION_H
+#ifndef NET_UDPCONNECTION_H
+#define NET_UDPCONNECTION_H
 
 #include "ace/Asynch_Connector.h"
 #include "ace/Connector.h"
@@ -34,25 +34,28 @@
 #include "net_stream_common.h"
 #include "net_transportlayer_udp.h"
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 class Net_UDPConnection_T
  : public Net_SocketConnectionBase_T<HandlerType,
                                      Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
+                                     UserDataType,
                                      SessionDataType,
                                      Stream_Statistic_t>
  , public Net_TransportLayer_UDP
 {
-  friend class ACE_Connector<Net_UDPConnection_T<SessionDataType,
+  friend class ACE_Connector<Net_UDPConnection_T<UserDataType,
+                                                 SessionDataType,
                                                  HandlerType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
   typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                   SessionDataType,
-                                   Net_IInetTransportLayer_t,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   UserDataType,
+                                   Stream_Statistic_t,
+                                   Net_IInetTransportLayer_t> ICONNECTION_MANAGER_T;
 
   Net_UDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
                        unsigned int = 0);      // statistics collecting interval (second(s))
@@ -92,14 +95,11 @@ class Net_UDPConnection_T
   typedef Net_SocketConnectionBase_T<HandlerType,
                                      Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
+                                     UserDataType,
                                      SessionDataType,
                                      Stream_Statistic_t> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
-  // *NOTE*: this is required due to compiler issues and probable incomplete
-  //         ACE (Asynch_)Connector implementation
-  // *TODO*: remove this ASAP
-  //Net_UDPConnection_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T (const Net_UDPConnection_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T& operator= (const Net_UDPConnection_T&));
@@ -107,24 +107,27 @@ class Net_UDPConnection_T
 
 ///////////////////////////////////////////
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 class Net_AsynchUDPConnection_T
  : public Net_AsynchSocketConnectionBase_T<HandlerType,
                                            Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
+                                           UserDataType,
                                            SessionDataType,
                                            Stream_Statistic_t>
  , public Net_TransportLayer_UDP
 {
-  friend class ACE_Asynch_Connector<Net_AsynchUDPConnection_T<SessionDataType,
+  friend class ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
+                                                              SessionDataType,
                                                               HandlerType> >;
 
  public:
   typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                   SessionDataType,
-                                   Net_IInetTransportLayer_t,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   UserDataType,
+                                   Stream_Statistic_t,
+                                   Net_IInetTransportLayer_t> ICONNECTION_MANAGER_T;
 
   Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
@@ -157,14 +160,11 @@ class Net_AsynchUDPConnection_T
   typedef Net_AsynchSocketConnectionBase_T<HandlerType,
                                            Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
+                                           UserDataType,
                                            SessionDataType,
                                            Stream_Statistic_t> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
-  // *NOTE*: this is required due to compiler issues and probable incomplete
-  //         ACE (Asynch_)Connector implementation
-  // *TODO*: remove this ASAP
-  Net_AsynchUDPConnection_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T (const Net_AsynchUDPConnection_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T& operator= (const Net_AsynchUDPConnection_T&));

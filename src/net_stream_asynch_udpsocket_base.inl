@@ -25,14 +25,16 @@
 #include "net_macros.h"
 
 template <typename ConfigurationType,
-          typename SessonDataType,
+          typename UserDataType,
+          typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
-                                SessonDataType,
+                                UserDataType,
+                                SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
@@ -66,14 +68,16 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessonDataType,
+          typename UserDataType,
+          typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
-                                SessonDataType,
+                                UserDataType,
+                                SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
@@ -85,7 +89,8 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessonDataType,
+          typename UserDataType,
+          typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
@@ -93,7 +98,8 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
-                                SessonDataType,
+                                UserDataType,
+                                SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
@@ -253,7 +259,8 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessonDataType,
+          typename UserDataType,
+          typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
@@ -261,7 +268,8 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 int
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
-                                SessonDataType,
+                                UserDataType,
+                                SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
@@ -315,7 +323,8 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessonDataType,
+          typename UserDataType,
+          typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
@@ -323,7 +332,8 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 int
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
-                                SessonDataType,
+                                UserDataType,
+                                SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
@@ -386,7 +396,8 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessonDataType,
+          typename UserDataType,
+          typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
@@ -394,7 +405,8 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 bool
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
-                                SessonDataType,
+                                UserDataType,
+                                SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
@@ -417,7 +429,8 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessonDataType,
+          typename UserDataType,
+          typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
@@ -425,7 +438,8 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
-                                SessonDataType,
+                                UserDataType,
+                                SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
@@ -446,7 +460,8 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessonDataType,
+          typename UserDataType,
+          typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
@@ -454,7 +469,8 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
-                                SessonDataType,
+                                UserDataType,
+                                SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,

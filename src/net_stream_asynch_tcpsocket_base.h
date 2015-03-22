@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_STREAM_ASYNCH_TCPSOCKET_BASE_H
-#define Net_STREAM_ASYNCH_TCPSOCKET_BASE_H
+#ifndef NET_STREAM_ASYNCH_TCPSOCKET_BASE_H
+#define NET_STREAM_ASYNCH_TCPSOCKET_BASE_H
 
 #include "ace/Asynch_IO.h"
 #include "ace/Event_Handler.h"
@@ -29,6 +29,7 @@
 #include "net_connection_base.h"
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -38,15 +39,17 @@ class Net_StreamAsynchTCPSocketBase_T
  : public SocketHandlerType
  , public ACE_Event_Handler
  , public Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
                                SessionDataType,
-                               ITransportLayerType,
-                               StatisticContainerType>
+                               StatisticContainerType,
+                               ITransportLayerType>
 {
  public:
   typedef Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
                                SessionDataType,
-                               ITransportLayerType,
-                               StatisticContainerType> CONNECTION_BASE_T;
+                               StatisticContainerType,
+                               ITransportLayerType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchTCPSocketBase_T ();
 
@@ -65,9 +68,9 @@ class Net_StreamAsynchTCPSocketBase_T
 
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
-                                   SessionDataType,
-                                   ITransportLayerType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   UserDataType,
+                                   StatisticContainerType,
+                                   ITransportLayerType> ICONNECTION_MANAGER_T;
 
   Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                    unsigned int = 0);      // statistics collecting interval (second(s))
@@ -82,9 +85,10 @@ class Net_StreamAsynchTCPSocketBase_T
  private:
   typedef SocketHandlerType inherited;
   typedef Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
                                SessionDataType,
-                               ITransportLayerType,
-                               StatisticContainerType> inherited2;
+                               StatisticContainerType,
+                               ITransportLayerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&));

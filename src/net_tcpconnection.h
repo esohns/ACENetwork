@@ -44,6 +44,7 @@ class Net_Export Net_TCPConnection
  : public Net_SocketConnectionBase_T<Net_TCPHandler_t,
                                      Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
+                                     Net_UserData_t,
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t>
 {
@@ -51,9 +52,9 @@ class Net_Export Net_TCPConnection
 
  public:
   typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                   Net_StreamSessionData_t,
-                                   Net_IInetTransportLayer_t,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Net_UserData_t,
+                                   Stream_Statistic_t,
+                                   Net_IInetTransportLayer_t> ICONNECTION_MANAGER_T;
 
   Net_TCPConnection (ICONNECTION_MANAGER_T*, // connection manager handle
                      unsigned int = 0);      // statistics collecting interval (second(s))
@@ -85,6 +86,7 @@ class Net_Export Net_TCPConnection
   typedef Net_SocketConnectionBase_T<Net_TCPHandler_t,
                                      Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
+                                     Net_UserData_t,
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t> inherited;
 
@@ -105,6 +107,7 @@ class Net_Export Net_AsynchTCPConnection
  : public Net_AsynchSocketConnectionBase_T<Net_AsynchTCPHandler_t,
                                            Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
+                                           Net_UserData_t,
                                            Net_StreamSessionData_t,
                                            Stream_Statistic_t>
 {
@@ -112,9 +115,9 @@ class Net_Export Net_AsynchTCPConnection
 
  public:
   typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                   Net_StreamSessionData_t,
-                                   Net_IInetTransportLayer_t,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Net_UserData_t,
+                                   Stream_Statistic_t,
+                                   Net_IInetTransportLayer_t> ICONNECTION_MANAGER_T;
 
  // *WARNING*: need to make this available to Asynch_Connector
    //            (see: ace/Asynch_Connector.cpp:239)
@@ -146,6 +149,7 @@ class Net_Export Net_AsynchTCPConnection
   typedef Net_AsynchSocketConnectionBase_T<Net_AsynchTCPHandler_t,
                                            Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
+                                           Net_UserData_t,
                                            Net_StreamSessionData_t,
                                            Stream_Statistic_t> inherited;
 

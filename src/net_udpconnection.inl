@@ -24,9 +24,11 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
-Net_UDPConnection_T<SessionDataType,
+Net_UDPConnection_T<UserDataType,
+                    SessionDataType,
                     HandlerType>::Net_UDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                        unsigned int statisticsCollectionInterval_in)
  : inherited (interfaceHandle_in,
@@ -46,19 +48,23 @@ Net_UDPConnection_T<SessionDataType,
 //
 //}
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
-Net_UDPConnection_T<SessionDataType,
+Net_UDPConnection_T<UserDataType,
+                    SessionDataType,
                     HandlerType>::~Net_UDPConnection_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::~Net_UDPConnection_T"));
 
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 int
-Net_UDPConnection_T<SessionDataType,
+Net_UDPConnection_T<UserDataType,
+                    SessionDataType,
                     HandlerType>::open (void* args_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::open"));
@@ -125,10 +131,12 @@ Net_UDPConnection_T<SessionDataType,
   return 0;
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 int
-Net_UDPConnection_T<SessionDataType,
+Net_UDPConnection_T<UserDataType,
+                    SessionDataType,
                     HandlerType>::close (u_long flags_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::close"));
@@ -177,10 +185,12 @@ Net_UDPConnection_T<SessionDataType,
   return 0;
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 bool
-Net_UDPConnection_T<SessionDataType,
+Net_UDPConnection_T<UserDataType,
+                    SessionDataType,
                     HandlerType>::initialize (Net_ClientServerRole_t role_in,
                                               const Net_SocketConfiguration_t& configuration_in)
 {
@@ -201,10 +211,12 @@ Net_UDPConnection_T<SessionDataType,
 #endif
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 void
-Net_UDPConnection_T<SessionDataType,
+Net_UDPConnection_T<UserDataType,
+                    SessionDataType,
                     HandlerType>::finalize ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::finalize"));
@@ -217,10 +229,12 @@ Net_UDPConnection_T<SessionDataType,
                 ACE_TEXT ("failed to Net_UDPConnection_T::close(0): \"%m\", returning\n")));
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 void
-Net_UDPConnection_T<SessionDataType,
+Net_UDPConnection_T<UserDataType,
+                    SessionDataType,
                     HandlerType>::info (ACE_HANDLE& handle_out,
                                         ACE_INET_Addr& localSAP_out,
                                         ACE_INET_Addr& remoteSAP_out) const
@@ -234,10 +248,12 @@ Net_UDPConnection_T<SessionDataType,
   remoteSAP_out = inherited::configuration_.socketConfiguration.peerAddress;
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 unsigned int
-Net_UDPConnection_T<SessionDataType,
+Net_UDPConnection_T<UserDataType,
+                    SessionDataType,
                     HandlerType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::id"));
@@ -249,10 +265,12 @@ Net_UDPConnection_T<SessionDataType,
 #endif
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 void
-Net_UDPConnection_T<SessionDataType,
+Net_UDPConnection_T<UserDataType,
+                    SessionDataType,
                     HandlerType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::dump_state"));
@@ -535,9 +553,11 @@ Net_UDPConnection_T<SessionDataType,
 
 /////////////////////////////////////////
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
-Net_AsynchUDPConnection_T<SessionDataType,
+Net_AsynchUDPConnection_T<UserDataType,
+                          SessionDataType,
                           HandlerType>::Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                    unsigned int statisticsCollectionInterval_in)
  : inherited (interfaceHandle_in,
@@ -547,9 +567,11 @@ Net_AsynchUDPConnection_T<SessionDataType,
 
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
-Net_AsynchUDPConnection_T<SessionDataType,
+Net_AsynchUDPConnection_T<UserDataType,
+                          SessionDataType,
                           HandlerType>::Net_AsynchUDPConnection_T ()
  : inherited (NULL)
 {
@@ -557,19 +579,23 @@ Net_AsynchUDPConnection_T<SessionDataType,
 
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
-Net_AsynchUDPConnection_T<SessionDataType,
+Net_AsynchUDPConnection_T<UserDataType,
+                          SessionDataType,
                           HandlerType>::~Net_AsynchUDPConnection_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnection_T::~Net_AsynchUDPConnection_T"));
 
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 bool
-Net_AsynchUDPConnection_T<SessionDataType,
+Net_AsynchUDPConnection_T<UserDataType,
+                          SessionDataType,
                           HandlerType>::initialize (Net_ClientServerRole_t role_in,
                                                     const Net_SocketConfiguration_t& configuration_in)
 {
@@ -590,10 +616,12 @@ Net_AsynchUDPConnection_T<SessionDataType,
 #endif
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 void
-Net_AsynchUDPConnection_T<SessionDataType,
+Net_AsynchUDPConnection_T<UserDataType,
+                          SessionDataType,
                           HandlerType>::finalize ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnection_T::finalize"));
@@ -608,10 +636,12 @@ Net_AsynchUDPConnection_T<SessionDataType,
                 handle));
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 void
-Net_AsynchUDPConnection_T<SessionDataType,
+Net_AsynchUDPConnection_T<UserDataType,
+                          SessionDataType,
                           HandlerType>::info (ACE_HANDLE& handle_out,
                                               ACE_INET_Addr& localSAP_out,
                                               ACE_INET_Addr& remoteSAP_out) const
@@ -623,10 +653,12 @@ Net_AsynchUDPConnection_T<SessionDataType,
   remoteSAP_out = inherited::remoteSAP_;
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 unsigned int
-Net_AsynchUDPConnection_T<SessionDataType,
+Net_AsynchUDPConnection_T<UserDataType,
+                          SessionDataType,
                           HandlerType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnection_T::id"));
@@ -644,10 +676,12 @@ Net_AsynchUDPConnection_T<SessionDataType,
 #endif
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 void
-Net_AsynchUDPConnection_T<SessionDataType,
+Net_AsynchUDPConnection_T<UserDataType,
+                          SessionDataType,
                           HandlerType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnection_T::dump_state"));
@@ -683,10 +717,12 @@ Net_AsynchUDPConnection_T<SessionDataType,
               ACE_TEXT (peer_address.c_str ())));
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 void
-Net_AsynchUDPConnection_T<SessionDataType,
+Net_AsynchUDPConnection_T<UserDataType,
+                          SessionDataType,
                           HandlerType>::open (ACE_HANDLE handle_in,
                                               ACE_Message_Block& messageBlock_in)
 {
@@ -747,10 +783,12 @@ Net_AsynchUDPConnection_T<SessionDataType,
 #endif
 }
 
-template <typename SessionDataType,
+template <typename UserDataType,
+          typename SessionDataType,
           typename HandlerType>
 int
-Net_AsynchUDPConnection_T<SessionDataType,
+Net_AsynchUDPConnection_T<UserDataType,
+                          SessionDataType,
                           HandlerType>::handle_close (ACE_HANDLE handle_in,
                                                       ACE_Reactor_Mask mask_in)
 {

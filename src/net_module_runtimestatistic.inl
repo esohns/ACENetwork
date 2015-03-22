@@ -242,7 +242,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   {
     ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
-    // update our counters...
+    // update counters...
     // *NOTE*: currently, session messages travel only downstream...
     //numInboundMessages_++;
     numSessionMessages_++;
@@ -409,8 +409,8 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
               sessionID_,
               lastMessagesPerSecondCount_,
               numInboundMessages_, numOutboundMessages_,
-              (static_cast<float> ((numInboundMessages_ + numOutboundMessages_) - numSessionMessages_) /
-               static_cast<float> (numInboundMessages_ + numOutboundMessages_) *
+              (static_cast<float> (numInboundMessages_ + numOutboundMessages_) /
+               static_cast<float> (numInboundMessages_ + numOutboundMessages_ + numSessionMessages_) *
                100.0F),
               lastBytesPerSecondCount_,
               (numInboundBytes_ + numOutboundBytes_),

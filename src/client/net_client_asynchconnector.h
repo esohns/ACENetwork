@@ -33,6 +33,7 @@
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
@@ -43,9 +44,9 @@ class Net_Client_AsynchConnector_T
 {
  public:
    typedef Net_IConnectionManager_T<ConfigurationType,
-                                    SessionDataType,
-                                    ITransportLayerType,
-                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                    UserDataType,
+                                    Stream_Statistic_t,
+                                    ITransportLayerType> ICONNECTION_MANAGER_T;
 
    Net_Client_AsynchConnector_T (const ConfigurationType*, // configuration handle
                                  ICONNECTION_MANAGER_T*,   // connection manager handle
@@ -84,25 +85,30 @@ class Net_Client_AsynchConnector_T
 // partial specialization (for UDP)
 template <typename HandlerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                    ConfigurationType,
+                                   UserDataType,
                                    SessionDataType,
                                    ITransportLayerType,
-                                   Net_AsynchUDPConnection_T<SessionDataType,
+                                   Net_AsynchUDPConnection_T<UserDataType,
+                                                             SessionDataType,
                                                              HandlerType> >
- : public ACE_Asynch_Connector<Net_AsynchUDPConnection_T<SessionDataType,
+ : public ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
+                                                         SessionDataType,
                                                          HandlerType> >
  , public Net_Client_IConnector_T<ACE_INET_Addr,
                                   ConfigurationType>
 {
  public:
   typedef Net_IConnectionManager_T<ConfigurationType,
-                                   SessionDataType,
-                                   ITransportLayerType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
-  typedef Net_AsynchUDPConnection_T<SessionDataType,
+                                   UserDataType,
+                                   Stream_Statistic_t,
+                                   ITransportLayerType> ICONNECTION_MANAGER_T;
+  typedef Net_AsynchUDPConnection_T<UserDataType,
+                                    SessionDataType,
                                     HandlerType> CONNECTION_T;
 
   Net_Client_AsynchConnector_T (const ConfigurationType*, // configuration handle
@@ -126,11 +132,13 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
   // override default creation strategy
   // *TODO*: why isn't this being picked up ?
   //virtual CONNECTION_T* make_handler (void);
-   virtual Net_AsynchUDPConnection_T<SessionDataType,
+   virtual Net_AsynchUDPConnection_T<UserDataType,
+                                     SessionDataType,
                                      HandlerType>* make_handler (void);
 
  private:
-  typedef ACE_Asynch_Connector<Net_AsynchUDPConnection_T<SessionDataType,
+  typedef ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
+                                                         SessionDataType,
                                                          HandlerType> > inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());

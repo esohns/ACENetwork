@@ -25,12 +25,14 @@
 #include "net_macros.h"
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
                                 SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
@@ -47,12 +49,14 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
                                 SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
@@ -77,6 +81,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -84,6 +89,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
                                 SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
@@ -244,6 +250,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -251,6 +258,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 int
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
                                 SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
@@ -302,6 +310,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -309,6 +318,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 int
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
                                 SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
@@ -369,6 +379,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -376,6 +387,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
                                 SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
@@ -388,6 +400,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -395,6 +408,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 bool
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
                                 SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
@@ -417,6 +431,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -424,6 +439,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
                                 SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,
@@ -444,6 +460,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -451,6 +468,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 void
 Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
                                 SessionDataType,
                                 ITransportLayerType,
                                 StatisticContainerType,

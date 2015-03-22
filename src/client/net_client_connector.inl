@@ -27,11 +27,13 @@
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
                        ConnectionType>::Net_Client_Connector_T (const ConfigurationType* configuration_in,
@@ -50,11 +52,13 @@ Net_Client_Connector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
                        ConnectionType>::~Net_Client_Connector_T ()
@@ -65,12 +69,14 @@ Net_Client_Connector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
 int
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
                        ConnectionType>::make_svc_handler (ConnectionType*& handler_inout)
@@ -93,12 +99,14 @@ Net_Client_Connector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
 void
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
                        ConnectionType>::abort ()
@@ -112,12 +120,14 @@ Net_Client_Connector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
 bool
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
                        ConnectionType>::connect (const AddressType& address_in)
@@ -154,12 +164,14 @@ Net_Client_Connector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
 const ConfigurationType*
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
                        ConnectionType>::getConfiguration () const
@@ -173,16 +185,19 @@ Net_Client_Connector_T<AddressType,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
-                       Net_UDPConnection_T<SessionDataType,
-                       HandlerType> >::Net_Client_Connector_T (const ConfigurationType* configuration_in,
-                                                               ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                               unsigned int statisticsCollectionInterval_in)
+                       Net_UDPConnection_T<UserDataType,
+                                           SessionDataType,
+                                           HandlerType> >::Net_Client_Connector_T (const ConfigurationType* configuration_in,
+                                                                                   ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                   unsigned int statisticsCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
  , statCollectionInterval_ (statisticsCollectionInterval_in)
@@ -193,13 +208,16 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
-                       Net_UDPConnection_T<SessionDataType,
+                       Net_UDPConnection_T<UserDataType,
+                                           SessionDataType,
                                            HandlerType> >::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
@@ -208,14 +226,17 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 int
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
-                       Net_UDPConnection_T<SessionDataType,
+                       Net_UDPConnection_T<UserDataType,
+                                           SessionDataType,
                                            HandlerType> >::make_svc_handler (CONNECTION_T*& handler_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
@@ -235,14 +256,17 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 void
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
-                       Net_UDPConnection_T<SessionDataType,
+                       Net_UDPConnection_T<UserDataType,
+                                           SessionDataType,
                                            HandlerType> >::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
@@ -251,14 +275,17 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 bool
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
-                       Net_UDPConnection_T<SessionDataType,
+                       Net_UDPConnection_T<UserDataType,
+                                           SessionDataType,
                                            HandlerType> >::connect (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
@@ -300,14 +327,17 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 const ConfigurationType*
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       UserDataType,
                        SessionDataType,
                        ITransportLayerType,
-                       Net_UDPConnection_T<SessionDataType,
+                       Net_UDPConnection_T<UserDataType,
+                                           SessionDataType,
                                            HandlerType> >::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));

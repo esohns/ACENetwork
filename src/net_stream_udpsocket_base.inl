@@ -25,6 +25,7 @@
 #include "net_macros.h"
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -32,6 +33,7 @@ template <typename ConfigurationType,
 //          typename SocketType,
           typename SocketHandlerType>
 Net_StreamUDPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
                           ITransportLayerType,
                           StatisticContainerType,
@@ -53,6 +55,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -60,6 +63,7 @@ template <typename ConfigurationType,
 //          typename SocketType,
           typename SocketHandlerType>
 Net_StreamUDPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
                           ITransportLayerType,
                           StatisticContainerType,
@@ -89,6 +93,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -97,6 +102,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 int
 Net_StreamUDPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
                           ITransportLayerType,
                           StatisticContainerType,
@@ -251,6 +257,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -259,6 +266,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 int
 Net_StreamUDPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
                           ITransportLayerType,
                           StatisticContainerType,
@@ -333,6 +341,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -341,6 +350,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 int
 Net_StreamUDPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
                           ITransportLayerType,
                           StatisticContainerType,
@@ -452,7 +462,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     result = stream_.put (buffer_p);
   else
   {
-    const_cast<StreamType::STATE_T*> (stream_.getState ())->currentStatistics.numDroppedMessages++;
+    const_cast<typename StreamType::STATE_T*> (stream_.getState ())->currentStatistics.numDroppedMessages++;
 
     // clean up
     buffer_p->release ();
@@ -474,6 +484,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -482,6 +493,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 int
 Net_StreamUDPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
                           ITransportLayerType,
                           StatisticContainerType,
@@ -547,6 +559,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -555,6 +568,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 bool
 Net_StreamUDPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
                           ITransportLayerType,
                           StatisticContainerType,
@@ -578,6 +592,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -586,6 +601,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 void
 Net_StreamUDPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
                           ITransportLayerType,
                           StatisticContainerType,
@@ -607,6 +623,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -615,6 +632,7 @@ template <typename ConfigurationType,
           typename SocketHandlerType>
 ACE_Message_Block*
 Net_StreamUDPSocketBase_T<ConfigurationType,
+                          UserDataType,
                           SessionDataType,
                           ITransportLayerType,
                           StatisticContainerType,

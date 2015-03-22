@@ -24,70 +24,65 @@
 #include "ace/OS.h"
 
 #include "common_defines.h"
+#include "common_timer_manager.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::Net_Connection_Manager_T ()
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::Net_Connection_Manager_T ()
  : condition_ (lock_)
- //, connections_ ()
- //, configuration_ ()
+// , connections_ ()
+// , configuration_ ()
  , isActive_ (true)
  , isInitialized_ (false)
  , maxNumConnections_ (NET_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS)
- , sessionData_ ()
+ , userData_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::Net_Connection_Manager_T"));
 
   // init configuration data
   ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
-  //ACE_OS::memset (&sessionData_, 0, sizeof (sessionData_));
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::~Net_Connection_Manager_T ()
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::~Net_Connection_Manager_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::~Net_Connection_Manager_T"));
 
   // clean up
+  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+
+  if (!connections_.is_empty ())
   {
-    // synch access to myConnections
-    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
-
-    if (!connections_.is_empty ())
-    {
-      // *NOTE*: we should NEVER get here !
-      ACE_DEBUG ((LM_WARNING,
-                  ACE_TEXT ("%u connections still open --> check implementation !, continuing\n"),
-                  connections_.size ()));
-
-      abortConnections ();
-    } // end IF
-  } // end lock scope
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("%u connections still open --> check implementation !, continuing\n"),
+                connections_.size ()));
+    abortConnections ();
+  } // end IF
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::initialize (unsigned int maxNumConnections_in)
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::initialize (unsigned int maxNumConnections_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::initialize"));
 
@@ -98,146 +93,148 @@ Net_Connection_Manager_T<ConfigurationType,
 //               maxNumConnections_));
 }
 
+//template <typename ConfigurationType,
+//          typename StatisticContainerType>
+//void
+//Net_Connection_Manager_T<ConfigurationType,
+//                         StatisticContainerType>::lock ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::lock"));
+//
+//	lock_.acquire ();
+//}
+
+//template <typename ConfigurationType,
+//          typename StatisticContainerType>
+//void
+//Net_Connection_Manager_T<ConfigurationType,
+//                         StatisticContainerType>::unlock ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::unlock"));
+//
+//	lock_.release ();
+//}
+
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::set (const ConfigurationType& configuration_in,
-                                                        const SessionDataType& sessionData_in)
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::set (const ConfigurationType& configuration_in,
+                                                    UserDataType* userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::set"));
 
   configuration_ = configuration_in;
-  sessionData_ = sessionData_in;
+  userData_ = userData_in;
 
   isInitialized_ = true;
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::start ()
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::get (ConfigurationType& configuration_out,
+                                                    UserDataType*& userData_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
-
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
-
-  isActive_ = true;
-}
-
-template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
-void
-Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::stop (bool lockedAccess_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
-
-  if (lockedAccess_in)
-    lock_.acquire ();
-  isActive_ = false;
-  if (lockedAccess_in)
-    lock_.release ();
-}
-
-template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
-bool
-Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::isRunning () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
-
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
-
-  return isActive_;
-}
-
-template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
-void
-Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::getData (ConfigurationType& configuration_out,
-                                                           SessionDataType& sessionData_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::getData"));
-
-  ACE_ASSERT (isInitialized_);
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
   configuration_out = configuration_;
-  sessionData_out = sessionData_;
+  userData_out = userData_;
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
+Net_IConnection_T<ConfigurationType,
+                  StatisticContainerType,
+                  ITransportLayerType>*
+Net_Connection_Manager_T<ConfigurationType,
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::operator[] (unsigned int sessionID_in) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::operator[]"));
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+
+  // sanity check(s)
+  if (connections_.is_empty ())
+    return NULL;
+
+  CONNECTION_T* connection_p = NULL;
+  for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
+       iterator.next (connection_p);
+       iterator.advance ())
+    if (connection_p->id () == sessionID_in)
+      break;
+  if (!connection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid session id (was: %u), aborting\n"),
+                sessionID_in));
+    return NULL;
+  } // end IF
+
+  // increase reference count
+  connection_p->increase ();
+
+  return connection_p;
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 bool
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::registerConnection (CONNECTION_T* connection_in)
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::registerc (CONNECTION_T* connection_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::registerConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::registerc"));
 
   ACE_ASSERT (isInitialized_);
 
-  // synch access to myConnections
+  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+
+  // sanity check(s)
+  if (!isActive_)
+    return false; // currently rejecting new connections...
+  if (connections_.size () >= maxNumConnections_)
   {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("rejecting connection (maximum count [%u] has been reached), aborting\n"),
+    //            maxNumConnections_));
+    return false;
+  } // end IF
 
-    if (!isActive_)
-      return false; // currently rejecting new connections...
-
-    if (connections_.size () >= maxNumConnections_)
-    {
-      // max reached
-      //ACE_DEBUG ((LM_DEBUG,
-      //            ACE_TEXT ("rejecting connection (maximum count [%u] has been reached), aborting\n"),
-      //            maxNumConnections_));
-
-      return false;
-    } // end IF
-
-    connection_in->increase ();
-    connections_.insert_tail (connection_in);
-  } // end lock scope
+  connection_in->increase ();
+  connections_.insert_tail (connection_in);
 
   return true;
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::deregisterConnection (const CONNECTION_T* connection_in)
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::deregister (CONNECTION_T* connection_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::deregisterConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::deregister"));
 
   bool found = false;
   CONNECTION_T* connection_p = NULL;
@@ -255,15 +252,14 @@ Net_Connection_Manager_T<ConfigurationType,
 
       break;
     } // end IF
-
   if (!found)
   {
     // *IMPORTANT NOTE*: when a connection attempt fails, the reactor close()s
     // the connection although it was never open()ed
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to remove connection (%@): not found, aborting\n"),
-                connection_in));
-
+                ACE_TEXT ("connection handle %@ not found (id was: %u), returning\n"),
+                connection_in,
+                connection_in->id ()));
     return;
   } // end IF
 
@@ -276,14 +272,84 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
+unsigned int
+Net_Connection_Manager_T<ConfigurationType,
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::numConnections () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::numConnections"));
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+
+  return static_cast<unsigned int> (connections_.size ());
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::abortConnections ()
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::start ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+
+  isActive_ = true;
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
+void
+Net_Connection_Manager_T<ConfigurationType,
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::stop (bool lockedAccess_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
+
+  if (lockedAccess_in)
+    lock_.acquire ();
+  isActive_ = false;
+  if (lockedAccess_in)
+    lock_.release ();
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
+bool
+Net_Connection_Manager_T<ConfigurationType,
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::isRunning () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+
+  return isActive_;
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
+void
+Net_Connection_Manager_T<ConfigurationType,
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::abortConnections ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortConnections"));
 
@@ -322,7 +388,7 @@ Net_Connection_Manager_T<ConfigurationType,
     ACE_ASSERT (connection_p);
     try
     {
-      // *IMPORTANT NOTE*: implicitly invokes deregisterConnection
+      // *IMPORTANT NOTE*: implicitly invokes deregister()
       connection_p->finalize ();
     }
     catch (...)
@@ -339,14 +405,14 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::waitConnections () const
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::waitConnections () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::waitConnections"));
 
@@ -369,94 +435,14 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
-unsigned int
-Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::numConnections () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::numConnections"));
-
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
-
-  return static_cast<unsigned int> (connections_.size ());
-}
-
-//template <typename ConfigurationType,
-//          typename StatisticContainerType>
-//void
-//Net_Connection_Manager_T<ConfigurationType,
-//                         StatisticContainerType>::lock ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::lock"));
-//	
-//	lock_.acquire ();
-//}
-
-//template <typename ConfigurationType,
-//          typename StatisticContainerType>
-//void
-//Net_Connection_Manager_T<ConfigurationType,
-//                         StatisticContainerType>::unlock ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::unlock"));
-//	
-//	lock_.release ();
-//}
-
-template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
-const Net_IConnection_T<ITransportLayerType,
-                        StatisticContainerType>*
-Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::operator[] (unsigned int index_in) const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::operator[]"));
-
-  // init result
-  CONNECTION_T* return_value = NULL;
-
-  // synch access to myConnections
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
-
-  // sanity check
-  if (connections_.is_empty () ||
-      (index_in > connections_.size ()))
-  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("out of bounds (index was: %u), aborting"),
-//                index_in));
-
-    return NULL;
-  } // end IF
-
-  CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
-  for (unsigned int i = 0;
-       iterator.next (return_value) && (i < index_in);
-       iterator.advance (), i++) {} // end FOR
-
-  // increase reference count
-  return_value->increase ();
-
-  return return_value;
-}
-
-template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::abortOldestConnection ()
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::abortOldestConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortOldestConnection"));
 
@@ -486,51 +472,60 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::abortNewestConnection ()
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::abortNewestConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortNewestConnection"));
 
-  // synch access to myConnections
   ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
 
-  // sanity check: anything to do ?
-  if (connections_.is_empty () == 1)
+  // sanity check(s)
+  if (connections_.empty ())
     return;
 
-  // close "newest" connection --> list tail
-  CONNECTION_T* connection_p = NULL;
-  CONNECTION_CONTAINER_REVERSEITERATOR_T iterator (connections_);
-  if (iterator.next (connection_p) == 1)
+  // close "newest" connection
+  ACE_Time_Value earliest = ACE_Time_Value::max_time;
+  CONNECTION_CONTAINER_ITERATOR_T iterator;
+  // *TODO*: this is really slow, sort the map by timestamp
+  for (iterator = connections_.begin ();
+       iterator != connections_.end ();
+       iterator++)
+    if ((*iterator).second.timestamp < earliest)
+      earliest = (*iterator).second.timestamp;
+  for (iterator = connections_.begin ();
+       iterator != connections_.end ();
+       iterator++)
+    if ((*iterator).second.timestamp == earliest)
+      break;
+  ACE_ASSERT (iterator != connections_.end ());
+
+  try
+  { // *NOTE*: implicitly invokes deregisterConnection from a pro/reactor thread
+    //         context (if any)
+    (*iterator).second.connection->finalize ();
+  }
+  catch (...)
   {
-    try
-    {
-      // *IMPORTANT NOTE*: implicitly invokes deregisterConnection from a reactor thread, if any
-      connection_p->finalize ();
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection::finalize(), continuing")));
-    }
-  } // end IF
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnection::finalize(), continuing")));
+  }
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 bool
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::collect (StatisticContainerType& data_out)
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::collect"));
 
@@ -563,14 +558,14 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::report () const
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::report"));
 
@@ -601,14 +596,14 @@ Net_Connection_Manager_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 void
 Net_Connection_Manager_T<ConfigurationType,
-                         SessionDataType,
-                         ITransportLayerType,
-                         StatisticContainerType>::dump_state () const
+                         UserDataType,
+                         StatisticContainerType,
+                         ITransportLayerType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::dump_state"));
 

@@ -26,10 +26,12 @@
 #include "net_macros.h"
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType>
 Net_ConnectionBase_T<ConfigurationType,
+                     UserDataType,
                      SessionDataType,
                      ITransportLayerType,
                      StatisticContainerType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
@@ -39,7 +41,7 @@ Net_ConnectionBase_T<ConfigurationType,
  //, configuration_ ()
  , isRegistered_ (false)
  , manager_ (interfaceHandle_in)
- //, sessionData_ ()
+ , sessionData_ (NULL)
  , statCollectionInterval_ (statisticsCollectionInterval_in)
  , statCollectHandler_ (ACTION_COLLECT,
                         this,
@@ -69,21 +71,41 @@ Net_ConnectionBase_T<ConfigurationType,
     //                    statCollectionInterval_));
   } // end IF
 
-  // init user data
+  // initialize configuration/user data
   ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
-  //ACE_OS::memset (&sessionData_, 0, sizeof (sessionData_));
+  UserDataType* user_data_p = NULL;
   if (manager_)
   {
     try
-    { // (try to) get user data from the connection manager
-      manager_->getData (configuration_,
-                         sessionData_);
+    { // (try to) get (default) configuration/user data from the connection
+      // manager
+      manager_->get (configuration_,
+                     user_data_p);
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnectionManager::getData(), continuing\n")));
+                  ACE_TEXT ("caught exception in Net_IConnectionManager_T::get(), continuing\n")));
     }
+  } // end IF
+
+  // *TODO*: session data could be a member, then it would just require
+  //         initialization...
+  try
+  {
+    ACE_NEW_NORETURN (sessionData_,
+                      SessionDataType (user_data_p,
+                                       false));
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("caught exception in ACE_NEW_NORETURN(SessionDataType), continuing\n")));
+  }
+  if (!sessionData_)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("unable to allocate SessionDataType, continuing\n")));
   } // end IF
 
   // initialize: register with the connection manager, ...
@@ -95,10 +117,12 @@ Net_ConnectionBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType>
 Net_ConnectionBase_T<ConfigurationType,
+                     UserDataType,
                      SessionDataType,
                      ITransportLayerType,
                      StatisticContainerType>::~Net_ConnectionBase_T ()
@@ -124,11 +148,13 @@ Net_ConnectionBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType>
 bool
 Net_ConnectionBase_T<ConfigurationType,
+                     UserDataType,
                      SessionDataType,
                      ITransportLayerType,
                      StatisticContainerType>::initialize (Net_ClientServerRole_t role_in,
@@ -149,23 +175,23 @@ Net_ConnectionBase_T<ConfigurationType,
   } // end IF
 
   // (try to) register with the connection manager...
-  // *NOTE*: as the connection has not fully open()ed, there is a small window
-  //         for races here...
+  // *WARNING*: as the connection has not fully open()ed yet, there is a small
+  //            window for races here...
   if (manager_)
   {
     try
     {
-      isRegistered_ = manager_->registerConnection (this);
+      isRegistered_ = manager_->registerc (this);
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnectionManager::registerConnection(), aborting\n")));
+                  ACE_TEXT ("caught exception in Net_IConnectionManager_T::registerc(), aborting\n")));
     }
     if (!isRegistered_)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IConnectionManager::registerConnection(), aborting\n")));
+                  ACE_TEXT ("failed to Net_IConnectionManager_T::registerc(), aborting\n")));
       return false;
     } // end IF
   } // end IF
@@ -174,11 +200,13 @@ Net_ConnectionBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType>
 void
 Net_ConnectionBase_T<ConfigurationType,
+                     UserDataType,
                      SessionDataType,
                      ITransportLayerType,
                      StatisticContainerType>::finalize ()
@@ -199,7 +227,7 @@ Net_ConnectionBase_T<ConfigurationType,
     //            there is a small window for races here...
     try
     {
-      manager_->deregisterConnection (this);
+      manager_->deregister (this);
     }
     catch (...)
     {
@@ -211,11 +239,13 @@ Net_ConnectionBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType>
 bool
 Net_ConnectionBase_T<ConfigurationType,
+                     UserDataType,
                      SessionDataType,
                      ITransportLayerType,
                      StatisticContainerType>::initialize (const ConfigurationType& configuration_in)

@@ -33,6 +33,7 @@
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
@@ -44,9 +45,9 @@ class Net_Client_Connector_T
 {
  public:
   typedef Net_IConnectionManager_T<ConfigurationType,
-                                   SessionDataType,
-                                   ITransportLayerType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   UserDataType,
+                                   Stream_Statistic_t,
+                                   ITransportLayerType> ICONNECTION_MANAGER_T;
 
   Net_Client_Connector_T (const ConfigurationType*, // configuration handle
                           ICONNECTION_MANAGER_T*,   // connection manager handle
@@ -79,23 +80,27 @@ class Net_Client_Connector_T
 // partial specialization (for UDP)
 template <typename HandlerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 class Net_Client_Connector_T<ACE_INET_Addr,
                              ConfigurationType,
+                             UserDataType,
                              SessionDataType,
                              ITransportLayerType,
-                             Net_UDPConnection_T<SessionDataType,
+                             Net_UDPConnection_T<UserDataType,
+                                                 SessionDataType,
                                                  HandlerType> >
  : public Net_Client_IConnector_T<ACE_INET_Addr,
                                   ConfigurationType>
 {
  public:
   typedef Net_IConnectionManager_T<ConfigurationType,
-                                   SessionDataType,
-                                   ITransportLayerType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
-  typedef Net_UDPConnection_T<SessionDataType,
+                                   UserDataType,
+                                   Stream_Statistic_t,
+                                   ITransportLayerType> ICONNECTION_MANAGER_T;
+  typedef Net_UDPConnection_T<UserDataType,
+                              SessionDataType,
                               HandlerType> CONNECTION_T;
 
   Net_Client_Connector_T (const ConfigurationType*, // configuration handle

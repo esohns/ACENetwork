@@ -34,42 +34,42 @@
 #include "net_stream_common.h"
 
 typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                 Net_StreamSessionData_t,
-                                 Net_IInetTransportLayer_t,
-                                 Stream_Statistic_t> Net_IIPConnectionManager_t;
+                                 Net_UserData_t,
+                                 Stream_Statistic_t,
+                                 Net_IInetTransportLayer_t> Net_IIPConnectionManager_t;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                 Net_StreamSessionData_t,
-                                 Net_INetlinkTransportLayer_t,
-                                 Stream_Statistic_t> Net_INetlinkConnectionManager_t;
+                                 Net_UserData_t,
+                                 Stream_Statistic_t,
+                                 Net_INetlinkTransportLayer_t> Net_INetlinkConnectionManager_t;
 #endif
 typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                 Net_StreamSessionData_t,
-                                 Net_IInetTransportLayer_t,
-                                 Stream_Statistic_t> Net_ITCPConnectionManager_t;
+                                 Net_UserData_t,
+                                 Stream_Statistic_t,
+                                 Net_IInetTransportLayer_t> Net_ITCPConnectionManager_t;
 typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                 Net_StreamSessionData_t,
-                                 Net_IInetTransportLayer_t,
-                                 Stream_Statistic_t> Net_IUDPConnectionManager_t;
+                                 Net_UserData_t,
+                                 Stream_Statistic_t,
+                                 Net_IInetTransportLayer_t> Net_IUDPConnectionManager_t;
 
 typedef Net_Connection_Manager_T<Net_Configuration_t,
-                                 Net_StreamSessionData_t,
-                                 Net_IInetTransportLayer_t,
-                                 Stream_Statistic_t> Net_IPConnection_Manager_t;
+                                 Net_UserData_t,
+                                 Stream_Statistic_t,
+                                 Net_IInetTransportLayer_t> Net_IPConnection_Manager_t;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 typedef Net_Connection_Manager_T<Net_Configuration_t,
-                                 Net_StreamSessionData_t,
-                                 Net_INetlinkTransportLayer_t,
-                                 Stream_Statistic_t> Net_NetlinkConnection_Manager_t;
+                                 Net_UserData_t,
+                                 Stream_Statistic_t,
+                                 Net_INetlinkTransportLayer_t> Net_NetlinkConnection_Manager_t;
 #endif
 typedef Net_Connection_Manager_T<Net_Configuration_t,
-                                 Net_StreamSessionData_t,
-                                 Net_IInetTransportLayer_t,
-                                 Stream_Statistic_t> Net_TCPConnection_Manager_t;
+                                 Net_UserData_t,
+                                 Stream_Statistic_t,
+                                 Net_IInetTransportLayer_t> Net_TCPConnection_Manager_t;
 typedef Net_Connection_Manager_T<Net_Configuration_t,
-                                 Net_StreamSessionData_t,
-                                 Net_IInetTransportLayer_t,
-                                 Stream_Statistic_t> Net_UDPConnection_Manager_t;
+                                 Net_UserData_t,
+                                 Stream_Statistic_t,
+                                 Net_IInetTransportLayer_t> Net_UDPConnection_Manager_t;
 
 typedef ACE_Singleton<Net_IPConnection_Manager_t,
                       ACE_Recursive_Thread_Mutex> NET_IPBROADCASTCONNECTIONMANAGER_SINGLETON;

@@ -18,31 +18,45 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_ICONNECTIONMANAGER_H
-#define Net_ICONNECTIONMANAGER_H
-
-#include "net_iconnection.h"
+#ifndef NET_ICONNECTIONMANAGER_H
+#define NET_ICONNECTIONMANAGER_H
 
 #include "common_icontrol.h"
 
+#include "net_iconnection.h"
+
 template <typename ConfigurationType,
-          typename SessionDataType,
-          typename TransportLayerType,
-          typename StatisticContainerType>
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename ITransportLayerType>
 class Net_IConnectionManager_T
  : public Common_IControl
 {
  public:
+  // convenience types
+  typedef Net_IConnection_T<ConfigurationType,
+                            StatisticContainerType,
+                            ITransportLayerType> CONNECTION_T;
+
   virtual ~Net_IConnectionManager_T () {};
 
   // API
-  virtual void getData (ConfigurationType&,    // return value: (connection) handler configuration
-                        SessionDataType&) = 0; // return value: stream session data
+  // *TODO*: (possibly) move these to Common_ILockedGet_T
+  //virtual void lock () = 0;
+  //virtual void unlock () = 0;
+  virtual void set (const ConfigurationType&, // connection handler (default)
+                                              // configuration
+                    UserDataType*) = 0;       // (stream) user data
+  virtual void get (ConfigurationType&,  // return value: (default)
+                                         // connection handler configuration
+                    UserDataType*&) = 0; // return value: (stream) user data
 
-  virtual bool registerConnection (Net_IConnection_T<TransportLayerType,
-                                                     StatisticContainerType>*) = 0; // connection
-  virtual void deregisterConnection (const Net_IConnection_T<TransportLayerType,
-                                                             StatisticContainerType>*) = 0; // connection
+  // *WARNING*: if (!= NULL) callers must decrease() the returned handle
+  virtual CONNECTION_T* operator[] (unsigned int) const = 0; // session id
+
+  // *NOTE*: 'register' is a reserved keyword
+  virtual bool registerc (CONNECTION_T*) = 0; // connection handle
+  virtual void deregister (CONNECTION_T*) = 0; // connection handle
 
   virtual unsigned int numConnections () const = 0; // return value: (current) number of connections
 };

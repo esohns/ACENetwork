@@ -30,11 +30,11 @@
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 class Net_SocketConnectionBase_T
  : public SocketHandlerType
-// , virtual public ITransportLayerType
 {
  public:
   virtual ~Net_SocketConnectionBase_T ();
@@ -61,9 +61,9 @@ class Net_SocketConnectionBase_T
 
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
-                                   SessionDataType,
-                                   ITransportLayerType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   UserDataType,
+                                   StatisticContainerType,
+                                   ITransportLayerType> ICONNECTION_MANAGER_T;
 
   Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                               unsigned int = 0);      // statistics collecting interval (second(s))
@@ -71,7 +71,6 @@ class Net_SocketConnectionBase_T
 
  private:
   typedef SocketHandlerType inherited;
-//  typedef TransportLayerType inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&));
@@ -84,11 +83,11 @@ class Net_SocketConnectionBase_T
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 class Net_AsynchSocketConnectionBase_T
  : public SocketHandlerType
-// , public ITransportLayerType
 {
  public:
   virtual ~Net_AsynchSocketConnectionBase_T ();
@@ -115,13 +114,14 @@ class Net_AsynchSocketConnectionBase_T
 
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
-                                   SessionDataType,
-                                   ITransportLayerType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
-  typedef Net_ConnectionBase_T<ConfigurationType,
-                               SessionDataType,
-                               ITransportLayerType,
-                               StatisticContainerType> CONNECTION_BASE_T;
+                                   UserDataType,
+                                   StatisticContainerType,
+                                   ITransportLayerType> ICONNECTION_MANAGER_T;
+//  typedef Net_ConnectionBase_T<ConfigurationType,
+//                               UserDataType,
+//                               SessionDataType,
+//                               StatisticContainerType,
+//                               ITransportLayerType> CONNECTION_BASE_T;
 
   Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                     unsigned int = 0);      // statistics collecting interval (second(s))
@@ -131,7 +131,6 @@ class Net_AsynchSocketConnectionBase_T
 
  private:
   typedef SocketHandlerType inherited;
-//  typedef ITransportLayerType inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T (const Net_AsynchSocketConnectionBase_T&));

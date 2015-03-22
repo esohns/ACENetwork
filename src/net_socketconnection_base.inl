@@ -30,11 +30,13 @@
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
+                           UserDataType,
                            SessionDataType,
                            StatisticContainerType>::Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                                 unsigned int statisticsCollectionInterval_in)
@@ -50,11 +52,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
+                           UserDataType,
                            SessionDataType,
                            StatisticContainerType>::~Net_SocketConnectionBase_T ()
 {
@@ -70,12 +74,14 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 void
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
+                           UserDataType,
                            SessionDataType,
                            StatisticContainerType>::ping ()
 {
@@ -208,12 +214,14 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 int
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
+                           UserDataType,
                            SessionDataType,
                            StatisticContainerType>::open (void* arg_in)
 {
@@ -288,12 +296,14 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 int
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
+                           UserDataType,
                            SessionDataType,
                            StatisticContainerType>::close (u_long arg_in)
 {
@@ -498,11 +508,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                                             unsigned int statisticsCollectionInterval_in)
@@ -519,11 +531,13 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::~Net_AsynchSocketConnectionBase_T ()
 {
@@ -534,12 +548,14 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::ping ()
 {
@@ -708,15 +724,17 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::open (ACE_HANDLE handle_in,
-                                                                 ACE_Message_Block& messageBlock_in)
+                                                                ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::open"));
 
@@ -745,12 +763,14 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::act (const void* act_in)
 {
@@ -763,15 +783,17 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 int
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::handle_close (ACE_HANDLE handle_in,
-                                                                         ACE_Reactor_Mask mask_in)
+                                                                        ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::handle_close"));
 

@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_NETLINKCONNECTION_H
-#define Net_NETLINKCONNECTION_H
+#ifndef NET_NETLINKCONNECTION_H
+#define NET_NETLINKCONNECTION_H
 
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
@@ -46,6 +46,7 @@ class Net_Export Net_NetlinkConnection
  : public Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
                                      Net_INetlinkTransportLayer_t,
                                      Net_Configuration_t,
+                                     Net_UserData_t,
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t>
 {
@@ -53,9 +54,9 @@ class Net_Export Net_NetlinkConnection
 
  public:
   typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                   Net_StreamSessionData_t,
-                                   Net_INetlinkTransportLayer_t,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Net_UserData_t,
+                                   Stream_Statistic_t,
+                                   Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
 
   // *NOTE*: consider encapsulating this (need to grant access to
    //         ACE_Connector however (see: ace/Connector.cpp:239))
@@ -87,6 +88,7 @@ class Net_Export Net_NetlinkConnection
   typedef Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
                                      Net_INetlinkTransportLayer_t,
                                      Net_Configuration_t,
+                                     Net_UserData_t,
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t> inherited;
 

@@ -29,6 +29,7 @@
 #include "net_connection_base.h"
 
 template <typename ConfigurationType,
+          typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename StatisticContainerType,
@@ -40,15 +41,17 @@ class Net_StreamAsynchUDPSocketBase_T
  , public SocketType
  , public ACE_Event_Handler
  , public Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
                                SessionDataType,
-                               ITransportLayerType,
-                               StatisticContainerType>
+                               StatisticContainerType,
+                               ITransportLayerType>
 {
  public:
   typedef Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
                                SessionDataType,
-                               ITransportLayerType,
-                               StatisticContainerType> CONNECTION_BASE_T;
+                               StatisticContainerType,
+                               ITransportLayerType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchUDPSocketBase_T ();
 
@@ -66,9 +69,9 @@ class Net_StreamAsynchUDPSocketBase_T
 
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
-                                   SessionDataType,
-                                   ITransportLayerType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   UserDataType,
+                                   StatisticContainerType,
+                                   ITransportLayerType> ICONNECTION_MANAGER_T;
 
   Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                    unsigned int = 0);      // statistics collecting interval (second(s))
@@ -85,9 +88,10 @@ class Net_StreamAsynchUDPSocketBase_T
   typedef SocketType inherited2;
   typedef ACE_Event_Handler inherited3;
   typedef Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
                                SessionDataType,
-                               ITransportLayerType,
-                               StatisticContainerType> inherited4;
+                               StatisticContainerType,
+                               ITransportLayerType> inherited4;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
