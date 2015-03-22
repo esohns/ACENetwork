@@ -165,7 +165,11 @@ class Net_AsynchUDPConnection_T
                                            Stream_Statistic_t> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T ());
+  // *NOTE*: ACE_Asynch_Connector<HANDLER>::make_handler requires a default
+  //         ctor (see Asynch_Connector.cpp:239)
+  // *TODO*: remove this ASAP
+  Net_AsynchUDPConnection_T ();
+  //ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T (const Net_AsynchUDPConnection_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T& operator= (const Net_AsynchUDPConnection_T&));
 };

@@ -573,7 +573,8 @@ template <typename UserDataType,
 Net_AsynchUDPConnection_T<UserDataType,
                           SessionDataType,
                           HandlerType>::Net_AsynchUDPConnection_T ()
- : inherited (NULL)
+ : inherited (NULL,
+              0)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnection_T::Net_AsynchUDPConnection_T"));
 
