@@ -45,9 +45,7 @@ class Net_Export Net_AsynchUDPSocketHandler
                      ACE_Message_Block&); // initial data (if any)
   virtual void addresses (const ACE_INET_Addr&,  // remote address
                           const ACE_INET_Addr&); // local address
-  virtual int handle_output (ACE_HANDLE) = 0; // (socket) handle
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+  virtual void handle_wakeup ();
 
   // implement ACE_Notification_Strategy
   virtual int notify (void);
@@ -58,14 +56,17 @@ class Net_Export Net_AsynchUDPSocketHandler
   Net_AsynchUDPSocketHandler ();
 
   // helper method(s)
-  void initiate_read_stream ();
+  void initiate_read_dgram ();
+  virtual int handle_close (ACE_HANDLE handle_in,                                           // (socket) handle
+                            ACE_Reactor_Mask mask_in = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+  virtual int handle_output (ACE_HANDLE) = 0; // (socket) handle
 
-  virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
+  virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
-  ACE_Asynch_Read_Stream  inputStream_;
-  ACE_Asynch_Write_Stream outputStream_;
-  ACE_INET_Addr           localSAP_;
-  ACE_INET_Addr           remoteSAP_;
+  ACE_Asynch_Read_Dgram  inputStream_;
+  ACE_Asynch_Write_Dgram outputStream_;
+  ACE_INET_Addr          localSAP_;
+//  ACE_INET_Addr           remoteSAP_;
 
  private:
   typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;

@@ -44,6 +44,7 @@ class Net_Export Net_TCPConnection
  : public Net_SocketConnectionBase_T<Net_TCPHandler_t,
                                      Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
+                                     Net_SocketHandlerConfiguration_t,
                                      Net_UserData_t,
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t>
@@ -86,6 +87,7 @@ class Net_Export Net_TCPConnection
   typedef Net_SocketConnectionBase_T<Net_TCPHandler_t,
                                      Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
+                                     Net_SocketHandlerConfiguration_t,
                                      Net_UserData_t,
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t> inherited;
@@ -107,6 +109,7 @@ class Net_Export Net_AsynchTCPConnection
  : public Net_AsynchSocketConnectionBase_T<Net_AsynchTCPHandler_t,
                                            Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
+                                           Net_SocketHandlerConfiguration_t,
                                            Net_UserData_t,
                                            Net_StreamSessionData_t,
                                            Stream_Statistic_t>
@@ -149,6 +152,7 @@ class Net_Export Net_AsynchTCPConnection
   typedef Net_AsynchSocketConnectionBase_T<Net_AsynchTCPHandler_t,
                                            Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
+                                           Net_SocketHandlerConfiguration_t,
                                            Net_UserData_t,
                                            Net_StreamSessionData_t,
                                            Stream_Statistic_t> inherited;

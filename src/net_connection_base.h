@@ -80,9 +80,9 @@ class Net_ConnectionBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&));
 
   // timer stuff
-  unsigned int                      statCollectionInterval_; // seconds
-  Stream_StatisticHandler_Reactor_t statCollectHandler_;
-  long                              statCollectHandlerID_;
+  unsigned int                      statisticCollectionInterval_; // seconds
+  Stream_StatisticHandler_Reactor_t statisticCollectHandler_;
+  long                              statisticCollectHandlerID_;
 };
 
 // include template implementation

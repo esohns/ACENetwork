@@ -245,7 +245,8 @@ Net_UDPConnection_T<UserDataType,
   if (inherited::peer_.get_local_addr (localSAP_out) == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
-  remoteSAP_out = inherited::configuration_.socketConfiguration.peerAddress;
+  remoteSAP_out =
+      inherited::CONNECTION_BASE_T::configuration_.socketConfiguration.peerAddress;
 }
 
 template <typename UserDataType,
@@ -629,12 +630,13 @@ Net_AsynchUDPConnection_T<UserDataType,
 
   int result = -1;
 
-  ACE_HANDLE handle = inherited::handle ();
-  result = ACE_OS::closesocket (handle);
+  result = inherited::handle_close (inherited::handle (),
+                                    ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", returning\n"),
-                handle));
+                ACE_TEXT ("failed to Net_SocketConnectionBase_T::handle_close(): \"%m\", continuing\n")));
+
+  inherited::finalize ();
 }
 
 template <typename UserDataType,
@@ -649,9 +651,15 @@ Net_AsynchUDPConnection_T<UserDataType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnection_T::info"));
 
-  handle_out = ACE_Event_Handler::get_handle ();
-  localSAP_out = inherited::localSAP_;
-  remoteSAP_out = inherited::remoteSAP_;
+  int result = -1;
+
+  handle_out = ACE_IPC_SAP::get_handle ();
+
+  result = inherited::get_local_addr (localSAP_out);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SOCK::get_local_addr(): \"%m\", continuing\n")));
+  remoteSAP_out = inherited::configuration_->socketConfiguration.peerAddress;
 }
 
 template <typename UserDataType,
@@ -752,23 +760,22 @@ Net_AsynchUDPConnection_T<UserDataType,
 
     return;
   }
-  // *TODO*: retrieve netlink socket information
-//  if (local_SAP.addr_to_string (buffer,
-//                                sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+  if (local_SAP.addr_to_string (buffer,
+                                sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
   local_address = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-//  if (remote_SAP.addr_to_string (buffer,
-//                                 sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+  if (remote_SAP.addr_to_string (buffer,
+                                 sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
 
   // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, reinterpret_cast<unsigned int> (handle),
+              this, reinterpret_cast<unsigned int> (ACE_IPC_SAP::get_handle ()),
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
               (inherited::manager_ ? inherited::manager_->numConnections ()
@@ -776,7 +783,7 @@ Net_AsynchUDPConnection_T<UserDataType,
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, handle,
+              this, ACE_IPC_SAP::get_handle (),
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
               (inherited::manager_ ? inherited::manager_->numConnections ()

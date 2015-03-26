@@ -642,27 +642,42 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::allocateMessage"));
 
-  ACE_ASSERT (inherited3::configuration_.streamConfiguration.messageAllocator);
-
   // init return value(s)
   ACE_Message_Block* message_p = NULL;
 
-  try
+  if (inherited3::configuration_.streamConfiguration.messageAllocator)
   {
-    message_p =
-        static_cast<ACE_Message_Block*> (inherited3::configuration_.streamConfiguration.messageAllocator->malloc (requestedSize_in));
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-                requestedSize_in));
-  }
+    try
+    {
+      message_p =
+          static_cast<ACE_Message_Block*> (inherited3::configuration_.streamConfiguration.messageAllocator->malloc (requestedSize_in));
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
+                  requestedSize_in));
+    }
+  } // end IF
+  else
+    ACE_NEW_NORETURN (message_p,
+                      ACE_Message_Block (requestedSize_in,
+                                         ACE_Message_Block::MB_DATA,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                         ACE_Time_Value::zero,
+                                         ACE_Time_Value::max_time,
+                                         NULL,
+                                         NULL));
   if (!message_p)
   {
-    if (inherited3::configuration_.streamConfiguration.messageAllocator->block ())
+    if (!inherited3::configuration_.streamConfiguration.messageAllocator ||
+         inherited3::configuration_.streamConfiguration.messageAllocator->block ())
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to Stream_IAllocator::malloc(%u): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to allocate message buffer (%u): \"%m\", aborting\n"),
                   requestedSize_in));
   } // end IF
 

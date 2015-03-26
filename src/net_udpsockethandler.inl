@@ -32,9 +32,9 @@
 
 template <typename SocketType>
 Net_UDPSocketHandler_T<SocketType>::Net_UDPSocketHandler_T ()//MANAGER_T* manager_in)
- : inherited (NULL,                     // no specific thread manager
-              NULL,                     // no specific message queue
-              ACE_Reactor::instance ()) // default reactor
+ : inherited2 (NULL,                     // no specific thread manager
+               NULL,                     // no specific message queue
+               ACE_Reactor::instance ()) // default reactor
  , notificationStrategy_ (ACE_Reactor::instance (),      // reactor
                           this,                          // event handler
                           ACE_Event_Handler::WRITE_MASK) // handle output only
@@ -144,10 +144,10 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
   ACE_INET_Addr local_SAP (configuration_p->peerAddress.get_port_number (),
                            (configuration_p->useLoopbackDevice ? INADDR_LOOPBACK
                                                                : INADDR_ANY));
-  result = inherited::peer_.open (local_SAP,                // local SAP
-                                  ACE_PROTOCOL_FAMILY_INET, // protocol family
-                                  0,                        // protocol
-                                  1);                       // reuse_addr
+  result = inherited2::peer_.open (local_SAP,                // local SAP
+                                   ACE_PROTOCOL_FAMILY_INET, // protocol family
+                                   0,                        // protocol
+                                   1);                       // reuse_addr
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
@@ -308,21 +308,21 @@ Net_UDPSocketHandler_T<SocketType>::handle_close (ACE_HANDLE handle_in,
 
       if (handle_in != ACE_INVALID_HANDLE)
       {
-        result = inherited::peer_.close ();
+        result = inherited2::peer_.close ();
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_SOCK_IO::close (): %d, continuing\n")));
       } // end IF
 
-      ACE_ASSERT (inherited::reactor ());
+      ACE_ASSERT (inherited2::reactor ());
       //result =
-      // inherited::reactor ()->remove_handler (this,
+      // inherited2::reactor ()->remove_handler (this,
       //                                        (mask_in |
       //                                         ACE_Event_Handler::DONT_CALL));
       result =
-        inherited::reactor ()->remove_handler (handle_in,
-                                               (mask_in |
-                                                ACE_Event_Handler::DONT_CALL));
+        inherited2::reactor ()->remove_handler (handle_in,
+                                                (mask_in |
+                                                 ACE_Event_Handler::DONT_CALL));
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d), continuing\n"),

@@ -35,40 +35,40 @@ Net_ConnectionBase_T<ConfigurationType,
                      SessionDataType,
                      ITransportLayerType,
                      StatisticContainerType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                    unsigned int statisticsCollectionInterval_in)
+                                                                    unsigned int statisticCollectionInterval_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
  //, configuration_ ()
  , isRegistered_ (false)
  , manager_ (interfaceHandle_in)
  , sessionData_ (NULL)
- , statCollectionInterval_ (statisticsCollectionInterval_in)
- , statCollectHandler_ (ACTION_COLLECT,
-                        this,
-                        true)
- , statCollectHandlerID_ (-1)
+ , statisticCollectionInterval_ (statisticCollectionInterval_in)
+ , statisticCollectHandler_ (ACTION_COLLECT,
+                             this,
+                             true)
+ , statisticCollectHandlerID_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
 
-  if (statCollectionInterval_)
+  if (statisticCollectionInterval_)
   {
     // schedule regular statistics collection...
-    ACE_Time_Value interval (statCollectionInterval_, 0);
-    ACE_ASSERT (statCollectHandlerID_ == -1);
-    ACE_Event_Handler* eh = &statCollectHandler_;
-    statCollectHandlerID_ =
+    ACE_Time_Value interval (statisticCollectionInterval_, 0);
+    ACE_ASSERT (statisticCollectHandlerID_ == -1);
+    ACE_Event_Handler* eh = &statisticCollectHandler_;
+    statisticCollectHandlerID_ =
       COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
                                                             NULL,                             // argument
                                                             COMMON_TIME_POLICY () + interval, // first wakeup time
                                                             interval);                        // interval
-    if (statCollectHandlerID_ == -1)
+    if (statisticCollectHandlerID_ == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Timer_Manager::schedule(), continuing\n")));
     //else
     //        ACE_DEBUG ((LM_DEBUG,
     //                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
-    //                    statCollectHandlerID_,
-    //                    statCollectionInterval_));
+    //                    statisticCollectHandlerID_,
+    //                    statisticCollectionInterval_));
   } // end IF
 
   // initialize configuration/user data
@@ -130,21 +130,27 @@ Net_ConnectionBase_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
 
   // clean up timer if necessary
-  if (statCollectHandlerID_ != -1)
+  if (statisticCollectHandlerID_ != -1)
   {
     const void* act = NULL;
-    if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statCollectHandlerID_,
+    if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statisticCollectHandlerID_,
                                                             &act) == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                  statCollectHandlerID_));
+                  statisticCollectHandlerID_));
     else
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("cancelled timer (ID: %d)\n"),
-                  statCollectHandlerID_));
+                  statisticCollectHandlerID_));
   } // end IF
 
-  finalize ();
+  if (manager_ && isRegistered_)
+  {
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("still registered in dtor --> check implementation !\n")));
+
+    finalize ();
+  } // end IF
 }
 
 template <typename ConfigurationType,
@@ -222,6 +228,9 @@ Net_ConnectionBase_T<ConfigurationType,
 
   if (isRegistered_)
   {
+    // avoid loops (see dtor)
+    isRegistered_ = false;
+
     // (try to) de-register with the connection manager...
     // *WARNING*: as registration happens BEFORE the connection has open()ed,
     //            there is a small window for races here...
@@ -234,7 +243,6 @@ Net_ConnectionBase_T<ConfigurationType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnectionManager::deregisterConnection(), continuing\n")));
     }
-    isRegistered_ = false;
   } // end IF
 }
 

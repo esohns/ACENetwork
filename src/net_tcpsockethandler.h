@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_TCPSOCKETHANDLER_H
-#define Net_TCPSOCKETHANDLER_H
+#ifndef NET_TCPSOCKETHANDLER_H
+#define NET_TCPSOCKETHANDLER_H
 
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
@@ -28,14 +28,13 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Reactor_Notification_Strategy.h"
 
+#include "net_configuration.h"
 #include "net_exports.h"
-//#include "net_configuration.h"
-//#include "net_sockethandler_base.h"
+#include "net_sockethandler_base.h"
 
 class Net_Export Net_TCPSocketHandler
- //: public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t,
- //                               Net_SessionData_t>,
- : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
+ : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t>
+ , public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
 {
  public:
   //// override some event handler methods
@@ -59,7 +58,7 @@ class Net_Export Net_TCPSocketHandler
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  //typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
+  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
   typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler (const Net_TCPSocketHandler&));

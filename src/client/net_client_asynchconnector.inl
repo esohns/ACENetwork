@@ -25,21 +25,23 @@
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
 Net_Client_AsynchConnector_T<AddressType,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
                              ConnectionType>::Net_Client_AsynchConnector_T (const ConfigurationType* configuration_in,
                                                                             ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                            unsigned int statisticsCollectionInterval_in)
+                                                                            unsigned int statisticCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
- , statCollectionInterval_ (statisticsCollectionInterval_in)
+ , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
@@ -56,12 +58,14 @@ Net_Client_AsynchConnector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
 Net_Client_AsynchConnector_T<AddressType,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -73,6 +77,7 @@ Net_Client_AsynchConnector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
@@ -80,6 +85,7 @@ template <typename AddressType,
 int
 Net_Client_AsynchConnector_T<AddressType,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -89,12 +95,16 @@ Net_Client_AsynchConnector_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
+  int result = -1;
+
   // success ?
-  if (result_in.success () == 0)
+  result = result_in.success ();
+  if (result != 1)
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    if (remoteSAP_in.addr_to_string (buffer, sizeof (buffer)) == -1)
+    result = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
+    if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
@@ -108,13 +118,15 @@ Net_Client_AsynchConnector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
-const ConfigurationType*
+const SocketHandlerConfigurationType*
 Net_Client_AsynchConnector_T<AddressType,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -122,11 +134,14 @@ Net_Client_AsynchConnector_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::getConfiguration"));
 
-  return configuration_;
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (NULL);
+//  return configuration_;
 }
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
@@ -134,6 +149,7 @@ template <typename AddressType,
 bool
 Net_Client_AsynchConnector_T<AddressType,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -143,16 +159,17 @@ Net_Client_AsynchConnector_T<AddressType,
 
   int result = -1;
 
-  result = inherited::connect (address_in,                            // remote SAP
-                               ACE_sap_any_cast (const AddressType&), // local SAP
-                               1,                                     // re-use address (SO_REUSEADDR) ?
-                               NULL);                                 // ACT
+  result =
+      inherited::connect (address_in,                            // remote SAP
+                          ACE_sap_any_cast (const AddressType&), // local SAP
+                          1,                                     // re-use address (SO_REUSEADDR) ?
+                          NULL);                                 // ACT
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    if (address_in.addr_to_string (buffer,
-                                   sizeof (buffer)) == -1)
+    result = address_in.addr_to_string (buffer, sizeof (buffer));
+    if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
@@ -167,6 +184,7 @@ Net_Client_AsynchConnector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
@@ -174,6 +192,7 @@ template <typename AddressType,
 void
 Net_Client_AsynchConnector_T<AddressType,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -191,6 +210,7 @@ Net_Client_AsynchConnector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
@@ -198,6 +218,7 @@ template <typename AddressType,
 ConnectionType*
 Net_Client_AsynchConnector_T<AddressType,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -210,7 +231,7 @@ Net_Client_AsynchConnector_T<AddressType,
 
   ACE_NEW_NORETURN (handler_p,
                     ConnectionType (interfaceHandle_,
-                                    statCollectionInterval_));
+                                    statisticCollectionInterval_));
   if (!handler_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -222,11 +243,13 @@ Net_Client_AsynchConnector_T<AddressType,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -234,10 +257,10 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                                        SessionDataType,
                                                        HandlerType> >::Net_Client_AsynchConnector_T (const ConfigurationType* configuration_in,
                                                                                                      ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                                     unsigned int statisticsCollectionInterval_in)
+                                                                                                     unsigned int statisticCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
- , statCollectionInterval_ (statisticsCollectionInterval_in)
+ , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
@@ -254,11 +277,13 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -272,12 +297,14 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 int
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -289,12 +316,16 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
+  int result = -1;
+
   // success ?
-  if (result_in.success () == 0)
+  result = result_in.success ();
+  if (result != 1)
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    if (remoteSAP_in.addr_to_string (buffer, sizeof (buffer)) == -1)
+    result = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
+    if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
@@ -308,12 +339,14 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
-const ConfigurationType*
+const SocketHandlerConfigurationType*
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -323,17 +356,21 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::getConfiguration"));
 
-  return configuration_;
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (NULL);
+//  return configuration_;
 }
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 void
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -353,12 +390,14 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 bool
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -374,11 +413,10 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T<Net_AsynchUDPConnection>::make_handler(): \"%m\", aborting\n")));
-
     return false;
   } // end IF
   ACE_ASSERT (handler_p);
-  handler_p->act (const_cast<ConfigurationType*> (this->getConfiguration ()));
+  handler_p->act (const_cast<ConfigurationType*> (configuration_));
 
   // *NOTE*: the handler registers with the reactor and will be freed (or
   //         recycled) automatically
@@ -391,6 +429,7 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
@@ -399,6 +438,7 @@ Net_AsynchUDPConnection_T<UserDataType,
                           HandlerType>*
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              ConfigurationType,
+                             SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              ITransportLayerType,
@@ -413,7 +453,7 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
   ACE_NEW_NORETURN (handler_p,
                     CONNECTION_T (interfaceHandle_,
-                                  statCollectionInterval_));
+                                  statisticCollectionInterval_));
   if (!handler_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_SOCKETCONNECTION_BASE_H
-#define Net_SOCKETCONNECTION_BASE_H
+#ifndef NET_SOCKETCONNECTION_BASE_H
+#define NET_SOCKETCONNECTION_BASE_H
 
 #include "ace/config-macros.h"
 #include "ace/Event_Handler.h"
@@ -30,6 +30,7 @@
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
@@ -80,9 +81,12 @@ class Net_SocketConnectionBase_T
 //  void shutdown ();
 };
 
+/////////////////////////////////////////
+
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
@@ -117,11 +121,6 @@ class Net_AsynchSocketConnectionBase_T
                                    UserDataType,
                                    StatisticContainerType,
                                    ITransportLayerType> ICONNECTION_MANAGER_T;
-//  typedef Net_ConnectionBase_T<ConfigurationType,
-//                               UserDataType,
-//                               SessionDataType,
-//                               StatisticContainerType,
-//                               ITransportLayerType> CONNECTION_BASE_T;
 
   Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                     unsigned int = 0);      // statistics collecting interval (second(s))

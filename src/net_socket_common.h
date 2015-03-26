@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_SOCKET_COMMON_H
-#define Net_SOCKET_COMMON_H
+#ifndef NET_SOCKET_COMMON_H
+#define NET_SOCKET_COMMON_H
 
 #include "ace/Global_Macros.h"
 #include "ace/SOCK_Dgram.h"

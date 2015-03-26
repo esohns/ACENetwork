@@ -29,9 +29,6 @@
 #include "net_common.h"
 #include "net_stream_common.h"
 
-// forward declarations
-class ACE_Allocator;
-
 struct Net_SocketConfiguration_t
 {
   int              bufferSize;
@@ -46,12 +43,14 @@ struct Net_SocketConfiguration_t
 
 struct Net_SocketHandlerConfiguration_t
 {
-  ACE_Allocator*            messageAllocator;
+  int                       bufferSize; // pdu size (if fixed)
+  Stream_IAllocator*        messageAllocator;
   Net_SocketConfiguration_t socketConfiguration;
 };
 
 struct Net_ProtocolConfiguration_t
 {
+  int          bufferSize; // pdu size (if fixed)
   unsigned int peerPingInterval; // ms {0 --> OFF}
   bool         pingAutoAnswer;
   bool         printPongMessages;

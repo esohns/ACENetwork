@@ -27,24 +27,26 @@
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
                        ConnectionType>::Net_Client_Connector_T (const ConfigurationType* configuration_in,
                                                                 ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                unsigned int statisticsCollectionInterval_in)
+                                                                unsigned int statisticCollectionInterval_in)
  : inherited (ACE_Reactor::instance (), // default reactor
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
  , configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
- , statCollectionInterval_ (statisticsCollectionInterval_in)
+ , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
 
@@ -52,12 +54,14 @@ Net_Client_Connector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
@@ -69,6 +73,7 @@ Net_Client_Connector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
@@ -76,6 +81,7 @@ template <typename AddressType,
 int
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
@@ -89,7 +95,7 @@ Net_Client_Connector_T<AddressType,
   // default behavior
   ACE_NEW_NORETURN (handler_inout,
                     ConnectionType (interfaceHandle_,
-                                    statCollectionInterval_));
+                                    statisticCollectionInterval_));
   if (!handler_inout)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -99,6 +105,7 @@ Net_Client_Connector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
@@ -106,6 +113,7 @@ template <typename AddressType,
 void
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
@@ -120,6 +128,7 @@ Net_Client_Connector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
@@ -127,6 +136,7 @@ template <typename AddressType,
 bool
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
@@ -137,13 +147,14 @@ Net_Client_Connector_T<AddressType,
   ConnectionType* handler_p = NULL;
   int result = -1;
 
-  result = inherited::connect (handler_p,                       // service handler
-                               address_in,                      // remote SAP
-                               ACE_Synch_Options::defaults,     // synch options
-                               ACE_sap_any_cast (AddressType&), // local SAP
-                               1,                               // re-use address (SO_REUSEADDR) ?
-                               O_RDWR,                          // flags
-                               0);                              // perms
+  result =
+      inherited::connect (handler_p,                       // service handler
+                          address_in,                      // remote SAP
+                          ACE_Synch_Options::defaults,     // synch options
+                          ACE_sap_any_cast (AddressType&), // local SAP
+                          1,                               // re-use address (SO_REUSEADDR) ?
+                          O_RDWR,                          // flags
+                          0);                              // perms
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
@@ -164,13 +175,15 @@ Net_Client_Connector_T<AddressType,
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
           typename ConnectionType>
-const ConfigurationType*
+const SocketHandlerConfigurationType*
 Net_Client_Connector_T<AddressType,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
@@ -178,18 +191,22 @@ Net_Client_Connector_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
 
-  return configuration_;
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (NULL);
+//  return configuration_;
 }
 
 /////////////////////////////////////////
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
@@ -197,10 +214,10 @@ Net_Client_Connector_T<ACE_INET_Addr,
                                            SessionDataType,
                                            HandlerType> >::Net_Client_Connector_T (const ConfigurationType* configuration_in,
                                                                                    ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                   unsigned int statisticsCollectionInterval_in)
+                                                                                   unsigned int statisticCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
- , statCollectionInterval_ (statisticsCollectionInterval_in)
+ , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
 
@@ -208,11 +225,13 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
@@ -226,12 +245,14 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 int
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
@@ -246,7 +267,7 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
   ACE_NEW_NORETURN (handler_inout,
                     CONNECTION_T (interfaceHandle_,
-                                  statCollectionInterval_));
+                                  statisticCollectionInterval_));
   if (!handler_inout)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -256,12 +277,14 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 void
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
@@ -275,12 +298,14 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 bool
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
@@ -306,7 +331,7 @@ Net_Client_Connector_T<ACE_INET_Addr,
   // *NOTE*: the handler registers with the reactor and will be freed (or
   //         recycled) automatically
   result =
-      handler_p->open (const_cast<ConfigurationType*> (this->getConfiguration ()));
+      handler_p->open (const_cast<ConfigurationType*> (configuration_));
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
@@ -327,12 +352,14 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
-const ConfigurationType*
+const SocketHandlerConfigurationType*
 Net_Client_Connector_T<ACE_INET_Addr,
                        ConfigurationType,
+                       SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
                        ITransportLayerType,
@@ -342,5 +369,7 @@ Net_Client_Connector_T<ACE_INET_Addr,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
 
-  return configuration_;
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (NULL);
+//  return configuration_;
 }

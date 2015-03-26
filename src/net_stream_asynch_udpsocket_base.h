@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_STREAM_ASYNCH_UDPSOCKET_BASE_H
-#define Net_STREAM_ASYNCH_UDPSOCKET_BASE_H
+#ifndef NET_STREAM_ASYNCH_UDPSOCKET_BASE_H
+#define NET_STREAM_ASYNCH_UDPSOCKET_BASE_H
 
 #include "ace/config-lite.h"
 #include "ace/Asynch_IO.h"
@@ -58,9 +58,6 @@ class Net_StreamAsynchUDPSocketBase_T
   // override some service methods
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
-  virtual int handle_output (ACE_HANDLE); // (socket) handle
-  virtual int handle_close (ACE_HANDLE,        // (socket) handle
-                            ACE_Reactor_Mask); // (select) mask
 
   // implement Common_IStatistic
   // *NOTE*: delegate these to the stream
@@ -77,7 +74,11 @@ class Net_StreamAsynchUDPSocketBase_T
                                    unsigned int = 0);      // statistics collecting interval (second(s))
                                                            // 0 --> DON'T collect statistics
 
-  virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
+  // helper methods
+  virtual int handle_close (ACE_HANDLE handle_in,                                           // (socket) handle
+                            ACE_Reactor_Mask mask_in = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+
+  virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
 
   StreamType      stream_;
   // *TODO*: (try to) handle short writes gracefully...
@@ -96,6 +97,9 @@ class Net_StreamAsynchUDPSocketBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&));
+
+  // helper methods
+  virtual int handle_output (ACE_HANDLE); // (socket) handle
 };
 
 // include template definition

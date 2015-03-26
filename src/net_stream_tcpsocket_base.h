@@ -70,6 +70,11 @@ class Net_StreamTCPSocketBase_T
                                    UserDataType,
                                    StatisticContainerType,
                                    ITransportLayerType> ICONNECTION_MANAGER_T;
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
+                               SessionDataType,
+                               StatisticContainerType,
+                               ITransportLayerType> CONNECTION_BASE_T;
 
   Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))

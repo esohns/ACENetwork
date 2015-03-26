@@ -49,6 +49,31 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
 
+//  // *NOTE*: let the proactor manage this handler...
+//  if (inherited4::manager_ &&
+//      inherited4::isRegistered_)
+//    inherited4::decrease ();
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketType,
+          typename SocketHandlerType>
+Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                ITransportLayerType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketType,
+                                SocketHandlerType>::~Net_StreamAsynchUDPSocketBase_T ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
+
   // step1: remove enqueued module (if any)
   if (inherited4::configuration_.streamConfiguration.module)
   {
@@ -75,27 +100,6 @@ template <typename ConfigurationType,
           typename StreamType,
           typename SocketType,
           typename SocketHandlerType>
-Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
-                                UserDataType,
-                                SessionDataType,
-                                ITransportLayerType,
-                                StatisticContainerType,
-                                StreamType,
-                                SocketType,
-                                SocketHandlerType>::~Net_StreamAsynchUDPSocketBase_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
-
-}
-
-template <typename ConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
-          typename ITransportLayerType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename SocketType,
-          typename SocketHandlerType>
 void
 Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 UserDataType,
@@ -109,14 +113,61 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::open"));
 
-  // step1: tweak socket, init I/O
-  inherited::open (handle_in, messageBlock_in);
+  int result = -1;
 
-  // step2: init/start stream
-  // step2a: connect stream head message queue with a notification pipe/queue ?
+  // step1: open socket
+  ACE_INET_Addr local_SAP (inherited4::configuration_.socketConfiguration.peerAddress.get_port_number (),
+                           (inherited4::configuration_.socketConfiguration.useLoopbackDevice ? INADDR_LOOPBACK
+                                                                                             : INADDR_ANY));
+  result = inherited2::open (local_SAP,                // local SAP
+                             ACE_PROTOCOL_FAMILY_INET, // protocol family
+                             0,                        // protocol
+                             1);                       // reuse_addr
+  if (result == -1)
+  {
+    ACE_TCHAR buffer[BUFSIZ];
+    ACE_OS::memset (buffer, 0, sizeof (buffer));
+    std::string local_address;
+    if (local_SAP.addr_to_string (buffer,
+                                  sizeof (buffer)) == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+    local_address = buffer;
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", returning\n"),
+                ACE_TEXT (local_address.c_str ())));
+    return;
+  } // end IF
+
+  // step2a: initialize baseclass
+  // *TODO*: this should not be happening here...
+  Net_SocketHandlerConfiguration_t socket_handler_configuration;
+  socket_handler_configuration.bufferSize =
+      inherited4::configuration_.protocolConfiguration.bufferSize;
+  socket_handler_configuration.messageAllocator =
+      inherited4::configuration_.streamConfiguration.messageAllocator;
+  socket_handler_configuration.socketConfiguration =
+      inherited4::configuration_.socketConfiguration;
+  if (!inherited::initialize (socket_handler_configuration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_SocketHandlerBase::initialize(): \"%m\", returning\n")));
+
+    // clean up
+    handle_close (handle_in,
+                  ACE_Event_Handler::ALL_EVENTS_MASK);
+
+    return;
+  } // end IF
+
+  // step2b: tweak socket, init I/O
+  inherited::open (inherited2::get_handle (), messageBlock_in);
+
+  // step3: init/start stream
+  // step3a: connect stream head message queue with a notification pipe/queue ?
   if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
     inherited4::configuration_.streamConfiguration.notificationStrategy = this;
-  // step2b: init final module (if any)
+  // step3b: init final module (if any)
   if (inherited4::configuration_.streamConfiguration.module)
   {
     Stream_IModule_t* imodule_handle = NULL;
@@ -205,13 +256,13 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
     return;
   } // end IF
 
-  // step3: start reading (need to pass any data ?)
+  // step4: start reading (need to pass any data ?)
   if (messageBlock_in.length () == 0)
-   inherited::initiate_read_stream ();
+    inherited::initiate_read_dgram ();
   else
   {
-    ACE_Message_Block* duplicate = messageBlock_in.duplicate ();
-    if (!duplicate)
+    ACE_Message_Block* message_p = messageBlock_in.duplicate ();
+    if (!message_p)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
@@ -223,19 +274,21 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
       return;
     } // end IF
     // fake a result to emulate regular behavior...
-    ACE_Asynch_Read_Stream_Result_Impl* fake_result =
-      inherited::proactor ()->create_asynch_read_stream_result (inherited::proxy (), // handler proxy
-                                                                handle_in,           // socket handle
-                                                                *duplicate,          // buffer
-                                                                duplicate->size (),  // (max) bytes to read
-                                                                NULL,                // ACT
-                                                                ACE_INVALID_HANDLE,  // event
-                                                                0,                   // priority
-                                                                0);                  // signal number
+    ACE_Asynch_Read_Dgram_Result_Impl* fake_result =
+      inherited::proactor ()->create_asynch_read_dgram_result (inherited::proxy (), // handler proxy
+                                                               handle_in,           // socket handle
+                                                               message_p,           // buffer
+                                                               message_p->size (),  // #bytes to read
+                                                               0,                   // flags
+                                                               PF_INET,             // protocol family
+                                                               NULL,                // ACT
+                                                               ACE_INVALID_HANDLE,  // event
+                                                               0,                   // priority
+                                                               ACE_SIGRTMIN);       // signal
     if (!fake_result)
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Proactor::create_asynch_read_stream_result: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to ACE_Proactor::create_asynch_read_dgram_result: \"%m\", aborting\n")));
 
       // clean up
       handle_close (handle_in,
@@ -243,12 +296,12 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
       return;
     } // end IF
-    size_t bytes_transferred = duplicate->length ();
+    size_t bytes_transferred = message_p->length ();
     // <complete> for Accept would have already moved the <wr_ptr>
     // forward; update it to the beginning position
-    duplicate->wr_ptr (duplicate->wr_ptr () - bytes_transferred);
+    message_p->wr_ptr (message_p->wr_ptr () - bytes_transferred);
     // invoke ourselves (see handle_read_stream)
-    fake_result->complete (duplicate->length (), // bytes read
+    fake_result->complete (message_p->length (), // bytes read
                            1,                    // success
                            NULL,                 // ACT
                            0);                   // error
@@ -280,41 +333,47 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
   ACE_UNUSED_ARG (handle_in);
 
-  ACE_Message_Block* message_block = NULL;
+  int result = -1;
+  ssize_t result_2 = -1;
+  ACE_Message_Block* message_p = NULL;
 //  if (buffer_ == NULL)
 //  {
   // send next data chunk from the stream...
   // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
   // been notified
-//  if (stream_.get (buffer_, &ACE_Time_Value::zero) == -1)
-  if (stream_.get (message_block,
-                   &const_cast<ACE_Time_Value&> (ACE_Time_Value::zero)) == -1)
+  //  result = stream_.get (buffer_, &ACE_Time_Value::zero);
+  result = stream_.get (message_p,
+                        &const_cast<ACE_Time_Value&> (ACE_Time_Value::zero));
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
-
     return -1;
   } // end IF
 //  } // end IF
 
   // start (asynch) write
   // *NOTE*: this is a fire-and-forget API for message_block...
-//  if (inherited::outputStream_.write (*buffer_,               // data
-  if (inherited::outputStream_.write (*message_block,         // data
-                                      message_block->size (), // bytes to write
-                                      NULL,                   // ACT
-                                      0,                      // priority
-                                      ACE_SIGRTMIN) == -1)    // signal number
+  size_t bytes_to_send = message_p->size (); // why oh why...
+  result_2 =
+//      inherited::outputStream_.send (buffer_,         // data
+      inherited::outputStream_.send (message_p,                                                  // data
+                                     bytes_to_send,                                              // #bytes to send
+                                     0,                                                          // flags
+                                     inherited4::configuration_.socketConfiguration.peerAddress, // remote address
+                                     NULL,                                                       // ACT
+                                     0,                                                          // priority
+                                     ACE_SIGRTMIN);                                              // signal
+  if (result_2 == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Write_Stream::write(%u): \"%m\", aborting\n"),
-//                buffer_->size ()));
-                message_block->size ()));
+                ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
+                message_p->size ()));
 
     // clean up
 //    buffer_->release ();
 //    buffer_ = NULL;
-    message_block->release ();
+    message_p->release ();
 
     return -1;
   } // end IF
@@ -345,6 +404,8 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
   ACE_UNUSED_ARG (handle_in);
 
+  int result = -1;
+
   // step1: wait for all workers within the stream (if any)
   if (stream_.isRunning ())
   {
@@ -370,8 +431,11 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   } // end IF
 
   // step3: invoke base class maintenance
-  int result = inherited::handle_close (inherited::handle (),
-                                        mask_in);
+  result = inherited::handle_close (inherited::handle (),
+                                    mask_in);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to SocketHandlerType::handle_close(): \"%m\", continuing\n")));
 
 //  // step4: deregister ?
 //  if (inherited::manager_)
@@ -475,33 +539,36 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketType,
-                                SocketHandlerType>::handle_read_stream (const ACE_Asynch_Read_Stream::Result& result)
+                                SocketHandlerType>::handle_read_dgram (const ACE_Asynch_Read_Dgram::Result& result_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_read_stream"));
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_read_dgram"));
+
+  int result = -1;
 
   // sanity check
-  if (result.success () == 0)
+  result = result_in.success ();
+  if (result != 1)
   {
     // connection reset (by peer) ? --> not an error
-    if ((result.error () != ECONNRESET) &&
-        (result.error () != EPIPE))
+    if ((result_in.error () != ECONNRESET) &&
+        (result_in.error () != EPIPE))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to read from input stream (%d): \"%s\", continuing\n"),
-                  result.handle (),
-                  ACE_TEXT (ACE_OS::strerror (result.error ()))));
+                  result_in.handle (),
+                  ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
   } // end IF
 
-  switch (result.bytes_transferred ())
+  switch (result_in.bytes_transferred ())
   {
     case -1:
     {
       // connection reset (by peer) ? --> not an error
-      if ((result.error () != ECONNRESET) &&
-          (result.error () != EPIPE))
+      if ((result_in.error () != ECONNRESET) &&
+          (result_in.error () != EPIPE))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
-                    result.handle (),
-                    ACE_TEXT (ACE_OS::strerror (result.error ()))));
+                    result_in.handle (),
+                    ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
 
       break;
     }
@@ -518,27 +585,31 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
     {
 //       ACE_DEBUG ((LM_DEBUG,
 //                   ACE_TEXT ("[%d]: received %u bytes...\n"),
-//                   result.handle (),
-//                   result.bytes_transferred ()));
+//                   result_in.handle (),
+//                   result_in.bytes_transferred ()));
 
       // push the buffer onto our stream for processing
-      if (stream_.put (&result.message_block (), NULL) == -1)
+      result = stream_.put (result_in.message_block (), NULL);
+      if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", continuing\n")));
 
         break;
       } // end IF
 
       // start next read
-      inherited::initiate_read_stream ();
+      inherited::initiate_read_dgram ();
 
       return;
     }
   } // end SWITCH
 
   // clean up
-  result.message_block ().release ();
-  handle_close (inherited::handle (),
-                ACE_Event_Handler::ALL_EVENTS_MASK);
+  result_in.message_block ()->release ();
+  result = handle_close (inherited::handle (),
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Svc_Handler::handle_close(): \"%m\", continuing\n")));
 }

@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_UDPSOCKETHANDLER_H
-#define Net_UDPSOCKETHANDLER_H
+#ifndef NET_UDPSOCKETHANDLER_H
+#define NET_UDPSOCKETHANDLER_H
 
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
@@ -27,9 +27,13 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Reactor_Notification_Strategy.h"
 
+#include "net_configuration.h"
+#include "net_sockethandler_base.h"
+
 template <typename SocketType>
 class Net_UDPSocketHandler_T
- : public ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>
+ : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t>
+ , public ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>
 {
  public:
   //// override some event handler methods
@@ -58,7 +62,8 @@ class Net_UDPSocketHandler_T
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> inherited;
+  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
+  typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&));

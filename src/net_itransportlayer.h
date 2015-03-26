@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_ITRANSPORTLAYER_H
-#define Net_ITRANSPORTLAYER_H
+#ifndef NET_ITRANSPORTLAYER_H
+#define NET_ITRANSPORTLAYER_H
 
 #include "ace/config-macros.h"
 #include "ace/INET_Addr.h"

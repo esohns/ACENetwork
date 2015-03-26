@@ -18,15 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_SOCKETHANDLER_BASE_H
-#define Net_SOCKETHANDLER_BASE_H
+#ifndef NET_SOCKETHANDLER_BASE_H
+#define NET_SOCKETHANDLER_BASE_H
 
 #include "ace/Global_Macros.h"
 
 #include "common_iinitialize.h"
 
-template <typename ConfigurationType/*,
-          typename SessionDataType*/>
+template <typename ConfigurationType>
 class Net_SocketHandlerBase
  : public Common_IInitialize_T<ConfigurationType>
 {
@@ -41,10 +40,8 @@ class Net_SocketHandlerBase
 
   ConfigurationType configuration_;
   bool              isInitialized_;
-  //SessionDataType   sessionData_;
 
  private:
-//  ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase ());
   ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase (const Net_SocketHandlerBase&));
   ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase& operator= (const Net_SocketHandlerBase&));
 };

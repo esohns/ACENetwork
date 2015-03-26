@@ -30,12 +30,14 @@
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
+                           SocketHandlerConfigurationType,
                            UserDataType,
                            SessionDataType,
                            StatisticContainerType>::Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
@@ -52,12 +54,14 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
+                           SocketHandlerConfigurationType,
                            UserDataType,
                            SessionDataType,
                            StatisticContainerType>::~Net_SocketConnectionBase_T ()
@@ -65,7 +69,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::~Net_SocketConnectionBase_T"));
 
   // wait for our worker (if any)
-  if (inherited::configuration_.streamConfiguration.useThreadPerConnection)
+  if (SocketHandlerType::CONNECTION_BASE_T::configuration_.streamConfiguration.useThreadPerConnection)
     if (inherited::wait () == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Task_Base::wait(): \"%m\", continuing\n")));
@@ -74,6 +78,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
@@ -81,6 +86,7 @@ void
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
+                           SocketHandlerConfigurationType,
                            UserDataType,
                            SessionDataType,
                            StatisticContainerType>::ping ()
@@ -214,6 +220,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
@@ -221,6 +228,7 @@ int
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
+                           SocketHandlerConfigurationType,
                            UserDataType,
                            SessionDataType,
                            StatisticContainerType>::open (void* arg_in)
@@ -228,6 +236,22 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::open"));
 
   int result = -1;
+  ConfigurationType* configuration_p =
+      reinterpret_cast<ConfigurationType*> (arg_in);
+
+  // step0: initialize this connection (if there is no connection manager)
+  if (!inherited::manager_)
+  {
+    // sanity check(s)
+    ACE_ASSERT (configuration_p);
+
+    if (!SocketHandlerType::CONNECTION_BASE_T::initialize (*configuration_p))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", aborting\n")));
+      return -1;
+    } // end IF
+  } // end IF
 
   // step1: init/start stream, tweak socket, register reading data with reactor
   // , ...
@@ -236,7 +260,6 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
-
     return -1;
   } // end IF
 
@@ -270,25 +293,9 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 //    {
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("failed to ACE_Task_Base::activate(): \"%m\", aborting\n")));
-
 //      return -1;
 //    } // end IF
 //  } // end IF
-
-  // step3: initialize this connection (if there is no connection manager)
-  if (!inherited::manager_)
-  {
-    ConfigurationType* configuration_p =
-        reinterpret_cast<ConfigurationType*> (arg_in);
-    ACE_ASSERT (configuration_p);
-    if (!inherited::initialize (*configuration_p))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", aborting\n")));
-
-      return -1;
-    } // end IF
-  } // end IF
 
   return 0;
 }
@@ -296,6 +303,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
@@ -303,6 +311,7 @@ int
 Net_SocketConnectionBase_T<SocketHandlerType,
                            ITransportLayerType,
                            ConfigurationType,
+                           SocketHandlerConfigurationType,
                            UserDataType,
                            SessionDataType,
                            StatisticContainerType>::close (u_long arg_in)
@@ -508,12 +517,14 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 SocketHandlerConfigurationType,
                                  UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
@@ -531,12 +542,14 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 SocketHandlerConfigurationType,
                                  UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::~Net_AsynchSocketConnectionBase_T ()
@@ -548,6 +561,7 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
@@ -555,6 +569,7 @@ void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 SocketHandlerConfigurationType,
                                  UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::ping ()
@@ -724,6 +739,7 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
@@ -731,6 +747,7 @@ void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 SocketHandlerConfigurationType,
                                  UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::open (ACE_HANDLE handle_in,
@@ -738,19 +755,14 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::open"));
 
-  // step1: init/start stream, tweak socket, register reading data with reactor
-  // , ...
-  inherited::open (handle_in,
-                   messageBlock_in);
-
-  // step2: initialize this connection (if there is no connection manager)
+  // step0: initialize this connection (if there is no connection manager)
   if (!inherited::manager_)
   {
     ACE_ASSERT (configuration_);
-    SocketHandlerType* socket_handler_p = this;
-    typename SocketHandlerType::CONNECTION_BASE_T* connection_base_p =
-     socket_handler_p;
-    if (!connection_base_p->initialize (*configuration_))
+//    SocketHandlerType* socket_handler_p = this;
+//    typename SocketHandlerType::CONNECTION_BASE_T* connection_base_p =
+//     socket_handler_p;
+    if (!SocketHandlerType::CONNECTION_BASE_T::initialize (*configuration_))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", returning\n")));
@@ -758,11 +770,17 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
       return;
     } // end IF
   } // end IF
+
+  // step1: init/start stream, tweak socket, register reading data with reactor
+  // , ...
+  inherited::open (handle_in,
+                   messageBlock_in);
 }
 
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
@@ -770,6 +788,7 @@ void
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 SocketHandlerConfigurationType,
                                  UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::act (const void* act_in)
@@ -783,6 +802,7 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 template <typename SocketHandlerType,
           typename ITransportLayerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
@@ -790,6 +810,7 @@ int
 Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                                  ITransportLayerType,
                                  ConfigurationType,
+                                 SocketHandlerConfigurationType,
                                  UserDataType,
                                  SessionDataType,
                                  StatisticContainerType>::handle_close (ACE_HANDLE handle_in,
@@ -799,11 +820,12 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 
   ACE_UNUSED_ARG (handle_in);
 
+  int result = -1;
+
   switch (mask_in)
   {
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
-    case ACE_Event_Handler::ALL_EVENTS_MASK: // --> connect failed (e.g. connection refused) /
-      //     accept failed (e.g. too many connections) /
+    case ACE_Event_Handler::ALL_EVENTS_MASK: // --> asynch abort
       //     select failed (EBADF see Select_Reactor_T.cpp)
       //     asynch abort
       break;
@@ -826,12 +848,12 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("handle_close called for unknown reasons (handle: %@, mask: %u) --> check implementation !, continuing\n"),
-                  ACE_Event_Handler::get_handle (),
+                  inherited::handle (),
                   mask_in));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("handle_close called for unknown reasons (handle: %d, mask: %u) --> check implementation !, continuing\n"),
-                  ACE_Event_Handler::get_handle (),
+                  inherited::handle (),
                   mask_in));
 #endif
       break;
@@ -857,19 +879,19 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 //  } // end IF
 
   // step3: invoke base-class maintenance
-  int result = inherited::handle_close (ACE_Event_Handler::get_handle (), // event handle
-                                        mask_in);     // event mask
+  result = inherited::handle_close (inherited::handle (), // event handle
+                                    mask_in);             // event mask
   if (result == -1)
     // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamSocketBase::handle_close(%@, %d): \"%m\", continuing\n"),
-                ACE_Event_Handler::get_handle (),
+                inherited::handle (),
                 mask_in));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamSocketBase::handle_close(%d, %d): \"%m\", continuing\n"),
-                ACE_Event_Handler::get_handle (),
+                inherited::handle (),
                 mask_in));
 #endif
 

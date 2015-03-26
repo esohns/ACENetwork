@@ -33,6 +33,7 @@
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType,
@@ -40,7 +41,7 @@ template <typename AddressType,
 class Net_Client_AsynchConnector_T
  : public ACE_Asynch_Connector<ConnectionType>
  , public Net_Client_IConnector_T<AddressType,
-                                  ConfigurationType>
+                                  SocketHandlerConfigurationType>
 {
  public:
    typedef Net_IConnectionManager_T<ConfigurationType,
@@ -48,6 +49,7 @@ class Net_Client_AsynchConnector_T
                                     Stream_Statistic_t,
                                     ITransportLayerType> ICONNECTION_MANAGER_T;
 
+  // *TODO*: pass SocketHandlerConfigurationType instead
    Net_Client_AsynchConnector_T (const ConfigurationType*, // configuration handle
                                  ICONNECTION_MANAGER_T*,   // connection manager handle
                                  unsigned int = 0);        // statistics collecting interval (second(s))
@@ -60,8 +62,7 @@ class Net_Client_AsynchConnector_T
                                    const ACE_INET_Addr&);             // local address
 
   // implement Net_Client_IConnector_T
-  virtual const ConfigurationType* getConfiguration () const;
-
+  virtual const SocketHandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual bool connect (const AddressType&);
 
@@ -77,19 +78,22 @@ class Net_Client_AsynchConnector_T
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&));
 
+  // *TODO*: retain SocketHandlerConfigurationType instead
   const ConfigurationType* configuration_;
   ICONNECTION_MANAGER_T*   interfaceHandle_;
-  unsigned int             statCollectionInterval_; // seconds
+  unsigned int             statisticCollectionInterval_; // seconds
 };
 
 // partial specialization (for UDP)
 template <typename HandlerType,
           typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename ITransportLayerType>
 class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                    ConfigurationType,
+                                   SocketHandlerConfigurationType,
                                    UserDataType,
                                    SessionDataType,
                                    ITransportLayerType,
@@ -100,7 +104,7 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                                          SessionDataType,
                                                          HandlerType> >
  , public Net_Client_IConnector_T<ACE_INET_Addr,
-                                  ConfigurationType>
+                                  SocketHandlerConfigurationType>
 {
  public:
   typedef Net_IConnectionManager_T<ConfigurationType,
@@ -111,7 +115,8 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                     SessionDataType,
                                     HandlerType> CONNECTION_T;
 
-  Net_Client_AsynchConnector_T (const ConfigurationType*, // configuration handle
+  // *TODO*: pass SocketHandlerConfigurationType instead
+  Net_Client_AsynchConnector_T (const ConfigurationType*, // socket handler configuration handle
                                 ICONNECTION_MANAGER_T*,   // connection manager handle
                                 unsigned int = 0);        // statistics collecting interval (second(s))
                                                           // 0 --> DON'T collect statistics
@@ -123,8 +128,7 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                    const ACE_INET_Addr&);             // local address
 
   // implement Net_Client_IConnector_T
-  virtual const ConfigurationType* getConfiguration () const;
-
+  virtual const SocketHandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual bool connect (const ACE_INET_Addr&);
 
@@ -145,9 +149,10 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&));
 
+  // *TODO*: retain SocketHandlerConfigurationType instead
   const ConfigurationType* configuration_;
   ICONNECTION_MANAGER_T*   interfaceHandle_;
-  unsigned int             statCollectionInterval_; // seconds
+  unsigned int             statisticCollectionInterval_; // seconds
 };
 
 // include template implementation

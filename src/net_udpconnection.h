@@ -41,6 +41,7 @@ class Net_UDPConnection_T
  : public Net_SocketConnectionBase_T<HandlerType,
                                      Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
+                                     Net_SocketHandlerConfiguration_t,
                                      UserDataType,
                                      SessionDataType,
                                      Stream_Statistic_t>
@@ -95,6 +96,7 @@ class Net_UDPConnection_T
   typedef Net_SocketConnectionBase_T<HandlerType,
                                      Net_IInetTransportLayer_t,
                                      Net_Configuration_t,
+                                     Net_SocketHandlerConfiguration_t,
                                      UserDataType,
                                      SessionDataType,
                                      Stream_Statistic_t> inherited;
@@ -114,6 +116,7 @@ class Net_AsynchUDPConnection_T
  : public Net_AsynchSocketConnectionBase_T<HandlerType,
                                            Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
+                                           Net_SocketHandlerConfiguration_t,
                                            UserDataType,
                                            SessionDataType,
                                            Stream_Statistic_t>
@@ -160,6 +163,7 @@ class Net_AsynchUDPConnection_T
   typedef Net_AsynchSocketConnectionBase_T<HandlerType,
                                            Net_IInetTransportLayer_t,
                                            Net_Configuration_t,
+                                           Net_SocketHandlerConfiguration_t,
                                            UserDataType,
                                            SessionDataType,
                                            Stream_Statistic_t> inherited;

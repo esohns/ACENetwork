@@ -22,34 +22,26 @@
 
 #include "net_macros.h"
 
-template <typename ConfigurationType/*,
-          typename SessionDataType*/>
-Net_SocketHandlerBase<ConfigurationType/*,
-                      SessionDataType*/>::Net_SocketHandlerBase ()
+template <typename ConfigurationType>
+Net_SocketHandlerBase<ConfigurationType>::Net_SocketHandlerBase ()
  : configuration_ ()
  , isInitialized_ (false)
- //, sessionData_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase::Net_SocketHandlerBase"));
 
   ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
-  //ACE_OS::memset (&sessionData_, 0, sizeof (sessionData_));
 }
 
-template <typename ConfigurationType/*,
-          typename SessionDataType*/>
-Net_SocketHandlerBase<ConfigurationType/*,
-                      SessionDataType*/>::~Net_SocketHandlerBase ()
+template <typename ConfigurationType>
+Net_SocketHandlerBase<ConfigurationType>::~Net_SocketHandlerBase ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase::~Net_SocketHandlerBase"));
 
 }
 
-template <typename ConfigurationType/*,
-          typename SessionDataType*/>
+template <typename ConfigurationType>
 bool
-Net_SocketHandlerBase<ConfigurationType/*,
-                      SessionDataType*/>::initialize (const ConfigurationType& configuration_in)
+Net_SocketHandlerBase<ConfigurationType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase::initialize"));
 

@@ -46,6 +46,7 @@ class Net_Export Net_NetlinkConnection
  : public Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
                                      Net_INetlinkTransportLayer_t,
                                      Net_Configuration_t,
+                                     Net_SocketHandlerConfiguration_t,
                                      Net_UserData_t,
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t>
@@ -88,6 +89,7 @@ class Net_Export Net_NetlinkConnection
   typedef Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
                                      Net_INetlinkTransportLayer_t,
                                      Net_Configuration_t,
+                                     Net_SocketHandlerConfiguration_t,
                                      Net_UserData_t,
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t> inherited;
