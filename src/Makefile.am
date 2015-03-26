@@ -13,6 +13,7 @@ AM_CPPFLAGS = \
 noinst_HEADERS = \
   stdafx.h
 include_HEADERS = \
+  net_asynch_netlinksockethandler.h \
   net_asynch_tcpsockethandler.h \
   net_asynch_udpsockethandler.h \
   net_common_modules.h \
@@ -40,6 +41,7 @@ include_HEADERS = \
   net_module_sockethandler.h \
   net_module_sockethandler.inl \
   net_netlinkconnection.h \
+  net_netlinksockethandler.h \
   net_packet_headers.h \
   net_protocol_layer.h \
   net_remote_comm.h \
@@ -74,6 +76,8 @@ include_HEADERS = \
 lib_LTLIBRARIES = libACENetwork.la
 
 libACENetwork_la_SOURCES = \
+  net_asynch_netlinksockethandler.cpp \
+  net_asynch_netlinksockethandler.h \
   net_asynch_tcpsockethandler.cpp \
   net_asynch_tcpsockethandler.h \
   net_asynch_udpsockethandler.cpp \
@@ -118,6 +122,8 @@ libACENetwork_la_SOURCES = \
   net_module_sockethandler.inl \
   net_netlinkconnection.cpp \
   net_netlinkconnection.h \
+  net_netlinksockethandler.cpp \
+  net_netlinksockethandler.h \
   net_packet_headers.h \
   net_protocol_layer.cpp \
   net_protocol_layer.h \

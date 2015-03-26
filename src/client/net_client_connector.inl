@@ -159,14 +159,14 @@ Net_Client_Connector_T<AddressType,
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = address_in.addr_to_string (buffer, sizeof (buffer));
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
+    // *TODO*: find a replacement for ACE_Netlink_Addr::addr_to_string
+//    result = address_in.addr_to_string (buffer, sizeof (buffer));
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Connector::connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));
-
     return false;
   } // end IF
 
@@ -323,7 +323,6 @@ Net_Client_Connector_T<ACE_INET_Addr,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_Connector_T<Net_UDPConnection>::make_svc_handler(): \"%m\", aborting\n")));
-
     return false;
   } // end IF
   ACE_ASSERT (handler_p);
@@ -343,7 +342,6 @@ Net_Client_Connector_T<ACE_INET_Addr,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Connector::connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));
-
     return false;
   } // end IF
 
@@ -366,6 +364,159 @@ Net_Client_Connector_T<ACE_INET_Addr,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
                                            HandlerType> >::getConfiguration () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (NULL);
+//  return configuration_;
+}
+
+/////////////////////////////////////////
+
+template <typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType>
+Net_Client_Connector_T<ACE_Netlink_Addr,
+                       ConfigurationType,
+                       SocketHandlerConfigurationType,
+                       UserDataType,
+                       SessionDataType,
+                       Net_INetlinkTransportLayer_t,
+                       Net_NetlinkConnection>::Net_Client_Connector_T (const ConfigurationType* configuration_in,
+                                                                       ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                       unsigned int statisticCollectionInterval_in)
+ : configuration_ (configuration_in)
+ , interfaceHandle_ (interfaceHandle_in)
+ , statisticCollectionInterval_ (statisticCollectionInterval_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
+
+}
+
+template <typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType>
+Net_Client_Connector_T<ACE_Netlink_Addr,
+                       ConfigurationType,
+                       SocketHandlerConfigurationType,
+                       UserDataType,
+                       SessionDataType,
+                       Net_INetlinkTransportLayer_t,
+                       Net_NetlinkConnection>::~Net_Client_Connector_T ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
+
+}
+
+template <typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType>
+int
+Net_Client_Connector_T<ACE_Netlink_Addr,
+                       ConfigurationType,
+                       SocketHandlerConfigurationType,
+                       UserDataType,
+                       SessionDataType,
+                       Net_INetlinkTransportLayer_t,
+                       Net_NetlinkConnection>::make_svc_handler (Net_NetlinkConnection*& handler_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
+
+  // init return value(s)
+  handler_inout = NULL;
+
+  ACE_NEW_NORETURN (handler_inout,
+                    Net_NetlinkConnection (interfaceHandle_,
+                                           statisticCollectionInterval_));
+  if (!handler_inout)
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+
+  return ((handler_inout == NULL) ? -1 : 0);
+}
+
+template <typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType>
+void
+Net_Client_Connector_T<ACE_Netlink_Addr,
+                       ConfigurationType,
+                       SocketHandlerConfigurationType,
+                       UserDataType,
+                       SessionDataType,
+                       Net_INetlinkTransportLayer_t,
+                       Net_NetlinkConnection>::abort ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
+
+}
+
+template <typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType>
+bool
+Net_Client_Connector_T<ACE_Netlink_Addr,
+                       ConfigurationType,
+                       SocketHandlerConfigurationType,
+                       UserDataType,
+                       SessionDataType,
+                       Net_INetlinkTransportLayer_t,
+                       Net_NetlinkConnection>::connect (const ACE_Netlink_Addr& address_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
+
+  int result = -1;
+
+  Net_NetlinkConnection* handler_p = NULL;
+  result = make_svc_handler (handler_p);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Client_Connector_T<Net_NetlinkConnection>::make_svc_handler(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  ACE_ASSERT (handler_p);
+
+  // *NOTE*: the handler registers with the reactor and will be freed (or
+  //         recycled) automatically
+  result =
+      handler_p->open (const_cast<ConfigurationType*> (configuration_));
+  if (result == -1)
+  {
+    ACE_TCHAR buffer[BUFSIZ];
+    ACE_OS::memset (buffer, 0, sizeof (buffer));
+    // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
+//    result = address_in.addr_to_string (buffer, sizeof (buffer));
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Connector::connect(\"%s\"): \"%m\", aborting\n"),
+                buffer));
+    return false;
+  } // end IF
+
+  return true;
+}
+
+template <typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType>
+const SocketHandlerConfigurationType*
+Net_Client_Connector_T<ACE_Netlink_Addr,
+                       ConfigurationType,
+                       SocketHandlerConfigurationType,
+                       UserDataType,
+                       SessionDataType,
+                       Net_INetlinkTransportLayer_t,
+                       Net_NetlinkConnection>::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
 

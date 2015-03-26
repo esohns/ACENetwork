@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_ASYNCHUDPSOCKETHANDLER_H
-#define NET_ASYNCHUDPSOCKETHANDLER_H
+#ifndef NET_ASYNCH_UDP_SOCKETHANDLER_H
+#define NET_ASYNCH_UDP_SOCKETHANDLER_H
 
 #include "ace/Asynch_IO.h"
 #include "ace/Event_Handler.h"

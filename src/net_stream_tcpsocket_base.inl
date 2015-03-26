@@ -358,8 +358,11 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
   } // end IF
 
   // read some data from the socket...
-  size_t bytes_received = inherited::peer_.recv (currentReadBuffer_->wr_ptr (),
-                                                 currentReadBuffer_->size ());
+  size_t bytes_received = -1;
+  bytes_received =
+      inherited::peer_.recv (currentReadBuffer_->wr_ptr (), // buffer
+                             currentReadBuffer_->size (),   // #bytes to read
+                             0);                            // flags
   switch (bytes_received)
   {
     case -1:
@@ -448,6 +451,8 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 
   ACE_UNUSED_ARG (handle_in);
 
+  int result = -1;
+
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY be
   // dispatching the reactor notification queue concurrently (most notably,
   // ACE_TP_Reactor) --> enforce proper serialization
@@ -459,7 +464,6 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
     // send next data chunk from the stream...
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
     // been notified to the reactor
-    int result = -1;
     if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
       result = stream_.get (currentWriteBuffer_,
                             const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
@@ -506,8 +510,11 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
   } // end IF
 
   // put some data into the socket...
-  ssize_t bytes_sent = inherited::peer_.send (currentWriteBuffer_->rd_ptr (),
-                                              currentWriteBuffer_->length ());
+  ssize_t bytes_sent = -1;
+  bytes_sent =
+      inherited::peer_.send (currentWriteBuffer_->rd_ptr (), // buffer
+                             currentWriteBuffer_->length (), // #bytes to send
+                             0);                             // flags
   switch (bytes_sent)
   {
     case -1:

@@ -24,11 +24,13 @@
 #include "ace/Asynch_Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
+#include "ace/Netlink_Addr.h"
 
 #include "stream_common.h"
 
 #include "net_client_iconnector.h"
 #include "net_connection_manager_common.h"
+#include "net_netlinkconnection.h"
 #include "net_udpconnection.h"
 
 template <typename AddressType,
@@ -83,6 +85,8 @@ class Net_Client_AsynchConnector_T
   ICONNECTION_MANAGER_T*   interfaceHandle_;
   unsigned int             statisticCollectionInterval_; // seconds
 };
+
+/////////////////////////////////////////
 
 // partial specialization (for UDP)
 template <typename HandlerType,
@@ -144,6 +148,65 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
   typedef ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
                                                          SessionDataType,
                                                          HandlerType> > inherited;
+
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&));
+
+  // *TODO*: retain SocketHandlerConfigurationType instead
+  const ConfigurationType* configuration_;
+  ICONNECTION_MANAGER_T*   interfaceHandle_;
+  unsigned int             statisticCollectionInterval_; // seconds
+};
+
+/////////////////////////////////////////
+
+// partial specialization (for Netlink)
+template <typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType>
+class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
+                                   ConfigurationType,
+                                   SocketHandlerConfigurationType,
+                                   UserDataType,
+                                   SessionDataType,
+                                   Net_INetlinkTransportLayer_t,
+                                   Net_AsynchNetlinkConnection>
+ : public ACE_Asynch_Connector<Net_AsynchNetlinkConnection>
+ , public Net_Client_IConnector_T<ACE_Netlink_Addr,
+                                  SocketHandlerConfigurationType>
+{
+ public:
+  typedef Net_IConnectionManager_T<ConfigurationType,
+                                   UserDataType,
+                                   Stream_Statistic_t,
+                                   Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
+
+  // *TODO*: pass SocketHandlerConfigurationType instead
+  Net_Client_AsynchConnector_T (const ConfigurationType*, // socket handler configuration handle
+                                ICONNECTION_MANAGER_T*,   // connection manager handle
+                                unsigned int = 0);        // statistics collecting interval (second(s))
+                                                          // 0 --> DON'T collect statistics
+  virtual ~Net_Client_AsynchConnector_T ();
+
+  // override default connect strategy
+  virtual int validate_connection (const ACE_Asynch_Connect::Result&, // result
+                                   const ACE_Netlink_Addr&,           // remote address
+                                   const ACE_Netlink_Addr&);          // local address
+
+  // implement Net_Client_IConnector_T
+  virtual const SocketHandlerConfigurationType* getConfiguration () const;
+  virtual void abort ();
+  virtual bool connect (const ACE_Netlink_Addr&);
+
+ protected:
+  // override default creation strategy
+  // *TODO*: why isn't this being picked up ?
+  virtual Net_AsynchNetlinkConnection* make_handler (void);
+
+ private:
+  typedef ACE_Asynch_Connector<Net_AsynchNetlinkConnection> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));

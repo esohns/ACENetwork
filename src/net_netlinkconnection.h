@@ -35,6 +35,7 @@
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
 #include "net_stream_common.h"
+#include "net_transportlayer_netlink.h"
 
 // forward declarations
 template <typename SVC_HANDLER,
@@ -50,8 +51,10 @@ class Net_Export Net_NetlinkConnection
                                      Net_UserData_t,
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t>
+ , public Net_TransportLayer_Netlink
 {
-  //friend class ACE_Connector<Net_NetlinkConnection, ACE_SOCK_CONNECTOR>;
+  friend class ACE_Connector<Net_NetlinkConnection,
+                             ACE_SOCK_CONNECTOR>;
 
  public:
   typedef Net_IConnectionManager_T<Net_Configuration_t,
@@ -59,10 +62,21 @@ class Net_Export Net_NetlinkConnection
                                    Stream_Statistic_t,
                                    Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
 
-  // *NOTE*: consider encapsulating this (need to grant access to
-   //         ACE_Connector however (see: ace/Connector.cpp:239))
-//   Net_NetlinkConnection ();
-   Net_NetlinkConnection (ICONNECTION_MANAGER_T*);
+   Net_NetlinkConnection (ICONNECTION_MANAGER_T*, // connection manager handle
+                          unsigned int = 0);      // statistics collecting interval (second(s))
+                                                  // 0 --> DON'T collect statistics
+   virtual ~Net_NetlinkConnection ();
+
+   // override some task-based members
+//   virtual int open (void* = NULL); // args
+   //  // *NOTE*: enqueue any received data onto our stream for further processing
+   //   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
+   //  // *NOTE*: send any enqueued data back to the client...
+   //  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
+   // *NOTE*: this is called when:
+   // - handle_xxx() returns -1
+   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
    // override / implement (part of) Net_INetlinkTransportLayer
    virtual bool initialize (Net_ClientServerRole_t,            // role
@@ -74,17 +88,6 @@ class Net_Export Net_NetlinkConnection
    virtual unsigned int id () const;
    virtual void dump_state () const;
 
-  //// override some task-based members
-  //virtual int open (void* = NULL); // args
-  //virtual int close (u_long = 0); // args
-
-//  // *NOTE*: enqueue any received data onto our stream for further processing
-//   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
-  // *NOTE*: this is called when:
-  // - handle_xxx() returns -1
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
-
  private:
   typedef Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
                                      Net_INetlinkTransportLayer_t,
@@ -93,71 +96,78 @@ class Net_Export Net_NetlinkConnection
                                      Net_UserData_t,
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t> inherited;
+  typedef Net_TransportLayer_Netlink inherited2;
 
-  //// override some task-based members
-  //virtual int svc (void);
-
-  //// stop worker, if any
-  //void shutdown ();
-
-  virtual ~Net_NetlinkConnection ();
-  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection ());
+  // *TODO*: remove this ASAP
+  Net_NetlinkConnection ();
+//  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection ());
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection (const Net_NetlinkConnection&));
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection& operator= (const Net_NetlinkConnection&));
 };
-#endif
 
 /////////////////////////////////////////
 
-//class Net_Export Net_AsynchNetlinkConnection
-// : public Net_SocketConnectionBase_T<Net_AsynchNetlinkHandler_t,
-//                                     Net_TransportLayer_Netlink,
-//                                     Net_Configuration_t,
-//                                     Stream_SessionData_t,
-//                                     Stream_Statistic_t>
-//{
-// friend class ACE_Asynch_Connector<Net_AsynchNetlinkConnection>;
+class Net_Export Net_AsynchNetlinkConnection
+ : public Net_AsynchSocketConnectionBase_T<Net_AsynchNetlinkHandler_t,
+                                           Net_INetlinkTransportLayer_t,
+                                           Net_Configuration_t,
+                                           Net_SocketHandlerConfiguration_t,
+                                           Net_UserData_t,
+                                           Stream_SessionData_t,
+                                           Stream_Statistic_t>
+ , public Net_TransportLayer_Netlink
+{
+ friend class ACE_Asynch_Connector<Net_AsynchNetlinkConnection>;
 
-// public:
-//  // *WARNING*: need to make this available to Asynch_Connector
-//  //            (see: ace/Asynch_Connector.cpp:239)
-//  Net_AsynchNetlinkConnection ();
-//  //Net_AsynchNetlinkConnection (Net_IConnectionManager_t*);
+ public:
+  typedef Net_IConnectionManager_T<Net_Configuration_t,
+                                   Net_UserData_t,
+                                   Stream_Statistic_t,
+                                   Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
 
-//  // implement (part of) Net_INetlinkTransportLayer
-//  virtual void info (ACE_HANDLE&,              // return value: handle
-//                     ACE_Netlink_Addr&,        // return value: local SAP
-//                     ACE_Netlink_Addr&) const; // return value: remote SAP
-//  virtual unsigned int id () const;
-//  virtual void dump_state () const;
+  Net_AsynchNetlinkConnection (ICONNECTION_MANAGER_T*, // connection manager handle
+                               unsigned int = 0);      // statistics collecting interval (second(s))
+                                                       // 0 --> DON'T collect statistics
+  virtual ~Net_AsynchNetlinkConnection ();
 
-//  //// override some task-based members
-//  //virtual int open (void* = NULL); // args
-//  //virtual int close (u_long = 0); // args
+  // implement (part of) Net_INetlinkTransportLayer
+  virtual bool initialize (Net_ClientServerRole_t,            // role
+                           const Net_SocketConfiguration_t&); // configuration
+  virtual void finalize ();
+  virtual void info (ACE_HANDLE&,              // return value: handle
+                     ACE_Netlink_Addr&,        // return value: local SAP
+                     ACE_Netlink_Addr&) const; // return value: remote SAP
+  virtual unsigned int id () const;
+  virtual void dump_state () const;
 
-//  //  // *NOTE*: enqueue any received data onto our stream for further processing
-//  //   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
-//  // *NOTE*: this is called when:
-//  // - handle_xxx() returns -1
-//  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-//                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+  // override some ACE_Service_Handler members
+  virtual void open (ACE_HANDLE,          // handle
+                     ACE_Message_Block&); // (initial) data (if any)
+  //  // *NOTE*: enqueue any received data onto our stream for further processing
+  //   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
+  //  // *NOTE*: send any enqueued data back to the client...
+  //  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
+    // *NOTE*: this is called when:
+    // - handle_xxx() returns -1
+    virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+                              ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
-// private:
-//  typedef Net_SocketConnectionBase_T<Net_AsynchNetlinkHandler_t,
-//                                     Net_TransportLayer_Netlink,
-//                                     Net_Configuration_t,
-//                                     Stream_SessionData_t,
-//                                     Stream_Statistic_t> inherited;
+ private:
+  typedef Net_AsynchSocketConnectionBase_T<Net_AsynchNetlinkHandler_t,
+                                           Net_INetlinkTransportLayer_t,
+                                           Net_Configuration_t,
+                                           Net_SocketHandlerConfiguration_t,
+                                           Net_UserData_t,
+                                           Stream_SessionData_t,
+                                           Stream_Statistic_t> inherited;
+  typedef Net_TransportLayer_Netlink inherited2;
 
-//  //// override some task-based members
-//  //virtual int svc (void);
-
-//  //// stop worker, if any
-//  //void shutdown ();
-
-//  virtual ~Net_AsynchNetlinkConnection ();
-//  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection (const Net_AsynchNetlinkConnection&));
-//  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection& operator= (const Net_AsynchNetlinkConnection&));
-//};
+  // *TODO*: remove this ASAP
+  Net_AsynchNetlinkConnection ();
+  //  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection ());
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection (const Net_AsynchNetlinkConnection&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection& operator= (const Net_AsynchNetlinkConnection&));
+};
+#endif
 
 #endif

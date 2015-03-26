@@ -21,6 +21,8 @@
 #ifndef Net_TCPCONNECTION_H
 #define Net_TCPCONNECTION_H
 
+#include "ace/Asynch_Connector.h"
+#include "ace/Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/Event_Handler.h"
 #include "ace/SOCK_Connector.h"
@@ -35,11 +37,6 @@
 #include "net_socketconnection_base.h"
 #include "net_stream_common.h"
 
-// forward declarations
-template <typename SVC_HANDLER,
-          typename PEER_CONNECTOR> class ACE_Connector;
-template <class HANDLER> class ACE_Asynch_Connector;
-
 class Net_Export Net_TCPConnection
  : public Net_SocketConnectionBase_T<Net_TCPHandler_t,
                                      Net_IInetTransportLayer_t,
@@ -49,7 +46,8 @@ class Net_Export Net_TCPConnection
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t>
 {
-  //friend class ACE_Connector<Net_TCPConnection, ACE_SOCK_CONNECTOR>;
+  friend class ACE_Connector<Net_TCPConnection,
+                             ACE_SOCK_CONNECTOR>;
 
  public:
   typedef Net_IConnectionManager_T<Net_Configuration_t,
@@ -98,7 +96,7 @@ class Net_Export Net_TCPConnection
   //// stop worker, if any
   //void shutdown ();
 
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection ());
+//  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection ());
   ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection (const Net_TCPConnection&));
   ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection& operator= (const Net_TCPConnection&));
 };
@@ -122,10 +120,10 @@ class Net_Export Net_AsynchTCPConnection
                                    Stream_Statistic_t,
                                    Net_IInetTransportLayer_t> ICONNECTION_MANAGER_T;
 
- // *WARNING*: need to make this available to Asynch_Connector
-   //            (see: ace/Asynch_Connector.cpp:239)
-//   Net_AsynchTCPConnection ();
-  Net_AsynchTCPConnection (ICONNECTION_MANAGER_T*);
+  Net_AsynchTCPConnection (ICONNECTION_MANAGER_T*, // connection manager handle
+                           unsigned int = 0);      // statistics collecting interval (second(s))
+                                                   // 0 --> DON'T collect statistics
+  virtual ~Net_AsynchTCPConnection ();
 
   // override / implement (part of) Net_IInetTransportLayer
   virtual bool initialize (Net_ClientServerRole_t,            // role
@@ -137,8 +135,9 @@ class Net_Export Net_AsynchTCPConnection
   virtual unsigned int id () const;
   virtual void dump_state () const;
 
-  //// override some task-based members
-  //virtual int open (void* = NULL); // args
+  // override some ACE_Service_Handler members
+  virtual void open (ACE_HANDLE,          // handle
+                     ACE_Message_Block&); // (initial) data (if any)
   //virtual int close (u_long = 0); // args
 
   //  // *NOTE*: enqueue any received data onto our stream for further processing
@@ -163,8 +162,7 @@ class Net_Export Net_AsynchTCPConnection
   //// stop worker, if any
   //void shutdown ();
 
-  virtual ~Net_AsynchTCPConnection ();
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection ());
+//  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection ());
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection (const Net_AsynchTCPConnection&));
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection& operator= (const Net_AsynchTCPConnection&));
 };

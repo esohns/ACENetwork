@@ -29,6 +29,7 @@
 
 #include "stream_common.h"
 
+#include "net_asynch_netlinksockethandler.h"
 #include "net_asynch_tcpsockethandler.h"
 #include "net_asynch_udpsockethandler.h"
 #include "net_configuration.h"
@@ -39,6 +40,7 @@
 #include "net_stream_common.h"
 #include "net_stream_tcpsocket_base.h"
 #include "net_stream_udpsocket_base.h"
+#include "net_netlinksockethandler.h"
 #include "net_tcpsockethandler.h"
 #include "net_udpsockethandler.h"
 
@@ -49,13 +51,15 @@ typedef Net_StreamAsynchTCPSocketBase_T<Net_Configuration_t,
                                         Stream_Statistic_t,
                                         Net_Stream,
                                         Net_AsynchTCPSocketHandler> Net_AsynchTCPHandler_t;
-//typedef Net_StreamAsynchTCPSocketBase_T<Net_Configuration_t,
-//                                        Net_StreamSessionData_t,
-//                                        Net_INetlinkTransportLayer_t,
-//                                        Stream_Statistic_t,
-//                                        Net_Stream,
-//                                        Net_AsynchTCPSocketHandler> Net_AsynchNetlinkHandler_t;
-
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+typedef Net_StreamAsynchTCPSocketBase_T<Net_Configuration_t,
+                                        Net_UserData_t,
+                                        Net_StreamSessionData_t,
+                                        Net_INetlinkTransportLayer_t,
+                                        Stream_Statistic_t,
+                                        Net_Stream,
+                                        Net_AsynchNetlinkSocketHandler> Net_AsynchNetlinkHandler_t;
+#endif
 typedef Net_StreamAsynchUDPSocketBase_T<Net_Configuration_t,
                                         Net_UserData_t,
                                         Net_StreamSessionData_t,
@@ -95,7 +99,7 @@ typedef Net_StreamTCPSocketBase_T<Net_Configuration_t,
                                   Net_INetlinkTransportLayer_t,
                                   Stream_Statistic_t,
                                   Net_Stream,
-                                  Net_TCPSocketHandler> Net_NetlinkHandler_t;
+                                  Net_NetlinkSocketHandler> Net_NetlinkHandler_t;
 #endif
 typedef Net_StreamUDPSocketBase_T<Net_Configuration_t,
                                   Net_UserData_t,

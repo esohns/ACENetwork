@@ -27,9 +27,9 @@
 #include "net_macros.h"
 
 Net_TCPConnection::Net_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                      unsigned int statisticsCollectionInterval_in)
+                                      unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
-              statisticsCollectionInterval_in)
+              statisticCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
 
@@ -52,7 +52,6 @@ Net_TCPConnection::initialize (Net_ClientServerRole_t role_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
-
     return false;
   } // end IF
 
@@ -74,7 +73,7 @@ Net_TCPConnection::initialize (Net_ClientServerRole_t role_in,
 
     return false;
   }
-  // *TODO*: retrieve netlink socket information
+  // *TODO*: retrieve socket information
 //  if (local_SAP.addr_to_string (buffer,
 //                                sizeof (buffer)) == -1)
 //    ACE_DEBUG ((LM_ERROR,
@@ -576,8 +575,10 @@ Net_TCPConnection::handle_close (ACE_HANDLE handle_in,
 
 //}
 
-Net_AsynchTCPConnection::Net_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in)
- : inherited (interfaceHandle_in)
+Net_AsynchTCPConnection::Net_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                  unsigned int statisticCollectionInterval_in)
+ : inherited (interfaceHandle_in,
+              statisticCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
 
@@ -707,7 +708,6 @@ Net_AsynchTCPConnection::initialize (Net_ClientServerRole_t role_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
-
     return false;
   } // end IF
 
@@ -726,20 +726,18 @@ Net_AsynchTCPConnection::initialize (Net_ClientServerRole_t role_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting")));
-
     return false;
   }
-  // *TODO*: retrieve netlink socket information
-//  if (local_SAP.addr_to_string (buffer,
-//                                sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+  if (local_SAP.addr_to_string (buffer,
+                                sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
   local_address = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-//  if (remote_SAP.addr_to_string (buffer,
-//                                 sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+  if (remote_SAP.addr_to_string (buffer,
+                                 sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
 
   // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -866,78 +864,66 @@ Net_AsynchTCPConnection::dump_state () const
               ACE_TEXT (peer_address.c_str ())));
 }
 
-//int
-//Net_AsynchTCPConnection::open (void* arg_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::open"));
-//
-//  // step1: init/start stream, tweak socket, register reading data with reactor
-//  // , ...
-//  int result = inherited::open (arg_in);
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("failed to Net_StreamSocketBase::open(): \"%m\", aborting\n")));
-//    return -1;
-//  } // end IF
-//
-//  // step2: start a worker ?
-//  if (inherited::myUserData.useThreadPerConnection)
-//  {
-//    ACE_thread_t thread_ids[1];
-//    thread_ids[0] = 0;
-//    ACE_hthread_t thread_handles[1];
-//    thread_handles[0] = 0;
-//    char thread_name[RPG_COMMON_BUFSIZE];
-//    ACE_OS::memset (thread_name, 0, sizeof(thread_name));
-//    ACE_OS::strcpy (thread_name,
-//                    Net_CONNECTION_HANDLER_THREAD_NAME);
-//    const char* thread_names[1];
-//    thread_names[0] = thread_name;
-//    if (inherited::activate ((THR_NEW_LWP      |
-//                              THR_JOINABLE     |
-//                              THR_INHERIT_SCHED),                    // flags
-//                             1,                                      // # threads
-//                             0,                                      // force spawning
-//                             ACE_DEFAULT_THREAD_PRIORITY,            // priority
-//                             Net_CONNECTION_HANDLER_THREAD_GROUP_ID, // group id
-//                             NULL,                                   // corresp. task --> use 'this'
-//                             thread_handles,                         // thread handle(s)
-//                             NULL,                                   // thread stack(s)
-//                             NULL,                                   // thread stack size(s)
-//                             thread_ids,                             // thread id(s)
-//                             thread_names) == -1)                    // thread name(s)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_Task_Base::activate(): \"%m\", aborting\n")));
-//      return -1;
-//    } // end IF
-//  } // end IF
-//
-////  // step3: register this connection
-////  if (inherited::myManager)
-////  {
-////    // (try to) register with the connection manager...
-////    try
-////    {
-////      inherited::myIsRegistered = inherited::myManager->registerConnection (this);
-////    }
-////    catch (...)
-////    {
-////      ACE_DEBUG ((LM_ERROR,
-////                  ACE_TEXT ("caught exception in Net_IConnectionManager::registerConnection(), continuing\n")));
-////    }
-////    if (!inherited::myIsRegistered)
-////    {
-////      // (most probably) too many connections...
-////      ACE_OS::last_error (EBUSY);
-////      return -1;
-////    } // end IF
-////  } // end IF
-//
-//  return 0;
-//}
-//
+void
+Net_AsynchTCPConnection::open (ACE_HANDLE handle_in,
+                               ACE_Message_Block& messageBlock_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::open"));
+
+  // step1: init/start stream, tweak socket, register reading data with reactor
+  // , ...
+  inherited::open (handle_in,
+                   messageBlock_in);
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  ACE_INET_Addr local_SAP, remote_SAP;
+  try
+  {
+    info (handle,
+          local_SAP,
+          remote_SAP);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), returning\n")));
+
+    return;
+  }
+  if (local_SAP.addr_to_string (buffer,
+                                sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  if (remote_SAP.addr_to_string (buffer,
+                                 sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+
+  // *PORTABILITY*: this isn't entirely portable...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              this, reinterpret_cast<unsigned int> (handle),
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (buffer),
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              this, handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (buffer),
+              (inherited::manager_ ? inherited::manager_->numConnections ()
+                                   : -1)));
+#endif
+}
+
 //int
 //Net_AsynchTCPConnection::close (u_long arg_in)
 //{

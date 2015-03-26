@@ -77,21 +77,6 @@ class Net_UDPConnection_T
   virtual unsigned int id () const;
   virtual void dump_state () const;
 
-//  // *NOTE*: enqueue any received data onto our stream for further processing
-//   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
-  // *NOTE*: send any enqueued data back to the client...
-//  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
-  // *NOTE*: this is called when:
-  // - handle_xxx() returns -1
-//  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-//                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
-
-//  // resolve ambiguity between ACE_Event_Handler and ACE_Svc_Handler
-//  using ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH>::get_handle;
-////  using ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>::get_handle;
-//  using ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_MT_SYNCH>::set_handle;
-////  using ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>::set_handle;
-
  private:
   typedef Net_SocketConnectionBase_T<HandlerType,
                                      Net_IInetTransportLayer_t,
@@ -169,11 +154,7 @@ class Net_AsynchUDPConnection_T
                                            Stream_Statistic_t> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
-  // *NOTE*: ACE_Asynch_Connector<HANDLER>::make_handler requires a default
-  //         ctor (see Asynch_Connector.cpp:239)
-  // *TODO*: remove this ASAP
-  Net_AsynchUDPConnection_T ();
-  //ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T (const Net_AsynchUDPConnection_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T& operator= (const Net_AsynchUDPConnection_T&));
 };
