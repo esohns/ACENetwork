@@ -228,7 +228,7 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
         pingTimerID_ =
             COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
                                                                   NULL,                             // ACT
-                                                                  COMMON_TIME_POLICY () + interval, // first wakeup time
+                                                                  COMMON_TIME_NOW + interval, // first wakeup time
                                                                   interval);                        // interval
         if (pingTimerID_ == -1)
         {

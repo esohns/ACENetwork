@@ -59,7 +59,7 @@ Net_ConnectionBase_T<ConfigurationType,
     statisticCollectHandlerID_ =
       COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
                                                             NULL,                             // argument
-                                                            COMMON_TIME_POLICY () + interval, // first wakeup time
+                                                            COMMON_TIME_NOW + interval, // first wakeup time
                                                             interval);                        // interval
     if (statisticCollectHandlerID_ == -1)
       ACE_DEBUG ((LM_ERROR,

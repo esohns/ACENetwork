@@ -148,7 +148,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     resetTimeoutHandlerID_ =
       COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (event_handler_p,                  // event handler
                                                             NULL,                             // ACT
-                                                            COMMON_TIME_POLICY () + interval, // first wakeup time
+                                                            COMMON_TIME_NOW + interval, // first wakeup time
                                                             interval);                        // interval
     if (resetTimeoutHandlerID_ == -1)
     {
@@ -266,7 +266,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
         localReportingHandlerID_ =
           COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (event_handler_p,                  // event handler
                                                                 NULL,                             // act
-                                                                COMMON_TIME_POLICY () + interval, // first wakeup time
+                                                                COMMON_TIME_NOW + interval, // first wakeup time
                                                                 interval);                        // interval
         if (localReportingHandlerID_ == -1)
         {

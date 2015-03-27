@@ -249,7 +249,7 @@ Net_Module_SocketHandler_T<StreamStateType,
         statCollectHandlerID_ =
             COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
                                                                   NULL,                             // argument
-                                                                  COMMON_TIME_POLICY () + interval, // first wakeup time
+                                                                  COMMON_TIME_NOW + interval, // first wakeup time
                                                                   interval);                        // interval
         if (statCollectHandlerID_ == -1)
         {
@@ -317,7 +317,7 @@ Net_Module_SocketHandler_T<StreamStateType,
 
   // step1: send the container downstream
   if (!putStatisticsMessage (data_out,               // data container
-                             COMMON_TIME_POLICY ())) // timestamp
+                             COMMON_TIME_NOW)) // timestamp
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to putSessionMessage(SESSION_STATISTICS), aborting\n")));
@@ -770,7 +770,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
         statCollectHandlerID_ =
             COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
                                                                   NULL,                             // argument
-                                                                  COMMON_TIME_POLICY () + interval, // first wakeup time
+                                                                  COMMON_TIME_NOW + interval, // first wakeup time
                                                                   interval);                        // interval
         if (statCollectHandlerID_ == -1)
         {
@@ -836,7 +836,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
 
   // step1: send the container downstream
   if (!putStatisticsMessage (data_out,               // data container
-                             COMMON_TIME_POLICY ())) // timestamp
+                             COMMON_TIME_NOW)) // timestamp
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to putSessionMessage(SESSION_STATISTICS), aborting\n")));
