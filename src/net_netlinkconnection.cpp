@@ -943,6 +943,8 @@ Net_AsynchNetlinkConnection::handle_close (ACE_HANDLE handle_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection::handle_close"));
 
+  int result = -1;
+
   switch (mask_in)
   {
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
@@ -1001,8 +1003,8 @@ Net_AsynchNetlinkConnection::handle_close (ACE_HANDLE handle_in,
   //  } // end IF
 
   // step3: invoke base-class maintenance
-  int result = inherited::handle_close (handle_in, // event handle
-                                        mask_in);  // event mask
+  result = inherited::handle_close (handle_in, // event handle
+                                    mask_in);  // event mask
   if (result == -1)
     // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

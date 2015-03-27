@@ -70,6 +70,7 @@ class Net_StreamTCPSocketBase_T
                                    UserDataType,
                                    StatisticContainerType,
                                    ITransportLayerType> ICONNECTION_MANAGER_T;
+//  typedef SocketHandlerType SOCKET_HANDLER_T;
   typedef Net_ConnectionBase_T<ConfigurationType,
                                UserDataType,
                                SessionDataType,
