@@ -162,7 +162,8 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
 /////////////////////////////////////////
 
 // partial specialization (for Netlink)
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
@@ -172,8 +173,8 @@ class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                                    UserDataType,
                                    SessionDataType,
                                    Net_INetlinkTransportLayer_t,
-                                   Net_AsynchNetlinkConnection>
- : public ACE_Asynch_Connector<Net_AsynchNetlinkConnection>
+                                   HandlerType>
+ : public ACE_Asynch_Connector<HandlerType>
  , public Net_Client_IConnector_T<ACE_Netlink_Addr,
                                   SocketHandlerConfigurationType>
 {
@@ -203,10 +204,10 @@ class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
  protected:
   // override default creation strategy
   // *TODO*: why isn't this being picked up ?
-  virtual Net_AsynchNetlinkConnection* make_handler (void);
+  virtual HandlerType* make_handler (void);
 
  private:
-  typedef ACE_Asynch_Connector<Net_AsynchNetlinkConnection> inherited;
+  typedef ACE_Asynch_Connector<HandlerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));

@@ -30,7 +30,6 @@
 #include "stream_common.h"
 
 #include "net_configuration.h"
-#include "net_exports.h"
 #include "net_itransportlayer.h"
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
@@ -43,29 +42,32 @@ template <typename SVC_HANDLER,
 template <class HANDLER> class ACE_Asynch_Connector;
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-class Net_Export Net_NetlinkConnection
- : public Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
+class Net_NetlinkConnection_T
+ : public Net_SocketConnectionBase_T<HandlerType,
                                      Net_INetlinkTransportLayer_t,
                                      Net_Configuration_t,
                                      Net_SocketHandlerConfiguration_t,
-                                     Net_UserData_t,
-                                     Net_StreamSessionData_t,
+                                     UserDataType,
+                                     SessionDataType,
                                      Stream_Statistic_t>
  , public Net_TransportLayer_Netlink
 {
-  friend class ACE_Connector<Net_NetlinkConnection,
+  friend class ACE_Connector<HandlerType,
                              ACE_SOCK_CONNECTOR>;
 
  public:
   typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                   Net_UserData_t,
+                                   UserDataType,
                                    Stream_Statistic_t,
                                    Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
 
-   Net_NetlinkConnection (ICONNECTION_MANAGER_T*, // connection manager handle
-                          unsigned int = 0);      // statistics collecting interval (second(s))
-                                                  // 0 --> DON'T collect statistics
-   virtual ~Net_NetlinkConnection ();
+   Net_NetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                            unsigned int = 0);      // statistics collecting interval (second(s))
+                                                    // 0 --> DON'T collect statistics
+   virtual ~Net_NetlinkConnection_T ();
 
    // override some task-based members
 //   virtual int open (void* = NULL); // args
@@ -89,46 +91,51 @@ class Net_Export Net_NetlinkConnection
    virtual void dump_state () const;
 
  private:
-  typedef Net_SocketConnectionBase_T<Net_NetlinkHandler_t,
+  typedef Net_SocketConnectionBase_T<HandlerType,
                                      Net_INetlinkTransportLayer_t,
                                      Net_Configuration_t,
                                      Net_SocketHandlerConfiguration_t,
-                                     Net_UserData_t,
-                                     Net_StreamSessionData_t,
+                                     UserDataType,
+                                     SessionDataType,
                                      Stream_Statistic_t> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 
   // *TODO*: remove this ASAP
-  Net_NetlinkConnection ();
-//  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection ());
-  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection (const Net_NetlinkConnection&));
-  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection& operator= (const Net_NetlinkConnection&));
+  Net_NetlinkConnection_T ();
+//  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T (const Net_NetlinkConnection_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T& operator= (const Net_NetlinkConnection_T&));
 };
 
 /////////////////////////////////////////
 
-class Net_Export Net_AsynchNetlinkConnection
- : public Net_AsynchSocketConnectionBase_T<Net_AsynchNetlinkHandler_t,
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
+class Net_AsynchNetlinkConnection_T
+ : public Net_AsynchSocketConnectionBase_T<HandlerType,
                                            Net_INetlinkTransportLayer_t,
                                            Net_Configuration_t,
                                            Net_SocketHandlerConfiguration_t,
-                                           Net_UserData_t,
-                                           Stream_SessionData_t,
+                                           UserDataType,
+                                           SessionDataType,
                                            Stream_Statistic_t>
  , public Net_TransportLayer_Netlink
 {
- friend class ACE_Asynch_Connector<Net_AsynchNetlinkConnection>;
+ friend class ACE_Asynch_Connector<Net_AsynchNetlinkConnection_T<UserDataType,
+                                                                 SessionDataType,
+                                                                 HandlerType> >;
 
  public:
   typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                   Net_UserData_t,
+                                   UserDataType,
                                    Stream_Statistic_t,
                                    Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
 
-  Net_AsynchNetlinkConnection (ICONNECTION_MANAGER_T*, // connection manager handle
-                               unsigned int = 0);      // statistics collecting interval (second(s))
-                                                       // 0 --> DON'T collect statistics
-  virtual ~Net_AsynchNetlinkConnection ();
+  Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                                 unsigned int = 0);      // statistics collecting interval (second(s))
+                                                         // 0 --> DON'T collect statistics
+  virtual ~Net_AsynchNetlinkConnection_T ();
 
   // implement (part of) Net_INetlinkTransportLayer
   virtual bool initialize (Net_ClientServerRole_t,            // role
@@ -153,21 +160,24 @@ class Net_Export Net_AsynchNetlinkConnection
                               ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef Net_AsynchSocketConnectionBase_T<Net_AsynchNetlinkHandler_t,
+  typedef Net_AsynchSocketConnectionBase_T<HandlerType,
                                            Net_INetlinkTransportLayer_t,
                                            Net_Configuration_t,
                                            Net_SocketHandlerConfiguration_t,
-                                           Net_UserData_t,
-                                           Stream_SessionData_t,
+                                           UserDataType,
+                                           SessionDataType,
                                            Stream_Statistic_t> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 
   // *TODO*: remove this ASAP
-  Net_AsynchNetlinkConnection ();
-  //  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection ());
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection (const Net_AsynchNetlinkConnection&));
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection& operator= (const Net_AsynchNetlinkConnection&));
+  Net_AsynchNetlinkConnection_T ();
+  //  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T (const Net_AsynchNetlinkConnection_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T& operator= (const Net_AsynchNetlinkConnection_T&));
 };
+
+// include template implementation
+#include "net_netlinkconnection.inl"
 #endif
 
 #endif

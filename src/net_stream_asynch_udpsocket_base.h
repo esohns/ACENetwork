@@ -26,7 +26,10 @@
 #include "ace/Event_Handler.h"
 #include "ace/Message_Block.h"
 
+#include "net_asynch_netlinksockethandler.h"
 #include "net_connection_base.h"
+#include "net_itransportlayer.h"
+#include "net_netlinksockethandler.h"
 
 template <typename ConfigurationType,
           typename UserDataType,
@@ -93,6 +96,87 @@ class Net_StreamAsynchUDPSocketBase_T
                                SessionDataType,
                                StatisticContainerType,
                                ITransportLayerType> inherited4;
+
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&));
+
+  // helper methods
+  virtual int handle_output (ACE_HANDLE); // (socket) handle
+};
+
+/////////////////////////////////////////
+
+// partial specialization (for Netlink)
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType>
+class Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                      UserDataType,
+                                      SessionDataType,
+                                      Net_INetlinkTransportLayer_t,
+                                      StatisticContainerType,
+                                      StreamType,
+                                      ACE_SOCK_NETLINK,
+                                      Net_AsynchNetlinkSocketHandler>
+ : public Net_AsynchNetlinkSocketHandler
+ , public ACE_SOCK_NETLINK
+ , public ACE_Event_Handler
+ , public Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
+                               SessionDataType,
+                               StatisticContainerType,
+                               Net_INetlinkTransportLayer_t>
+{
+ public:
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
+                               SessionDataType,
+                               StatisticContainerType,
+                               Net_INetlinkTransportLayer_t> CONNECTION_BASE_T;
+
+  virtual ~Net_StreamAsynchUDPSocketBase_T ();
+
+  // override some service methods
+  virtual void open (ACE_HANDLE,          // (socket) handle
+                     ACE_Message_Block&); // initial data (if any)
+
+  // implement Common_IStatistic
+  // *NOTE*: delegate these to the stream
+  virtual bool collect (StatisticContainerType&); // return value: statistic data
+  virtual void report () const;
+
+ protected:
+  typedef Net_IConnectionManager_T<ConfigurationType,
+                                   UserDataType,
+                                   StatisticContainerType,
+                                   Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
+
+  Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                                   unsigned int = 0);      // statistics collecting interval (second(s))
+                                                           // 0 --> DON'T collect statistics
+
+  // helper methods
+  virtual int handle_close (ACE_HANDLE handle_in,                                           // (socket) handle
+                            ACE_Reactor_Mask mask_in = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+
+  virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
+
+  StreamType      stream_;
+  // *TODO*: (try to) handle short writes gracefully...
+//  ACE_Message_Block* buffer_;
+
+ private:
+  typedef Net_AsynchNetlinkSocketHandler inherited;
+  typedef ACE_SOCK_NETLINK inherited2;
+  typedef ACE_Event_Handler inherited3;
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
+                               SessionDataType,
+                               StatisticContainerType,
+                               Net_INetlinkTransportLayer_t> inherited4;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));

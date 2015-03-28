@@ -145,7 +145,8 @@ class Net_Client_Connector_T<ACE_INET_Addr,
 /////////////////////////////////////////
 
 // partial specialization (for Netlink)
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
@@ -155,7 +156,7 @@ class Net_Client_Connector_T<ACE_Netlink_Addr,
                              UserDataType,
                              SessionDataType,
                              Net_INetlinkTransportLayer_t,
-                             Net_NetlinkConnection>
+                             HandlerType>
  : public Net_Client_IConnector_T<ACE_Netlink_Addr,
                                   SocketHandlerConfigurationType>
 {
@@ -173,7 +174,7 @@ class Net_Client_Connector_T<ACE_Netlink_Addr,
   virtual ~Net_Client_Connector_T ();
 
   // override default instantiation strategy
-  virtual int make_svc_handler (Net_NetlinkConnection*&);
+  virtual int make_svc_handler (HandlerType*&);
 
   // implement Net_Client_IConnector_T
   virtual const SocketHandlerConfigurationType* getConfiguration () const;

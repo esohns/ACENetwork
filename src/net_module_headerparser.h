@@ -25,8 +25,9 @@
 
 #include "common.h"
 
-#include "stream_task_base_synch.h"
+#include "stream_common.h"
 #include "stream_streammodule_base.h"
+#include "stream_task_base_synch.h"
 
 // forward declaration(s)
 class Net_Message;
@@ -63,8 +64,9 @@ class Net_Module_HeaderParser
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,             // task synch type
-                              Common_TimePolicy_t,      // time policy type
-                              Net_Module_HeaderParser); // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                 // task synch type
+                              Common_TimePolicy_t,          // time policy type
+                              Stream_ModuleConfiguration_t, // configuration type
+                              Net_Module_HeaderParser);     // writer type
 
 #endif

@@ -28,6 +28,8 @@
 #include "ace/Synch.h"
 
 #include "net_connection_base.h"
+#include "net_itransportlayer.h"
+#include "net_netlinksockethandler.h"
 
 template <typename ConfigurationType,
           typename UserDataType,
@@ -98,6 +100,87 @@ class Net_StreamUDPSocketBase_T
                                SessionDataType,
                                StatisticContainerType,
                                ITransportLayerType> inherited3;
+
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&));
+};
+
+/////////////////////////////////////////
+
+// partial specialization (for Netlink)
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType>
+class Net_StreamUDPSocketBase_T<ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                Net_INetlinkTransportLayer_t,
+                                StatisticContainerType,
+                                StreamType,
+                                Net_NetlinkSocketHandler>
+ : /*public SocketType
+ ,*/ public Net_NetlinkSocketHandler
+ , public Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
+                               SessionDataType,
+                               StatisticContainerType,
+                               Net_INetlinkTransportLayer_t>
+{
+ public:
+  virtual ~Net_StreamUDPSocketBase_T ();
+
+  virtual int open (void* = NULL); // args
+  virtual int close (u_long = 0); // flags
+
+  // *NOTE*: enqueue any received data onto our stream for further processing
+  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+  // *NOTE*: this is called when:
+  // - handle_xxx() returns -1
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+
+  // implement Common_IStatistic
+  // *NOTE*: delegate these to the stream
+  virtual bool collect (StatisticContainerType&); // return value: statistic data
+  virtual void report () const;
+
+ protected:
+ typedef Net_IConnectionManager_T<ConfigurationType,
+                                  UserDataType,
+                                  StatisticContainerType,
+                                  Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
+                               SessionDataType,
+                               StatisticContainerType,
+                               Net_INetlinkTransportLayer_t> CONNECTION_BASE_T;
+
+  Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                             unsigned int = 0);      // statistics collecting interval (second(s))
+                                                     // 0 --> DON'T collect statistics
+
+  ACE_Message_Block* currentWriteBuffer_;
+  ACE_Thread_Mutex   sendLock_;
+  // *IMPORTANT NOTE*: in a threaded environment, workers MAY
+  // dispatch the reactor notification queue concurrently (most notably,
+  // ACE_TP_Reactor) --> enforce proper serialization
+  bool               serializeOutput_;
+  StreamType         stream_;
+
+  // helper method(s)
+  ACE_Message_Block* allocateMessage (unsigned int); // requested size
+
+ private:
+//  typedef SocketType inherited;
+  typedef Net_NetlinkSocketHandler inherited2;
+  typedef Net_ConnectionBase_T<ConfigurationType,
+                               UserDataType,
+                               SessionDataType,
+                               StatisticContainerType,
+                               Net_INetlinkTransportLayer_t> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));

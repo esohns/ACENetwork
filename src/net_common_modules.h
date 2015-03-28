@@ -43,9 +43,10 @@ typedef Net_Module_SocketHandler_T<Stream_State_t,
                                    Net_SessionMessage,
                                    Net_Message,
                                    Net_Remote_Comm::MessageHeader> Net_Module_SocketHandler;
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,              // task synch type
-                              Common_TimePolicy_t,       // time policy type
-                              Net_Module_SocketHandler); // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                 // task synch type
+                              Common_TimePolicy_t,          // time policy type
+                              Stream_ModuleConfiguration_t, // configuration type
+                              Net_Module_SocketHandler);    // writer type
 
 typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
@@ -61,6 +62,7 @@ typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                           Stream_Statistic_t> Net_Module_Statistic_WriterTask_t;
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                      // task synch type
                           Common_TimePolicy_t,               // time policy type
+                          Stream_ModuleConfiguration_t,      // configuration type
                           Net_Module_Statistic_ReaderTask_t, // reader type
                           Net_Module_Statistic_WriterTask_t, // writer type
                           Net_Module_RuntimeStatistic);      // name

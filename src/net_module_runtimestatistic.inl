@@ -99,11 +99,11 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   SessionMessageType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticContainerType>::init (unsigned int reportingInterval_in,
-                                                                  bool printFinalReport_in,
-                                                                  const Stream_IAllocator* allocator_in)
+                                  StatisticContainerType>::initialize (unsigned int reportingInterval_in,
+                                                                       bool printFinalReport_in,
+                                                                       const Stream_IAllocator* allocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::init"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::initialize"));
 
   // sanity check(s)
   if (isInitialized_)

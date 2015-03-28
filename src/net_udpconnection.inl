@@ -112,7 +112,7 @@ Net_UDPConnection_T<UserDataType,
   // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              ACE_TEXT ("registered UDP connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, reinterpret_cast<unsigned int> (handle),
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
@@ -120,7 +120,7 @@ Net_UDPConnection_T<UserDataType,
                                    : -1)));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("opened connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              ACE_TEXT ("registered UDP connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, handle,
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
@@ -172,12 +172,12 @@ Net_UDPConnection_T<UserDataType,
   // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
+              ACE_TEXT ("deregistered UDP connection [%@/%u] (total: %u)\n"),
               this_p, reinterpret_cast<unsigned int> (handle),
               num_connections));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("closed connection [%@/%d] (total: %d)\n"),
+              ACE_TEXT ("deregistered UDP connection [%@/%d] (total: %d)\n"),
               this_p, handle,
               num_connections));
 #endif
@@ -774,7 +774,7 @@ Net_AsynchUDPConnection_T<UserDataType,
   // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              ACE_TEXT ("registered UDP connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, reinterpret_cast<unsigned int> (ACE_IPC_SAP::get_handle ()),
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
@@ -782,7 +782,7 @@ Net_AsynchUDPConnection_T<UserDataType,
                                    : -1)));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              ACE_TEXT ("registered UDP connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, ACE_IPC_SAP::get_handle (),
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
@@ -838,13 +838,13 @@ Net_AsynchUDPConnection_T<UserDataType,
   // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
+              ACE_TEXT ("deregistered UDP connection [%@/%u] (total: %u)\n"),
               this, reinterpret_cast<unsigned int> (handle_in),
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
+              ACE_TEXT ("deregistered UDP connection [%@/%d] (total: %d)\n"),
               this, handle_in,
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));

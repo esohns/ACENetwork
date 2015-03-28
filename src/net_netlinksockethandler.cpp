@@ -138,10 +138,34 @@ Net_NetlinkSocketHandler::open (void* arg_in)
 //    return -1;
 //  } // end IF
 
+  int result = -1;
   Net_SocketConfiguration_t* socket_configuration_p =
       reinterpret_cast<Net_SocketConfiguration_t*> (arg_in);
 
-  // step1: tweak socket
+  // step1: open socket
+  ACE_Netlink_Addr local_SAP;
+  local_SAP.set (ACE_OS::getpid (), 0);
+  result = inherited2::peer_.open (local_SAP,                  // local SAP
+                                   ACE_PROTOCOL_FAMILY_NETLINK, // protocol family
+                                   NETLINK_GENERIC);            // protocol
+  if (result == -1)
+  {
+    ACE_TCHAR buffer[BUFSIZ];
+    ACE_OS::memset (buffer, 0, sizeof (buffer));
+    std::string local_address;
+    // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
+//    if (local_SAP.addr_to_string (buffer,
+//                                  sizeof (buffer)) == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+    local_address = buffer;
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (local_address.c_str ())));
+    return -1;
+  } // end IF
+
+  // step2: tweak socket
   if (socket_configuration_p->bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (get_handle (),
                                             SO_RCVBUF,

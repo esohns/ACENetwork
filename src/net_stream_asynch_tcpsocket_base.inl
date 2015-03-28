@@ -38,9 +38,9 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                     unsigned int statisticsCollectionInterval_in)
+                                                                                     unsigned int statisticCollectionInterval_in)
  : inherited2 (interfaceHandle_in,
-               statisticsCollectionInterval_in)
+               statisticCollectionInterval_in)
  //, configuration_ (NULL)
 // , stream_ ()
 {

@@ -59,6 +59,34 @@ Net_AsynchNetlinkSocketHandler::open (ACE_HANDLE handle_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkSocketHandler::open"));
 
+//  int result = -1;
+
+  // step0: initialize baseclass
+  inherited2::handle (handle_in);
+
+//  // step1: open netlink socket
+//  ACE_Netlink_Addr local_SAP;
+//  local_SAP.set (ACE_OS::getpid (), 0);
+//  result = socket_.open (local_SAP,                  // local SAP
+//                         ACE_PROTOCOL_FAMILY_NETLINK, // protocol family
+//                         NETLINK_GENERIC);            // protocol
+//  if (result == -1)
+//  {
+//    ACE_TCHAR buffer[BUFSIZ];
+//    ACE_OS::memset (buffer, 0, sizeof (buffer));
+//    std::string local_address;
+//    // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
+////    if (local_SAP.addr_to_string (buffer,
+////                                  sizeof (buffer)) == -1)
+////      ACE_DEBUG ((LM_ERROR,
+////                  ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+//    local_address = buffer;
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_SOCK_Netlink::open(\"%s\"): \"%m\", returning\n"),
+//                ACE_TEXT (local_address.c_str ())));
+//    return;
+//  } // end IF
+
   // step1: tweak socket
   if (inherited::configuration_.socketConfiguration.bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (handle_in,
@@ -76,21 +104,6 @@ Net_AsynchNetlinkSocketHandler::open (ACE_HANDLE handle_in,
 
       return;
     } // end IF
-  if (!Net_Common_Tools::setNoDelay (handle_in,
-                                     NET_DEFAULT_SOCKET_TCP_NODELAY))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
-                (NET_DEFAULT_SOCKET_TCP_NODELAY ? ACE_TEXT ("true")
-                                                : ACE_TEXT ("false")),
-                handle_in));
-
-    // clean up
-    handle_close (handle_in,
-                  ACE_Event_Handler::ALL_EVENTS_MASK);
-
-    return;
-  } // end IF
   if (!Net_Common_Tools::setKeepAlive (handle_in,
                                        NET_DEFAULT_SOCKET_TCP_KEEPALIVE))
   {
@@ -268,38 +281,41 @@ Net_AsynchNetlinkSocketHandler::allocateMessage (unsigned int requestedSize_in)
 }
 
 void
-Net_AsynchNetlinkSocketHandler::handle_write_stream (const ACE_Asynch_Write_Stream::Result& result)
+Net_AsynchNetlinkSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram::Result& result_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkSocketHandler::handle_write_stream"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkSocketHandler::handle_write_dgram"));
 
+  int result = -1;
   bool close = false;
+  size_t bytes_transferred = result_in.bytes_transferred ();
 
   // sanity check
-  if (result.success () == 0)
+  result = result_in.success ();
+  if (result == 0)
   {
     // connection reset (by peer) ? --> not an error
-    if ((result.error () != ECONNRESET) &&
-        (result.error () != EPIPE))
+    if ((result_in.error () != ECONNRESET) &&
+        (result_in.error () != EPIPE))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
-                  result.handle (),
-                  ACE_TEXT (ACE_OS::strerror (result.error ()))));
+                  result_in.handle (),
+                  ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
 
     close = true;
   } // end IF
 
-  switch (result.bytes_transferred ())
+  switch (bytes_transferred)
   {
     case -1:
     case 0:
     {
       // connection reset (by peer) ? --> not an error
-      if ((result.error() != ECONNRESET) &&
-          (result.error() != EPIPE))
+      if ((result_in.error() != ECONNRESET) &&
+          (result_in.error() != EPIPE))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
-                    result.handle (),
-                    ACE_TEXT (ACE_OS::strerror (result.error ()))));
+                    result_in.handle (),
+                    ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
 
       close = true;
 
@@ -309,14 +325,14 @@ Net_AsynchNetlinkSocketHandler::handle_write_stream (const ACE_Asynch_Write_Stre
     default:
     {
       // short write ?
-      if (result.bytes_to_write () != result.bytes_transferred ())
+      if (result_in.bytes_to_write () != bytes_transferred)
       {
         // *TODO*: handle short writes more gracefully
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("stream (%d): sent %u/%u byte(s) only, aborting"),
-                    result.handle (),
-                    result.bytes_transferred (),
-                    result.bytes_to_write ()));
+                    result_in.handle (),
+                    bytes_transferred,
+                    result_in.bytes_to_write ()));
 
         close = true;
       } // end IF
@@ -326,24 +342,27 @@ Net_AsynchNetlinkSocketHandler::handle_write_stream (const ACE_Asynch_Write_Stre
   } // end SWITCH
 
   // clean up
-  result.message_block ().release ();
+  result_in.message_block ()->release ();
   if (close)
     handle_close (inherited2::handle (),
                   ACE_Event_Handler::ALL_EVENTS_MASK);
 }
 
 void
-Net_AsynchNetlinkSocketHandler::initiate_read_stream ()
+Net_AsynchNetlinkSocketHandler::initiate_read_dgram ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkSocketHandler::initiate_read_stream"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkSocketHandler::initiate_read_dgram"));
+
+  int result = -1;
+  ACE_Message_Block* message_p = NULL;
 
   // allocate a data buffer
-  ACE_Message_Block* message_block = allocateMessage (STREAM_BUFFER_SIZE);
-  if (!message_block)
+  message_p = allocateMessage (inherited::configuration_.bufferSize);
+  if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchNetlinkSocketHandler::allocateMessage(%u), aborting\n"),
-                STREAM_BUFFER_SIZE));
+                inherited::configuration_.bufferSize));
 
     // clean up
     handle_close (inherited2::handle (),
@@ -351,15 +370,22 @@ Net_AsynchNetlinkSocketHandler::initiate_read_stream ()
   } // end IF
 
   // start (asynch) read...
-  if (inputStream_.read (*message_block,
-                         message_block->size ()) == -1)
+  size_t bytes_to_read = message_p->size (); // why oh why...
+  result = inputStream_.recv (message_p,                   // buffer
+                              bytes_to_read,               // buffer size
+                              0,                           // flags
+                              ACE_PROTOCOL_FAMILY_NETLINK, // protocol family
+                              NULL,                        // ACT
+                              0,                           // priority
+                              ACE_SIGRTMIN);               // signal
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Read_Stream::read(%u): \"%m\", aborting\n"),
-                message_block->size ()));
+                ACE_TEXT ("failed to ACE_Asynch_Read_Stream::recv(%u): \"%m\", aborting\n"),
+                message_p->size ()));
 
     // clean up
-    message_block->release ();
+    message_p->release ();
     handle_close (inherited2::handle (),
                   ACE_Event_Handler::ALL_EVENTS_MASK);
   } // end IF

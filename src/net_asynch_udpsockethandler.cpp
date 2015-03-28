@@ -262,7 +262,7 @@ Net_AsynchUDPSocketHandler::initiate_read_dgram ()
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler::allocateMessage(%u), aborting\n"),
+                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler::allocateMessage(%u), aborting\n"),
                 inherited::configuration_.bufferSize));
 
     // clean up
@@ -272,13 +272,13 @@ Net_AsynchUDPSocketHandler::initiate_read_dgram ()
 
   // step2: start (asynch) read...
   size_t bytes_to_read = message_p->size (); // why oh why...
-  result = inputStream_.recv (message_p,     // buffer
-                              bytes_to_read, // #bytes to read
-                              0,             // flags
-                              PF_INET,       // protocol family
-                              NULL,          // act
-                              0,             // priority
-                              ACE_SIGRTMIN); // signal
+  result = inputStream_.recv (message_p,                // buffer
+                              bytes_to_read,            // #bytes to read
+                              0,                        // flags
+                              ACE_PROTOCOL_FAMILY_INET, // protocol family
+                              NULL,                     // ACT
+                              0,                        // priority
+                              ACE_SIGRTMIN);            // signal
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,

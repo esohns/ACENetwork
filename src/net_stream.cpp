@@ -99,7 +99,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("no head module found, aborting\n")));
-
       return false;
     } // end IF
     inherited::TASK_T* task = module->reader ();
@@ -107,7 +106,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("no head module reader task found, aborting\n")));
-
       return false;
     } // end IF
     task->msg_queue ()->notification_strategy (configuration_in.notificationStrategy);
@@ -121,7 +119,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
                   ACE_TEXT (configuration_in.module->name ())));
-
       return false;
     } // end IF
 
@@ -135,7 +132,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_ProtocolHandler> failed, aborting\n")));
-
     return false;
   } // end IF
   if (!protocolHandler_impl->initialize (configuration_in.messageAllocator,
@@ -146,7 +142,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
                 ACE_TEXT (protocolHandler_.name ())));
-
     return false;
   } // end IF
 
@@ -156,7 +151,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (protocolHandler_.name ())));
-
     return false;
   } // end IF
 
@@ -171,14 +165,13 @@ Net_Stream::initialize (unsigned int sessionID_in,
 
     return false;
   } // end IF
-  if (!runtimeStatistic_impl->init (configuration_in.statisticsReportingInterval, // reporting interval (seconds)
-                                    configuration_in.printFinalReport,            // print final report ?
-                                    configuration_in.messageAllocator))           // message allocator handle
+  if (!runtimeStatistic_impl->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
+                                          configuration_in.printFinalReport,           // print final report ?
+                                          configuration_in.messageAllocator))          // message allocator handle
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
                 ACE_TEXT (runtimeStatistic_.name ())));
-
     return false;
   } // end IF
 
@@ -188,7 +181,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (runtimeStatistic_.name ())));
-
     return false;
   } // end IF
 
@@ -200,7 +192,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_HeaderParser> failed, aborting\n")));
-
     return false;
   } // end IF
   if (!headerParser_impl->initialize ())
@@ -208,7 +199,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
                 ACE_TEXT (headerParser_.name ())));
-
     return false;
   } // end IF
 
@@ -218,7 +208,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (headerParser_.name ())));
-
     return false;
   } // end IF
 
@@ -230,7 +219,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_SocketHandler> failed, aborting\n")));
-
     return false;
   } // end IF
   if (!socketHandler_impl->initialize (&state_,
@@ -241,7 +229,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
                 ACE_TEXT (socketHandler_.name ())));
-
     return false;
   } // end IF
 
@@ -254,7 +241,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (socketHandler_.name ())));
-
     return false;
   } // end IF
 

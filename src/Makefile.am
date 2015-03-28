@@ -41,6 +41,7 @@ include_HEADERS = \
   net_module_sockethandler.h \
   net_module_sockethandler.inl \
   net_netlinkconnection.h \
+  net_netlinkconnection.inl \
   net_netlinksockethandler.h \
   net_packet_headers.h \
   net_protocol_layer.h \
@@ -122,6 +123,7 @@ libACENetwork_la_SOURCES = \
   net_module_sockethandler.inl \
   net_netlinkconnection.cpp \
   net_netlinkconnection.h \
+  net_netlinkconnection.inl \
   net_netlinksockethandler.cpp \
   net_netlinksockethandler.h \
   net_packet_headers.h \

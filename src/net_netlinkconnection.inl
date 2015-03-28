@@ -17,38 +17,63 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "stdafx.h"
-
-#include "net_tcpconnection.h"
 
 #include "ace/Log_Msg.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
 
-Net_TCPConnection::Net_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                      unsigned int statisticCollectionInterval_in)
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
+Net_NetlinkConnection_T<UserDataType,
+                        SessionDataType,
+                        HandlerType>::Net_NetlinkConnection_T ()
+ : inherited (NULL,
+              0)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::Net_NetlinkConnection_T"));
+
+}
+
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
+Net_NetlinkConnection_T<UserDataType,
+                        SessionDataType,
+                        HandlerType>::Net_NetlinkConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                               unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::Net_NetlinkConnection_T"));
 
 }
 
-Net_TCPConnection::~Net_TCPConnection ()
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
+Net_NetlinkConnection_T<UserDataType,
+                        SessionDataType,
+                        HandlerType>::~Net_NetlinkConnection_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::~Net_TCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::~Net_NetlinkConnection_T"));
 
 }
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 bool
-Net_TCPConnection::initialize (Net_ClientServerRole_t role_in,
-                               const Net_SocketConfiguration_t& configuration_in)
+Net_NetlinkConnection_T<UserDataType,
+                        SessionDataType,
+                        HandlerType>::initialize (Net_ClientServerRole_t role_in,
+                                                  const Net_SocketConfiguration_t& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::initialize"));
 
-  if (!Net_ConnectionBase_T::initialize (role_in,
-                                         configuration_in))
+  if (!inherited::CONNECTION_BASE_T::initialize (role_in,
+                                                 configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
@@ -59,7 +84,7 @@ Net_TCPConnection::initialize (Net_ClientServerRole_t role_in,
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   std::string local_address;
-  ACE_INET_Addr local_SAP, remote_SAP;
+  ACE_Netlink_Addr local_SAP, remote_SAP;
   try
   {
     info (handle,
@@ -73,7 +98,7 @@ Net_TCPConnection::initialize (Net_ClientServerRole_t role_in,
 
     return false;
   }
-  // *TODO*: retrieve socket information
+  // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
 //  if (local_SAP.addr_to_string (buffer,
 //                                sizeof (buffer)) == -1)
 //    ACE_DEBUG ((LM_ERROR,
@@ -88,15 +113,15 @@ Net_TCPConnection::initialize (Net_ClientServerRole_t role_in,
   // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered TCP connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, reinterpret_cast<unsigned int> (handle),
-              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (localAddress.c_str ()),
               ACE_TEXT (buffer),
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered TCP connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              ACE_TEXT ("registered netlink connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, handle,
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
@@ -107,13 +132,18 @@ Net_TCPConnection::initialize (Net_ClientServerRole_t role_in,
   return true;
 }
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 void
-Net_TCPConnection::finalize ()
+Net_NetlinkConnection_T<UserDataType,
+                        SessionDataType,
+                        HandlerType>::finalize ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::finalize"));
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::finalize"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr address1, address2;
+  ACE_Netlink_Addr address1, address2;
   try
   {
     info (handle,
@@ -126,30 +156,35 @@ Net_TCPConnection::finalize ()
                 ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
   }
 
-  Net_ConnectionBase_T::finalize ();
+  inherited::CONNECTION_BASE_T::finalize ();
 
   // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered TCP connection [%@/%u] (total: %u)\n"),
+              ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
               this, reinterpret_cast<unsigned int> (handle),
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered TCP connection [%@/%d] (total: %d)\n"),
+              ACE_TEXT ("deregistered netlink connection [%@/%d] (total: %u)\n"),
               this, handle,
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
 #endif
 }
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 void
-Net_TCPConnection::info (ACE_HANDLE& handle_out,
-                         ACE_INET_Addr& localSAP_out,
-                         ACE_INET_Addr& remoteSAP_out) const
+Net_NetlinkConnection_T<UserDataType,
+                        SessionDataType,
+                        HandlerType>::info (ACE_HANDLE& handle_out,
+                                            ACE_Netlink_Addr& localSAP_out,
+                                            ACE_Netlink_Addr& remoteSAP_out) const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::info"));
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::info"));
 
   handle_out = inherited::peer_.get_handle ();
   if (inherited::peer_.get_local_addr (localSAP_out) == -1)
@@ -160,13 +195,18 @@ Net_TCPConnection::info (ACE_HANDLE& handle_out,
                 ACE_TEXT ("failed to ACE_SOCK::get_remote_addr(): \"%m\", continuing\n")));
 }
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 unsigned int
-Net_TCPConnection::id () const
+Net_NetlinkConnection_T<UserDataType,
+                        SessionDataType,
+                        HandlerType>::id () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::id"));
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::id"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
+  ACE_Netlink_Addr local_inet_address, peer_inet_address;
   info (handle,
         local_inet_address,
         peer_inet_address);
@@ -178,34 +218,40 @@ Net_TCPConnection::id () const
 #endif
 }
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 void
-Net_TCPConnection::dump_state () const
+Net_NetlinkConnection_T<UserDataType,
+                        SessionDataType,
+                        HandlerType>::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::dump_state"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
+  ACE_Netlink_Addr local_netlink_address, peer_netlink_address;
   info (handle,
-        local_inet_address,
-        peer_inet_address);
+        local_netlink_address,
+        peer_netlink_address);
 
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   std::string local_address;
-  if (local_inet_address.addr_to_string (buffer,
-                                         sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    local_address = buffer;
+  // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
+//  if (local_netlink_address.addr_to_string (buffer,
+//                                            sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+//  else
+//    local_address = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   std::string peer_address;
-  if (peer_inet_address.addr_to_string (buffer,
-                                        sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address = buffer;
+//  if (peer_netlink_address.addr_to_string (buffer,
+//                                           sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+//  else
+//    peer_address = buffer;
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
@@ -215,9 +261,9 @@ Net_TCPConnection::dump_state () const
 }
 
 //int
-//Net_TCPConnection::svc (void)
+//Net_NetlinkConnection_T::svc (void)
 //{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::svc"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::svc"));
 //
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("(%t) worker (connection: %u) starting...\n"),
@@ -317,9 +363,9 @@ Net_TCPConnection::dump_state () const
 //}
 
 //int
-//Net_TCPConnection::open (void* arg_in)
+//Net_NetlinkConnection_T::open (void* arg_in)
 //{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::open"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::open"));
 //
 //  // step1: init/start stream, tweak socket, register reading data with reactor
 //  // , ...
@@ -389,9 +435,9 @@ Net_TCPConnection::dump_state () const
 //}
 
 //int
-//Net_TCPConnection::close (u_long arg_in)
+//Net_NetlinkConnection_T::close (u_long arg_in)
 //{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::close"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::close"));
 //  // [*NOTE*: hereby we override the default behavior of a ACE_Svc_Handler,
 //  // which would call handle_close() AGAIN]
 //
@@ -447,11 +493,16 @@ Net_TCPConnection::dump_state () const
 //  return 0;
 //}
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 int
-Net_TCPConnection::handle_close (ACE_HANDLE handle_in,
-                                 ACE_Reactor_Mask mask_in)
+Net_NetlinkConnection_T<UserDataType,
+                        SessionDataType,
+                        HandlerType>::handle_close (ACE_HANDLE handle_in,
+                                                    ACE_Reactor_Mask mask_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::handle_close"));
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::handle_close"));
 
   switch (mask_in)
   {
@@ -531,9 +582,9 @@ Net_TCPConnection::handle_close (ACE_HANDLE handle_in,
 }
 
 //void
-//Net_TCPConnection::shutdown ()
+//Net_NetlinkConnection_T::shutdown ()
 //{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::shutdown"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::shutdown"));
 //
 //  ACE_Message_Block* stop_mb = NULL;
 //  ACE_NEW_NORETURN (stop_mb,
@@ -568,25 +619,41 @@ Net_TCPConnection::handle_close (ACE_HANDLE handle_in,
 
 /////////////////////////////////////////
 
-//Net_AsynchTCPConnection::Net_AsynchTCPConnection ()
-//  //: inherited ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
-
-//}
-
-Net_AsynchTCPConnection::Net_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                  unsigned int statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
+Net_AsynchNetlinkConnection_T<UserDataType,
+                              SessionDataType,
+                              HandlerType>::Net_AsynchNetlinkConnection_T ()
+ : inherited (NULL,
+              0)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::Net_AsynchNetlinkConnection_T"));
 
 }
 
-Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
+Net_AsynchNetlinkConnection_T<UserDataType,
+                              SessionDataType,
+                              HandlerType>::Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                           unsigned int statisticCollectionInterval_in)
+ : inherited (interfaceHandle_in,
+              statisticCollectionInterval_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::~Net_AsynchTCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::Net_AsynchNetlinkConnection_T"));
+
+}
+
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
+Net_AsynchNetlinkConnection_T<UserDataType,
+                              SessionDataType,
+                              HandlerType>::~Net_AsynchNetlinkConnection_T ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::~Net_AsynchNetlinkConnection_T"));
 
   //// wait for our worker (if any)
   //if (inherited::userData_.useThreadPerConnection)
@@ -595,116 +662,121 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
   //                ACE_TEXT ("failed to ACE_Task_Base::wait(): \"%m\", continuing\n")));
 }
 
-//int
-//Net_AsynchTCPConnection::svc (void)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::svc"));
-//
-//  ACE_DEBUG((LM_DEBUG,
-//             ACE_TEXT("(%t) worker (connection: %u) starting...\n"),
-//             inherited::stream_.getSessionID ()));
-//
-//  ssize_t bytes_sent = 0;
-//  while (true)
-//  {
-//    if (inherited::currentWriteBuffer_ == NULL)
-//      if (inherited::stream_.get (inherited::currentWriteBuffer_, NULL) == -1) // block
-//      {
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
-//        return -1;
-//      } // end IF
-//
-//    // finished ?
-//    if (inherited::currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
-//    {
-//      inherited::currentWriteBuffer_->release ();
-//      inherited::currentWriteBuffer_ = NULL;
-//
-////       ACE_DEBUG ((LM_DEBUG,
-////                   ACE_TEXT ("[%u]: finished sending...\n"),
-////                   peer_.get_handle ()));
-//
-//      break;
-//    } // end IF
-//
-//    // put some data into the socket...
-//    bytes_sent = inherited::peer_.send (inherited::currentWriteBuffer_->rd_ptr (),
-//                                        inherited::currentWriteBuffer_->length (),
-//                                        0, // default behavior
-//                                        //MSG_DONTWAIT, // don't block
-//                                        NULL); // block if necessary...
-//    switch (bytes_sent)
-//    {
-//      case -1:
-//      {
-//        // connection reset by peer/broken pipe ? --> not an error
-//        int error = ACE_OS::last_error ();
-//        if ((error != ECONNRESET) &&
-//            (error != ENOTSOCK) &&
-//            (error != EPIPE))
-//          ACE_DEBUG ((LM_ERROR,
-//                      ACE_TEXT ("failed to ACE_SOCK_Stream::send(): \"%m\", returning\n")));
-//
-//        inherited::currentWriteBuffer_->release ();
-//        inherited::currentWriteBuffer_ = NULL;
-//
-//        // nothing to do but wait for our shutdown signal (see above)...
-//        break;
-//      }
-//      // *** GOOD CASES ***
-//      case 0:
-//      {
-//        inherited::currentWriteBuffer_->release ();
-//        inherited::currentWriteBuffer_ = NULL;
-//
-////         ACE_DEBUG ((LM_DEBUG,
-////                     ACE_TEXT ("[%u]: socket was closed by the peer...\n"),
-////                     peer_.get_handle ()));
-//
-//        // nothing to do but wait for our shutdown signal (see above)...
-//        break;
-//      }
-//      default:
-//      {
-////         ACE_DEBUG ((LM_DEBUG,
-////                     ACE_TEXT ("[%u]: sent %u bytes...\n"),
-////                     peer_.get_handle (),
-////                     bytes_sent));
-//
-//        // finished with this buffer ?
-//        if (static_cast<size_t> (bytes_sent) == inherited::currentWriteBuffer_->length ())
-//        {
-//          // get the next one...
-//          inherited::currentWriteBuffer_->release ();
-//          inherited::currentWriteBuffer_ = NULL;
-//        } // end IF
-//        else
-//        {
-//          // there's more data --> adjust read pointer
-//          inherited::currentWriteBuffer_->rd_ptr (bytes_sent);
-//        } // end ELSE
-//
-//        break;
-//      }
-//    } // end SWITCH
-//  } // end WHILE
-//
-//  //ACE_DEBUG ((LM_DEBUG,
-//  //            ACE_TEXT ("(%t) worker (connection: %u) joining...\n"),
-//  //            inherited::stream_.getSessionID ()));
-//
-//  return 0;
-//}
+////int
+////Net_AsynchNetlinkConnection_T::svc (void)
+////{
+////  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::svc"));
+////
+////  ACE_DEBUG((LM_DEBUG,
+////             ACE_TEXT("(%t) worker (connection: %u) starting...\n"),
+////             inherited::stream_.getSessionID ()));
+////
+////  ssize_t bytes_sent = 0;
+////  while (true)
+////  {
+////    if (inherited::currentWriteBuffer_ == NULL)
+////      if (inherited::stream_.get (inherited::currentWriteBuffer_, NULL) == -1) // block
+////      {
+////        ACE_DEBUG ((LM_ERROR,
+////                    ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
+////        return -1;
+////      } // end IF
+////
+////    // finished ?
+////    if (inherited::currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
+////    {
+////      inherited::currentWriteBuffer_->release ();
+////      inherited::currentWriteBuffer_ = NULL;
+////
+//////       ACE_DEBUG ((LM_DEBUG,
+//////                   ACE_TEXT ("[%u]: finished sending...\n"),
+//////                   peer_.get_handle ()));
+////
+////      break;
+////    } // end IF
+////
+////    // put some data into the socket...
+////    bytes_sent = inherited::peer_.send (inherited::currentWriteBuffer_->rd_ptr (),
+////                                        inherited::currentWriteBuffer_->length (),
+////                                        0, // default behavior
+////                                        //MSG_DONTWAIT, // don't block
+////                                        NULL); // block if necessary...
+////    switch (bytes_sent)
+////    {
+////      case -1:
+////      {
+////        // connection reset by peer/broken pipe ? --> not an error
+////        int error = ACE_OS::last_error ();
+////        if ((error != ECONNRESET) &&
+////            (error != ENOTSOCK) &&
+////            (error != EPIPE))
+////          ACE_DEBUG ((LM_ERROR,
+////                      ACE_TEXT ("failed to ACE_SOCK_Stream::send(): \"%m\", returning\n")));
+////
+////        inherited::currentWriteBuffer_->release ();
+////        inherited::currentWriteBuffer_ = NULL;
+////
+////        // nothing to do but wait for our shutdown signal (see above)...
+////        break;
+////      }
+////      // *** GOOD CASES ***
+////      case 0:
+////      {
+////        inherited::currentWriteBuffer_->release ();
+////        inherited::currentWriteBuffer_ = NULL;
+////
+//////         ACE_DEBUG ((LM_DEBUG,
+//////                     ACE_TEXT ("[%u]: socket was closed by the peer...\n"),
+//////                     peer_.get_handle ()));
+////
+////        // nothing to do but wait for our shutdown signal (see above)...
+////        break;
+////      }
+////      default:
+////      {
+//////         ACE_DEBUG ((LM_DEBUG,
+//////                     ACE_TEXT ("[%u]: sent %u bytes...\n"),
+//////                     peer_.get_handle (),
+//////                     bytes_sent));
+////
+////        // finished with this buffer ?
+////        if (static_cast<size_t> (bytes_sent) == inherited::currentWriteBuffer_->length ())
+////        {
+////          // get the next one...
+////          inherited::currentWriteBuffer_->release ();
+////          inherited::currentWriteBuffer_ = NULL;
+////        } // end IF
+////        else
+////        {
+////          // there's more data --> adjust read pointer
+////          inherited::currentWriteBuffer_->rd_ptr (bytes_sent);
+////        } // end ELSE
+////
+////        break;
+////      }
+////    } // end SWITCH
+////  } // end WHILE
+////
+////  //ACE_DEBUG ((LM_DEBUG,
+////  //            ACE_TEXT ("(%t) worker (connection: %u) joining...\n"),
+////  //            inherited::stream_.getSessionID ()));
+////
+////  return 0;
+////}
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 bool
-Net_AsynchTCPConnection::initialize (Net_ClientServerRole_t role_in,
-                                     const Net_SocketConfiguration_t& configuration_in)
+Net_AsynchNetlinkConnection_T<UserDataType,
+                              SessionDataType,
+                              HandlerType>::initialize (Net_ClientServerRole_t role_in,
+                                                        const Net_SocketConfiguration_t& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::initialize"));
 
-  if (!Net_ConnectionBase_T::initialize (role_in,
-                                         configuration_in))
+  if (!inherited::CONNECTION_BASE_T::initialize (role_in,
+                                                 configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
@@ -715,7 +787,7 @@ Net_AsynchTCPConnection::initialize (Net_ClientServerRole_t role_in,
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   std::string local_address;
-  ACE_INET_Addr local_SAP, remote_SAP;
+  ACE_Netlink_Addr local_SAP, remote_SAP;
   try
   {
     info (handle,
@@ -728,16 +800,17 @@ Net_AsynchTCPConnection::initialize (Net_ClientServerRole_t role_in,
                 ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting")));
     return false;
   }
-  if (local_SAP.addr_to_string (buffer,
-                                sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
+//  if (local_SAP.addr_to_string (buffer,
+//                                sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
   local_address = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-  if (remote_SAP.addr_to_string (buffer,
-                                 sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+//  if (remote_SAP.addr_to_string (buffer,
+//                                 sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
 
   // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -761,13 +834,18 @@ Net_AsynchTCPConnection::initialize (Net_ClientServerRole_t role_in,
   return true;
 }
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 void
-Net_AsynchTCPConnection::finalize ()
+Net_AsynchNetlinkConnection_T<UserDataType,
+                              SessionDataType,
+                              HandlerType>::finalize ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::finalize"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::finalize"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr address1, address2;
+  ACE_Netlink_Addr address1, address2;
   try
   {
     info (handle,
@@ -780,46 +858,56 @@ Net_AsynchTCPConnection::finalize ()
                 ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
   }
 
-  Net_ConnectionBase_T::finalize ();
+  inherited::CONNECTION_BASE_T::finalize ();
 
   // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered TCP connection [%@/%u] (total: %u)\n"),
+              ACE_TEXT ("deregistered netlink connection [%@/%u] (total: %u)\n"),
               this, reinterpret_cast<unsigned int> (handle),
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered TCP connection [%@/%d] (total: %d)\n"),
+              ACE_TEXT ("deregistered netlink connection [%@/%d] (total: %d)\n"),
               this, handle,
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
 #endif
 }
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 void
-Net_AsynchTCPConnection::info (ACE_HANDLE& handle_out,
-                               ACE_INET_Addr& localSAP_out,
-                               ACE_INET_Addr& remoteSAP_out) const
+Net_AsynchNetlinkConnection_T<UserDataType,
+                              SessionDataType,
+                              HandlerType>::info (ACE_HANDLE& handle_out,
+                                                  ACE_Netlink_Addr& localSAP_out,
+                                                  ACE_Netlink_Addr& remoteSAP_out) const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::info"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::info"));
 
-  handle_out = ACE_Event_Handler::get_handle ();
+  handle_out = ACE_IPC_SAP::get_handle ();
   localSAP_out = inherited::localSAP_;
   remoteSAP_out = inherited::remoteSAP_;
 }
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 unsigned int
-Net_AsynchTCPConnection::id () const
+Net_AsynchNetlinkConnection_T<UserDataType,
+                              SessionDataType,
+                              HandlerType>::id () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::id"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::id"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
+  ACE_Netlink_Addr local_netlink_address, peer_netlink_address;
   info (handle,
-        local_inet_address,
-        peer_inet_address);
+        local_netlink_address,
+        peer_netlink_address);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   return *static_cast<unsigned int*> (handle);
@@ -828,47 +916,58 @@ Net_AsynchTCPConnection::id () const
 #endif
 }
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 void
-Net_AsynchTCPConnection::dump_state () const
+Net_AsynchNetlinkConnection_T<UserDataType,
+                              SessionDataType,
+                              HandlerType>::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::dump_state"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
+  ACE_Netlink_Addr local_netlink_address, peer_netlink_address;
   info (handle,
-        local_inet_address,
-        peer_inet_address);
+        local_netlink_address,
+        peer_netlink_address);
 
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   std::string local_address;
-  if (local_inet_address.addr_to_string (buffer,
-                                         sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    local_address = buffer;
+  // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
+//  if (local_netlink_address.addr_to_string (buffer,
+//                                            sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+//  else
+//    local_address = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   std::string peer_address;
-  if (peer_inet_address.addr_to_string (buffer,
-                                        sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address = buffer;
+//  if (peer_netlink_address.addr_to_string (buffer,
+//                                           sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+//  else
+//    peer_address = buffer;
 
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
+              ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (peer_address.c_str ())));
 }
 
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 void
-Net_AsynchTCPConnection::open (ACE_HANDLE handle_in,
-                               ACE_Message_Block& messageBlock_in)
+Net_AsynchNetlinkConnection_T<UserDataType,
+                              SessionDataType,
+                              HandlerType>::open (ACE_HANDLE handle_in,
+                                                  ACE_Message_Block& messageBlock_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::open"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::open"));
 
   // step1: init/start stream, tweak socket, register reading data with reactor
   // , ...
@@ -879,7 +978,7 @@ Net_AsynchTCPConnection::open (ACE_HANDLE handle_in,
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   std::string local_address;
-  ACE_INET_Addr local_SAP, remote_SAP;
+  ACE_Netlink_Addr local_SAP, remote_SAP;
   try
   {
     info (handle,
@@ -893,21 +992,22 @@ Net_AsynchTCPConnection::open (ACE_HANDLE handle_in,
 
     return;
   }
-  if (local_SAP.addr_to_string (buffer,
-                                sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
+//  if (local_SAP.addr_to_string (buffer,
+//                                sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
   local_address = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-  if (remote_SAP.addr_to_string (buffer,
-                                 sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+//  if (remote_SAP.addr_to_string (buffer,
+//                                 sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
 
   // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered TCP connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              ACE_TEXT ("registered netlink connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, reinterpret_cast<unsigned int> (handle),
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
@@ -915,7 +1015,7 @@ Net_AsynchTCPConnection::open (ACE_HANDLE handle_in,
                                    : -1)));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered TCP connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+              ACE_TEXT ("registered netlink connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, handle,
               ACE_TEXT (local_address.c_str ()),
               ACE_TEXT (buffer),
@@ -924,70 +1024,18 @@ Net_AsynchTCPConnection::open (ACE_HANDLE handle_in,
 #endif
 }
 
-//int
-//Net_AsynchTCPConnection::close (u_long arg_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::close"));
-//  // [*NOTE*: hereby we override the default behavior of a ACE_Svc_Handler,
-//  // which would call handle_close() AGAIN]
-//
-//  // *NOTE*: this method will be invoked
-//  // - by any worker after returning from svc()
-//  //    --> in this case, this should be a NOP (triggered from handle_close(),
-//  //        which was invoked by the reactor) - we override the default
-//  //        behavior of a ACE_Svc_Handler, which would call handle_close() AGAIN
-//  // - by the connector/acceptor when open() fails (e.g. too many connections !)
-//  //    --> shutdown
-//
-//  switch (arg_in)
-//  {
-//    // called by:
-//    // - any worker from ACE_Task_Base on clean-up
-//    // - acceptor/connector if there are too many connections (i.e. open()
-//    //   returned -1)
-//    case NORMAL_CLOSE_OPERATION:
-//    {
-//      // check specifically for the first case...
-//      if (ACE_OS::thr_equal (ACE_Thread::self (),
-//                             inherited::last_thread ()))
-//      {
-////       if (module ())
-////         ACE_DEBUG ((LM_DEBUG,
-////                     ACE_TEXT ("\"%s\" worker thread (ID: %t) leaving...\n"),
-////                     ACE_TEXT_ALWAYS_CHAR (name ())));
-////       else
-////         ACE_DEBUG ((LM_DEBUG,
-////                     ACE_TEXT ("worker thread (ID: %t) leaving...\n")));
-//
-//        break;
-//      } // end IF
-//
-//      // too many connections: invoke inherited default behavior
-//      // --> simply fall through to the next case
-//    }
-//    // called by external (e.g. reactor) thread wanting to close the connection
-//    // (e.g. too many connections)
-//    // *NOTE*: this eventually calls handle_close() (see below)
-//    case CLOSE_DURING_NEW_CONNECTION:
-//      return inherited::close (arg_in);
-//    default:
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("invalid argument: %u, returning\n"),
-//                  arg_in));
-//
-//      break;
-//    }
-//  } // end SWITCH
-//
-//  return 0;
-//}
-
+template <typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
 int
-Net_AsynchTCPConnection::handle_close (ACE_HANDLE handle_in,
-                                       ACE_Reactor_Mask mask_in)
+Net_AsynchNetlinkConnection_T<UserDataType,
+                              SessionDataType,
+                              HandlerType>::handle_close (ACE_HANDLE handle_in,
+                                                          ACE_Reactor_Mask mask_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::handle_close"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::handle_close"));
+
+  int result = -1;
 
   switch (mask_in)
   {
@@ -1047,8 +1095,8 @@ Net_AsynchTCPConnection::handle_close (ACE_HANDLE handle_in,
   //  } // end IF
 
   // step3: invoke base-class maintenance
-  int result = inherited::handle_close (handle_in, // event handle
-                                        mask_in);  // event mask
+  result = inherited::handle_close (handle_in, // event handle
+                                    mask_in);  // event mask
   if (result == -1)
     // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1066,38 +1114,38 @@ Net_AsynchTCPConnection::handle_close (ACE_HANDLE handle_in,
   return result;
 }
 
-//void
-//Net_AsynchTCPConnection::shutdown()
-//{
-//  NETWORK_TRACE(ACE_TEXT("Net_AsynchTCPConnection::shutdown"));
-//
-//  ACE_Message_Block* stop_mb = NULL;
-//  ACE_NEW_NORETURN(stop_mb,
-//                   ACE_Message_Block(0,                                  // size
-//                                     ACE_Message_Block::MB_STOP,         // type
-//                                     NULL,                               // continuation
-//                                     NULL,                               // data
-//                                     NULL,                               // buffer allocator
-//                                     NULL,                               // locking strategy
-//                                     ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // priority
-//                                     ACE_Time_Value::zero,               // execution time
-//                                     ACE_Time_Value::max_time,           // deadline time
-//                                     NULL,                               // data block allocator
-//                                     NULL));                             // message allocator)
-//  if (!stop_mb)
-//  {
-//    ACE_DEBUG((LM_ERROR,
-//               ACE_TEXT("failed to allocate ACE_Message_Block: \"%m\", aborting\n")));
-//    return;
-//  } // end IF
-//
-//  if (inherited::putq(stop_mb, NULL) == -1)
-//  {
-//    ACE_DEBUG((LM_ERROR,
-//               ACE_TEXT("failed to ACE_Task::putq(): \"%m\", continuing\n")));
-//
-//    stop_mb->release();
-//  } // end IF
-//
-//  // *NOTE*: defer waiting for any worker(s) to the dtor
-//}
+////void
+////Net_AsynchNetlinkConnection_T::shutdown()
+////{
+////  NETWORK_TRACE(ACE_TEXT("Net_AsynchNetlinkConnection_T::shutdown"));
+////
+////  ACE_Message_Block* stop_mb = NULL;
+////  ACE_NEW_NORETURN(stop_mb,
+////                   ACE_Message_Block(0,                                  // size
+////                                     ACE_Message_Block::MB_STOP,         // type
+////                                     NULL,                               // continuation
+////                                     NULL,                               // data
+////                                     NULL,                               // buffer allocator
+////                                     NULL,                               // locking strategy
+////                                     ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // priority
+////                                     ACE_Time_Value::zero,               // execution time
+////                                     ACE_Time_Value::max_time,           // deadline time
+////                                     NULL,                               // data block allocator
+////                                     NULL));                             // message allocator)
+////  if (!stop_mb)
+////  {
+////    ACE_DEBUG((LM_ERROR,
+////               ACE_TEXT("failed to allocate ACE_Message_Block: \"%m\", aborting\n")));
+////    return;
+////  } // end IF
+////
+////  if (inherited::putq(stop_mb, NULL) == -1)
+////  {
+////    ACE_DEBUG((LM_ERROR,
+////               ACE_TEXT("failed to ACE_Task::putq(): \"%m\", continuing\n")));
+////
+////    stop_mb->release();
+////  } // end IF
+////
+////  // *NOTE*: defer waiting for any worker(s) to the dtor
+////}

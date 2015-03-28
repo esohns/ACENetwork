@@ -24,10 +24,10 @@
 #include "ace/Asynch_IO.h"
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
 #include "ace/Message_Block.h"
 #include "ace/Netlink_Addr.h"
 #include "ace/Notification_Strategy.h"
+//#include "ace/SOCK_Netlink.h"
 
 #include "net_configuration.h"
 #include "net_exports.h"
@@ -58,14 +58,14 @@ class Net_Export Net_AsynchNetlinkSocketHandler
   Net_AsynchNetlinkSocketHandler ();
 
   // helper method(s)
-  void initiate_read_stream ();
+  void initiate_read_dgram ();
 
-  virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
+  virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
-  ACE_Asynch_Read_Stream  inputStream_;
-  ACE_Asynch_Write_Stream outputStream_;
-  ACE_Netlink_Addr        localSAP_;
-  ACE_Netlink_Addr        remoteSAP_;
+  ACE_Asynch_Read_Dgram  inputStream_;
+  ACE_Asynch_Write_Dgram outputStream_;
+  ACE_Netlink_Addr       localSAP_;
+  ACE_Netlink_Addr       remoteSAP_;
 
  private:
   typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
@@ -77,6 +77,8 @@ class Net_Export Net_AsynchNetlinkSocketHandler
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
+
+//  ACE_SOCK_Netlink       socket_;
 };
 
 #endif

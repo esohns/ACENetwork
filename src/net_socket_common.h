@@ -52,12 +52,13 @@ typedef Net_StreamAsynchTCPSocketBase_T<Net_Configuration_t,
                                         Net_Stream,
                                         Net_AsynchTCPSocketHandler> Net_AsynchTCPHandler_t;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-typedef Net_StreamAsynchTCPSocketBase_T<Net_Configuration_t,
+typedef Net_StreamAsynchUDPSocketBase_T<Net_Configuration_t,
                                         Net_UserData_t,
                                         Net_StreamSessionData_t,
                                         Net_INetlinkTransportLayer_t,
                                         Stream_Statistic_t,
                                         Net_Stream,
+                                        ACE_SOCK_NETLINK,
                                         Net_AsynchNetlinkSocketHandler> Net_AsynchNetlinkHandler_t;
 #endif
 typedef Net_StreamAsynchUDPSocketBase_T<Net_Configuration_t,
@@ -93,7 +94,7 @@ typedef Net_StreamTCPSocketBase_T<Net_Configuration_t,
                                   Net_Stream,
                                   Net_TCPSocketHandler> Net_TCPHandler_t;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-typedef Net_StreamTCPSocketBase_T<Net_Configuration_t,
+typedef Net_StreamUDPSocketBase_T<Net_Configuration_t,
                                   Net_UserData_t,
                                   Net_StreamSessionData_t,
                                   Net_INetlinkTransportLayer_t,

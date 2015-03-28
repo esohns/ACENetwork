@@ -374,7 +374,8 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 /////////////////////////////////////////
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
@@ -384,9 +385,9 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
                        UserDataType,
                        SessionDataType,
                        Net_INetlinkTransportLayer_t,
-                       Net_NetlinkConnection>::Net_Client_Connector_T (const ConfigurationType* configuration_in,
-                                                                       ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                       unsigned int statisticCollectionInterval_in)
+                       HandlerType>::Net_Client_Connector_T (const ConfigurationType* configuration_in,
+                                                             ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                             unsigned int statisticCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
@@ -395,7 +396,8 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
 
 }
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
@@ -405,13 +407,14 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
                        UserDataType,
                        SessionDataType,
                        Net_INetlinkTransportLayer_t,
-                       Net_NetlinkConnection>::~Net_Client_Connector_T ()
+                       HandlerType>::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
 
 }
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
@@ -422,7 +425,7 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
                        UserDataType,
                        SessionDataType,
                        Net_INetlinkTransportLayer_t,
-                       Net_NetlinkConnection>::make_svc_handler (Net_NetlinkConnection*& handler_inout)
+                       HandlerType>::make_svc_handler (HandlerType*& handler_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
 
@@ -430,8 +433,8 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
   handler_inout = NULL;
 
   ACE_NEW_NORETURN (handler_inout,
-                    Net_NetlinkConnection (interfaceHandle_,
-                                           statisticCollectionInterval_));
+                    HandlerType (interfaceHandle_,
+                                 statisticCollectionInterval_));
   if (!handler_inout)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -439,7 +442,8 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
   return ((handler_inout == NULL) ? -1 : 0);
 }
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
@@ -450,13 +454,14 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
                        UserDataType,
                        SessionDataType,
                        Net_INetlinkTransportLayer_t,
-                       Net_NetlinkConnection>::abort ()
+                       HandlerType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
 
 }
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
@@ -467,18 +472,18 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
                        UserDataType,
                        SessionDataType,
                        Net_INetlinkTransportLayer_t,
-                       Net_NetlinkConnection>::connect (const ACE_Netlink_Addr& address_in)
+                       HandlerType>::connect (const ACE_Netlink_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
 
   int result = -1;
 
-  Net_NetlinkConnection* handler_p = NULL;
+  HandlerType* handler_p = NULL;
   result = make_svc_handler (handler_p);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Client_Connector_T<Net_NetlinkConnection>::make_svc_handler(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to Net_Client_Connector_T::make_svc_handler(): \"%m\", aborting\n")));
     return false;
   } // end IF
   ACE_ASSERT (handler_p);
@@ -497,7 +502,7 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Connector::connect(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to HandlerType::open(\"%s\"): \"%m\", aborting\n"),
                 buffer));
     return false;
   } // end IF
@@ -505,7 +510,8 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
   return true;
 }
 
-template <typename ConfigurationType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
@@ -516,7 +522,7 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
                        UserDataType,
                        SessionDataType,
                        Net_INetlinkTransportLayer_t,
-                       Net_NetlinkConnection>::getConfiguration () const
+                       HandlerType>::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
 

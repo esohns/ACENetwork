@@ -62,6 +62,8 @@ class Net_Export Net_NetlinkSocketHandler
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
  protected:
+  typedef ACE_Svc_Handler<ACE_SOCK_NETLINK, ACE_MT_SYNCH> SVC_HANDLER_T;
+
   Net_NetlinkSocketHandler ();
   virtual ~Net_NetlinkSocketHandler ();
 
