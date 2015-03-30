@@ -2,9 +2,10 @@ ACLOCAL_AMFLAGS = -I m4
 
 DEFS = \
   -DNET_CLIENT_BUILD_DLL=1 \
-  -DMETA_PACKAGE=\"@META_PACKAGE@\"
+  -DMETA_PACKAGE=\"@PACKAGE_NAME@\"
 
 AM_CPPFLAGS = \
+  -I$(top_srcdir)/../ATCD/ACE \
   -I$(top_srcdir)/../libCommon/src \
   -I$(top_srcdir)/../libACEStream/src \
   -I$(srcdir)/..

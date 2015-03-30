@@ -1040,10 +1040,10 @@ Net_AsynchNetlinkConnection_T<UserDataType,
   switch (mask_in)
   {
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
-    case ACE_Event_Handler::ALL_EVENTS_MASK: // --> connect failed (e.g. connection refused) /
-      //     accept failed (e.g. too many connections) /
-      //     select failed (EBADF see Select_Reactor_T.cpp)
-      //     asynch abort
+    case ACE_Event_Handler::ALL_EVENTS_MASK: // --> connect failed (e.g. connection refused)
+                                             //     accept failed (e.g. too many connections)
+                                             //     select failed (EBADF see Select_Reactor_T.cpp)
+                                             //     asynch abort
       break;
     case ACE_Event_Handler::EXCEPT_MASK:
       // *IMPORTANT NOTE*: the TP_Reactor dispatches notifications in parallel

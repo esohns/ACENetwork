@@ -194,8 +194,14 @@ Net_AsynchNetlinkSocketHandler::handle_close(ACE_HANDLE handle_in,
   int result = -1;
 
   // clean up
-  inputStream_.cancel ();
-  outputStream_.cancel ();
+  result = inputStream_.cancel ();
+//  if (result == -1)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\", continuing\n")));
+  result = outputStream_.cancel ();
+//  if (result == -1)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%m\", continuing\n")));
 
   if (handle_in != ACE_INVALID_HANDLE)
   {

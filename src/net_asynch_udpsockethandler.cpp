@@ -299,6 +299,7 @@ Net_AsynchUDPSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram::Re
 
   int result = -1;
   bool close = false;
+  size_t bytes_transferred = result_in.bytes_transferred ();
 
   // sanity check
   result = result_in.success ();
@@ -315,7 +316,7 @@ Net_AsynchUDPSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram::Re
     close = true;
   } // end IF
 
-  switch (result_in.bytes_transferred ())
+  switch (bytes_transferred)
   {
     case -1:
     case 0:
@@ -336,14 +337,16 @@ Net_AsynchUDPSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram::Re
     default:
     {
       // short write ?
-      if (result_in.bytes_to_write () != result_in.bytes_transferred ())
+      if (result_in.bytes_to_write () != bytes_transferred)
       {
-        // *TODO*: handle short writes more gracefully
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("stream (%d): sent %u/%u byte(s) only, aborting"),
                     result_in.handle (),
-                    result_in.bytes_transferred (),
+                    bytes_transferred,
                     result_in.bytes_to_write ()));
+
+        // *TODO*: (try to) handle short writes gracefully...
+        // result_in.message_block ()->wr_ptr (bytes_transferred);
 
         close = true;
       } // end IF

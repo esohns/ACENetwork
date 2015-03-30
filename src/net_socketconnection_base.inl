@@ -826,8 +826,8 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
   {
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
     case ACE_Event_Handler::ALL_EVENTS_MASK: // --> asynch abort
-      //     select failed (EBADF see Select_Reactor_T.cpp)
-      //     asynch abort
+                                             //     select failed (EBADF see Select_Reactor_T.cpp)
+                                             //     asynch abort
       break;
     case ACE_Event_Handler::EXCEPT_MASK:
       // *IMPORTANT NOTE*: the TP_Reactor dispatches notifications in parallel

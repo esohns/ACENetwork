@@ -40,7 +40,7 @@ class Net_SocketConnectionBase_T
  public:
   virtual ~Net_SocketConnectionBase_T ();
 
-  // implement (part of) Net_IInetTransportLayer
+  // implement (part of) Net_ITransportLayer
   virtual void ping (); // ping the peer !
 
   //// implement Common_IStatistic
@@ -96,7 +96,7 @@ class Net_AsynchSocketConnectionBase_T
  public:
   virtual ~Net_AsynchSocketConnectionBase_T ();
 
-  // implement (part of) Net_IInetTransportLayer
+  // implement (part of) Net_ITransportLayer
   virtual void ping (); // ping the peer !
 
   //// implement Common_IStatistic

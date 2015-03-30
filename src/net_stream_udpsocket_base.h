@@ -56,6 +56,8 @@ class Net_StreamUDPSocketBase_T
 
   // *NOTE*: enqueue any received data onto our stream for further processing
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+  // *NOTE*: send any enqueued data back to the client...
+  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() returns -1
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
@@ -137,6 +139,8 @@ class Net_StreamUDPSocketBase_T<ConfigurationType,
 
   // *NOTE*: enqueue any received data onto our stream for further processing
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+  // *NOTE*: send any enqueued data back to the client...
+  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() returns -1
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,

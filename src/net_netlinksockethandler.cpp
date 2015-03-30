@@ -143,11 +143,10 @@ Net_NetlinkSocketHandler::open (void* arg_in)
       reinterpret_cast<Net_SocketConfiguration_t*> (arg_in);
 
   // step1: open socket
-  ACE_Netlink_Addr local_SAP;
-  local_SAP.set (ACE_OS::getpid (), 0);
-  result = inherited2::peer_.open (local_SAP,                  // local SAP
-                                   ACE_PROTOCOL_FAMILY_NETLINK, // protocol family
-                                   NETLINK_GENERIC);            // protocol
+  result =
+      inherited2::peer_.open (socket_configuration_p->netlinkAddress, // local SAP
+                              ACE_PROTOCOL_FAMILY_NETLINK,            // protocol family
+                              NETLINK_GENERIC);                       // protocol
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];

@@ -506,6 +506,182 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
                           StatisticContainerType,
                           StreamType,
 //                          SocketType,
+                          SocketHandlerType>::handle_output (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_output"));
+
+  int result = -1;
+  ssize_t bytes_sent = -1;
+
+  ACE_UNUSED_ARG (handle_in);
+
+  // *IMPORTANT NOTE*: in a threaded environment, workers MAY be
+  // dispatching the reactor notification queue concurrently (most notably,
+  // ACE_TP_Reactor) --> enforce proper serialization
+  if (serializeOutput_)
+    sendLock_.acquire ();
+
+  if (!currentWriteBuffer_)
+  {
+    // send next data chunk from the stream...
+    // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
+    // been notified to the reactor
+    //if (!inherited::myUserData.useThreadPerConnection)
+    result =
+        stream_.get (currentWriteBuffer_,
+                     const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
+    //else
+    //  result = inherited2::getq (inherited::currentWriteBuffer_,
+    //                             const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
+    if (result == -1)
+    {
+      // *IMPORTANT NOTE*: a number of issues can occur here:
+      // - connection has been closed in the meantime
+      // - queue has been deactivated
+      int error = ACE_OS::last_error ();
+      if ((error != EAGAIN) ||  // <-- connection has been closed in the meantime
+          (error != ESHUTDOWN)) // <-- queue has been deactivated
+        ACE_DEBUG ((LM_ERROR,
+                    (inherited3::configuration_.streamConfiguration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
+                                                                                           : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
+
+      // clean up
+      if (serializeOutput_)
+        sendLock_.release ();
+
+      return -1;
+    } // end IF
+  } // end IF
+  ACE_ASSERT (currentWriteBuffer_);
+
+  // finished ?
+  if (inherited3::configuration_.streamConfiguration.useThreadPerConnection &&
+      currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
+  {
+    currentWriteBuffer_->release ();
+    currentWriteBuffer_ = NULL;
+
+    //       ACE_DEBUG ((LM_DEBUG,
+    //                   ACE_TEXT ("[%u]: finished sending...\n"),
+    //                   peer_.get_handle ()));
+
+    // clean up
+    if (serializeOutput_)
+      sendLock_.release ();
+
+    return -1;
+  } // end IF
+
+  bytes_sent =
+      inherited2::peer_.send (currentWriteBuffer_->rd_ptr (),                             // data
+                              currentWriteBuffer_->length (),                             // bytes to send
+                              inherited3::configuration_.socketConfiguration.peerAddress, // peer address
+                              0);                                                         // flags
+  switch (bytes_sent)
+  {
+    case -1:
+    {
+      // *IMPORTANT NOTE*: a number of issues can occur here:
+      // - connection reset by peer
+      // - connection abort()ed locally
+      int error = ACE_OS::last_error ();
+      if ((error != ECONNRESET) &&
+          (error != ECONNABORTED) &&
+          (error != EPIPE) &&      // <-- connection reset by peer
+          // -------------------------------------------------------------------
+          (error != ENOTSOCK) &&
+          (error != EBADF))        // <-- connection abort()ed locally
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SOCK_Stream::send(): \"%m\", aborting\n")));
+
+      // clean up
+      currentWriteBuffer_->release ();
+      currentWriteBuffer_ = NULL;
+      if (serializeOutput_)
+        sendLock_.release ();
+
+      return -1;
+    }
+      // *** GOOD CASES ***
+    case 0:
+    {
+      //       ACE_DEBUG ((LM_DEBUG,
+      //                   ACE_TEXT ("[%u]: socket was closed by the peer...\n"),
+      //                   handle_in));
+
+      // clean up
+      currentWriteBuffer_->release ();
+      currentWriteBuffer_ = NULL;
+      if (serializeOutput_)
+        sendLock_.release ();
+
+      return -1;
+    }
+    default:
+    {
+      //       ACE_DEBUG ((LM_DEBUG,
+      //                  ACE_TEXT ("[%u]: sent %u bytes...\n"),
+      //                  handle_in,
+      //                  bytes_sent));
+
+      // finished with this buffer ?
+      currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
+      if (currentWriteBuffer_->length () > 0)
+        break; // there's more data
+
+      // clean up
+      currentWriteBuffer_->release ();
+      currentWriteBuffer_ = NULL;
+
+      break;
+    }
+  } // end SWITCH
+
+  // immediately reschedule sending ?
+  //  if ((currentWriteBuffer_ == NULL) && inherited::msg_queue ()->is_empty ())
+  //  {
+  //    if (inherited::reactor ()->cancel_wakeup (this,
+  //                                              ACE_Event_Handler::WRITE_MASK) == -1)
+  //      ACE_DEBUG ((LM_ERROR,
+  //                  ACE_TEXT ("failed to ACE_Reactor::cancel_wakeup(): \"%m\", continuing\n")));
+  //  } // end IF
+  //  else
+  if (currentWriteBuffer_)
+  {
+    // clean up
+    if (serializeOutput_)
+      sendLock_.release ();
+
+    return 1;
+  } // end IF
+  //if (inherited::reactor ()->schedule_wakeup (this,
+  //                                            ACE_Event_Handler::WRITE_MASK) == -1)
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to ACE_Reactor::schedule_wakeup(): \"%m\", continuing\n")));
+
+  // clean up
+  if (serializeOutput_)
+    sendLock_.release ();
+
+  return 0;
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+//          typename SocketType,
+          typename SocketHandlerType>
+int
+Net_StreamUDPSocketBase_T<ConfigurationType,
+                          UserDataType,
+                          SessionDataType,
+                          ITransportLayerType,
+                          StatisticContainerType,
+                          StreamType,
+//                          SocketType,
                           SocketHandlerType>::handle_close (ACE_HANDLE handle_in,
                                                             ACE_Reactor_Mask mask_in)
 {
@@ -1058,7 +1234,6 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
   // read a datagram from the socket...
   ssize_t bytes_received = -1;
-  ACE_Netlink_Addr peer_address;
   bytes_received = inherited2::peer_.recv (buffer_p->wr_ptr (), // buf
                                            buffer_p->size (),   // n
                                            0);                  // flags
@@ -1134,6 +1309,177 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
     return -1;
   } // end IF
+
+  return 0;
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType>
+int
+Net_StreamUDPSocketBase_T<ConfigurationType,
+                          UserDataType,
+                          SessionDataType,
+                          Net_INetlinkTransportLayer_t,
+                          StatisticContainerType,
+                          StreamType,
+                          Net_NetlinkSocketHandler>::handle_output (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_output"));
+
+  int result = -1;
+  ssize_t bytes_sent = -1;
+
+  ACE_UNUSED_ARG (handle_in);
+
+  // *IMPORTANT NOTE*: in a threaded environment, workers MAY be
+  // dispatching the reactor notification queue concurrently (most notably,
+  // ACE_TP_Reactor) --> enforce proper serialization
+  if (serializeOutput_)
+    sendLock_.acquire ();
+
+  if (!currentWriteBuffer_)
+  {
+    // send next data chunk from the stream...
+    // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
+    // been notified to the reactor
+    //if (!inherited::myUserData.useThreadPerConnection)
+    result =
+        stream_.get (currentWriteBuffer_,
+                     const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
+    //else
+    //  result = inherited2::getq (inherited::currentWriteBuffer_,
+    //                             const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
+    if (result == -1)
+    {
+      // *IMPORTANT NOTE*: a number of issues can occur here:
+      // - connection has been closed in the meantime
+      // - queue has been deactivated
+      int error = ACE_OS::last_error ();
+      if ((error != EAGAIN) ||  // <-- connection has been closed in the meantime
+          (error != ESHUTDOWN)) // <-- queue has been deactivated
+        ACE_DEBUG ((LM_ERROR,
+                    (inherited3::configuration_.streamConfiguration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
+                                                                                           : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
+
+      // clean up
+      if (serializeOutput_)
+        sendLock_.release ();
+
+      return -1;
+    } // end IF
+  } // end IF
+  ACE_ASSERT (currentWriteBuffer_);
+
+  // finished ?
+  if (inherited3::configuration_.streamConfiguration.useThreadPerConnection &&
+      currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
+  {
+    currentWriteBuffer_->release ();
+    currentWriteBuffer_ = NULL;
+
+    //       ACE_DEBUG ((LM_DEBUG,
+    //                   ACE_TEXT ("[%u]: finished sending...\n"),
+    //                   peer_.get_handle ()));
+
+    // clean up
+    if (serializeOutput_)
+      sendLock_.release ();
+
+    return -1;
+  } // end IF
+
+  bytes_sent =
+      inherited2::peer_.send (currentWriteBuffer_->rd_ptr (), // data
+                              currentWriteBuffer_->length (), // bytes to send
+                              0);                             // flags
+  switch (bytes_sent)
+  {
+    case -1:
+    {
+      // *IMPORTANT NOTE*: a number of issues can occur here:
+      // - connection reset by peer
+      // - connection abort()ed locally
+      int error = ACE_OS::last_error ();
+      if ((error != ECONNRESET) &&
+          (error != ECONNABORTED) &&
+          (error != EPIPE) &&      // <-- connection reset by peer
+          // -------------------------------------------------------------------
+          (error != ENOTSOCK) &&
+          (error != EBADF))        // <-- connection abort()ed locally
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SOCK_Stream::send(): \"%m\", aborting\n")));
+
+      // clean up
+      currentWriteBuffer_->release ();
+      currentWriteBuffer_ = NULL;
+      if (serializeOutput_)
+        sendLock_.release ();
+
+      return -1;
+    }
+      // *** GOOD CASES ***
+    case 0:
+    {
+      //       ACE_DEBUG ((LM_DEBUG,
+      //                   ACE_TEXT ("[%u]: socket was closed by the peer...\n"),
+      //                   handle_in));
+
+      // clean up
+      currentWriteBuffer_->release ();
+      currentWriteBuffer_ = NULL;
+      if (serializeOutput_)
+        sendLock_.release ();
+
+      return -1;
+    }
+    default:
+    {
+      //       ACE_DEBUG ((LM_DEBUG,
+      //                  ACE_TEXT ("[%u]: sent %u bytes...\n"),
+      //                  handle_in,
+      //                  bytes_sent));
+
+      // finished with this buffer ?
+      currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
+      if (currentWriteBuffer_->length () > 0)
+        break; // there's more data
+
+      // clean up
+      currentWriteBuffer_->release ();
+      currentWriteBuffer_ = NULL;
+
+      break;
+    }
+  } // end SWITCH
+
+  // immediately reschedule sending ?
+  //  if ((currentWriteBuffer_ == NULL) && inherited::msg_queue ()->is_empty ())
+  //  {
+  //    if (inherited::reactor ()->cancel_wakeup (this,
+  //                                              ACE_Event_Handler::WRITE_MASK) == -1)
+  //      ACE_DEBUG ((LM_ERROR,
+  //                  ACE_TEXT ("failed to ACE_Reactor::cancel_wakeup(): \"%m\", continuing\n")));
+  //  } // end IF
+  //  else
+  if (currentWriteBuffer_)
+  {
+    // clean up
+    if (serializeOutput_)
+      sendLock_.release ();
+
+    return 1;
+  } // end IF
+  //if (inherited::reactor ()->schedule_wakeup (this,
+  //                                            ACE_Event_Handler::WRITE_MASK) == -1)
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to ACE_Reactor::schedule_wakeup(): \"%m\", continuing\n")));
+
+  // clean up
+  if (serializeOutput_)
+    sendLock_.release ();
 
   return 0;
 }

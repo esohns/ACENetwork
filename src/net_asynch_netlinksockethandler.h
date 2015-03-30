@@ -27,7 +27,6 @@
 #include "ace/Message_Block.h"
 #include "ace/Netlink_Addr.h"
 #include "ace/Notification_Strategy.h"
-//#include "ace/SOCK_Netlink.h"
 
 #include "net_configuration.h"
 #include "net_exports.h"
@@ -77,8 +76,6 @@ class Net_Export Net_AsynchNetlinkSocketHandler
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
-
-//  ACE_SOCK_Netlink       socket_;
 };
 
 #endif

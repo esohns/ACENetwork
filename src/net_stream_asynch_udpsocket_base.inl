@@ -22,6 +22,7 @@
 
 #include "stream_common.h"
 
+#include "net_defines.h"
 #include "net_macros.h"
 
 template <typename ConfigurationType,
@@ -44,7 +45,6 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
  : inherited4 (interfaceHandle_in,
                statisticsCollectionInterval_in)
 // , buffer_ (NULL)
- //, userData_ ()
  //, stream_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
@@ -336,29 +336,33 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
-  ssize_t result_2 = -1;
+  size_t bytes_to_send = -1;
   ACE_Message_Block* message_p = NULL;
-//  if (buffer_ == NULL)
+  ssize_t result_2 = -1;
+
+//  if (!buffer_)
 //  {
-  // send next data chunk from the stream...
-  // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
-  // been notified
-  //  result = stream_.get (buffer_, &ACE_Time_Value::zero);
-  result = stream_.get (message_p,
-                        &const_cast<ACE_Time_Value&> (ACE_Time_Value::zero));
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
-    return -1;
-  } // end IF
+    // send next data chunk from the stream...
+    // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
+    //                   been notified
+//    result = stream_.get (buffer_,
+    result = stream_.get (message_p,
+                          &const_cast<ACE_Time_Value&> (ACE_Time_Value::zero));
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
+      return -1;
+    } // end IF
 //  } // end IF
+//  ACE_ASSERT (buffer_);
+  ACE_ASSERT (message_p);
 
   // start (asynch) write
-  // *NOTE*: this is a fire-and-forget API for message_block...
-  size_t bytes_to_send = message_p->size (); // why oh why...
+//  bytes_to_send = buffer_->size (); // why oh why...
+  bytes_to_send = message_p->size (); // why oh why...
   result_2 =
-//      inherited::outputStream_.send (buffer_,         // data
+//      inherited::outputStream_.send (buffer_,                                                    // data
       inherited::outputStream_.send (message_p,                                                  // data
                                      bytes_to_send,                                              // #bytes to send
                                      0,                                                          // flags
@@ -370,7 +374,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
-                message_p->size ()));
+                bytes_to_send));
 
     // clean up
 //    buffer_->release ();
@@ -702,13 +706,16 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
   int result = -1;
 
+  // *TODO*: ???
+  ACE_Netlink_Addr address =
+      inherited4::configuration_.socketConfiguration.netlinkAddress;
   // step1: open socket
-  ACE_Netlink_Addr local_SAP;
-  local_SAP.set (ACE_OS::getpid (),
-                 0);
-  result = inherited2::open (local_SAP,                   // local SAP
-                             ACE_PROTOCOL_FAMILY_NETLINK, // protocol family
-                             NETLINK_GENERIC);            // protocol
+  result =
+      inherited2::open (address,                                                         // local SAP
+                        ACE_PROTOCOL_FAMILY_NETLINK,                                     // protocol family
+                        inherited4::configuration_.socketConfiguration.netlinkProtocol); // protocol
+                        // NETLINK_USERSOCK);                                             // protocol
+                        //NETLINK_GENERIC);                                              // protocol
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
@@ -723,6 +730,11 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", returning\n"),
                 ACE_TEXT (local_address.c_str ())));
+
+    // clean up
+    handle_close (inherited2::get_handle (),
+                  ACE_Event_Handler::ALL_EVENTS_MASK);
+
     return;
   } // end IF
 
@@ -939,20 +951,21 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   // start (asynch) write
   // *NOTE*: this is a fire-and-forget API for message_block...
   size_t bytes_to_send = message_p->size (); // why oh why...
-  result_2 =
-//      inherited::outputStream_.send (buffer_,         // data
-      inherited::outputStream_.send (message_p,                                                  // data
-                                     bytes_to_send,                                              // #bytes to send
-                                     0,                                                          // flags
-                                     inherited4::configuration_.socketConfiguration.peerNetlinkAddress, // remote address
-                                     NULL,                                                       // ACT
-                                     0,                                                          // priority
-                                     ACE_SIGRTMIN);                                              // signal
+  ACE_Netlink_Addr peer_address;
+  peer_address.set (0, 0); // send to kernel
+//  result_2 = inherited::outputStream_.send (buffer_,     // data
+  result_2 = inherited::outputStream_.send (message_p,     // data
+                                            bytes_to_send, // #bytes to send
+                                            0,             // flags
+                                            peer_address,  // peer address
+                                            NULL,          // ACT
+                                            0,             // priority
+                                            ACE_SIGRTMIN); // signal
   if (result_2 == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
-                message_p->size ()));
+                bytes_to_send));
 
     // clean up
 //    buffer_->release ();
@@ -1015,7 +1028,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   result = inherited::handle_close (inherited2::get_handle (),
                                     mask_in);
   if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
+    ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to SocketHandlerType::handle_close(): \"%m\", continuing\n")));
 
 //  // step4: deregister ?

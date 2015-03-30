@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_CONFIGURATION_H
-#define Net_CONFIGURATION_H
+#ifndef NET_CONFIGURATION_H
+#define NET_CONFIGURATION_H
 
 #include "ace/INET_Addr.h"
 #include "ace/Netlink_Addr.h"
@@ -31,14 +31,15 @@
 
 struct Net_SocketConfiguration_t
 {
-  int              bufferSize;
+  int                 bufferSize;
   // *TODO*: remove address information (pass as AddressType in open() instead)
-  ACE_INET_Addr    peerAddress;
+  ACE_INET_Addr       peerAddress;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  ACE_Netlink_Addr peerNetlinkAddress;
+  ACE_Netlink_Addr    netlinkAddress;
+  int                 netlinkProtocol;
 #endif
-  bool             useLoopbackDevice;
-  // *TODO*: add network interface specifier
+  bool                useLoopbackDevice;
+  // *TODO*: add network interface specifier (interface index on linux, (G)UID on windows)
 };
 
 struct Net_SocketHandlerConfiguration_t

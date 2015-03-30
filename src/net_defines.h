@@ -21,6 +21,10 @@
 #ifndef NET_DEFINES_H
 #define NET_DEFINES_H
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#include "linux/netlink.h"
+#endif
+
 #include "ace/Default_Constants.h"
 
 // *** network-related ***
@@ -35,6 +39,11 @@
 #define NET_DEFAULT_PORT                          10001
 #define NET_DEFAULT_IP_MULTICAST_ADDRESS          "224.0.0.1"
 #define NET_DEFAULT_IP_BROADCAST_ADDRESS          "255.255.255.255"
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+// *IMPORTANT NOTE*: this must match with the kernel module implementation !
+#define NET_DEFAULT_NETLINK_PROTOCOL              NETLINK_USERSOCK
+#define NET_DEFAULT_NETLINK_PROTOCOL_GROUP        1
+#endif
 
 // default event dispatcher (default: use asynch I/O (proactor))
 #define NET_USES_REACTOR                          false

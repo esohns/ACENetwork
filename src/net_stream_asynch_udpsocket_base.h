@@ -164,9 +164,9 @@ class Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
   virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
 
-  StreamType      stream_;
   // *TODO*: (try to) handle short writes gracefully...
-//  ACE_Message_Block* buffer_;
+  //  ACE_Message_Block* buffer_;
+  StreamType         stream_;
 
  private:
   typedef Net_AsynchNetlinkSocketHandler inherited;
