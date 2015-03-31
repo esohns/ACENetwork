@@ -41,7 +41,7 @@
 #define NET_DEFAULT_IP_BROADCAST_ADDRESS          "255.255.255.255"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // *IMPORTANT NOTE*: this must match with the kernel module implementation !
-#define NET_DEFAULT_NETLINK_PROTOCOL              NETLINK_USERSOCK
+#define NET_DEFAULT_NETLINK_PROTOCOL              NETLINK_GENERIC
 #define NET_DEFAULT_NETLINK_PROTOCOL_GROUP        1
 #endif
 
