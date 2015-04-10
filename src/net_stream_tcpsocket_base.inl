@@ -136,15 +136,10 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
     // --> this means that "manual" cleanup is necessary (see handle_close())
     inherited::closing_ = true;
 
-    // *NOTE*: must use 'this' for some strange reason (inherited:: does not
-    //         work here (GCC 4.9.2)...
-#if defined (__GNUC__)
+    // *NOTE*: must use 'this' (inherited2:: does not work here for some
+    //         strange reason)...
     inherited2::configuration_.streamConfiguration.notificationStrategy =
-        &this->notificationStrategy_;
-#else
-    inherited2::configuration_.streamConfiguration.notificationStrategy =
-        &inherited::notificationStrategy_;
-#endif
+      &this->notificationStrategy_;
   } // end IF
   // step1b: init final module (if any)
   if (inherited2::configuration_.streamConfiguration.module)

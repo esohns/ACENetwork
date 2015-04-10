@@ -622,6 +622,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
 /////////////////////////////////////////
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
@@ -1200,3 +1201,4 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Svc_Handler::handle_close(): \"%m\", continuing\n")));
 }
+#endif

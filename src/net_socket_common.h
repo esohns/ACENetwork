@@ -29,7 +29,9 @@
 
 #include "stream_common.h"
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "net_asynch_netlinksockethandler.h"
+#endif
 #include "net_asynch_tcpsockethandler.h"
 #include "net_asynch_udpsockethandler.h"
 #include "net_configuration.h"
@@ -40,7 +42,9 @@
 #include "net_stream_common.h"
 #include "net_stream_tcpsocket_base.h"
 #include "net_stream_udpsocket_base.h"
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "net_netlinksockethandler.h"
+#endif
 #include "net_tcpsockethandler.h"
 #include "net_udpsockethandler.h"
 

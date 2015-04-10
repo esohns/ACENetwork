@@ -26,10 +26,14 @@
 #include "ace/Event_Handler.h"
 #include "ace/Message_Block.h"
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "net_asynch_netlinksockethandler.h"
+#endif
 #include "net_connection_base.h"
 #include "net_itransportlayer.h"
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "net_netlinksockethandler.h"
+#endif
 
 template <typename ConfigurationType,
           typename UserDataType,
@@ -107,6 +111,7 @@ class Net_StreamAsynchUDPSocketBase_T
 
 /////////////////////////////////////////
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // partial specialization (for Netlink)
 template <typename ConfigurationType,
           typename UserDataType,
@@ -185,6 +190,7 @@ class Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   // helper methods
   virtual int handle_output (ACE_HANDLE); // (socket) handle
 };
+#endif
 
 // include template definition
 #include "net_stream_asynch_udpsocket_base.inl"

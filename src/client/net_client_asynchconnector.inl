@@ -463,6 +463,7 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
 /////////////////////////////////////////
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 template <typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
@@ -660,3 +661,4 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
 
   return handler_p;
 }
+#endif

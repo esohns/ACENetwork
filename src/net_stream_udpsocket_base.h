@@ -29,7 +29,9 @@
 
 #include "net_connection_base.h"
 #include "net_itransportlayer.h"
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "net_netlinksockethandler.h"
+#endif
 
 template <typename ConfigurationType,
           typename UserDataType,
@@ -110,6 +112,7 @@ class Net_StreamUDPSocketBase_T
 
 /////////////////////////////////////////
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // partial specialization (for Netlink)
 template <typename ConfigurationType,
           typename UserDataType,
@@ -190,6 +193,7 @@ class Net_StreamUDPSocketBase_T<ConfigurationType,
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&));
 };
+#endif
 
 // include template implementation
 #include "net_stream_udpsocket_base.inl"

@@ -30,7 +30,9 @@
 
 #include "net_client_iconnector.h"
 #include "net_connection_manager_common.h"
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "net_netlinkconnection.h"
+#endif
 #include "net_udpconnection.h"
 
 template <typename AddressType,
@@ -161,6 +163,7 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
 /////////////////////////////////////////
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // partial specialization (for Netlink)
 template <typename HandlerType,
           typename ConfigurationType,
@@ -218,6 +221,7 @@ class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
   ICONNECTION_MANAGER_T*   interfaceHandle_;
   unsigned int             statisticCollectionInterval_; // seconds
 };
+#endif
 
 // include template implementation
 #include "net_client_asynchconnector.inl"

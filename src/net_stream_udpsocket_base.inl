@@ -151,15 +151,10 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     // last active notification has been dispatched, it will be safely deleted
     inherited2::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 
-    // *NOTE*: must use 'this' for some strange reason (inherited:: does not
-    //         work here (GCC 4.9.2)...
-#if defined (__GNUC__)
+    // *NOTE*: must use 'this' (inherited2:: does not work here for some
+    //         strange reason)...
     inherited3::configuration_.streamConfiguration.notificationStrategy =
         &this->notificationStrategy_;
-#else
-    inherited3::configuration_.streamConfiguration.notificationStrategy =
-        &inherited::notificationStrategy_;
-#endif
   } // end IF
   // step2b: init final module (if any)
   if (inherited3::configuration_.streamConfiguration.module)
@@ -869,6 +864,7 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
 /////////////////////////////////////////
 
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
@@ -1668,3 +1664,4 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
   return message_p;
 }
+#endif
