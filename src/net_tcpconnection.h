@@ -21,10 +21,13 @@
 #ifndef Net_TCPCONNECTION_H
 #define Net_TCPCONNECTION_H
 
+#include "ace/Asynch_Acceptor.h"
 #include "ace/Asynch_Connector.h"
 #include "ace/Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/Event_Handler.h"
+#include "ace/Acceptor.h"
+#include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Connector.h"
 
 #include "stream_common.h"
@@ -46,8 +49,8 @@ class Net_Export Net_TCPConnection
                                      Net_StreamSessionData_t,
                                      Stream_Statistic_t>
 {
-  friend class ACE_Connector<Net_TCPConnection,
-                             ACE_SOCK_CONNECTOR>;
+ friend class ACE_Acceptor<Net_TCPConnection, ACE_SOCK_ACCEPTOR>;
+ friend class ACE_Connector<Net_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
   typedef Net_IConnectionManager_T<Net_Configuration_t,
@@ -96,7 +99,7 @@ class Net_Export Net_TCPConnection
   //// stop worker, if any
   //void shutdown ();
 
-//  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection ());
+  Net_TCPConnection ();
   ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection (const Net_TCPConnection&));
   ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection& operator= (const Net_TCPConnection&));
 };
@@ -112,6 +115,7 @@ class Net_Export Net_AsynchTCPConnection
                                            Net_StreamSessionData_t,
                                            Stream_Statistic_t>
 {
+ friend class ACE_Asynch_Acceptor<Net_AsynchTCPConnection>;
  friend class ACE_Asynch_Connector<Net_AsynchTCPConnection>;
 
  public:
@@ -162,7 +166,7 @@ class Net_Export Net_AsynchTCPConnection
   //// stop worker, if any
   //void shutdown ();
 
-//  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection ());
+  Net_AsynchTCPConnection ();
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection (const Net_AsynchTCPConnection&));
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection& operator= (const Net_AsynchTCPConnection&));
 };

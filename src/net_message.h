@@ -23,6 +23,7 @@
 
 #include <string>
 
+#include "net_exports.h"
 #include "net_message_base.h"
 #include "net_remote_comm.h"
 
@@ -35,7 +36,7 @@ class Net_SessionMessage;
 template <typename MessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
-class Net_Message
+class Net_Export Net_Message
  : public Net_MessageBase_T<Net_MessageType_t>
 {
   // enable access to specific private ctors...

@@ -21,13 +21,32 @@
 #ifndef NET_CLIENT_COMMON_H
 #define NET_CLIENT_COMMON_H
 
-//#include "net_client_sockethandler.h"
+#include "ace/INET_Addr.h"
 
-//#include "ace/Connector.h"
-//#include "ace/SOCK_Connector.h"
+#include "net_configuration.h"
+#include "net_itransportlayer.h"
+#include "net_stream_common.h"
+#include "net_tcpconnection.h"
 
-// define implementation-specific connector...
-//typedef ACE_Connector<Net_Client_SocketHandler,
-//                      ACE_SOCK_CONNECTOR> Net_Client_Connector;
+#include "net_client_asynchconnector.h"
+#include "net_client_connector.h"
+
+typedef Net_Client_IConnector_T<ACE_INET_Addr,
+                                Net_SocketHandlerConfiguration_t> Net_Client_IConnector_t;
+
+typedef Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                                     Net_Configuration_t,
+                                     Net_SocketHandlerConfiguration_t,
+                                     Net_UserData_t,
+                                     Net_StreamSessionData_t,
+                                     Net_IInetTransportLayer_t,
+                                     Net_AsynchTCPConnection> Net_Client_AsynchConnector_t;
+typedef Net_Client_Connector_T<ACE_INET_Addr,
+                               Net_Configuration_t,
+                               Net_SocketHandlerConfiguration_t,
+                               Net_UserData_t,
+                               Net_StreamSessionData_t,
+                               Net_IInetTransportLayer_t,
+                               Net_TCPConnection> Net_Client_Connector_t;
 
 #endif

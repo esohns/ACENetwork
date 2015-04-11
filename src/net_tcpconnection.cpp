@@ -35,6 +35,14 @@ Net_TCPConnection::Net_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
 
 }
 
+Net_TCPConnection::Net_TCPConnection ()
+ : inherited (NULL,
+              0)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
+
+}
+
 Net_TCPConnection::~Net_TCPConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::~Net_TCPConnection"));
@@ -568,17 +576,18 @@ Net_TCPConnection::handle_close (ACE_HANDLE handle_in,
 
 /////////////////////////////////////////
 
-//Net_AsynchTCPConnection::Net_AsynchTCPConnection ()
-//  //: inherited ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
-
-//}
-
 Net_AsynchTCPConnection::Net_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                   unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
+
+}
+
+Net_AsynchTCPConnection::Net_AsynchTCPConnection ()
+ : inherited (NULL,
+              0)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
 
