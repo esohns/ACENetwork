@@ -71,11 +71,6 @@ class Net_UDPConnection_T
   virtual bool initialize (Net_ClientServerRole_t,            // role
                            const Net_SocketConfiguration_t&); // configuration
   virtual void finalize ();
-  virtual void info (ACE_HANDLE&,           // return value: handle
-                     ACE_INET_Addr&,        // return value: local SAP
-                     ACE_INET_Addr&) const; // return value: remote SAP
-  virtual unsigned int id () const;
-  virtual void dump_state () const;
 
  private:
   typedef Net_SocketConnectionBase_T<HandlerType,
@@ -126,11 +121,6 @@ class Net_AsynchUDPConnection_T
   virtual bool initialize (Net_ClientServerRole_t,            // role
                            const Net_SocketConfiguration_t&); // configuration
   virtual void finalize ();
-  virtual void info (ACE_HANDLE&,           // return value: handle
-                     ACE_INET_Addr&,        // return value: local SAP
-                     ACE_INET_Addr&) const; // return value: remote SAP
-  virtual unsigned int id () const;
-  virtual void dump_state () const;
 
   // override some ACE_Service_Handler members
   virtual void open (ACE_HANDLE,          // handle

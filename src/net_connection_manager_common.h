@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_CONNECTION_MANAGER_COMMON_H
-#define Net_CONNECTION_MANAGER_COMMON_H
+#ifndef NET_CONNECTION_MANAGER_COMMON_H
+#define NET_CONNECTION_MANAGER_COMMON_H
 
 #include "ace/Singleton.h"
 #include "ace/Synch.h"
@@ -90,9 +90,9 @@ NET_SINGLETON_DECLARE (ACE_Singleton,
                        Net_NetlinkConnection_Manager_t,
                        ACE_Recursive_Thread_Mutex);
 #endif
-//NET_SINGLETON_DECLARE (ACE_Singleton,
-//                       Net_TCPConnection_Manager_t,
-//                       ACE_Recursive_Thread_Mutex);
+NET_SINGLETON_DECLARE (ACE_Singleton,
+                       Net_TCPConnection_Manager_t,
+                       ACE_Recursive_Thread_Mutex);
 NET_SINGLETON_DECLARE (ACE_Singleton,
                        Net_UDPConnection_Manager_t,
                        ACE_Recursive_Thread_Mutex);

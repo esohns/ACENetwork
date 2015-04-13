@@ -350,12 +350,11 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
   // read some data from the socket
   currentReadBuffer_ =
       allocateMessage (inherited2::configuration_.streamConfiguration.bufferSize);
-  if (currentReadBuffer_ == NULL)
+  if (!currentReadBuffer_)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
                 inherited2::configuration_.streamConfiguration.bufferSize));
-
     return -1;
   } // end IF
 
@@ -737,6 +736,114 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
   }
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+void
+Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
+                          SessionDataType,
+                          ITransportLayerType,
+                          StatisticContainerType,
+                          StreamType,
+                          SocketHandlerType>::info (ACE_HANDLE& handle_out,
+                                                    ACE_INET_Addr& localSAP_out,
+                                                    ACE_INET_Addr& remoteSAP_out) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::info"));
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  handle_out = inherited::get_handle ();
+#else
+  handle_out = inherited::get_handle ();
+#endif
+
+  if (inherited::peer_.get_local_addr (localSAP_out) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SOCK::get_local_addr(): \"%m\", continuing\n")));
+  if (inherited::peer_.get_remote_addr (remoteSAP_out) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SOCK::get_remote_addr(): \"%m\", continuing\n")));
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+unsigned int
+Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
+                          SessionDataType,
+                          ITransportLayerType,
+                          StatisticContainerType,
+                          StreamType,
+                          SocketHandlerType>::id () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::id"));
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return *static_cast<unsigned int*> (inherited::get_handle ());
+#else
+  return static_cast<unsigned int> (inherited::get_handle ());
+#endif
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+void
+Net_StreamTCPSocketBase_T<ConfigurationType,
+                          UserDataType,
+                          SessionDataType,
+                          ITransportLayerType,
+                          StatisticContainerType,
+                          StreamType,
+                          SocketHandlerType>::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::dump_state"));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  if (local_inet_address.addr_to_string (buffer,
+    sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string peer_address;
+  if (peer_inet_address.addr_to_string (buffer,
+    sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    peer_address = buffer;
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
+              id (), handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (peer_address.c_str ())));
 }
 
 template <typename ConfigurationType,

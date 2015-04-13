@@ -65,6 +65,13 @@ class Net_StreamTCPSocketBase_T
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;
 
+  // implement (part of) Net_ITransportLayer_T
+  virtual void info (ACE_HANDLE&,           // return value: handle
+                     ACE_INET_Addr&,        // return value: local SAP
+                     ACE_INET_Addr&) const; // return value: remote SAP
+  virtual unsigned int id () const;
+  virtual void dump_state () const;
+
  protected:
   typedef Net_IConnectionManager_T<ConfigurationType,
                                    UserDataType,

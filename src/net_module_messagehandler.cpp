@@ -17,37 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "stdafx.h"
 
-#ifndef NET_CLIENT_COMMON_H
-#define NET_CLIENT_COMMON_H
-
-#include "ace/INET_Addr.h"
-
-#include "net_configuration.h"
-#include "net_itransportlayer.h"
-#include "net_stream_common.h"
-#include "net_tcpconnection.h"
-
-#include "net_client_asynchconnector.h"
-#include "net_client_connector.h"
-#include "net_client_iconnector.h"
-
-typedef Net_Client_IConnector_T<ACE_INET_Addr,
-                                Net_SocketHandlerConfiguration_t> Net_Client_IConnector;
-
-typedef Net_Client_AsynchConnector_T<ACE_INET_Addr,
-                                     Net_Configuration_t,
-                                     Net_SocketHandlerConfiguration_t,
-                                     Net_UserData_t,
-                                     Net_StreamSessionData_t,
-                                     Net_IInetTransportLayer_t,
-                                     Net_AsynchTCPConnection> Net_Client_AsynchConnector_t;
-typedef Net_Client_Connector_T<ACE_INET_Addr,
-                               Net_Configuration_t,
-                               Net_SocketHandlerConfiguration_t,
-                               Net_UserData_t,
-                               Net_StreamSessionData_t,
-                               Net_IInetTransportLayer_t,
-                               Net_TCPConnection> Net_Client_Connector_t;
-
-#endif
+#include "net_module_messagehandler.h"

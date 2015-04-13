@@ -486,35 +486,25 @@ Net_Connection_Manager_T<ConfigurationType,
   ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
 
   // sanity check(s)
-  if (connections_.empty ())
+  if (connections_.is_empty ())
     return;
 
-  // close "newest" connection
-  ACE_Time_Value earliest = ACE_Time_Value::max_time;
-  CONNECTION_CONTAINER_ITERATOR_T iterator;
-  // *TODO*: this is really slow, sort the map by timestamp
-  for (iterator = connections_.begin ();
-       iterator != connections_.end ();
-       iterator++)
-    if ((*iterator).second.timestamp < earliest)
-      earliest = (*iterator).second.timestamp;
-  for (iterator = connections_.begin ();
-       iterator != connections_.end ();
-       iterator++)
-    if ((*iterator).second.timestamp == earliest)
-      break;
-  ACE_ASSERT (iterator != connections_.end ());
-
-  try
-  { // *NOTE*: implicitly invokes deregisterConnection from a pro/reactor thread
-    //         context (if any)
-    (*iterator).second.connection->finalize ();
-  }
-  catch (...)
+  // close "newest" connection --> list tail 
+  CONNECTION_T* connection_p = NULL;
+  CONNECTION_CONTAINER_REVERSEITERATOR_T iterator (connections_);
+  if (iterator.next (connection_p) == 1)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection::finalize(), continuing")));
-  }
+    try
+    { // *NOTE*: implicitly invokes deregisterConnection from a pro/reactor thread
+      //         context (if any)
+      connection_p->finalize ();
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Net_IConnection::finalize(), continuing")));
+    }
+  } // end IF
 }
 
 template <typename ConfigurationType,

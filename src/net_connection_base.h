@@ -28,6 +28,7 @@
 #include "stream_common.h"
 #include "stream_statistichandler.h"
 
+#include "net_common.h"
 #include "net_configuration.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"

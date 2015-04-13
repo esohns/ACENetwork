@@ -21,15 +21,32 @@
 #ifndef NET_STREAM_COMMON_H
 #define NET_STREAM_COMMON_H
 
+#include <list>
+
+#include "ace/Synch_Traits.h"
+
+#include "common.h"
+#include "common_inotify.h"
+#include "common_isubscribe.h"
+
 #include "stream_common.h"
+#include "stream_imodule.h"
 #include "stream_session_data_base.h"
 
-// *NOTE*: I speculate that this is the main reason that C# was ever invented !
-struct Net_UserData_t
-{
-  void* userData;
-};
+#include "net_configuration.h"
+#include "net_message.h"
 
 typedef Stream_SessionDataBase_T<Net_UserData_t> Net_StreamSessionData_t;
+
+typedef Stream_IModule<ACE_MT_SYNCH,
+                       Common_TimePolicy_t,
+                       Stream_ModuleConfiguration_t> Net_IModule_t;
+
+typedef Common_INotify_T<Stream_ModuleConfiguration_t,
+                         Net_Message> Net_INotify_t;
+typedef std::list<Net_INotify_t*> Net_Subscribers_t;
+typedef Net_Subscribers_t::iterator Net_SubscribersIterator_t;
+
+typedef Common_ISubscribe_T<Net_INotify_t> Net_ISubscribe_t;
 
 #endif

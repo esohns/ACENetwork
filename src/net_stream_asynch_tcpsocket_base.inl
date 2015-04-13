@@ -473,6 +473,107 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
                                 ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
+                                SocketHandlerType>::info (ACE_HANDLE& handle_out,
+                                                          ACE_INET_Addr& localSAP_out,
+                                                          ACE_INET_Addr& remoteSAP_out) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::info"));
+
+  int result = -1;
+
+  handle_out = inherited::handle ();
+  localSAP_out = inherited::localSAP_;
+  remoteSAP_out = inherited::remoteSAP_;
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+unsigned int
+Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                ITransportLayerType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketHandlerType>::id () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::id"));
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return *static_cast<unsigned int*> (inherited::handle ());
+#else
+  return static_cast<unsigned int> (inherited::handle ());
+#endif
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+void
+Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                ITransportLayerType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketHandlerType>::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::dump_state"));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  if (local_inet_address.addr_to_string (buffer,
+                                         sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string peer_address;
+  if (peer_inet_address.addr_to_string (buffer,
+                                        sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    peer_address = buffer;
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
+              id (), handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (peer_address.c_str ())));
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+void
+Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                ITransportLayerType,
+                                StatisticContainerType,
+                                StreamType,
                                 SocketHandlerType>::handle_read_stream (const ACE_Asynch_Read_Stream::Result& result)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::handle_read_stream"));

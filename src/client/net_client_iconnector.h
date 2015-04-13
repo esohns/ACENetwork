@@ -22,13 +22,11 @@
 #define NET_CLIENT_ICONNECTOR_H
 
 template <typename AddressType,
-          typename SocketHandlerConfigurationType>
+          typename ConfigurationType> // socket handler configuration
 class Net_Client_IConnector_T
 {
  public:
-  virtual ~Net_Client_IConnector_T () {}
-
-  virtual const SocketHandlerConfigurationType* getConfiguration () const = 0;
+  virtual const ConfigurationType* getConfiguration () const = 0;
 
   virtual void abort () = 0; // shutdown
   virtual bool connect (const AddressType&) = 0;

@@ -30,34 +30,23 @@
 #include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Connector.h"
 
-#include "stream_common.h"
-
+#include "net_common.h"
 #include "net_configuration.h"
 #include "net_exports.h"
-#include "net_iconnectionmanager.h"
-#include "net_itransportlayer.h"
 #include "net_socket_common.h"
-#include "net_socketconnection_base.h"
-#include "net_stream_common.h"
+//#include "net_stream_common.h"
+#include "net_tcpconnection_base.h"
 
 class Net_Export Net_TCPConnection
- : public Net_SocketConnectionBase_T<Net_TCPHandler_t,
-                                     Net_IInetTransportLayer_t,
-                                     Net_Configuration_t,
-                                     Net_SocketHandlerConfiguration_t,
-                                     Net_UserData_t,
-                                     Net_StreamSessionData_t,
-                                     Stream_Statistic_t>
+ : public Net_TCPConnectionBase_T<Net_Configuration_t,
+                                  Net_UserData_t,
+                                  Net_StreamSessionData_t,
+                                  Net_TCPHandler_t>
 {
  friend class ACE_Acceptor<Net_TCPConnection, ACE_SOCK_ACCEPTOR>;
  friend class ACE_Connector<Net_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-  typedef Net_IConnectionManager_T<Net_Configuration_t,
-                                   Net_UserData_t,
-                                   Stream_Statistic_t,
-                                   Net_IInetTransportLayer_t> ICONNECTION_MANAGER_T;
-
   Net_TCPConnection (ICONNECTION_MANAGER_T*, // connection manager handle
                      unsigned int = 0);      // statistics collecting interval (second(s))
                                              // 0 --> DON'T collect statistics
@@ -67,11 +56,6 @@ class Net_Export Net_TCPConnection
   virtual bool initialize (Net_ClientServerRole_t,            // role
                            const Net_SocketConfiguration_t&); // socket configuration
   virtual void finalize ();
-  virtual void info (ACE_HANDLE&,           // return value: handle
-                     ACE_INET_Addr&,        // return value: local SAP
-                     ACE_INET_Addr&) const; // return value: remote SAP
-  virtual unsigned int id () const;
-  virtual void dump_state () const;
 
   //// override some task-based members
   //virtual int open (void* = NULL); // args
@@ -85,13 +69,10 @@ class Net_Export Net_TCPConnection
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef Net_SocketConnectionBase_T<Net_TCPHandler_t,
-                                     Net_IInetTransportLayer_t,
-                                     Net_Configuration_t,
-                                     Net_SocketHandlerConfiguration_t,
-                                     Net_UserData_t,
-                                     Net_StreamSessionData_t,
-                                     Stream_Statistic_t> inherited;
+  typedef Net_TCPConnectionBase_T<Net_Configuration_t,
+                                  Net_UserData_t,
+                                  Net_StreamSessionData_t,
+                                  Net_TCPHandler_t> inherited;
 
   //// override some task-based members
   //virtual int svc (void);
@@ -106,14 +87,11 @@ class Net_Export Net_TCPConnection
 
 /////////////////////////////////////////
 
-class Net_Export Net_AsynchTCPConnection
- : public Net_AsynchSocketConnectionBase_T<Net_AsynchTCPHandler_t,
-                                           Net_IInetTransportLayer_t,
-                                           Net_Configuration_t,
-                                           Net_SocketHandlerConfiguration_t,
-                                           Net_UserData_t,
-                                           Net_StreamSessionData_t,
-                                           Stream_Statistic_t>
+class Net_AsynchTCPConnection
+ : public Net_AsynchTCPConnectionBase_T<Net_Configuration_t,
+                                        Net_UserData_t,
+                                        Net_StreamSessionData_t,
+                                        Net_AsynchTCPHandler_t>
 {
  friend class ACE_Asynch_Acceptor<Net_AsynchTCPConnection>;
  friend class ACE_Asynch_Connector<Net_AsynchTCPConnection>;
@@ -133,11 +111,6 @@ class Net_Export Net_AsynchTCPConnection
   virtual bool initialize (Net_ClientServerRole_t,            // role
                            const Net_SocketConfiguration_t&); // socket configuration
   virtual void finalize ();
-  virtual void info (ACE_HANDLE&,           // return value: handle
-                     ACE_INET_Addr&,        // return value: local SAP
-                     ACE_INET_Addr&) const; // return value: remote SAP
-  virtual unsigned int id () const;
-  virtual void dump_state () const;
 
   // override some ACE_Service_Handler members
   virtual void open (ACE_HANDLE,          // handle
@@ -152,13 +125,10 @@ class Net_Export Net_AsynchTCPConnection
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef Net_AsynchSocketConnectionBase_T<Net_AsynchTCPHandler_t,
-                                           Net_IInetTransportLayer_t,
-                                           Net_Configuration_t,
-                                           Net_SocketHandlerConfiguration_t,
-                                           Net_UserData_t,
-                                           Net_StreamSessionData_t,
-                                           Stream_Statistic_t> inherited;
+  typedef Net_AsynchTCPConnectionBase_T<Net_Configuration_t,
+                                        Net_UserData_t,
+                                        Net_StreamSessionData_t,
+                                        Net_AsynchTCPHandler_t> inherited;
 
   //// override some task-based members
   //virtual int svc (void);

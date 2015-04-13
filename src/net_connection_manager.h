@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_CONNECTION_MANAGER_H
-#define Net_CONNECTION_MANAGER_H
+#ifndef NET_CONNECTION_MANAGER_H
+#define NET_CONNECTION_MANAGER_H
 
 #include "ace/Condition_T.h"
 #include "ace/Containers_T.h"
@@ -30,7 +30,6 @@
 #include "common_idumpstate.h"
 #include "common_istatistic.h"
 
-#include "net_exports.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 

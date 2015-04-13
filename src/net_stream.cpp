@@ -275,25 +275,6 @@ Net_Stream::ping ()
   protocolHandler_impl->handleTimeout (NULL);
 }
 
-//unsigned int
-//Net_Stream::getSessionID () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Stream::getSessionID"));
-
-//  Stream_Module_t* module = &const_cast<Net_Module_SocketHandler_Module&> (socketHandler_);
-//  Net_Module_SocketHandler* socketHandler_impl = NULL;
-//  socketHandler_impl = dynamic_cast<Net_Module_SocketHandler*> (module->writer ());
-//  if (!socketHandler_impl)
-//  {
-//    ACE_DEBUG((LM_ERROR,
-//               ACE_TEXT ("dynamic_cast<Net_Module_SocketHandler> failed, aborting\n")));
-
-//    return 0;
-//  } // end IF
-
-//  return socketHandler_impl->getSessionID ();
-//}
-
 bool
 Net_Stream::collect (Stream_Statistic_t& data_out)
 {

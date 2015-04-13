@@ -21,14 +21,6 @@
 #ifndef NET_COMMON_H
 #define NET_COMMON_H
 
-#include <list>
-
-#include "common_inotify.h"
-
-#include "stream_common.h"
-
-#include "net_message.h"
-
 enum Net_ClientServerRole_t
 {
   ROLE_INVALID = -1,
@@ -49,10 +41,5 @@ enum Net_TransportLayer_t
   ///////////////////////////////////////
   TRANSPORTLAYER_MAX
 };
-
-typedef Common_INotify_T<Stream_ModuleConfiguration_t,
-                         Net_Message> Net_Notification_t;
-typedef std::list<Net_Notification_t*> Net_Subscribers_t;
-typedef Net_Subscribers_t::iterator Net_SubscribersIterator_t;
 
 #endif

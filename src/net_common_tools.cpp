@@ -27,23 +27,23 @@
 #include <netinet/ether.h>
 #endif
 
-#include "ace/Log_Msg.h"
-#include "ace/INET_Addr.h"
 #include "ace/Dirent_Selector.h"
+#include "ace/INET_Addr.h"
+#include "ace/Log_Msg.h"
 
 #include "common_defines.h"
-#include "common_tools.h"
 #include "common_file_tools.h"
+#include "common_tools.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
 #include "net_packet_headers.h"
 
 std::string
-Net_Common_Tools::IPAddress2String(const unsigned short& port_in,
-                                   const unsigned int& IPAddress_in)
+Net_Common_Tools::IPAddress2String (unsigned short port_in,
+                                    unsigned int IPAddress_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Common_Tools::IPAddress2String"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddress2String"));
 
   // init return value(s)
   std::string result;
@@ -87,12 +87,12 @@ Net_Common_Tools::IPAddress2String(const unsigned short& port_in,
 }
 
 std::string
-Net_Common_Tools::IPProtocol2String(const unsigned char& protocol_in)
+Net_Common_Tools::IPProtocol2String (unsigned char protocol_in)
 {
-  NETWORK_TRACE("Net_Common_Tools::IPProtocol2String");
+  NETWORK_TRACE ("Net_Common_Tools::IPProtocol2String");
 
     // init return value(s)
-  std::string result = ACE_TEXT("INVALID_PROTOCOL");
+  std::string result = ACE_TEXT ("INVALID_PROTOCOL");
 
   switch (protocol_in)
   {
@@ -266,9 +266,9 @@ Net_Common_Tools::IPProtocol2String(const unsigned char& protocol_in)
 }
 
 std::string
-Net_Common_Tools::MACAddress2String(const char* const addressDataPtr_in)
+Net_Common_Tools::MACAddress2String (const char* const addressDataPtr_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Common_Tools::MACAddress2String"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::MACAddress2String"));
 
   // init return value(s)
   std::string result;
@@ -302,9 +302,9 @@ Net_Common_Tools::MACAddress2String(const char* const addressDataPtr_in)
 }
 
 std::string
-Net_Common_Tools::EthernetProtocolTypeID2String(const unsigned short& frameType_in)
+Net_Common_Tools::EthernetProtocolTypeID2String (unsigned short frameType_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Common_Tools::EthernetProtocolTypeID2String"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::EthernetProtocolTypeID2String"));
 
   // init return value(s)
   std::string result = ACE_TEXT("UNKNOWN_ETHERNET_FRAME_TYPE");
@@ -825,10 +825,10 @@ Net_Common_Tools::EthernetProtocolTypeID2String(const unsigned short& frameType_
 // }
 
 bool
-Net_Common_Tools::retrieveLocalIPAddress(const std::string& interfaceIdentifier_in,
-                                             std::string& IPaddress_out)
+Net_Common_Tools::retrieveLocalIPAddress (const std::string& interfaceIdentifier_in,
+                                          std::string& IPaddress_out)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Common_Tools::retrieveLocalIPAddress"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::retrieveLocalIPAddress"));
 
   // init return value(s)
   IPaddress_out.resize(0);
@@ -932,9 +932,9 @@ Net_Common_Tools::retrieveLocalIPAddress(const std::string& interfaceIdentifier_
 }
 
 bool
-Net_Common_Tools::retrieveLocalHostname(std::string& hostname_out)
+Net_Common_Tools::retrieveLocalHostname (std::string& hostname_out)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Common_Tools::retrieveLocalHostname"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::retrieveLocalHostname"));
 
   // init return value(s)
   hostname_out.resize(0);
@@ -955,33 +955,32 @@ Net_Common_Tools::retrieveLocalHostname(std::string& hostname_out)
 }
 
 bool
-Net_Common_Tools::setSocketBuffer(const ACE_HANDLE& handle_in,
-                                      const int& optname_in,
-                                      const int& size_in)
+Net_Common_Tools::setSocketBuffer (const ACE_HANDLE& handle_in,
+                                   int optname_in,
+                                   int size_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Common_Tools::setSocketBuffer"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setSocketBuffer"));
 
   // sanity check
   if ((optname_in != SO_RCVBUF) &&
       (optname_in != SO_SNDBUF))
   {
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("invalid socket option (was: %d), aborting\n"),
-               optname_in));
-
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid socket option (was: %d), aborting\n"),
+                optname_in));
     return false;
   } // end IF
 
   int optval = size_in;
   int optlen = sizeof(optval);
-  if (ACE_OS::setsockopt(handle_in,
-                         SOL_SOCKET,
-                         optname_in,
-                         reinterpret_cast<const char*>(&optval),
-                         optlen))
+  if (ACE_OS::setsockopt (handle_in,
+                          SOL_SOCKET,
+                          optname_in,
+                          reinterpret_cast<const char*> (&optval),
+                          optlen))
   {
     // *PORTABILITY*
-#if defined(ACE_WIN32) || defined(ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT("failed to ACE_OS::setsockopt(%@, %s): \"%m\", aborting\n"),
                handle_in,
@@ -998,20 +997,20 @@ Net_Common_Tools::setSocketBuffer(const ACE_HANDLE& handle_in,
 
   // validate result
   optval = 0;
-  if (ACE_OS::getsockopt(handle_in,
-                         SOL_SOCKET,
-                         optname_in,
-                         reinterpret_cast<char*>(&optval),
-                         &optlen))
+  if (ACE_OS::getsockopt (handle_in,
+                          SOL_SOCKET,
+                          optname_in,
+                          reinterpret_cast<char*> (&optval),
+                          &optlen))
   {
     // *PORTABILITY*
-#if defined(ACE_WIN32) || defined(ACE_WIN64)
-		ACE_DEBUG((LM_ERROR,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
                ACE_TEXT("failed to ACE_OS::getsockopt(%@, %s): \"%m\", aborting\n"),
                handle_in,
                ((optname_in == SO_SNDBUF) ? ACE_TEXT("SO_SNDBUF") : ACE_TEXT("SO_RCVBUF"))));
 #else
-		ACE_DEBUG((LM_ERROR,
+    ACE_DEBUG((LM_ERROR,
                ACE_TEXT("failed to ACE_OS::getsockopt(%d, %s): \"%m\", aborting\n"),
                handle_in,
                ((optname_in == SO_SNDBUF) ? ACE_TEXT("SO_SNDBUF") : ACE_TEXT("SO_RCVBUF"))));
@@ -1057,10 +1056,10 @@ Net_Common_Tools::setSocketBuffer(const ACE_HANDLE& handle_in,
 }
 
 bool
-Net_Common_Tools::setNoDelay(const ACE_HANDLE& handle_in,
-                                 const bool& noDelay_in)
+Net_Common_Tools::setNoDelay (const ACE_HANDLE& handle_in,
+                              bool noDelay_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Common_Tools::setNoDelay"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setNoDelay"));
 
   int optval = (noDelay_in ? 1 : 0);
   int optlen = sizeof(optval);
@@ -1116,10 +1115,10 @@ Net_Common_Tools::setNoDelay(const ACE_HANDLE& handle_in,
 }
 
 bool
-Net_Common_Tools::setKeepAlive(const ACE_HANDLE& handle_in,
-                                   const bool& keepAlive_in)
+Net_Common_Tools::setKeepAlive (const ACE_HANDLE& handle_in,
+                                bool keepAlive_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Common_Tools::setKeepAlive"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setKeepAlive"));
 
   int optval = (keepAlive_in ? 1 : 0);
   int optlen = sizeof(optval);
@@ -1175,10 +1174,10 @@ Net_Common_Tools::setKeepAlive(const ACE_HANDLE& handle_in,
 }
 
 bool
-Net_Common_Tools::setLinger(const ACE_HANDLE& handle_in,
-                                const unsigned int& seconds_in)
+Net_Common_Tools::setLinger (const ACE_HANDLE& handle_in,
+                             unsigned int seconds_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Common_Tools::setLinger"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setLinger"));
 
   linger optval;
   optval.l_onoff = ((seconds_in > 0) ? 1 : 0);

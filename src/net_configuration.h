@@ -25,9 +25,7 @@
 #include "ace/Netlink_Addr.h"
 
 #include "stream_common.h"
-
-#include "net_common.h"
-#include "net_stream_common.h"
+#include "stream_iallocator.h"
 
 struct Net_SocketConfiguration_t
 {
@@ -55,6 +53,12 @@ struct Net_ProtocolConfiguration_t
   unsigned int peerPingInterval; // ms {0 --> OFF}
   bool         pingAutoAnswer;
   bool         printPongMessages;
+};
+
+// *NOTE*: I speculate that this is the main reason that C# was ever invented !
+struct Net_UserData_t
+{
+  void* userData;
 };
 
 struct Net_Configuration_t

@@ -545,6 +545,116 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketType,
+                                SocketHandlerType>::info (ACE_HANDLE& handle_out,
+                                                          ACE_INET_Addr& localSAP_out,
+                                                          ACE_INET_Addr& remoteSAP_out) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::info"));
+
+  int result = -1;
+
+  handle_out = inherited2::get_handle ();
+  result = inherited2::get_local_addr (localSAP_out);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SOCK_DGram::get_local_addr(): \"%m\", continuing\n")));
+  remoteSAP_out = inherited4::configuration_.socketConfiguration.peerAddress;
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketType,
+          typename SocketHandlerType>
+unsigned int
+Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                ITransportLayerType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketType,
+                                SocketHandlerType>::id () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return *static_cast<unsigned int*> (inherited::handle ());
+#else
+  return static_cast<unsigned int> (inherited::handle ());
+#endif
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketType,
+          typename SocketHandlerType>
+void
+Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                ITransportLayerType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketType,
+                                SocketHandlerType>::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::dump_state"));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  if (local_inet_address.addr_to_string (buffer,
+                                         sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string peer_address;
+  if (peer_inet_address.addr_to_string (buffer,
+                                        sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    peer_address = buffer;
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
+              id (), handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (peer_address.c_str ())));
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename ITransportLayerType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketType,
+          typename SocketHandlerType>
+void
+Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                ITransportLayerType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketType,
                                 SocketHandlerType>::handle_read_dgram (const ACE_Asynch_Read_Dgram::Result& result_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_read_dgram"));
@@ -1110,6 +1220,107 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
   }
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType>
+void
+Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                Net_INetlinkTransportLayer_t,
+                                StatisticContainerType,
+                                StreamType,
+                                ACE_SOCK_NETLINK,
+                                Net_AsynchNetlinkSocketHandler>::info (ACE_HANDLE& handle_out,
+                                                                       ACE_INET_Addr& localSAP_out,
+                                                                       ACE_INET_Addr& remoteSAP_out) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::info"));
+
+  int result = -1;
+
+  handle_out = inherited2::handle ();
+  result = inherited2::get_local_addr (localSAP_out);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+    ACE_TEXT ("failed to ACE_SOCK_DGram::get_local_addr(): \"%m\", continuing\n")));
+  remoteSAP_out = inherited4::configuration_->socketConfiguration.peerAddress;
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType>
+unsigned int
+Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                Net_INetlinkTransportLayer_t,
+                                StatisticContainerType,
+                                StreamType,
+                                ACE_SOCK_NETLINK,
+                                Net_AsynchNetlinkSocketHandler>::id () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return *static_cast<unsigned int*> (inherited::handle ());
+#else
+  return static_cast<unsigned int> (inherited::handle ());
+#endif
+}
+
+template <typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType>
+void
+Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                Net_INetlinkTransportLayer_t,
+                                StatisticContainerType,
+                                StreamType,
+                                ACE_SOCK_NETLINK,
+                                Net_AsynchNetlinkSocketHandler>::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::dump_state"));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  if (local_inet_address.addr_to_string (buffer,
+                                         sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string peer_address;
+  if (peer_inet_address.addr_to_string (buffer,
+                                        sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    peer_address = buffer;
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
+              id (), handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (peer_address.c_str ())));
 }
 
 template <typename ConfigurationType,

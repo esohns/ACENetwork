@@ -114,6 +114,15 @@
     <ClCompile Include="..\..\src\net_asynch_netlinksockethandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\net_messagehandler_base.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\net_module_messagehandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\net_tcpconnection_base.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\net_asynch_tcpsockethandler.h">
@@ -260,6 +269,15 @@
     <ClInclude Include="..\..\src\net_asynch_netlinksockethandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\net_messagehandler_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\net_module_messagehandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\net_tcpconnection_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\net_connection_base.inl">
@@ -299,6 +317,15 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\src\net_module_sockethandler.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\net_messagehandler_base.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\net_module_messagehandler.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\net_tcpconnection_base.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
