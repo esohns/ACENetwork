@@ -87,7 +87,7 @@ class Net_Export Net_TCPConnection
 
 /////////////////////////////////////////
 
-class Net_AsynchTCPConnection
+class Net_Export Net_AsynchTCPConnection
  : public Net_AsynchTCPConnectionBase_T<Net_Configuration_t,
                                         Net_UserData_t,
                                         Net_StreamSessionData_t,
