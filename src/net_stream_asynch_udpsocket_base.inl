@@ -1243,11 +1243,11 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
 
   int result = -1;
 
-  handle_out = inherited2::handle ();
+  handle_out = inherited::handle ();
   result = inherited2::get_local_addr (localSAP_out);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-    ACE_TEXT ("failed to ACE_SOCK_DGram::get_local_addr(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to ACE_SOCK_DGram::get_local_addr(): \"%m\", continuing\n")));
   remoteSAP_out = inherited4::configuration_->socketConfiguration.peerAddress;
 }
 

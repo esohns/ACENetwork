@@ -479,8 +479,6 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::info"));
 
-  int result = -1;
-
   handle_out = inherited::handle ();
   localSAP_out = inherited::localSAP_;
   remoteSAP_out = inherited::remoteSAP_;

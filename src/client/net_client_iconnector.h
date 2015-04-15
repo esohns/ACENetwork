@@ -26,6 +26,8 @@ template <typename AddressType,
 class Net_Client_IConnector_T
 {
  public:
+  virtual ~Net_Client_IConnector_T () {};
+
   virtual const ConfigurationType* getConfiguration () const = 0;
 
   virtual void abort () = 0; // shutdown
@@ -37,7 +39,7 @@ class Net_Client_IConnector_T
 //class Net_Client_IAsynchConnector_T
 //{
 // public:
-//  virtual ~Net_Client_IAsynchConnector_T () {}
+//  virtual ~Net_Client_IAsynchConnector_T () {};
 //
 //  virtual const ConfigurationType* getConfiguration () const = 0;
 //

@@ -47,8 +47,8 @@ Net_Client_AsynchConnector_T<AddressType,
 
   int result = -1;
 
-  // init base class
-  result = inherited::open (false, // pass addresses ?
+  // initialize base class
+  result = inherited::open (true,  // pass addresses ?
                             NULL,  // default proactor
                             true); // validate new connections ?
   if (result == -1)

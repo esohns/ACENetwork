@@ -32,9 +32,9 @@ Net_Module_MessageHandler_T<ConfigurationType,
                             SessionMessageType,
                             MessageType>::Net_Module_MessageHandler_T ()
  : inherited ()
- , delete_ (false)
  , lock_ (NULL)
  , subscribers_ (NULL)
+ , delete_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_MessageHandler_T::Net_Module_MessageHandler_T"));
 

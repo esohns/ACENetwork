@@ -80,8 +80,8 @@ Net_TCPConnectionBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::initialize"));
 
-  if (!Net_ConnectionBase_T::initialize (role_in,
-                                         configuration_in))
+  if (!inherited::CONNECTION_BASE_T::initialize (role_in,
+                                                 configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
@@ -95,9 +95,9 @@ Net_TCPConnectionBase_T<ConfigurationType,
   ACE_INET_Addr local_SAP, remote_SAP;
   try
   {
-    info (handle,
-          local_SAP,
-          remote_SAP);
+    this->info (handle,
+                local_SAP,
+                remote_SAP);
   }
   catch (...)
   {
@@ -156,9 +156,9 @@ Net_TCPConnectionBase_T<ConfigurationType,
   ACE_INET_Addr address1, address2;
   try
   {
-    info (handle,
-          address1,
-          address2);
+    this->info (handle,
+                address1,
+                address2);
   }
   catch (...)
   {
@@ -166,7 +166,7 @@ Net_TCPConnectionBase_T<ConfigurationType,
                 ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
   }
 
-  Net_ConnectionBase_T::finalize ();
+  inherited::finalize ();
 
   // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -709,8 +709,8 @@ Net_AsynchTCPConnectionBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::initialize"));
 
-  if (!Net_ConnectionBase_T::initialize (role_in,
-                                         configuration_in))
+  if (!inherited::CONNECTION_BASE_T::initialize (role_in,
+                                                 configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
@@ -724,9 +724,9 @@ Net_AsynchTCPConnectionBase_T<ConfigurationType,
   ACE_INET_Addr local_SAP, remote_SAP;
   try
   {
-    info (handle,
-          local_SAP,
-          remote_SAP);
+    this->info (handle,
+                local_SAP,
+                remote_SAP);
   }
   catch (...)
   {
@@ -783,9 +783,9 @@ Net_AsynchTCPConnectionBase_T<ConfigurationType,
   ACE_INET_Addr address1, address2;
   try
   {
-    info (handle,
-          address1,
-          address2);
+    this->info (handle,
+                address1,
+                address2);
   }
   catch (...)
   {
@@ -793,7 +793,7 @@ Net_AsynchTCPConnectionBase_T<ConfigurationType,
                 ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
   }
 
-  Net_ConnectionBase_T::finalize ();
+  inherited::finalize ();
 
   // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -836,9 +836,9 @@ Net_AsynchTCPConnectionBase_T<ConfigurationType,
   ACE_INET_Addr local_SAP, remote_SAP;
   try
   {
-    info (handle,
-          local_SAP,
-          remote_SAP);
+    this->info (handle,
+                local_SAP,
+                remote_SAP);
   }
   catch (...)
   {

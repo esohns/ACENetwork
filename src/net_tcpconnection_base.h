@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_TCPCONNECTION_BASE_H
-#define Net_TCPCONNECTION_BASE_H
+#ifndef NET_TCPCONNECTION_BASE_H
+#define NET_TCPCONNECTION_BASE_H
 
 #include "ace/Asynch_Acceptor.h"
 #include "ace/Asynch_Connector.h"
