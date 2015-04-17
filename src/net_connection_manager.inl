@@ -38,8 +38,8 @@ Net_Connection_Manager_T<ConfigurationType,
                          StatisticContainerType,
                          ITransportLayerType>::Net_Connection_Manager_T ()
  : condition_ (lock_)
-// , connections_ ()
-// , configuration_ ()
+ , configuration_ ()
+ , connections_ ()
  , isActive_ (true)
  , isInitialized_ (false)
  , maxNumConnections_ (NET_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS)

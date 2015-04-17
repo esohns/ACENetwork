@@ -38,7 +38,7 @@ Net_ConnectionBase_T<ConfigurationType,
                                                                     unsigned int statisticCollectionInterval_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
- //, configuration_ ()
+ , configuration_ ()
  , isRegistered_ (false)
  , manager_ (interfaceHandle_in)
  , sessionData_ (NULL)
@@ -145,12 +145,7 @@ Net_ConnectionBase_T<ConfigurationType,
   } // end IF
 
   if (manager_ && isRegistered_)
-  {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("still registered in dtor --> check implementation !\n")));
-
     finalize ();
-  } // end IF
 }
 
 template <typename ConfigurationType,

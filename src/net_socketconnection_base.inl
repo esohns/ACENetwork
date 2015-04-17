@@ -356,17 +356,16 @@ Net_SocketConnectionBase_T<SocketHandlerType,
       // --> simply fall through to the next case
     }
     // called by external (e.g. reactor) thread wanting to close the connection
-    // (e.g. too many connections)
+    // (e.g. cannot connect, too many connections, ...)
     // *NOTE*: this (eventually) calls handle_close() (see below)
     case CLOSE_DURING_NEW_CONNECTION:
       return inherited::close (arg_in);
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid argument: %u, returning\n"),
+                  ACE_TEXT ("invalid argument (was: %u), aborting\n"),
                   arg_in));
-
-      break;
+      return -1;
     }
   } // end SWITCH
 

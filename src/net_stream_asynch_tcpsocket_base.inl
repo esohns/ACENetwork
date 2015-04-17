@@ -68,13 +68,18 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   // step1: remove enqueued module (if any)
   if (inherited2::configuration_.streamConfiguration.module)
   {
-    if (stream_.find (inherited2::configuration_.streamConfiguration.module->name ()))
-      if (stream_.remove (inherited2::configuration_.streamConfiguration.module->name (),
-                          ACE_Module_Base::M_DELETE_NONE) == -1)
+    Common_Module_t* module_p =
+      stream_.find (inherited2::configuration_.streamConfiguration.module->name ());
+    if (module_p)
+    {
+      int result =
+        stream_.remove (inherited2::configuration_.streamConfiguration.module->name (),
+                        ACE_Module_Base::M_DELETE_NONE);
+      if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
                     inherited2::configuration_.streamConfiguration.module->name ()));
-
+    } // end IF
     if (inherited2::configuration_.streamConfiguration.deleteModule)
       delete inherited2::configuration_.streamConfiguration.module;
   } // end IF
@@ -109,14 +114,14 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   // step2b: init final module (if any)
   if (inherited2::configuration_.streamConfiguration.module)
   {
-    Stream_IModule_t* imodule_handle = NULL;
+    Stream_IModule_t* imodule_p = NULL;
     // need a downcast...
-    imodule_handle =
+    imodule_p =
       dynamic_cast<Stream_IModule_t*> (inherited2::configuration_.streamConfiguration.module);
-    if (!imodule_handle)
+    if (!imodule_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
+                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, returning\n"),
                   ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
 
       // clean up
@@ -125,15 +130,15 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
       return;
     } // end IF
-    Common_Module_t* clone = NULL;
+    Common_Module_t* clone_p = NULL;
     try
     {
-      clone = imodule_handle->clone ();
+      clone_p = imodule_p->clone ();
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
+                  ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), returning\n"),
                   ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
 
       // clean up
@@ -142,10 +147,10 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
       return;
     }
-    if (!clone)
+    if (!clone_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
+                  ACE_TEXT ("%s: failed to Stream_IModule::clone(), returning\n"),
                   ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
 
       // clean up
@@ -154,7 +159,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
       return;
     }
-    inherited2::configuration_.streamConfiguration.module = clone;
+    inherited2::configuration_.streamConfiguration.module = clone_p;
     inherited2::configuration_.streamConfiguration.deleteModule = true;
   } // end IF
 

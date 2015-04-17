@@ -95,6 +95,8 @@ Net_Client_AsynchConnector_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
+  // *NOTE*: on error, the addresses are not passed through...
+
   int result = -1;
 
   // success ?
@@ -266,8 +268,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
   int result = -1;
 
-  // init base class
-  result = inherited::open (false, // pass addresses ?
+  // initialize base class
+  result = inherited::open (true,  // pass addresses ?
                             NULL,  // default proactor
                             true); // validate new connections ?
   if (result == -1)
@@ -315,6 +317,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                                                                             const ACE_INET_Addr& localSAP_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
+
+  // *NOTE*: on error, the addresses are not passed through...
 
   int result = -1;
 
@@ -486,8 +490,8 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
 
   int result = -1;
 
-  // init base class
-  result = inherited::open (false, // pass addresses ?
+  // initialize base class
+  result = inherited::open (true,  // pass addresses ?
                             NULL,  // default proactor
                             true); // validate new connections ?
   if (result == -1)
@@ -529,6 +533,8 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                                                                 const ACE_Netlink_Addr& localSAP_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
+
+  // *NOTE*: on error, the addresses are not passed through...
 
   int result = -1;
 
