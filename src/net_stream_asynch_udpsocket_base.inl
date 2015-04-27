@@ -786,7 +786,7 @@ Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   if (inherited4::configuration_.streamConfiguration.module)
   {
     Common_Module_t* module_p =
-      stream_.find (inherited2::configuration_.streamConfiguration.module->name ());
+      stream_.find (inherited4::configuration_.streamConfiguration.module->name ());
     if (module_p)
     {
       int result =
