@@ -114,6 +114,21 @@ Net_Stream::initialize (unsigned int sessionID_in,
   // ---------------------------------------------------------------------------
 
   if (configuration_in.module)
+  {
+    Stream_IModule_t* module_p =
+      dynamic_cast<Stream_IModule_t*> (configuration_in.module);
+    if (!module_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("dynamic_cast<Stream_IModule_t> failed, aborting\n")));
+      return false;
+    } // end IF
+    if (!module_p->initialize (configuration_in.moduleConfiguration))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Stream_IModule_t::initialize, aborting\n")));
+      return false;
+    } // end IF
     if (inherited::push (configuration_in.module) == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -121,6 +136,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
                   ACE_TEXT (configuration_in.module->name ())));
       return false;
     } // end IF
+  } // end IF
 
   // ---------------------------------------------------------------------------
 

@@ -1235,3 +1235,11 @@ Net_Common_Tools::setLinger (const ACE_HANDLE& handle_in,
                               (optval.l_linger == static_cast<int>(seconds_in)))
                            : (optval.l_onoff == 0));
 }
+
+Net_IInetConnectionManager_t*
+Net_Common_Tools::getConnectionManager ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getConnectionManager"));
+
+  return NET_CONNECTIONMANAGER_SINGLETON::instance ();
+}

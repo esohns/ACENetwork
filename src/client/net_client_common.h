@@ -33,7 +33,7 @@
 #include "net_client_iconnector.h"
 
 typedef Net_Client_IConnector_T<ACE_INET_Addr,
-                                Net_SocketHandlerConfiguration_t> Net_Client_IConnector;
+                                Net_SocketHandlerConfiguration_t> Net_Client_IConnector_t;
 
 typedef Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                      Net_Configuration_t,

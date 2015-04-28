@@ -40,16 +40,15 @@ class Net_IConnectionManager_T
 
   virtual ~Net_IConnectionManager_T () {};
 
-  // API
   // *TODO*: (possibly) move these to Common_ILockedGet_T
   //virtual void lock () = 0;
   //virtual void unlock () = 0;
   virtual void set (const ConfigurationType&, // connection handler (default)
                                               // configuration
                     UserDataType*) = 0;       // (stream) user data
-  virtual void get (ConfigurationType&,  // return value: (default)
-                                         // connection handler configuration
-                    UserDataType*&) = 0; // return value: (stream) user data
+  virtual void get (ConfigurationType&,        // return value: (default)
+                                               // connection handler configuration
+                    UserDataType*&) const = 0; // return value: (stream) user data
 
   // *WARNING*: if (!= NULL) callers must decrease() the returned handle
   virtual CONNECTION_T* operator[] (unsigned int) const = 0; // session id
@@ -58,7 +57,9 @@ class Net_IConnectionManager_T
   virtual bool registerc (CONNECTION_T*) = 0; // connection handle
   virtual void deregister (CONNECTION_T*) = 0; // connection handle
 
+  virtual void abort () = 0;
   virtual unsigned int numConnections () const = 0; // return value: (current) number of connections
+  virtual void wait () const = 0;
 };
 
 #endif

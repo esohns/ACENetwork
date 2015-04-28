@@ -62,10 +62,10 @@ NET_SINGLETON_DECLARE (ACE_Singleton,
 typedef ACE_Singleton<Net_NetlinkConnection_Manager_t,
                       ACE_Recursive_Thread_Mutex> NET_NETLINKCONNECTIONMANAGER_SINGLETON;
 #endif
+typedef ACE_Singleton<Net_InetConnection_Manager_t,
+                      ACE_Recursive_Thread_Mutex> NET_CONNECTIONMANAGER_SINGLETON;
 NET_SINGLETON_DECLARE (ACE_Singleton,
                        Net_InetConnection_Manager_t,
                        ACE_Recursive_Thread_Mutex);
-typedef ACE_Singleton<Net_InetConnection_Manager_t,
-                      ACE_Recursive_Thread_Mutex> NET_CONNECTIONMANAGER_SINGLETON;
 
 #endif

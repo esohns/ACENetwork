@@ -25,6 +25,7 @@
 
 #include "ace/Global_Macros.h"
 
+#include "net_connection_manager_common.h"
 #include "net_exports.h"
 
 class Net_Export Net_Common_Tools
@@ -54,11 +55,13 @@ class Net_Export Net_Common_Tools
   static bool setLinger (const ACE_HANDLE&, // socket handle
                          unsigned int);     // seconds {0 --> off}
 
+  static Net_IInetConnectionManager_t* getConnectionManager ();
+
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools ());
   ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Common_Tools ());
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools (const Net_Common_Tools&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools& operator=(const Net_Common_Tools&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools& operator= (const Net_Common_Tools&));
 };
 
 #endif

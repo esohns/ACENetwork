@@ -72,24 +72,24 @@ class Net_Connection_Manager_T
   virtual void set (const ConfigurationType&, // connection handler (default)
                                               // configuration
                     UserDataType*);           // (stream) user data
-  virtual void get (ConfigurationType&, // return value: (default)
-                                        // connection handler configuration
-                    UserDataType*&);    // return value: (stream) user data
+  virtual void get (ConfigurationType&,    // return value: (default)
+                                           // connection handler configuration
+                    UserDataType*&) const; // return value: (stream) user data
 
   virtual CONNECTION_T* operator[] (unsigned int) const;
 
   virtual bool registerc (CONNECTION_T*); // connection handle
   virtual void deregister (CONNECTION_T*); // connection handle
 
+  virtual void abort ();
   virtual unsigned int numConnections () const;
+  virtual void wait () const;
 
   // implement Common_IControl
   virtual void start ();
   virtual void stop (bool = true); // locked access ?
   virtual bool isRunning () const;
 
-  void abortConnections ();
-  void waitConnections () const;
   // ---------------------------------------------------------------------------
   void abortOldestConnection ();
   void abortNewestConnection ();

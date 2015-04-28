@@ -70,7 +70,7 @@ Net_Connection_Manager_T<ConfigurationType,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("%u connections still open --> check implementation !, continuing\n"),
                 connections_.size ()));
-    abortConnections ();
+    abort ();
   } // end IF
 }
 
@@ -143,7 +143,7 @@ Net_Connection_Manager_T<ConfigurationType,
                          UserDataType,
                          StatisticContainerType,
                          ITransportLayerType>::get (ConfigurationType& configuration_out,
-                                                    UserDataType*& userData_out)
+                                                    UserDataType*& userData_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
@@ -349,9 +349,9 @@ void
 Net_Connection_Manager_T<ConfigurationType,
                          UserDataType,
                          StatisticContainerType,
-                         ITransportLayerType>::abortConnections ()
+                         ITransportLayerType>::abort ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortConnections"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abort"));
 
   // synch access to myConnections
   ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
@@ -412,9 +412,9 @@ void
 Net_Connection_Manager_T<ConfigurationType,
                          UserDataType,
                          StatisticContainerType,
-                         ITransportLayerType>::waitConnections () const
+                         ITransportLayerType>::wait () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::waitConnections"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::wait"));
 
   // synch access to myConnections
   {

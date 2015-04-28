@@ -88,7 +88,7 @@ class Net_Module_MessageHandler_T
   ACE_UNIMPLEMENTED_FUNC (Net_Module_MessageHandler_T (const Net_Module_MessageHandler_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_Module_MessageHandler_T& operator= (const Net_Module_MessageHandler_T&));
 
-  bool                        delete_;
+  bool                         delete_;
 };
 
 #include "net_module_messagehandler.inl"
