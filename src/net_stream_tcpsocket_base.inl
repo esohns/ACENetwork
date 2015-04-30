@@ -115,6 +115,8 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::open"));
 
+  ACE_UNUSED_ARG (arg_in);
+
   // step0: init this
   //// *TODO*: find a better way to do this
   //serializeOutput_ = configuration_->streamConfiguration.serializeOutput;
@@ -224,7 +226,7 @@ Net_StreamTCPSocketBase_T<ConfigurationType,
   // step2: tweak socket, register I/O handle with the reactor, ...
   // *NOTE*: as soon as this returns, data starts arriving at handle_input()
   int result = -1;
-  result = inherited::open (arg_in);
+  result = inherited::open (&inherited2::configuration_.socketConfiguration);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,

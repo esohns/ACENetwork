@@ -107,7 +107,7 @@ class Net_AsynchSocketConnectionBase_T
   // override some ACE_Service_Handler members
   virtual void open (ACE_HANDLE,          // handle
                      ACE_Message_Block&); // (initial) data (if any)
-  virtual void act (const void*); // (user) data handle
+  //virtual void act (const void*); // (user) data handle
 
 //  // *NOTE*: enqueue any received data onto our stream for further processing
 //   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);

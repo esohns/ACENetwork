@@ -15,44 +15,53 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\client\net_client_asynchconnector.cpp">
+    <ClCompile Include="..\..\src\client_server\net_client_asynchconnector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\client\net_client_connector.cpp">
+    <ClCompile Include="..\..\src\client_server\net_client_connector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\client\stdafx.cpp">
+    <ClCompile Include="..\..\src\client_server\net_client_sockethandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\client_server\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\client\net_client_asynchconnector.h">
+    <ClInclude Include="..\..\src\client_server\net_client_asynchconnector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\client\net_client_common.h">
+    <ClInclude Include="..\..\src\client_server\net_client_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\client\net_client_connector.h">
+    <ClInclude Include="..\..\src\client_server\net_client_connector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\client\net_client_defines.h">
+    <ClInclude Include="..\..\src\client_server\net_client_connector_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\client\net_client_exports.h">
+    <ClInclude Include="..\..\src\client_server\net_client_defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\client\net_client_iconnector.h">
+    <ClInclude Include="..\..\src\client_server\net_client_exports.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\client\stdafx.h">
+    <ClInclude Include="..\..\src\client_server\net_client_iconnector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\client_server\net_client_sockethandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\client_server\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\client\net_client_connector.inl">
+    <None Include="..\..\src\client_server\net_client_asynchconnector.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\src\client\net_client_asynchconnector.inl">
+    <None Include="..\..\src\client_server\net_client_connector.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

@@ -69,6 +69,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::~Net_SocketConnectionBase_T"));
 
   // wait for our worker (if any)
+  // *TODO*: this clearly is a design glitch
   if (SocketHandlerType::CONNECTION_BASE_T::configuration_.streamConfiguration.useThreadPerConnection)
     if (inherited::wait () == -1)
       ACE_DEBUG ((LM_ERROR,
@@ -236,25 +237,35 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::open"));
 
   int result = -1;
-  ConfigurationType* configuration_p =
-      reinterpret_cast<ConfigurationType*> (arg_in);
+
+//  Net_Client_ConnectorBase_t* connector_base_p =
+//      static_cast<Net_Client_ConnectorBase_t*> (arg_in);
+//  Net_Client_IConnector_t* iconnector_p =
+//      dynamic_cast<Net_Client_IConnector_t*> (connector_base_p);
+//  ACE_ASSERT (iconnector_p);
+//  const SocketHandlerConfigurationType* configuration_p =
+//      iconnector_p->getConfiguration ();
+
+  ConfigurationType* configuration_p = NULL;
+  if (!inherited::manager_)
+    configuration_p = reinterpret_cast<ConfigurationType*> (arg_in);
+  else
+    configuration_p =
+        &(SocketHandlerType::CONNECTION_BASE_T::configuration_);
+  // sanity check(s)
+  ACE_ASSERT (configuration_p);
 
   // step0: initialize this connection (if there is no connection manager)
   if (!inherited::manager_)
-  {
-    // sanity check(s)
-    ACE_ASSERT (configuration_p);
-
     if (!SocketHandlerType::CONNECTION_BASE_T::initialize (*configuration_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", aborting\n")));
       return -1;
     } // end IF
-  } // end IF
 
-  // step1: init/start stream, tweak socket, register reading data with reactor
-  // , ...
+  // step1: initialize/start stream, tweak socket, register reading data with
+  //        reactor, ...
   result = inherited::open (arg_in);
   if (result == -1)
   {
@@ -776,27 +787,27 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                    messageBlock_in);
 }
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
-          typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
-          typename StatisticContainerType>
-void
-Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 ITransportLayerType,
-                                 ConfigurationType,
-                                 SocketHandlerConfigurationType,
-                                 UserDataType,
-                                 SessionDataType,
-                                 StatisticContainerType>::act (const void* act_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::act"));
-
-  configuration_ =
-      reinterpret_cast<ConfigurationType*> (const_cast<void*> (act_in));
-}
+//template <typename SocketHandlerType,
+//          typename ITransportLayerType,
+//          typename ConfigurationType,
+//          typename SocketHandlerConfigurationType,
+//          typename UserDataType,
+//          typename SessionDataType,
+//          typename StatisticContainerType>
+//void
+//Net_AsynchSocketConnectionBase_T<SocketHandlerType,
+//                                 ITransportLayerType,
+//                                 ConfigurationType,
+//                                 SocketHandlerConfigurationType,
+//                                 UserDataType,
+//                                 SessionDataType,
+//                                 StatisticContainerType>::act (const void* act_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::act"));
+//
+//  configuration_ =
+//      reinterpret_cast<ConfigurationType*> (const_cast<void*> (act_in));
+//}
 
 template <typename SocketHandlerType,
           typename ITransportLayerType,

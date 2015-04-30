@@ -161,27 +161,24 @@ Net_IConnection_T<ConfigurationType,
 Net_Connection_Manager_T<ConfigurationType,
                          UserDataType,
                          StatisticContainerType,
-                         ITransportLayerType>::operator[] (unsigned int sessionID_in) const
+                         ITransportLayerType>::operator[] (unsigned int index_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::operator[]"));
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
 
-  // sanity check(s)
-  if (connections_.is_empty ())
-    return NULL;
-
   CONNECTION_T* connection_p = NULL;
+  int index = 0;
   for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
        iterator.next (connection_p);
-       iterator.advance ())
-    if (connection_p->id () == sessionID_in)
+       iterator.advance (), index++)
+    if (index == index_in)
       break;
   if (!connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("invalid session id (was: %u), aborting\n"),
-                sessionID_in));
+                ACE_TEXT ("invalid index (was: %u), aborting\n"),
+                index_in));
     return NULL;
   } // end IF
 

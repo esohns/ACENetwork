@@ -40,10 +40,13 @@ class Net_Export Net_AsynchTCPSocketHandler
  public:
   virtual ~Net_AsynchTCPSocketHandler ();
 
+  // override some ACE_Service_Handler methods
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
   virtual void addresses (const ACE_INET_Addr&,  // remote address
                           const ACE_INET_Addr&); // local address
+  virtual void act (const void*); // act
+
   virtual int handle_output (ACE_HANDLE) = 0; // (socket) handle
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask

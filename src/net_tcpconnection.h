@@ -52,11 +52,6 @@ class Net_Export Net_TCPConnection
                                              // 0 --> DON'T collect statistics
   virtual ~Net_TCPConnection ();
 
-  // override / implement (part of) Net_IInetTransportLayer
-  virtual bool initialize (Net_ClientServerRole_t,            // role
-                           const Net_SocketConfiguration_t&); // socket configuration
-  virtual void finalize ();
-
   //// override some task-based members
   //virtual int open (void* = NULL); // args
   //virtual int close (u_long = 0); // args
@@ -107,15 +102,10 @@ class Net_Export Net_AsynchTCPConnection
                                                    // 0 --> DON'T collect statistics
   virtual ~Net_AsynchTCPConnection ();
 
-  // override / implement (part of) Net_IInetTransportLayer
-  virtual bool initialize (Net_ClientServerRole_t,            // role
-                           const Net_SocketConfiguration_t&); // socket configuration
-  virtual void finalize ();
-
   // override some ACE_Service_Handler members
-  virtual void open (ACE_HANDLE,          // handle
-                     ACE_Message_Block&); // (initial) data (if any)
-  //virtual int close (u_long = 0); // args
+  //virtual void open (ACE_HANDLE,          // handle
+  //                   ACE_Message_Block&); // (initial) data (if any)
+  ////virtual int close (u_long = 0); // args
 
   //  // *NOTE*: enqueue any received data onto our stream for further processing
   //   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);

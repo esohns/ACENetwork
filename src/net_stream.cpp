@@ -69,7 +69,7 @@ Net_Stream::~Net_Stream ()
 
 bool
 Net_Stream::initialize (unsigned int sessionID_in,
-                        const Stream_Configuration_t& configuration_in,
+                        Stream_Configuration_t& configuration_in,
                         const Net_ProtocolConfiguration_t& protocolConfiguration_in,
                         const Net_UserData_t& userData_in)
 {
@@ -81,55 +81,60 @@ Net_Stream::initialize (unsigned int sessionID_in,
   // things to be done here:
   // [- init base class]
   // ------------------------------------
-  // - init notification strategy (if any)
+  // - initialize notification strategy (if any)
   // ------------------------------------
   // - push the final module onto the stream (if any)
   // ------------------------------------
-  // - init modules (done for the ones "owned" by the stream)
+  // - initialize modules
   // - push them onto the stream (tail-first) !
   // ------------------------------------
 
 //  ACE_OS::memset (&inherited::state_, 0, sizeof (inherited::state_));
   inherited::state_.sessionID = sessionID_in;
 
+  int result = -1;
+  inherited::MODULE_T* module_p = NULL;
   if (configuration_in.notificationStrategy)
   {
-    inherited::MODULE_T* module = inherited::head ();
-    if (!module)
+    module_p = inherited::head ();
+    if (!module_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("no head module found, aborting\n")));
       return false;
     } // end IF
-    inherited::TASK_T* task = module->reader ();
-    if (!task)
+    inherited::TASK_T* task_p = module_p->reader ();
+    if (!task_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("no head module reader task found, aborting\n")));
       return false;
     } // end IF
-    task->msg_queue ()->notification_strategy (configuration_in.notificationStrategy);
+    task_p->msg_queue ()->notification_strategy (configuration_in.notificationStrategy);
   } // end IF
 
-  // ---------------------------------------------------------------------------
+  ACE_ASSERT (configuration_in.moduleConfiguration);
+  configuration_in.moduleConfiguration->streamState = &state_;
 
+  // ---------------------------------------------------------------------------
   if (configuration_in.module)
   {
-    Stream_IModule_t* module_p =
+    Stream_IModule_t* module_2 =
       dynamic_cast<Stream_IModule_t*> (configuration_in.module);
-    if (!module_p)
+    if (!module_2)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("dynamic_cast<Stream_IModule_t> failed, aborting\n")));
       return false;
     } // end IF
-    if (!module_p->initialize (configuration_in.moduleConfiguration))
+    if (!module_2->initialize (*configuration_in.moduleConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Stream_IModule_t::initialize, aborting\n")));
       return false;
     } // end IF
-    if (inherited::push (configuration_in.module) == -1)
+    result = inherited::push (configuration_in.module);
+    if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
@@ -141,6 +146,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   // ---------------------------------------------------------------------------
 
   // ******************* Protocol Handler ************************
+  protocolHandler_.initialize (*configuration_in.moduleConfiguration);
   Net_Module_ProtocolHandler* protocolHandler_impl = NULL;
   protocolHandler_impl =
       dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
@@ -160,9 +166,8 @@ Net_Stream::initialize (unsigned int sessionID_in,
                 ACE_TEXT (protocolHandler_.name ())));
     return false;
   } // end IF
-
-  // enqueue the module...
-  if (inherited::push (&protocolHandler_) == -1)
+  result = inherited::push (&protocolHandler_);
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
@@ -171,6 +176,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   } // end IF
 
   // ******************* Runtime Statistics ************************
+  runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
   Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl = NULL;
   runtimeStatistic_impl =
       dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
@@ -178,7 +184,6 @@ Net_Stream::initialize (unsigned int sessionID_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_RuntimeStatistic> failed, aborting\n")));
-
     return false;
   } // end IF
   if (!runtimeStatistic_impl->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
@@ -190,9 +195,8 @@ Net_Stream::initialize (unsigned int sessionID_in,
                 ACE_TEXT (runtimeStatistic_.name ())));
     return false;
   } // end IF
-
-  // enqueue the module...
-  if (inherited::push (&runtimeStatistic_) == -1)
+  result = inherited::push (&runtimeStatistic_);
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
@@ -201,6 +205,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   } // end IF
 
   // ******************* Header Parser ************************
+  headerParser_.initialize (*configuration_in.moduleConfiguration);
   Net_Module_HeaderParser* headerParser_impl = NULL;
   headerParser_impl =
       dynamic_cast<Net_Module_HeaderParser*> (headerParser_.writer ());
@@ -217,9 +222,8 @@ Net_Stream::initialize (unsigned int sessionID_in,
                 ACE_TEXT (headerParser_.name ())));
     return false;
   } // end IF
-
-  // enqueue the module...
-  if (inherited::push (&headerParser_) == -1)
+  result = inherited::push (&headerParser_);
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
@@ -228,6 +232,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   } // end IF
 
   // ******************* Socket Handler ************************
+  socketHandler_.initialize (*configuration_in.moduleConfiguration);
   Net_Module_SocketHandler* socketHandler_impl = NULL;
   socketHandler_impl =
       dynamic_cast<Net_Module_SocketHandler*> (socketHandler_.writer ());
@@ -248,11 +253,11 @@ Net_Stream::initialize (unsigned int sessionID_in,
     return false;
   } // end IF
 
-  // enqueue the module...
   // *NOTE*: push()ing the module will open() it
   // --> set the argument that is passed along
   socketHandler_.arg (&const_cast<Net_UserData_t&> (userData_in));
-  if (inherited::push (&socketHandler_) == -1)
+  result = inherited::push (&socketHandler_);
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),

@@ -179,4 +179,4 @@ libACENetwork_la_SOURCES = \
   stdafx.h
 
 SUBDIRS = \
-  client
+  client_server

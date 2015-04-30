@@ -567,45 +567,42 @@ Net_Module_Statistic_ReaderTask_T<TaskSynchType,
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_ReaderTask_T::put"));
 
   // pass the message to the sibling
-  ACE_Task_Base* sibling_task = inherited::sibling ();
-  if (!sibling_task)
+  ACE_Task_Base* sibling_base_p = inherited::sibling ();
+  if (!sibling_base_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("no sibling task: \"%m\", aborting\n")));
-
     return -1;
   } // end IF
-  Net_Module_Statistic_WriterTask_t* stream_task =
-      dynamic_cast<Net_Module_Statistic_WriterTask_t*> (sibling_task);
-  if (!stream_task)
+  Net_Module_Statistic_WriterTask_t* sibling_p =
+    dynamic_cast<Net_Module_Statistic_WriterTask_t*> (sibling_base_p);
+  if (!sibling_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<Net_Module_Statistic_WriterTask_t>: \"%m\", aborting\n")));
-
     return -1;
   } // end IF
-  ProtocolMessageType* message = dynamic_cast<ProtocolMessageType*> (mb_in);
-  if (!message)
+  ProtocolMessageType* message_p = dynamic_cast<ProtocolMessageType*> (mb_in);
+  if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<ProtocolMessageType>: \"%m\", aborting\n")));
-
     return -1;
   } // end IF
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard (stream_task->lock_);
+    ACE_Guard<ACE_Thread_Mutex> aGuard (sibling_p->lock_);
 
     // update counters...
-    stream_task->numOutboundMessages_++;
-    stream_task->numOutboundBytes_ += mb_in->total_length ();
+    sibling_p->numOutboundMessages_++;
+    sibling_p->numOutboundBytes_ += mb_in->total_length ();
 
-    stream_task->byteCounter_ += mb_in->total_length ();
+    sibling_p->byteCounter_ += mb_in->total_length ();
 
-    stream_task->messageCounter_++;
+    sibling_p->messageCounter_++;
 
     // add message to statistic...
-    stream_task->messageTypeStatistics_[message->getCommand ()]++;
+    sibling_p->messageTypeStatistics_[message_p->getCommand ()]++;
   } // end lock scope
 
   return inherited::put (mb_in, tv_in);

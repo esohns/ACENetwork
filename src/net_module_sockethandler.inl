@@ -404,7 +404,6 @@ Net_Module_SocketHandler_T<StreamStateType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ProtocolMessageType::crunchForHeader(%u), aborting\n")));
-
       return false;
     } // end IF
 

@@ -59,7 +59,7 @@ class Net_StreamAsynchTCPSocketBase_T
   virtual int handle_output (ACE_HANDLE); // (socket) handle
   virtual int handle_close (ACE_HANDLE,        // (socket) handle
                             ACE_Reactor_Mask); // (select) mask
-  virtual void act (const void*); // (user) data handle
+  //virtual void act (const void*); // (user) data handle
 
   // implement Common_IStatistic
   // *NOTE*: delegate these to the stream

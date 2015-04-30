@@ -56,7 +56,7 @@ class Net_Export Net_Stream
 
   // initialize stream
   bool initialize (unsigned int,                       // session ID
-                   const Stream_Configuration_t&,      // configuration
+                   Stream_Configuration_t&,            // stream configuration
                    // *TODO*: implement a generic module initialization method
                    const Net_ProtocolConfiguration_t&, // protocol configuration
                    const Net_UserData_t&);             // user data

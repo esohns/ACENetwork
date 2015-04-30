@@ -79,7 +79,7 @@ class Net_TCPConnectionBase_T
   virtual void finalize ();
 
   //// override some task-based members
-  //virtual int open (void* = NULL); // args
+  virtual int open (void* = NULL); // args
   //virtual int close (u_long = 0); // args
 
 //  // *NOTE*: enqueue any received data onto our stream for further processing

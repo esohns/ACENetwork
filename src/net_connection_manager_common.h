@@ -48,24 +48,24 @@ typedef Net_IConnectionManager_T<Net_Configuration_t,
 typedef Net_Connection_Manager_T<Net_Configuration_t,
                                  Net_UserData_t,
                                  Stream_Statistic_t,
-                                 Net_INetlinkTransportLayer_t> Net_NetlinkConnection_Manager_t;
+                                 Net_INetlinkTransportLayer_t> Net_NetlinkConnectionManager_t;
 #endif
 typedef Net_Connection_Manager_T<Net_Configuration_t,
                                  Net_UserData_t,
                                  Stream_Statistic_t,
-                                 Net_IInetTransportLayer_t> Net_InetConnection_Manager_t;
+                                 Net_IInetTransportLayer_t> Net_InetConnectionManager_t;
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 NET_SINGLETON_DECLARE (ACE_Singleton,
-                       Net_NetlinkConnection_Manager_t,
+                       Net_NetlinkConnectionManager_t,
                        ACE_Recursive_Thread_Mutex);
-typedef ACE_Singleton<Net_NetlinkConnection_Manager_t,
+typedef ACE_Singleton<Net_NetlinkConnectionManager_t,
                       ACE_Recursive_Thread_Mutex> NET_NETLINKCONNECTIONMANAGER_SINGLETON;
 #endif
-typedef ACE_Singleton<Net_InetConnection_Manager_t,
+typedef ACE_Singleton<Net_InetConnectionManager_t,
                       ACE_Recursive_Thread_Mutex> NET_CONNECTIONMANAGER_SINGLETON;
 NET_SINGLETON_DECLARE (ACE_Singleton,
-                       Net_InetConnection_Manager_t,
+                       Net_InetConnectionManager_t,
                        ACE_Recursive_Thread_Mutex);
 
 #endif

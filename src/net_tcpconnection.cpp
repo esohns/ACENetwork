@@ -49,109 +49,6 @@ Net_TCPConnection::~Net_TCPConnection ()
 
 }
 
-bool
-Net_TCPConnection::initialize (Net_ClientServerRole_t role_in,
-                               const Net_SocketConfiguration_t& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::initialize"));
-
-  if (!Net_ConnectionBase_T::initialize (role_in,
-                                         configuration_in))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
-    return false;
-  } // end IF
-
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  ACE_INET_Addr local_SAP, remote_SAP;
-  try
-  {
-    info (handle,
-          local_SAP,
-          remote_SAP);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting")));
-
-    return false;
-  }
-  // *TODO*: retrieve socket information
-//  if (local_SAP.addr_to_string (buffer,
-//                                sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
-  local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-//  if (remote_SAP.addr_to_string (buffer,
-//                                 sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
-
-  // *PORTABILITY*: this isn't entirely portable...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered TCP connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, reinterpret_cast<unsigned int> (handle),
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (buffer),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered TCP connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (buffer),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#endif
-
-  return true;
-}
-
-void
-Net_TCPConnection::finalize ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::finalize"));
-
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr address1, address2;
-  try
-  {
-    info (handle,
-          address1,
-          address2);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
-  }
-
-  Net_ConnectionBase_T::finalize ();
-
-  // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered TCP connection [%@/%u] (total: %u)\n"),
-              this, reinterpret_cast<unsigned int> (handle),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered TCP connection [%@/%d] (total: %d)\n"),
-              this, handle,
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#endif
-}
-
 //int
 //Net_TCPConnection::svc (void)
 //{
@@ -636,166 +533,65 @@ Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
 //  return 0;
 //}
 
-bool
-Net_AsynchTCPConnection::initialize (Net_ClientServerRole_t role_in,
-                                     const Net_SocketConfiguration_t& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::initialize"));
-
-  if (!Net_ConnectionBase_T::initialize (role_in,
-                                         configuration_in))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
-    return false;
-  } // end IF
-
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  ACE_INET_Addr local_SAP, remote_SAP;
-  try
-  {
-    info (handle,
-          local_SAP,
-          remote_SAP);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting")));
-    return false;
-  }
-  if (local_SAP.addr_to_string (buffer,
-                                sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  if (remote_SAP.addr_to_string (buffer,
-                                 sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
-  // *PORTABILITY*: this isn't entirely portable...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, reinterpret_cast<unsigned int> (handle),
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (buffer),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (buffer),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#endif
-
-  return true;
-}
-
-void
-Net_AsynchTCPConnection::finalize ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::finalize"));
-
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr address1, address2;
-  try
-  {
-    info (handle,
-          address1,
-          address2);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
-  }
-
-  Net_ConnectionBase_T::finalize ();
-
-  // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered TCP connection [%@/%u] (total: %u)\n"),
-              this, reinterpret_cast<unsigned int> (handle),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered TCP connection [%@/%d] (total: %d)\n"),
-              this, handle,
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#endif
-}
-
-void
-Net_AsynchTCPConnection::open (ACE_HANDLE handle_in,
-                               ACE_Message_Block& messageBlock_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::open"));
-
-  // step1: init/start stream, tweak socket, register reading data with reactor
-  // , ...
-  inherited::open (handle_in,
-                   messageBlock_in);
-
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  ACE_INET_Addr local_SAP, remote_SAP;
-  try
-  {
-    info (handle,
-          local_SAP,
-          remote_SAP);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), returning\n")));
-
-    return;
-  }
-  if (local_SAP.addr_to_string (buffer,
-                                sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  if (remote_SAP.addr_to_string (buffer,
-                                 sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
-  // *PORTABILITY*: this isn't entirely portable...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered TCP connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, reinterpret_cast<unsigned int> (handle),
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (buffer),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered TCP connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (buffer),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#endif
-}
+//void
+//Net_AsynchTCPConnection::open (ACE_HANDLE handle_in,
+//                               ACE_Message_Block& messageBlock_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::open"));
+//
+//  // step1: initialize/start stream, tweak socket, register reading data with
+//  //        the reactor, ...
+//  inherited::open (handle_in,
+//                   messageBlock_in);
+//
+//  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+//  ACE_TCHAR buffer[BUFSIZ];
+//  ACE_OS::memset (buffer, 0, sizeof (buffer));
+//  std::string local_address;
+//  ACE_INET_Addr local_SAP, remote_SAP;
+//  try
+//  {
+//    info (handle,
+//          local_SAP,
+//          remote_SAP);
+//  }
+//  catch (...)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), returning\n")));
+//
+//    return;
+//  }
+//  if (local_SAP.addr_to_string (buffer,
+//                                sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+//  local_address = buffer;
+//  ACE_OS::memset (buffer, 0, sizeof (buffer));
+//  if (remote_SAP.addr_to_string (buffer,
+//                                 sizeof (buffer)) == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+//
+//  // *PORTABILITY*: this isn't entirely portable...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("registered TCP connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+//              this, reinterpret_cast<unsigned int> (handle),
+//              ACE_TEXT (local_address.c_str ()),
+//              ACE_TEXT (buffer),
+//              (inherited::manager_ ? inherited::manager_->numConnections ()
+//                                   : -1)));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("registered TCP connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+//              this, handle,
+//              ACE_TEXT (local_address.c_str ()),
+//              ACE_TEXT (buffer),
+//              (inherited::manager_ ? inherited::manager_->numConnections ()
+//                                   : -1)));
+//#endif
+//}
 
 //int
 //Net_AsynchTCPConnection::close (u_long arg_in)

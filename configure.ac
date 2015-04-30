@@ -171,7 +171,7 @@ AC_CHECK_LIB([ACE], [main])
 AC_CONFIG_FILES([Makefile
                  scripts/Makefile
                  src/Makefile
-                 src/client/Makefile])
+                 src/client_server/Makefile])
 
 AC_OUTPUT
 

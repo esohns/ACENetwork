@@ -66,7 +66,7 @@ Net_Module_HeaderParser::handleDataMessage (Net_Message*& message_inout,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_HeaderParser::handleDataMessage"));
 
-  // don't care (implies yes per default, if we're part of a stream)
+  // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // interpret the message header...
