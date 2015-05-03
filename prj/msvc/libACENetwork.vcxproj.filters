@@ -328,5 +328,6 @@
     <None Include="..\..\src\net_tcpconnection_base.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

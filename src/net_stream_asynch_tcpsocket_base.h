@@ -59,7 +59,7 @@ class Net_StreamAsynchTCPSocketBase_T
   // override some service methods
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
-  virtual int handle_output (ACE_HANDLE); // (socket) handle
+  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE); // (socket) handle
   virtual int handle_close (ACE_HANDLE,        // (socket) handle
                             ACE_Reactor_Mask); // (select) mask
   //virtual void act (const void*); // (user) data handle

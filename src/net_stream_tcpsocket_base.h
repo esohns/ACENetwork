@@ -28,7 +28,7 @@
 #include "ace/Synch.h"
 
 #include "net_connection_base.h"
-#include "net_connection_manager.h"
+#include "net_iconnectionmanager.h"
 
 template <typename AddressType,
           typename SocketConfigurationType,
@@ -54,14 +54,22 @@ class Net_StreamTCPSocketBase_T
   virtual int open (void* = NULL); // args
   virtual int close (u_long = 0); // args
 
+  // override some ACE_Event_Handler methods
   // *NOTE*: enqueue any received data onto our stream for further processing
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: send any enqueued data back to the client...
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() returns -1
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+  virtual int handle_close (ACE_HANDLE,
+                            ACE_Reactor_Mask);
+
+  virtual ACE_Event_Handler::Reference_Count add_reference (void);
+  // *IMPORTANT NOTE*: this API works as long as the reactor doesn't manage
+  // the lifecycle of the event handler. To avoid unforseen behavior, make sure
+  // that the event handler has been properly deregistered from the reactor
+  // before removing the last reference (delete on zero).
+  virtual ACE_Event_Handler::Reference_Count remove_reference (void);
 
   // implement (part of) Net_IConnection_T
   virtual void info (ACE_HANDLE&,         // return value: handle
@@ -112,11 +120,6 @@ class Net_StreamTCPSocketBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T (const Net_StreamTCPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T& operator= (const Net_StreamTCPSocketBase_T&));
-
-  // *IMPORTANT NOTE*: in a threaded environment, workers MAY
-  // dispatch the reactor notification queue concurrently (most notably,
-  // ACE_TP_Reactor) --> enforce proper serialization
-  //bool               serializeOutput_;
 };
 
 // include template implementation

@@ -23,14 +23,12 @@
 
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
 #include "ace/Netlink_Addr.h"
 #include "ace/SOCK_Connector.h"
 
 #include "stream_common.h"
 
 #include "net_configuration.h"
-#include "net_itransportlayer.h"
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
 #include "net_stream_common.h"
@@ -46,8 +44,9 @@ template <typename UserDataType,
           typename SessionDataType,
           typename HandlerType>
 class Net_NetlinkConnection_T
- : public Net_SocketConnectionBase_T<HandlerType,
-                                     Net_INetlinkTransportLayer_t,
+ : public Net_SocketConnectionBase_T<ACE_Netlink_Addr,
+                                     Net_SocketConfiguration_t,
+                                     HandlerType,
                                      Net_Configuration_t,
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
@@ -59,10 +58,11 @@ class Net_NetlinkConnection_T
                              ACE_SOCK_CONNECTOR>;
 
  public:
-  typedef Net_IConnectionManager_T<Net_Configuration_t,
+  typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
+                                   Net_SocketConfiguration_t,
+                                   Net_Configuration_t,
                                    UserDataType,
-                                   Stream_Statistic_t,
-                                   Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
    Net_NetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
                             unsigned int = 0);      // statistics collecting interval (second(s))
@@ -91,8 +91,9 @@ class Net_NetlinkConnection_T
    virtual void dump_state () const;
 
  private:
-  typedef Net_SocketConnectionBase_T<HandlerType,
-                                     Net_INetlinkTransportLayer_t,
+  typedef Net_SocketConnectionBase_T<ACE_Netlink_Addr,
+                                     Net_SocketConfiguration_t,
+                                     HandlerType,
                                      Net_Configuration_t,
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
@@ -113,8 +114,9 @@ template <typename UserDataType,
           typename SessionDataType,
           typename HandlerType>
 class Net_AsynchNetlinkConnection_T
- : public Net_AsynchSocketConnectionBase_T<HandlerType,
-                                           Net_INetlinkTransportLayer_t,
+ : public Net_AsynchSocketConnectionBase_T<ACE_Netlink_Addr,
+                                           Net_SocketConfiguration_t,
+                                           HandlerType,
                                            Net_Configuration_t,
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,
@@ -122,15 +124,16 @@ class Net_AsynchNetlinkConnection_T
                                            Stream_Statistic_t>
  , public Net_TransportLayer_Netlink
 {
- friend class ACE_Asynch_Connector<Net_AsynchNetlinkConnection_T<UserDataType,
-                                                                 SessionDataType,
-                                                                 HandlerType> >;
+  friend class ACE_Asynch_Connector<Net_AsynchNetlinkConnection_T<UserDataType,
+                                                                  SessionDataType,
+                                                                  HandlerType> >;
 
  public:
-  typedef Net_IConnectionManager_T<Net_Configuration_t,
+  typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
+                                   Net_SocketConfiguration_t,
+                                   Net_Configuration_t,
                                    UserDataType,
-                                   Stream_Statistic_t,
-                                   Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
   Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                  unsigned int = 0);      // statistics collecting interval (second(s))
@@ -160,8 +163,9 @@ class Net_AsynchNetlinkConnection_T
                               ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef Net_AsynchSocketConnectionBase_T<HandlerType,
-                                           Net_INetlinkTransportLayer_t,
+  typedef Net_AsynchSocketConnectionBase_T<ACE_Netlink_Addr,
+                                           Net_SocketConfiguration_t,
+                                           HandlerType,
                                            Net_Configuration_t,
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,

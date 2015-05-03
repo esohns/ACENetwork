@@ -21,76 +21,30 @@
 
 #include "net_tcpsockethandler.h"
 
-#include "ace/INET_Addr.h"
+#include "ace/Event_Handler.h"
 #include "ace/Log_Msg.h"
 #include "ace/Reactor.h"
 
-#include "net_defines.h"
 #include "net_common_tools.h"
-#include "net_configuration.h"
-#include "net_iconnectionmanager.h"
+#include "net_defines.h"
 #include "net_macros.h"
 
 Net_TCPSocketHandler::Net_TCPSocketHandler ()//MANAGER_T* manager_in)
- //: inherited (1,    // initial count
- //             true) // delete on zero ?
- : inherited2 (NULL,                     // no specific thread manager
-               NULL,                     // no specific message queue
-               ACE_Reactor::instance ()) // default reactor
+ : inherited ()
+ , inherited2 (NULL,                     // thread manager
+               NULL,                     // message queue
+               ACE_Reactor::instance ()) // reactor
  , notificationStrategy_ (ACE_Reactor::instance (),      // reactor
                           this,                          // event handler
                           ACE_Event_Handler::WRITE_MASK) // handle output only
-// , manager_ (manager_in)
-// , userData_ ()
-// , isRegistered_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::Net_TCPSocketHandler"));
 
-  // sanity check(s)
-//  ACE_ASSERT (manager_);
-
-  //  // register notification strategy ?
-  //  inherited::msg_queue ()->notification_strategy (&notificationStrategy_);
-
-  // init user data
-  //ACE_OS::memset (&userData_, 0, sizeof (userData_));
-//  if (manager_)
-//  {
-//    try
-//    { // (try to) get user data from the connection manager
-//      manager_->getConfiguration (userData_);
-//    }
-//    catch (...)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("caught exception in Net_IConnectionManager::getConfiguration(), continuing\n")));
-//    }
-//  } // end IF
 }
 
 Net_TCPSocketHandler::~Net_TCPSocketHandler ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::~Net_TCPSocketHandler"));
-
-  //if (manager_ && isRegistered_)
-  //{ // (try to) de-register with connection manager
-  //  try
-  //  {
-  //    manager_->deregisterConnection (this);
-  //  }
-  //  catch (...)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("caught exception in Net_IConnectionManager::deregisterConnection(), continuing\n")));
-  //  }
-  //} // end IF
-
-//  // *IMPORTANT NOTE*: the streamed socket handler uses the stream head modules' queue
-//  // --> this happens too late, as the stream/queue will have been deleted by now...
-//  if (reactor ()->purge_pending_notifications (this, ACE_Event_Handler::ALL_EVENTS_MASK) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@): \"%m\", continuing\n"),
-//                this));
 
   // need to close the socket (see handle_close() below) ?
   if (inherited2::reference_counting_policy ().value () ==
@@ -104,9 +58,9 @@ Net_TCPSocketHandler::~Net_TCPSocketHandler ()
 //Net_TCPSocketHandler::add_reference (void)
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::add_reference"));
-//
+
 //  inherited::increase ();
-//
+
 //  //return inherited::add_reference ();
 //  return 0;
 //}
@@ -115,10 +69,10 @@ Net_TCPSocketHandler::~Net_TCPSocketHandler ()
 //Net_TCPSocketHandler::remove_reference (void)
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::remove_reference"));
-//
+
 //  // *NOTE*: may "delete this"
 //  inherited2::decrease ();
-//
+
 //  //// *NOTE*: may "delete this"
 //  //return inherited::remove_reference ();
 //  return 0;
@@ -129,14 +83,11 @@ Net_TCPSocketHandler::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::open"));
 
+  // initialize return value
+  int result = -1;
+
   // sanity check(s)
   ACE_ASSERT (arg_in);
-//  if (!manager_)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("invalid connection manager, aborting\n")));
-//    return -1;
-//  } // end IF
 
   Net_SocketConfiguration_t* socket_configuration_p =
       reinterpret_cast<Net_SocketConfiguration_t*> (arg_in);
@@ -185,7 +136,8 @@ Net_TCPSocketHandler::open (void* arg_in)
   } // end IF
 
   // register with the reactor
-  if (inherited2::open (arg_in) == -1)
+  result = inherited2::open (arg_in);
+  if (result == -1)
   {
     // *IMPORTANT NOTE*: this can happen when the connection handle is still
     // registered with the reactor (i.e. the reactor is still processing events
@@ -198,7 +150,7 @@ Net_TCPSocketHandler::open (void* arg_in)
     return -1;
   } // end IF
 
-  // *NOTE*: we're registered with the reactor (READ_MASK) at this point
+  // *NOTE*: registered with the reactor (READ_MASK) at this point
 
 //   // ...register for writes (WRITE_MASK) as well
 //   if (reactor ()->register_handler (this,
@@ -209,23 +161,7 @@ Net_TCPSocketHandler::open (void* arg_in)
 //     return -1;
 //   } // end IF
 
-//  if (manager_)
-//  {
-//    // (try to) register with the connection manager...
-//    // *WARNING*: as we register BEFORE the connection has fully opened, there
-//    // is a small window for races...
-//    try
-//    {
-//      isRegistered_ = manager_->registerConnection (this);
-//    }
-//    catch (...)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("caught exception in Net_IConnectionManager::registerConnection(), continuing\n")));
-//    }
-//  } // end IF
-
-  return 0;
+  return result;
 }
 
 int
@@ -234,16 +170,22 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::handle_close"));
 
-  // sanity check(s)
+  // initialize return value
+  int result = 0;
+
   // *IMPORTANT NOTE*: handle failed connects (e.g. connection refused)
   // as well... (see below). This may change in the future, so keep the
   // alternate implementation
   if (inherited2::reference_counting_policy ().value () ==
       ACE_Event_Handler::Reference_Counting_Policy::DISABLED)
-    return inherited2::handle_close (); // --> shortcut
+  {
+    result = inherited2::handle_close ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Svc_Handler::handle_close(): \"%m\", aborting\n")));
 
-  // init return value
-  int result = 0;
+    return result;
+  } // end IF
 
   // *IMPORTANT NOTE*: due to reference counting, the
   // ACE_Svc_Handle::shutdown() method will crash, as it references a
@@ -272,7 +214,7 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
     case ACE_Event_Handler::ALL_EVENTS_MASK: // - connect failed (e.g. connection refused) /
                                              // - accept failed (e.g. too many connections) /
                                              // - select failed (EBADF see Select_Reactor_T.cpp) /
-                                             // - asynch abort
+                                             // - asynchronous (local) close
                                              // - ... ?
     {
       if (handle_in != ACE_INVALID_HANDLE)
@@ -315,13 +257,14 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
                                                         ACE_Event_Handler::DONT_CALL));
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d), continuing\n"),
+                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d), aborting\n"),
                     this,
                     mask_in));
 
       break;
     }
     default:
+    {
 // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -334,134 +277,10 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
                   handle_in,
                   mask_in));
 #endif
+
       break;
+    }
   } // end SWITCH
 
   return result;
 }
-
-//void
-//Net_TCPSocketHandler::info (ACE_HANDLE& handle_out,
-//                            ACE_INET_Addr& localSAP_out,
-//                            ACE_INET_Addr& remoteSAP_out) const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::info"));
-
-//  //handle_out = reinterpret_cast<ACE_HANDLE>(myUserData.sessionID);
-//  handle_out = peer_.get_handle ();
-//  if (inherited::peer_.get_local_addr (localSAP_out) == -1)
-//  {
-//    // *NOTE*: socket already closed ? --> not an error
-//    int error = ACE_OS::last_error ();
-//    if ((error != EBADF) &&
-//        (error != ENOTSOCK))
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_SOCK_Stream::get_local_addr(): \"%m\", continuing\n")));
-//  } // end IF
-//  if (inherited::peer_.get_remote_addr (remoteSAP_out) == -1)
-//  {
-//    // *NOTE*: socket already closed ? --> not an error
-//    int error = ACE_OS::last_error ();
-//    if ((error != ENOTCONN) &&
-//        (error != EBADF) &&
-//        (error != ENOTSOCK))
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_SOCK_Stream::get_remote_addr(): \"%m\", continuing\n")));
-//  } // end IF
-//}
-
-//void
-//Net_TCPSocketHandler::close ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::close"));
-
-//  // *NOTE*: do NOT simply close the underlying socket
-
-//  // de-register from the manager, close the stream, de-register from the
-//  // reactor[, delete this]
-//  close (NORMAL_CLOSE_OPERATION);
-
-//  // *IMPORTANT NOTE*: if called from a non-reactor context, or when using a
-//  // a multithreaded reactor, there may still be in-flight notifications and/or
-//  // socket events being dispatched at this stage...
-//}
-
-//unsigned int
-//Net_TCPSocketHandler::id () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::id"));
-
-//  // *PORTABILITY*: this isn't entirely portable...
-//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-//  return peer_.get_handle ();
-//#else
-//  return reinterpret_cast<unsigned int> (peer_.get_handle ());
-//#endif
-//}
-
-//void
-//Net_TCPSocketHandler::increase ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::increase"));
-//
-//  inherited2::increase ();
-//  //inherited::add_reference ();
-//}
-//
-//void
-//Net_TCPSocketHandler::decrease ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::decrease"));
-//
-//  // *NOTE*: may "delete this"
-//  inherited2::decrease ();
-//  //// *NOTE*: may "delete this"
-//  //inherited::remove_reference ();
-//}
-
-//void
-//Net_TCPSocketHandler::dump_state () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler::dump_state"));
-//
-//  ACE_TCHAR buffer[BUFSIZ];
-//  ACE_OS::memset (buffer, 0, sizeof (buffer));
-//  ACE_INET_Addr address;
-//  if (inherited::peer_.get_local_addr (address) == -1)
-//  {
-//    // *NOTE*: socket already closed ? --> not an error
-//    int error = ACE_OS::last_error ();
-//    if ((error != EBADF) &&
-//        (error != ENOTSOCK))
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_SOCK_Stream::get_local_addr(): \"%m\", continuing\n")));
-//  } // end IF
-//  else if (address.addr_to_string (buffer,
-//                                   sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-//  std::string local_address = buffer;
-//
-//  ACE_OS::memset (buffer, 0, sizeof (buffer));
-//  if (inherited::peer_.get_remote_addr (address) == -1)
-//  {
-//    // *NOTE*: socket already closed ? --> not an error
-//    int error = ACE_OS::last_error ();
-//    if ((error != ENOTCONN) &&
-//        (error != EBADF) &&
-//        (error != ENOTSOCK))
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_SOCK_Stream::get_remote_addr(): \"%m\", continuing\n")));
-//  } // end IF
-//  else if (address.addr_to_string (buffer,
-//                                   sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-//  std::string peer_address = buffer;
-//
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("socket [%d]: \"%s\" <--> \"%s\"\n"),
-//              get_handle (),
-//              ACE_TEXT (local_address.c_str ()),
-//              ACE_TEXT (peer_address.c_str ())));
-//}

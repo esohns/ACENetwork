@@ -26,19 +26,19 @@
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename SocketHandlerType>
+          typename HandlerType>
 Net_Client_AsynchConnector_T<AddressType,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::Net_Client_AsynchConnector_T (const SocketHandlerConfigurationType* configuration_in,
-                                                                               ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                               unsigned int statisticCollectionInterval_in)
+                             HandlerType>::Net_Client_AsynchConnector_T (const HandlerConfigurationType* configuration_in,
+                                                                         ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                         unsigned int statisticCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
@@ -59,17 +59,17 @@ Net_Client_AsynchConnector_T<AddressType,
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename SocketHandlerType>
+          typename HandlerType>
 Net_Client_AsynchConnector_T<AddressType,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::~Net_Client_AsynchConnector_T ()
+                             HandlerType>::~Net_Client_AsynchConnector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::~Net_Client_AsynchConnector_T"));
 
@@ -78,20 +78,20 @@ Net_Client_AsynchConnector_T<AddressType,
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename SocketHandlerType>
+          typename HandlerType>
 int
 Net_Client_AsynchConnector_T<AddressType,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::validate_connection (const ACE_Asynch_Connect::Result& result_in,
-                                                                      const ACE_INET_Addr& remoteSAP_in,
-                                                                      const ACE_INET_Addr& localSAP_in)
+                             HandlerType>::validate_connection (const ACE_Asynch_Connect::Result& result_in,
+                                                                const ACE_INET_Addr& remoteSAP_in,
+                                                                const ACE_INET_Addr& localSAP_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
@@ -105,8 +105,8 @@ Net_Client_AsynchConnector_T<AddressType,
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
-    if (result == -1)
+    int result_2 = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
+    if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
@@ -115,24 +115,24 @@ Net_Client_AsynchConnector_T<AddressType,
                 ACE_OS::strerror (result_in.error ())));
   } // end IF
 
-  return ((result_in.success () == 1) ? 0 : -1);
+  return ((result == 0) ? -1 : 0);
 }
 
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename SocketHandlerType>
-const SocketHandlerConfigurationType*
+          typename HandlerType>
+const HandlerConfigurationType*
 Net_Client_AsynchConnector_T<AddressType,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::getConfiguration () const
+                             HandlerType>::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::getConfiguration"));
 
@@ -142,18 +142,18 @@ Net_Client_AsynchConnector_T<AddressType,
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename SocketHandlerType>
+          typename HandlerType>
 bool
 Net_Client_AsynchConnector_T<AddressType,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::connect (const AddressType& address_in)
+                             HandlerType>::connect (const AddressType& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
@@ -189,18 +189,18 @@ Net_Client_AsynchConnector_T<AddressType,
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename SocketHandlerType>
+          typename HandlerType>
 void
 Net_Client_AsynchConnector_T<AddressType,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::abort ()
+                             HandlerType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::abort"));
 
@@ -215,27 +215,28 @@ Net_Client_AsynchConnector_T<AddressType,
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename SocketHandlerType>
-SocketHandlerType*
+          typename HandlerType>
+HandlerType*
 Net_Client_AsynchConnector_T<AddressType,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::make_handler (void)
+                             HandlerType>::make_handler (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::make_handler"));
 
-  // init return value(s)
-  SocketHandlerType* handler_p = NULL;
+  // initialize return value(s)
+  HandlerType* handler_p = NULL;
 
+  // default behavior
   ACE_NEW_NORETURN (handler_p,
-                    SocketHandlerType (interfaceHandle_,
-                                    statisticCollectionInterval_));
+                    HandlerType (interfaceHandle_,
+                                 statisticCollectionInterval_));
   if (!handler_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -246,22 +247,22 @@ Net_Client_AsynchConnector_T<AddressType,
 /////////////////////////////////////////
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       SocketHandlerType> >::Net_Client_AsynchConnector_T (const SocketHandlerConfigurationType* configuration_in,
-                                                                                                           ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                                           unsigned int statisticCollectionInterval_in)
+                                                       HandlerType> >::Net_Client_AsynchConnector_T (const HandlerConfigurationType* configuration_in,
+                                                                                                     ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                                     unsigned int statisticCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
@@ -280,43 +281,43 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       SocketHandlerType> >::~Net_Client_AsynchConnector_T ()
+                                                       HandlerType> >::~Net_Client_AsynchConnector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::~Net_Client_AsynchConnector_T"));
 
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 int
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       SocketHandlerType> >::validate_connection (const ACE_Asynch_Connect::Result& result_in,
-                                                                                                  const ACE_INET_Addr& remoteSAP_in,
-                                                                                                  const ACE_INET_Addr& localSAP_in)
+                                                       HandlerType> >::validate_connection (const ACE_Asynch_Connect::Result& result_in,
+                                                                                            const ACE_INET_Addr& remoteSAP_in,
+                                                                                            const ACE_INET_Addr& localSAP_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
@@ -330,8 +331,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
-    if (result == -1)
+    int result_2 = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
+    if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
@@ -340,25 +341,25 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                 ACE_OS::strerror (result_in.error ())));
   } // end IF
 
-  return ((result_in.success () == 1) ? 0 : -1);
+  return ((result == 0) ? -1 : 0);
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
-const SocketHandlerConfigurationType*
+const HandlerConfigurationType*
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       SocketHandlerType> >::getConfiguration () const
+                                                       HandlerType> >::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::getConfiguration"));
 
@@ -366,21 +367,21 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 void
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       SocketHandlerType> >::abort ()
+                                                       HandlerType> >::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::abort"));
 
@@ -393,21 +394,21 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 bool
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       SocketHandlerType> >::connect (const ACE_INET_Addr& address_in)
+                                                       HandlerType> >::connect (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
@@ -432,29 +433,30 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 Net_AsynchUDPConnection_T<UserDataType,
                           SessionDataType,
-                          SocketHandlerType>*
+                          HandlerType>*
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       SocketHandlerType> >::make_handler (void)
+                                                       HandlerType> >::make_handler (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::make_handler"));
 
   // init return value(s)
   CONNECTION_T* handler_p = NULL;
 
+  // default behavior
   ACE_NEW_NORETURN (handler_p,
                     CONNECTION_T (interfaceHandle_,
                                   statisticCollectionInterval_));
@@ -469,20 +471,20 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::Net_Client_AsynchConnector_T (const SocketHandlerConfigurationType* configuration_in,
-                                                                               ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                               unsigned int statisticCollectionInterval_in)
+                             HandlerType>::Net_Client_AsynchConnector_T (const HandlerConfigurationType* configuration_in,
+                                                                         ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                         unsigned int statisticCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
@@ -501,39 +503,39 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::~Net_Client_AsynchConnector_T ()
+                             HandlerType>::~Net_Client_AsynchConnector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::~Net_Client_AsynchConnector_T"));
 
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 int
 Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::validate_connection (const ACE_Asynch_Connect::Result& result_in,
-                                                                      const ACE_Netlink_Addr& remoteSAP_in,
-                                                                      const ACE_Netlink_Addr& localSAP_in)
+                             HandlerType>::validate_connection (const ACE_Asynch_Connect::Result& result_in,
+                                                                const ACE_Netlink_Addr& remoteSAP_in,
+                                                                const ACE_Netlink_Addr& localSAP_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
@@ -548,8 +550,8 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
     // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
-//    result = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
-//    if (result == -1)
+//  int result_2 = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
+//    if (result_2 == -1)
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
@@ -558,23 +560,23 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                 ACE_OS::strerror (result_in.error ())));
   } // end IF
 
-  return ((result_in.success () == 1) ? 0 : -1);
+  return ((result == 0) ? -1 : 0);
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
-const SocketHandlerConfigurationType*
+const HandlerConfigurationType*
 Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::getConfiguration () const
+                             HandlerType>::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::getConfiguration"));
 
@@ -582,19 +584,19 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 void
 Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::abort ()
+                             HandlerType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::abort"));
 
@@ -607,23 +609,23 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 bool
 Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::connect (const ACE_Netlink_Addr& address_in)
+                             HandlerType>::connect (const ACE_Netlink_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
-  SocketHandlerType* handler_p = NULL;
+  HandlerType* handler_p = NULL;
   handler_p = make_handler ();
   if (!handler_p)
   {
@@ -644,28 +646,29 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
 }
 
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
-SocketHandlerType*
+HandlerType*
 Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>::make_handler (void)
+                             HandlerType>::make_handler (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::make_handler"));
 
-  // init return value(s)
-  SocketHandlerType* handler_p = NULL;
+  // initialize return value(s)
+  HandlerType* handler_p = NULL;
 
+  // default behavior
   ACE_NEW_NORETURN (handler_p,
-                    SocketHandlerType (interfaceHandle_,
-                                       statisticCollectionInterval_));
+                    HandlerType (interfaceHandle_,
+                                 statisticCollectionInterval_));
   if (!handler_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

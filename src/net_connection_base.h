@@ -59,7 +59,7 @@ class Net_ConnectionBase_T
                                                 // 0 --> DON'T collect statistics
   virtual ~Net_ConnectionBase_T ();
 
-  // *NOTE*: (de-)registers connection with the connection manager (if any)
+  // (de-)register with the connection manager (if any)
   bool registerc ();
   void deregister ();
 

@@ -66,16 +66,22 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::~Net_Connection_Manager_T"));
 
-  // clean up
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  bool do_abort = false;
 
-  if (!connections_.is_empty ())
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("%u connections still open --> check implementation !, continuing\n"),
-                connections_.size ()));
+    //  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+
+    if (!connections_.is_empty ())
+    {
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("connections still open --> check implementation, continuing\n")));
+      do_abort = true;
+    } // end IF
+  } // end lock scope
+
+  if (do_abort)
     abort ();
-  } // end IF
 }
 
 template <typename AddressType,
@@ -177,7 +183,8 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::operator[]"));
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+//  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
   CONNECTION_T* connection_p = NULL;
   unsigned int index = 0;
@@ -216,18 +223,12 @@ Net_Connection_Manager_T<AddressType,
 
   ACE_ASSERT (isInitialized_);
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+//  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
-  // sanity check(s)
-  if (!isActive_)
-    return false; // currently rejecting new connections...
-  if (connections_.size () >= maxNumConnections_)
-  {
-    //ACE_DEBUG ((LM_DEBUG,
-    //            ACE_TEXT ("rejecting connection (maximum count [%u] has been reached), aborting\n"),
-    //            maxNumConnections_));
+  if (!isActive_ || // --> currently rejecting new connections...
+      (connections_.size () >= maxNumConnections_))
     return false;
-  } // end IF
 
   connection_in->increase ();
   connections_.insert_tail (connection_in);
@@ -252,8 +253,8 @@ Net_Connection_Manager_T<AddressType,
   bool found = false;
   CONNECTION_T* connection_p = NULL;
 
-  // synch access to myConnections
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+//  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
   for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
        iterator.next (connection_p);
@@ -298,7 +299,8 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::numConnections"));
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+//  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
   return static_cast<unsigned int> (connections_.size ());
 }
@@ -317,7 +319,8 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+//  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
   isActive_ = true;
 }
@@ -357,7 +360,8 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+//  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
   return isActive_;
 }
@@ -376,44 +380,23 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abort"));
 
-  int result = -1;
+//  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
-  // synch access to connections_
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
-
-  // sanity check: anything to do ?
+  // sanity check(s)
   if (connections_.is_empty ())
     return;
 
   unsigned int num_connections = connections_.size ();
 
   CONNECTION_T* connection_p = NULL;
-//  for (ConnectionsIterator_t iterator (connections_);
-//       iterator.next (connection_p);
-//       iterator.advance ())
-//  {
-//    ACE_ASSERT (connection_p);
-//    try
-//    {
-//      // *IMPORTANT NOTE*: implicitly invokes deregisterConnection
-//      connection_p->abort ();
-//    }
-//    catch (...)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("caught exception in Net_IConnection::abort(), continuing")));
-//    }
-//  } // end FOR
-  do
+  for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
+       iterator.next (connection_p);
+       iterator.advance ())
   {
-    connection_p = NULL;
-    result = connections_.get (connection_p, 0);
-    if (result == -1)
-      break; // done
     ACE_ASSERT (connection_p);
-
     try
-    { // *NOTE*: implicitly invokes deregister from a pro/reactor thread context
+    {
       connection_p->close ();
     }
     catch (...)
@@ -421,8 +404,7 @@ Net_Connection_Manager_T<AddressType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
     }
-  } while (true);
-  ACE_ASSERT (connections_.is_empty ());
+  } // end FOR
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("closed %u connection(s)\n"),
@@ -443,9 +425,9 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::wait"));
 
-  // synch access to myConnections
   {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+//    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
     while (connections_.is_empty () == 0)
     {
@@ -456,9 +438,6 @@ Net_Connection_Manager_T<AddressType,
       condition_.wait ();
     } // end WHILE
   } // end lock scope
-
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("leaving...\n")));
 }
 
 template <typename AddressType,
@@ -475,27 +454,35 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortOldestConnection"));
 
-  // synch access to myConnections
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  int result = -1;
 
-  // sanity check: anything to do ?
+//  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+
+  // sanity check(s)
   if (connections_.is_empty () == 1)
     return;
 
   // close "oldest" connection --> list head
   CONNECTION_T* connection_p = NULL;
-  if (connections_.get (connection_p) != -1)
+  result = connections_.get (connection_p, 0);
+  if (result == -1)
   {
-    try
-    { // *NOTE*: implicitly invokes deregister from a pro/reactor thread context
-      connection_p->close ();
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
-    }
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_DLList::get(0): \"%m\", returning\n")));
+    return;
   } // end IF
+  ACE_ASSERT (connection_p);
+
+  try
+  {
+    connection_p->close ();
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
+  }
 }
 
 template <typename AddressType,
@@ -512,7 +499,10 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortNewestConnection"));
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  int result = -1;
+
+//  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
   // sanity check(s)
   if (connections_.is_empty ())
@@ -521,18 +511,24 @@ Net_Connection_Manager_T<AddressType,
   // close "newest" connection --> list tail
   CONNECTION_T* connection_p = NULL;
   CONNECTION_CONTAINER_REVERSEITERATOR_T iterator (connections_);
-  if (iterator.next (connection_p) == 1)
+  result = iterator.next (connection_p);
+  if (result == -1)
   {
-    try
-    { // *NOTE*: implicitly invokes deregister from a pro/reactor thread context
-      connection_p->close ();
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
-    }
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_DLList_Reverse_Iterator::next(): \"%m\", returning\n")));
+    return;
   } // end IF
+  ACE_ASSERT (connection_p);
+
+  try
+  {
+    connection_p->close ();
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
+  }
 }
 
 template <typename AddressType,
@@ -549,8 +545,12 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::collect"));
 
-  // init result
+  // initialize result
   ACE_OS::memset (&data_out, 0, sizeof (data_out));
+
+  // *NOTE*: called from report () only !
+//  //  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+//  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
   StatisticContainerType temp;
   // aggregate statistical data
@@ -595,9 +595,9 @@ Net_Connection_Manager_T<AddressType,
   StatisticContainerType result;
   ACE_OS::memset (&result, 0, sizeof (result));
 
-  // synch access to myConnections
   {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+//    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
     // aggregate data from active connections
     if (!const_cast<SELF_T*> (this)->collect (result))
@@ -631,8 +631,8 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::dump_state"));
 
-  // synch access to myConnections
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+//  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
 
   CONNECTION_T* connection_p = NULL;
   for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));

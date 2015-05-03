@@ -44,14 +44,13 @@ Net_StreamTCPSocketBase_T<AddressType,
                           StreamType,
                           SocketHandlerType>::Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                          unsigned int statisticsCollectionInterval_in)
- : inherited2 (interfaceHandle_in,
+ : inherited ()
+ , inherited2 (interfaceHandle_in,
                statisticsCollectionInterval_in)
-// , configuration_ (NULL)
-// , stream_ ()
  , currentReadBuffer_ (NULL)
-// , sendLock_ ()
  , currentWriteBuffer_ (NULL)
-// , serializeOutput_ (false)
+ , sendLock_ ()
+ , stream_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::Net_StreamTCPSocketBase_T"));
 
@@ -123,11 +122,7 @@ Net_StreamTCPSocketBase_T<AddressType,
 
   ACE_UNUSED_ARG (arg_in);
 
-  // step0: init this
-  //// *TODO*: find a better way to do this
-  //serializeOutput_ = configuration_->streamConfiguration.serializeOutput;
-
-  // step1: init/start stream
+  // step1: initialize/start stream
   // step1a: connect stream head message queue with the reactor notification
   // pipe ?
   if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
@@ -135,7 +130,7 @@ Net_StreamTCPSocketBase_T<AddressType,
     // *IMPORTANT NOTE*: enable the reference counting policy, as this will
     // be registered with the reactor several times (1x READ_MASK, nx
     // WRITE_MASK); therefore several threads MAY be dispatching notifications
-    // (yes, even concurrently; myLock enforces the proper sequence order, see
+    // (yes, even concurrently; lock_ enforces the proper sequence order, see
     // handle_output()) on the SAME handler. When the socket closes, the event
     // handler should thus not be destroyed() immediately, but simply purge any
     // pending notifications (see handle_close()) and de-register; after the
@@ -155,7 +150,7 @@ Net_StreamTCPSocketBase_T<AddressType,
     inherited2::configuration_.streamConfiguration.notificationStrategy =
       &this->notificationStrategy_;
   } // end IF
-  // step1b: init final module (if any)
+  // step1b: initialize final module (if any)
   if (inherited2::configuration_.streamConfiguration.module)
   {
     Stream_IModule_t* imodule_p = NULL;
@@ -191,17 +186,9 @@ Net_StreamTCPSocketBase_T<AddressType,
     inherited2::configuration_.streamConfiguration.module = clone_p;
     inherited2::configuration_.streamConfiguration.deleteModule = true;
   } // end IF
-  // step1c: init stream
-  //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  //  state_->sessionID =
-  //      reinterpret_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-  //#else
-  //  state_->sessionID =
-  //      static_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-  //#endif
-
+  // step1c: initialize stream
   unsigned int session_id = 0;
-#if defined (_MSC_VER)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   session_id =
     reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #else
@@ -240,10 +227,18 @@ Net_StreamTCPSocketBase_T<AddressType,
     return -1;
   } // end IF
 
-  // *NOTE*: let the reactor manage this handler...
-  // *WARNING*: this has some implications (see close() below)
-  if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
-    inherited::remove_reference ();
+  // step3: register with the connection manager (if any)
+  if (!inherited2::registerc ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    return -1;
+  } // end IF
+
+//  // *NOTE*: let the reactor manage this handler...
+//  // *WARNING*: this has some implications (see close() below)
+//  if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
+//    inherited::remove_reference ();
 
   return 0;
 }
@@ -358,6 +353,8 @@ Net_StreamTCPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::handle_input"));
 
+  int result = -1;
+
   ACE_UNUSED_ARG (handle_in);
 
   // sanity check
@@ -375,8 +372,7 @@ Net_StreamTCPSocketBase_T<AddressType,
   } // end IF
 
   // read some data from the socket...
-  size_t bytes_received = -1;
-  bytes_received =
+  size_t bytes_received =
       inherited::peer_.recv (currentReadBuffer_->wr_ptr (), // buffer
                              currentReadBuffer_->size (),   // #bytes to read
                              0);                            // flags
@@ -389,10 +385,10 @@ Net_StreamTCPSocketBase_T<AddressType,
       // - connection abort()ed locally
       int error = ACE_OS::last_error ();
       if ((error != ECONNRESET) &&
-          (error != EPIPE) &&      // <-- connection reset by peer
+          (error != EPIPE)      && // <-- connection reset by peer
           // -------------------------------------------------------------------
-          (error != EBADF) &&
-          (error != ENOTSOCK) &&
+          (error != EBADF)      &&
+          (error != ENOTSOCK)   &&
           (error != ECONNABORTED)) // <-- connection abort()ed locally
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SOCK_Stream::recv(): \"%m\", returning\n")));
@@ -432,7 +428,8 @@ Net_StreamTCPSocketBase_T<AddressType,
 
   // push the buffer onto our stream for processing
   // *NOTE*: the stream assumes ownership of the buffer
-  if (stream_.put (currentReadBuffer_) == -1)
+  result = stream_.put (currentReadBuffer_);
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
@@ -445,7 +442,7 @@ Net_StreamTCPSocketBase_T<AddressType,
   } // end IF
   currentReadBuffer_ = NULL;
 
-  return 0;
+  return result;
 }
 
 template <typename AddressType,
@@ -484,18 +481,20 @@ Net_StreamTCPSocketBase_T<AddressType,
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
     // been notified to the reactor
     if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
-      result = stream_.get (currentWriteBuffer_,
-                            const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
+      result =
+          stream_.get (currentWriteBuffer_,
+                       const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
     else
-      result = inherited::getq (currentWriteBuffer_,
-                                const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
+      result =
+          inherited::getq (currentWriteBuffer_,
+                           const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
     if (result == -1)
     {
       // *IMPORTANT NOTE*: a number of issues can occur here:
       // - connection has been closed in the meantime
       // - queue has been deactivated
       int error = ACE_OS::last_error ();
-      if ((error != EAGAIN) ||  // <-- connection has been closed in the meantime
+      if ((error != EAGAIN) ||  // <-- connection has been closed
           (error != ESHUTDOWN)) // <-- queue has been deactivated
         ACE_DEBUG ((LM_ERROR,
                     (inherited2::configuration_.streamConfiguration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
@@ -529,8 +528,7 @@ Net_StreamTCPSocketBase_T<AddressType,
   } // end IF
 
   // put some data into the socket...
-  ssize_t bytes_sent = -1;
-  bytes_sent =
+  ssize_t bytes_sent =
       inherited::peer_.send (currentWriteBuffer_->rd_ptr (), // buffer
                              currentWriteBuffer_->length (), // #bytes to send
                              0);                             // flags
@@ -542,12 +540,12 @@ Net_StreamTCPSocketBase_T<AddressType,
       // - connection reset by peer
       // - connection abort()ed locally
       int error = ACE_OS::last_error ();
-      if ((error != ECONNRESET) &&
+      if ((error != ECONNRESET)   &&
           (error != ECONNABORTED) &&
-          (error != EPIPE) &&      // <-- connection reset by peer
+          (error != EPIPE)        && // <-- connection reset by peer
           // -------------------------------------------------------------------
-          (error != ENOTSOCK) &&
-          (error != EBADF))        // <-- connection abort()ed locally
+          (error != ENOTSOCK)     &&
+          (error != EBADF))          // <-- connection abort()ed locally
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SOCK_Stream::send(): \"%m\", aborting\n")));
 
@@ -603,7 +601,7 @@ Net_StreamTCPSocketBase_T<AddressType,
 //                  ACE_TEXT ("failed to ACE_Reactor::cancel_wakeup(): \"%m\", continuing\n")));
 //  } // end IF
 //  else
-  if (currentWriteBuffer_ != NULL)
+  if (currentWriteBuffer_)
   {
     // clean up
     if (inherited2::configuration_.streamConfiguration.serializeOutput)
@@ -644,6 +642,8 @@ Net_StreamTCPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::handle_close"));
 
+  int result = -1;
+
   switch (mask_in)
   {
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
@@ -664,11 +664,15 @@ Net_StreamTCPSocketBase_T<AddressType,
       // a multithreaded reactor, there may still be in-flight notifications
       // being dispatched at this stage, so this just speeds things up a little
       if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
-        if (inherited::reactor ()->purge_pending_notifications (this,
-                                                                ACE_Event_Handler::ALL_EVENTS_MASK) == -1)
+      {
+        result =
+            inherited::reactor ()->purge_pending_notifications (this,
+                                                                ACE_Event_Handler::ALL_EVENTS_MASK);
+        if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@): \"%m\", continuing\n"),
                       this));
+      } // end IF
 
       break;
     }
@@ -693,9 +697,72 @@ Net_StreamTCPSocketBase_T<AddressType,
       break;
   } // end SWITCH
 
-  // invoke base-class maintenance
-  return inherited::handle_close (handle_in,
-                                  mask_in);
+  // step3: invoke base-class maintenance
+  result = inherited::handle_close (handle_in,
+                                    mask_in);
+  if (result == -1)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to SocketHandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
+                handle_in, mask_in));
+
+  // step4: deregister with the connection manager (if any)
+  inherited2::deregister ();
+
+//  // step5: release a reference
+//  // *IMPORTANT NOTE*: may 'delete this'
+//  inherited2::decrease ();
+
+  return result;
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+ACE_Event_Handler::Reference_Count
+Net_StreamTCPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
+                          UserDataType,
+                          SessionDataType,
+                          StatisticContainerType,
+                          StreamType,
+                          SocketHandlerType>::add_reference (void)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::add_reference"));
+
+  inherited2::increase ();
+
+  return inherited2::count ();
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+ACE_Event_Handler::Reference_Count
+Net_StreamTCPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
+                          UserDataType,
+                          SessionDataType,
+                          StatisticContainerType,
+                          StreamType,
+                          SocketHandlerType>::remove_reference (void)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::remove_reference"));
+
+  inherited2::decrease ();
+
+  return 0;
 }
 
 template <typename AddressType,
@@ -784,16 +851,20 @@ Net_StreamTCPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::info"));
 
+  int result = -1;
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   handle_out = inherited::get_handle ();
 #else
   handle_out = inherited::get_handle ();
 #endif
 
-  if (inherited::peer_.get_local_addr (localSAP_out) == -1)
+  result = inherited::peer_.get_local_addr (localSAP_out);
+  if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK::get_local_addr(): \"%m\", continuing\n")));
-  if (inherited::peer_.get_remote_addr (remoteSAP_out) == -1)
+  result = inherited::peer_.get_remote_addr (remoteSAP_out);
+  if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK::get_remote_addr(): \"%m\", continuing\n")));
 }
@@ -898,7 +969,16 @@ Net_StreamTCPSocketBase_T<AddressType,
 
   int result = -1;
 
+  // step1: shutdown operations
   ACE_HANDLE handle = inherited::get_handle ();
+  // *NOTE*: may 'delete this'
+  result = handle_close (handle,
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+
+  //  step2: release the socket handle
   if (handle != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (handle);
@@ -906,7 +986,7 @@ Net_StreamTCPSocketBase_T<AddressType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                   handle));
-//    inherited::set_handle (ACE_INVALID_HANDLE);
+//    inherited::handle (ACE_INVALID_HANDLE);
   } // end IF
 }
 
@@ -930,7 +1010,7 @@ Net_StreamTCPSocketBase_T<AddressType,
 {
   NETWORK_TRACE(ACE_TEXT("Net_StreamTCPSocketBase_T::allocateMessage"));
 
-  // init return value(s)
+  // initialize return value(s)
   ACE_Message_Block* message_out = NULL;
 
   try

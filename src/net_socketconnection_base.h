@@ -46,29 +46,23 @@ class Net_SocketConnectionBase_T
  public:
   virtual ~Net_SocketConnectionBase_T ();
 
-  //// implement (part of) Net_ITransportLayer_T
-  //virtual bool initialize (Net_ClientServerRole_t,            // role
-  //                         const Net_SocketConfiguration_t&); // socket configuration
-  //virtual void finalize ();
-
-  virtual void ping (); // ping the peer !
-
-  //// implement Common_IStatistic
-  //// *NOTE*: delegate these to the stream
-  //virtual bool collect (StatisticContainerType&); // return value: statistic data
-  //virtual void report () const;
-
   // override some task-based members
   virtual int open (void* = NULL); // args
   virtual int close (u_long = 0); // args
 //  virtual int svc (void);
 
+  //// implement (part of) Net_ITransportLayer_T
+  //virtual bool initialize (Net_ClientServerRole_t,            // role
+  //                         const Net_SocketConfiguration_t&); // socket configuration
+  //virtual void finalize ();
+  virtual void ping (); // ping the peer !
+
 //  // *NOTE*: enqueue any received data onto our stream for further processing
-//   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
-  // *NOTE*: this is called when:
-  // - handle_xxx() returns -1
-//  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-//                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+//  virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
+//  // *NOTE*: this is called when:
+//  // handle_xxx() returns -1
+//  virtual int handle_close (ACE_HANDLE,
+//                            ACE_Reactor_Mask);
 
  protected:
   typedef Net_IConnectionManager_T<AddressType,
@@ -112,25 +106,13 @@ class Net_AsynchSocketConnectionBase_T
  public:
   virtual ~Net_AsynchSocketConnectionBase_T ();
 
-  // implement (part of) Net_ITransportLayer
-  virtual void ping (); // ping the peer !
-
-  //// implement Common_IStatistic
-  //// *NOTE*: delegate these to the stream
-  //virtual bool collect (StatisticContainerType&); // return value: statistic data
-  //virtual void report () const;
-
   // override some ACE_Service_Handler members
   virtual void open (ACE_HANDLE,          // handle
                      ACE_Message_Block&); // (initial) data (if any)
   //virtual void act (const void*); // (user) data handle
 
-//  // *NOTE*: enqueue any received data onto our stream for further processing
-//   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
-  // *NOTE*: this is called when:
-  // - handle_xxx() returns -1
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+  // implement (part of) Net_ITransportLayer
+  virtual void ping (); // ping the peer !
 
  protected:
   typedef Net_IConnectionManager_T<AddressType,

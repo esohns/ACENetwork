@@ -70,7 +70,6 @@ Net_AsynchTCPSocketHandler::open (ACE_HANDLE handle_in,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
                   inherited::configuration_.socketConfiguration.bufferSize,
                   handle_in));
-
       goto close;
     } // end IF
   if (!Net_Common_Tools::setNoDelay (handle_in,
@@ -81,7 +80,6 @@ Net_AsynchTCPSocketHandler::open (ACE_HANDLE handle_in,
                 (NET_DEFAULT_SOCKET_TCP_NODELAY ? ACE_TEXT ("true")
                                                 : ACE_TEXT ("false")),
                 handle_in));
-
     goto close;
   } // end IF
   if (!Net_Common_Tools::setKeepAlive (handle_in,
@@ -94,7 +92,6 @@ Net_AsynchTCPSocketHandler::open (ACE_HANDLE handle_in,
                   (NET_DEFAULT_SOCKET_TCP_KEEPALIVE ? ACE_TEXT ("true")
                                                     : ACE_TEXT ("false")),
                   handle_in));
-
     goto close;
   } // end IF
   if (!Net_Common_Tools::setLinger (handle_in,
@@ -107,7 +104,6 @@ Net_AsynchTCPSocketHandler::open (ACE_HANDLE handle_in,
                   ((NET_DEFAULT_SOCKET_LINGER > 0) ? ACE_TEXT ("true")
                                                    : ACE_TEXT ("false")),
                   handle_in));
-
     goto close;
   } // end IF
 
@@ -115,26 +111,24 @@ Net_AsynchTCPSocketHandler::open (ACE_HANDLE handle_in,
   inherited2::proactor (ACE_Proactor::instance ());
   result = inputStream_.open (*this,                    // event handler
                               handle_in,                // handle
-                              NULL,                     // ACT
+                              NULL,                     // completion key
                               inherited2::proactor ()); // proactor
   if (result == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Read_Stream::open(%d): \"%m\", aborting\n"),
                 handle_in));
-
     goto close;
   } // end IF
   result = outputStream_.open (*this,                    // event handler
                                handle_in,                // handle
-                               NULL,                     // ACT
+                               NULL,                     // completion key
                                inherited2::proactor ()); // proactor
   if (result == -1)
   {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Write_Stream::open(%d): \"%m\", returning\n"),
+                ACE_TEXT ("failed to ACE_Asynch_Write_Stream::open(%d): \"%m\", aborting\n"),
                 handle_in));
-
     goto close;
   } // end IF
 
@@ -206,9 +200,10 @@ Net_AsynchTCPSocketHandler::notify (void)
 
   int result = -1;
 
+  ACE_HANDLE handle = inherited2::handle ();
   try
   {
-    result = handle_output (inherited2::handle ());
+    result = handle_output (handle);
   }
   catch (...)
   {
@@ -221,7 +216,7 @@ Net_AsynchTCPSocketHandler::notify (void)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchTCPSocketHandler::handle_output(): \"%m\", aborting\n")));
 
-    int result_2 = handle_close (inherited2::handle (),
+    int result_2 = handle_close (handle,
                                  ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
@@ -299,12 +294,13 @@ Net_AsynchTCPSocketHandler::handle_write_stream (const ACE_Asynch_Write_Stream::
     if ((error != ECONNRESET) &&
         (error != EPIPE)      &&
         (error != EBADF)) // 9 happens on Linux (local close())
+    {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
                   result_in.handle (),
                   ACE_TEXT (ACE_OS::strerror (error))));
-
-    close = true;
+      close = true;
+    } // end IF
   } // end IF
 
   switch (bytes_transferred)
@@ -317,12 +313,13 @@ Net_AsynchTCPSocketHandler::handle_write_stream (const ACE_Asynch_Write_Stream::
       if ((error != ECONNRESET) &&
           (error != EPIPE)      &&
           (error != EBADF)) // 9 happens on Linux (local close())
+      {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
                     result_in.handle (),
                     ACE_TEXT (ACE_OS::strerror (error))));
-
-      close = true;
+        close = true;
+      } // end IF
 
       break;
     }
@@ -334,11 +331,10 @@ Net_AsynchTCPSocketHandler::handle_write_stream (const ACE_Asynch_Write_Stream::
       {
         // *TODO*: handle short writes (more) gracefully
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("stream (%d): sent %u/%u byte(s) only, aborting"),
+                    ACE_TEXT ("stream (%d): sent %u/%u byte(s) only, aborting\n"),
                     result_in.handle (),
-                    result_in.bytes_transferred (),
+                    bytes_transferred,
                     result_in.bytes_to_write ()));
-
         close = true;
       } // end IF
 

@@ -309,6 +309,7 @@
     <None Include="..\..\src\net_tcpconnection_base.inl" />
     <None Include="..\..\src\net_udpconnection.inl" />
     <None Include="..\..\src\net_udpsockethandler.inl" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\libACEStream\prj\msvc\libACEStream.vcxproj">

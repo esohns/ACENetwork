@@ -21,12 +21,12 @@
 #ifndef NET_TCP_SOCKETHANDLER_H
 #define NET_TCP_SOCKETHANDLER_H
 
-#include "ace/Event_Handler.h"
+#include "ace/config-macros.h"
 #include "ace/Global_Macros.h"
-#include "ace/SOCK_Stream.h"
+#include "ace/Reactor_Notification_Strategy.h"
 #include "ace/Svc_Handler.h"
 #include "ace/Synch_Traits.h"
-#include "ace/Reactor_Notification_Strategy.h"
+#include "ace/SOCK_Stream.h"
 
 #include "net_configuration.h"
 #include "net_exports.h"
@@ -37,19 +37,12 @@ class Net_Export Net_TCPSocketHandler
  , public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
 {
  public:
-  //// override some event handler methods
-  //virtual ACE_Event_Handler::Reference_Count add_reference (void);
-  //// *IMPORTANT NOTE*: this API works as long as the reactor doesn't manage
-  //// the lifecycle of the event handler. To avoid unforseen behavior, make sure
-  //// that the event handler has been properly deregistered from the reactor
-  //// before removing the last reference (delete on zero).
-  //virtual ACE_Event_Handler::Reference_Count remove_reference (void);
-
   // override some task-based members
   virtual int open (void* = NULL); // args
 
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+  // override some event handler methods
+  virtual int handle_close (ACE_HANDLE,        // handle
+                            ACE_Reactor_Mask); // event mask
 
  protected:
   Net_TCPSocketHandler ();

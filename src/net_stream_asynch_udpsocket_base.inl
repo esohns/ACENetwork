@@ -154,7 +154,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
     goto close;
   } // end IF
 
-  // step2a: initialize baseclass
+  // step2a: initialize base-class
   // *TODO*: this should not be happening here...
   socket_handler_configuration.bufferSize =
       inherited4::configuration_.protocolConfiguration.bufferSize;
@@ -169,14 +169,14 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
     goto close;
   } // end IF
 
-  // step2b: tweak socket, init I/O
+  // step2b: tweak socket, initialize I/O
   inherited::open (inherited2::get_handle (), messageBlock_in);
 
-  // step3: init/start stream
+  // step3: initialize/start stream
   // step3a: connect stream head message queue with a notification pipe/queue ?
   if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
     inherited4::configuration_.streamConfiguration.notificationStrategy = this;
-  // step3b: init final module (if any)
+  // step3b: initialize final module (if any)
   if (inherited4::configuration_.streamConfiguration.module)
   {
     Stream_IModule_t* imodule_p = NULL;
@@ -282,6 +282,14 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
     // clean up
     delete fake_result_p;
   } // end ELSE
+
+  // step5: register with the connection manager (if any)
+  if (!inherited4::registerc ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    goto close;
+  } // end IF
 
   return;
 
@@ -423,13 +431,18 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
     } // end IF
   } // end IF
 
-  // step3: invoke base class maintenance
+  // step3: invoke base-class maintenance
   result = inherited::handle_close (inherited::handle (),
                                     mask_in);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketHandlerType::handle_close(): \"%m\", continuing\n")));
 
+  // step4: deregister with the connection manager (if any)
+  inherited4::deregister ();
+
+  // step5: release a reference
+  // *IMPORTANT NOTE*: may 'delete this'
   inherited4::decrease ();
 
   return result;
@@ -643,7 +656,16 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 
   int result = -1;
 
+  // step1: shutdown operations
   ACE_HANDLE handle = inherited::handle ();
+  // *NOTE*: may 'delete this'
+  result = handle_close (handle,
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+
+  //  step2: release the socket handle
   if (handle != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (handle);
@@ -678,31 +700,38 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_read_dgram"));
 
   int result = -1;
+  unsigned long error = 0;
 
   // sanity check
   result = result_in.success ();
-  if (result != 1)
+  if (result == 0)
   {
-    // connection reset (by peer) ? --> not an error
-    if ((result_in.error () != ECONNRESET) &&
-        (result_in.error () != EPIPE))
+    // connection closed/reset ? --> not an error
+    error = result_in.error ();
+    if ((error != ECONNRESET) &&
+        (error != EPIPE)      &&
+        (error != EBADF)      && // local close (), happens on Linux
+        (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to read from input stream (%d): \"%s\", continuing\n"),
+                  ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                   result_in.handle (),
-                  ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
+                  error, ACE_TEXT (ACE_OS::strerror (error))));
   } // end IF
 
   switch (result_in.bytes_transferred ())
   {
     case -1:
     {
-      // connection reset (by peer) ? --> not an error
-      if ((result_in.error () != ECONNRESET) &&
-          (result_in.error () != EPIPE))
+      // connection closed/reset (by peer) ? --> not an error
+      error = result_in.error ();
+      if ((error != ECONNRESET) &&
+          (error != EPIPE)      &&
+          (error != EBADF)      && // local close (), happens on Linux
+          (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
+                    ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                     result_in.handle (),
-                    ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
+                    error, ACE_TEXT (ACE_OS::strerror (error))));
 
       break;
     }
@@ -722,13 +751,12 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 //                   result_in.handle (),
 //                   result_in.bytes_transferred ()));
 
-      // push the buffer onto our stream for processing
+      // push the buffer onto the stream for processing
       result = stream_.put (result_in.message_block (), NULL);
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", continuing\n")));
-
+                    ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
         break;
       } // end IF
 
@@ -741,6 +769,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 
   // clean up
   result_in.message_block ()->release ();
+
   result = handle_close (inherited::handle (),
                          ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
@@ -878,7 +907,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
     goto close;
   } // end IF
 
-  // step2a: initialize baseclass
+  // step2a: initialize base-class
   // *TODO*: this should not be happening here...
   socket_handler_configuration.bufferSize =
       inherited4::configuration_.protocolConfiguration.bufferSize;
@@ -893,14 +922,14 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
     goto close;
   } // end IF
 
-  // step2b: tweak socket, init I/O
+  // step2b: tweak socket, initialize I/O
   inherited::open (inherited2::get_handle (), messageBlock_in);
 
-  // step3: init/start stream
+  // step3: initialize/start stream
   // step3a: connect stream head message queue with a notification pipe/queue ?
   if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
     inherited4::configuration_.streamConfiguration.notificationStrategy = this;
-  // step3b: init final module (if any)
+  // step3b: initialize final module (if any)
   if (inherited4::configuration_.streamConfiguration.module)
   {
     Stream_IModule_t* imodule_p =
@@ -1005,6 +1034,14 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
     delete fake_result_p;
   } // end ELSE
 
+  // step5: register with the connection manager (if any)
+  if (!inherited4::registerc ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    goto close;
+  } // end IF
+
   return;
 
 close:
@@ -1056,7 +1093,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   } // end IF
 //  } // end IF
 
-  // start (asynch) write
+  // start (asynchronous) write
   // *NOTE*: this is a fire-and-forget API for message_block...
 //  size_t bytes_to_send = message_block_p->size (); // why oh why...
   ACE_Netlink_Addr peer_address;
@@ -1123,26 +1160,31 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
   {
     Stream_Iterator_t iterator (stream_);
-    const Common_Module_t* module = NULL;
-    result = iterator.next (module);
+    const Common_Module_t* module_p = NULL;
+    result = iterator.next (module_p);
     if (result == 1)
     {
-      ACE_ASSERT (module);
-      Common_Task_t* task = const_cast<Common_Module_t*> (module)->writer ();
-      ACE_ASSERT (task);
-      if (task->msg_queue ()->flush () == -1)
+      ACE_ASSERT (module_p);
+      Common_Task_t* task_p = const_cast<Common_Module_t*> (module_p)->writer ();
+      ACE_ASSERT (task_p);
+      if (task_p->msg_queue ()->flush () == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_MessageQueue::flush(): \"%m\", continuing\n")));
     } // end IF
   } // end IF
 
-  // step3: invoke base class maintenance
+  // step3: invoke base-class maintenance
   result = inherited::handle_close (inherited2::get_handle (),
                                     mask_in);
   if (result == -1)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to SocketHandlerType::handle_close(): \"%m\", continuing\n")));
 
+  // step4: deregister with the connection manager (if any)
+  inherited4::deregister ();
+
+  // step5: release a reference
+  // *IMPORTANT NOTE*: may 'delete this'
   inherited4::decrease ();
 
   return result;
@@ -1344,7 +1386,16 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 
   int result = -1;
 
+  // step1: shutdown operations
   ACE_HANDLE handle = inherited::handle ();
+  // *NOTE*: may 'delete this'
+  result = handle_close (handle,
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+
+  //  step2: release the socket handle
   if (handle != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (handle);
@@ -1377,33 +1428,38 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_read_dgram"));
 
   int result = -1;
-  size_t bytes_transferred;
+  unsigned long error = 0;
 
   // sanity check
   result = result_in.success ();
-  if (result != 1)
+  if (result == 0)
   {
-    // connection reset (by peer) ? --> not an error
-    if ((result_in.error () != ECONNRESET) &&
-        (result_in.error () != EPIPE))
+    // connection closed/reset ? --> not an error
+    error = result_in.error ();
+    if ((error != ECONNRESET) &&
+        (error != EPIPE)      &&
+        (error != EBADF)      && // local close (), happens on Linux
+        (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to read from input stream (%d): \"%s\", continuing\n"),
+                  ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                   result_in.handle (),
-                  ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
+                  error, ACE_TEXT (ACE_OS::strerror (error))));
   } // end IF
 
-  bytes_transferred = result_in.bytes_transferred ();
-  switch (bytes_transferred)
+  switch (result_in.bytes_transferred ())
   {
     case -1:
     {
-      // connection reset (by peer) ? --> not an error
-      if ((result_in.error () != ECONNRESET) &&
-          (result_in.error () != EPIPE))
+      // connection closed/reset (by peer) ? --> not an error
+      error = result_in.error ();
+      if ((error != ECONNRESET) &&
+          (error != EPIPE)      &&
+          (error != EBADF)      && // local close (), happens on Linux
+          (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
+                    ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                     result_in.handle (),
-                    ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
+                    error, ACE_TEXT (ACE_OS::strerror (error))));
 
       break;
     }
@@ -1428,8 +1484,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", continuing\n")));
-
+                    ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
         break;
       } // end IF
 
@@ -1442,6 +1497,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 
   // clean up
   result_in.message_block ()->release ();
+
   result = handle_close (inherited::handle (),
                          ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)

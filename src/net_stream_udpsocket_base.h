@@ -64,8 +64,8 @@ class Net_StreamUDPSocketBase_T
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() returns -1
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+  virtual int handle_close (ACE_HANDLE,
+                            ACE_Reactor_Mask);
 
   // implement (part of) Net_IConnection_T
   virtual void info (ACE_HANDLE&,         // return value: handle
@@ -162,8 +162,8 @@ class Net_StreamUDPSocketBase_T<AddressType,
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() returns -1
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+  virtual int handle_close (ACE_HANDLE,
+                            ACE_Reactor_Mask);
 
   // implement (part of) Net_IConnection_T
   virtual void info (ACE_HANDLE&,         // return value: handle

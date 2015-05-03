@@ -37,11 +37,11 @@
 
 template <typename UserDataType,
           typename SessionDataType,
-          typename SocketHandlerType>
+          typename HandlerType>
 class Net_UDPConnection_T
  : public Net_SocketConnectionBase_T<ACE_INET_Addr,
                                      Net_SocketConfiguration_t,
-                                     SocketHandlerType,
+                                     HandlerType,
                                      Net_Configuration_t,
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
@@ -51,7 +51,7 @@ class Net_UDPConnection_T
 {
   friend class ACE_Connector<Net_UDPConnection_T<UserDataType,
                                                  SessionDataType,
-                                                 SocketHandlerType>,
+                                                 HandlerType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
@@ -69,7 +69,7 @@ class Net_UDPConnection_T
   // override / implement (part of) Net_IInetTransportLayer
   //using Net_SocketConnectionBase_T::inherited::Net_ConnectionBase_T::initialize;
   //using Net_SocketConnectionBase_T::inherited::Net_ConnectionBase_T::finalize;
-  using Net_SocketConnectionBase_T::info;
+//  using Net_SocketConnectionBase_T::info;
   //virtual void info (ACE_HANDLE&,           // return value: handle
   //                   ACE_INET_Addr&,        // return value: local SAP
   //                   ACE_INET_Addr&) const; // return value: remote SAP
@@ -80,7 +80,7 @@ class Net_UDPConnection_T
  private:
   typedef Net_SocketConnectionBase_T<ACE_INET_Addr,
                                      Net_SocketConfiguration_t,
-                                     SocketHandlerType,
+                                     HandlerType,
                                      Net_Configuration_t,
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
@@ -97,11 +97,11 @@ class Net_UDPConnection_T
 
 template <typename UserDataType,
           typename SessionDataType,
-          typename SocketHandlerType>
+          typename HandlerType>
 class Net_AsynchUDPConnection_T
  : public Net_AsynchSocketConnectionBase_T<ACE_INET_Addr,
                                            Net_SocketConfiguration_t,
-                                           SocketHandlerType,
+                                           HandlerType,
                                            Net_Configuration_t,
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,
@@ -111,7 +111,7 @@ class Net_AsynchUDPConnection_T
 {
   friend class ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
                                                               SessionDataType,
-                                                              SocketHandlerType> >;
+                                                              HandlerType> >;
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
@@ -128,7 +128,7 @@ class Net_AsynchUDPConnection_T
   // override / implement (part of) Net_IInetTransportLayer
   //using Net_AsynchSocketConnectionBase_T::inherited::Net_ConnectionBase_T::initialize;
   //using Net_AsynchSocketConnectionBase_T::inherited::Net_ConnectionBase_T::finalize;
-  using Net_AsynchSocketConnectionBase_T::info;
+//  using Net_AsynchSocketConnectionBase_T::info;
   //virtual void info (ACE_HANDLE&,           // return value: handle
   //                   ACE_INET_Addr&,        // return value: local SAP
   //                   ACE_INET_Addr&) const; // return value: remote SAP
@@ -136,7 +136,7 @@ class Net_AsynchUDPConnection_T
  private:
   typedef Net_AsynchSocketConnectionBase_T<ACE_INET_Addr,
                                            Net_SocketConfiguration_t,
-                                           SocketHandlerType,
+                                           HandlerType,
                                            Net_Configuration_t,
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,

@@ -36,15 +36,15 @@
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename SocketHandlerType>
+          typename HandlerType>
 class Net_Client_Connector_T
- : public ACE_Connector<SocketHandlerType,
+ : public ACE_Connector<HandlerType,
                         ACE_SOCK_CONNECTOR>
  , public Net_Client_IConnector_T<AddressType,
-                                  SocketHandlerConfigurationType>
+                                  HandlerConfigurationType>
 {
  public:
   typedef Net_IConnectionManager_T<AddressType,
@@ -53,54 +53,54 @@ class Net_Client_Connector_T
                                    UserDataType,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
-  Net_Client_Connector_T (const SocketHandlerConfigurationType*, // socket handler configuration handle
-                          ICONNECTION_MANAGER_T*,                // connection manager handle
-                          unsigned int = 0);                     // statistics collecting interval (second(s))
-                                                                 // 0 --> DON'T collect statistics
+  Net_Client_Connector_T (const HandlerConfigurationType*, // socket handler configuration handle
+                          ICONNECTION_MANAGER_T*,          // connection manager handle
+                          unsigned int = 0);               // statistics collecting interval (second(s))
+                                                           // 0 --> DON'T collect statistics
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  virtual const SocketHandlerConfigurationType* getConfiguration () const;
+  virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual bool connect (const AddressType&);
 
  protected:
   // override default instantiation strategy
-  virtual int make_svc_handler (SocketHandlerType*&);
+  virtual int make_svc_handler (HandlerType*&);
 
  private:
-  typedef ACE_Connector<SocketHandlerType,
+  typedef ACE_Connector<HandlerType,
                         ACE_SOCK_CONNECTOR> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&));
 
-  const SocketHandlerConfigurationType* configuration_;
-  ICONNECTION_MANAGER_T*                interfaceHandle_;
-  unsigned int                          statisticCollectionInterval_; // seconds
+  const HandlerConfigurationType* configuration_;
+  ICONNECTION_MANAGER_T*          interfaceHandle_;
+  unsigned int                    statisticCollectionInterval_; // seconds
 };
 
 /////////////////////////////////////////
 
 // partial specialization (for UDP)
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 class Net_Client_Connector_T<ACE_INET_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
                              Net_UDPConnection_T<UserDataType,
                                                  SessionDataType,
-                                                 SocketHandlerType> >
+                                                 HandlerType> >
  : public Net_Client_IConnector_T<ACE_INET_Addr,
-                                  SocketHandlerConfigurationType>
+                                  HandlerConfigurationType>
 {
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
@@ -110,19 +110,19 @@ class Net_Client_Connector_T<ACE_INET_Addr,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
   typedef Net_UDPConnection_T<UserDataType,
                               SessionDataType,
-                              SocketHandlerType> CONNECTION_T;
+                              HandlerType> CONNECTION_T;
 
-  Net_Client_Connector_T (const SocketHandlerConfigurationType*, // configuration handle
-                          ICONNECTION_MANAGER_T*,                // connection manager handle
-                          unsigned int = 0);                     // statistics collecting interval (second(s))
-                                                                 // 0 --> DON'T collect statistics
+  Net_Client_Connector_T (const HandlerConfigurationType*, // configuration handle
+                          ICONNECTION_MANAGER_T*,          // connection manager handle
+                          unsigned int = 0);               // statistics collecting interval (second(s))
+                                                           // 0 --> DON'T collect statistics
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
   // *TODO*: why is it necessary to provide an implementation when there is (a
   //         more generic) one available ? (gcc complains about abort() and
   //         getConfiguration())
-  virtual const SocketHandlerConfigurationType* getConfiguration () const;
+  virtual const HandlerConfigurationType* getConfiguration () const;
   // *NOTE*: this is just a stub
   virtual void abort ();
   // specialize (part of) Net_Client_IConnector_T
@@ -137,9 +137,9 @@ class Net_Client_Connector_T<ACE_INET_Addr,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&));
 
-  const SocketHandlerConfigurationType* configuration_;
-  ICONNECTION_MANAGER_T*                interfaceHandle_;
-  unsigned int                          statisticCollectionInterval_; // seconds
+  const HandlerConfigurationType* configuration_;
+  ICONNECTION_MANAGER_T*          interfaceHandle_;
+  unsigned int                    statisticCollectionInterval_; // seconds
 };
 
 /////////////////////////////////////////
@@ -147,20 +147,20 @@ class Net_Client_Connector_T<ACE_INET_Addr,
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // partial specialization (for Netlink)
 template <typename SocketConfigurationType,
-          typename SocketHandlerType,
+          typename HandlerType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
+          typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 class Net_Client_Connector_T<ACE_Netlink_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             SocketHandlerConfigurationType,
+                             HandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             SocketHandlerType>
+                             HandlerType>
  : public Net_Client_IConnector_T<ACE_Netlink_Addr,
-                                  SocketHandlerConfigurationType>
+                                  HandlerConfigurationType>
 {
  public:
   typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
@@ -169,29 +169,29 @@ class Net_Client_Connector_T<ACE_Netlink_Addr,
                                    UserDataType,
                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
-  Net_Client_Connector_T (const SocketHandlerConfigurationType*, // configuration handle
-                          ICONNECTION_MANAGER_T*,                // connection manager handle
-                          unsigned int = 0);                     // statistics collecting interval (second(s))
-                                                                 // 0 --> DON'T collect statistics
+  Net_Client_Connector_T (const HandlerConfigurationType*, // configuration handle
+                          ICONNECTION_MANAGER_T*,          // connection manager handle
+                          unsigned int = 0);               // statistics collecting interval (second(s))
+                                                           // 0 --> DON'T collect statistics
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  virtual const SocketHandlerConfigurationType* getConfiguration () const;
+  virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual bool connect (const ACE_Netlink_Addr&);
 
  protected:
   // override default instantiation strategy
-  virtual int make_svc_handler (SocketHandlerType*&);
+  virtual int make_svc_handler (HandlerType*&);
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&));
 
-  const SocketHandlerConfigurationType* configuration_;
-  ICONNECTION_MANAGER_T*                interfaceHandle_;
-  unsigned int                          statisticCollectionInterval_; // seconds
+  const HandlerConfigurationType* configuration_;
+  ICONNECTION_MANAGER_T*          interfaceHandle_;
+  unsigned int                    statisticCollectionInterval_; // seconds
 };
 #endif
 

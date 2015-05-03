@@ -68,6 +68,9 @@ class Net_StreamAsynchUDPSocketBase_T
   // override some service methods
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
+  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE); // (socket) handle
+  virtual int handle_close (ACE_HANDLE handle_in,      // (socket) handle
+                            ACE_Reactor_Mask mask_in); // event mask
 
   // implement (part of) Net_IConnection_T
   virtual void info (ACE_HANDLE&,         // return value: handle
@@ -92,9 +95,6 @@ class Net_StreamAsynchUDPSocketBase_T
                                                            // 0 --> DON'T collect statistics
 
   // helper methods
-  virtual int handle_close (ACE_HANDLE handle_in,                                           // (socket) handle
-                            ACE_Reactor_Mask mask_in = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
-
   virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
 
   StreamType      stream_;
@@ -115,9 +115,6 @@ class Net_StreamAsynchUDPSocketBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&));
-
-  // helper methods
-  virtual int handle_output (ACE_HANDLE); // (socket) handle
 };
 
 /////////////////////////////////////////
@@ -163,6 +160,9 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
   // override some service methods
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
+  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE); // (socket) handle
+  virtual int handle_close (ACE_HANDLE handle_in,      // (socket) handle
+                            ACE_Reactor_Mask mask_in); // event mask
 
   // implement (part of) Net_IConnection_T
   virtual void info (ACE_HANDLE&,         // return value: handle
@@ -176,7 +176,7 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
   virtual void dump_state () const;
 
  protected:
-  typedef Net_IConnectionManager_T<AdressType,
+  typedef Net_IConnectionManager_T<AddressType,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
@@ -187,12 +187,9 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
                                                            // 0 --> DON'T collect statistics
 
   // helper methods
-  virtual int handle_close (ACE_HANDLE handle_in,                                           // (socket) handle
-                            ACE_Reactor_Mask mask_in = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
-
   virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
 
-  // *TODO*: (try to) handle short writes gracefully...
+  // *TODO*: handle short writes (more) gracefully...
   //  ACE_Message_Block* buffer_;
   StreamType         stream_;
 
@@ -210,9 +207,6 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&));
-
-  // helper methods
-  virtual int handle_output (ACE_HANDLE); // (socket) handle
 };
 #endif
 

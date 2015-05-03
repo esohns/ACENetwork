@@ -124,20 +124,20 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   // step2b: initialize final module (if any)
   if (inherited3::configuration_.streamConfiguration.module)
   {
-    Common_Module_t* module_p = NULL;
-    module_p =
-      dynamic_cast<Common_Module_t*> (inherited3::configuration_.streamConfiguration.module);
-    if (!module_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-                  ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
-      goto close;
-    } // end IF
+//    Common_Module_t* module_p = NULL;
+//    module_p =
+//      dynamic_cast<Common_Module_t*> (inherited3::configuration_.streamConfiguration.module);
+//    if (!module_p)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
+//                  ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
+//      goto close;
+//    } // end IF
     Stream_IModule_t* imodule_p = NULL;
     // need a downcast...
     imodule_p =
-      dynamic_cast<Stream_IModule_t*> (module_p);
+        dynamic_cast<Stream_IModule_t*> (inherited3::configuration_.streamConfiguration.module);
     if (!imodule_p)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -237,6 +237,14 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
     delete fake_result_p;
   } // end ELSE
 
+  // step4: register with the connection manager (if any)
+  if (!inherited3::registerc ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    goto close;
+  } // end IF
+
   return;
 
 close:
@@ -286,7 +294,7 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
     return -1;
   } // end IF
 
-  // start (asynch) write
+  // start (asynchronous) write
   // *NOTE*: this is a fire-and-forget API for message_block...
 //  if (inherited::outputStream_.write (*buffer_,               // data
   result =
@@ -363,13 +371,18 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
     } // end IF
   } // end IF
 
-  // step3: invoke base class maintenance
+  // step3: invoke base-class maintenance
   result = inherited::handle_close (inherited::handle (),
                                     mask_in);
   if (result == -1)
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to SocketHandlerType::handle_close(): \"%m\", continuing\n")));
 
+  // step4: deregister with the connection manager (if any)
+  inherited3::deregister ();
+
+  // step5: release a reference
+  // *IMPORTANT NOTE*: may 'delete this'
   inherited3::decrease ();
 
   return result;
@@ -482,7 +495,16 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
 
   int result = -1;
 
+  // step1: shutdown operations
   ACE_HANDLE handle = inherited::handle ();
+  // *NOTE*: may 'delete this'
+  result = handle_close (handle,
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+
+  //  step2: release the socket handle
   if (handle != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (handle);
@@ -635,7 +657,7 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
         (error != EBADF)      && // local close (), happens on Linux
         (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", continuing\n"),
+                  ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                   result_in.handle (),
                   error, ACE_TEXT (ACE_OS::strerror (error))));
   } // end IF
@@ -651,9 +673,9 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
           (error != EBADF)      && // local close (), happens on Linux
           (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
+                    ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                     result_in.handle (),
-                    ACE_TEXT (ACE_OS::strerror (error))));
+                    error, ACE_TEXT (ACE_OS::strerror (error))));
 
       break;
     }
@@ -673,13 +695,12 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
 //                   result.handle (),
 //                   result.bytes_transferred ()));
 
-      // push the buffer onto our stream for processing
+      // push the buffer onto the stream for processing
       result = stream_.put (&result_in.message_block (), NULL);
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
-
         break;
       } // end IF
 

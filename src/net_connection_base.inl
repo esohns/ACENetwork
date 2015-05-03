@@ -66,11 +66,11 @@ Net_ConnectionBase_T<AddressType,
     if (statisticCollectHandlerID_ == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Timer_Manager::schedule(), continuing\n")));
-    //else
-    //        ACE_DEBUG ((LM_DEBUG,
-    //                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
-    //                    statisticCollectHandlerID_,
-    //                    statisticCollectionInterval_));
+//    else
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
+//                  statisticCollectHandlerID_,
+//                  statisticCollectionInterval_));
   } // end IF
 
   // initialize configuration/user data
@@ -110,10 +110,10 @@ Net_ConnectionBase_T<AddressType,
                 ACE_TEXT ("unable to allocate SessionDataType, continuing\n")));
   } // end IF
 
-  // register with the connection manager, if any
-  if (!registerc ())
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), continuing\n")));
+//  // register with the connection manager, if any
+//  if (!registerc ())
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), continuing\n")));
 }
 
 template <typename AddressType,
@@ -144,17 +144,17 @@ Net_ConnectionBase_T<AddressType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
                   statisticCollectHandlerID_));
-    else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("cancelled timer (ID: %d)\n"),
-                  statisticCollectHandlerID_));
+//    else
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("cancelled timer (ID: %d)\n"),
+//                  statisticCollectHandlerID_));
   } // end IF
 
   // clean up
   delete sessionData_;
 
-  // deregister with the connection manager, if any
-  deregister ();
+//  // deregister with the connection manager, if any
+//  deregister ();
 }
 
 template <typename AddressType,
@@ -202,30 +202,29 @@ Net_ConnectionBase_T<AddressType,
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
     std::string local_address;
-    ACE_INET_Addr local_SAP, remote_SAP;
+    AddressType local_SAP, remote_SAP;
     try
     {
-      info (handle,
-            local_SAP,
-            remote_SAP);
+      this->info (handle,
+                  local_SAP,
+                  remote_SAP);
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting\n")));
+                  ACE_TEXT ("caught exception in Net_IConnection_T::info(), aborting\n")));
       return false;
     }
-    // *TODO*: retrieve socket information
-  //  if (local_SAP.addr_to_string (buffer,
-  //                                sizeof (buffer)) == -1)
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+    if (local_SAP.addr_to_string (buffer,
+                                  sizeof (buffer)) == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Addr::addr_to_string(): \"%m\", continuing\n")));
     local_address = buffer;
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-  //  if (remote_SAP.addr_to_string (buffer,
-  //                                 sizeof (buffer)) == -1)
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+    if (remote_SAP.addr_to_string (buffer,
+                                   sizeof (buffer)) == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Addr::addr_to_string(): \"%m\", continuing\n")));
 
     // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -273,19 +272,17 @@ Net_ConnectionBase_T<AddressType,
     ACE_INET_Addr local_SAP, remote_SAP;
     try
     {
-      info (handle,
-            local_SAP,
-            remote_SAP);
+      this->info (handle,
+                  local_SAP,
+                  remote_SAP);
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
+                  ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
     }
 
     // (try to) de-register with the connection manager...
-    // *WARNING*: as registration happens BEFORE the connection has open()ed,
-    //            there is a small window for races here...
     try
     {
       manager_->deregister (this);

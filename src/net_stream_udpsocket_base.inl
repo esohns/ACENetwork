@@ -33,7 +33,7 @@ template <typename AddressType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
-Net_StreamUDPSocketBase_T<AddressType, 
+Net_StreamUDPSocketBase_T<AddressType,
                           SocketConfigurationType,
                           ConfigurationType,
                           UserDataType,
@@ -125,17 +125,10 @@ Net_StreamUDPSocketBase_T<AddressType,
 
   int result = -1;
 
-  // step0: init this
+  // step0: initialize this
   // *TODO*: find a better way to do this
   serializeOutput_ =
    inherited3::configuration_.streamConfiguration.serializeOutput;
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  state_->sessionID =
-//      *static_cast<unsigned int*> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-//#else
-//  state_->sessionID =
-//      static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-//#endif
 
   // step1: open / tweak socket, ...
   result = inherited2::open (args_in);
@@ -147,7 +140,7 @@ Net_StreamUDPSocketBase_T<AddressType,
   } // end IF
   //// *NOTE*: as soon as this returns, data starts arriving at handle_input()
 
-  // step2: init/start stream
+  // step2: initialize/start stream
   // step2a: connect stream head message queue with the reactor notification
   // pipe ?
   if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
@@ -167,7 +160,7 @@ Net_StreamUDPSocketBase_T<AddressType,
     inherited3::configuration_.streamConfiguration.notificationStrategy =
         &this->notificationStrategy_;
   } // end IF
-  // step2b: init final module (if any)
+  // step2b: initialize final module (if any)
   if (inherited3::configuration_.streamConfiguration.module)
   {
     Stream_IModule_t* imodule_p =
@@ -201,17 +194,9 @@ Net_StreamUDPSocketBase_T<AddressType,
     inherited3::configuration_.streamConfiguration.module = clone_p;
     inherited3::configuration_.streamConfiguration.deleteModule = true;
   } // end IF
-  // step2c: init stream
-  //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  //  state_->sessionID =
-  //      reinterpret_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-  //#else
-  //  state_->sessionID =
-  //      static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-  //#endif
-
+  // step2c: initialize stream
   unsigned int session_id = 0;
-#if defined (_MSC_VER)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   session_id =
     reinterpret_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
 #else
@@ -248,7 +233,7 @@ Net_StreamUDPSocketBase_T<AddressType,
     return -1;
   } // end IF
 
-  // *NOTE*: we're registered with the reactor (READ_MASK) at this point
+  // *NOTE*: registered with the reactor (READ_MASK) at this point
 
 //   // ...register for writes (WRITE_MASK) as well
 //   if (reactor ()->register_handler (this,
@@ -258,6 +243,14 @@ Net_StreamUDPSocketBase_T<AddressType,
 //                 ACE_TEXT ("failed to ACE_Reactor::register_handler(WRITE_MASK): \"%m\", aborting\n")));
 //     return -1;
 //   } // end IF
+
+  // step4: register with the connection manager (if any)
+  if (!inherited3::registerc ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    return -1;
+  } // end IF
 
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
@@ -330,8 +323,14 @@ Net_StreamUDPSocketBase_T<AddressType,
     // *NOTE*: this eventually calls handle_close() (see below)
     case CLOSE_DURING_NEW_CONNECTION:
     {
+      // step1: stop processing in/outbound data
+      if (stream_.isRunning ())
+        stream_.stop ();
+      stream_.waitForCompletion ();
+
+      // step2: close socket, deregister I/O handle with the reactor, ...
       int result = -1;
-      result = inherited2::close ();
+      result = inherited2::close (CLOSE_DURING_NEW_CONNECTION);
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -699,6 +698,8 @@ Net_StreamUDPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_close"));
 
+  int result = -1;
+
   switch (mask_in)
   {
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
@@ -719,11 +720,16 @@ Net_StreamUDPSocketBase_T<AddressType,
       // a multithreaded reactor, there may still be in-flight notifications
       // being dispatched at this stage, so this just speeds things up a little
       if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
-        if (inherited2::reactor ()->purge_pending_notifications (this,
-                                                                 ACE_Event_Handler::ALL_EVENTS_MASK) == -1)
+      {
+        result =
+            inherited2::reactor ()->purge_pending_notifications (this,
+                                                                 ACE_Event_Handler::ALL_EVENTS_MASK);
+        if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@): \"%m\", continuing\n"),
                       this));
+      } // end IF
+
       break;
     }
     case ACE_Event_Handler::EXCEPT_MASK:
@@ -747,10 +753,22 @@ Net_StreamUDPSocketBase_T<AddressType,
       break;
   } // end SWITCH
 
-  // invoke base-class maintenance
-  return inherited2::handle_close (((handle_in != ACE_INVALID_HANDLE) ? handle_in
-                                                                      : inherited2::get_handle ()),
-                                   mask_in);
+  // step3: invoke base-class maintenance
+  result = inherited2::handle_close (handle_in,
+                                     mask_in);
+  if (result == -1)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to SocketHandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
+                handle_in, mask_in));
+
+  // step4: deregister with the connection manager (if any)
+  inherited3::deregister ();
+
+  // step5: release a reference
+  // *IMPORTANT NOTE*: may 'delete this'
+  inherited3::decrease ();
+
+  return result;
 }
 
 template <typename AddressType,
@@ -959,7 +977,16 @@ Net_StreamUDPSocketBase_T<AddressType,
 
   int result = -1;
 
+  // step1: shutdown operations
   ACE_HANDLE handle = inherited2::SVC_HANDLER_T::get_handle ();
+  // *NOTE*: may 'delete this'
+  result = handle_close (handle,
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+
+  //  step2: release the socket handle
   if (handle != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (handle);
@@ -967,7 +994,7 @@ Net_StreamUDPSocketBase_T<AddressType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                   handle));
-//    inherited2::SVC_HANDLER_T::set_handle (ACE_INVALID_HANDLE);
+//    inherited::handle (ACE_INVALID_HANDLE);
   } // end IF
 }
 
@@ -1130,17 +1157,10 @@ Net_StreamUDPSocketBase_T<AddressType,
 
   int result = -1;
 
-  // step0: init this
+  // step0: initialize this
   // *TODO*: find a better way to do this
   serializeOutput_ =
    inherited3::configuration_.streamConfiguration.serializeOutput;
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  state_->sessionID =
-//      *static_cast<unsigned int*> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-//#else
-//  state_->sessionID =
-//      static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-//#endif
 
   // step1: open / tweak socket, ...
   result = inherited2::open (args_in);
@@ -1152,7 +1172,7 @@ Net_StreamUDPSocketBase_T<AddressType,
   } // end IF
   //// *NOTE*: as soon as this returns, data starts arriving at handle_input()
 
-  // step2: init/start stream
+  // step2: initialize/start stream
   // step2a: connect stream head message queue with the reactor notification
   // pipe ?
   if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
@@ -1177,7 +1197,7 @@ Net_StreamUDPSocketBase_T<AddressType,
         &inherited::notificationStrategy_;
 #endif
   } // end IF
-  // step2b: init final module (if any)
+  // step2b: initialize final module (if any)
   if (inherited3::configuration_.streamConfiguration.module)
   {
     Stream_IModule_t* imodule_p =
@@ -1211,17 +1231,9 @@ Net_StreamUDPSocketBase_T<AddressType,
     inherited3::configuration_.streamConfiguration.module = clone_p;
     inherited3::configuration_.streamConfiguration.deleteModule = true;
   } // end IF
-  // step2c: init stream
-  //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  //  state_->sessionID =
-  //      reinterpret_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-  //#else
-  //  state_->sessionID =
-  //      static_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
-  //#endif
-
+  // step2c: initialize stream
   unsigned int session_id = 0;
-#if defined (_MSC_VER)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   session_id =
       reinterpret_cast<unsigned int> (inherited2::SVC_HANDLER_T::get_handle ()); // (== socket handle)
 #else
@@ -1258,7 +1270,7 @@ Net_StreamUDPSocketBase_T<AddressType,
     return -1;
   } // end IF
 
-  // *NOTE*: we're registered with the reactor (READ_MASK) at this point
+  // *NOTE*: registered with the reactor (READ_MASK) at this point
 
 //   // ...register for writes (WRITE_MASK) as well
 //   if (reactor ()->register_handler (this,
@@ -1268,6 +1280,14 @@ Net_StreamUDPSocketBase_T<AddressType,
 //                 ACE_TEXT ("failed to ACE_Reactor::register_handler(WRITE_MASK): \"%m\", aborting\n")));
 //     return -1;
 //   } // end IF
+
+  // step4: register with the connection manager (if any)
+  if (!inherited3::registerc ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    return -1;
+  } // end IF
 
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
@@ -1296,8 +1316,8 @@ Net_StreamUDPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::close"));
 
-  // [*NOTE*: hereby we override the default behavior of a ACE_Svc_Handler,
-  // which would call handle_close() AGAIN]
+  // [*NOTE*: override the default behavior of a ACE_Svc_Handler, which would
+  //          call handle_close() AGAIN]
 
   // *NOTE*: this method will be invoked
   // - by any worker after returning from svc()
@@ -1337,8 +1357,14 @@ Net_StreamUDPSocketBase_T<AddressType,
     // *NOTE*: this eventually calls handle_close() (see below)
     case CLOSE_DURING_NEW_CONNECTION:
     {
+      // step1: stop processing in/outbound data
+      if (stream_.isRunning ())
+        stream_.stop ();
+      stream_.waitForCompletion ();
+
+      // step2: close socket, deregister I/O handle with the reactor, ...
       int result = -1;
-      result = inherited2::close ();
+      result = inherited2::close (CLOSE_DURING_NEW_CONNECTION);
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -1694,6 +1720,8 @@ Net_StreamUDPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_close"));
 
+  int result = -1;
+
   switch (mask_in)
   {
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
@@ -1714,11 +1742,16 @@ Net_StreamUDPSocketBase_T<AddressType,
       // a multithreaded reactor, there may still be in-flight notifications
       // being dispatched at this stage, so this just speeds things up a little
       if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
-        if (inherited2::reactor ()->purge_pending_notifications (this,
-                                                                 ACE_Event_Handler::ALL_EVENTS_MASK) == -1)
+      {
+        result =
+            inherited2::reactor ()->purge_pending_notifications (this,
+                                                                 ACE_Event_Handler::ALL_EVENTS_MASK);
+        if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@): \"%m\", continuing\n"),
                       this));
+      } // end IF
+
       break;
     }
     case ACE_Event_Handler::EXCEPT_MASK:
@@ -1743,9 +1776,21 @@ Net_StreamUDPSocketBase_T<AddressType,
   } // end SWITCH
 
   // invoke base-class maintenance
-  return inherited2::handle_close (((handle_in != ACE_INVALID_HANDLE) ? handle_in
-                                                                      : inherited2::get_handle ()),
-                                   mask_in);
+  result = inherited2::handle_close (handle_in,
+                                     mask_in);
+  if (result == -1)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to SocketHandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
+                handle_in, mask_in));
+
+  // step4: deregister with the connection manager (if any)
+  inherited3::deregister ();
+
+  // step5: release a reference
+  // *IMPORTANT NOTE*: may 'delete this'
+  inherited3::decrease ();
+
+  return result;
 }
 
 template <typename AddressType,
@@ -1936,7 +1981,16 @@ Net_StreamUDPSocketBase_T<AddressType,
 
   int result = -1;
 
+  // step1: shutdown operations
   ACE_HANDLE handle = inherited2::SVC_HANDLER_T::get_handle ();
+  // *NOTE*: may 'delete this'
+  result = handle_close (handle,
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+
+  //  step2: release the socket handle
   if (handle != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (handle);
@@ -1944,7 +1998,7 @@ Net_StreamUDPSocketBase_T<AddressType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                   handle));
-//    inherited2::SVC_HANDLER_T::set_handle (ACE_INVALID_HANDLE);
+//    inherited::handle (ACE_INVALID_HANDLE);
   } // end IF
 }
 
