@@ -24,18 +24,20 @@
 
 #include "net_macros.h"
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
           typename SocketHandlerType>
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType, 
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
 //                          SocketType,
@@ -54,21 +56,23 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-//          typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-//                          SocketType,
+                          //                          SocketType,
                           SocketHandlerType>::~Net_StreamUDPSocketBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::~Net_StreamUDPSocketBase_T"));
@@ -97,22 +101,24 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     currentWriteBuffer_->release ();
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-//          typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
 int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-//                          SocketType,
+                          //                          SocketType,
                           SocketHandlerType>::open (void* args_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::open"));
@@ -261,22 +267,24 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   return 0;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-//          typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
 int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-//                          SocketType,
+                          //                          SocketType,
                           SocketHandlerType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::close"));
@@ -345,22 +353,24 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   return 0;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-//          typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
 int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-//                          SocketType,
+                          //                          SocketType,
                           SocketHandlerType>::handle_input (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_input"));
@@ -488,22 +498,24 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   return 0;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-//          typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
 int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-//                          SocketType,
+                          //                          SocketType,
                           SocketHandlerType>::handle_output (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_output"));
@@ -664,22 +676,24 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   return 0;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-//          typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
 int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-//                          SocketType,
+                          //                          SocketType,
                           SocketHandlerType>::handle_close (ACE_HANDLE handle_in,
                                                             ACE_Reactor_Mask mask_in)
 {
@@ -734,27 +748,29 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   } // end SWITCH
 
   // invoke base-class maintenance
-  return inherited2::handle_close (((handle_in != ACE_INVALID_HANDLE) ? handle_in 
+  return inherited2::handle_close (((handle_in != ACE_INVALID_HANDLE) ? handle_in
                                                                       : inherited2::get_handle ()),
                                    mask_in);
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-//          typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
 bool
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-//                          SocketType,
+                          //                          SocketType,
                           SocketHandlerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::collect"));
@@ -772,22 +788,24 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   return false;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-//          typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
 void
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-//                          SocketType,
+                          //                          SocketType,
                           SocketHandlerType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::report"));
@@ -803,25 +821,27 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   }
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-          //typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
 void
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-                          //SocketType,
+                          //                          SocketType,
                           SocketHandlerType>::info (ACE_HANDLE& handle_out,
-                                                    ACE_INET_Addr& localSAP_out,
-                                                    ACE_INET_Addr& remoteSAP_out) const
+                                                    AddressType& localSAP_out,
+                                                    AddressType& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::info"));
 
@@ -833,22 +853,24 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     inherited3::configuration_.socketConfiguration.peerAddress;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-          //typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
 unsigned int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-                          //SocketType,
+                          //                          SocketType,
                           SocketHandlerType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
@@ -860,22 +882,24 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 #endif
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-          //typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
 void
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-                          //SocketType,
+                          //                          SocketType,
                           SocketHandlerType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::dump_state"));
@@ -911,22 +935,60 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
               ACE_TEXT (peer_address.c_str ())));
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
-//          typename SocketType,
+          //          typename SocketType,
           typename SocketHandlerType>
-ACE_Message_Block*
-Net_StreamUDPSocketBase_T<ConfigurationType,
+void
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          ITransportLayerType,
                           StatisticContainerType,
                           StreamType,
-//                          SocketType,
+                          //                          SocketType,
+                          SocketHandlerType>::close ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::close"));
+
+  int result = -1;
+
+  ACE_HANDLE handle = inherited2::SVC_HANDLER_T::get_handle ();
+  if (handle != ACE_INVALID_HANDLE)
+  {
+    result = ACE_OS::closesocket (handle);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                  handle));
+//    inherited2::SVC_HANDLER_T::set_handle (ACE_INVALID_HANDLE);
+  } // end IF
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType,
+          //          typename SocketType,
+          typename SocketHandlerType>
+ACE_Message_Block*
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
+                          UserDataType,
+                          SessionDataType,
+                          StatisticContainerType,
+                          StreamType,
+                          //                          SocketType,
                           SocketHandlerType>::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::allocateMessage"));
@@ -976,15 +1038,18 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 /////////////////////////////////////////
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
@@ -1002,15 +1067,18 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::~Net_StreamUDPSocketBase_T ()
@@ -1041,16 +1109,19 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     currentWriteBuffer_->release ();
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
 int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::open (void* args_in)
@@ -1206,16 +1277,19 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   return 0;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
 int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::close (u_long arg_in)
@@ -1286,16 +1360,19 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   return 0;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
 int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::handle_input (ACE_HANDLE handle_in)
@@ -1423,16 +1500,19 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   return 0;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
 int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::handle_output (ACE_HANDLE handle_in)
@@ -1594,16 +1674,19 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   return 0;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
 int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::handle_close (ACE_HANDLE handle_in,
@@ -1665,16 +1748,19 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
                                    mask_in);
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
 bool
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::collect (StatisticContainerType& data_out)
@@ -1694,16 +1780,19 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   return false;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
 void
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::report () const
@@ -1721,21 +1810,24 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
   }
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
 void
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::info (ACE_HANDLE& handle_out,
-                                                           ACE_INET_Addr& localSAP_out,
-                                                           ACE_INET_Addr& remoteSAP_out) const
+                                                           AddressType& localSAP_out,
+                                                           AddressType& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::info"));
 
@@ -1747,16 +1839,19 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
     inherited3::configuration_.socketConfiguration.peerAddress;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
 unsigned int
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::id () const
@@ -1770,16 +1865,19 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
 #endif
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
 void
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::dump_state () const
@@ -1817,16 +1915,52 @@ Net_StreamUDPSocketBase_T<ConfigurationType,
               ACE_TEXT (peer_address.c_str ())));
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType>
+void
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
+                          UserDataType,
+                          SessionDataType,
+                          StatisticContainerType,
+                          StreamType,
+                          Net_NetlinkSocketHandler>::close ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::close"));
+
+  int result = -1;
+
+  ACE_HANDLE handle = inherited2::SVC_HANDLER_T::get_handle ();
+  if (handle != ACE_INVALID_HANDLE)
+  {
+    result = ACE_OS::closesocket (handle);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                  handle));
+//    inherited2::SVC_HANDLER_T::set_handle (ACE_INVALID_HANDLE);
+  } // end IF
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
 ACE_Message_Block*
-Net_StreamUDPSocketBase_T<ConfigurationType,
+Net_StreamUDPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
                           UserDataType,
                           SessionDataType,
-                          Net_INetlinkTransportLayer_t,
                           StatisticContainerType,
                           StreamType,
                           Net_NetlinkSocketHandler>::allocateMessage (unsigned int requestedSize_in)

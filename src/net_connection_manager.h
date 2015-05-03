@@ -33,23 +33,26 @@
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 class Net_Connection_Manager_T
- : public Net_IConnectionManager_T<ConfigurationType,
+ : public Net_IConnectionManager_T<AddressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType,
-                                   ITransportLayerType>
+                                   StatisticContainerType>
  , public Common_IStatistic_T<StatisticContainerType>
  , public Common_IDumpState
 {
   // singleton has access to the ctor/dtors
-  friend class ACE_Singleton<Net_Connection_Manager_T<ConfigurationType,
+  friend class ACE_Singleton<Net_Connection_Manager_T<AddressType,
+                                                      SocketConfigurationType,
+                                                      ConfigurationType,
                                                       UserDataType,
-                                                      StatisticContainerType,
-                                                      ITransportLayerType>,
+                                                      StatisticContainerType>,
                              ACE_Recursive_Thread_Mutex>;
 
   //// needs access to (de-)register itself with the singleton
@@ -59,9 +62,9 @@ class Net_Connection_Manager_T
 
  public:
   // convenience types
-  typedef Net_IConnection_T<ConfigurationType,
-                            StatisticContainerType,
-                            ITransportLayerType> CONNECTION_T;
+  typedef Net_IConnection_T<AddressType,
+                            ConfigurationType,
+                            StatisticContainerType> CONNECTION_T;
 
   // configuration / initialization
   void initialize (unsigned int); // maximum number of concurrent connections
@@ -103,10 +106,11 @@ class Net_Connection_Manager_T
 
  private:
   // convenience types
-  typedef Net_Connection_Manager_T<ConfigurationType,
+  typedef Net_Connection_Manager_T<AddressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType,
-                                   ITransportLayerType> SELF_T;
+                                   StatisticContainerType> SELF_T;
 
   typedef ACE_DLList<CONNECTION_T> CONNECTION_CONTAINER_T;
   typedef ACE_DLList_Iterator<CONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;

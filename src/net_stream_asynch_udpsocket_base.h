@@ -30,15 +30,16 @@
 #include "net_asynch_netlinksockethandler.h"
 #endif
 #include "net_connection_base.h"
-#include "net_itransportlayer.h"
+#include "net_connection_common.h"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "net_netlinksockethandler.h"
 #endif
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
@@ -47,18 +48,20 @@ class Net_StreamAsynchUDPSocketBase_T
  : public SocketHandlerType
  , public SocketType
  , public ACE_Event_Handler
- , public Net_ConnectionBase_T<ConfigurationType,
+ , public Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               ITransportLayerType>
+                               StatisticContainerType>
 {
  public:
-  typedef Net_ConnectionBase_T<ConfigurationType,
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               ITransportLayerType> CONNECTION_BASE_T;
+                               StatisticContainerType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchUDPSocketBase_T ();
 
@@ -66,23 +69,23 @@ class Net_StreamAsynchUDPSocketBase_T
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
 
-  // implement Common_IStatistic
+  // implement (part of) Net_IConnection_T
+  virtual void info (ACE_HANDLE&,         // return value: handle
+                     AddressType&,        // return value: local SAP
+                     AddressType&) const; // return value: remote SAP
+  virtual unsigned int id () const;
+  virtual void close ();
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;
-
-  // implement (part of) Net_ITransportLayer_T
-  virtual void info (ACE_HANDLE&,           // return value: handle
-                     ACE_INET_Addr&,        // return value: local SAP
-                     ACE_INET_Addr&) const; // return value: remote SAP
-  virtual unsigned int id () const;
   virtual void dump_state () const;
 
  protected:
-  typedef Net_IConnectionManager_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<AddressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType,
-                                   ITransportLayerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
 
   Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                    unsigned int = 0);      // statistics collecting interval (second(s))
@@ -95,18 +98,19 @@ class Net_StreamAsynchUDPSocketBase_T
   virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
 
   StreamType      stream_;
-  // *TODO*: (try to) handle short writes gracefully...
-//  ACE_Message_Block* buffer_;
+  // *TODO*: handle short writes (more) gracefully...
+  //  ACE_Message_Block* buffer_;
 
  private:
   typedef SocketHandlerType inherited;
   typedef SocketType inherited2;
   typedef ACE_Event_Handler inherited3;
-  typedef Net_ConnectionBase_T<ConfigurationType,
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               ITransportLayerType> inherited4;
+                               StatisticContainerType> inherited4;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
@@ -120,15 +124,18 @@ class Net_StreamAsynchUDPSocketBase_T
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // partial specialization (for Netlink)
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
-class Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
+class Net_StreamAsynchUDPSocketBase_T<AddressType,
+                                      SocketConfigurationType,
+                                      ConfigurationType,
                                       UserDataType,
                                       SessionDataType,
-                                      Net_INetlinkTransportLayer_t,
                                       StatisticContainerType,
                                       StreamType,
                                       ACE_SOCK_NETLINK,
@@ -136,18 +143,20 @@ class Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
  : public Net_AsynchNetlinkSocketHandler
  , public ACE_SOCK_NETLINK
  , public ACE_Event_Handler
- , public Net_ConnectionBase_T<ConfigurationType,
+ , public Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               Net_INetlinkTransportLayer_t>
+                               StatisticContainerType>
 {
  public:
-  typedef Net_ConnectionBase_T<ConfigurationType,
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               Net_INetlinkTransportLayer_t> CONNECTION_BASE_T;
+                               StatisticContainerType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchUDPSocketBase_T ();
 
@@ -155,23 +164,23 @@ class Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
 
-  // implement Common_IStatistic
+  // implement (part of) Net_IConnection_T
+  virtual void info (ACE_HANDLE&,         // return value: handle
+                     AddressType&,        // return value: local SAP
+                     AddressType&) const; // return value: remote SAP
+  virtual unsigned int id () const;
+  virtual void close ();
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;
-
-  // implement (part of) Net_ITransportLayer_T
-  virtual void info (ACE_HANDLE&,           // return value: handle
-                     ACE_INET_Addr&,        // return value: local SAP
-                     ACE_INET_Addr&) const; // return value: remote SAP
-  virtual unsigned int id () const;
   virtual void dump_state () const;
 
  protected:
-  typedef Net_IConnectionManager_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<AdressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType,
-                                   Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
 
   Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                    unsigned int = 0);      // statistics collecting interval (second(s))
@@ -191,11 +200,12 @@ class Net_StreamAsynchUDPSocketBase_T<ConfigurationType,
   typedef Net_AsynchNetlinkSocketHandler inherited;
   typedef ACE_SOCK_NETLINK inherited2;
   typedef ACE_Event_Handler inherited3;
-  typedef Net_ConnectionBase_T<ConfigurationType,
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               Net_INetlinkTransportLayer_t> inherited4;
+                               StatisticContainerType> inherited4;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));

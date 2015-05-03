@@ -36,19 +36,19 @@ typedef Net_Client_IConnector_T<ACE_INET_Addr,
                                 Net_SocketHandlerConfiguration_t> Net_Client_IConnector_t;
 
 typedef Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                                     Net_SocketConfiguration_t,
                                      Net_Configuration_t,
                                      Net_SocketHandlerConfiguration_t,
                                      Net_UserData_t,
                                      Net_StreamSessionData_t,
-                                     Net_IInetTransportLayer_t,
                                      Net_AsynchTCPConnection> Net_Client_AsynchConnector_t;
 
 typedef Net_Client_Connector_T<ACE_INET_Addr,
+                               Net_SocketConfiguration_t,
                                Net_Configuration_t,
                                Net_SocketHandlerConfiguration_t,
                                Net_UserData_t,
                                Net_StreamSessionData_t,
-                               Net_IInetTransportLayer_t,
                                Net_TCPConnection> Net_Client_Connector_t;
 
 #endif

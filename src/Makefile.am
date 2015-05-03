@@ -64,6 +64,8 @@ include_HEADERS = \
   net_stream_udpsocket_base.inl \
   net_stream.h \
   net_tcpconnection.h \
+  net_tcpconnection_base.h \
+  net_tcpconnection_base.inl \
   net_tcpsockethandler.h \
   net_transportlayer_base.h \
   net_transportlayer_ip_cast.h \
@@ -157,6 +159,9 @@ libACENetwork_la_SOURCES = \
   net_stream.h \
   net_tcpconnection.cpp \
   net_tcpconnection.h \
+  net_tcpconnection_base.cpp \
+  net_tcpconnection_base.h \
+  net_tcpconnection_base.inl \
   net_tcpsockethandler.cpp \
   net_tcpsockethandler.h \
   net_transportlayer_base.cpp \

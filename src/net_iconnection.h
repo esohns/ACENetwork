@@ -18,24 +18,50 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_ICONNECTION_H
-#define Net_ICONNECTION_H
+#ifndef NET_ICONNECTION_H
+#define NET_ICONNECTION_H
 
+#include "ace/config-macros.h"
+
+#include "common_idumpstate.h"
 #include "common_iinitialize.h"
 #include "common_irefcount.h"
 #include "common_istatistic.h"
 
-template <typename ConfigurationType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+#include "net_itransportlayer.h"
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename StatisticContainerType>
 class Net_IConnection_T
  : public Common_IInitialize_T<ConfigurationType>
  , public Common_IStatistic_T<StatisticContainerType>
  , virtual public Common_IRefCount
- , virtual public ITransportLayerType
+ , public Common_IDumpState
 {
  public:
   virtual ~Net_IConnection_T () {};
+
+  virtual void info (ACE_HANDLE&,             // return value: I/O handle
+                     AddressType&,            // return value: local SAP
+                     AddressType&) const = 0; // return value: remote SAP
+  virtual unsigned int id () const = 0;
+
+  virtual void close () = 0;
+};
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename StatisticContainerType>
+class Net_ISocketConnection_T
+ : virtual public Net_IConnection_T<AddressType,
+                                    ConfigurationType,
+                                    StatisticContainerType>
+ , virtual public Net_ITransportLayer_T<SocketConfigurationType>
+{
+ public:
+  virtual ~Net_ISocketConnection_T () {};
 };
 
 #endif

@@ -18,7 +18,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_CONNECTION_COMMON_H
-#define Net_CONNECTION_COMMON_H
+#ifndef NET_CONNECTION_COMMON_H
+#define NET_CONNECTION_COMMON_H
+
+#include "net_configuration.h"
+#include "net_iconnection.h"
+#include "net_itransportlayer.h"
+
+typedef Net_ITransportLayer_T<Net_SocketConfiguration_t> Net_ITransportLayer_t;
+
+
 
 #endif

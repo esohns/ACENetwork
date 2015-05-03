@@ -21,13 +21,11 @@
 #ifndef NET_SERVER_COMMON_H
 #define NET_SERVER_COMMON_H
 
-#include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
 #include "ace/Synch.h"
 
 #include "net_configuration.h"
 #include "net_connection_manager_common.h"
-#include "net_itransportlayer.h"
 #include "net_stream_common.h"
 #include "net_tcpconnection.h"
 
@@ -41,13 +39,11 @@ typedef Net_Server_IListener_T<Net_ListenerConfiguration_t> Net_Server_IListener
 typedef Net_Server_AsynchListener_T<Net_Configuration_t,
                                     Net_SocketHandlerConfiguration_t,
                                     Net_UserData_t,
-                                    Net_IInetTransportLayer_t,
                                     Net_AsynchTCPConnection> Net_Server_AsynchListener_t;
 
 typedef Net_Server_Listener_T<Net_Configuration_t,
                               Net_SocketHandlerConfiguration_t,
                               Net_UserData_t,
-                              Net_IInetTransportLayer_t,
                               Net_TCPConnection> Net_Server_Listener_t;
 
 typedef ACE_Singleton<Net_Server_AsynchListener_t,

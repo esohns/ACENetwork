@@ -37,10 +37,9 @@
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 class Net_Server_AsynchListener_T
- : public ACE_Asynch_Acceptor<ConnectionType>
+ : public ACE_Asynch_Acceptor<HandlerType>
  , public Net_Server_IListener_T<Net_ListenerConfiguration_t>
  , public Common_IDumpState
 {
@@ -48,8 +47,7 @@ class Net_Server_AsynchListener_T
   friend class ACE_Singleton<Net_Server_AsynchListener_T<ConfigurationType,
                                                          SocketHandlerConfigurationType,
                                                          UserDataType,
-                                                         ITransportLayerType,
-                                                         ConnectionType>,
+                                                         HandlerType>,
                              ACE_Recursive_Thread_Mutex>;
 
  public:
@@ -76,10 +74,10 @@ class Net_Server_AsynchListener_T
 
  protected:
   // override default creation strategy
-  virtual ConnectionType* make_handler (void);
+  virtual HandlerType* make_handler (void);
 
  private:
-  typedef ACE_Asynch_Acceptor<ConnectionType> inherited;
+  typedef ACE_Asynch_Acceptor<HandlerType> inherited;
 
   Net_Server_AsynchListener_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T (const Net_Server_AsynchListener_T&));

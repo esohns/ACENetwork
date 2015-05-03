@@ -25,18 +25,19 @@
 
 #include "net_iconnection.h"
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 class Net_IConnectionManager_T
  : public Common_IControl
 {
  public:
   // convenience types
-  typedef Net_IConnection_T<ConfigurationType,
-                            StatisticContainerType,
-                            ITransportLayerType> CONNECTION_T;
+  typedef Net_IConnection_T<AddressType,
+                            ConfigurationType,
+                            StatisticContainerType> CONNECTION_T;
 
   virtual ~Net_IConnectionManager_T () {};
 
@@ -51,7 +52,7 @@ class Net_IConnectionManager_T
                     UserDataType*&) const = 0; // return value: (stream) user data
 
   // *WARNING*: if (!= NULL) callers must decrease() the returned handle
-  virtual CONNECTION_T* operator[] (unsigned int) const = 0; // session id
+  virtual CONNECTION_T* operator[] (unsigned int) const = 0; // index
 
   // *NOTE*: 'register' is a reserved keyword
   virtual bool registerc (CONNECTION_T*) = 0; // connection handle

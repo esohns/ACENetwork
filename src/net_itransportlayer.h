@@ -21,41 +21,20 @@
 #ifndef NET_ITRANSPORTLAYER_H
 #define NET_ITRANSPORTLAYER_H
 
-#include "ace/config-macros.h"
-#include "ace/INET_Addr.h"
-#include "ace/Netlink_Addr.h"
-
-#include "common_idumpstate.h"
-
 #include "net_common.h"
-#include "net_configuration.h"
-#include "net_exports.h"
 
-template <typename AddressType,
-          typename ConfigurationType>
+template <typename ConfigurationType>
 class Net_ITransportLayer_T
- : public Common_IDumpState
 {
  public:
   virtual ~Net_ITransportLayer_T () {};
 
+  virtual void ping () = 0;
+
+ protected:
   virtual bool initialize (Net_ClientServerRole_t,        // role
                            const ConfigurationType&) = 0; // configuration
   virtual void finalize () = 0;
-
-  virtual void ping () = 0; // ping the peer !
-
-  virtual void info (ACE_HANDLE&,             // return value: I/O handle
-                     AddressType&,            // return value: local SAP
-                     AddressType&) const = 0; // return value: remote SAP
-  virtual unsigned int id () const = 0;
 };
 
-typedef Net_ITransportLayer_T<ACE_INET_Addr,
-                              Net_SocketConfiguration_t> Net_IInetTransportLayer_t;
-
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-typedef Net_ITransportLayer_T<ACE_Netlink_Addr,
-                              Net_SocketConfiguration_t> Net_INetlinkTransportLayer_t;
-#endif
 #endif

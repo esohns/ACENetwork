@@ -29,14 +29,16 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
-Net_Connection_Manager_T<ConfigurationType,
+          typename StatisticContainerType>
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::Net_Connection_Manager_T ()
+                         StatisticContainerType>::Net_Connection_Manager_T ()
  : condition_ (lock_)
  , configuration_ ()
  , connections_ ()
@@ -51,14 +53,16 @@ Net_Connection_Manager_T<ConfigurationType,
   ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
-Net_Connection_Manager_T<ConfigurationType,
+          typename StatisticContainerType>
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::~Net_Connection_Manager_T ()
+                         StatisticContainerType>::~Net_Connection_Manager_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::~Net_Connection_Manager_T"));
 
@@ -74,15 +78,17 @@ Net_Connection_Manager_T<ConfigurationType,
   } // end IF
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::initialize (unsigned int maxNumConnections_in)
+                         StatisticContainerType>::initialize (unsigned int maxNumConnections_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::initialize"));
 
@@ -115,16 +121,18 @@ Net_Connection_Manager_T<ConfigurationType,
 //	lock_.release ();
 //}
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::set (const ConfigurationType& configuration_in,
-                                                    UserDataType* userData_in)
+                         StatisticContainerType>::set (const ConfigurationType& configuration_in,
+                                                       UserDataType* userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::set"));
 
@@ -134,16 +142,18 @@ Net_Connection_Manager_T<ConfigurationType,
   isInitialized_ = true;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::get (ConfigurationType& configuration_out,
-                                                    UserDataType*& userData_out) const
+                         StatisticContainerType>::get (ConfigurationType& configuration_out,
+                                                       UserDataType*& userData_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
@@ -151,24 +161,26 @@ Net_Connection_Manager_T<ConfigurationType,
   userData_out = userData_;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
-Net_IConnection_T<ConfigurationType,
-                  StatisticContainerType,
-                  ITransportLayerType>*
-Net_Connection_Manager_T<ConfigurationType,
+          typename StatisticContainerType>
+Net_IConnection_T<AddressType,
+                  ConfigurationType,
+                  StatisticContainerType>*
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::operator[] (unsigned int index_in) const
+                         StatisticContainerType>::operator[] (unsigned int index_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::operator[]"));
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
 
   CONNECTION_T* connection_p = NULL;
-  int index = 0;
+  unsigned int index = 0;
   for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
        iterator.next (connection_p);
        iterator.advance (), index++)
@@ -188,15 +200,17 @@ Net_Connection_Manager_T<ConfigurationType,
   return connection_p;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 bool
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::registerc (CONNECTION_T* connection_in)
+                         StatisticContainerType>::registerc (CONNECTION_T* connection_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::registerc"));
 
@@ -221,15 +235,17 @@ Net_Connection_Manager_T<ConfigurationType,
   return true;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::deregister (CONNECTION_T* connection_in)
+                         StatisticContainerType>::deregister (CONNECTION_T* connection_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::deregister"));
 
@@ -268,15 +284,17 @@ Net_Connection_Manager_T<ConfigurationType,
     condition_.broadcast ();
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 unsigned int
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::numConnections () const
+                         StatisticContainerType>::numConnections () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::numConnections"));
 
@@ -285,15 +303,17 @@ Net_Connection_Manager_T<ConfigurationType,
   return static_cast<unsigned int> (connections_.size ());
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::start ()
+                         StatisticContainerType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
 
@@ -302,15 +322,17 @@ Net_Connection_Manager_T<ConfigurationType,
   isActive_ = true;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::stop (bool lockedAccess_in)
+                         StatisticContainerType>::stop (bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
 
@@ -321,15 +343,17 @@ Net_Connection_Manager_T<ConfigurationType,
     lock_.release ();
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 bool
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::isRunning () const
+                         StatisticContainerType>::isRunning () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
 
@@ -338,19 +362,23 @@ Net_Connection_Manager_T<ConfigurationType,
   return isActive_;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::abort ()
+                         StatisticContainerType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abort"));
 
-  // synch access to myConnections
+  int result = -1;
+
+  // synch access to connections_
   ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
 
   // sanity check: anything to do ?
@@ -379,19 +407,19 @@ Net_Connection_Manager_T<ConfigurationType,
   do
   {
     connection_p = NULL;
-    if (connections_.get (connection_p, 0) == -1)
+    result = connections_.get (connection_p, 0);
+    if (result == -1)
       break; // done
-
     ACE_ASSERT (connection_p);
+
     try
-    {
-      // *IMPORTANT NOTE*: implicitly invokes deregister()
-      connection_p->finalize ();
+    { // *NOTE*: implicitly invokes deregister from a pro/reactor thread context
+      connection_p->close ();
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection_T::finalize(), continuing")));
+                  ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
     }
   } while (true);
   ACE_ASSERT (connections_.is_empty ());
@@ -401,15 +429,17 @@ Net_Connection_Manager_T<ConfigurationType,
               num_connections));
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::wait () const
+                         StatisticContainerType>::wait () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::wait"));
 
@@ -431,15 +461,17 @@ Net_Connection_Manager_T<ConfigurationType,
 //              ACE_TEXT ("leaving...\n")));
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::abortOldestConnection ()
+                         StatisticContainerType>::abortOldestConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortOldestConnection"));
 
@@ -455,28 +487,28 @@ Net_Connection_Manager_T<ConfigurationType,
   if (connections_.get (connection_p) != -1)
   {
     try
-    {
-      // *IMPORTANT NOTE*: implicitly invokes deregisterConnection from a
-      // reactor thread, if any
-      connection_p->finalize ();
+    { // *NOTE*: implicitly invokes deregister from a pro/reactor thread context
+      connection_p->close ();
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection::finalize(), continuing")));
+                  ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
     }
   } // end IF
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::abortNewestConnection ()
+                         StatisticContainerType>::abortNewestConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortNewestConnection"));
 
@@ -486,33 +518,34 @@ Net_Connection_Manager_T<ConfigurationType,
   if (connections_.is_empty ())
     return;
 
-  // close "newest" connection --> list tail 
+  // close "newest" connection --> list tail
   CONNECTION_T* connection_p = NULL;
   CONNECTION_CONTAINER_REVERSEITERATOR_T iterator (connections_);
   if (iterator.next (connection_p) == 1)
   {
     try
-    { // *NOTE*: implicitly invokes deregisterConnection from a pro/reactor thread
-      //         context (if any)
-      connection_p->finalize ();
+    { // *NOTE*: implicitly invokes deregister from a pro/reactor thread context
+      connection_p->close ();
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection::finalize(), continuing")));
+                  ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
     }
   } // end IF
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 bool
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::collect (StatisticContainerType& data_out)
+                         StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::collect"));
 
@@ -535,7 +568,7 @@ Net_Connection_Manager_T<ConfigurationType,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in RPG_Common_IStatistic::collect(), continuing\n")));
+                  ACE_TEXT ("caught exception in Common_IStatistic::collect(), continuing\n")));
     }
 
     data_out += temp;
@@ -544,15 +577,17 @@ Net_Connection_Manager_T<ConfigurationType,
   return true;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::report () const
+                         StatisticContainerType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::report"));
 
@@ -568,7 +603,7 @@ Net_Connection_Manager_T<ConfigurationType,
     if (!const_cast<SELF_T*> (this)->collect (result))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_IStatistic::collect(), aborting\n")));
+                  ACE_TEXT ("failed to Common_IStatistic::collect(), returning\n")));
       return;
     } // end IF
 
@@ -582,15 +617,17 @@ Net_Connection_Manager_T<ConfigurationType,
   } // end lock scope
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType,
-          typename ITransportLayerType>
+          typename StatisticContainerType>
 void
-Net_Connection_Manager_T<ConfigurationType,
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
                          UserDataType,
-                         StatisticContainerType,
-                         ITransportLayerType>::dump_state () const
+                         StatisticContainerType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::dump_state"));
 
@@ -609,7 +646,7 @@ Net_Connection_Manager_T<ConfigurationType,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection::dump_state(), continuing")));
+                  ACE_TEXT ("caught exception in Net_IConnection_T::dump_state(), continuing\n")));
     }
   } // end FOR
 }

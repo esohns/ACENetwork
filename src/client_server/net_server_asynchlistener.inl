@@ -31,13 +31,11 @@
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::Net_Server_AsynchListener_T ()
+                            HandlerType>::Net_Server_AsynchListener_T ()
  : inherited ()
  , addressFamily_ (2)
  , configuration_ (NULL)
@@ -53,13 +51,11 @@ Net_Server_AsynchListener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::~Net_Server_AsynchListener_T ()
+                            HandlerType>::~Net_Server_AsynchListener_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::~Net_Server_AsynchListener_T"));
 
@@ -77,16 +73,14 @@ Net_Server_AsynchListener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 int
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::validate_connection (const ACE_Asynch_Accept::Result& result_in,
-                                                                  const ACE_INET_Addr& remoteSAP_in,
-                                                                  const ACE_INET_Addr& localSAP_in)
+                            HandlerType>::validate_connection (const ACE_Asynch_Accept::Result& result_in,
+                                                               const ACE_INET_Addr& remoteSAP_in,
+                                                               const ACE_INET_Addr& localSAP_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::validate_connection"));
 
@@ -114,15 +108,13 @@ Net_Server_AsynchListener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 int
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::accept (size_t bytesToRead_in,
-                                                     const void* act_in)
+                            HandlerType>::accept (size_t bytesToRead_in,
+                                                  const void* act_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::accept"));
 
@@ -151,7 +143,7 @@ Net_Server_AsynchListener_T<ConfigurationType,
                                                    (act_in ? act_in
                                                            : configuration_),
                                                    0,
-                                                   ACE_SIGRTMIN,
+                                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL,
                                                    //this->addr_family_,
                                                    addressFamily_);
   if (result == -1)
@@ -171,14 +163,12 @@ Net_Server_AsynchListener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 int
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::should_reissue_accept ()
+                            HandlerType>::should_reissue_accept ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::should_reissue_accept"));
 
@@ -189,14 +179,12 @@ Net_Server_AsynchListener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 bool
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::initialize (const Net_ListenerConfiguration_t& configuration_in)
+                            HandlerType>::initialize (const Net_ListenerConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::initialize"));
 
@@ -214,14 +202,12 @@ Net_Server_AsynchListener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 bool
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::isInitialized () const
+                            HandlerType>::isInitialized () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::isInitialized"));
 
@@ -231,14 +217,12 @@ Net_Server_AsynchListener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 void
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::start ()
+                            HandlerType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::start"));
 
@@ -299,14 +283,12 @@ Net_Server_AsynchListener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 void
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::stop (bool lockedAccess_in)
+                            HandlerType>::stop (bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::stop"));
 
@@ -321,10 +303,10 @@ Net_Server_AsynchListener_T<ConfigurationType,
 
   int result = -1;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  ACE_POSIX_Asynch_Accept* accept = NULL;
+  ACE_POSIX_Asynch_Accept* accept_p = NULL;
   try
   {
-    accept =
+    accept_p =
         dynamic_cast<ACE_POSIX_Asynch_Accept*> (inherited::asynch_accept ().implementation ());
   }
   catch (...)
@@ -333,17 +315,16 @@ Net_Server_AsynchListener_T<ConfigurationType,
                 ACE_TEXT ("dynamic_cast<ACE_POSIX_Asynch_Accept*>(%@) failed, aborting\n"),
                 inherited::asynch_accept ().implementation ()));
 
-    accept = NULL;
+    accept_p = NULL;
   }
-  if (!accept)
+  if (!accept_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<ACE_POSIX_Asynch_Accept*>(%@) failed, aborting\n"),
                 inherited::asynch_accept ().implementation ()));
-
     return;
   }
-  result = accept->close ();
+  result = accept_p->close ();
   if (result == -1)
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT("failed to ACE_POSIX_Asynch_Accept::close(): \"%m\", continuing\n")));
@@ -370,14 +351,12 @@ Net_Server_AsynchListener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 bool
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::isRunning () const
+                            HandlerType>::isRunning () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::isRunning"));
 
@@ -387,14 +366,12 @@ Net_Server_AsynchListener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 void
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::dump_state () const
+                            HandlerType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::dump_state"));
 
@@ -405,24 +382,22 @@ Net_Server_AsynchListener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
-ConnectionType*
+          typename HandlerType>
+HandlerType*
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            ITransportLayerType,
-                            ConnectionType>::make_handler (void)
+                            HandlerType>::make_handler (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::make_handler"));
 
   // initialize return value(s)
-  ConnectionType* connection_p = NULL;
+  HandlerType* connection_p = NULL;
 
   // default behavior
   ACE_NEW_NORETURN (connection_p,
-                    ConnectionType (NET_CONNECTIONMANAGER_SINGLETON::instance (),
-                                    statisticCollectionInterval_));
+                    HandlerType (NET_CONNECTIONMANAGER_SINGLETON::instance (),
+                                 statisticCollectionInterval_));
   if (!connection_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

@@ -36,10 +36,9 @@
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename HandlerType>
 class Net_Server_Listener_T
- : public ACE_Acceptor<ConnectionType,
+ : public ACE_Acceptor<HandlerType,
                        ACE_SOCK_ACCEPTOR>
  , public Net_Server_IListener_T<Net_ListenerConfiguration_t>
  , public Common_IDumpState
@@ -48,8 +47,7 @@ class Net_Server_Listener_T
   friend class ACE_Singleton<Net_Server_Listener_T<ConfigurationType,
                                                    SocketHandlerConfigurationType,
                                                    UserDataType,
-                                                   ITransportLayerType,
-                                                   ConnectionType>,
+                                                   HandlerType>,
                              ACE_Recursive_Thread_Mutex>;
 
  public:
@@ -73,10 +71,10 @@ class Net_Server_Listener_T
 
  protected:
   // override default instantiation strategy
-  virtual int make_svc_handler (ConnectionType*&);
+  virtual int make_svc_handler (HandlerType*&);
 
  private:
-  typedef ACE_Acceptor<ConnectionType,
+  typedef ACE_Acceptor<HandlerType,
                        ACE_SOCK_ACCEPTOR> inherited;
 
   Net_Server_Listener_T ();

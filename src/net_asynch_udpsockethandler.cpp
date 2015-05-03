@@ -148,34 +148,31 @@ Net_AsynchUDPSocketHandler::handle_close (ACE_HANDLE handle_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler::handle_close"));
 
+  ACE_UNUSED_ARG (handle_in);
   ACE_UNUSED_ARG (mask_in);
 
   int result = -1;
 
-  // clean up
   // *BUG*: Posix_Proactor.cpp:1575 should read:
   //        int rc = ::aio_cancel (result->handle_, result);
   result = inputStream_.cancel ();
-  if (result)
+//  if ((result != 0) && (result != 1))
+  if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
                 result));
-  result = outputStream_.cancel ();
-  ACE_DEBUG ((LM_ERROR,
-              ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
-              result));
+  int result_2 = outputStream_.cancel ();
+//  if ((result_2 != 0) && (result_2 != 1))
+  if (result_2 == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
+                result));
 
-  if (handle_in != ACE_INVALID_HANDLE)
-  {
-    result = ACE_OS::closesocket (handle_in);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  handle_in));
-    inherited2::handle (ACE_INVALID_HANDLE);
-  } // end IF
-
-  return result;
+//  return ((((result != 0) && (result != 1)) ||
+//           ((result_2 != 0) && (result_2 != 1))) ? -1
+//                                                 : 0);
+  return ((result == -1) || (result_2 == -1) ? -1
+                                             : 0);
 }
 
 void
@@ -193,11 +190,12 @@ Net_AsynchUDPSocketHandler::handle_wakeup ()
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_AsynchTCPSocketHandler::handle_close(): \"%m\", continuing")));
+                ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler::handle_close(): \"%m\", continuing\n")));
+    result = -1;
   }
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler::handle_close(): \"%m\", continuing")));
+                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler::handle_close(): \"%m\", continuing\n")));
 }
 
 int
@@ -214,18 +212,19 @@ Net_AsynchUDPSocketHandler::notify (void)
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_AsynchTCPSocketHandler::handle_output(), aborting")));
+                ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler::handle_output(): \"%m\", continuing\n")));
+    result = -1;
   }
   if (result == -1)
   {
-    // clean up
-    result = handle_close (inherited2::handle (),
-                           ACE_Event_Handler::ALL_EVENTS_MASK);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler::handle_close(), continuing")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler::handle_output(): \"%m\", aborting\n")));
 
-    return -1;
+    int result_2 = handle_close (inherited2::handle (),
+                                 ACE_Event_Handler::ALL_EVENTS_MASK);
+    if (result_2 == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler::handle_close(): \"%m\", continuing\n")));
   } // end IF
 
   return result;
@@ -255,41 +254,48 @@ Net_AsynchUDPSocketHandler::initiate_read_dgram ()
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler::initiate_read_dgram"));
 
   int result = -1;
+  size_t bytes_to_read = 0;
 
   // step1: allocate a data buffer
-  ACE_Message_Block* message_p = NULL;
-  message_p = allocateMessage (inherited::configuration_.bufferSize);
-  if (!message_p)
+  ACE_Message_Block* message_block_p =
+      allocateMessage (inherited::configuration_.bufferSize);
+  if (!message_block_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchUDPSocketHandler::allocateMessage(%u), aborting\n"),
                 inherited::configuration_.bufferSize));
-
-    // clean up
-    handle_close (inherited2::handle (),
-                  ACE_Event_Handler::ALL_EVENTS_MASK);
+    goto close;
   } // end IF
 
-  // step2: start (asynch) read...
-  size_t bytes_to_read = message_p->size (); // why oh why...
-  result = inputStream_.recv (message_p,                // buffer
-                              bytes_to_read,            // #bytes to read
-                              0,                        // flags
-                              ACE_PROTOCOL_FAMILY_INET, // protocol family
-                              NULL,                     // ACT
-                              0,                        // priority
-                              ACE_SIGRTMIN);            // signal
+  // step2: start (asynchronous) read...
+  bytes_to_read = message_block_p->size ();
+  result = inputStream_.recv (message_block_p,                      // buffer
+                              bytes_to_read,                        // #bytes to read
+                              0,                                    // flags
+                              ACE_PROTOCOL_FAMILY_INET,             // protocol family
+                              NULL,                                 // ACT
+                              0,                                    // priority
+                              COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::recv(%u): \"%m\", aborting\n"),
-                message_p->size ()));
+                message_block_p->size ()));
 
     // clean up
-    message_p->release ();
-    handle_close (inherited2::handle (),
-                  ACE_Event_Handler::ALL_EVENTS_MASK);
+    message_block_p->release ();
+
+    goto close;
   } // end IF
+
+  return;
+
+close:
+  result = handle_close (inherited2::handle (),
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler::handle_close(): \"%m\", continuing\n")));
 }
 
 void
@@ -300,18 +306,21 @@ Net_AsynchUDPSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram::Re
   int result = -1;
   bool close = false;
   size_t bytes_transferred = result_in.bytes_transferred ();
+  unsigned long error = 0;
 
   // sanity check
   result = result_in.success ();
   if (result != 1)
   {
-    // connection reset (by peer) ? --> not an error
-    if ((result_in.error () != ECONNRESET) &&
-        (result_in.error () != EPIPE))
+    // connection closed/reset (by peer) ? --> not an error
+    error = result_in.error ();
+    if ((error != ECONNRESET) &&
+        (error != EPIPE)      &&
+        (error != EBADF)) // 9 happens on Linux (local close())
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
                   result_in.handle (),
-                  ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
+                  ACE_TEXT (ACE_OS::strerror (error))));
 
     close = true;
   } // end IF
@@ -321,13 +330,15 @@ Net_AsynchUDPSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram::Re
     case -1:
     case 0:
     {
-      // connection reset (by peer) ? --> not an error
-      if ((result_in.error() != ECONNRESET) &&
-          (result_in.error() != EPIPE))
+      // connection closed/reset (by peer) ? --> not an error
+      error = result_in.error ();
+      if ((error != ECONNRESET) &&
+          (error != EPIPE)      &&
+          (error != EBADF)) // 9 happens on Linux (local close())
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
                     result_in.handle (),
-                    ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
+                    ACE_TEXT (ACE_OS::strerror (error))));
 
       close = true;
 
@@ -336,7 +347,7 @@ Net_AsynchUDPSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram::Re
     // *** GOOD CASES ***
     default:
     {
-      // short write ?
+      // *TODO*: handle short writes (more) gracefully
       if (result_in.bytes_to_write () != bytes_transferred)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -344,9 +355,6 @@ Net_AsynchUDPSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram::Re
                     result_in.handle (),
                     bytes_transferred,
                     result_in.bytes_to_write ()));
-
-        // *TODO*: (try to) handle short writes gracefully...
-        // result_in.message_block ()->wr_ptr (bytes_transferred);
 
         close = true;
       } // end IF
@@ -357,19 +365,16 @@ Net_AsynchUDPSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram::Re
 
   // clean up
   result_in.message_block ()->release ();
+
   if (close)
-    handle_close (inherited2::handle (),
-                  ACE_Event_Handler::ALL_EVENTS_MASK);
+  {
+    result = handle_close (inherited2::handle (),
+                           ACE_Event_Handler::ALL_EVENTS_MASK);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler::handle_close(): \"%m\", continuing\n")));
+  } // end IF
 }
-
-//void
-//Net_AsynchUDPSocketHandler::abort ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler::abort"));
-
-//  handle_close (inherited::handle (),
-//                ACE_Event_Handler::ALL_EVENTS_MASK);
-//}
 
 ACE_Message_Block*
 Net_AsynchUDPSocketHandler::allocateMessage (unsigned int requestedSize_in)

@@ -24,41 +24,46 @@
 
 #include "net_macros.h"
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
-Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                                      unsigned int statisticCollectionInterval_in)
- : inherited2 (interfaceHandle_in,
+ : inherited ()
+ , inherited2 ()
+ , inherited3 (interfaceHandle_in,
                statisticCollectionInterval_in)
- //, configuration_ (NULL)
-// , stream_ ()
+ , stream_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::Net_StreamAsynchTCPSocketBase_T"));
 
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
-Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::~Net_StreamAsynchTCPSocketBase_T ()
@@ -66,37 +71,39 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::~Net_StreamAsynchTCPSocketBase_T"));
 
   // step1: remove enqueued module (if any)
-  if (inherited2::configuration_.streamConfiguration.module)
+  if (inherited3::configuration_.streamConfiguration.module)
   {
     Common_Module_t* module_p =
-      stream_.find (inherited2::configuration_.streamConfiguration.module->name ());
+      stream_.find (inherited3::configuration_.streamConfiguration.module->name ());
     if (module_p)
     {
       int result =
-        stream_.remove (inherited2::configuration_.streamConfiguration.module->name (),
+        stream_.remove (inherited3::configuration_.streamConfiguration.module->name (),
                         ACE_Module_Base::M_DELETE_NONE);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    inherited2::configuration_.streamConfiguration.module->name ()));
+                    inherited3::configuration_.streamConfiguration.module->name ()));
     } // end IF
-    if (inherited2::configuration_.streamConfiguration.deleteModule)
-      delete inherited2::configuration_.streamConfiguration.module;
+    if (inherited3::configuration_.streamConfiguration.deleteModule)
+      delete inherited3::configuration_.streamConfiguration.module;
   } // end IF
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
-Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::open (ACE_HANDLE handle_in,
@@ -112,20 +119,19 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
   // step2: initialize/start stream
   // step2a: connect stream head message queue with a notification pipe/queue ?
-  if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
-    inherited2::configuration_.streamConfiguration.notificationStrategy = this;
+  if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
+    inherited3::configuration_.streamConfiguration.notificationStrategy = this;
   // step2b: initialize final module (if any)
-  if (inherited2::configuration_.streamConfiguration.module)
+  if (inherited3::configuration_.streamConfiguration.module)
   {
     Common_Module_t* module_p = NULL;
     module_p =
-      dynamic_cast<Common_Module_t*> (inherited2::configuration_.streamConfiguration.module);
+      dynamic_cast<Common_Module_t*> (inherited3::configuration_.streamConfiguration.module);
     if (!module_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-
+                  ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
       goto close;
     } // end IF
     Stream_IModule_t* imodule_p = NULL;
@@ -136,8 +142,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-
+                  ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
       goto close;
     } // end IF
     Common_Module_t* clone_p = NULL;
@@ -149,20 +154,18 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-
+                  ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
       goto close;
     }
     if (!clone_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-
+                  ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
       goto close;
     }
-    inherited2::configuration_.streamConfiguration.module = clone_p;
-    inherited2::configuration_.streamConfiguration.deleteModule = true;
+    inherited3::configuration_.streamConfiguration.module = clone_p;
+    inherited3::configuration_.streamConfiguration.deleteModule = true;
   } // end IF
 
 #if defined (_MSC_VER)
@@ -174,13 +177,12 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 #endif
   // *TODO*: this clearly is a design glitch
   if (!stream_.initialize (session_id,
-                           inherited2::configuration_.streamConfiguration,
-                           inherited2::configuration_.protocolConfiguration,
-                           inherited2::configuration_.streamSessionData))
+                           inherited3::configuration_.streamConfiguration,
+                           inherited3::configuration_.protocolConfiguration,
+                           inherited3::configuration_.streamSessionData))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
-
     goto close;
   } // end IF
   //stream_.dump_state ();
@@ -190,7 +192,6 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
-
     goto close;
   } // end IF
 
@@ -204,24 +205,22 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
-
       goto close;
     } // end IF
     // fake a result to emulate regular behavior...
     ACE_Asynch_Read_Stream_Result_Impl* fake_result_p =
-      inherited::proactor ()->create_asynch_read_stream_result (inherited::proxy (),   // handler proxy
-                                                                handle_in,             // socket handle
-                                                                *duplicate_p,          // buffer
-                                                                duplicate_p->size (),  // (max) bytes to read
-                                                                NULL,                  // ACT
-                                                                ACE_INVALID_HANDLE,    // event
-                                                                0,                     // priority
-                                                                ACE_SIGRTMIN);         // signal number
+        inherited::proactor ()->create_asynch_read_stream_result (inherited::proxy (),                  // handler proxy
+                                                                  handle_in,                            // socket handle
+                                                                  *duplicate_p,                         // buffer
+                                                                  duplicate_p->size (),                 // (max) bytes to read
+                                                                  NULL,                                 // ACT
+                                                                  ACE_INVALID_HANDLE,                   // event
+                                                                  0,                                    // priority
+                                                                  COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
     if (!fake_result_p)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Proactor::create_asynch_read_stream_result: \"%m\", aborting\n")));
-
       goto close;
     } // end IF
     size_t bytes_transferred = duplicate_p->length ();
@@ -248,18 +247,20 @@ close:
                 ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
-Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::handle_output (ACE_HANDLE handle_in)
@@ -289,11 +290,11 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   // *NOTE*: this is a fire-and-forget API for message_block...
 //  if (inherited::outputStream_.write (*buffer_,               // data
   result =
-    inherited::outputStream_.write (*message_block_p,         // data
-                                    message_block_p->size (), // bytes to write
-                                    NULL,                     // ACT
-                                    0,                        // priority
-                                    ACE_SIGRTMIN);            // signal number
+    inherited::outputStream_.write (*message_block_p,                     // data
+                                    message_block_p->size (),             // bytes to write
+                                    NULL,                                 // ACT
+                                    0,                                    // priority
+                                    COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -310,24 +311,28 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   return 0;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 int
-Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::handle_close (ACE_HANDLE handle_in,
                                                                   ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::handle_close"));
+
+  ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
 
@@ -340,14 +345,16 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
-  if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
+  if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
   {
     Stream_Iterator_t iterator (stream_);
     const Common_Module_t* module_p = NULL;
-    if (iterator.next (module_p) == 0)
+    result = iterator.next (module_p);
+    if (result == 1)
     {
       ACE_ASSERT (module_p);
-      Common_Task_t* task_p = const_cast<Common_Module_t*> (module_p)->writer ();
+      Common_Task_t* task_p =
+          const_cast<Common_Module_t*> (module_p)->writer ();
       ACE_ASSERT (task_p);
       result = task_p->msg_queue ()->flush ();
       if (result == -1)
@@ -357,10 +364,13 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   } // end IF
 
   // step3: invoke base class maintenance
-  result = inherited::handle_close (handle_in, mask_in);
+  result = inherited::handle_close (inherited::handle (),
+                                    mask_in);
   if (result == -1)
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to SocketHandlerType::handle_close(): \"%m\", continuing\n")));
+
+  inherited3::decrease ();
 
   return result;
 }
@@ -386,18 +396,20 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 //  //inherited2::configuration_ = *reinterpret_cast<ConfigurationType*> (const_cast<void*> (act_in));
 //}
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 bool
-Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::collect (StatisticContainerType& data_out)
@@ -417,18 +429,20 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   return false;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
-Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::report () const
@@ -446,23 +460,59 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   }
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
-Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                ITransportLayerType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketHandlerType>::close ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::close"));
+
+  int result = -1;
+
+  ACE_HANDLE handle = inherited::handle ();
+  if (handle != ACE_INVALID_HANDLE)
+  {
+    result = ACE_OS::closesocket (handle);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                  handle));
+//    inherited::handle (ACE_INVALID_HANDLE);
+  } // end IF
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+void
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::info (ACE_HANDLE& handle_out,
-                                                          ACE_INET_Addr& localSAP_out,
-                                                          ACE_INET_Addr& remoteSAP_out) const
+                                                          AddressType& localSAP_out,
+                                                          AddressType& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::info"));
 
@@ -471,18 +521,20 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   remoteSAP_out = inherited::remoteSAP_;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 unsigned int
-Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::id () const
@@ -496,18 +548,20 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 #endif
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
-Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::dump_state () const
@@ -547,18 +601,20 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
               ACE_TEXT (peer_address.c_str ())));
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 void
-Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                ITransportLayerType,
                                 StatisticContainerType,
                                 StreamType,
                                 SocketHandlerType>::handle_read_stream (const ACE_Asynch_Read_Stream::Result& result_in)
@@ -572,10 +628,11 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   result = result_in.success ();
   if (result == 0)
   {
-    // connection reset (by peer) ? --> not an error
+    // connection closed/reset (by peer) ? --> not an error
     error = result_in.error ();
     if ((error != ECONNRESET) &&
         (error != EPIPE)      &&
+        (error != EBADF)      && // local close (), happens on Linux
         (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", continuing\n"),
@@ -587,10 +644,11 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
   {
     case -1:
     {
-      // connection reset (by peer) ? --> not an error
+      // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();
       if ((error != ECONNRESET) &&
-          (error != EPIPE) &&
+          (error != EPIPE)      &&
+          (error != EBADF)      && // local close (), happens on Linux
           (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
@@ -637,5 +695,7 @@ Net_StreamAsynchTCPSocketBase_T<ConfigurationType,
 
   result = handle_close (inherited::handle (),
                          ACE_Event_Handler::ALL_EVENTS_MASK);
-
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
 }

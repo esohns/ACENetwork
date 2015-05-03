@@ -25,15 +25,17 @@
 
 #include "net_macros.h"
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType>
-Net_ConnectionBase_T<ConfigurationType,
+Net_ConnectionBase_T<AddressType,
+                     SocketConfigurationType,
+                     ConfigurationType,
                      UserDataType,
                      SessionDataType,
-                     ITransportLayerType,
                      StatisticContainerType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                     unsigned int statisticCollectionInterval_in)
  : inherited (1,    // initial count
@@ -55,12 +57,12 @@ Net_ConnectionBase_T<ConfigurationType,
     // schedule regular statistics collection...
     ACE_Time_Value interval (statisticCollectionInterval_, 0);
     ACE_ASSERT (statisticCollectHandlerID_ == -1);
-    ACE_Event_Handler* eh = &statisticCollectHandler_;
+    ACE_Event_Handler* handler_p = &statisticCollectHandler_;
     statisticCollectHandlerID_ =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
-                                                            NULL,                             // argument
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                  // event handler
+                                                            NULL,                       // argument
                                                             COMMON_TIME_NOW + interval, // first wakeup time
-                                                            interval);                        // interval
+                                                            interval);                  // interval
     if (statisticCollectHandlerID_ == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Timer_Manager::schedule(), continuing\n")));
@@ -108,33 +110,37 @@ Net_ConnectionBase_T<ConfigurationType,
                 ACE_TEXT ("unable to allocate SessionDataType, continuing\n")));
   } // end IF
 
-  // initialize: register with the connection manager, ...
-  // *TODO*: find a way to pass role information (acceptor / connector)
-  if (!initialize (ROLE_INVALID,
-                   configuration_.socketConfiguration))
+  // register with the connection manager, if any
+  if (!registerc ())
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), continuing\n")));
+                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), continuing\n")));
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType>
-Net_ConnectionBase_T<ConfigurationType,
+Net_ConnectionBase_T<AddressType,
+                     SocketConfigurationType,
+                     ConfigurationType,
                      UserDataType,
                      SessionDataType,
-                     ITransportLayerType,
                      StatisticContainerType>::~Net_ConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
 
-  // clean up timer if necessary
+  int result = -1;
+
+  // clean up timer, if necessary
   if (statisticCollectHandlerID_ != -1)
   {
-    const void* act = NULL;
-    if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statisticCollectHandlerID_,
-                                                            &act) == -1)
+    const void* act_p = NULL;
+    result =
+        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statisticCollectHandlerID_,
+                                                            &act_p);
+    if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
                   statisticCollectHandlerID_));
@@ -144,36 +150,31 @@ Net_ConnectionBase_T<ConfigurationType,
                   statisticCollectHandlerID_));
   } // end IF
 
-  if (manager_ && isRegistered_)
-    finalize ();
+  // clean up
+  delete sessionData_;
+
+  // deregister with the connection manager, if any
+  deregister ();
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType>
 bool
-Net_ConnectionBase_T<ConfigurationType,
+Net_ConnectionBase_T<AddressType,
+                     SocketConfigurationType,
+                     ConfigurationType,
                      UserDataType,
                      SessionDataType,
-                     ITransportLayerType,
-                     StatisticContainerType>::initialize (Net_ClientServerRole_t role_in,
-                                                          const Net_SocketConfiguration_t& configuration_in)
+                     StatisticContainerType>::registerc ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));
-
-  ACE_UNUSED_ARG (role_in);
-  ACE_UNUSED_ARG (configuration_in);
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::registerc"));
 
   // sanity check(s)
   ACE_ASSERT (!isRegistered_);
-  if (!manager_)
-  {
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("no connection manager, returning\n")));
-    return true;
-  } // end IF
 
   // (try to) register with the connection manager...
   // *WARNING*: as the connection has not fully open()ed yet, there is a small
@@ -187,7 +188,8 @@ Net_ConnectionBase_T<ConfigurationType,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnectionManager_T::registerc(), aborting\n")));
+                  ACE_TEXT ("caught exception in Net_IConnectionManager_T::registerc(), continuing\n")));
+      isRegistered_ = false;
     }
     if (!isRegistered_)
     {
@@ -195,36 +197,91 @@ Net_ConnectionBase_T<ConfigurationType,
                   ACE_TEXT ("failed to Net_IConnectionManager_T::registerc(), aborting\n")));
       return false;
     } // end IF
+
+    ACE_HANDLE handle = ACE_INVALID_HANDLE;
+    ACE_TCHAR buffer[BUFSIZ];
+    ACE_OS::memset (buffer, 0, sizeof (buffer));
+    std::string local_address;
+    ACE_INET_Addr local_SAP, remote_SAP;
+    try
+    {
+      info (handle,
+            local_SAP,
+            remote_SAP);
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting\n")));
+      return false;
+    }
+    // *TODO*: retrieve socket information
+  //  if (local_SAP.addr_to_string (buffer,
+  //                                sizeof (buffer)) == -1)
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+    local_address = buffer;
+    ACE_OS::memset (buffer, 0, sizeof (buffer));
+  //  if (remote_SAP.addr_to_string (buffer,
+  //                                 sizeof (buffer)) == -1)
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+
+    // *PORTABILITY*: this isn't entirely portable...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+                this, reinterpret_cast<unsigned int> (handle),
+                ACE_TEXT (local_address.c_str ()),
+                ACE_TEXT (buffer),
+                manager_->numConnections ()));
+#else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+                this, handle,
+                ACE_TEXT (local_address.c_str ()),
+                ACE_TEXT (buffer),
+                manager_->numConnections ()));
+#endif
+
+    // *NOTE*: let the reactor/proactor/manager handle lifetime
+    inherited::decrease ();
   } // end IF
 
   return true;
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType>
 void
-Net_ConnectionBase_T<ConfigurationType,
+Net_ConnectionBase_T<AddressType,
+                     SocketConfigurationType,
+                     ConfigurationType,
                      UserDataType,
                      SessionDataType,
-                     ITransportLayerType,
-                     StatisticContainerType>::finalize ()
+                     StatisticContainerType>::deregister ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::finalize"));
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::deregister"));
 
-  if (!manager_)
+  if (manager_ && isRegistered_)
   {
-    //ACE_DEBUG ((LM_DEBUG,
-    //            ACE_TEXT ("no connection manager, returning\n")));
-    return;
-  } // end IF
-
-  if (isRegistered_)
-  {
-    // avoid loops (see dtor)
-    isRegistered_ = false;
+    ACE_HANDLE handle = ACE_INVALID_HANDLE;
+    ACE_INET_Addr local_SAP, remote_SAP;
+    try
+    {
+      info (handle,
+            local_SAP,
+            remote_SAP);
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
+    }
 
     // (try to) de-register with the connection manager...
     // *WARNING*: as registration happens BEFORE the connection has open()ed,
@@ -236,21 +293,37 @@ Net_ConnectionBase_T<ConfigurationType,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnectionManager::deregisterConnection(), continuing\n")));
+                  ACE_TEXT ("caught exception in Net_IConnectionManager_T::deregister(), continuing\n")));
     }
+    isRegistered_ = false;
+
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
+                this, reinterpret_cast<unsigned int> (handle),
+                manager_->numConnections ()));
+#else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
+                this, handle,
+                manager_->numConnections ()));
+#endif
   } // end IF
 }
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType>
 bool
-Net_ConnectionBase_T<ConfigurationType,
+Net_ConnectionBase_T<AddressType,
+                     SocketConfigurationType,
+                     ConfigurationType,
                      UserDataType,
                      SessionDataType,
-                     ITransportLayerType,
                      StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));

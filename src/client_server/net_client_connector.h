@@ -34,23 +34,24 @@
 #include "net_connection_manager_common.h"
 
 template <typename AddressType,
+          typename SocketConfigurationType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename SocketHandlerType>
 class Net_Client_Connector_T
- : public ACE_Connector<ConnectionType,
+ : public ACE_Connector<SocketHandlerType,
                         ACE_SOCK_CONNECTOR>
  , public Net_Client_IConnector_T<AddressType,
                                   SocketHandlerConfigurationType>
 {
  public:
-  typedef Net_IConnectionManager_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<AddressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t,
-                                   ITransportLayerType> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
   Net_Client_Connector_T (const SocketHandlerConfigurationType*, // socket handler configuration handle
                           ICONNECTION_MANAGER_T*,                // connection manager handle
@@ -65,10 +66,10 @@ class Net_Client_Connector_T
 
  protected:
   // override default instantiation strategy
-  virtual int make_svc_handler (ConnectionType*&);
+  virtual int make_svc_handler (SocketHandlerType*&);
 
  private:
-  typedef ACE_Connector<ConnectionType,
+  typedef ACE_Connector<SocketHandlerType,
                         ACE_SOCK_CONNECTOR> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ());
@@ -83,32 +84,33 @@ class Net_Client_Connector_T
 /////////////////////////////////////////
 
 // partial specialization (for UDP)
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
-          typename ITransportLayerType>
+          typename SessionDataType>
 class Net_Client_Connector_T<ACE_INET_Addr,
+                             SocketConfigurationType,
                              ConfigurationType,
                              SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             ITransportLayerType,
                              Net_UDPConnection_T<UserDataType,
                                                  SessionDataType,
-                                                 HandlerType> >
+                                                 SocketHandlerType> >
  : public Net_Client_IConnector_T<ACE_INET_Addr,
                                   SocketHandlerConfigurationType>
 {
  public:
-  typedef Net_IConnectionManager_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t,
-                                   ITransportLayerType> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
   typedef Net_UDPConnection_T<UserDataType,
                               SessionDataType,
-                              HandlerType> CONNECTION_T;
+                              SocketHandlerType> CONNECTION_T;
 
   Net_Client_Connector_T (const SocketHandlerConfigurationType*, // configuration handle
                           ICONNECTION_MANAGER_T*,                // connection manager handle
@@ -144,26 +146,28 @@ class Net_Client_Connector_T<ACE_INET_Addr,
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // partial specialization (for Netlink)
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 class Net_Client_Connector_T<ACE_Netlink_Addr,
+                             SocketConfigurationType,
                              ConfigurationType,
                              SocketHandlerConfigurationType,
                              UserDataType,
                              SessionDataType,
-                             Net_INetlinkTransportLayer_t,
-                             HandlerType>
+                             SocketHandlerType>
  : public Net_Client_IConnector_T<ACE_Netlink_Addr,
                                   SocketHandlerConfigurationType>
 {
  public:
-  typedef Net_IConnectionManager_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t,
-                                   Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
   Net_Client_Connector_T (const SocketHandlerConfigurationType*, // configuration handle
                           ICONNECTION_MANAGER_T*,                // connection manager handle
@@ -178,7 +182,7 @@ class Net_Client_Connector_T<ACE_Netlink_Addr,
 
  protected:
   // override default instantiation strategy
-  virtual int make_svc_handler (HandlerType*&);
+  virtual int make_svc_handler (SocketHandlerType*&);
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ());

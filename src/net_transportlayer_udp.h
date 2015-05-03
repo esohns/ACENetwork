@@ -18,12 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_TRANSPORTLAYER_UDP_H
-#define Net_TRANSPORTLAYER_UDP_H
+#ifndef NET_TRANSPORTLAYER_UDP_H
+#define NET_TRANSPORTLAYER_UDP_H
 
-#include "ace/INET_Addr.h"
-
-#include "net_common.h"
 #include "net_exports.h"
 #include "net_transportlayer_base.h"
 

@@ -21,6 +21,7 @@
 #ifndef NET_STREAM_TCPSOCKET_BASE_H
 #define NET_STREAM_TCPSOCKET_BASE_H
 
+#include "ace/config-macros.h"
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
@@ -29,20 +30,22 @@
 #include "net_connection_base.h"
 #include "net_connection_manager.h"
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
 class Net_StreamTCPSocketBase_T
  : public SocketHandlerType
- , public Net_ConnectionBase_T<ConfigurationType,
+ , public Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               ITransportLayerType>
+                               StatisticContainerType>
 {
  public:
   virtual ~Net_StreamTCPSocketBase_T ();
@@ -60,29 +63,30 @@ class Net_StreamTCPSocketBase_T
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
-  // implement Common_IStatistic
+  // implement (part of) Net_IConnection_T
+  virtual void info (ACE_HANDLE&,         // return value: handle
+                     AddressType&,        // return value: local SAP
+                     AddressType&) const; // return value: remote SAP
+  virtual unsigned int id () const;
+  virtual void close ();
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;
-
-  // implement (part of) Net_ITransportLayer_T
-  virtual void info (ACE_HANDLE&,           // return value: handle
-                     ACE_INET_Addr&,        // return value: local SAP
-                     ACE_INET_Addr&) const; // return value: remote SAP
-  virtual unsigned int id () const;
   virtual void dump_state () const;
 
  protected:
-  typedef Net_IConnectionManager_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<AddressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType,
-                                   ITransportLayerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
 //  typedef SocketHandlerType SOCKET_HANDLER_T;
-  typedef Net_ConnectionBase_T<ConfigurationType,
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               ITransportLayerType> CONNECTION_BASE_T;
+                               StatisticContainerType> CONNECTION_BASE_T;
 
   Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
@@ -98,11 +102,12 @@ class Net_StreamTCPSocketBase_T
 
  private:
   typedef SocketHandlerType inherited;
-  typedef Net_ConnectionBase_T<ConfigurationType,
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               ITransportLayerType> inherited2;
+                               StatisticContainerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T (const Net_StreamTCPSocketBase_T&));

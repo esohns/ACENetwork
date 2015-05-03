@@ -30,12 +30,10 @@
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
           typename ConnectionType>
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ITransportLayerType,
                       ConnectionType>::Net_Server_Listener_T ()
  : inherited (NULL, // use global (default) reactor
               1)    // always accept ALL pending connections
@@ -54,12 +52,10 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
           typename ConnectionType>
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ITransportLayerType,
                       ConnectionType>::~Net_Server_Listener_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::~Net_Server_Listener_T"));
@@ -71,13 +67,11 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
           typename ConnectionType>
 bool
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ITransportLayerType,
                       ConnectionType>::initialize (const Net_ListenerConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::initialize"));
@@ -95,13 +89,11 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
           typename ConnectionType>
 bool
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ITransportLayerType,
                       ConnectionType>::isInitialized () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::isInitialized"));
@@ -112,13 +104,11 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
           typename ConnectionType>
 int
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ITransportLayerType,
                       ConnectionType>::handle_accept_error (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::handle_accept_error"));
@@ -135,13 +125,11 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
           typename ConnectionType>
 void
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ITransportLayerType,
                       ConnectionType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::start"));
@@ -217,13 +205,11 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
           typename ConnectionType>
 void
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ITransportLayerType,
                       ConnectionType>::stop (bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::stop"));
@@ -267,13 +253,11 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
           typename ConnectionType>
 bool
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ITransportLayerType,
                       ConnectionType>::isRunning () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::isRunning"));
@@ -284,13 +268,11 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
           typename ConnectionType>
 void
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ITransportLayerType,
                       ConnectionType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::dump_state"));
@@ -318,13 +300,11 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ITransportLayerType,
           typename ConnectionType>
 int
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ITransportLayerType,
                       ConnectionType>::make_svc_handler (ConnectionType*& handler_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::make_svc_handler"));

@@ -18,18 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_InetTransportLayer_Base_H
-#define Net_InetTransportLayer_Base_H
+#ifndef NET_TRANSPORTLAYER_BASE_H
+#define NET_TRANSPORTLAYER_BASE_H
 
 #include "ace/Global_Macros.h"
 
-#include "net_exports.h"
 #include "net_common.h"
+#include "net_configuration.h"
+#include "net_exports.h"
 #include "net_itransportlayer.h"
 
 class Net_Export Net_InetTransportLayer_Base
- : virtual public Net_IInetTransportLayer_t
-// : public Net_IInetTransportLayer_t
+ : virtual public Net_ITransportLayer_T<Net_SocketConfiguration_t>
 {
  public:
   virtual ~Net_InetTransportLayer_Base ();
@@ -54,7 +54,7 @@ class Net_Export Net_InetTransportLayer_Base
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 class Net_Export Net_NetlinkTransportLayer_Base
- : virtual public Net_INetlinkTransportLayer_t
+ : virtual public Net_ITransportLayer_T<Net_SocketConfiguration_t>
 {
  public:
   virtual ~Net_NetlinkTransportLayer_Base ();

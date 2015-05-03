@@ -23,20 +23,20 @@
 
 #include "ace/config-lite.h"
 #include "ace/Event_Handler.h"
-#include "ace/INET_Addr.h"
 #include "ace/Message_Block.h"
 #include "ace/Synch.h"
 
 #include "net_connection_base.h"
-#include "net_itransportlayer.h"
+#include "net_connection_common.h"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "net_netlinksockethandler.h"
 #endif
 
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
           typename StatisticContainerType,
           typename StreamType,
 //          typename SocketType,
@@ -44,15 +44,17 @@ template <typename ConfigurationType,
 class Net_StreamUDPSocketBase_T
  : /*public SocketType
  ,*/ public SocketHandlerType
- , public Net_ConnectionBase_T<ConfigurationType,
+ , public Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               ITransportLayerType>
+                               StatisticContainerType>
 {
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
 
+  // override some task-based members
   virtual int open (void* = NULL); // args
   virtual int close (u_long = 0); // flags
 
@@ -65,28 +67,29 @@ class Net_StreamUDPSocketBase_T
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
-  // implement Common_IStatistic
+  // implement (part of) Net_IConnection_T
+  virtual void info (ACE_HANDLE&,         // return value: handle
+                     AddressType&,        // return value: local SAP
+                     AddressType&) const; // return value: remote SAP
+  virtual unsigned int id () const;
+  virtual void close ();
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;
-
-  // implement (part of) Net_ITransportLayer_T
-  virtual void info (ACE_HANDLE&,           // return value: handle
-                     ACE_INET_Addr&,        // return value: local SAP
-                     ACE_INET_Addr&) const; // return value: remote SAP
-  virtual unsigned int id () const;
   virtual void dump_state () const;
 
  protected:
- typedef Net_IConnectionManager_T<ConfigurationType,
-                                  UserDataType,
-                                  StatisticContainerType,
-                                  ITransportLayerType> ICONNECTION_MANAGER_T;
-  typedef Net_ConnectionBase_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<AddressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
+                                   UserDataType,
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               ITransportLayerType> CONNECTION_BASE_T;
+                               StatisticContainerType> CONNECTION_BASE_T;
 
   Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
@@ -106,11 +109,12 @@ class Net_StreamUDPSocketBase_T
  private:
 //  typedef SocketType inherited;
   typedef SocketHandlerType inherited2;
-  typedef Net_ConnectionBase_T<ConfigurationType,
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               ITransportLayerType> inherited3;
+                               StatisticContainerType> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));
@@ -121,29 +125,34 @@ class Net_StreamUDPSocketBase_T
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // partial specialization (for Netlink)
-template <typename ConfigurationType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
-class Net_StreamUDPSocketBase_T<ConfigurationType,
+class Net_StreamUDPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
                                 UserDataType,
                                 SessionDataType,
-                                Net_INetlinkTransportLayer_t,
                                 StatisticContainerType,
                                 StreamType,
                                 Net_NetlinkSocketHandler>
  : /*public SocketType
  ,*/ public Net_NetlinkSocketHandler
- , public Net_ConnectionBase_T<ConfigurationType,
+ , public Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               Net_INetlinkTransportLayer_t>
+                               StatisticContainerType>
 {
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
 
+  // override some task-based members
   virtual int open (void* = NULL); // args
   virtual int close (u_long = 0); // flags
 
@@ -156,28 +165,29 @@ class Net_StreamUDPSocketBase_T<ConfigurationType,
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
-  // implement Common_IStatistic
+  // implement (part of) Net_IConnection_T
+  virtual void info (ACE_HANDLE&,         // return value: handle
+                     AddressType&,        // return value: local SAP
+                     AddressType&) const; // return value: remote SAP
+  virtual unsigned int id () const;
+  virtual void close ();
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;
-
-  // implement (part of) Net_ITransportLayer_T
-  virtual void info (ACE_HANDLE&,           // return value: handle
-                     ACE_INET_Addr&,        // return value: local SAP
-                     ACE_INET_Addr&) const; // return value: remote SAP
-  virtual unsigned int id () const;
   virtual void dump_state () const;
 
  protected:
- typedef Net_IConnectionManager_T<ConfigurationType,
-                                  UserDataType,
-                                  StatisticContainerType,
-                                  Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
-  typedef Net_ConnectionBase_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<AddressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
+                                   UserDataType,
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               Net_INetlinkTransportLayer_t> CONNECTION_BASE_T;
+                               StatisticContainerType> CONNECTION_BASE_T;
 
   Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
@@ -197,11 +207,12 @@ class Net_StreamUDPSocketBase_T<ConfigurationType,
  private:
 //  typedef SocketType inherited;
   typedef Net_NetlinkSocketHandler inherited2;
-  typedef Net_ConnectionBase_T<ConfigurationType,
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType,
-                               Net_INetlinkTransportLayer_t> inherited3;
+                               StatisticContainerType> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));

@@ -18,24 +18,24 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-//#include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
-//#include "ace/Netlink_Addr.h"
 #include "ace/Svc_Handler.h"
 
 #include "net_common.h"
 #include "net_defines.h"
 #include "net_macros.h"
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
-Net_SocketConnectionBase_T<SocketHandlerType,
-                           ITransportLayerType,
+Net_SocketConnectionBase_T<AddressType,
+                           SocketConfigurationType,
+                           HandlerType,
                            ConfigurationType,
                            SocketHandlerConfigurationType,
                            UserDataType,
@@ -51,15 +51,17 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 
 }
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
-Net_SocketConnectionBase_T<SocketHandlerType,
-                           ITransportLayerType,
+Net_SocketConnectionBase_T<AddressType,
+                           SocketConfigurationType,
+                           HandlerType,
                            ConfigurationType,
                            SocketHandlerConfigurationType,
                            UserDataType,
@@ -70,22 +72,73 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 
   // wait for our worker (if any)
   // *TODO*: this clearly is a design glitch
-  if (SocketHandlerType::CONNECTION_BASE_T::configuration_.streamConfiguration.useThreadPerConnection)
+  if (HandlerType::CONNECTION_BASE_T::configuration_.streamConfiguration.useThreadPerConnection)
     if (inherited::wait () == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Task_Base::wait(): \"%m\", continuing\n")));
 }
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+//template <typename AddressType,
+//          typename SocketConfigurationType,
+//          typename HandlerType,
+//          typename ConfigurationType,
+//          typename SocketHandlerConfigurationType,
+//          typename UserDataType,
+//          typename SessionDataType,
+//          typename StatisticContainerType>
+//bool
+//Net_SocketConnectionBase_T<AddressType,
+//                           SocketConfigurationType,
+//                           HandlerType,
+//                           ConfigurationType,
+//                           SocketHandlerConfigurationType,
+//                           UserDataType,
+//                           SessionDataType,
+//                           StatisticContainerType>::initialize (Net_ClientServerRole_t role_in,
+//                                                                const Net_SocketConfiguration_t& configuration_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::initialize"));
+//
+//  ACE_UNUSED_ARG (role_in);
+//  ACE_UNUSED_ARG (configuration_in);
+//
+//  return true;
+//}
+
+//template <typename AddressType,
+//          typename SocketConfigurationType,
+//          typename HandlerType,
+//          typename ConfigurationType,
+//          typename SocketHandlerConfigurationType,
+//          typename UserDataType,
+//          typename SessionDataType,
+//          typename StatisticContainerType>
+//void
+//Net_SocketConnectionBase_T<AddressType,
+//                           SocketConfigurationType,
+//                           HandlerType,
+//                           ConfigurationType,
+//                           SocketHandlerConfigurationType,
+//                           UserDataType,
+//                           SessionDataType,
+//                           StatisticContainerType>::finalize ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::finalize"));
+//
+//}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 void
-Net_SocketConnectionBase_T<SocketHandlerType,
-                           ITransportLayerType,
+Net_SocketConnectionBase_T<AddressType,
+                           SocketConfigurationType,
+                           HandlerType,
                            ConfigurationType,
                            SocketHandlerConfigurationType,
                            UserDataType,
@@ -97,7 +150,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   inherited::stream_.ping ();
 }
 
-//template <typename SocketHandlerType,
+//template <typename HandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
 //          typename SessionDataType,
@@ -218,16 +271,18 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 //  return 0;
 //}
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 int
-Net_SocketConnectionBase_T<SocketHandlerType,
-                           ITransportLayerType,
+Net_SocketConnectionBase_T<AddressType,
+                           SocketConfigurationType,
+                           HandlerType,
                            ConfigurationType,
                            SocketHandlerConfigurationType,
                            UserDataType,
@@ -250,14 +305,13 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   if (!inherited::manager_)
     configuration_p = reinterpret_cast<ConfigurationType*> (arg_in);
   else
-    configuration_p =
-        &(SocketHandlerType::CONNECTION_BASE_T::configuration_);
+    configuration_p = &(HandlerType::CONNECTION_BASE_T::configuration_);
   // sanity check(s)
   ACE_ASSERT (configuration_p);
 
   // step0: initialize this connection (if there is no connection manager)
   if (!inherited::manager_)
-    if (!SocketHandlerType::CONNECTION_BASE_T::initialize (*configuration_p))
+    if (!HandlerType::CONNECTION_BASE_T::initialize (*configuration_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", aborting\n")));
@@ -270,7 +324,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   if (result == -1)
   {
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
     return -1;
   } // end IF
 
@@ -311,16 +365,18 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   return 0;
 }
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 int
-Net_SocketConnectionBase_T<SocketHandlerType,
-                           ITransportLayerType,
+Net_SocketConnectionBase_T<AddressType,
+                           SocketConfigurationType,
+                           HandlerType,
                            ConfigurationType,
                            SocketHandlerConfigurationType,
                            UserDataType,
@@ -383,7 +439,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
   return 0;
 }
 
-//template <typename SocketHandlerType,
+//template <typename HandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
 //          typename SessionDataType,
@@ -477,7 +533,7 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 //  return result;
 //}
 
-//template <typename SocketHandlerType,
+//template <typename HandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
 //          typename SessionDataType,
@@ -524,15 +580,17 @@ Net_SocketConnectionBase_T<SocketHandlerType,
 
 /////////////////////////////////////////
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
-Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 ITransportLayerType,
+Net_AsynchSocketConnectionBase_T<AddressType,
+                                 SocketConfigurationType,
+                                 HandlerType,
                                  ConfigurationType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
@@ -549,15 +607,17 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 
 }
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
-Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 ITransportLayerType,
+Net_AsynchSocketConnectionBase_T<AddressType,
+                                 SocketConfigurationType,
+                                 HandlerType,
                                  ConfigurationType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
@@ -568,16 +628,18 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 
 }
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 void
-Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 ITransportLayerType,
+Net_AsynchSocketConnectionBase_T<AddressType,
+                                 SocketConfigurationType,
+                                 HandlerType,
                                  ConfigurationType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
@@ -589,7 +651,7 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
   inherited::stream_.ping ();
 }
 
-//template <typename SocketHandlerType,
+//template <typename HandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
 //          typename SessionDataType,
@@ -616,7 +678,7 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 //  return false;
 //}
 //
-//template <typename SocketHandlerType,
+//template <typename HandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
 //          typename SessionDataType,
@@ -641,7 +703,7 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 //  }
 //}
 
-//template <typename SocketHandlerType,
+//template <typename HandlerType,
 //          typename ConfigurationType,
 //          typename StatisticContainerType>
 //int
@@ -746,16 +808,18 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 //  return 0;
 //}
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 void
-Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 ITransportLayerType,
+Net_AsynchSocketConnectionBase_T<AddressType,
+                                 SocketConfigurationType,
+                                 HandlerType,
                                  ConfigurationType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
@@ -769,14 +833,13 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
   if (!inherited::manager_)
   {
     ACE_ASSERT (configuration_);
-//    SocketHandlerType* socket_handler_p = this;
-//    typename SocketHandlerType::CONNECTION_BASE_T* connection_base_p =
+//    HandlerType* socket_handler_p = this;
+//    typename HandlerType::CONNECTION_BASE_T* connection_base_p =
 //     socket_handler_p;
-    if (!SocketHandlerType::CONNECTION_BASE_T::initialize (*configuration_))
+    if (!HandlerType::CONNECTION_BASE_T::initialize (*configuration_))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", returning\n")));
-
       return;
     } // end IF
   } // end IF
@@ -787,7 +850,7 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
                    messageBlock_in);
 }
 
-//template <typename SocketHandlerType,
+//template <typename HandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
 //          typename SocketHandlerConfigurationType,
@@ -809,16 +872,18 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 //      reinterpret_cast<ConfigurationType*> (const_cast<void*> (act_in));
 //}
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 int
-Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-                                 ITransportLayerType,
+Net_AsynchSocketConnectionBase_T<AddressType,
+                                 SocketConfigurationType,
+                                 HandlerType,
                                  ConfigurationType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
@@ -895,12 +960,12 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
     // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_StreamSocketBase::handle_close(%@, %d): \"%m\", continuing\n"),
+                ACE_TEXT ("failed to HandlerType::handle_close(%@, %d): \"%m\", continuing\n"),
                 inherited::handle (),
                 mask_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_StreamSocketBase::handle_close(%d, %d): \"%m\", continuing\n"),
+                ACE_TEXT ("failed to HandlerType::handle_close(%d, %d): \"%m\", continuing\n"),
                 inherited::handle (),
                 mask_in));
 #endif
@@ -908,7 +973,7 @@ Net_AsynchSocketConnectionBase_T<SocketHandlerType,
   return result;
 }
 
-//template <typename SocketHandlerType,
+//template <typename HandlerType,
 //          typename ConfigurationType,
 //          typename StatisticContainerType>
 //void

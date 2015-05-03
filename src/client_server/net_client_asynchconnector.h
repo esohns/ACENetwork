@@ -24,7 +24,9 @@
 #include "ace/Asynch_Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "ace/Netlink_Addr.h"
+#endif
 
 #include "stream_common.h"
 
@@ -37,22 +39,23 @@
 #include "net_client_iconnector.h"
 
 template <typename AddressType,
+          typename SocketConfigurationType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename SocketHandlerType>
 class Net_Client_AsynchConnector_T
- : public ACE_Asynch_Connector<ConnectionType>
+ : public ACE_Asynch_Connector<SocketHandlerType>
  , public Net_Client_IConnector_T<AddressType,
                                   SocketHandlerConfigurationType>
 {
  public:
-  typedef Net_IConnectionManager_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<AddressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t,
-                                   ITransportLayerType> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
   Net_Client_AsynchConnector_T (const SocketHandlerConfigurationType*, // socket handler configuration handle
                                 ICONNECTION_MANAGER_T*,                // connection manager handle
@@ -72,11 +75,10 @@ class Net_Client_AsynchConnector_T
 
  protected:
   // override default creation strategy
-  // *TODO*: why isn't this being picked up ?
-  virtual ConnectionType* make_handler (void);
+  virtual SocketHandlerType* make_handler (void);
 
  private:
-  typedef ACE_Asynch_Connector<ConnectionType> inherited;
+  typedef ACE_Asynch_Connector<SocketHandlerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));
@@ -90,35 +92,36 @@ class Net_Client_AsynchConnector_T
 /////////////////////////////////////////
 
 // partial specialization (for UDP)
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
-          typename ITransportLayerType>
+          typename SessionDataType>
 class Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                                   SocketConfigurationType,
                                    ConfigurationType,
                                    SocketHandlerConfigurationType,
                                    UserDataType,
                                    SessionDataType,
-                                   ITransportLayerType,
                                    Net_AsynchUDPConnection_T<UserDataType,
                                                              SessionDataType,
-                                                             HandlerType> >
+                                                             SocketHandlerType> >
  : public ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
                                                          SessionDataType,
-                                                         HandlerType> >
+                                                         SocketHandlerType> >
  , public Net_Client_IConnector_T<ACE_INET_Addr,
                                   SocketHandlerConfigurationType>
 {
  public:
-  typedef Net_IConnectionManager_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t,
-                                   ITransportLayerType> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
   typedef Net_AsynchUDPConnection_T<UserDataType,
                                     SessionDataType,
-                                    HandlerType> CONNECTION_T;
+                                    SocketHandlerType> CONNECTION_T;
 
   // *TODO*: pass SocketHandlerConfigurationType instead
   Net_Client_AsynchConnector_T (const SocketHandlerConfigurationType*, // socket handler configuration handle
@@ -139,16 +142,15 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
  protected:
   // override default creation strategy
-  // *TODO*: why isn't this being picked up ?
   //virtual CONNECTION_T* make_handler (void);
    virtual Net_AsynchUDPConnection_T<UserDataType,
                                      SessionDataType,
-                                     HandlerType>* make_handler (void);
+                                     SocketHandlerType>* make_handler (void);
 
  private:
   typedef ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
                                                          SessionDataType,
-                                                         HandlerType> > inherited;
+                                                         SocketHandlerType> > inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));
@@ -163,27 +165,29 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // partial specialization (for Netlink)
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
+                                   SocketConfigurationType,
                                    ConfigurationType,
                                    SocketHandlerConfigurationType,
                                    UserDataType,
                                    SessionDataType,
-                                   Net_INetlinkTransportLayer_t,
-                                   HandlerType>
- : public ACE_Asynch_Connector<HandlerType>
+                                   SocketHandlerType>
+ : public ACE_Asynch_Connector<SocketHandlerType>
  , public Net_Client_IConnector_T<ACE_Netlink_Addr,
                                   SocketHandlerConfigurationType>
 {
  public:
-  typedef Net_IConnectionManager_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t,
-                                   Net_INetlinkTransportLayer_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
   // *TODO*: pass SocketHandlerConfigurationType instead
   Net_Client_AsynchConnector_T (const SocketHandlerConfigurationType*, // socket handler configuration handle
@@ -204,11 +208,10 @@ class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
 
  protected:
   // override default creation strategy
-  // *TODO*: why isn't this being picked up ?
-  virtual HandlerType* make_handler (void);
+  virtual SocketHandlerType* make_handler (void);
 
  private:
-  typedef ACE_Asynch_Connector<HandlerType> inherited;
+  typedef ACE_Asynch_Connector<SocketHandlerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));

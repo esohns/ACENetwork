@@ -26,21 +26,21 @@
 #include "net_macros.h"
 
 template <typename AddressType,
+          typename SocketConfigurationType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename SocketHandlerType>
 Net_Client_Connector_T<AddressType,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
-                       ConnectionType>::Net_Client_Connector_T (const SocketHandlerConfigurationType* configuration_in,
-                                                                ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                unsigned int statisticCollectionInterval_in)
+                       SocketHandlerType>::Net_Client_Connector_T (const SocketHandlerConfigurationType* configuration_in,
+                                                                   ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                   unsigned int statisticCollectionInterval_in)
  : inherited (ACE_Reactor::instance (), // default reactor
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
@@ -53,39 +53,39 @@ Net_Client_Connector_T<AddressType,
 }
 
 template <typename AddressType,
+          typename SocketConfigurationType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename SocketHandlerType>
 Net_Client_Connector_T<AddressType,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
-                       ConnectionType>::~Net_Client_Connector_T ()
+                       SocketHandlerType>::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
 
 }
 
 template <typename AddressType,
+          typename SocketConfigurationType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename SocketHandlerType>
 int
 Net_Client_Connector_T<AddressType,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
-                       ConnectionType>::make_svc_handler (ConnectionType*& handler_inout)
+                       SocketHandlerType>::make_svc_handler (SocketHandlerType*& handler_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
 
@@ -94,8 +94,8 @@ Net_Client_Connector_T<AddressType,
 
   // default behavior
   ACE_NEW_NORETURN (handler_inout,
-                    ConnectionType (interfaceHandle_,
-                                    statisticCollectionInterval_));
+                    SocketHandlerType (interfaceHandle_,
+                                       statisticCollectionInterval_));
   if (!handler_inout)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -104,20 +104,20 @@ Net_Client_Connector_T<AddressType,
 }
 
 template <typename AddressType,
+          typename SocketConfigurationType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename SocketHandlerType>
 void
 Net_Client_Connector_T<AddressType,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
-                       ConnectionType>::abort ()
+                       SocketHandlerType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
 
@@ -128,24 +128,24 @@ Net_Client_Connector_T<AddressType,
 }
 
 template <typename AddressType,
+          typename SocketConfigurationType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename SocketHandlerType>
 bool
 Net_Client_Connector_T<AddressType,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
-                       ConnectionType>::connect (const AddressType& address_in)
+                       SocketHandlerType>::connect (const AddressType& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
 
-  ConnectionType* handler_p = NULL;
+  SocketHandlerType* handler_p = NULL;
   int result = -1;
 
   result =
@@ -175,20 +175,20 @@ Net_Client_Connector_T<AddressType,
 }
 
 template <typename AddressType,
+          typename SocketConfigurationType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename ITransportLayerType,
-          typename ConnectionType>
+          typename SocketHandlerType>
 const SocketHandlerConfigurationType*
 Net_Client_Connector_T<AddressType,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
-                       ConnectionType>::getConfiguration () const
+                       SocketHandlerType>::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
 
@@ -197,23 +197,23 @@ Net_Client_Connector_T<AddressType,
 
 /////////////////////////////////////////
 
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
-          typename ITransportLayerType>
+          typename SessionDataType>
 Net_Client_Connector_T<ACE_INET_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
-                                           HandlerType> >::Net_Client_Connector_T (const SocketHandlerConfigurationType* configuration_in,
-                                                                                   ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                   unsigned int statisticCollectionInterval_in)
+                                           SocketHandlerType> >::Net_Client_Connector_T (const SocketHandlerConfigurationType* configuration_in,
+                                                                                         ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                         unsigned int statisticCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
@@ -222,42 +222,42 @@ Net_Client_Connector_T<ACE_INET_Addr,
 
 }
 
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
-          typename ITransportLayerType>
+          typename SessionDataType>
 Net_Client_Connector_T<ACE_INET_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
-                                           HandlerType> >::~Net_Client_Connector_T ()
+                                           SocketHandlerType> >::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
 
 }
 
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
-          typename ITransportLayerType>
+          typename SessionDataType>
 int
 Net_Client_Connector_T<ACE_INET_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
-                                           HandlerType> >::make_svc_handler (CONNECTION_T*& handler_inout)
+                                           SocketHandlerType> >::make_svc_handler (CONNECTION_T*& handler_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
 
@@ -274,43 +274,43 @@ Net_Client_Connector_T<ACE_INET_Addr,
   return (handler_inout ? -1 : 0);
 }
 
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
-          typename ITransportLayerType>
+          typename SessionDataType>
 void
 Net_Client_Connector_T<ACE_INET_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
-                                           HandlerType> >::abort ()
+                                           SocketHandlerType> >::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
 
 }
 
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
-          typename ITransportLayerType>
+          typename SessionDataType>
 bool
 Net_Client_Connector_T<ACE_INET_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
-                                           HandlerType> >::connect (const ACE_INET_Addr& address_in)
+                                           SocketHandlerType> >::connect (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
 
@@ -347,22 +347,22 @@ Net_Client_Connector_T<ACE_INET_Addr,
   return true;
 }
 
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
-          typename ITransportLayerType>
+          typename SessionDataType>
 const SocketHandlerConfigurationType*
 Net_Client_Connector_T<ACE_INET_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       ITransportLayerType,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
-                                           HandlerType> >::getConfiguration () const
+                                           SocketHandlerType> >::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
 
@@ -372,20 +372,21 @@ Net_Client_Connector_T<ACE_INET_Addr,
 /////////////////////////////////////////
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 Net_Client_Connector_T<ACE_Netlink_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       Net_INetlinkTransportLayer_t,
-                       HandlerType>::Net_Client_Connector_T (const SocketHandlerConfigurationType* configuration_in,
-                                                             ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                             unsigned int statisticCollectionInterval_in)
+                       SocketHandlerType>::Net_Client_Connector_T (const SocketHandlerConfigurationType* configuration_in,
+                                                                   ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                   unsigned int statisticCollectionInterval_in)
  : configuration_ (configuration_in)
  , interfaceHandle_ (interfaceHandle_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
@@ -394,36 +395,38 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
 
 }
 
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 Net_Client_Connector_T<ACE_Netlink_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       Net_INetlinkTransportLayer_t,
-                       HandlerType>::~Net_Client_Connector_T ()
+                       SocketHandlerType>::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
 
 }
 
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 int
 Net_Client_Connector_T<ACE_Netlink_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       Net_INetlinkTransportLayer_t,
-                       HandlerType>::make_svc_handler (HandlerType*& handler_inout)
+                       SocketHandlerType>::make_svc_handler (HandlerType*& handler_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
 
@@ -431,7 +434,7 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
   handler_inout = NULL;
 
   ACE_NEW_NORETURN (handler_inout,
-                    HandlerType (interfaceHandle_,
+                    SocketHandlerType (interfaceHandle_,
                                  statisticCollectionInterval_));
   if (!handler_inout)
     ACE_DEBUG ((LM_CRITICAL,
@@ -440,43 +443,45 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
   return (handler_inout ? -1 : 0);
 }
 
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 void
 Net_Client_Connector_T<ACE_Netlink_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       Net_INetlinkTransportLayer_t,
-                       HandlerType>::abort ()
+                       SocketHandlerType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
 
 }
 
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 bool
 Net_Client_Connector_T<ACE_Netlink_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       Net_INetlinkTransportLayer_t,
-                       HandlerType>::connect (const ACE_Netlink_Addr& address_in)
+                       SocketHandlerType>::connect (const ACE_Netlink_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
 
   int result = -1;
 
-  HandlerType* handler_p = NULL;
+  SocketHandlerType* handler_p = NULL;
   result = make_svc_handler (handler_p);
   if (result == -1)
   {
@@ -500,7 +505,7 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HandlerType::open(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to SocketHandlerType::open(\"%s\"): \"%m\", aborting\n"),
                 buffer));
     return false;
   } // end IF
@@ -508,19 +513,20 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
   return true;
 }
 
-template <typename HandlerType,
+template <typename SocketConfigurationType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
 const SocketHandlerConfigurationType*
 Net_Client_Connector_T<ACE_Netlink_Addr,
+                       SocketConfigurationType,
                        ConfigurationType,
                        SocketHandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       Net_INetlinkTransportLayer_t,
-                       HandlerType>::getConfiguration () const
+                       SocketHandlerType>::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
 

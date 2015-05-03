@@ -26,21 +26,31 @@
 
 #include "net_connection_base.h"
 #include "net_connection_manager.h"
+#include "net_iconnection.h"
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 class Net_SocketConnectionBase_T
- : public SocketHandlerType
+ : public HandlerType
+ , public Net_ISocketConnection_T<AddressType,
+                                  SocketConfigurationType,
+                                  ConfigurationType,
+                                  StatisticContainerType>
 {
  public:
   virtual ~Net_SocketConnectionBase_T ();
 
-  // implement (part of) Net_ITransportLayer
+  //// implement (part of) Net_ITransportLayer_T
+  //virtual bool initialize (Net_ClientServerRole_t,            // role
+  //                         const Net_SocketConfiguration_t&); // socket configuration
+  //virtual void finalize ();
+
   virtual void ping (); // ping the peer !
 
   //// implement Common_IStatistic
@@ -61,17 +71,18 @@ class Net_SocketConnectionBase_T
 //                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  protected:
-  typedef Net_IConnectionManager_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<AddressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType,
-                                   ITransportLayerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
 
   Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                               unsigned int = 0);      // statistics collecting interval (second(s))
                                                       // 0 --> DON'T collect statistics
 
  private:
-  typedef SocketHandlerType inherited;
+  typedef HandlerType inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&));
@@ -83,15 +94,20 @@ class Net_SocketConnectionBase_T
 
 /////////////////////////////////////////
 
-template <typename SocketHandlerType,
-          typename ITransportLayerType,
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType>
 class Net_AsynchSocketConnectionBase_T
- : public SocketHandlerType
+ : public HandlerType
+ , public Net_ISocketConnection_T<AddressType,
+                                  SocketConfigurationType,
+                                  ConfigurationType,
+                                  StatisticContainerType>
 {
  public:
   virtual ~Net_AsynchSocketConnectionBase_T ();
@@ -117,10 +133,11 @@ class Net_AsynchSocketConnectionBase_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  protected:
-  typedef Net_IConnectionManager_T<ConfigurationType,
+  typedef Net_IConnectionManager_T<AddressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType,
-                                   ITransportLayerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType> ICONNECTION_MANAGER_T;
 
   Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                     unsigned int = 0);      // statistics collecting interval (second(s))
@@ -129,7 +146,7 @@ class Net_AsynchSocketConnectionBase_T
   const ConfigurationType* configuration_;
 
  private:
-  typedef SocketHandlerType inherited;
+  typedef HandlerType inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T (const Net_AsynchSocketConnectionBase_T&));

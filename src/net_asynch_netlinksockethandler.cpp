@@ -184,35 +184,32 @@ Net_AsynchNetlinkSocketHandler::open (ACE_HANDLE handle_in,
 //}
 
 int
-Net_AsynchNetlinkSocketHandler::handle_close(ACE_HANDLE handle_in,
-                                             ACE_Reactor_Mask mask_in)
+Net_AsynchNetlinkSocketHandler::handle_close (ACE_HANDLE handle_in,
+                                              ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkSocketHandler::handle_close"));
 
+  ACE_UNUSED_ARG (handle_in);
   ACE_UNUSED_ARG (mask_in);
 
-  int result = -1;
+  int result = inputStream_.cancel ();
+//  if ((result != 0) && (result != 1))
+  if (result == -1)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
+                result));
+  int result_2 = outputStream_.cancel ();
+//  if ((result_2 != 0) && (result_2 != 1))
+  if (result_2 == -1)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
+                result));
 
-  // clean up
-  result = inputStream_.cancel ();
-//  if (result == -1)
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\", continuing\n")));
-  result = outputStream_.cancel ();
-//  if (result == -1)
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%m\", continuing\n")));
-
-  if (handle_in != ACE_INVALID_HANDLE)
-  {
-    result = ACE_OS::closesocket (handle_in);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  handle_in));
-  } // end IF
-
-  return result;
+//  return ((((result != 0) && (result != 1)) ||
+//           ((result_2 != 0) && (result_2 != 1))) ? -1
+//                                                 : 0);
+  return ((result == -1) || (result_2 == -1) ? -1
+                                             : 0);
 }
 
 int
@@ -228,11 +225,20 @@ Net_AsynchNetlinkSocketHandler::notify (void)
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_AsynchNetlinkSocketHandler::handle_output(), aborting")));
+                ACE_TEXT ("caught exception in Net_AsynchNetlinkSocketHandler::handle_output(): \"%m\", continuing\n")));
+    result = -1;
   }
   if (result == -1)
-    handle_close (inherited2::handle (),
-                  ACE_Event_Handler::ALL_EVENTS_MASK);
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchNetlinkSocketHandler::handle_output(): \"%m\", aborting\n")));
+
+    int result_2 = handle_close (inherited2::handle (),
+                                 ACE_Event_Handler::ALL_EVENTS_MASK);
+    if (result_2 == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchNetlinkSocketHandler::handle_close(): \"%m\", continuing\n")));
+  } // end IF
 
   return result;
 }
@@ -294,18 +300,21 @@ Net_AsynchNetlinkSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram
   int result = -1;
   bool close = false;
   size_t bytes_transferred = result_in.bytes_transferred ();
+  unsigned long error = 0;
 
   // sanity check
   result = result_in.success ();
   if (result == 0)
   {
-    // connection reset (by peer) ? --> not an error
-    if ((result_in.error () != ECONNRESET) &&
-        (result_in.error () != EPIPE))
+    // connection closed/reset (by peer) ? --> not an error
+    error = result_in.error ();
+    if ((error != ECONNRESET) &&
+        (error != EPIPE)      &&
+        (error != EBADF)) // 9 happens on Linux (local close())
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
                   result_in.handle (),
-                  ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
+                  ACE_TEXT (ACE_OS::strerror (error))));
 
     close = true;
   } // end IF
@@ -315,9 +324,11 @@ Net_AsynchNetlinkSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram
     case -1:
     case 0:
     {
-      // connection reset (by peer) ? --> not an error
-      if ((result_in.error() != ECONNRESET) &&
-          (result_in.error() != EPIPE))
+      // connection closed/reset (by peer) ? --> not an error
+      error = result_in.error ();
+      if ((error != ECONNRESET) &&
+          (error != EPIPE)      &&
+          (error != EBADF)) // 9 happens on Linux (local close())
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
                     result_in.handle (),
@@ -333,9 +344,9 @@ Net_AsynchNetlinkSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram
       // short write ?
       if (result_in.bytes_to_write () != bytes_transferred)
       {
-        // *TODO*: handle short writes more gracefully
+        // *TODO*: handle short writes (more) gracefully
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("stream (%d): sent %u/%u byte(s) only, aborting"),
+                    ACE_TEXT ("stream (%d): sent %u/%u byte(s) only, aborting\n"),
                     result_in.handle (),
                     bytes_transferred,
                     result_in.bytes_to_write ()));
@@ -349,9 +360,15 @@ Net_AsynchNetlinkSocketHandler::handle_write_dgram (const ACE_Asynch_Write_Dgram
 
   // clean up
   result_in.message_block ()->release ();
+
   if (close)
-    handle_close (inherited2::handle (),
-                  ACE_Event_Handler::ALL_EVENTS_MASK);
+  {
+    result = handle_close (inherited2::handle (),
+                           ACE_Event_Handler::ALL_EVENTS_MASK);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchNetlinkSocketHandler::handle_close(): \"%m\", continuing\n")));
+  } // end IF
 }
 
 void
@@ -360,48 +377,46 @@ Net_AsynchNetlinkSocketHandler::initiate_read_dgram ()
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkSocketHandler::initiate_read_dgram"));
 
   int result = -1;
-  ACE_Message_Block* message_p = NULL;
+  size_t bytes_to_read = 0;
 
-  // allocate a data buffer
-  message_p = allocateMessage (inherited::configuration_.bufferSize);
-  if (!message_p)
+  // step1: allocate a data buffer
+  ACE_Message_Block* message_block_p =
+      allocateMessage (inherited::configuration_.bufferSize);
+  if (!message_block_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchNetlinkSocketHandler::allocateMessage(%u), aborting\n"),
                 inherited::configuration_.bufferSize));
-
-    // clean up
-    handle_close (inherited2::handle (),
-                  ACE_Event_Handler::ALL_EVENTS_MASK);
+    goto close;
   } // end IF
 
-  // start (asynch) read...
-  size_t bytes_to_read = message_p->size (); // why oh why...
-  result = inputStream_.recv (message_p,                   // buffer
-                              bytes_to_read,               // buffer size
-                              0,                           // flags
-                              ACE_PROTOCOL_FAMILY_NETLINK, // protocol family
-                              NULL,                        // ACT
-                              0,                           // priority
-                              ACE_SIGRTMIN);               // signal
+  // start (asynchronous) read...
+  bytes_to_read = message_block_p->size ();
+  result = inputStream_.recv (message_block_p,                      // buffer
+                              bytes_to_read,                        // buffer size
+                              0,                                    // flags
+                              ACE_PROTOCOL_FAMILY_NETLINK,          // protocol family
+                              NULL,                                 // ACT
+                              0,                                    // priority
+                              COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Read_Stream::recv(%u): \"%m\", aborting\n"),
-                message_p->size ()));
+                message_block_p->size ()));
 
     // clean up
-    message_p->release ();
-    handle_close (inherited2::handle (),
-                  ACE_Event_Handler::ALL_EVENTS_MASK);
+    message_block_p->release ();
+
+    goto close;
   } // end IF
+
+  return;
+
+close:
+  result = handle_close (inherited2::handle (),
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (!result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchNetlinkSocketHandler::handle_close(), continuing\n")));
 }
-
-//void
-//Net_AsynchNetlinkSocketHandler::abort ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkSocketHandler::abort"));
-
-//  handle_close (inherited::handle (),
-//                ACE_Event_Handler::ALL_EVENTS_MASK);
-//}

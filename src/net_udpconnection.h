@@ -29,6 +29,7 @@
 
 #include "stream_common.h"
 
+#include "net_configuration.h"
 #include "net_connection_manager_common.h"
 #include "net_socketconnection_base.h"
 #include "net_stream_common.h"
@@ -36,10 +37,11 @@
 
 template <typename UserDataType,
           typename SessionDataType,
-          typename HandlerType>
+          typename SocketHandlerType>
 class Net_UDPConnection_T
- : public Net_SocketConnectionBase_T<HandlerType,
-                                     Net_IInetTransportLayer_t,
+ : public Net_SocketConnectionBase_T<ACE_INET_Addr,
+                                     Net_SocketConfiguration_t,
+                                     SocketHandlerType,
                                      Net_Configuration_t,
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
@@ -49,32 +51,36 @@ class Net_UDPConnection_T
 {
   friend class ACE_Connector<Net_UDPConnection_T<UserDataType,
                                                  SessionDataType,
-                                                 HandlerType>,
+                                                 SocketHandlerType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
-  typedef Net_IConnectionManager_T<Net_Configuration_t,
+  typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                   Net_SocketConfiguration_t,
+                                   Net_Configuration_t,
                                    UserDataType,
-                                   Stream_Statistic_t,
-                                   Net_IInetTransportLayer_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
   Net_UDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
                        unsigned int = 0);      // statistics collecting interval (second(s))
                                                // 0 --> DON'T collect statistics
   virtual ~Net_UDPConnection_T ();
 
-  // override some task-based members
-  virtual int open (void* = NULL); // args
-  virtual int close (u_long = 0); // args
-
   // override / implement (part of) Net_IInetTransportLayer
-  virtual bool initialize (Net_ClientServerRole_t,            // role
-                           const Net_SocketConfiguration_t&); // configuration
-  virtual void finalize ();
+  //using Net_SocketConnectionBase_T::inherited::Net_ConnectionBase_T::initialize;
+  //using Net_SocketConnectionBase_T::inherited::Net_ConnectionBase_T::finalize;
+  using Net_SocketConnectionBase_T::info;
+  //virtual void info (ACE_HANDLE&,           // return value: handle
+  //                   ACE_INET_Addr&,        // return value: local SAP
+  //                   ACE_INET_Addr&) const; // return value: remote SAP
+
+  // override / implement (part of) Net_IConnection_T
+  virtual void close ();
 
  private:
-  typedef Net_SocketConnectionBase_T<HandlerType,
-                                     Net_IInetTransportLayer_t,
+  typedef Net_SocketConnectionBase_T<ACE_INET_Addr,
+                                     Net_SocketConfiguration_t,
+                                     SocketHandlerType,
                                      Net_Configuration_t,
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
@@ -91,10 +97,11 @@ class Net_UDPConnection_T
 
 template <typename UserDataType,
           typename SessionDataType,
-          typename HandlerType>
+          typename SocketHandlerType>
 class Net_AsynchUDPConnection_T
- : public Net_AsynchSocketConnectionBase_T<HandlerType,
-                                           Net_IInetTransportLayer_t,
+ : public Net_AsynchSocketConnectionBase_T<ACE_INET_Addr,
+                                           Net_SocketConfiguration_t,
+                                           SocketHandlerType,
                                            Net_Configuration_t,
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,
@@ -104,13 +111,14 @@ class Net_AsynchUDPConnection_T
 {
   friend class ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
                                                               SessionDataType,
-                                                              HandlerType> >;
+                                                              SocketHandlerType> >;
 
  public:
-  typedef Net_IConnectionManager_T<Net_Configuration_t,
+  typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                   Net_SocketConfiguration_t,
+                                   Net_Configuration_t,
                                    UserDataType,
-                                   Stream_Statistic_t,
-                                   Net_IInetTransportLayer_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
 
   Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
@@ -118,23 +126,17 @@ class Net_AsynchUDPConnection_T
   virtual ~Net_AsynchUDPConnection_T ();
 
   // override / implement (part of) Net_IInetTransportLayer
-  virtual bool initialize (Net_ClientServerRole_t,            // role
-                           const Net_SocketConfiguration_t&); // configuration
-  virtual void finalize ();
-
-  // override some ACE_Service_Handler members
-  virtual void open (ACE_HANDLE,          // handle
-                     ACE_Message_Block&); // (initial) data (if any)
-//  // *NOTE*: enqueue any received data onto our stream for further processing
-//   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
-  // *NOTE*: this is called when:
-  // - handle_xxx() returns -1
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+  //using Net_AsynchSocketConnectionBase_T::inherited::Net_ConnectionBase_T::initialize;
+  //using Net_AsynchSocketConnectionBase_T::inherited::Net_ConnectionBase_T::finalize;
+  using Net_AsynchSocketConnectionBase_T::info;
+  //virtual void info (ACE_HANDLE&,           // return value: handle
+  //                   ACE_INET_Addr&,        // return value: local SAP
+  //                   ACE_INET_Addr&) const; // return value: remote SAP
 
  private:
-  typedef Net_AsynchSocketConnectionBase_T<HandlerType,
-                                           Net_IInetTransportLayer_t,
+  typedef Net_AsynchSocketConnectionBase_T<ACE_INET_Addr,
+                                           Net_SocketConfiguration_t,
+                                           SocketHandlerType,
                                            Net_Configuration_t,
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,
