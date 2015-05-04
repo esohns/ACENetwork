@@ -94,17 +94,17 @@ class Net_Module_SocketHandler_T
   bool putStatisticsMessage (const Stream_Statistic_t&, // statistics info
                              const ACE_Time_Value&) const;  // statistics generation time
 
-  // protocol stuff
-  unsigned int                      currentMessageLength_;
-  ProtocolMessageType*              currentMessage_;
+  // protocol
   ProtocolMessageType*              currentBuffer_;
+  ProtocolMessageType*              currentMessage_;
+  unsigned int                      currentMessageLength_;
 
   bool                              isInitialized_;
 
-  // timer stuff
-  unsigned int                      statCollectionInterval_; // seconds
-  Stream_StatisticHandler_Reactor_t statCollectHandler_;
-  long                              statCollectHandlerID_;
+  // timer
+  Stream_StatisticHandler_Reactor_t statisticCollectionHandler_;
+  unsigned int                      statisticCollectionInterval_; // seconds
+  long                              timerID_;
 };
 
 /////////////////////////////////////////
@@ -170,10 +170,10 @@ class Net_Module_UDPSocketHandler_T
 
   bool                              isInitialized_;
 
-  // timer stuff
-  unsigned int                      statCollectionInterval_; // seconds
-  Stream_StatisticHandler_Reactor_t statCollectHandler_;
-  long                              statCollectHandlerID_;
+  // timer
+  Stream_StatisticHandler_Reactor_t statisticCollectionHandler_;
+  long                              timerID_;
+  unsigned int                      statisticCollectionInterval_; // seconds
 };
 
 // include template implementation

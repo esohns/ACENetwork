@@ -40,15 +40,15 @@ Net_Module_SocketHandler_T<StreamStateType,
                            ProtocolHeaderType>::Net_Module_SocketHandler_T ()
  : inherited (false, // inactive by default
               false) // DON'T auto-start !
- , currentMessageLength_ (0)
- , currentMessage_ (NULL)
  , currentBuffer_ (NULL)
+ , currentMessage_ (NULL)
+ , currentMessageLength_ (0)
  , isInitialized_ (false)
- , statCollectionInterval_ (0)
- , statCollectHandler_ (ACTION_COLLECT,
-                        this,
-                        false)
- , statCollectHandlerID_ (-1)
+ , statisticCollectionInterval_ (0)
+ , statisticCollectionHandler_ (ACTION_COLLECT,
+                                this,
+                                false)
+ , timerID_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::Net_Module_SocketHandler_T"));
 
@@ -69,22 +69,23 @@ Net_Module_SocketHandler_T<StreamStateType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::~Net_Module_SocketHandler_T"));
 
-  // clean up timer if necessary
-  if (statCollectHandlerID_ != -1)
+  int result = -1;
+
+  if (timerID_ != -1)
   {
-    const void* act = NULL;
-    if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statCollectHandlerID_,
-                                                            &act) == -1)
+    const void* act_p = NULL;
+    result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_,
+                                                                 &act_p);
+    if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                  statCollectHandlerID_));
+                  timerID_));
     else
       ACE_DEBUG ((LM_WARNING, // this should happen in END_SESSION
                   ACE_TEXT ("cancelled timer (ID: %d)\n"),
-                  statCollectHandlerID_));
+                  timerID_));
   } // end IF
 
-  // clean up any unprocessed (chained) buffer(s)
   if (currentMessage_)
     currentMessage_->release ();
 }
@@ -104,9 +105,11 @@ Net_Module_SocketHandler_T<StreamStateType,
                            ProtocolHeaderType>::initialize (StreamStateType* state_in,
                                                             Stream_IAllocator* allocator_in,
                                                             bool isActive_in,
-                                                            unsigned int statisticsCollectionInterval_in)
+                                                            unsigned int statisticCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::initialize"));
+
+  int result = -1;
 
   if (isInitialized_)
   {
@@ -114,16 +117,17 @@ Net_Module_SocketHandler_T<StreamStateType,
                 ACE_TEXT ("re-initializing...\n")));
 
     // clean up
-    if (statCollectHandlerID_ != -1)
+    if (timerID_ != -1)
     {
-      const void* act = NULL;
-      if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statCollectHandlerID_,
-                                                              &act) == -1)
+      const void* act_p = NULL;
+      result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_,
+                                                                   &act_p);
+      if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                    statCollectHandlerID_));
+                    timerID_));
     } // end IF
-    statCollectHandlerID_ = -1;
+    timerID_ = -1;
     currentMessageLength_ = 0;
     if (currentMessage_)
       currentMessage_->release ();
@@ -132,7 +136,7 @@ Net_Module_SocketHandler_T<StreamStateType,
     isInitialized_ = false;
   } // end IF
 
-  statCollectionInterval_ = statisticsCollectionInterval_in;
+  statisticCollectionInterval_ = statisticCollectionInterval_in;
 
   inherited::allocator_ = allocator_in;
   inherited::isActive_ = isActive_in;
@@ -143,19 +147,6 @@ Net_Module_SocketHandler_T<StreamStateType,
 
   return isInitialized_;
 }
-
-//template <typename StreamStateType,
-//          typename SessionDataType,          // session data
-//          typename SessionDataContainerType, // (reference counted)
-//          typename SessionMessageType,
-//          typename ProtocolMessageType>
-//unsigned int
-//Net_Module_SocketHandler_T::getSessionID () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::getSessionID"));
-
-//  return inherited::sessionID_;
-//}
 
 template <typename StreamStateType,
           typename SessionDataType,          // session data
@@ -174,8 +165,9 @@ Net_Module_SocketHandler_T<StreamStateType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::handleDataMessage"));
 
-  // init return value(s), default behavior is to pass all messages along...
-  // --> we don't want that !
+  int result = -1;
+
+  // initialize return value(s), default behavior is to pass all messages along
   passMessageDownstream_out = false;
 
   // sanity check(s)
@@ -197,7 +189,8 @@ Net_Module_SocketHandler_T<StreamStateType,
     if (message_p)
     {
       // --> push it downstream...
-      if (inherited::put_next (message_p, NULL) == -1)
+      result = inherited::put_next (message_p, NULL);
+      if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Task::put_next(): \"%m\", continuing\n")));
@@ -205,8 +198,6 @@ Net_Module_SocketHandler_T<StreamStateType,
         // clean up
         message_p->release ();
       } // end IF
-
-      // reset state
       message_p = NULL;
     } // end IF
   } // end WHILE
@@ -229,7 +220,9 @@ Net_Module_SocketHandler_T<StreamStateType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::handleSessionMessage"));
 
-  // don't care (implies yes per default, if we're part of a stream)
+  int result = -1;
+
+  // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
@@ -240,28 +233,27 @@ Net_Module_SocketHandler_T<StreamStateType,
   {
     case SESSION_BEGIN:
     {
-      if (statCollectionInterval_)
+      if (statisticCollectionInterval_)
       {
         // schedule regular statistics collection...
-        ACE_Time_Value interval (statCollectionInterval_, 0);
-        ACE_ASSERT (statCollectHandlerID_ == -1);
-        ACE_Event_Handler* eh = &statCollectHandler_;
-        statCollectHandlerID_ =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
-                                                                  NULL,                             // argument
-                                                                  COMMON_TIME_NOW + interval, // first wakeup time
-                                                                  interval);                        // interval
-        if (statCollectHandlerID_ == -1)
+        ACE_Time_Value interval (statisticCollectionInterval_, 0);
+        ACE_ASSERT (timerID_ == -1);
+        ACE_Event_Handler* handler_p = &statisticCollectionHandler_;
+        timerID_ =
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                   // event handler
+                                                                 NULL,                       // argument
+                                                                 COMMON_TIME_NOW + interval, // first wakeup time
+                                                                 interval);                  // interval
+        if (timerID_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to Common_Timer_Manager::schedule(), aborting\n")));
-
           return;
         } // end IF
-//        ACE_DEBUG ((LM_DEBUG,
-//                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
-//                    statCollectHandlerID_,
-//                    statCollectionInterval_));
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
+                    timerID_,
+                    statisticCollectionInterval_));
       } // end IF
 
 //      // start profile timer...
@@ -271,16 +263,17 @@ Net_Module_SocketHandler_T<StreamStateType,
     }
     case SESSION_END:
     {
-      if (statCollectHandlerID_ != -1)
+      if (timerID_ != -1)
       {
-        int result = -1;
+        const void* act_p = NULL;
         result =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statCollectHandlerID_);
+            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_,
+                                                                &act_p);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                      statCollectHandlerID_));
-        statCollectHandlerID_ = -1;
+                      timerID_));
+        timerID_ = -1;
       } // end IF
 
       break;
@@ -321,7 +314,6 @@ Net_Module_SocketHandler_T<StreamStateType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to putSessionMessage(SESSION_STATISTICS), aborting\n")));
-
     return false;
   } // end IF
 
@@ -368,7 +360,7 @@ Net_Module_SocketHandler_T<StreamStateType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::bisectMessages"));
 
-  // init result
+  // initialize result
   message_out = NULL;
 
   if (currentMessageLength_ == 0)
@@ -399,19 +391,11 @@ Net_Module_SocketHandler_T<StreamStateType,
 
     // OK, start interpreting this message...
 
-    // ensure enough CONTIGUOUS data is available
-    if (!currentMessage_->crunchForHeader (sizeof (ProtocolHeaderType)))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ProtocolMessageType::crunchForHeader(%u), aborting\n")));
-      return false;
-    } // end IF
-
-    ProtocolHeaderType* message_header_p =
-        reinterpret_cast<ProtocolHeaderType*> (currentMessage_->rd_ptr ());
+    ProtocolHeaderType message_header = currentMessage_->getHeader ();
     // *PORTABILITY*: handle endianness && type issues !
+    // see also net_remote_comm.h
     currentMessageLength_ =
-        message_header_p->messageLength + sizeof (unsigned int);
+        message_header.messageLength + sizeof (unsigned int);
   } // end IF
 
 //   ACE_DEBUG ((LM_DEBUG,
@@ -430,70 +414,63 @@ Net_Module_SocketHandler_T<StreamStateType,
     return false;
   } // end IF
 
-  // OK, message header complete !
+  // OK, message complete !
   message_out = currentMessage_;
 
   // check if (part of) the next message has arrived
   if (currentMessage_->total_length () > currentMessageLength_)
   {
-    // remember overlapping bytes
-//     size_t overlap = currentMessage_->total_length () - currentMessageLength_;
-
-    // adjust write pointer of current buffer so (total_-)length() reflects the
-    // proper size...
+    // adjust write pointer of (current) buffer so (total_-)length() returns
+    // the proper size...
     unsigned int offset = currentMessageLength_;
-    // in order to find the correct offset in currentBuffer_, the total size of
-    // the preceding continuation MAY need to be retrieved... :-(
-    ACE_Message_Block* current = currentMessage_;
-    while (current != currentBuffer_)
+    // in order to find the correct offset in the tail buffer, the total size
+    // of the preceding continuation(s) may need to be retrieved...
+    ACE_Message_Block* tail_p = currentMessage_;
+    do
     {
-      offset -= current->length ();
-      current = current->cont ();
-    } // end WHILE
+      if (offset < tail_p->length ())
+        break;
 
-//     currentBuffer_->wr_ptr (currentBuffer_->rd_ptrc() + offset);
-//     // --> create a new message head...
-//     Net_Message* new_head = allocateMessage (NET_DEF_NETWORK_BUFFER_SIZE);
-//     if (new_head == NULL)
-//     {
-//       ACE_DEBUG ((LM_CRITICAL,
-//                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-//                   NET_DEF_NETWORK_BUFFER_SIZE));
-//
-//       return true;
-//     } // end IF
-//     // ...and copy the overlapping data
-//     if (new_head->copy (currentBuffer_->wr_ptr (),
-//                        overlap))
-//     {
-//       ACE_DEBUG ((LM_ERROR,
-//                   ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
-//
-//       // clean up
-//       new_head->release ();
-//
-//       return true;
-//     } // end IF
+      offset -= tail_p->length ();
+      if (offset == 0) // <-- no overlap
+      {
+        // set new message head
+        currentMessage_ =
+          dynamic_cast<ProtocolMessageType*> (tail_p->cont ());
+        ACE_ASSERT (currentMessage_);
 
-    // [instead], use copy ctor and just reference the same data block...
-    ProtocolMessageType* new_head =
-        dynamic_cast<ProtocolMessageType*> (currentBuffer_->duplicate ());
+        // unchain the rest of the buffer
+        tail_p->cont (NULL);
 
-    // adjust wr_ptr to make length() work...
-    currentBuffer_->wr_ptr (currentBuffer_->rd_ptr () + offset);
-    // sanity check
-    ACE_ASSERT (currentMessage_->total_length () == currentMessageLength_);
+        // don't know anything about the next message...
+        currentMessageLength_ = 0;
 
-    // adjust rd_ptr to point to the beginning of the next message
-    new_head->rd_ptr (offset);
+        return true;
+      } // end IF
 
+      tail_p = tail_p->cont ();
+    } while (tail_p != currentBuffer_);
+
+    // create a shallow copy...
+    ProtocolMessageType* new_head_p =
+        dynamic_cast<ProtocolMessageType*> (tail_p->duplicate ());
+    if (!new_head_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ProtocolMessageType::duplicate(): \"%m\", aborting\n")));
+      return false;
+    } // end IF
+    // ...and adjust rd_ptr to point to the beginning of the next message
+    new_head_p->rd_ptr (offset);
+
+    // adjust wr_ptr to make total_length() work...
+    tail_p->wr_ptr (tail_p->rd_ptr () + offset);
+      
     // set new message head/current buffer
-    currentMessage_ = new_head;
-    currentBuffer_ = currentMessage_;
+    currentBuffer_ = currentMessage_ = new_head_p;
   } // end IF
   else
   {
-    // bye bye...
     currentMessage_ = NULL;
     currentBuffer_ = NULL;
   } // end ELSE
@@ -598,7 +575,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
  , statCollectHandler_ (ACTION_COLLECT,
                         this,
                         false)
- , statCollectHandlerID_ (-1)
+ , timerID_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::Net_Module_UDPSocketHandler_T"));
 
@@ -618,21 +595,21 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::~Net_Module_UDPSocketHandler_T"));
 
   // clean up timer if necessary
-  if (statCollectHandlerID_ != -1)
+  if (timerID_ != -1)
   {
     const void* act = NULL;
     int result = -1;
     result =
-        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statCollectHandlerID_,
+        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_,
                                                             &act);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                  statCollectHandlerID_));
+                  timerID_));
     else
       ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("cancelled timer (ID: %d)\n"),
-                  statCollectHandlerID_));
+                  timerID_));
   } // end IF
 }
 
@@ -659,19 +636,19 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
                 ACE_TEXT ("re-initializing...\n")));
 
     // clean up
-    if (statCollectHandlerID_ != -1)
+    if (timerID_ != -1)
     {
       const void* act = NULL;
       int result = -1;
       result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statCollectHandlerID_,
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_,
                                                               &act);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                    statCollectHandlerID_));
+                    timerID_));
     } // end IF
-    statCollectHandlerID_ = -1;
+    timerID_ = -1;
     isInitialized_ = false;
   } // end IF
 
@@ -764,14 +741,14 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
       {
         // schedule regular statistics collection...
         ACE_Time_Value interval (statCollectionInterval_, 0);
-        ACE_ASSERT (statCollectHandlerID_ == -1);
+        ACE_ASSERT (timerID_ == -1);
         ACE_Event_Handler* eh = &statCollectHandler_;
-        statCollectHandlerID_ =
+        timerID_ =
             COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
                                                                   NULL,                             // argument
                                                                   COMMON_TIME_NOW + interval, // first wakeup time
                                                                   interval);                        // interval
-        if (statCollectHandlerID_ == -1)
+        if (timerID_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to Common_Timer_Manager::schedule(), aborting\n")));
@@ -780,7 +757,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
         } // end IF
 //        ACE_DEBUG ((LM_DEBUG,
 //                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
-//                    statCollectHandlerID_,
+//                    timerID_,
 //                    statCollectionInterval_));
       } // end IF
 
@@ -791,16 +768,16 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
     }
     case SESSION_END:
     {
-      if (statCollectHandlerID_ != -1)
+      if (timerID_ != -1)
       {
         int result = -1;
         result =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statCollectHandlerID_);
+            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                      statCollectHandlerID_));
-        statCollectHandlerID_ = -1;
+                      timerID_));
+        timerID_ = -1;
       } // end IF
 
       break;

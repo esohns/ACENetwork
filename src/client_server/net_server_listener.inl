@@ -30,11 +30,11 @@
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ConnectionType>
+          typename HandlerType>
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ConnectionType>::Net_Server_Listener_T ()
+                      HandlerType>::Net_Server_Listener_T ()
  : inherited (NULL, // use global (default) reactor
               1)    // always accept ALL pending connections
  , configuration_ (NULL)
@@ -52,11 +52,11 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ConnectionType>
+          typename HandlerType>
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ConnectionType>::~Net_Server_Listener_T ()
+                      HandlerType>::~Net_Server_Listener_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::~Net_Server_Listener_T"));
 
@@ -67,12 +67,12 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ConnectionType>
+          typename HandlerType>
 bool
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ConnectionType>::initialize (const Net_ListenerConfiguration_t& configuration_in)
+                      HandlerType>::initialize (const Net_ListenerConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::initialize"));
 
@@ -89,12 +89,12 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ConnectionType>
+          typename HandlerType>
 bool
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ConnectionType>::isInitialized () const
+                      HandlerType>::isInitialized () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::isInitialized"));
 
@@ -104,12 +104,12 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ConnectionType>
+          typename HandlerType>
 int
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ConnectionType>::handle_accept_error (void)
+                      HandlerType>::handle_accept_error (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::handle_accept_error"));
 
@@ -125,12 +125,12 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ConnectionType>
+          typename HandlerType>
 void
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ConnectionType>::start ()
+                      HandlerType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::start"));
 
@@ -205,12 +205,12 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ConnectionType>
+          typename HandlerType>
 void
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ConnectionType>::stop (bool lockedAccess_in)
+                      HandlerType>::stop (bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::stop"));
 
@@ -253,12 +253,12 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ConnectionType>
+          typename HandlerType>
 bool
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ConnectionType>::isRunning () const
+                      HandlerType>::isRunning () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::isRunning"));
 
@@ -268,12 +268,12 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ConnectionType>
+          typename HandlerType>
 void
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ConnectionType>::dump_state () const
+                      HandlerType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::dump_state"));
 
@@ -300,25 +300,25 @@ Net_Server_Listener_T<ConfigurationType,
 template <typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename ConnectionType>
+          typename HandlerType>
 int
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      ConnectionType>::make_svc_handler (ConnectionType*& handler_inout)
+                      HandlerType>::make_svc_handler (HandlerType*& handler_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::make_svc_handler"));
 
-  // init return value(s)
-  handler_inout = NULL;
+  // initialize return value(s)
+  handler_out = NULL;
 
   // default behavior
-  ACE_NEW_NORETURN (handler_inout,
-                    ConnectionType (NET_CONNECTIONMANAGER_SINGLETON::instance (),
-                                    statisticCollectionInterval_));
-  if (!handler_inout)
+  ACE_NEW_NORETURN (handler_out,
+                    HandlerType (NET_CONNECTIONMANAGER_SINGLETON::instance (),
+                                 statisticCollectionInterval_));
+  if (!handler_out)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
-  return (handler_inout ? -1 : 0);
+  return (handler_out ? 0 : -1);
 }

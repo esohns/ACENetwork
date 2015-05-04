@@ -79,7 +79,7 @@ Net_Message::CommandType2String (Net_MessageType_t messageType_in)
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid message type (was %d), aborting\n"),
+                  ACE_TEXT ("invalid message type (was: %d), aborting\n"),
                   messageType_in));
 
       break;

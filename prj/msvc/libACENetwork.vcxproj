@@ -65,6 +65,7 @@
       <BrowseInformation>false</BrowseInformation>
       <MinimalRebuild>false</MinimalRebuild>
       <EnablePREfast>false</EnablePREfast>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -309,7 +310,6 @@
     <None Include="..\..\src\net_tcpconnection_base.inl" />
     <None Include="..\..\src\net_udpconnection.inl" />
     <None Include="..\..\src\net_udpsockethandler.inl" />
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\libACEStream\prj\msvc\libACEStream.vcxproj">

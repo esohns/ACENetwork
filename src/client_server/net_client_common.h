@@ -24,7 +24,6 @@
 #include "ace/INET_Addr.h"
 
 #include "net_configuration.h"
-#include "net_itransportlayer.h"
 #include "net_stream_common.h"
 #include "net_tcpconnection.h"
 

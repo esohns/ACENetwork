@@ -92,8 +92,8 @@ Net_Server_AsynchListener_T<ConfigurationType,
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset(buffer, 0, sizeof (buffer));
-    result = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
-    if (result == -1)
+    int result_2 = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
+    if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
@@ -102,7 +102,7 @@ Net_Server_AsynchListener_T<ConfigurationType,
                 ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
   } // end IF
 
-  return ((result_in.success () == 1) ? 0 : -1);
+  return ((result == 1) ? 0 : -1);
 }
 
 template <typename ConfigurationType,

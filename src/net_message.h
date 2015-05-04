@@ -37,7 +37,8 @@ template <typename MessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Net_Export Net_Message
- : public Net_MessageBase_T<Net_MessageType_t>
+ : public Net_MessageBase_T<Net_Remote_Comm::MessageHeader,
+                            Net_MessageType_t>
 {
   // enable access to specific private ctors...
   //   friend class RPG_Net_StreamMessageAllocator;
@@ -64,7 +65,8 @@ class Net_Export Net_Message
   Net_Message (const Net_Message&);
 
  private:
-  typedef Net_MessageBase_T<Net_MessageType_t> inherited;
+  typedef Net_MessageBase_T<Net_Remote_Comm::MessageHeader,
+                            Net_MessageType_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Message ());
   // *NOTE*: to be used by allocators...

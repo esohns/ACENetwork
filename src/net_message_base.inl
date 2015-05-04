@@ -26,8 +26,10 @@
 #include "net_macros.h"
 
 // *NOTE*: this is implicitly invoked by duplicate() as well...
-template <typename ProtocolCommandType>
-Net_MessageBase_T<ProtocolCommandType>::Net_MessageBase_T (const Net_MessageBase_T& message_in)
+template <typename HeaderType,
+          typename ProtocolCommandType>
+Net_MessageBase_T<HeaderType,
+                  ProtocolCommandType>::Net_MessageBase_T (const Net_MessageBase_T& message_in)
  : inherited (message_in)
  , isInitialized_ (message_in.isInitialized_)
 {
@@ -35,8 +37,10 @@ Net_MessageBase_T<ProtocolCommandType>::Net_MessageBase_T (const Net_MessageBase
 
 }
 
-template <typename ProtocolCommandType>
-Net_MessageBase_T<ProtocolCommandType>::Net_MessageBase_T (ACE_Data_Block* dataBlock_in,
+template <typename HeaderType,
+          typename ProtocolCommandType>
+Net_MessageBase_T<HeaderType,
+                  ProtocolCommandType>::Net_MessageBase_T (ACE_Data_Block* dataBlock_in,
                                                            ACE_Allocator* messageAllocator_in)
  : inherited (dataBlock_in,        // use (don't own !) this data block
               messageAllocator_in, // use this when destruction is imminent...
@@ -47,8 +51,10 @@ Net_MessageBase_T<ProtocolCommandType>::Net_MessageBase_T (ACE_Data_Block* dataB
 
 }
 
-template <typename ProtocolCommandType>
-Net_MessageBase_T<ProtocolCommandType>::~Net_MessageBase_T ()
+template <typename HeaderType,
+          typename ProtocolCommandType>
+Net_MessageBase_T<HeaderType,
+                  ProtocolCommandType>::~Net_MessageBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_MessageBase_T::~Net_MessageBase_T"));
 
@@ -58,9 +64,11 @@ Net_MessageBase_T<ProtocolCommandType>::~Net_MessageBase_T ()
   isInitialized_ = false;
 }
 
-template <typename ProtocolCommandType>
+template <typename HeaderType,
+          typename ProtocolCommandType>
 void
-Net_MessageBase_T<ProtocolCommandType>::initialize (ACE_Data_Block* dataBlock_in)
+Net_MessageBase_T<HeaderType,
+                  ProtocolCommandType>::initialize (ACE_Data_Block* dataBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_MessageBase_T::initialize"));
 
@@ -73,9 +81,11 @@ Net_MessageBase_T<ProtocolCommandType>::initialize (ACE_Data_Block* dataBlock_in
   isInitialized_ = true;
 }
 
-template <typename ProtocolCommandType>
+template <typename HeaderType,
+          typename ProtocolCommandType>
 void
-Net_MessageBase_T<ProtocolCommandType>::dump_state () const
+Net_MessageBase_T<HeaderType,
+                  ProtocolCommandType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_MessageBase_T::dump_state"));
 
@@ -84,59 +94,74 @@ Net_MessageBase_T<ProtocolCommandType>::dump_state () const
               getID ()));
 }
 
-template <typename ProtocolCommandType>
-bool
-Net_MessageBase_T<ProtocolCommandType>::crunchForHeader (unsigned int headerSize_in)
+template <typename HeaderType,
+          typename ProtocolCommandType>
+HeaderType
+Net_MessageBase_T<HeaderType,
+                  ProtocolCommandType>::getHeader () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_MessageBase_T::crunchForHeader"));
+  NETWORK_TRACE (ACE_TEXT ("Net_MessageBase_T::getHeader"));
+
+  int result = -1;
+
+  // initialize return value(s)
+  HeaderType message_header;
+  ACE_OS::memset (&message_header, 0, sizeof (HeaderType));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::size () >= headerSize_in); // enough space ?
-  if (inherited::total_length () < headerSize_in)
+  ACE_ASSERT (inherited::size () >= sizeof (HeaderType)); // enough space ?
+  if (inherited::total_length () < sizeof (HeaderType))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("not enough data (needed: %u, had: %u), aborting\n"),
-                headerSize_in,
+                sizeof (HeaderType),
                 inherited::total_length ()));
-
-    return false;
+    return message_header;
   } // end IF
-  if (inherited::length () >= headerSize_in)
-    return true; // nothing to do...
+  
+  if (inherited::length () >= sizeof (HeaderType))
+  {
+    ACE_OS::memcpy (&message_header,
+                    inherited::rd_ptr (),
+                    sizeof (HeaderType));
+    return message_header;
+  } // end IF
 
-  ACE_Message_Block* source_block = this;
-  size_t missing_data = headerSize_in - inherited::length ();
+  // --> part of the header data lies in the continuation
+
+  const ACE_Message_Block* source_message_block_p = this;
+  size_t missing_data = sizeof (HeaderType) - inherited::length ();
+
+  // copy first bit
+  ACE_OS::memcpy (&message_header,
+                  inherited::rd_ptr (),
+                  inherited::length ());
+
   size_t amount = 0;
+  unsigned char* destination_p =
+    reinterpret_cast<unsigned char*> (&message_header) + inherited::length ();
   while (missing_data)
   {
-    // *sigh*: copy some data from the chain...
-    source_block = inherited::cont ();
+    source_message_block_p = inherited::cont ();
+    ACE_ASSERT (source_message_block_p);
 
     // skip over any "empty" continuations...
-    while (source_block->length () == 0)
-      source_block = source_block->cont ();
+    while (source_message_block_p->length () == 0)
+      source_message_block_p = source_message_block_p->cont ();
 
-    // copy some data... this adjusts our write pointer
-    amount = (source_block->length () < missing_data ? source_block->length ()
-                                                     : missing_data);
-    if (inherited::copy (source_block->rd_ptr (), amount))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+    // copy some data over...
+    amount =
+      ((source_message_block_p->length () < missing_data) ? source_message_block_p->length ()
+                                                          : missing_data);
+    ACE_OS::memcpy (destination_p,
+                    source_message_block_p->rd_ptr (),
+                    amount);
 
-      return false;
-    } // end IF
-
+    destination_p += amount;
     missing_data -= amount;
-
-    // adjust the continuation accordingly...
-    source_block->rd_ptr (amount);
   } // end WHILE
 
-  // sanity check
-  ACE_ASSERT (inherited::length () == headerSize_in);
-
-  return true;
+  return message_header;
 }
 
 // void

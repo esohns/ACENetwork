@@ -21,8 +21,6 @@
 #ifndef NET_MESSAGE_BASE_H
 #define NET_MESSAGE_BASE_H
 
-//#include <string>
-
 #include "ace/Global_Macros.h"
 
 #include "stream_message_base.h"
@@ -31,7 +29,8 @@
 class ACE_Data_Block;
 class ACE_Allocator;
 
-template <typename ProtocolCommandType>
+template <typename HeaderType,
+          typename ProtocolCommandType>
 class Net_MessageBase_T
  : public Stream_MessageBase
 {
@@ -48,13 +47,7 @@ class Net_MessageBase_T
   // implement Common_IDumpState
   virtual void dump_state () const;
 
-  // *NOTE*: this "normalizes" data in this message (fragment) in the sense that
-  // enough contiguous data is available to "comfortably" interpret a message
-  // header of given size by simply using its struct declaration. To do this,
-  // some data may need to be COPIED.
-  // --> if necessary, the missing data is taken from the continuation(s),
-  // adjusting read/write pointers as necessary
-  bool crunchForHeader (unsigned int); // header size
+  HeaderType getHeader () const;
 
  protected:
   // copy ctor to be used by duplicate() and child classes

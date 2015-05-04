@@ -70,32 +70,13 @@ Net_Module_HeaderParser::handleDataMessage (Net_Message*& message_inout,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // interpret the message header...
+  Net_Remote_Comm::MessageHeader message_header = message_inout->getHeader ();
 
-  if (message_inout->length () < sizeof (Net_MessageHeader_t))
-  {
-    if (!message_inout->crunchForHeader (sizeof (Net_MessageHeader_t)))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("[%u]: failed to Net_Message::crunchForHeader(%u), aborting\n"),
-                  message_inout->getID (),
-                  sizeof (Net_MessageHeader_t)));
-
-      // clean up
-      message_inout->release ();
-      passMessageDownstream_out = false;
-
-      return;
-    } // end IF
-  } // end IF
-
-//   // OK: retrieve type of message and other details...
-//   Net_MessageHeader* message_header = reinterpret_cast<Net_MessageHeader*> (//                                                                message_inout->rd_ptr());
-
-//   ACE_DEBUG ((LM_DEBUG,
-//               ACE_TEXT ("received protocol message (ID: %u): [length: %u; type: \"%s\"]...\n"),
-//               message_inout->getID (),
-//               message_header->messageLength,
-//               ACE_TEXT (Net_Common_Tools::messageType2String (message_header->messageType).c_str ())));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("received protocol message (ID: %u): [length: %u; type: \"%s\"]...\n"),
+  //            message_inout->getID (),
+  //            message_header.messageLength,
+  //            ACE_TEXT (Net_Message::CommandType2String (message_header.messageType).c_str ())));
 }
 
 void

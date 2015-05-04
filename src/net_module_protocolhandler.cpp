@@ -97,13 +97,11 @@ Net_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
                                                                    &act_p);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("session %u: failed to cancel \"ping\" timer (ID: %d): \"%m\", continuing\n"),
-                    sessionID_,
+                    ACE_TEXT ("failed to cancel \"ping\" timer (ID: %d): \"%m\", continuing\n"),
                     pingTimerID_));
       else
         ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("session %u: cancelled \"ping\" timer (ID: %d)\n"),
-                    sessionID_,
+                    ACE_TEXT ("cancelled \"ping\" timer (ID: %d)\n"),
                     pingTimerID_));
       pingTimerID_ = -1;
     } // end IF
@@ -229,6 +227,10 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
   {
     case SESSION_BEGIN:
     {
+      const Stream_State_t* state_p = message_inout->getState ();
+      ACE_ASSERT (state_p);
+      sessionID_ = state_p->sessionID;
+
       if (pingInterval_)
       {
         // schedule ourselves...
@@ -244,18 +246,16 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
         if (pingTimerID_ == -1)
         {
            ACE_DEBUG ((LM_ERROR,
-                       ACE_TEXT ("failed to RPG_Common_Timer_Manager::schedule(), aborting\n")));
+                       ACE_TEXT ("failed to Common_Timer_Manager::schedule(), aborting\n")));
            return;
         } // end IF
         ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("scheduled \"ping\" timer (id: %d), interval: %u second(s)...\n"),
+                    ACE_TEXT ("session %u: scheduled \"ping\" timer (id: %d), interval: %u second(s)...\n"),
+                    sessionID_,
                     pingTimerID_,
                     pingInterval_));
       } // end IF
 
-      const Stream_State_t* state_p = message_inout->getState ();
-      ACE_ASSERT (state_p);
-      sessionID_ = state_p->sessionID;
       break;
     }
     case SESSION_END:

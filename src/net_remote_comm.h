@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_REMOTE_COMM_H
-#define Net_REMOTE_COMM_H
+#ifndef NET_REMOTE_COMM_H
+#define NET_REMOTE_COMM_H
 
 #include "ace/Global_Macros.h"
 
