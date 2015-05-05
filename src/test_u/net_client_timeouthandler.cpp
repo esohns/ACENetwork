@@ -21,13 +21,14 @@
 
 #include "net_client_timeouthandler.h"
 
+#include <random>
+
 #include "ace/Log_Msg.h"
 
 #include "net_defines.h"
 #include "net_common.h"
 #include "net_connection_manager_common.h"
-
-#include "rpg_dice.h"
+#include "net_macros.h"
 
 Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
                                                       unsigned int maxNumConnections_in,
@@ -41,13 +42,13 @@ Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
  , mode_ (mode_in)
  , peerAddress_ (remoteSAP_in)
 {
-  RPG_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::Net_Client_TimeoutHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::Net_Client_TimeoutHandler"));
 
 }
 
 Net_Client_TimeoutHandler::~Net_Client_TimeoutHandler ()
 {
-  RPG_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::~Net_Client_TimeoutHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::~Net_Client_TimeoutHandler"));
 
 }
 
@@ -55,7 +56,7 @@ int
 Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
                                            const void* arg_in)
 {
-  RPG_TRACE(ACE_TEXT("Net_Client_TimeoutHandler::handle_timeout"));
+  NETWORK_TRACE(ACE_TEXT("Net_Client_TimeoutHandler::handle_timeout"));
 
   ACE_UNUSED_ARG (tv_in);
 
@@ -99,18 +100,24 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
             break; // nothing to do...
 
           // grab a (random) connection handler
-          // *WARNING*: there's a race condition here...
-          RPG_Dice_RollResult_t result;
-          RPG_Dice::generateRandomNumbers(num_connections,
-                                          1,
-                                          result);
+          int index = 0;
+          // *PORTABILITY*: outside glibc, this is not very portable...
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+          index = ((::random () % num_connections) + 1);
+#else
+          // *NOTE*: use ACE_OS::rand_r() for improved thread safety !
+          //results_out.push_back((ACE_OS::rand() % range_in) + 1);
+          unsigned int usecs = static_cast<unsigned int> (COMMON_TIME_NOW.usec ());
+          index = ((ACE_OS::rand_r (&usecs) % num_connections) + 1);
+#endif
+
           Net_InetConnectionManager_t::CONNECTION_T* connection_p =
-            NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (result.front () - 1);
+            NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (index - 1);
           if (!connection_p)
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to retrieve connection #%d, returning\n"),
-                        result.front () - 1));
+                        index - 1));
             return 0;
           } // end IF
 
@@ -154,9 +161,13 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
     case ACTION_STRESS:
     {
       // allow some probability for closing connections in between
-      // *WARNING*: there's a race condition here...
+      std::default_random_engine generator;
+      std::uniform_int_distribution<int> distribution (1, 100);
+      auto dice = std::bind (distribution, generator);
+      float dice_roll = static_cast<float> (dice ()) / 100.0F;
+
       if ((num_connections > 0) &&
-          RPG_Dice::probability (NET_CLIENT_U_TEST_ABORT_PROBABILITY))
+          (dice_roll <= NET_CLIENT_U_TEST_ABORT_PROBABILITY))
       {
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("closing newest connection...\n")));
@@ -165,7 +176,8 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
       } // end IF
 
       // allow some probability for opening connections in between
-      if (RPG_Dice::probability (NET_CLIENT_U_TEST_CONNECT_PROBABILITY))
+      dice_roll = static_cast<float> (dice ()) / 100.0F;
+      if (dice_roll <= NET_CLIENT_U_TEST_CONNECT_PROBABILITY)
         do_connect = true;
 
       // ping the server
@@ -176,18 +188,15 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         break;
 
       // grab a (random) connection handler
-      // *WARNING*: there's a race condition here...
-      RPG_Dice_RollResult_t result;
-      RPG_Dice::generateRandomNumbers (num_connections,
-                                       1,
-                                       result);
+      std::uniform_int_distribution<int> distribution_2 (0, num_connections - 1);
+      int dice_roll_2 = distribution_2 (generator);
       Net_InetConnectionManager_t::CONNECTION_T* connection_base_p =
-          NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (result.front () - 1);
+        NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (dice_roll_2);
       if (!connection_base_p)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to retrieve connection #%d, returning\n"),
-                    result.front () - 1));
+                    dice_roll_2));
         return 0;
       } // end IF
       Net_ITransportLayer_t* connection_p =

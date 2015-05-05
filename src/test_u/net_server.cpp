@@ -43,6 +43,7 @@
 #endif
 
 #include "common_file_tools.h"
+#include "common_logger.h"
 #include "common_tools.h"
 
 #include "common_ui_defines.h"
@@ -51,50 +52,65 @@
 #include "common_ui_gtk_manager.h"
 
 #include "stream_allocatorheap.h"
+#include "stream_defines.h"
 
 #include "net_common_tools.h"
 #include "net_configuration.h"
 #include "net_connection_manager_common.h"
+#include "net_macros.h"
 
 #include "net_server_common.h"
+#include "net_server_common_tools.h"
+#include "net_server_listener_common.h"
 
-#ifdef HAVE_CONFIG_H
-#include "rpg_config.h"
-#endif
+//#ifdef HAVE_CONFIG_H
+//#include "rpg_config.h"
+//#endif
 
-#include "rpg_common_file_tools.h"
-#include "rpg_common_macros.h"
+//#include "rpg_common_file_tools.h"
+//#include "rpg_common_macros.h"
 
 //#include "rpg_net_common.h"
 //#include "rpg_net_defines.h"
 //#include "rpg_net_module_eventhandler.h"
 
-#include "rpg_client_logger.h"
-
-#include "rpg_net_server_common.h"
-#include "rpg_net_server_common_tools.h"
-#include "rpg_net_server_defines.h"
+//#include "rpg_client_logger.h"
+//
+//#include "rpg_net_server_common.h"
+//#include "rpg_net_server_common_tools.h"
+//#include "rpg_net_server_defines.h"
 
 #include "net_callbacks.h"
 #include "net_common.h"
 #include "net_defines.h"
 #include "net_eventhandler.h"
+#include "net_module_eventhandler.h"
 
+#include "net_server_defines.h"
 #include "net_server_signalhandler.h"
 
 void
 do_printUsage (const std::string& programName_in)
 {
-  RPG_TRACE (ACE_TEXT ("::do_printUsage"));
+  NETWORK_TRACE (ACE_TEXT ("::do_printUsage"));
 
   // enable verbatim boolean output
   std::cout.setf (ios::boolalpha);
 
   std::string configuration_path =
-    RPG_Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (BASEDIR),
-                                                          true);
+    Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory();
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
 #endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT ("usage: ")
@@ -104,26 +120,22 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::cout << ACE_TEXT ("currently available options:") << std::endl;
   std::cout << ACE_TEXT ("-c [VALUE]   : max #connections ([")
-            << RPG_NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS
+            << NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS
             << ACE_TEXT ("])")
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//#if defined(_DEBUG) && !defined(DEBUG_RELEASE)
-//  path += ACE_TEXT_ALWAYS_CHAR("net");
-//  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//#endif
-  path += ACE_TEXT_ALWAYS_CHAR(NET_SERVER_UI_FILE);
+  path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
   std::cout << ACE_TEXT ("-g[[STRING]] : UI file [\"")
             << path
             << ACE_TEXT ("\"] {\"\" --> no GUI}")
             << std::endl;
   std::cout << ACE_TEXT ("-i [VALUE]   : client ping interval (ms) [")
-            << RPG_NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL
+            << NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL
             << ACE_TEXT ("] {0 --> OFF})")
             << std::endl;
 //  std::cout << ACE_TEXT("-k [VALUE]  : client keep-alive timeout ([")
-//            << RPG_NET_SERVER_DEF_CLIENT_KEEPALIVE
+//            << NET_SERVER_DEF_CLIENT_KEEPALIVE
 //            << ACE_TEXT("] second(s) {0 --> no timeout})")
 //            << std::endl;
   std::cout << ACE_TEXT ("-l           : log to a file [")
@@ -135,7 +147,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-n [STRING]  : network interface [\"")
-            << ACE_TEXT (RPG_NET_DEFAULT_NETWORK_INTERFACE)
+            << ACE_TEXT (NET_DEFAULT_NETWORK_INTERFACE)
             << ACE_TEXT ("\"]")
             << std::endl;
   // *TODO*: this doesn't really make sense (yet)
@@ -144,22 +156,22 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-p [VALUE]   : listening port [")
-            << RPG_NET_SERVER_DEFAULT_LISTENING_PORT
+            << NET_SERVER_DEFAULT_LISTENING_PORT
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-r           : use reactor [")
-            << RPG_NET_USES_REACTOR
+            << NET_USES_REACTOR
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-s [VALUE]   : statistics reporting interval (second(s)) [")
-            << RPG_NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL
+            << NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL
             << ACE_TEXT ("] {0 --> OFF})")
             << std::endl;
   std::cout << ACE_TEXT ("-t           : trace information") << std::endl;
   std::cout << ACE_TEXT ("-v           : print version information and exit")
             << std::endl;
   std::cout << ACE_TEXT ("-x [VALUE]   : #dispatch threads [")
-            << RPG_NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS
+            << NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS
             << ACE_TEXT ("]")
             << std::endl;
 }
@@ -182,39 +194,47 @@ do_processArguments (const int& argc_in,
                      bool& printVersionAndExit_out,
                      unsigned int& numDispatchThreads_out)
 {
-  RPG_TRACE (ACE_TEXT ("::do_processArguments"));
+  NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
   std::string configuration_path =
-    RPG_Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (BASEDIR),
-                                                          true);
+    Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
+  configuration_path = Common_File_Tools::getWorkingDirectory ();
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
 #endif // #ifdef DEBUG_DEBUGGER
 
-  // init results
-  maxNumConnections_out           = RPG_NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
-  clientPingInterval_out          = RPG_NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
-//  keepAliveTimeout_out = RPG_NET_SERVER_DEF_CLIENT_KEEPALIVE;
+  // initialize results
+  maxNumConnections_out           =
+    NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
+  clientPingInterval_out          =
+    NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
+//  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
   logToFile_out                   = false;
   useUDP_out                      = false;
   networkInterface_out            =
-    ACE_TEXT_ALWAYS_CHAR (RPG_NET_DEFAULT_NETWORK_INTERFACE);
+    ACE_TEXT_ALWAYS_CHAR (NET_DEFAULT_NETWORK_INTERFACE);
   useLoopback_out                 = false;
-  listeningPortNumber_out         = RPG_NET_SERVER_DEFAULT_LISTENING_PORT;
-  useReactor_out                  = RPG_NET_USES_REACTOR;
+  listeningPortNumber_out         = NET_SERVER_DEFAULT_LISTENING_PORT;
+  useReactor_out                  = NET_USES_REACTOR;
   statisticsReportingInterval_out =
-      RPG_NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL;
+      NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL;
   traceInformation_out            = false;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//#if defined(_DEBUG) && !defined(DEBUG_RELEASE)
-//  path += ACE_TEXT_ALWAYS_CHAR("net");
-//  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//#endif
   path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
   UIFile_out                      = path;
   printVersionAndExit_out         = false;
-  numDispatchThreads_out          = RPG_NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
+  numDispatchThreads_out          =
+    NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
@@ -346,7 +366,7 @@ do_initializeSignals (bool useReactor_in,
                       ACE_Sig_Set& signals_out,
                       ACE_Sig_Set& ignoredSignals_out)
 {
-  RPG_TRACE (ACE_TEXT ("::do_initializeSignals"));
+  NETWORK_TRACE (ACE_TEXT ("::do_initializeSignals"));
 
   int result = -1;
 
@@ -441,18 +461,18 @@ do_work (unsigned int maxNumConnections_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout)
 {
-  RPG_TRACE (ACE_TEXT ("::do_work"));
+  NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   // step0a: initialize stream configuration object
   Stream_ModuleConfiguration_t module_configuration;
   ACE_OS::memset (&module_configuration, 0, sizeof (module_configuration));
 
   Net_EventHandler ui_event_handler (&CBData_in);
-  RPG_Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
-                                                    NULL);
-  RPG_Net_Module_EventHandler* eventHandler_impl = NULL;
+  Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
+                                                NULL);
+  Net_Module_EventHandler* eventHandler_impl = NULL;
   eventHandler_impl =
-    dynamic_cast<RPG_Net_Module_EventHandler*> (event_handler.writer ());
+    dynamic_cast<Net_Module_EventHandler*> (event_handler.writer ());
   if (!eventHandler_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -464,26 +484,26 @@ do_work (unsigned int maxNumConnections_in,
   eventHandler_impl->subscribe (&ui_event_handler);
 
   Stream_AllocatorHeap heap_allocator;
-  RPG_Net_StreamMessageAllocator_t message_allocator (RPG_NET_MAXIMUM_NUMBER_OF_INFLIGHT_MESSAGES,
-                                                      &heap_allocator,
-                                                      false);
+  Net_StreamMessageAllocator_t message_allocator (STREAM_MAX_MESSAGES,
+                                                  &heap_allocator,
+                                                  false);
 
   Net_Configuration_t configuration;
   ACE_OS::memset (&configuration, 0, sizeof (Net_Configuration_t));
   // ************ connection configuration data ************
-  configuration.protocolConfiguration.bufferSize = RPG_NET_STREAM_BUFFER_SIZE;
+  configuration.protocolConfiguration.bufferSize = STREAM_BUFFER_SIZE;
   configuration.protocolConfiguration.peerPingInterval = pingInterval_in;
   configuration.protocolConfiguration.pingAutoAnswer = true;
   configuration.protocolConfiguration.printPongMessages = true;
   // ************ socket / stream configuration data ************
   configuration.socketConfiguration.bufferSize =
-   RPG_NET_DEFAULT_SOCKET_RECEIVE_BUFFER_SIZE;
+    NET_DEFAULT_SOCKET_RECEIVE_BUFFER_SIZE;
   configuration.streamConfiguration.moduleConfiguration = &module_configuration;
   //  config.useThreadPerConnection = false;
   //  config.serializeOutput = false;
 
   //  config.notificationStrategy = NULL;
-  configuration.streamConfiguration.bufferSize = RPG_NET_STREAM_BUFFER_SIZE;
+  configuration.streamConfiguration.bufferSize = STREAM_BUFFER_SIZE;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
@@ -510,7 +530,7 @@ do_work (unsigned int maxNumConnections_in,
 
   // step1: init regular (global) stats reporting
   Stream_StatisticHandler_Reactor_t statistics_handler (ACTION_REPORT,
-                                                        RPG_CONNECTIONMANAGER_SINGLETON::instance (),
+                                                        NET_CONNECTIONMANAGER_SINGLETON::instance (),
                                                         false);
   long timer_id = -1;
   if (statisticsReportingInterval_in)
@@ -537,14 +557,14 @@ do_work (unsigned int maxNumConnections_in,
 
   // step2: signal handling
   if (useReactor_in)
-    CBData_in.listenerHandle = RPG_NET_SERVER_LISTENER_SINGLETON::instance ();
+    CBData_in.listenerHandle = NET_SERVER_LISTENER_SINGLETON::instance ();
   else
     CBData_in.listenerHandle =
-      RPG_NET_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
+      NET_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
   // event handler for signals
   Net_Server_SignalHandler signal_handler (timer_id,
                                            CBData_in.listenerHandle,
-                                           RPG_CONNECTIONMANAGER_SINGLETON::instance (),
+                                           NET_CONNECTIONMANAGER_SINGLETON::instance (),
                                            useReactor_in);
   int result = -1;
   const void* act_p = NULL;
@@ -572,9 +592,9 @@ do_work (unsigned int maxNumConnections_in,
   } // end IF
 
   // step3: initialize connection manager
-  RPG_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (maxNumConnections_in);
+  NET_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (maxNumConnections_in);
   Net_UserData_t session_data;
-  RPG_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
+  NET_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
                                                      &session_data);
 
   // step4: handle events (signals, incoming connections/data, timers, ...)
@@ -668,7 +688,7 @@ do_work (unsigned int maxNumConnections_in,
   ACE_OS::memset (&socket_handler_configuration,
                   0,
                   sizeof (socket_handler_configuration));
-  socket_handler_configuration.bufferSize = RPG_NET_STREAM_BUFFER_SIZE;
+  socket_handler_configuration.bufferSize = STREAM_BUFFER_SIZE;
   socket_handler_configuration.messageAllocator = &message_allocator;
   socket_handler_configuration.socketConfiguration =
       configuration.socketConfiguration;
@@ -819,7 +839,7 @@ do_work (unsigned int maxNumConnections_in,
 void
 do_printVersion (const std::string& programName_in)
 {
-  RPG_TRACE (ACE_TEXT ("::do_printVersion"));
+  NETWORK_TRACE (ACE_TEXT ("::do_printVersion"));
 
   std::cout << programName_in
 #ifdef HAVE_CONFIG_H
@@ -848,7 +868,7 @@ int
 ACE_TMAIN (int argc_in,
            ACE_TCHAR** argv_in)
 {
-  RPG_TRACE (ACE_TEXT ("::main"));
+  NETWORK_TRACE (ACE_TEXT ("::main"));
 
   // step0: init
 // *PORTABILITY*: on Windows, init ACE...
@@ -867,38 +887,43 @@ ACE_TMAIN (int argc_in,
   process_profile.start();
 
   std::string configuration_path =
-    RPG_Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (BASEDIR),
-                                                          true);
+    Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
+  configuration_path = Common_File_Tools::getWorkingDirectory ();
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
   unsigned int max_num_connections =
-    RPG_NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
-  unsigned int ping_interval = RPG_NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
-  //  unsigned int keep_alive_timeout            = RPG_NET_SERVER_DEFAULT_TCP_KEEPALIVE;
+    NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
+  unsigned int ping_interval = NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
+  //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
   bool log_to_file = false;
   bool use_udp = false;
   std::string network_interface =
-    ACE_TEXT_ALWAYS_CHAR (RPG_NET_DEFAULT_NETWORK_INTERFACE);
+    ACE_TEXT_ALWAYS_CHAR (NET_DEFAULT_NETWORK_INTERFACE);
   bool use_loopback = false;
-  unsigned short listening_port_number = RPG_NET_SERVER_DEFAULT_LISTENING_PORT;
-  bool use_reactor = RPG_NET_USES_REACTOR;
+  unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
+  bool use_reactor = NET_USES_REACTOR;
   unsigned int statistics_reporting_interval =
-    RPG_NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL;
+    NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL;
   bool trace_information = false;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//#if defined (DEBUG_DEBUGGER)
-//  path += ACE_TEXT_ALWAYS_CHAR ("net");
-//  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//#endif // #ifdef DEBUG_DEBUGGER
   path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
   std::string UI_file = path;
   bool print_version_and_exit = false;
   unsigned int num_dispatch_threads =
-    RPG_NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
+    NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
   // step1b: parse/process/validate configuration
   if (!do_processArguments (argc_in,
@@ -941,8 +966,7 @@ ACE_TMAIN (int argc_in,
   //                   reactor/proactor thread could (dead)lock on the
   //                   allocator lock, as it cannot dispatch events that would
   //                   free slots
-  if (NET_MAXIMUM_NUMBER_OF_INFLIGHT_MESSAGES <=
-      std::numeric_limits<unsigned int>::max ())
+  if (STREAM_MAX_MESSAGES <= std::numeric_limits<unsigned int>::max ())
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
   if (!UI_file.empty() &&
@@ -1001,15 +1025,15 @@ ACE_TMAIN (int argc_in,
                                             // is off
 
   // step1e: initialize logging and/or tracing
-  RPG_Client_Logger logger (&gtk_cb_user_data.logStack,
-                            &gtk_cb_user_data.stackLock);
+  Common_Logger logger (&gtk_cb_user_data.logStack,
+                        &gtk_cb_user_data.stackLock);
   std::string log_file;
   if (log_to_file &&
-      !RPG_Net_Server_Common_Tools::getNextLogFilename (Common_File_Tools::getDumpDirectory (),
-                                                        log_file))
+      !Net_Server_Common_Tools::getNextLogFilename (Common_File_Tools::getDumpDirectory (),
+                                                    log_file))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to RPG_Net_Common_Tools::getNextLogFilename(), aborting\n")));
+                ACE_TEXT ("failed to Net_Common_Tools::getNextLogFilename(), aborting\n")));
 
     // *PORTABILITY*: on Windows, need to fini ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

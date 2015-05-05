@@ -40,6 +40,7 @@
 #endif
 
 #include "common_file_tools.h"
+#include "common_logger.h"
 #include "common_timer_manager.h"
 #include "common_tools.h"
 
@@ -51,21 +52,22 @@
 #include "stream_allocatorheap.h"
 
 #include "net_connection_manager.h"
+#include "net_macros.h"
 
 #include "net_client_connector_common.h"
 #include "net_client_defines.h"
 
-#ifdef HAVE_CONFIG_H
-#include "rpg_config.h"
-#endif
+//#ifdef HAVE_CONFIG_H
+//#include "rpg_config.h"
+//#endif
 
-#include "rpg_dice.h"
-
-#include "rpg_common.h"
-#include "rpg_common_defines.h"
-#include "rpg_common_file_tools.h"
-#include "rpg_common_macros.h"
-#include "rpg_common_tools.h"
+//#include "rpg_dice.h"
+//
+//#include "rpg_common.h"
+//#include "rpg_common_defines.h"
+//#include "rpg_common_file_tools.h"
+//#include "rpg_common_macros.h"
+//#include "rpg_common_tools.h"
 
 //#include "rpg_net_defines.h"
 //#include "rpg_net_common.h"
@@ -73,31 +75,43 @@
 //
 //#include "rpg_net_server_defines.h"
 
-#include "rpg_client_defines.h"
-#include "rpg_client_logger.h"
-#include "rpg_client_ui_tools.h"
+//#include "rpg_client_defines.h"
+//#include "rpg_client_logger.h"
+//#include "rpg_client_ui_tools.h"
 
 #include "net_callbacks.h"
 #include "net_common.h"
 #include "net_defines.h"
 #include "net_eventhandler.h"
+#include "net_module_eventhandler.h"
 
 #include "net_client_signalhandler.h"
 #include "net_client_timeouthandler.h"
 
+#include "net_server_defines.h"
+
 void
 do_printUsage (const std::string& programName_in)
 {
-  RPG_TRACE (ACE_TEXT ("::do_printUsage"));
+  NETWORK_TRACE (ACE_TEXT ("::do_printUsage"));
 
   // enable verbatim boolean output
   std::cout.setf (ios::boolalpha);
 
   std::string configuration_path =
-    RPG_Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (BASEDIR),
-                                                          true);
+    Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory ();
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
 #endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT("usage: ")
@@ -139,11 +153,11 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT("]")
             << std::endl;
   std::cout << ACE_TEXT("-p [VALUE]   : server port [")
-            << RPG_NET_SERVER_DEFAULT_LISTENING_PORT
+            << NET_SERVER_DEFAULT_LISTENING_PORT
             << ACE_TEXT("]")
             << std::endl;
   std::cout << ACE_TEXT("-r           : use reactor [")
-            << RPG_NET_USES_REACTOR
+            << NET_USES_REACTOR
             << ACE_TEXT("]")
             << std::endl;
   std::cout << ACE_TEXT("-s           : server ping interval (millisecond(s)) [")
@@ -173,7 +187,7 @@ do_printUsage (const std::string& programName_in)
 }
 
 bool
-do_processArguments (const int& argc_in,
+do_processArguments (int argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
                      bool& alternatingMode_out,
                      unsigned int& maxNumConnections_out,
@@ -190,16 +204,25 @@ do_processArguments (const int& argc_in,
                      unsigned int& numDispatchThreads_out,
                      bool& runStressTest_out)
 {
-  RPG_TRACE (ACE_TEXT ("::do_processArguments"));
+  NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
   std::string configuration_path =
-    RPG_Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (BASEDIR),
-                                                          true);
+    Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
-#endif // #ifdef BASEDIR
+  configuration_path = Common_File_Tools::getWorkingDirectory ();
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
+#endif // #ifdef DEBUG_DEBUGGER
 
-  // init results
+  // initialize results
   alternatingMode_out     = false;
   maxNumConnections_out   = NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS;
   std::string path = configuration_path;
@@ -213,8 +236,8 @@ do_processArguments (const int& argc_in,
   serverHostname_out      = NET_CLIENT_DEF_SERVER_HOSTNAME;
   connectionInterval_out  = NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
   logToFile_out           = false;
-  serverPortNumber_out    = RPG_NET_SERVER_DEFAULT_LISTENING_PORT;
-  useReactor_out          = RPG_NET_USES_REACTOR;
+  serverPortNumber_out    = NET_SERVER_DEFAULT_LISTENING_PORT;
+  useReactor_out          = NET_USES_REACTOR;
   serverPingInterval_out  = NET_CLIENT_DEF_SERVER_PING_INTERVAL;
   traceInformation_out    = false;
   useUDP_out              = false;
@@ -260,14 +283,14 @@ do_processArguments (const int& argc_in,
       }
       case 'h':
       {
-        serverHostname_out = argumentParser.opt_arg();
+        serverHostname_out = argumentParser.opt_arg ();
         break;
       }
       case 'i':
       {
-        converter.clear();
-        converter.str(ACE_TEXT_ALWAYS_CHAR(""));
-        converter << argumentParser.opt_arg();
+        converter.clear ();
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter << argumentParser.opt_arg ();
         converter >> connectionInterval_out;
         break;
       }
@@ -278,9 +301,9 @@ do_processArguments (const int& argc_in,
       }
       case 'p':
       {
-        converter.clear();
-        converter.str(ACE_TEXT_ALWAYS_CHAR(""));
-        converter << argumentParser.opt_arg();
+        converter.clear ();
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter << argumentParser.opt_arg ();
         converter >> serverPortNumber_out;
         break;
       }
@@ -291,9 +314,9 @@ do_processArguments (const int& argc_in,
       }
       case 's':
       {
-        converter.clear();
-        converter.str(ACE_TEXT_ALWAYS_CHAR(""));
-        converter << argumentParser.opt_arg();
+        converter.clear ();
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter << argumentParser.opt_arg ();
         converter >> serverPingInterval_out;
         break;
       }
@@ -314,9 +337,9 @@ do_processArguments (const int& argc_in,
       }
       case 'x':
       {
-        converter.clear();
-        converter.str(ACE_TEXT_ALWAYS_CHAR(""));
-        converter << argumentParser.opt_arg();
+        converter.clear ();
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter << argumentParser.opt_arg ();
         converter >> numDispatchThreads_out;
         break;
       }
@@ -328,29 +351,29 @@ do_processArguments (const int& argc_in,
       // error handling
       case ':':
       {
-        ACE_DEBUG((LM_ERROR,
-                   ACE_TEXT("option \"%c\" requires an argument, aborting\n"),
-                   argumentParser.opt_opt()));
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("option \"%c\" requires an argument, aborting\n"),
+                    argumentParser.opt_opt ()));
         return false;
       }
       case '?':
       {
-        ACE_DEBUG((LM_ERROR,
-                   ACE_TEXT("unrecognized option \"%s\", aborting\n"),
-                   ACE_TEXT(argumentParser.last_option())));
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("unrecognized option \"%s\", aborting\n"),
+                    ACE_TEXT (argumentParser.last_option ())));
         return false;
       }
       case 0:
       {
-        ACE_DEBUG((LM_ERROR,
-                   ACE_TEXT("found long option \"%s\", aborting\n"),
-                   ACE_TEXT(argumentParser.long_option())));
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("found long option \"%s\", aborting\n"),
+                    ACE_TEXT (argumentParser.long_option ())));
         return false;
       }
       default:
       {
-        ACE_DEBUG((LM_ERROR,
-                   ACE_TEXT("parse error, aborting\n")));
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("parse error, aborting\n")));
         return false;
       }
     } // end SWITCH
@@ -364,7 +387,7 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
                       ACE_Sig_Set& signals_out,
                       ACE_Sig_Set& ignoredSignals_out)
 {
-  RPG_TRACE (ACE_TEXT ("::do_initializeSignals"));
+  NETWORK_TRACE (ACE_TEXT ("::do_initializeSignals"));
 
   int result = -1;
 
@@ -447,36 +470,24 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout)
 {
-  RPG_TRACE (ACE_TEXT ("::do_work"));
+  NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
 
-  // step0a: initialize randomization
-  try
-  {
-    RPG_Dice::init ();
-  }
-  catch(...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in RPG_Dice::init, returning\n")));
-    return;
-  }
-
-  // step0b: initialize stream configuration object
+  // step0a: initialize stream configuration object
   Stream_ModuleConfiguration_t module_configuration;
   ACE_OS::memset (&module_configuration, 0, sizeof (module_configuration));
 
   Net_EventHandler ui_event_handler (&CBData_in);
-  RPG_Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
+  Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
                                                     NULL);
-  RPG_Net_Module_EventHandler* eventHandler_impl = NULL;
+  Net_Module_EventHandler* eventHandler_impl = NULL;
   eventHandler_impl =
-    dynamic_cast<RPG_Net_Module_EventHandler*> (event_handler.writer ());
+    dynamic_cast<Net_Module_EventHandler*> (event_handler.writer ());
   if (!eventHandler_impl)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<RPG_Net_Module_EventHandler> failed, returning\n")));
+                ACE_TEXT ("dynamic_cast<Net_Module_EventHandler> failed, returning\n")));
     return;
   } // end IF
   eventHandler_impl->initialize (&CBData_in.subscribers,
@@ -484,9 +495,9 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   eventHandler_impl->subscribe (&ui_event_handler);
 
   Stream_AllocatorHeap heap_allocator;
-  RPG_Net_StreamMessageAllocator_t message_allocator (RPG_NET_MAXIMUM_NUMBER_OF_INFLIGHT_MESSAGES,
-                                                      &heap_allocator,
-                                                      false);
+  Net_StreamMessageAllocator_t message_allocator (STREAM_MAX_MESSAGES,
+                                                  &heap_allocator,
+                                                  false);
   Net_Configuration_t configuration;
   ACE_OS::memset (&configuration, 0, sizeof (Net_Configuration_t));
   // ************ connection configuration data ************
@@ -497,9 +508,9 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   configuration.protocolConfiguration.printPongMessages = true;
   // ************ socket / stream configuration data ************
   configuration.socketConfiguration.bufferSize =
-   RPG_NET_DEFAULT_SOCKET_RECEIVE_BUFFER_SIZE;
+   NET_DEFAULT_SOCKET_RECEIVE_BUFFER_SIZE;
 
-  configuration.streamConfiguration.bufferSize = RPG_NET_STREAM_BUFFER_SIZE;
+  configuration.streamConfiguration.bufferSize = STREAM_BUFFER_SIZE;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.moduleConfiguration = &module_configuration;
   configuration.streamConfiguration.module =
@@ -519,7 +530,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 //	config.currentStatistics = {};
 //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
-  // step0c: initialize event dispatch
+  // step0b: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (useReactor_in,
                                               numDispatchThreads_in,
                                               configuration.streamConfiguration.serializeOutput))
@@ -529,9 +540,9 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     return;
   } // end IF
 
-  // step0d: initialize client connector
+  // step0c: initialize client connector
   Net_SocketHandlerConfiguration_t socket_handler_configuration;
-  socket_handler_configuration.bufferSize = RPG_NET_STREAM_BUFFER_SIZE;
+  socket_handler_configuration.bufferSize = STREAM_BUFFER_SIZE;
   socket_handler_configuration.messageAllocator = &message_allocator;
   socket_handler_configuration.socketConfiguration =
     configuration.socketConfiguration;
@@ -553,7 +564,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     return;
   } // end IF
 
-  // step0e: initialize connection manager
+  // step0d: initialize connection manager
   Net_IInetConnectionManager_t* iconnection_manager_p =
     Net_Common_Tools::getConnectionManager ();
   ACE_ASSERT (iconnection_manager_p);
@@ -564,7 +575,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   connection_manager_p->set (configuration,
                              &configuration.streamSessionData);
 
-  // step0f: initialize action timer
+  // step0e: initialize action timer
   ACE_INET_Addr peer_address (serverPortNumber_in,
                               serverHostname_in.c_str (),
                               AF_INET);
@@ -601,7 +612,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   } // end IF
   const void* act_p = NULL;
 
-  // step0f: initialize signal handling
+  // step0e: initialize signal handling
   Net_Client_SignalHandler signal_handler (CBData_in.timerId, // action timer id
                                            peer_address,      // remote SAP
                                            connector_p,       // connector
@@ -842,7 +853,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 void
 do_printVersion (const std::string& programName_in)
 {
-  RPG_TRACE (ACE_TEXT ("::do_printVersion"));
+  NETWORK_TRACE (ACE_TEXT ("::do_printVersion"));
 
   std::cout << programName_in
 #ifdef HAVE_CONFIG_H
@@ -871,7 +882,7 @@ int
 ACE_TMAIN (int argc_in,
            ACE_TCHAR* argv_in[])
 {
-  RPG_TRACE (ACE_TEXT ("::main"));
+  NETWORK_TRACE (ACE_TEXT ("::main"));
 
   // step0: initialize
 // *PORTABILITY*: on Windows, initialize ACE...
@@ -889,12 +900,36 @@ ACE_TMAIN (int argc_in,
   // start profile timer...
   process_profile.start();
 
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("initializing random seed (RAND_MAX = %d)...\n"),
+              RAND_MAX));
+
+  ACE_Time_Value now = COMMON_TIME_NOW;
+  // *PORTABILITY*: outside glibc, this is not very portable...
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+  ::srandom (now.sec ());
+#else
+  ACE_OS::srand (static_cast<u_int> (now.sec ()));
+#endif
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("initializing random seed...DONE\n")));
+
   std::string configuration_path =
-    RPG_Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (BASEDIR),
-                                                          true);
+    Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
-#endif // #ifdef BASEDIR
+  configuration_path = Common_File_Tools::getWorkingDirectory ();
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
+#endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
   Net_Client_TimeoutHandler::ActionMode_t action_mode =
@@ -916,8 +951,8 @@ ACE_TMAIN (int argc_in,
    NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
   bool log_to_file                                    = false;
   unsigned short server_port_number                   =
-   RPG_NET_SERVER_DEFAULT_LISTENING_PORT;
-  bool use_reactor                                    = RPG_NET_USES_REACTOR;
+   NET_SERVER_DEFAULT_LISTENING_PORT;
+  bool use_reactor                                    = NET_USES_REACTOR;
   unsigned int server_ping_interval                   =
    NET_CLIENT_DEF_SERVER_PING_INTERVAL;
   bool trace_information                              = false;
@@ -962,8 +997,7 @@ ACE_TMAIN (int argc_in,
   //                   reactor/proactor thread could (dead)lock on the
   //                   allocator lock, as it cannot dispatch events that would
   //                   free slots
-  if (RPG_NET_MAXIMUM_NUMBER_OF_INFLIGHT_MESSAGES <=
-      std::numeric_limits<unsigned int>::max ())
+  if (STREAM_MAX_MESSAGES <= std::numeric_limits<unsigned int>::max ())
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
   if ((!UI_file.empty () && (alternating_mode || run_stress_test)) ||
@@ -1033,11 +1067,11 @@ ACE_TMAIN (int argc_in,
 
   Net_GTK_CBData_t gtk_cb_user_data;
   // step1e: initialize logging and/or tracing
-  RPG_Client_Logger logger (&gtk_cb_user_data.logStack,
-                            &gtk_cb_user_data.stackLock);
+  Common_Logger logger (&gtk_cb_user_data.logStack,
+                        &gtk_cb_user_data.stackLock);
   std::string log_file;
   if (log_to_file)
-    log_file = RPG_Common_File_Tools::getLogFilename (ACE::basename (argv_in[0]));
+    log_file = Common_File_Tools::getLogFilename (ACE::basename (argv_in[0]));
   if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]),    // program name
                                         log_file,                      // logfile
                                         false,                         // log to syslog ?
@@ -1128,8 +1162,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  RPG_Common_Tools::period2String (working_time,
-                                   working_time_string);
+  Common_Tools::period2String (working_time,
+                               working_time_string);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
@@ -1163,42 +1197,42 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  RPG_Common_Tools::period2String (user_time,
-                                   user_time_string);
-  RPG_Common_Tools::period2String (system_time,
-                                   system_time_string);
+  Common_Tools::period2String (user_time,
+                               user_time_string);
+  Common_Tools::period2String (system_time,
+                               system_time_string);
 
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT(" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\nmaximum resident set size = %d\nintegral shared memory size = %d\nintegral unshared data size = %d\nintegral unshared stack size = %d\npage reclaims = %d\npage faults = %d\nswaps = %d\nblock input operations = %d\nblock output operations = %d\nmessages sent = %d\nmessages received = %d\nsignals received = %d\nvoluntary context switches = %d\ninvoluntary context switches = %d\n"),
-             elapsed_time.real_time,
-             elapsed_time.user_time,
-             elapsed_time.system_time,
-             user_time_string.c_str(),
-             system_time_string.c_str(),
-             elapsed_rusage.ru_maxrss,
-             elapsed_rusage.ru_ixrss,
-             elapsed_rusage.ru_idrss,
-             elapsed_rusage.ru_isrss,
-             elapsed_rusage.ru_minflt,
-             elapsed_rusage.ru_majflt,
-             elapsed_rusage.ru_nswap,
-             elapsed_rusage.ru_inblock,
-             elapsed_rusage.ru_oublock,
-             elapsed_rusage.ru_msgsnd,
-             elapsed_rusage.ru_msgrcv,
-             elapsed_rusage.ru_nsignals,
-             elapsed_rusage.ru_nvcsw,
-             elapsed_rusage.ru_nivcsw));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\nmaximum resident set size = %d\nintegral shared memory size = %d\nintegral unshared data size = %d\nintegral unshared stack size = %d\npage reclaims = %d\npage faults = %d\nswaps = %d\nblock input operations = %d\nblock output operations = %d\nmessages sent = %d\nmessages received = %d\nsignals received = %d\nvoluntary context switches = %d\ninvoluntary context switches = %d\n"),
+              elapsed_time.real_time,
+              elapsed_time.user_time,
+              elapsed_time.system_time,
+              ACE_TEXT (user_time_string.c_str ()),
+              ACE_TEXT (system_time_string.c_str ()),
+              elapsed_rusage.ru_maxrss,
+              elapsed_rusage.ru_ixrss,
+              elapsed_rusage.ru_idrss,
+              elapsed_rusage.ru_isrss,
+              elapsed_rusage.ru_minflt,
+              elapsed_rusage.ru_majflt,
+              elapsed_rusage.ru_nswap,
+              elapsed_rusage.ru_inblock,
+              elapsed_rusage.ru_oublock,
+              elapsed_rusage.ru_msgsnd,
+              elapsed_rusage.ru_msgrcv,
+              elapsed_rusage.ru_nsignals,
+              elapsed_rusage.ru_nvcsw,
+              elapsed_rusage.ru_nivcsw));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
               elapsed_time.real_time,
               elapsed_time.user_time,
               elapsed_time.system_time,
-              user_time_string.c_str (),
-              system_time_string.c_str ()));
+              ACE_TEXT (user_time_string.c_str ()),
+              ACE_TEXT (system_time_string.c_str ())));
 #endif
 
 // *PORTABILITY*: on Windows, must fini ACE...

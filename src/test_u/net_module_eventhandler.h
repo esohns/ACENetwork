@@ -18,48 +18,54 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_SERVER_SIGNALHANDLER_H
-#define NET_SERVER_SIGNALHANDLER_H
+#ifndef NET_MODULE_EVENTHANDLER_H
+#define NET_MODULE_EVENTHANDLER_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch.h"
 
-#include "common_signalhandler.h"
-#include "common_isignal.h"
-#include "common_istatistic.h"
+#include "common.h"
+#include "common_isubscribe.h"
+#include "common_iclone.h"
 
 #include "stream_common.h"
+#include "stream_task_base_synch.h"
+#include "stream_streammodule_base.h"
 
 #include "net_common.h"
+#include "net_message.h"
+#include "net_sessionmessage.h"
+#include "net_module_messagehandler.h"
 
-// forward declarations
-class Common_IControl;
+// forward declaration(s)
+class Net_SessionMessage;
+class Net_Message;
 
-class Net_Server_SignalHandler
- : public Common_SignalHandler
- , public Common_ISignal
+class Net_Module_EventHandler
+ : public Net_Module_MessageHandler_T<Stream_ModuleConfiguration_t,
+                                      Net_SessionMessage,
+                                      Net_Message>
 {
  public:
-  Net_Server_SignalHandler (long,                                     // timer ID
-                            Common_IControl*,                         // controller handle
-                            Common_IStatistic_T<Stream_Statistic_t>*, // reporter handle
-                            // ---------------------------------------------------------------
-                            bool = true);                             // use reactor ?
-  virtual ~Net_Server_SignalHandler ();
+  Net_Module_EventHandler ();
+  virtual ~Net_Module_EventHandler ();
 
-  // implement Common_ISignal
-  virtual bool handleSignal (int); // signal
+  // implement Common_IClone_T
+  virtual Common_Module_t* clone ();
 
  private:
-  typedef Common_SignalHandler inherited;
+  typedef Net_Module_MessageHandler_T<Stream_ModuleConfiguration_t,
+                                      Net_SessionMessage,
+                                      Net_Message> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler ());
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler (const Net_Server_SignalHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler& operator= (const Net_Server_SignalHandler&));
-
-  Common_IControl*                         control_;
-  Common_IStatistic_T<Stream_Statistic_t>* report_;
-  long                                     timerID_;
-  bool                                     useReactor_;
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler (const Net_Module_EventHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler& operator= (const Net_Module_EventHandler&));
 };
+
+// declare module
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                 // task synch type
+                              Common_TimePolicy_t,          // time policy
+                              Stream_ModuleConfiguration_t, // configuration type
+                              Net_Module_EventHandler);     // writer type
 
 #endif

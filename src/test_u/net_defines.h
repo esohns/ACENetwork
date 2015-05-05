@@ -31,6 +31,8 @@
 #define NET_UI_GTK_BUTTON_CLOSEALL_NAME           "close_all"
 #define NET_UI_GTK_BUTTON_REPORT_NAME             "report"
 #define NET_UI_GTK_BUTTON_QUIT_NAME               "quit"
+#define NET_UI_GTK_DIALOG_ABOUT_NAME              "about_dialog"
+#define NET_UI_GTK_DIALOG_MAIN_NAME               "main_dialog"
 #define NET_UI_LOG_FONTDESCRIPTION                "Monospace 10"
 #define NET_UI_LOG_BASE                           "#000000" // black
 #define NET_UI_LOG_TEXT                           "#FFFFFF" // white

@@ -34,14 +34,11 @@
 #include "common_tools.h"
 
 #include "net_connection_manager_common.h"
-
-#include "rpg_common_macros.h"
-
-#include "rpg_net_protocol_common.h"
+#include "net_macros.h"
 
 Net_Server_SignalHandler::Net_Server_SignalHandler (long timerID_in,
                                                     Common_IControl* controller_in,
-                                                    Common_IStatistic_T<RPG_Net_Protocol_RuntimeStatistic>* report_in,
+                                                    Common_IStatistic_T<Stream_Statistic_t>* report_in,
                                                     bool useReactor_in)
  : inherited (this,          // event handler handle
               useReactor_in) // use reactor ?
@@ -50,20 +47,20 @@ Net_Server_SignalHandler::Net_Server_SignalHandler (long timerID_in,
  , timerID_ (timerID_in)
  , useReactor_ (useReactor_in)
 {
-  RPG_TRACE (ACE_TEXT ("Net_Server_SignalHandler::Net_Server_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::Net_Server_SignalHandler"));
 
 }
 
 Net_Server_SignalHandler::~Net_Server_SignalHandler ()
 {
-  RPG_TRACE (ACE_TEXT ("Net_Server_SignalHandler::~Net_Server_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::~Net_Server_SignalHandler"));
 
 }
 
 bool
 Net_Server_SignalHandler::handleSignal (int signal_in)
 {
-  RPG_TRACE (ACE_TEXT ("Net_Server_SignalHandler::handleSignal"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::handleSignal"));
 
   bool stop_event_dispatching = false;
   bool report = false;

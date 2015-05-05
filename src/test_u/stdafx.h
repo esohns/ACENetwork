@@ -9,13 +9,13 @@
 #include <windows.h>
 #endif
 
-// System Library Header Files
-#include <ace/OS.h>
-#include <ace/Log_Msg.h>
-
 // C RunTime Header Files
 #include <string>
 #include <iostream>
 
+// System Library Header Files
+#include "ace/OS.h"
+#include "ace/Log_Msg.h"
+
 // Local Header Files
-#include "rpg_common_macros.h"
+#include "common_macros.h"

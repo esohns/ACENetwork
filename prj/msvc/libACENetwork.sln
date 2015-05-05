@@ -9,9 +9,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libACENetwork_Client", "lib
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libACENetwork_Server", "libACENetwork_Server.vcxproj", "{4BA6E9EA-9F26-462E-B799-8ED2B7B5BA3D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_u_net_client", "test_u_net_client.vcxproj", "{6D91015A-553A-4512-8EEE-0DA6230A2DF7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_u_client", "test_u_net_client.vcxproj", "{6D91015A-553A-4512-8EEE-0DA6230A2DF7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_u_net_server", "test_u_net_server.vcxproj", "{B8422D9F-1595-4C6E-B6C4-F5A96E35AA80}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_u_server", "test_u_net_server.vcxproj", "{B8422D9F-1595-4C6E-B6C4-F5A96E35AA80}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libACEStream", "..\..\modules\libACEStream\prj\msvc\libACEStream.vcxproj", "{C7A3EE44-14F9-413A-B311-5A77BA5A4EDD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libCommon", "..\..\modules\libCommon\prj\msvc\libCommon.vcxproj", "{78A90D08-4E40-4ED4-8F75-393AC6526158}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libCommon_UI", "..\..\modules\libCommon\prj\msvc\libCommon_UI.vcxproj", "{06296185-3E70-472E-8B65-6F552AB1E283}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +45,18 @@ Global
 		{B8422D9F-1595-4C6E-B6C4-F5A96E35AA80}.Debug|Win32.Build.0 = Debug|Win32
 		{B8422D9F-1595-4C6E-B6C4-F5A96E35AA80}.Release|Win32.ActiveCfg = Release|Win32
 		{B8422D9F-1595-4C6E-B6C4-F5A96E35AA80}.Release|Win32.Build.0 = Release|Win32
+		{C7A3EE44-14F9-413A-B311-5A77BA5A4EDD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C7A3EE44-14F9-413A-B311-5A77BA5A4EDD}.Debug|Win32.Build.0 = Debug|Win32
+		{C7A3EE44-14F9-413A-B311-5A77BA5A4EDD}.Release|Win32.ActiveCfg = Release|Win32
+		{C7A3EE44-14F9-413A-B311-5A77BA5A4EDD}.Release|Win32.Build.0 = Release|Win32
+		{78A90D08-4E40-4ED4-8F75-393AC6526158}.Debug|Win32.ActiveCfg = Debug|Win32
+		{78A90D08-4E40-4ED4-8F75-393AC6526158}.Debug|Win32.Build.0 = Debug|Win32
+		{78A90D08-4E40-4ED4-8F75-393AC6526158}.Release|Win32.ActiveCfg = Release|Win32
+		{78A90D08-4E40-4ED4-8F75-393AC6526158}.Release|Win32.Build.0 = Release|Win32
+		{06296185-3E70-472E-8B65-6F552AB1E283}.Debug|Win32.ActiveCfg = Debug|Win32
+		{06296185-3E70-472E-8B65-6F552AB1E283}.Debug|Win32.Build.0 = Debug|Win32
+		{06296185-3E70-472E-8B65-6F552AB1E283}.Release|Win32.ActiveCfg = Release|Win32
+		{06296185-3E70-472E-8B65-6F552AB1E283}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

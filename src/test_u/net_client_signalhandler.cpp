@@ -27,10 +27,7 @@
 #include "common_tools.h"
 
 #include "net_connection_manager_common.h"
-
-#include "rpg_common_macros.h"
-
-#include "rpg_net_common_tools.h"
+#include "net_macros.h"
 
 Net_Client_SignalHandler::Net_Client_SignalHandler (long actionTimerID_in,
                                                     const ACE_INET_Addr& peerSAP_in,
@@ -43,20 +40,20 @@ Net_Client_SignalHandler::Net_Client_SignalHandler (long actionTimerID_in,
  , peerAddress_ (peerSAP_in)
  , useReactor_ (useReactor_in)
 {
-  RPG_TRACE (ACE_TEXT ("Net_Client_SignalHandler::Net_Client_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::Net_Client_SignalHandler"));
 
 }
 
 Net_Client_SignalHandler::~Net_Client_SignalHandler ()
 {
-  RPG_TRACE (ACE_TEXT ("Net_Client_SignalHandler::~Net_Client_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::~Net_Client_SignalHandler"));
 
 }
 
 bool
 Net_Client_SignalHandler::handleSignal (int signal_in)
 {
-  RPG_TRACE (ACE_TEXT ("Net_Client_SignalHandler::handleSignal"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::handleSignal"));
 
   bool stop_event_dispatching = false;
   bool connect = false;

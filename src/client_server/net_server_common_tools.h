@@ -21,14 +21,23 @@
 #ifndef NET_SERVER_COMMON_TOOLS_H
 #define NET_SERVER_COMMON_TOOLS_H
 
+#include <string>
+
 #include "ace/Global_Macros.h"
 
 #include "net_server_common.h"
 #include "net_server_exports.h"
 
+// forward declaration(s)
+struct dirent;
+
 class Net_Server_Export Net_Server_Common_Tools
 {
  public:
+  // *NOTE*: implements log rotation
+  static bool getNextLogFilename (const std::string&, // directory
+                                  std::string&);      // return value: log filename
+
   static Net_Server_IListener_t* getListenerSingleton ();
   static Net_Server_IListener_t* getAsynchListenerSingleton ();
 
@@ -37,6 +46,14 @@ class Net_Server_Export Net_Server_Common_Tools
   ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Server_Common_Tools ());
   ACE_UNIMPLEMENTED_FUNC (Net_Server_Common_Tools (const Net_Server_Common_Tools&));
   ACE_UNIMPLEMENTED_FUNC (Net_Server_Common_Tools& operator= (const Net_Server_Common_Tools&));
+
+  // *NOTE*: implements log rotation
+  // callbacks used for scandir...
+  static int selector (const dirent*); // directory entry
+  static int comparator (const dirent**,  // directory entry
+                         const dirent**); // directory entry
+
+  static unsigned int maxNumberOfLogFiles_;
 };
 
 #endif

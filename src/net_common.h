@@ -21,6 +21,11 @@
 #ifndef NET_COMMON_H
 #define NET_COMMON_H
 
+#include "stream_messageallocatorheap_base.h"
+
+#include "net_message.h"
+#include "net_sessionmessage.h"
+
 enum Net_ClientServerRole_t
 {
   ROLE_INVALID = -1,
@@ -41,5 +46,8 @@ enum Net_TransportLayer_t
   ///////////////////////////////////////
   TRANSPORTLAYER_MAX
 };
+
+typedef Stream_MessageAllocatorHeapBase_T<Net_Message,
+                                          Net_SessionMessage> Net_StreamMessageAllocator_t;
 
 #endif

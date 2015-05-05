@@ -28,6 +28,7 @@
 #include "common_ui_common.h"
 #include "common_ui_defines.h"
 #include "common_ui_gtk_manager.h"
+#include "common_ui_tools.h"
 
 #include "net_common.h"
 #include "net_connection_common.h"
@@ -38,12 +39,9 @@
 
 #include "net_server_common.h"
 
-#include "rpg_dice.h"
+#include "net_macros.h"
 
-#include "rpg_common_macros.h"
-
-#include "rpg_client_defines.h"
-#include "rpg_client_ui_tools.h"
+//#include "rpg_client_defines.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -52,7 +50,7 @@ extern "C"
 G_MODULE_EXPORT gboolean
 idle_initialize_client_UI_cb (gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::idle_initialize_client_UI_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_initialize_client_UI_cb"));
 
   Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
 
@@ -71,9 +69,9 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   // step1: initialize dialog window(s)
   GtkWidget* dialog_p =
   //  GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
-  //                                    ACE_TEXT_ALWAYS_CHAR (RPG_CLIENT_GTK_DIALOG_MAIN_NAME)));
+  //                                    ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_MAIN_NAME)));
     GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (RPG_CLIENT_GTK_DIALOG_MAIN_NAME)));
+                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_MAIN_NAME)));
   ACE_ASSERT (dialog_p);
   //  GtkWidget* image_icon_p = gtk_image_new_from_file (path.c_str ());
   //  ACE_ASSERT (image_icon_p);
@@ -85,9 +83,9 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 
   GtkWidget* about_dialog_p =
     //GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
-    //                                  ACE_TEXT_ALWAYS_CHAR (RPG_CLIENT_GTK_DIALOG_ABOUT_NAME)));
+    //                                  ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
     GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (RPG_CLIENT_GTK_DIALOG_ABOUT_NAME)));
+                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
   ACE_ASSERT (about_dialog_p);
 
   // step2: initialize info view
@@ -307,7 +305,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 G_MODULE_EXPORT gboolean
 idle_initialize_server_UI_cb (gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::idle_initialize_server_UI_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_initialize_server_UI_cb"));
 
   Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
 
@@ -325,9 +323,9 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   // step1: initialize dialog window(s)
   GtkWidget* dialog_p =
     //GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
-    //                                  ACE_TEXT_ALWAYS_CHAR (RPG_CLIENT_GTK_DIALOG_MAIN_NAME)));
+    //                                  ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_MAIN_NAME)));
     GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (RPG_CLIENT_GTK_DIALOG_MAIN_NAME)));
+                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_MAIN_NAME)));
   ACE_ASSERT (dialog_p);
   //  GtkWidget* image_icon = gtk_image_new_from_file (path.c_str());
   //  ACE_ASSERT (image_icon);
@@ -339,9 +337,9 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 
   GtkWidget* about_dialog_p =
     //GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
-    //                                  ACE_TEXT_ALWAYS_CHAR (RPG_CLIENT_GTK_DIALOG_ABOUT_NAME)));
+    //                                  ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
     GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (RPG_CLIENT_GTK_DIALOG_ABOUT_NAME)));
+                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
   ACE_ASSERT (about_dialog_p);
 
   // step2: initialize info view
@@ -550,7 +548,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 G_MODULE_EXPORT gboolean
 idle_finalize_UI_cb (gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
 
   // leave GTK
   gtk_main_quit ();
@@ -561,7 +559,7 @@ idle_finalize_UI_cb (gpointer userData_in)
 G_MODULE_EXPORT gboolean
 idle_update_log_display_cb (gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
 
   Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
 
@@ -598,11 +596,11 @@ idle_update_log_display_cb (gpointer userData_in)
       return TRUE; // G_SOURCE_CONTINUE
 
     // step1: convert text
-    for (RPG_Client_MessageStackConstIterator_t iterator_2 = data_p->logStack.begin ();
+    for (Common_MessageStackConstIterator_t iterator_2 = data_p->logStack.begin ();
          iterator_2 != data_p->logStack.end ();
          iterator_2++)
     {
-      converted_text = RPG_Client_UI_Tools::Locale2UTF8 (*iterator_2);
+      converted_text = Common_UI_Tools::Locale2UTF8 (*iterator_2);
       if (!converted_text)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -654,7 +652,7 @@ idle_update_log_display_cb (gpointer userData_in)
 G_MODULE_EXPORT gboolean
 idle_update_info_display_cb (gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
 
   Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
 
@@ -770,7 +768,7 @@ G_MODULE_EXPORT gint
 button_connect_clicked_cb(GtkWidget* widget_in,
                           gpointer userData_in)
 {
-  RPG_TRACE(ACE_TEXT("::button_connect_clicked_cb"));
+  NETWORK_TRACE(ACE_TEXT("::button_connect_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
@@ -804,7 +802,7 @@ G_MODULE_EXPORT gint
 button_close_clicked_cb (GtkWidget* widget_in,
                          gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::button_close_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_close_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
@@ -838,7 +836,7 @@ G_MODULE_EXPORT gint
 button_close_all_clicked_cb (GtkWidget* widget_in,
                              gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::button_close_all_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_close_all_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
@@ -861,7 +859,7 @@ G_MODULE_EXPORT gint
 button_ping_clicked_cb (GtkWidget* widget_in,
                         gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::button_ping_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_ping_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
@@ -873,18 +871,24 @@ button_ping_clicked_cb (GtkWidget* widget_in,
     return FALSE;
 
   // grab a (random) connection handler
-  // *WARNING*: there's a race condition here...
-  RPG_Dice_RollResult_t result;
-  RPG_Dice::generateRandomNumbers (num_connections,
-                                   1,
-                                   result);
+  int index = 0;
+  // *PORTABILITY*: outside glibc, this is not very portable...
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+  index = ((::random () % num_connections) + 1);
+#else
+  // *NOTE*: use ACE_OS::rand_r() for improved thread safety !
+  //results_out.push_back((ACE_OS::rand() % range_in) + 1);
+  unsigned int usecs = static_cast<unsigned int> (COMMON_TIME_NOW.usec ());
+  index = ((ACE_OS::rand_r (&usecs) % num_connections) + 1);
+#endif
+
   Net_InetConnectionManager_t::CONNECTION_T* connection_base_p =
-      NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator[] (result.front () - 1);
+      NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
   if (!connection_base_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve connection handler (%d), aborting\n"),
-                result.front () - 1));
+                index - 1));
     return FALSE;
   } // end IF
   Net_ITransportLayer_t* connection_p =
@@ -926,7 +930,7 @@ G_MODULE_EXPORT gint
 togglebutton_stress_toggled_cb (GtkWidget* widget_in,
                                 gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::togglebutton_stress_toggled_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::togglebutton_stress_toggled_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
@@ -997,7 +1001,7 @@ G_MODULE_EXPORT gint
 togglebutton_listen_toggled_cb (GtkWidget* widget_in,
                                 gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::togglebutton_listen_toggled_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::togglebutton_listen_toggled_cb"));
 
   Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
 
@@ -1046,7 +1050,7 @@ G_MODULE_EXPORT gint
 button_report_clicked_cb (GtkWidget* widget_in,
                           gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::button_report_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_report_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
@@ -1073,7 +1077,7 @@ G_MODULE_EXPORT gint
 button_about_clicked_cb (GtkWidget* widget_in,
                          gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::button_about_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_about_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
@@ -1092,16 +1096,14 @@ button_about_clicked_cb (GtkWidget* widget_in,
   // retrieve about dialog handle
   GtkDialog* about_dialog =
     //GTK_DIALOG (glade_xml_get_widget ((*iterator).second.second,
-    //                                  ACE_TEXT_ALWAYS_CHAR(RPG_CLIENT_GTK_DIALOG_ABOUT_NAME)));
+    //                                  ACE_TEXT_ALWAYS_CHAR(NET_UI_GTK_DIALOG_ABOUT_NAME)));
     GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (RPG_CLIENT_GTK_DIALOG_ABOUT_NAME)));
-  ACE_ASSERT(about_dialog);
+                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
   if (!about_dialog)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to glade_xml_get_widget(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (RPG_CLIENT_GTK_DIALOG_ABOUT_NAME)));
-
+                ACE_TEXT (NET_UI_GTK_DIALOG_ABOUT_NAME)));
     return TRUE; // propagate
   } // end IF
 
@@ -1123,7 +1125,7 @@ G_MODULE_EXPORT gint
 button_quit_clicked_cb (GtkWidget* widget_in,
                         gpointer userData_in)
 {
-  RPG_TRACE (ACE_TEXT ("::button_quit_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_quit_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);

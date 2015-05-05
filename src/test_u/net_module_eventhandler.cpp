@@ -19,55 +19,55 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "net_eventhandler.h"
-
-#include "ace/Synch.h"
-
-#include "stream_common.h"
+#include "net_module_eventhandler.h"
 
 #include "net_macros.h"
-#include "net_message.h"
 
-#include "net_common.h"
-
-Net_EventHandler::Net_EventHandler (Net_GTK_CBData_t* CBData_in)
- : CBData_ (CBData_in)
+Net_Module_EventHandler::Net_Module_EventHandler ()
+ : inherited ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::Net_EventHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_EventHandler::Net_Module_EventHandler"));
 
 }
 
-Net_EventHandler::~Net_EventHandler ()
+Net_Module_EventHandler::~Net_Module_EventHandler ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::~Net_EventHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_EventHandler::~Net_Module_EventHandler"));
 
 }
 
-void
-Net_EventHandler::start (const Stream_ModuleConfiguration_t& configuration_in)
+Common_Module_t*
+Net_Module_EventHandler::clone ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::start"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_EventHandler::clone"));
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (CBData_->stackLock);
+  // initialize return value(s)
+  Common_Module_t* module_p = NULL;
 
-  CBData_->eventStack.push_back (NET_GTKEVENT_CONNECT);
-}
+  ACE_NEW_NORETURN (module_p,
+                    Net_Module_EventHandler_Module (ACE_TEXT_ALWAYS_CHAR (inherited::name ()),
+                    NULL));
+  if (!module_p)
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory(%u): %m, aborting\n"),
+                sizeof (Net_Module_EventHandler_Module)));
+  else
+  {
+    Net_Module_EventHandler* eventHandler_impl = NULL;
+    eventHandler_impl =
+      dynamic_cast<Net_Module_EventHandler*> (module_p->writer ());
+    if (!eventHandler_impl)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("dynamic_cast<Net_Module_EventHandler> failed, aborting\n")));
 
-void
-Net_EventHandler::notify (const Net_Message& message_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
+      // clean up
+      delete module_p;
 
-  // *TODO*
-  ACE_UNUSED_ARG (message_in);
-}
+      return NULL;
+    } // end IF
+    eventHandler_impl->initialize (inherited::subscribers_, inherited::lock_);
+  } // end ELSE
 
-void
-Net_EventHandler::end ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::end"));
-
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (CBData_->stackLock);
-
-  CBData_->eventStack.push_back (NET_GTKEVENT_DISCONNECT);
+  return module_p;
 }
