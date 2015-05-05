@@ -51,10 +51,6 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
 
-//  // *NOTE*: let the proactor manage this handler...
-//  if (inherited4::manager_ &&
-//      inherited4::isRegistered_)
-//    inherited4::decrease ();
 }
 
 template <typename AddressType,
@@ -573,7 +569,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return *static_cast<unsigned int*> (inherited::handle ());
+  return reinterpret_cast<unsigned int> (inherited::handle ());
 #else
   return static_cast<unsigned int> (inherited::handle ());
 #endif
@@ -805,10 +801,6 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
 
-//  // *NOTE*: let the proactor manage this handler...
-//  if (inherited4::manager_ &&
-//      inherited4::isRegistered_)
-//    inherited4::decrease ();
 }
 
 template <typename AddressType,
@@ -1307,7 +1299,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return *static_cast<unsigned int*> (inherited::handle ());
+  return reinterpret_cast<unsigned int> (inherited::handle ());
 #else
   return static_cast<unsigned int> (inherited::handle ());
 #endif

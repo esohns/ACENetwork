@@ -23,6 +23,8 @@
 
 #include "net_macros.h"
 
+#include "net_server_listener_common.h"
+
 Net_Server_IListener_t*
 Net_Server_Common_Tools::getListenerSingleton ()
 {

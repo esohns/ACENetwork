@@ -29,8 +29,7 @@
 
 #include "common_idumpstate.h"
 
-#include "net_configuration.h"
-
+#include "net_server_common.h"
 #include "net_server_ilistener.h"
 
 template <typename ConfigurationType,
@@ -83,6 +82,7 @@ class Net_Server_Listener_T
   virtual ~Net_Server_Listener_T ();
 
   const SocketHandlerConfigurationType* configuration_;
+  Net_IInetConnectionManager_t*         interfaceHandle_;
   bool                                  isInitialized_;
   bool                                  isListening_;
   bool                                  isOpen_;

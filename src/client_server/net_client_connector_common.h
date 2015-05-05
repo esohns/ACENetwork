@@ -21,24 +21,32 @@
 #ifndef NET_CLIENT_CONNECTOR_COMMON_H
 #define NET_CLIENT_CONNECTOR_COMMON_H
 
-#include "ace/Connector.h"
-#include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
-#include "ace/SOCK_Connector.h"
 
 #include "net_configuration.h"
+#include "net_stream_common.h"
+#include "net_tcpconnection.h"
 
+#include "net_client_asynchconnector.h"
+#include "net_client_connector.h"
 #include "net_client_iconnector.h"
-
-// forward declarations
-class Net_TCPConnection;
 
 typedef Net_Client_IConnector_T<ACE_INET_Addr,
                                 Net_SocketHandlerConfiguration_t> Net_Client_IConnector_t;
 
-// *TODO*: this clearly is a design glitch
-//         (see also: net_socketconnection_base.inl:242)
-typedef ACE_Connector<Net_TCPConnection,
-                      ACE_SOCK_CONNECTOR> Net_Client_ConnectorBase_t;
+typedef Net_Client_AsynchConnector_T<ACE_INET_Addr,
+                                     Net_SocketConfiguration_t,
+                                     Net_Configuration_t,
+                                     Net_SocketHandlerConfiguration_t,
+                                     Net_UserData_t,
+                                     Net_StreamSessionData_t,
+                                     Net_AsynchTCPConnection> Net_Client_AsynchConnector_t;
+typedef Net_Client_Connector_T<ACE_INET_Addr,
+                               Net_SocketConfiguration_t,
+                               Net_Configuration_t,
+                               Net_SocketHandlerConfiguration_t,
+                               Net_UserData_t,
+                               Net_StreamSessionData_t,
+                               Net_TCPConnection> Net_Client_Connector_t;
 
 #endif

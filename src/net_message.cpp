@@ -25,6 +25,13 @@
 
 #include "net_macros.h"
 
+Net_Message::Net_Message (unsigned int requestedSize_in)
+ : inherited (requestedSize_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Message::Net_Message"));
+
+}
+
 // *NOTE*: this is implicitly invoked by duplicate() as well...
 Net_Message::Net_Message (const Net_Message& message_in)
  : inherited (message_in)
@@ -96,7 +103,7 @@ Net_Message::duplicate (void) const
 
   Net_Message* message_p = NULL;
 
-  // create a new Olimex_Mod_MPU6050_Message that contains unique copies of
+  // create a new Net_Message that contains unique copies of
   // the message block fields, but a (reference counted) "shallow" duplicate of
   // the same datablock
 
@@ -107,25 +114,54 @@ Net_Message::duplicate (void) const
                     NULL);
   else // otherwise, use the existing message_block_allocator
   {
-    // *NOTE*: the argument to malloc SHOULDN'T really matter, as this will be
-    // a "shallow" copy referencing the same datablock...
-    ACE_NEW_MALLOC_RETURN (message_p,
-                           static_cast<Net_Message*> (inherited::message_block_allocator_->calloc (inherited::capacity ())),
-                           Net_Message (*this),
-                           NULL);
+    Stream_IAllocator* allocator_p =
+      dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
+    ACE_ASSERT (allocator_p);
+allocate:
+    try
+    {
+      // *NOTE*: the argument to malloc SHOULDN'T really matter, as this will be
+      // a "shallow" copy referencing the same datablock...
+      ACE_NEW_MALLOC_RETURN (message_p,
+                             static_cast<Net_Message*> (inherited::message_block_allocator_->calloc (sizeof (Net_Message))),
+                             Net_Message (*this),
+                             NULL);
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), aborting\n"),
+                  inherited::capacity ()));
+      return NULL;
+    }
+
+    // keep retrying ?
+    if (!message_p &&
+        !allocator_p->block ())
+        goto allocate;
   } // end ELSE
   if (!message_p)
   {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate Net_Message: \"%m\", aborting\n")));
+    if (inherited::message_block_allocator_)
+    {
+      Stream_IAllocator* allocator_p =
+        dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
+      ACE_ASSERT (allocator_p);
 
+      if (allocator_p->block ())
+        ACE_DEBUG ((LM_CRITICAL,
+                    ACE_TEXT ("failed to allocate Net_Message: \"%m\", aborting\n")));
+    } // end IF
+    else
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate Net_Message: \"%m\", aborting\n")));
     return NULL;
   } // end IF
 
   // increment the reference counts of any continuation messages
   if (inherited::cont_)
   {
-    message_p->cont_ = cont_->duplicate ();
+    message_p->cont_ = inherited::cont_->duplicate ();
     if (!message_p->cont_)
     {
       ACE_DEBUG ((LM_ERROR,

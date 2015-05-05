@@ -30,8 +30,7 @@
 
 #include "common_idumpstate.h"
 
-#include "net_configuration.h"
-
+#include "net_server_common.h"
 #include "net_server_ilistener.h"
 
 template <typename ConfigurationType,
@@ -90,7 +89,9 @@ class Net_Server_AsynchListener_T
 //  virtual void handle_accept(const ACE_Asynch_Accept::Result&); // result
 
   int                                   addressFamily_;
+  Stream_IAllocator*                    allocator_;
   const SocketHandlerConfigurationType* configuration_;
+  Net_IInetConnectionManager_t*         interfaceHandle_;
   bool                                  isInitialized_;
   bool                                  isListening_;
   unsigned short                        listeningPort_;

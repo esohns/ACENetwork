@@ -381,44 +381,54 @@ Net_AsynchUDPSocketHandler::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler::allocateMessage"));
 
-  // init return value(s)
-  ACE_Message_Block* message_p = NULL;
+  // initialize return value(s)
+  ACE_Message_Block* message_block_p = NULL;
 
   if (inherited::configuration_.messageAllocator)
   {
+allocate:
     try
     {
-      message_p =
-          static_cast<ACE_Message_Block*> (inherited::configuration_.messageAllocator->malloc (requestedSize_in));
+      message_block_p =
+        static_cast<ACE_Message_Block*> (inherited::configuration_.messageAllocator->malloc (requestedSize_in));
     }
     catch (...)
     {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-                  requestedSize_in));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(0), aborting\n")));
+      return NULL;
     }
-  }
+
+    // keep retrying ?
+    if (!message_block_p &&
+        !inherited::configuration_.messageAllocator->block ())
+        goto allocate;
+  } // end IF
   else
-    ACE_NEW_NORETURN (message_p,
+    ACE_NEW_NORETURN (message_block_p,
                       ACE_Message_Block (requestedSize_in,
-                                         ACE_Message_Block::MB_DATA,
-                                         NULL,
-                                         NULL,
-                                         NULL,
-                                         NULL,
-                                         ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                                         ACE_Time_Value::zero,
-                                         ACE_Time_Value::max_time,
-                                         NULL,
-                                         NULL));
-  if (!message_p)
+                      ACE_Message_Block::MB_DATA,
+                      NULL,
+                      NULL,
+                      NULL,
+                      NULL,
+                      ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                      ACE_Time_Value::zero,
+                      ACE_Time_Value::max_time,
+                      NULL,
+                      NULL));
+  if (!message_block_p)
   {
-    if (!inherited::configuration_.messageAllocator ||
-         inherited::configuration_.messageAllocator->block ())
+    if (inherited::configuration_.messageAllocator)
+    {
+      if (inherited::configuration_.messageAllocator->block ())
+        ACE_DEBUG ((LM_CRITICAL,
+                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    } // end IF
+    else
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate message buffer (%u), aborting\n"),
-                  requestedSize_in));
+                  ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
   } // end IF
 
-  return message_p;
+  return message_block_p;
 }

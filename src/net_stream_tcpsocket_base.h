@@ -88,7 +88,7 @@ class Net_StreamTCPSocketBase_T
                                    ConfigurationType,
                                    UserDataType,
                                    StatisticContainerType> ICONNECTION_MANAGER_T;
-//  typedef SocketHandlerType SOCKET_HANDLER_T;
+  typedef SocketHandlerType SOCKET_HANDLER_T;
   typedef Net_ConnectionBase_T<AddressType,
                                SocketConfigurationType,
                                ConfigurationType,

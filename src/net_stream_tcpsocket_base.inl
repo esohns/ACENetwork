@@ -304,12 +304,6 @@ Net_StreamTCPSocketBase_T<AddressType,
     // *NOTE*: this eventually calls handle_close() (see below)
     case CLOSE_DURING_NEW_CONNECTION:
     {
-      // step1: stop processing in/outbound data
-      if (stream_.isRunning ())
-        stream_.stop ();
-      stream_.waitForCompletion ();
-
-      // step2: close socket, deregister I/O handle with the reactor, ...
       int result = -1;
       result = inherited::close (CLOSE_DURING_NEW_CONNECTION);
       if (result == -1)
@@ -708,9 +702,9 @@ Net_StreamTCPSocketBase_T<AddressType,
   // step4: deregister with the connection manager (if any)
   inherited2::deregister ();
 
-//  // step5: release a reference
-//  // *IMPORTANT NOTE*: may 'delete this'
-//  inherited2::decrease ();
+  // step5: release a reference
+  // *IMPORTANT NOTE*: may 'delete this'
+  inherited2::decrease ();
 
   return result;
 }
@@ -890,7 +884,7 @@ Net_StreamTCPSocketBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::id"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return *static_cast<unsigned int*> (inherited::get_handle ());
+  return reinterpret_cast<unsigned int> (inherited::get_handle ());
 #else
   return static_cast<unsigned int> (inherited::get_handle ());
 #endif
@@ -1008,28 +1002,56 @@ Net_StreamTCPSocketBase_T<AddressType,
                           StreamType,
                           SocketHandlerType>::allocateMessage (unsigned int requestedSize_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_StreamTCPSocketBase_T::allocateMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::allocateMessage"));
 
   // initialize return value(s)
-  ACE_Message_Block* message_out = NULL;
+  ACE_Message_Block* message_block_p = NULL;
 
-  try
+  if (inherited::configuration_.messageAllocator)
   {
-    message_out =
-        static_cast<ACE_Message_Block*> (inherited2::configuration_.streamConfiguration.messageAllocator->malloc (requestedSize_in));
-  }
-  catch (...)
+allocate:
+    try
+    {
+      message_block_p =
+        static_cast<ACE_Message_Block*> (inherited::configuration_.messageAllocator->malloc (requestedSize_in));
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(0), aborting\n")));
+      return NULL;
+    }
+
+    // keep retrying ?
+    if (!message_block_p &&
+        !inherited::configuration_.messageAllocator->block ())
+        goto allocate;
+  } // end IF
+  else
+    ACE_NEW_NORETURN (message_block_p,
+    ACE_Message_Block (requestedSize_in,
+                       ACE_Message_Block::MB_DATA,
+                       NULL,
+                       NULL,
+                       NULL,
+                       NULL,
+                       ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                       ACE_Time_Value::zero,
+                       ACE_Time_Value::max_time,
+                       NULL,
+                       NULL));
+  if (!message_block_p)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-                requestedSize_in));
-  }
-  if (!message_out)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_IAllocator::malloc(%u), aborting\n"),
-                requestedSize_in));
+    if (inherited::configuration_.messageAllocator)
+    {
+      if (inherited::configuration_.messageAllocator->block ())
+        ACE_DEBUG ((LM_CRITICAL,
+                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    } // end IF
+    else
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
   } // end IF
 
-  return message_out;
+  return message_block_p;
 }

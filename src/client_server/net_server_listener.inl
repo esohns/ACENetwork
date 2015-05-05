@@ -22,7 +22,6 @@
 #include "ace/OS.h"
 #include "ace/Reactor.h"
 
-#include "net_connection_manager_common.h"
 #include "net_macros.h"
 
 #include "net_server_defines.h"
@@ -38,6 +37,7 @@ Net_Server_Listener_T<ConfigurationType,
  : inherited (NULL, // use global (default) reactor
               1)    // always accept ALL pending connections
  , configuration_ (NULL)
+ , interfaceHandle_ (NULL)
  , isInitialized_ (false)
  , isListening_ (false)
  , isOpen_ (false)
@@ -314,7 +314,7 @@ Net_Server_Listener_T<ConfigurationType,
 
   // default behavior
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (NET_CONNECTIONMANAGER_SINGLETON::instance (),
+                    HandlerType (interfaceHandle_,
                                  statisticCollectionInterval_));
   if (!handler_out)
     ACE_DEBUG ((LM_CRITICAL,

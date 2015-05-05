@@ -385,7 +385,9 @@ Net_SocketConnectionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::close"));
 
-  // [*NOTE*: hereby we override the default behavior of a ACE_Svc_Handler,
+  int result = -1;
+
+  // [*NOTE*: hereby override the default behavior of a ACE_Svc_Handler,
   // which would call handle_close() AGAIN]
 
   // *NOTE*: this method will be invoked
@@ -426,7 +428,18 @@ Net_SocketConnectionBase_T<AddressType,
     // (e.g. cannot connect, too many connections, ...)
     // *NOTE*: this (eventually) calls handle_close() (see below)
     case CLOSE_DURING_NEW_CONNECTION:
-      return inherited::close (CLOSE_DURING_NEW_CONNECTION);
+    {
+      result = inherited::close (CLOSE_DURING_NEW_CONNECTION);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to HandlerType::close(CLOSE_DURING_NEW_CONNECTION): \"%m\", continuing\n")));
+
+      //// release a reference
+      //// *IMPORTANT NOTE*: may 'delete this'
+      //inherited::decrease ();
+
+      break;
+    } // end IF
     default:
     {
       ACE_DEBUG ((LM_ERROR,

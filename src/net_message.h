@@ -32,7 +32,6 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 class Net_SessionMessage;
-// class Net_StreamMessageAllocator;
 template <typename MessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
@@ -41,11 +40,11 @@ class Net_Export Net_Message
                             Net_MessageType_t>
 {
   // enable access to specific private ctors...
-  //   friend class RPG_Net_StreamMessageAllocator;
   friend class Stream_MessageAllocatorHeapBase_T<Net_Message,
                                                  Net_SessionMessage>;
 
  public:
+  Net_Message (unsigned int); // size
   virtual ~Net_Message ();
 
   virtual Net_MessageType_t getCommand () const; // return value: message type

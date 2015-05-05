@@ -308,7 +308,7 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Stream::write(%u): \"%m\", aborting\n"),
 //               buffer_->size ()));
-               message_block_p->size ()));
+                message_block_p->size ()));
 
     // clean up
     message_block_p->release ();
@@ -564,7 +564,7 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::id"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return *static_cast<unsigned int*> (inherited::handle ());
+  return reinterpret_cast<unsigned int> (inherited::handle ());
 #else
   return static_cast<unsigned int> (inherited::handle ());
 #endif

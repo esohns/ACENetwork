@@ -25,7 +25,6 @@
 
 #include "net_macros.h"
 
-#include "net_connection_manager_common.h"
 #include "net_server_defines.h"
 
 template <typename ConfigurationType,
@@ -37,8 +36,10 @@ Net_Server_AsynchListener_T<ConfigurationType,
                             UserDataType,
                             HandlerType>::Net_Server_AsynchListener_T ()
  : inherited ()
- , addressFamily_ (2)
+ , allocator_ (NULL)
+ , addressFamily_ (ACE_ADDRESS_FAMILY_INET)
  , configuration_ (NULL)
+ , interfaceHandle_ (NULL)
  , isInitialized_ (false)
  , isListening_ (false)
  , listeningPort_ (NET_SERVER_DEFAULT_LISTENING_PORT)
@@ -121,7 +122,8 @@ Net_Server_AsynchListener_T<ConfigurationType,
   // *IMPORTANT NOTE*: with minor modifications, this code was copied from
   //                   Asynch_Acceptor.cpp
 
-  ACE_Message_Block *message_block = 0;
+  int result = -1;
+
   // The space_needed calculation is drive by needs of Windows. POSIX doesn't
   // need to extra 16 bytes, but it doesn't hurt.
   size_t space_needed = sizeof (sockaddr_in) + 16;
@@ -132,32 +134,53 @@ Net_Server_AsynchListener_T<ConfigurationType,
   space_needed = (2 * space_needed) + bytesToRead_in;
 
   // Create a new message block big enough for the addresses and data
-  ACE_NEW_RETURN (message_block,
-                  ACE_Message_Block (space_needed),
-                  -1);
+  ACE_Message_Block* message_block_p = NULL;
+  if (allocator_)
+    message_block_p =
+      static_cast<ACE_Message_Block*> (allocator_->malloc (space_needed));
+  else
+    ACE_NEW_NORETURN (message_block_p,
+                      ACE_Message_Block (space_needed,
+                                         ACE_Message_Block::MB_DATA,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                         ACE_Time_Value::zero,
+                                         ACE_Time_Value::max_time,
+                                         NULL,
+                                         NULL));
+  if (!message_block_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    return -1;
+  } // end IF
 
   // Initiate asynchronous accepts
-  int result = inherited::asynch_accept ().accept (*message_block,
-                                                   bytesToRead_in,
-                                                   ACE_INVALID_HANDLE,
-                                                   (act_in ? act_in
-                                                           : configuration_),
-                                                   0,
-                                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL,
-                                                   //this->addr_family_,
-                                                   addressFamily_);
+  result =
+    inherited::asynch_accept ().accept (*message_block_p,
+                                        bytesToRead_in,
+                                        ACE_INVALID_HANDLE,
+                                        (act_in ? act_in
+                                                : configuration_),
+                                        0,
+                                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL,
+                                        //this->addr_family_,
+                                        addressFamily_);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Accept::accept(): \"%m\", aborting\n")));
 
     // Cleanup on error
-    message_block->release ();
+    message_block_p->release ();
 
     return -1;
-  }
+  } // end IF
 
-  return 0;
+  return result;
 }
 
 template <typename ConfigurationType,
@@ -189,7 +212,9 @@ Net_Server_AsynchListener_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::initialize"));
 
   addressFamily_ = configuration_in.addressFamily;
+  allocator_ = configuration_in.allocator;
   configuration_ = configuration_in.socketHandlerConfiguration;
+  interfaceHandle_ = configuration_in.connectionManager;
   listeningPort_ = configuration_in.portNumber;
   statisticCollectionInterval_ = configuration_in.statisticCollectionInterval;
   useLoopback_ = configuration_in.useLoopbackDevice;
@@ -396,7 +421,7 @@ Net_Server_AsynchListener_T<ConfigurationType,
 
   // default behavior
   ACE_NEW_NORETURN (connection_p,
-                    HandlerType (NET_CONNECTIONMANAGER_SINGLETON::instance (),
+                    HandlerType (interfaceHandle_,
                                  statisticCollectionInterval_));
   if (!connection_p)
     ACE_DEBUG ((LM_CRITICAL,

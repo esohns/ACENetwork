@@ -161,10 +161,10 @@ Net_Client_Connector_T<AddressType,
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
     // *TODO*: find a replacement for ACE_Netlink_Addr::addr_to_string
-//    result = address_in.addr_to_string (buffer, sizeof (buffer));
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
+    result = address_in.addr_to_string (buffer, sizeof (buffer));
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Connector::connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));

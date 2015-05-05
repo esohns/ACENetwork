@@ -43,3 +43,6 @@ m4/ltoptions.m4
 
 Debug
 Release
+/prj/msvc/Debug_obj
+/prj/msvc/*.sdf
+/prj/msvc/*.suo

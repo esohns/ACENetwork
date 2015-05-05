@@ -243,8 +243,8 @@ Net_ConnectionBase_T<AddressType,
                 manager_->numConnections ()));
 #endif
 
-    // *NOTE*: let the reactor/proactor/manager handle lifetime
-    inherited::decrease ();
+    //// *NOTE*: let the reactor/proactor/manager handle lifetime
+    //inherited::decrease ();
   } // end IF
 
   return true;

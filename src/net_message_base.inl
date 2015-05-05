@@ -25,6 +25,17 @@
 
 #include "net_macros.h"
 
+template <typename HeaderType,
+          typename ProtocolCommandType>
+Net_MessageBase_T<HeaderType,
+                  ProtocolCommandType>::Net_MessageBase_T (unsigned int requestedSize_in)
+ : inherited (requestedSize_in)
+ , isInitialized_ (true)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_MessageBase_T::Net_MessageBase_T"));
+
+}
+
 // *NOTE*: this is implicitly invoked by duplicate() as well...
 template <typename HeaderType,
           typename ProtocolCommandType>

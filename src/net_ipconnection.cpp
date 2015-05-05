@@ -247,7 +247,7 @@
 //  NETWORK_TRACE (ACE_TEXT ("Net_IPMulticastConnection::id"));
 
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  return *static_cast<unsigned int*> (inherited::SVC_HANDLER_T::get_handle ());
+//  return reinterpret_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ());
 //#else
 //  return static_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ());
 //#endif
@@ -734,7 +734,7 @@
 //        peer_inet_address);
 
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  return *static_cast<unsigned int*> (handle);
+//  return reinterpret_cast<unsigned int> (handle);
 //#else
 //  return static_cast<unsigned int> (handle);
 //#endif

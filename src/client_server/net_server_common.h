@@ -21,41 +21,25 @@
 #ifndef NET_SERVER_COMMON_H
 #define NET_SERVER_COMMON_H
 
-#include "ace/Singleton.h"
-#include "ace/Synch.h"
+#include "stream_iallocator.h"
 
 #include "net_configuration.h"
 #include "net_connection_manager_common.h"
-#include "net_stream_common.h"
-#include "net_tcpconnection.h"
 
-#include "net_server_asynchlistener.h"
-#include "net_server_exports.h"
 #include "net_server_ilistener.h"
-#include "net_server_listener.h"
+
+struct Net_ListenerConfiguration_t
+{
+  int                               addressFamily;
+  Stream_IAllocator*                allocator;
+  Net_IInetConnectionManager_t*     connectionManager;
+  unsigned short                    portNumber;
+  Net_SocketHandlerConfiguration_t* socketHandlerConfiguration;
+  unsigned int                      statisticCollectionInterval; // statistics collecting interval (second(s))
+                                                                 // 0 --> DON'T collect statistics
+  bool                              useLoopbackDevice;
+};
 
 typedef Net_Server_IListener_T<Net_ListenerConfiguration_t> Net_Server_IListener_t;
-
-typedef Net_Server_AsynchListener_T<Net_Configuration_t,
-                                    Net_SocketHandlerConfiguration_t,
-                                    Net_UserData_t,
-                                    Net_AsynchTCPConnection> Net_Server_AsynchListener_t;
-
-typedef Net_Server_Listener_T<Net_Configuration_t,
-                              Net_SocketHandlerConfiguration_t,
-                              Net_UserData_t,
-                              Net_TCPConnection> Net_Server_Listener_t;
-
-typedef ACE_Singleton<Net_Server_AsynchListener_t,
-                      ACE_Recursive_Thread_Mutex> NET_SERVER_ASYNCHLISTENER_SINGLETON;
-NET_SERVER_SINGLETON_DECLARE (ACE_Singleton,
-                              Net_Server_AsynchListener_t,
-                              ACE_Recursive_Thread_Mutex);
-
-typedef ACE_Singleton<Net_Server_Listener_t,
-                      ACE_Recursive_Thread_Mutex> NET_SERVER_LISTENER_SINGLETON;
-NET_SERVER_SINGLETON_DECLARE (ACE_Singleton,
-                              Net_Server_Listener_t,
-                              ACE_Recursive_Thread_Mutex);
 
 #endif

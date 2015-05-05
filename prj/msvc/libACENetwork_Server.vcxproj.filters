@@ -53,6 +53,9 @@
     <ClInclude Include="..\..\src\client_server\net_server_common_tools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\client_server\net_server_listener_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\client_server\net_server_asynchlistener.inl">

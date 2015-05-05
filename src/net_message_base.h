@@ -50,6 +50,8 @@ class Net_MessageBase_T
   HeaderType getHeader () const;
 
  protected:
+  Net_MessageBase_T (unsigned int); // size
+
   // copy ctor to be used by duplicate() and child classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")
   Net_MessageBase_T (const Net_MessageBase_T&);

@@ -127,15 +127,15 @@ class Net_Connection_Manager_T
   virtual ~Net_Connection_Manager_T ();
 
   // implement blocking wait...
-//  mutable ACE_Condition<ACE_Recursive_Thread_Mutex> condition_;
-  mutable ACE_Condition<ACE_Thread_Mutex>           condition_;
+  mutable ACE_Condition<ACE_Recursive_Thread_Mutex> condition_;
+//  mutable ACE_Condition<ACE_Thread_Mutex>           condition_;
   ConfigurationType                                 configuration_; // defailt-
   CONNECTION_CONTAINER_T                            connections_;
   bool                                              isActive_;
   bool                                              isInitialized_;
-//  // *NOTE*: MUST be recursive, otherwise asynchronous abort is not feasible
-//  mutable ACE_Recursive_Thread_Mutex                lock_;
-  mutable ACE_Thread_Mutex                          lock_;
+  // *NOTE*: MUST be recursive, otherwise asynchronous abort is not feasible
+  mutable ACE_Recursive_Thread_Mutex                lock_;
+  //mutable ACE_Thread_Mutex                          lock_;
   unsigned int                                      maxNumConnections_;
   UserDataType*                                     userData_;
 };

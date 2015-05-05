@@ -47,16 +47,6 @@ struct Net_SocketHandlerConfiguration_t
   Net_SocketConfiguration_t socketConfiguration;
 };
 
-struct Net_ListenerConfiguration_t
-{
-  int                               addressFamily;
-  unsigned short                    portNumber;
-  Net_SocketHandlerConfiguration_t* socketHandlerConfiguration;
-  unsigned int                      statisticCollectionInterval; // statistics collecting interval (second(s))
-                                                                 // 0 --> DON'T collect statistics
-  bool                              useLoopbackDevice;
-};
-
 struct Net_ProtocolConfiguration_t
 {
   int          bufferSize; // pdu size (if fixed)
