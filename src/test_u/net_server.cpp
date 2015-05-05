@@ -870,16 +870,19 @@ ACE_TMAIN (int argc_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::main"));
 
-  // step0: init
-// *PORTABILITY*: on Windows, init ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (ACE::init () == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-#endif
+  int result = -1;
+
+  // step0: initialize
+//// *PORTABILITY*: on Windows, initialize ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  result = ACE::init ();
+//  if (result == -1)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
+//    return EXIT_FAILURE;
+//  } // end IF
+//#endif
 
   // *PROCESS PROFILE*
   ACE_Profile_Timer process_profile;
@@ -946,12 +949,13 @@ ACE_TMAIN (int argc_in,
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
-    // *PORTABILITY*: on Windows, need to fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (ACE::fini () == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+//    // *PORTABILITY*: on Windows, need to fini ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    result = ACE::fini ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+//#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -979,12 +983,13 @@ ACE_TMAIN (int argc_in,
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
-    // *PORTABILITY*: on Windows, need to fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (ACE::fini () == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+//    // *PORTABILITY*: on Windows, need to fini ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    result = ACE::fini ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+//#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1008,12 +1013,13 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
 
-    // *PORTABILITY*: on Windows, need to fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (ACE::fini () == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+//    // *PORTABILITY*: on Windows, need to fini ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    result = ACE::fini ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+//#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1035,12 +1041,13 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::getNextLogFilename(), aborting\n")));
 
-    // *PORTABILITY*: on Windows, need to fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (ACE::fini () == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+//    // *PORTABILITY*: on Windows, need to fini ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    result = ACE::fini ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+//#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1055,12 +1062,13 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeLogging(), aborting\n")));
 
-    // *PORTABILITY*: on Windows, need to fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (ACE::fini () == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+//    // *PORTABILITY*: on Windows, need to fini ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    result = ACE::fini ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+//#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1070,12 +1078,13 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    // *PORTABILITY*: on Windows, need to fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (ACE::fini () == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+//    // *PORTABILITY*: on Windows, need to fini ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    result = ACE::fini ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+//#endif
 
     return EXIT_SUCCESS;
   } // end IF
@@ -1093,12 +1102,13 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
 
-    // *PORTABILITY*: on Windows, need to fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (ACE::fini () == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+//    // *PORTABILITY*: on Windows, need to fini ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    result = ACE::fini ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+//#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1157,12 +1167,13 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    // *PORTABILITY*: on Windows, need to fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (ACE::fini () == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+//    // *PORTABILITY*: on Windows, need to fini ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    result = ACE::fini ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+//#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1211,15 +1222,18 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-// *PORTABILITY*: on Windows, must fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (ACE::fini () == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-#endif
+//// *PORTABILITY*: on Windows, must fini ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  result = ACE::fini ();
+//  if (result == -1)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
+//    return EXIT_FAILURE;
+//  } // end IF
+//#endif
+
+  Common_Tools::finalizeLogging ();
 
   return EXIT_SUCCESS;
 } // end main
