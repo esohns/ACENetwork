@@ -35,13 +35,16 @@ class Net_Export Net_InetTransportLayer_Base
   virtual ~Net_InetTransportLayer_Base ();
 
   // implement (part of) Net_ITransportLayer_T
-  virtual bool initialize (Net_ClientServerRole_t,            // role
-                           const Net_SocketConfiguration_t&); // configuration
-  virtual void finalize ();
+  virtual Net_ClientServerRole_t role ();
 
  protected:
   Net_InetTransportLayer_Base (Net_ClientServerRole_t,
                                Net_TransportLayer_t);
+
+  // implement (part of) Net_ITransportLayer_T
+  virtual bool initialize (Net_ClientServerRole_t,            // role
+                           const Net_SocketConfiguration_t&); // configuration
+  virtual void finalize ();
 
   Net_ClientServerRole_t clientServerRole_;
   Net_TransportLayer_t   transportLayer_;

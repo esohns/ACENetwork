@@ -78,29 +78,18 @@ template <typename AddressType,
           typename UserDataType,
           typename SessionDataType,
           typename HandlerType>
-int
+bool
 Net_Client_Connector_T<AddressType,
                        SocketConfigurationType,
                        ConfigurationType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       HandlerType>::make_svc_handler (HandlerType*& handler_out)
+                       HandlerType>::useReactor () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
 
-  // initialize return value(s)
-  handler_out = NULL;
-
-  // default behavior
-  ACE_NEW_NORETURN (handler_out,
-                    HandlerType (interfaceHandle_,
-                                 statisticCollectionInterval_));
-  if (!handler_out)
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-
-  return (handler_out ? 0 : -1);
+  return true;
 }
 
 template <typename AddressType,
@@ -195,6 +184,38 @@ Net_Client_Connector_T<AddressType,
   return configuration_;
 }
 
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename HandlerType>
+int
+Net_Client_Connector_T<AddressType,
+                       SocketConfigurationType,
+                       ConfigurationType,
+                       HandlerConfigurationType,
+                       UserDataType,
+                       SessionDataType,
+                       HandlerType>::make_svc_handler (HandlerType*& handler_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
+
+  // initialize return value(s)
+  handler_out = NULL;
+
+  // default behavior
+  ACE_NEW_NORETURN (handler_out,
+                    HandlerType (interfaceHandle_,
+                    statisticCollectionInterval_));
+  if (!handler_out)
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+
+  return (handler_out ? 0 : -1);
+}
+
 /////////////////////////////////////////
 
 template <typename SocketConfigurationType,
@@ -248,7 +269,7 @@ template <typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
-int
+bool
 Net_Client_Connector_T<ACE_INET_Addr,
                        SocketConfigurationType,
                        ConfigurationType,
@@ -256,23 +277,12 @@ Net_Client_Connector_T<ACE_INET_Addr,
                        UserDataType,
                        SessionDataType,
                        Net_UDPConnection_T<UserDataType,
-                                           SessionDataType,
-                                           HandlerType> >::make_svc_handler (CONNECTION_T*& handler_out)
+                       SessionDataType,
+                       HandlerType> >::useReactor () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
 
-  // initialize return value(s)
-  handler_out = NULL;
-
-  // default behavior
-  ACE_NEW_NORETURN (handler_out,
-                    CONNECTION_T (interfaceHandle_,
-                                  statisticCollectionInterval_));
-  if (!handler_out)
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-
-  return (handler_out ? 0 : -1);
+  return true;
 }
 
 template <typename SocketConfigurationType,
@@ -370,6 +380,39 @@ Net_Client_Connector_T<ACE_INET_Addr,
   return configuration_;
 }
 
+template <typename SocketConfigurationType,
+          typename HandlerType,
+          typename ConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType>
+int
+Net_Client_Connector_T<ACE_INET_Addr,
+                       SocketConfigurationType,
+                       ConfigurationType,
+                       HandlerConfigurationType,
+                       UserDataType,
+                       SessionDataType,
+                       Net_UDPConnection_T<UserDataType,
+                       SessionDataType,
+                       HandlerType> >::make_svc_handler (CONNECTION_T*& handler_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
+
+  // initialize return value(s)
+  handler_out = NULL;
+
+  // default behavior
+  ACE_NEW_NORETURN (handler_out,
+                    CONNECTION_T (interfaceHandle_,
+                                  statisticCollectionInterval_));
+  if (!handler_out)
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+
+  return (handler_out ? 0 : -1);
+}
+
 /////////////////////////////////////////
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -420,29 +463,18 @@ template <typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType>
-int
+bool
 Net_Client_Connector_T<ACE_Netlink_Addr,
                        SocketConfigurationType,
                        ConfigurationType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
-                       HandlerType>::make_svc_handler (HandlerType*& handler_out)
+                       HandlerType>::useReactor () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
 
-  // initialize return value(s)
-  handler_out = NULL;
-
-  // default behavior
-  ACE_NEW_NORETURN (handler_out,
-                    HandlerType (interfaceHandle_,
-                                 statisticCollectionInterval_));
-  if (!handler_out)
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-
-  return (handler_out ? 0 : -1);
+  return true;
 }
 
 template <typename SocketConfigurationType,
@@ -533,5 +565,36 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
 
   return configuration_;
+}
+
+template <typename SocketConfigurationType,
+          typename HandlerType,
+          typename ConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType>
+int
+Net_Client_Connector_T<ACE_Netlink_Addr,
+                       SocketConfigurationType,
+                       ConfigurationType,
+                       HandlerConfigurationType,
+                       UserDataType,
+                       SessionDataType,
+                       HandlerType>::make_svc_handler (HandlerType*& handler_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
+
+  // initialize return value(s)
+  handler_out = NULL;
+
+  // default behavior
+  ACE_NEW_NORETURN (handler_out,
+                    HandlerType (interfaceHandle_,
+                                 statisticCollectionInterval_));
+  if (!handler_out)
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+
+  return (handler_out ? 0 : -1);
 }
 #endif

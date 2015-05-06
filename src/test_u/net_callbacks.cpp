@@ -916,9 +916,9 @@ button_ping_clicked_cb (GtkWidget* widget_in,
 
     return FALSE;
   }
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("session %u: sent ping...\n"),
-              connection_base_p->id ()));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("session %u: sent ping...\n"),
+  //            connection_base_p->id ()));
 
   // clean up
   connection_base_p->decrease ();

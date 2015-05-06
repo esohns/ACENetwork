@@ -29,6 +29,7 @@ class Net_ITransportLayer_T
  public:
   virtual ~Net_ITransportLayer_T () {};
 
+  virtual Net_ClientServerRole_t role () = 0;
   virtual void ping () = 0;
 
  protected:

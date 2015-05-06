@@ -77,11 +77,27 @@ Net_Server_Listener_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::initialize"));
 
   configuration_ = configuration_in.socketHandlerConfiguration;
+  interfaceHandle_ = configuration_in.connectionManager;
   listeningPort_ = configuration_in.portNumber;
   statisticCollectionInterval_ = configuration_in.statisticCollectionInterval;
   useLoopback_ = configuration_in.useLoopbackDevice;
 
   isInitialized_ = true;
+
+  return true;
+}
+
+template <typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
+          typename UserDataType,
+          typename HandlerType>
+bool
+Net_Server_Listener_T<ConfigurationType,
+                      SocketHandlerConfigurationType,
+                      UserDataType,
+                      HandlerType>::useReactor () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::useReactor"));
 
   return true;
 }

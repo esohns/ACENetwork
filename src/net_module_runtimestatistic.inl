@@ -372,7 +372,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   // *TODO*: the temaplate does not know about StatisticContainerType
   //         --> must be overriden by a (specialized) child class
 
-  // init return value(s)
+  // initialize return value(s)
   ACE_OS::memset (&data_out, 0, sizeof (StatisticContainerType));
 
   {

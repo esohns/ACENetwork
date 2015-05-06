@@ -193,8 +193,9 @@ Net_ConnectionBase_T<AddressType,
     }
     if (!isRegistered_)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IConnectionManager_T::registerc(), aborting\n")));
+      // *NOTE*: perhaps max# connections has been reached
+      //ACE_DEBUG ((LM_DEBUG,
+      //            ACE_TEXT ("failed to Net_IConnectionManager_T::registerc(), aborting\n")));
       return false;
     } // end IF
 
@@ -242,9 +243,6 @@ Net_ConnectionBase_T<AddressType,
                 ACE_TEXT (buffer),
                 manager_->numConnections ()));
 #endif
-
-    //// *NOTE*: let the reactor/proactor/manager handle lifetime
-    //inherited::decrease ();
   } // end IF
 
   return true;

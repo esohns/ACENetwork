@@ -52,7 +52,7 @@
 #include "common_ui_gtk_manager.h"
 
 #include "stream_allocatorheap.h"
-#include "stream_defines.h"
+//#include "stream_defines.h"
 
 #include "net_common_tools.h"
 #include "net_configuration.h"
@@ -66,19 +66,6 @@
 //#ifdef HAVE_CONFIG_H
 //#include "rpg_config.h"
 //#endif
-
-//#include "rpg_common_file_tools.h"
-//#include "rpg_common_macros.h"
-
-//#include "rpg_net_common.h"
-//#include "rpg_net_defines.h"
-//#include "rpg_net_module_eventhandler.h"
-
-//#include "rpg_client_logger.h"
-//
-//#include "rpg_net_server_common.h"
-//#include "rpg_net_server_common_tools.h"
-//#include "rpg_net_server_defines.h"
 
 #include "net_callbacks.h"
 #include "net_common.h"
@@ -130,6 +117,10 @@ do_printUsage (const std::string& programName_in)
             << path
             << ACE_TEXT ("\"] {\"\" --> no GUI}")
             << std::endl;
+  std::cout << ACE_TEXT ("-h           : use thread-pool [")
+            << NET_EVENT_USE_THREADPOOL
+            << ACE_TEXT ("]")
+            << std::endl;
   std::cout << ACE_TEXT ("-i [VALUE]   : client ping interval (ms) [")
             << NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL
             << ACE_TEXT ("] {0 --> OFF})")
@@ -147,7 +138,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-n [STRING]  : network interface [\"")
-            << ACE_TEXT (NET_DEFAULT_NETWORK_INTERFACE)
+            << ACE_TEXT (NET_INTERFACE_DEFAULT)
             << ACE_TEXT ("\"]")
             << std::endl;
   // *TODO*: this doesn't really make sense (yet)
@@ -160,7 +151,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-r           : use reactor [")
-            << NET_USES_REACTOR
+            << NET_EVENT_USE_REACTOR
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-s [VALUE]   : statistics reporting interval (second(s)) [")
@@ -180,6 +171,8 @@ bool
 do_processArguments (const int& argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
                      unsigned int& maxNumConnections_out,
+                     std::string& UIFile_out,
+                     bool& useThreadPool_out,
                      unsigned int& clientPingInterval_out,
                      //unsigned int& keepAliveTimeout_out,
                      bool& logToFile_out,
@@ -190,7 +183,6 @@ do_processArguments (const int& argc_in,
                      bool& useReactor_out,
                      unsigned int& statisticsReportingInterval_out,
                      bool& traceInformation_out,
-                     std::string& UIFile_out,
                      bool& printVersionAndExit_out,
                      unsigned int& numDispatchThreads_out)
 {
@@ -213,32 +205,33 @@ do_processArguments (const int& argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
-  maxNumConnections_out           =
+  maxNumConnections_out =
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
-  clientPingInterval_out          =
-    NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
-//  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
-  logToFile_out                   = false;
-  useUDP_out                      = false;
-  networkInterface_out            =
-    ACE_TEXT_ALWAYS_CHAR (NET_DEFAULT_NETWORK_INTERFACE);
-  useLoopback_out                 = false;
-  listeningPortNumber_out         = NET_SERVER_DEFAULT_LISTENING_PORT;
-  useReactor_out                  = NET_USES_REACTOR;
-  statisticsReportingInterval_out =
-      NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL;
-  traceInformation_out            = false;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
-  UIFile_out                      = path;
-  printVersionAndExit_out         = false;
-  numDispatchThreads_out          =
+  UIFile_out = path;
+  useThreadPool_out = NET_EVENT_USE_THREADPOOL;
+  clientPingInterval_out =
+    NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
+//  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
+  logToFile_out = false;
+  useUDP_out = false;
+  networkInterface_out =
+    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT);
+  useLoopback_out = false;
+  listeningPortNumber_out = NET_SERVER_DEFAULT_LISTENING_PORT;
+  useReactor_out = NET_EVENT_USE_REACTOR;
+  statisticsReportingInterval_out =
+      NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL;
+  traceInformation_out = false;
+  printVersionAndExit_out = false;
+  numDispatchThreads_out =
     NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("c:g::i:k:lmn:op:rs:tvx:"));
+                              ACE_TEXT ("c:g::hi:k:lmn:op:rs:tvx:"));
 
   int option = 0;
   std::stringstream converter;
@@ -261,6 +254,11 @@ do_processArguments (const int& argc_in,
           UIFile_out = ACE_TEXT_ALWAYS_CHAR (opt_arg);
         else
           UIFile_out.clear ();
+        break;
+      }
+      case 'h':
+      {
+        useThreadPool_out = true;
         break;
       }
       case 'i':
@@ -446,6 +444,8 @@ do_initializeSignals (bool useReactor_in,
 
 void
 do_work (unsigned int maxNumConnections_in,
+         const std::string& UIDefinitionFile_in,
+         bool useThreadPool_in,
          unsigned int pingInterval_in,
          //unsigned int keepAliveTimeout_in,
          bool useUDP_in,
@@ -455,7 +455,6 @@ do_work (unsigned int maxNumConnections_in,
          bool useReactor_in,
          unsigned int statisticsReportingInterval_in,
          unsigned int numDispatchThreads_in,
-         const std::string& UIDefinitionFile_in,
          Net_GTK_CBData_t& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -484,9 +483,9 @@ do_work (unsigned int maxNumConnections_in,
   eventHandler_impl->subscribe (&ui_event_handler);
 
   Stream_AllocatorHeap heap_allocator;
-  Net_StreamMessageAllocator_t message_allocator (STREAM_MAX_MESSAGES,
-                                                  &heap_allocator,
-                                                  false);
+  Net_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
+                                                  &heap_allocator,         // heap allocator handle
+                                                  true);                   // block ?
 
   Net_Configuration_t configuration;
   ACE_OS::memset (&configuration, 0, sizeof (Net_Configuration_t));
@@ -497,7 +496,7 @@ do_work (unsigned int maxNumConnections_in,
   configuration.protocolConfiguration.printPongMessages = true;
   // ************ socket / stream configuration data ************
   configuration.socketConfiguration.bufferSize =
-    NET_DEFAULT_SOCKET_RECEIVE_BUFFER_SIZE;
+    NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
   configuration.streamConfiguration.moduleConfiguration = &module_configuration;
   //  config.useThreadPerConnection = false;
   //  config.serializeOutput = false;
@@ -520,7 +519,7 @@ do_work (unsigned int maxNumConnections_in,
 
   // step0b: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (useReactor_in,
-                                              numDispatchThreads_in,
+                                              useThreadPool_in,
                                               configuration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -644,44 +643,49 @@ do_work (unsigned int maxNumConnections_in,
 
   // step4b: initialize worker(s)
   int group_id = -1;
+  // *NOTE*: this variable needs to stay on the working stack, it's passed to
+  //         the worker(s) (if any)
   bool use_reactor = useReactor_in;
-  if (!Common_Tools::startEventDispatch (use_reactor,
-                                         numDispatchThreads_in,
-                                         group_id))
+  if (useThreadPool_in &&
+      (numDispatchThreads_in > 1))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to start event dispatch, returning\n")));
-
-    // clean up
-    if (timer_id != -1)
+    if (!Common_Tools::startEventDispatch (use_reactor,
+                                           numDispatchThreads_in,
+                                           group_id))
     {
-      result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timer_id,
-                                                                   &act_p);
-      if (result <= 0)
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                    timer_id));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to start event dispatch, returning\n")));
+
+      // clean up
+      if (timer_id != -1)
+      {
+        result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timer_id,
+                                                                     &act_p);
+        if (result <= 0)
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
+                      timer_id));
+      } // end IF
+      //		{ // synch access
+      //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
+
+      //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
+      //					 iterator != CBData_in.event_source_ids.end();
+      //					 iterator++)
+      //				g_source_remove(*iterator);
+      //		} // end lock scope
+      if (!UIDefinitionFile_in.empty ())
+        COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+      COMMON_TIMERMANAGER_SINGLETON::instance()->stop();
+      Common_Tools::finalizeSignals (signalSet_in,
+                                     useReactor_in,
+                                     previousSignalActions_inout);
+
+      return;
     } // end IF
-    //		{ // synch access
-    //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-    //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-    //					 iterator != CBData_in.event_source_ids.end();
-    //					 iterator++)
-    //				g_source_remove(*iterator);
-    //		} // end lock scope
-    if (!UIDefinitionFile_in.empty ())
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
-    COMMON_TIMERMANAGER_SINGLETON::instance()->stop();
-    Common_Tools::finalizeSignals (signalSet_in,
-                                   useReactor_in,
-                                   previousSignalActions_inout);
-
-    return;
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("started event dispatch...\n")));
   } // end IF
-
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("started event dispatch...\n")));
 
   // step4c: start listening
   Net_SocketHandlerConfiguration_t socket_handler_configuration;
@@ -712,9 +716,11 @@ do_work (unsigned int maxNumConnections_in,
                 ACE_TEXT ("failed to initialize listener, returning\n")));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         group_id);
+    if (useThreadPool_in &&
+        (numDispatchThreads_in > 1))
+      Common_Tools::finalizeEventDispatch (useReactor_in,
+                                           !useReactor_in,
+                                           group_id);
     if (timer_id != -1)
     {
       result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timer_id,
@@ -749,9 +755,11 @@ do_work (unsigned int maxNumConnections_in,
                 listeningPortNumber_in));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         group_id);
+    if (useThreadPool_in &&
+        (numDispatchThreads_in > 1))
+      Common_Tools::finalizeEventDispatch (useReactor_in,
+                                           !useReactor_in,
+                                           group_id);
     if (timer_id != -1)
     {
       result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timer_id,
@@ -782,7 +790,8 @@ do_work (unsigned int maxNumConnections_in,
   // *NOTE*: from this point on, clean up any remote connections !
 
   // *NOTE*: when using a thread pool, handle things differently...
-  if (numDispatchThreads_in > 1)
+  if (useThreadPool_in &&
+      (numDispatchThreads_in > 1))
   {
     result = ACE_Thread_Manager::instance ()->wait_grp (group_id);
     if (result == -1)
@@ -794,9 +803,6 @@ do_work (unsigned int maxNumConnections_in,
   {
     if (useReactor_in)
     {
-/*      // *WARNING*: restart system calls (after e.g. SIGINT) for the reactor
-      ACE_Reactor::instance()->restart(1);
-*/
       result = ACE_Reactor::instance ()->run_reactor_event_loop (0);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
@@ -908,22 +914,23 @@ ACE_TMAIN (int argc_in,
   // step1a set defaults
   unsigned int max_num_connections =
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
+  std::string path = configuration_path;
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+  std::string UI_file = path;
+  bool use_threadpool = NET_EVENT_USE_THREADPOOL;
   unsigned int ping_interval = NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
   bool log_to_file = false;
   bool use_udp = false;
   std::string network_interface =
-    ACE_TEXT_ALWAYS_CHAR (NET_DEFAULT_NETWORK_INTERFACE);
+    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT);
   bool use_loopback = false;
   unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
-  bool use_reactor = NET_USES_REACTOR;
+  bool use_reactor = NET_EVENT_USE_REACTOR;
   unsigned int statistics_reporting_interval =
     NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL;
   bool trace_information = false;
-  std::string path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
-  std::string UI_file = path;
   bool print_version_and_exit = false;
   unsigned int num_dispatch_threads =
     NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
@@ -932,6 +939,8 @@ ACE_TMAIN (int argc_in,
   if (!do_processArguments (argc_in,
                             argv_in,
                             max_num_connections,
+                            UI_file,
+                            use_threadpool,
                             ping_interval,
                             //keep_alive_timeout,
                             log_to_file,
@@ -942,7 +951,6 @@ ACE_TMAIN (int argc_in,
                             use_reactor,
                             statistics_reporting_interval,
                             trace_information,
-                            UI_file,
                             print_version_and_exit,
                             num_dispatch_threads))
   {
@@ -970,15 +978,14 @@ ACE_TMAIN (int argc_in,
   //                   reactor/proactor thread could (dead)lock on the
   //                   allocator lock, as it cannot dispatch events that would
   //                   free slots
-  if (STREAM_MAX_MESSAGES <= std::numeric_limits<unsigned int>::max ())
+  if (NET_STREAM_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
-  if (!UI_file.empty() &&
-      !Common_File_Tools::isReadable (UI_file))
+  if ((!UI_file.empty () && !Common_File_Tools::isReadable (UI_file)) ||
+      (use_threadpool && !use_reactor))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("invalid UI definition file (was: %s), aborting\n"),
-                ACE_TEXT (UI_file.c_str ())));
+                ACE_TEXT ("invalid argument, aborting\n")));
 
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
@@ -996,7 +1003,56 @@ ACE_TMAIN (int argc_in,
   if (num_dispatch_threads == 0)
     num_dispatch_threads = 1;
 
-  // step1d: pre-init signal handling
+  Net_GTK_CBData_t gtk_cb_user_data;
+  gtk_cb_user_data.allowUserRuntimeStatistic =
+    (statistics_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
+                                          // iff regular reporting
+                                          // is off
+
+  // step1d: initialize logging and/or tracing
+  Common_Logger logger (&gtk_cb_user_data.logStack,
+                        &gtk_cb_user_data.stackLock);
+  std::string log_file;
+  if (log_to_file &&
+      !Net_Server_Common_Tools::getNextLogFilename (Common_File_Tools::getDumpDirectory (),
+                                                    log_file))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::getNextLogFilename(), aborting\n")));
+
+    //    // *PORTABILITY*: on Windows, need to fini ACE...
+    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    //    result = ACE::fini ();
+    //    if (result == -1)
+    //      ACE_DEBUG ((LM_ERROR,
+    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+    //#endif
+
+    return EXIT_FAILURE;
+  } // end IF
+  if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]),     // program name
+                                        log_file,                      // logfile
+                                        true,                          // log to syslog ?
+                                        false,                         // trace messages ?
+                                        trace_information,             // debug messages ?
+                                        (UI_file.empty () ? NULL
+                                                          : &logger))) // logger ?
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_Tools::initializeLogging(), aborting\n")));
+
+    //    // *PORTABILITY*: on Windows, need to fini ACE...
+    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    //    result = ACE::fini ();
+    //    if (result == -1)
+    //      ACE_DEBUG ((LM_ERROR,
+    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+    //#endif
+
+    return EXIT_FAILURE;
+  } // end IF
+
+  // step1e: pre-initialize signal handling
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
   do_initializeSignals (use_reactor,
@@ -1013,55 +1069,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
 
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
-
-    return EXIT_FAILURE;
-  } // end IF
-
-  Net_GTK_CBData_t gtk_cb_user_data;
-  gtk_cb_user_data.allowUserRuntimeStatistic =
-      (statistics_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
-                                            // iff regular reporting
-                                            // is off
-
-  // step1e: initialize logging and/or tracing
-  Common_Logger logger (&gtk_cb_user_data.logStack,
-                        &gtk_cb_user_data.stackLock);
-  std::string log_file;
-  if (log_to_file &&
-      !Net_Server_Common_Tools::getNextLogFilename (Common_File_Tools::getDumpDirectory (),
-                                                    log_file))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::getNextLogFilename(), aborting\n")));
-
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
-
-    return EXIT_FAILURE;
-  } // end IF
-  if (!Common_Tools::initializeLogging (ACE::basename(argv_in[0]),     // program name
-                                        log_file,                      // logfile
-                                        true,                          // log to syslog ?
-                                        false,                         // trace messages ?
-                                        trace_information,             // debug messages ?
-                                        (UI_file.empty () ? NULL
-                                                          : &logger))) // logger ?
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeLogging(), aborting\n")));
-
+    Common_Tools::finalizeLogging ();
 //    // *PORTABILITY*: on Windows, need to fini ACE...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    result = ACE::fini ();
@@ -1078,6 +1086,7 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
+    Common_Tools::finalizeLogging ();
 //    // *PORTABILITY*: on Windows, need to fini ACE...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    result = ACE::fini ();
@@ -1102,6 +1111,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
 
+    Common_Tools::finalizeLogging ();
 //    // *PORTABILITY*: on Windows, need to fini ACE...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    result = ACE::fini ();
@@ -1128,6 +1138,8 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   // step2: do actual work
   do_work (max_num_connections,
+           UI_file,
+           use_threadpool,
            ping_interval,
            //keep_alive_timeout,
            use_udp,
@@ -1137,7 +1149,6 @@ ACE_TMAIN (int argc_in,
            use_reactor,
            statistics_reporting_interval,
            num_dispatch_threads,
-           UI_file,
            gtk_cb_user_data,
            signal_set,
            ignored_signal_set,
@@ -1167,6 +1178,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
+    Common_Tools::finalizeLogging ();
 //    // *PORTABILITY*: on Windows, need to fini ACE...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    result = ACE::fini ();

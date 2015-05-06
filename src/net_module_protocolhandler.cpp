@@ -99,10 +99,10 @@ Net_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel \"ping\" timer (ID: %d): \"%m\", continuing\n"),
                     pingTimerID_));
-      else
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("cancelled \"ping\" timer (ID: %d)\n"),
-                    pingTimerID_));
+      //else
+      //  ACE_DEBUG ((LM_DEBUG,
+      //              ACE_TEXT ("cancelled \"ping\" timer (ID: %d)\n"),
+      //              pingTimerID_));
       pingTimerID_ = -1;
     } // end IF
     allocator_ = NULL;
@@ -193,7 +193,11 @@ Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
       //            sessionID_));
 
       if (printPongDot_)
-        std::clog << '.';
+      {
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT (".")));
+        std::cout << '.';
+      } // end IF
 
       break;
     }
@@ -249,11 +253,11 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
                        ACE_TEXT ("failed to Common_Timer_Manager::schedule(), aborting\n")));
            return;
         } // end IF
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("session %u: scheduled \"ping\" timer (id: %d), interval: %u second(s)...\n"),
-                    sessionID_,
-                    pingTimerID_,
-                    pingInterval_));
+        //ACE_DEBUG ((LM_DEBUG,
+        //            ACE_TEXT ("session %u: scheduled \"ping\" timer (id: %d), interval: %#T...\n"),
+        //            sessionID_,
+        //            pingTimerID_,
+        //            &interval));
       } // end IF
 
       break;
@@ -271,11 +275,11 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
                       ACE_TEXT ("session %u: failed to cancel \"ping\" timer (id: %d): \"%m\", continuing\n"),
                       sessionID_,
                       pingTimerID_));
-        else
-          ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT ("session %u: cancelled \"ping\" timer (id: %d)\n"),
-                      sessionID_,
-                      pingTimerID_));
+        //else
+        //  ACE_DEBUG ((LM_DEBUG,
+        //              ACE_TEXT ("session %u: cancelled \"ping\" timer (id: %d)\n"),
+        //              sessionID_,
+        //              pingTimerID_));
         pingTimerID_ = -1;
       } // end IF
 

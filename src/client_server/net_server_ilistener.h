@@ -31,6 +31,8 @@ class Net_Server_IListener_T
 {
  public:
   virtual ~Net_Server_IListener_T () {};
+
+  virtual bool useReactor () const = 0; // ? : uses proactor
 };
 
 #endif

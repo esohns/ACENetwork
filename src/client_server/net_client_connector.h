@@ -60,6 +60,7 @@ class Net_Client_Connector_T
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
+  virtual bool useReactor () const; // ? : uses proactor
   virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual bool connect (const AddressType&);
@@ -119,6 +120,7 @@ class Net_Client_Connector_T<ACE_INET_Addr,
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
+  virtual bool useReactor () const; // ? : uses proactor
   // *TODO*: why is it necessary to provide an implementation when there is (a
   //         more generic) one available ? (gcc complains about abort() and
   //         getConfiguration())
@@ -176,6 +178,7 @@ class Net_Client_Connector_T<ACE_Netlink_Addr,
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
+  virtual bool useReactor () const; // ? : uses proactor
   virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual bool connect (const ACE_Netlink_Addr&);

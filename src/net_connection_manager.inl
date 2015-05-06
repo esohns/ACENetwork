@@ -44,7 +44,7 @@ Net_Connection_Manager_T<AddressType,
  , connections_ ()
  , isActive_ (true)
  , isInitialized_ (false)
- , maxNumConnections_ (NET_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS)
+ , maxNumConnections_ (NET_CONNECTION_MAXIMUM_NUMBER_OF_OPEN)
  , userData_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::Net_Connection_Manager_T"));
@@ -623,7 +623,7 @@ Net_Connection_Manager_T<AddressType,
     } // end IF
 
     ACE_DEBUG ((LM_INFO,
-                ACE_TEXT ("*** RUNTIME STATISTICS ***\n--> [%u] Connection(s) <--\n # data messages: %u (avg.: %u)\ndata: %.0f (avg.: %.2f) bytes\n*** RUNTIME STATISTICS ***\\END\n"),
+                ACE_TEXT ("*** RUNTIME STATISTICS ***\n--> [%u] Connection(s) <--\n# data messages: %u (avg.: %u)\ndata: %.0f (avg.: %.2f) bytes\n*** RUNTIME STATISTICS ***\\END\n"),
                 connections_.size (),
                 result.numDataMessages,
                 (connections_.size () ? (result.numDataMessages / connections_.size ())

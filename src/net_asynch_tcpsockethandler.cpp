@@ -73,35 +73,35 @@ Net_AsynchTCPSocketHandler::open (ACE_HANDLE handle_in,
       goto close;
     } // end IF
   if (!Net_Common_Tools::setNoDelay (handle_in,
-                                     NET_DEFAULT_SOCKET_TCP_NODELAY))
+                                     NET_SOCKET_DEFAULT_TCP_NODELAY))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
-                (NET_DEFAULT_SOCKET_TCP_NODELAY ? ACE_TEXT ("true")
+                (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
                                                 : ACE_TEXT ("false")),
                 handle_in));
     goto close;
   } // end IF
   if (!Net_Common_Tools::setKeepAlive (handle_in,
-                                       NET_DEFAULT_SOCKET_TCP_KEEPALIVE))
+                                       NET_SOCKET_DEFAULT_TCP_KEEPALIVE))
   {
     error = ACE_OS::last_error ();
     if (error != ENOTSOCK) // <-- socket has been closed asynchronously
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
-                  (NET_DEFAULT_SOCKET_TCP_KEEPALIVE ? ACE_TEXT ("true")
+                  (NET_SOCKET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true")
                                                     : ACE_TEXT ("false")),
                   handle_in));
     goto close;
   } // end IF
   if (!Net_Common_Tools::setLinger (handle_in,
-                                    NET_DEFAULT_SOCKET_LINGER))
+                                    NET_SOCKET_DEFAULT_LINGER))
   {
     error = ACE_OS::last_error ();
     if (error != ENOTSOCK) // <-- socket has been closed asynchronously
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s) (handle was: %d), aborting\n"),
-                  ((NET_DEFAULT_SOCKET_LINGER > 0) ? ACE_TEXT ("true")
+                  ((NET_SOCKET_DEFAULT_LINGER > 0) ? ACE_TEXT ("true")
                                                    : ACE_TEXT ("false")),
                   handle_in));
     goto close;

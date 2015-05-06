@@ -25,6 +25,8 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
+//#include "net_client_connector_common.h"
+
 template <typename AddressType,
           typename SocketConfigurationType,
           typename HandlerType,
@@ -293,13 +295,37 @@ Net_SocketConnectionBase_T<AddressType,
 
   int result = -1;
 
-//  Net_Client_ConnectorBase_t* connector_base_p =
-//      static_cast<Net_Client_ConnectorBase_t*> (arg_in);
-//  Net_Client_IConnector_t* iconnector_p =
-//      dynamic_cast<Net_Client_IConnector_t*> (connector_base_p);
-//  ACE_ASSERT (iconnector_p);
-//  const SocketHandlerConfigurationType* configuration_p =
-//      iconnector_p->getConfiguration ();
+  //// *TODO*: client-side, arg_in is a handle to the connector instance...
+  ////         server-side, arg_in is a handle to the acceptor instance...
+  //const SocketHandlerConfigurationType* configuration_p = NULL;
+  //switch (role ())
+  //{
+  //  case ROLE_CLIENT:
+  //  {
+  //    Net_Client_ConnectorBase_t* connector_base_p =
+  //        static_cast<Net_Client_ConnectorBase_t*> (arg_in);
+  //    Net_Client_IConnector_t* iconnector_p =
+  //        dynamic_cast<Net_Client_IConnector_t*> (connector_base_p);
+  //    ACE_ASSERT (iconnector_p);
+  //    configuration_p =
+  //      iconnector_p->getConfiguration ();
+
+  //    break;
+  //  }
+  //  case ROLE_SERVER:
+  //  {
+
+  //    break;
+  //  }
+  //  default:
+  //  {
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("invalid role (was: %d), aborting\n"),
+  //                role ()));
+  //    return -1;
+  //  }
+  //} // end SWITCH
+  //ACE_ASSERT (configuration_p);
 
   ConfigurationType* configuration_p = NULL;
   if (!inherited::manager_)
@@ -323,8 +349,9 @@ Net_SocketConnectionBase_T<AddressType,
   result = inherited::open (arg_in);
   if (result == -1)
   {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
+    // *NOTE*: perhaps max# connections has been reached
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
     return -1;
   } // end IF
 
@@ -433,10 +460,6 @@ Net_SocketConnectionBase_T<AddressType,
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to HandlerType::close(CLOSE_DURING_NEW_CONNECTION): \"%m\", continuing\n")));
-
-      //// release a reference
-      //// *IMPORTANT NOTE*: may 'delete this'
-      //inherited::decrease ();
 
       break;
     } // end IF

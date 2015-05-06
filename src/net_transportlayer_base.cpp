@@ -38,6 +38,14 @@ Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base ()
 
 }
 
+Net_ClientServerRole_t
+Net_InetTransportLayer_Base::role ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::role"));
+
+  return clientServerRole_;
+}
+
 bool
 Net_InetTransportLayer_Base::initialize (Net_ClientServerRole_t role_in,
                                          const Net_SocketConfiguration_t& configuration_in)

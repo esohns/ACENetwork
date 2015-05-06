@@ -60,6 +60,8 @@ class Net_Server_AsynchListener_T
 
   // implement Net_Server_IListener_T
   virtual bool initialize (const Net_ListenerConfiguration_t&);
+  virtual bool useReactor () const;
+
   bool isInitialized () const;
 
   // implement Common_IControl

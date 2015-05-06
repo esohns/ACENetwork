@@ -52,6 +52,8 @@ class Net_Server_Listener_T
  public:
   // implement Net_Server_IListener_T
   virtual bool initialize (const Net_ListenerConfiguration_t&);
+  virtual bool useReactor () const;
+
   bool isInitialized () const;
 
   // override some methods from ACE_Acceptor

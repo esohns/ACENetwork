@@ -27,40 +27,47 @@
 
 #include "ace/Default_Constants.h"
 
-// *** network-related ***
+// interface
 // *PORTABILITY*: interface names are not portable, so let the user choose the
 //                interface from a list on Windows (see select_interface())...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#define NET_DEFAULT_NETWORK_INTERFACE             ""
+#define NET_INTERFACE_DEFAULT                    ""
 #else
-#define NET_DEFAULT_NETWORK_INTERFACE             "eth0"
+#define NET_INTERFACE_DEFAULT                    "eth0"
 #endif
 
-#define NET_DEFAULT_PORT                          10001
-#define NET_DEFAULT_IP_MULTICAST_ADDRESS          "224.0.0.1"
-#define NET_DEFAULT_IP_BROADCAST_ADDRESS          "255.255.255.255"
+// addresses
+#define NET_ADDRESS_DEFAULT_PORT                 10001
+#define NET_ADDRESS_DEFAULT_IP_MULTICAST         "224.0.0.1"
+#define NET_ADDRESS_DEFAULT_IP_BROADCAST         "255.255.255.255"
+
+// protocol
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // *IMPORTANT NOTE*: this must match with the kernel module implementation !
-#define NET_DEFAULT_NETLINK_PROTOCOL              NETLINK_GENERIC
-#define NET_DEFAULT_NETLINK_PROTOCOL_GROUP        1
+#define NET_PROTOCOL_DEFAULT_NETLINK             NETLINK_GENERIC
+#define NET_PROTOCOL_DEFAULT_NETLINK_GROUP       1
 #endif
 
+// socket
+#define NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE   ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+#define NET_SOCKET_DEFAULT_LINGER                10 // seconds {0 --> off}
+#define NET_SOCKET_DEFAULT_TCP_NODELAY           true
+#define NET_SOCKET_DEFAULT_TCP_KEEPALIVE         false
+
+// connection / handler
+#define NET_CONNECTION_MAXIMUM_NUMBER_OF_OPEN    10
+#define NET_CONNECTION_HANDLER_THREAD_NAME       "connection dispatch"
+#define NET_CONNECTION_HANDLER_THREAD_GROUP_ID   2
+
+// event dispatch
 // default event dispatcher (default: use asynch I/O (proactor))
-#define NET_USES_REACTOR                          false
-#define NET_CONNECTION_HANDLER_THREAD_NAME        "connection dispatch"
-#define NET_CONNECTION_HANDLER_THREAD_GROUP_ID    2
+#define NET_EVENT_USE_REACTOR                    false
+#define NET_EVENT_USE_THREADPOOL                 false // use ACE_TP_Reactor ?
+#define NET_EVENT_TASK_GROUP_ID                  100
 
-#define NET_DEFAULT_SOCKET_RECEIVE_BUFFER_SIZE    ACE_DEFAULT_MAX_SOCKET_BUFSIZ
-#define NET_DEFAULT_SOCKET_LINGER                 10 // seconds {0 --> off}
-#define NET_DEFAULT_SOCKET_TCP_NODELAY            true
-#define NET_DEFAULT_SOCKET_TCP_KEEPALIVE          false
-
-#define NET_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS    10
-
-// *** pro/reactor-related ***
-#define NET_TASK_GROUP_ID                         100
-
-#define NET_STATISTICS_COLLECTION_INTERVAL        60 // seconds [0 --> OFF]
-#define NET_DEFAULT_STATISTICS_REPORTING_INTERVAL 0  // seconds [0 --> OFF]
+// stream
+#define NET_STREAM_MAX_MESSAGES                  0  // 0 --> no limits
+#define NET_STREAM_DEFAULT_STATISTICS_COLLECTION 60 // seconds [0 --> OFF]
+#define NET_STREAM_DEFAULT_STATISTICS_REPORTING  0  // seconds [0 --> OFF]
 
 #endif

@@ -122,29 +122,30 @@ Net_StreamTCPSocketBase_T<AddressType,
 
   ACE_UNUSED_ARG (arg_in);
 
+  // step0: initialize this
+  // *IMPORTANT NOTE*: enable the reference counting policy, as this will
+  // be registered with the reactor several times (1x READ_MASK, nx
+  // WRITE_MASK); therefore several threads MAY be dispatching notifications
+  // (yes, even concurrently; lock_ enforces the proper sequence order, see
+  // handle_output()) on the SAME handler. When the socket closes, the event
+  // handler should thus not be destroyed() immediately, but simply purge any
+  // pending notifications (see handle_close()) and de-register; after the
+  // last active notification has been dispatched, it will be safely deleted
+  inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+  // *IMPORTANT NOTE*: due to reference counting, the
+  // ACE_Svc_Handle::shutdown() method will crash, as it references a
+  // connection recycler AFTER removing the connection from the reactor (which
+  // releases a reference). In the case that "this" is the final reference,
+  // this leads to a crash. (see code)
+  // --> avoid invoking ACE_Svc_Handle::shutdown()
+  // --> this means that "manual" cleanup is necessary (see handle_close())
+  inherited::closing_ = true;
+
   // step1: initialize/start stream
   // step1a: connect stream head message queue with the reactor notification
   // pipe ?
   if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
   {
-    // *IMPORTANT NOTE*: enable the reference counting policy, as this will
-    // be registered with the reactor several times (1x READ_MASK, nx
-    // WRITE_MASK); therefore several threads MAY be dispatching notifications
-    // (yes, even concurrently; lock_ enforces the proper sequence order, see
-    // handle_output()) on the SAME handler. When the socket closes, the event
-    // handler should thus not be destroyed() immediately, but simply purge any
-    // pending notifications (see handle_close()) and de-register; after the
-    // last active notification has been dispatched, it will be safely deleted
-    inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-    // *IMPORTANT NOTE*: due to reference counting, the
-    // ACE_Svc_Handle::shutdown() method will crash, as it references a
-    // connection recycler AFTER removing the connection from the reactor (which
-    // releases a reference). In the case that "this" is the final reference,
-    // this leads to a crash. (see code)
-    // --> avoid invoking ACE_Svc_Handle::shutdown()
-    // --> this means that "manual" cleanup is necessary (see handle_close())
-    inherited::closing_ = true;
-
     // *NOTE*: must use 'this' (inherited2:: does not work here for some
     //         strange reason)...
     inherited2::configuration_.streamConfiguration.notificationStrategy =
@@ -230,15 +231,11 @@ Net_StreamTCPSocketBase_T<AddressType,
   // step3: register with the connection manager (if any)
   if (!inherited2::registerc ())
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    // *NOTE*: perhaps max# connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
     return -1;
   } // end IF
-
-//  // *NOTE*: let the reactor manage this handler...
-//  // *WARNING*: this has some implications (see close() below)
-//  if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
-//    inherited::remove_reference ();
 
   return 0;
 }
@@ -304,6 +301,9 @@ Net_StreamTCPSocketBase_T<AddressType,
     // *NOTE*: this eventually calls handle_close() (see below)
     case CLOSE_DURING_NEW_CONNECTION:
     {
+      ACE_HANDLE handle = inherited::get_handle ();
+
+      // step1: release any connection resources
       int result = -1;
       result = inherited::close (CLOSE_DURING_NEW_CONNECTION);
       if (result == -1)
@@ -311,6 +311,20 @@ Net_StreamTCPSocketBase_T<AddressType,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to SocketHandlerType::close(): \"%m\", aborting\n")));
         return -1;
+      } // end IF
+
+      //  step2: release the socket handle
+      // *IMPORTANT NOTE*: this wakes up any reactor threads that may still be
+      //                   using the handle. Makes sure this connection is
+      //                   delete(d) ASAP
+      if (handle != ACE_INVALID_HANDLE)
+      {
+        result = ACE_OS::closesocket (handle);
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                      handle));
+        //    inherited::handle (ACE_INVALID_HANDLE);
       } // end IF
 
       break;
@@ -702,8 +716,9 @@ Net_StreamTCPSocketBase_T<AddressType,
   // step4: deregister with the connection manager (if any)
   inherited2::deregister ();
 
-  // step5: release a reference
+  // step5: release a reference ?
   // *IMPORTANT NOTE*: may 'delete this'
+  // *NOTE*: let the reactor manage this handler from here on...
   inherited2::decrease ();
 
   return result;
@@ -729,9 +744,7 @@ Net_StreamTCPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::add_reference"));
 
-  inherited2::increase ();
-
-  return inherited2::count ();
+  return inherited2::increase ();
 }
 
 template <typename AddressType,
@@ -754,9 +767,7 @@ Net_StreamTCPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::remove_reference"));
 
-  inherited2::decrease ();
-
-  return 0;
+  return inherited2::decrease ();
 }
 
 template <typename AddressType,
@@ -786,7 +797,7 @@ Net_StreamTCPSocketBase_T<AddressType,
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic::collect(), aborting\n")));
+                ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), aborting\n")));
   }
 
   return false;
@@ -973,6 +984,8 @@ Net_StreamTCPSocketBase_T<AddressType,
                 ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
 
   //  step2: release the socket handle
+  // *IMPORTANT NOTE*: this wakes up any reactor threads that may be working on
+  //                   the handle. Makes sure this connection is delete(d) ASAP
   if (handle != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (handle);
@@ -1007,13 +1020,14 @@ Net_StreamTCPSocketBase_T<AddressType,
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
-  if (inherited::configuration_.messageAllocator)
+  //if (inherited::configuration_.messageAllocator)
+  if (inherited2::configuration_.streamConfiguration.messageAllocator)
   {
 allocate:
     try
     {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited::configuration_.messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (inherited2::configuration_.streamConfiguration.messageAllocator->malloc (requestedSize_in));
     }
     catch (...)
     {
@@ -1024,27 +1038,27 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !inherited::configuration_.messageAllocator->block ())
+        !inherited2::configuration_.streamConfiguration.messageAllocator->block ())
         goto allocate;
   } // end IF
   else
     ACE_NEW_NORETURN (message_block_p,
-    ACE_Message_Block (requestedSize_in,
-                       ACE_Message_Block::MB_DATA,
-                       NULL,
-                       NULL,
-                       NULL,
-                       NULL,
-                       ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                       ACE_Time_Value::zero,
-                       ACE_Time_Value::max_time,
-                       NULL,
-                       NULL));
+                      ACE_Message_Block (requestedSize_in,
+                                         ACE_Message_Block::MB_DATA,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                         ACE_Time_Value::zero,
+                                         ACE_Time_Value::max_time,
+                                         NULL,
+                                         NULL));
   if (!message_block_p)
   {
-    if (inherited::configuration_.messageAllocator)
+    if (inherited2::configuration_.streamConfiguration.messageAllocator)
     {
-      if (inherited::configuration_.messageAllocator->block ())
+      if (inherited2::configuration_.streamConfiguration.messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     } // end IF

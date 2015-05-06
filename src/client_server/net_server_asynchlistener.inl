@@ -232,6 +232,21 @@ bool
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
+                            HandlerType>::useReactor () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::useReactor"));
+
+  return false;
+}
+
+template <typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
+          typename UserDataType,
+          typename HandlerType>
+bool
+Net_Server_AsynchListener_T<ConfigurationType,
+                            SocketHandlerConfigurationType,
+                            UserDataType,
                             HandlerType>::isInitialized () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::isInitialized"));

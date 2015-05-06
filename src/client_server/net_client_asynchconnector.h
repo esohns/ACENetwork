@@ -69,6 +69,7 @@ class Net_Client_AsynchConnector_T
                                    const ACE_INET_Addr&);             // local address
 
   // implement Net_Client_IConnector_T
+  virtual bool useReactor () const; // ? : uses proactor
   virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual bool connect (const AddressType&);
@@ -136,6 +137,7 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                    const ACE_INET_Addr&);             // local address
 
   // implement Net_Client_IConnector_T
+  virtual bool useReactor () const; // ? : uses proactor
   virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual bool connect (const ACE_INET_Addr&);
@@ -202,6 +204,7 @@ class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                                    const ACE_Netlink_Addr&);          // local address
 
   // implement Net_Client_IConnector_T
+  virtual bool useReactor () const; // ? : uses proactor
   virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual bool connect (const ACE_Netlink_Addr&);

@@ -245,7 +245,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   if (!socketHandler_impl->initialize (&state_,
                                        configuration_in.messageAllocator,
                                        configuration_in.useThreadPerConnection,
-                                       NET_STATISTICS_COLLECTION_INTERVAL))
+                                       NET_STREAM_DEFAULT_STATISTICS_COLLECTION))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -301,9 +301,8 @@ Net_Stream::collect (Stream_Statistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::collect"));
 
-  Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl = NULL;
-  runtimeStatistic_impl =
-   dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
+  Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl =
+    dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
   if (!runtimeStatistic_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -312,13 +311,24 @@ Net_Stream::collect (Stream_Statistic_t& data_out)
   } // end IF
 
   // delegate to the statistics module...
-  if (!runtimeStatistic_impl->collect (data_out))
+  bool result = false;
+  try
+  {
+    result = runtimeStatistic_impl->collect (data_out);
+  }
+  catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Module_Statistic_WriterTask_t::collect(), aborting\n")));
+                ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
+  }
+  if (!result)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
     return false;
   } // end IF
-  data_out = inherited::state_.currentStatistics;
+  inherited::state_.lastCollectionTimestamp = COMMON_TIME_NOW;
+  inherited::state_.currentStatistics = data_out;
 
   return true;
 }
