@@ -177,31 +177,31 @@ Net_NetlinkSocketHandler::open (void* arg_in)
       return -1;
     } // end IF
   if (!Net_Common_Tools::setNoDelay (get_handle (),
-                                     NET_DEFAULT_SOCKET_TCP_NODELAY))
+                                     NET_SOCKET_DEFAULT_TCP_NODELAY))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
-                (NET_DEFAULT_SOCKET_TCP_NODELAY ? ACE_TEXT ("true")
+                (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
                                                 : ACE_TEXT ("false")),
                 get_handle ()));
     return -1;
   } // end IF
   if (!Net_Common_Tools::setKeepAlive (get_handle (),
-                                       NET_DEFAULT_SOCKET_TCP_KEEPALIVE))
+                                       NET_SOCKET_DEFAULT_TCP_KEEPALIVE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
-                (NET_DEFAULT_SOCKET_TCP_KEEPALIVE ? ACE_TEXT ("true")
+                (NET_SOCKET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true")
                                                   : ACE_TEXT ("false")),
                 get_handle ()));
     return -1;
   } // end IF
   if (!Net_Common_Tools::setLinger (get_handle (),
-                                    NET_DEFAULT_SOCKET_LINGER))
+                                    NET_SOCKET_DEFAULT_LINGER))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s) (handle was: %d), aborting\n"),
-                ((NET_DEFAULT_SOCKET_LINGER > 0) ? ACE_TEXT ("true")
+                ((NET_SOCKET_DEFAULT_LINGER > 0) ? ACE_TEXT ("true")
                                                  : ACE_TEXT ("false")),
                 get_handle ()));
     return -1;

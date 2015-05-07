@@ -113,7 +113,7 @@ Net_MessageBase_T<HeaderType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_MessageBase_T::getHeader"));
 
-  int result = -1;
+//  int result = -1;
 
   // initialize return value(s)
   HeaderType message_header;
@@ -129,7 +129,7 @@ Net_MessageBase_T<HeaderType,
                 inherited::total_length ()));
     return message_header;
   } // end IF
-  
+
   if (inherited::length () >= sizeof (HeaderType))
   {
     ACE_OS::memcpy (&message_header,

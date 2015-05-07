@@ -876,7 +876,7 @@ ACE_TMAIN (int argc_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::main"));
 
-  int result = -1;
+//  int result = -1;
 
   // step0: initialize
 //// *PORTABILITY*: on Windows, initialize ACE...

@@ -44,10 +44,10 @@ Net_Module_SocketHandler_T<StreamStateType,
  , currentMessage_ (NULL)
  , currentMessageLength_ (0)
  , isInitialized_ (false)
- , statisticCollectionInterval_ (0)
  , statisticCollectionHandler_ (ACTION_COLLECT,
                                 this,
                                 false)
+ , statisticCollectionInterval_ (0)
  , timerID_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::Net_Module_SocketHandler_T"));

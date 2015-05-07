@@ -69,8 +69,8 @@ Net_Module_HeaderParser::handleDataMessage (Net_Message*& message_inout,
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
-  // interpret the message header...
-  Net_Remote_Comm::MessageHeader message_header = message_inout->getHeader ();
+//  // interpret the message header...
+//  Net_Remote_Comm::MessageHeader message_header = message_inout->getHeader ();
 
   //ACE_DEBUG ((LM_DEBUG,
   //            ACE_TEXT ("received protocol message (ID: %u): [length: %u; type: \"%s\"]...\n"),
