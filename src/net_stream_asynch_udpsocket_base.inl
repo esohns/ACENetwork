@@ -1087,12 +1087,12 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 
   // start (asynchronous) write
   // *NOTE*: this is a fire-and-forget API for message_block...
-//  size_t bytes_to_send = message_block_p->size (); // why oh why...
+  size_t bytes_to_send = message_block_p->size ();
   ACE_Netlink_Addr peer_address;
   peer_address.set (0, 0); // send to kernel
 //  result_2 = inherited::outputStream_.send (buffer_,     // data
   result_2 = inherited::outputStream_.send (message_block_p,                      // data
-                                            message_block_p->size (),             // #bytes to send
+                                            bytes_to_send,                        // #bytes to send
                                             0,                                    // flags
                                             peer_address,                         // peer address
                                             NULL,                                 // ACT

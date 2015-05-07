@@ -107,9 +107,9 @@ class Net_Module_Statistic_WriterTask_T
   virtual ~Net_Module_Statistic_WriterTask_T ();
 
   // initialization
-  bool initialize (unsigned int = NET_DEFAULT_STATISTICS_REPORTING_INTERVAL, // (local) reporting interval [seconds: 0 --> OFF]
-                   bool = false,                                             // print final report ?
-                   const Stream_IAllocator* = NULL);                         // report cache usage ?
+  bool initialize (unsigned int = NET_STREAM_DEFAULT_STATISTICS_REPORTING, // (local) reporting interval [seconds: 0 --> OFF]
+                   bool = false,                                           // print final report ?
+                   const Stream_IAllocator* = NULL);                       // report cache usage ?
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (ProtocolMessageType*&, // data message handle

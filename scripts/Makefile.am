@@ -1,3 +1,8 @@
-METASOURCES = AUTO
+#METASOURCES = AUTO
 
-EXTRA_DIST = exports.sh
+EXTRA_DIST = \
+  Doxyfile \
+  exports.sh \
+  libACENetwork.pc.in \
+  libACENetwork.spec
+

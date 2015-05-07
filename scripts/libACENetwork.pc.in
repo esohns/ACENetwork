@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: @PACKAGE_NAME@
+Description: streams functionality (*NOTE*: uses ACE to for portability)
+URL: @PACKAGE_URL@
+Version: @VERSION@
+Requires: ACE libCommon
+Libs: -L${libdir} -lCommon -lACEStream
+Cflags: -DCOMMON_HAS_DLL -DACESTREAM_HAS_DLL
+

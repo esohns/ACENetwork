@@ -1040,7 +1040,7 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !inherited::configuration_.messageAllocator->block ())
+        !inherited3::configuration_.streamConfiguration.messageAllocator->block ())
         goto allocate;
   } // end IF
   else

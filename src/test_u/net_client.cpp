@@ -51,7 +51,7 @@
 
 #include "stream_allocatorheap.h"
 
-#include "net_connection_manager.h"
+//#include "net_connection_manager.h"
 #include "net_macros.h"
 
 #include "net_client_connector_common.h"

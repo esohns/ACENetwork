@@ -36,8 +36,8 @@ Net_Server_AsynchListener_T<ConfigurationType,
                             UserDataType,
                             HandlerType>::Net_Server_AsynchListener_T ()
  : inherited ()
- , allocator_ (NULL)
  , addressFamily_ (ACE_ADDRESS_FAMILY_INET)
+ , allocator_ (NULL)
  , configuration_ (NULL)
  , interfaceHandle_ (NULL)
  , isInitialized_ (false)

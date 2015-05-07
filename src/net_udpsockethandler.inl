@@ -199,11 +199,11 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
 // *CHECK*
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
   if (!Net_Common_Tools::setLinger (SVC_HANDLER_T::get_handle (),
-                                    NET_DEFAULT_SOCKET_LINGER))
+                                    NET_SOCKET_DEFAULT_LINGER))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s) (handle was: %d), aborting\n"),
-                ((NET_DEFAULT_SOCKET_LINGER > 0) ? ACE_TEXT ("true")
+                ((NET_SOCKET_DEFAULT_LINGER > 0) ? ACE_TEXT ("true")
                                                  : ACE_TEXT ("false")),
                 SVC_HANDLER_T::get_handle ()));
     return -1;

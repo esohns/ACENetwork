@@ -465,7 +465,7 @@ Net_Module_SocketHandler_T<StreamStateType,
 
     // adjust wr_ptr to make total_length() work...
     tail_p->wr_ptr (tail_p->rd_ptr () + offset);
-      
+
     // set new message head/current buffer
     currentBuffer_ = currentMessage_ = new_head_p;
   } // end IF
@@ -572,9 +572,9 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
  : inherited (false, // inactive by default
               false) // DON'T auto-start !
  , isInitialized_ (false)
- , statCollectHandler_ (ACTION_COLLECT,
-                        this,
-                        false)
+ , statisticCollectionHandler_ (ACTION_COLLECT,
+                                this,
+                                false)
  , timerID_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::Net_Module_UDPSocketHandler_T"));
@@ -626,7 +626,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
                               ProtocolMessageType>::initialize (StreamStateType* state_in,
                                                                 Stream_IAllocator* allocator_in,
                                                                 bool isActive_in,
-                                                                unsigned int statisticsCollectionInterval_in)
+                                                                unsigned int statisticCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::initialize"));
 
@@ -652,7 +652,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
     isInitialized_ = false;
   } // end IF
 
-  statCollectionInterval_ = statisticsCollectionInterval_in;
+  statisticCollectionInterval_ = statisticCollectionInterval_in;
 
   inherited::allocator_ = allocator_in;
   inherited::isActive_ = isActive_in;
@@ -737,28 +737,27 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
   {
     case SESSION_BEGIN:
     {
-      if (statCollectionInterval_)
+      if (statisticCollectionInterval_)
       {
         // schedule regular statistics collection...
-        ACE_Time_Value interval (statCollectionInterval_, 0);
+        ACE_Time_Value interval (statisticCollectionInterval_, 0);
         ACE_ASSERT (timerID_ == -1);
-        ACE_Event_Handler* eh = &statCollectHandler_;
+        ACE_Event_Handler* handler_p = &statisticCollectionHandler_;
         timerID_ =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (eh,                               // event handler
-                                                                  NULL,                             // argument
+            COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                  // event handler
+                                                                  NULL,                       // argument
                                                                   COMMON_TIME_NOW + interval, // first wakeup time
-                                                                  interval);                        // interval
+                                                                  interval);                  // interval
         if (timerID_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to Common_Timer_Manager::schedule(), aborting\n")));
-
+                      ACE_TEXT ("failed to Common_Timer_Manager::schedule(), returning\n")));
           return;
         } // end IF
 //        ACE_DEBUG ((LM_DEBUG,
-//                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
+//                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for interval %#T...\n"),
 //                    timerID_,
-//                    statCollectionInterval_));
+//                    &interval));
       } // end IF
 
 //      // start profile timer...

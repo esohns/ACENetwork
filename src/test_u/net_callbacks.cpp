@@ -41,8 +41,6 @@
 
 #include "net_macros.h"
 
-//#include "rpg_client_defines.h"
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -81,12 +79,12 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   //gtk_window_set_title (,
   //                      caption.c_str ());
 
-  GtkWidget* about_dialog_p =
-    //GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
-    //                                  ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
-    GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
-  ACE_ASSERT (about_dialog_p);
+//  GtkWidget* about_dialog_p =
+//    //GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
+//    //                                  ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
+//    GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
+//                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
+//  ACE_ASSERT (about_dialog_p);
 
   // step2: initialize info view
   GtkSpinButton* spinbutton_p =
@@ -108,11 +106,11 @@ idle_initialize_client_UI_cb (gpointer userData_in)
     GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_TEXTVIEW_NAME)));
   ACE_ASSERT (view_p);
-  GtkTextBuffer* buffer_p =
-//    gtk_text_buffer_new (NULL); // text tag table --> create new
-      gtk_text_view_get_buffer (view_p);
-  ACE_ASSERT (buffer_p);
-//  gtk_text_view_set_buffer (view_p, buffer_p);
+//  GtkTextBuffer* buffer_p =
+////    gtk_text_buffer_new (NULL); // text tag table --> create new
+//      gtk_text_view_get_buffer (view_p);
+//  ACE_ASSERT (buffer_p);
+////  gtk_text_view_set_buffer (view_p, buffer_p);
 
   PangoFontDescription* font_description_p =
     pango_font_description_from_string (ACE_TEXT_ALWAYS_CHAR (NET_UI_LOG_FONTDESCRIPTION));
@@ -290,6 +288,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                         G_CALLBACK (button_quit_clicked_cb),
                         userData_in);
   ACE_ASSERT (result);
+  ACE_UNUSED_ARG (result);
 
   //   // step7: use correct screen
   //   if (parentWidget_in)
@@ -335,12 +334,12 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   //gtk_window_set_title(,
   //                     caption.c_str ());
 
-  GtkWidget* about_dialog_p =
-    //GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
-    //                                  ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
-    GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
-  ACE_ASSERT (about_dialog_p);
+//  GtkWidget* about_dialog_p =
+//    //GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
+//    //                                  ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
+//    GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
+//                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
+//  ACE_ASSERT (about_dialog_p);
 
   // step2: initialize info view
   GtkSpinButton* spinbutton_p =
@@ -362,11 +361,11 @@ idle_initialize_server_UI_cb (gpointer userData_in)
     GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_TEXTVIEW_NAME)));
   ACE_ASSERT (view_p);
-  GtkTextBuffer* buffer_p =
-//      gtk_text_buffer_new (NULL); // text tag table --> create new
-//      gtk_text_view_set_buffer (view_p, buffer_p);
-      gtk_text_view_get_buffer (view_p);
-  ACE_ASSERT (buffer_p);
+//  GtkTextBuffer* buffer_p =
+////      gtk_text_buffer_new (NULL); // text tag table --> create new
+////      gtk_text_view_set_buffer (view_p, buffer_p);
+//      gtk_text_view_get_buffer (view_p);
+//  ACE_ASSERT (buffer_p);
 
   //  GtkTextIter iterator;
   //  gtk_text_buffer_get_end_iter (buffer_p,
@@ -533,6 +532,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
                         G_CALLBACK (button_quit_clicked_cb),
                         userData_in);
   ACE_ASSERT (result);
+  ACE_UNUSED_ARG (result);
 
   //   // step7: use correct screen
   //   if (parentWidget_in)
