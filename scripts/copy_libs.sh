@@ -58,16 +58,10 @@ echo "copying external module libraries"
 LIB_DIR=".libs"
 SUB_DIRS="modules/libCommon/src
 modules/libCommon/src/ui
-modules/libACEStream/src
-modules/libACENetwork/src
-modules/libACENetwork/src/client_server
-modules/libACENetwork/src/client_server"
+modules/libACEStream/src"
 declare -a LIBS=("libCommon.so"
 "libCommon_UI.so"
-"libACEStream.so"
-"libACENetwork.so"
-"libACENetwork_Client.so"
-"libACENetwork_Server.so")
+"libACEStream.so")
 i=0
 for DIR in $SUB_DIRS
 do
@@ -82,40 +76,12 @@ done
 
 echo "copying framework libraries"
 LIB_DIR=".libs"
-SUB_DIRS="chance/dice
-chance
-character/monster
-character/player
-character
-client
-combat
-common
-engine
-graphics
-item
-magic
-map
-net
-net/protocol
-net/server
-sound"
-declare -a LIBS=("libRPG_Dice.so"
-"libRPG_Chance.so"
-"libRPG_Monster.so"
-"libRPG_Player.so"
-"libRPG_Character.so"
-"libRPG_Client_GUI.so"
-"libRPG_Combat.so"
-"libRPG_Common.so"
-"libRPG_Engine.so"
-"libRPG_Graphics.so"
-"libRPG_Item.so"
-"libRPG_Magic.so"
-"libRPG_Map.so"
-"libRPG_Net.so"
-"libRPG_Net_Protocol.so"
-"libRPG_Net_Server.so"
-"libRPG_Sound.so")
+SUB_DIRS="src
+src/client_server
+src/client_server"
+declare -a LIBS=("libACENetwork.so"
+"libACENetwork_Client.so"
+"libACENetwork_Server.so")
 i=0
 for DIR in $SUB_DIRS
 do
@@ -127,4 +93,3 @@ do
 
  i=$i+1
 done
-
