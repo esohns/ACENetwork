@@ -24,6 +24,7 @@
 #include "ace/Global_Macros.h"
 
 #include "common_signalhandler.h"
+#include "common_iinitialize.h"
 #include "common_isignal.h"
 #include "common_istatistic.h"
 
@@ -31,20 +32,19 @@
 
 #include "net_common.h"
 
-// forward declarations
-class Common_IControl;
+#include "net_server_common.h"
 
 class Net_Server_SignalHandler
  : public Common_SignalHandler
+ , public Common_IInitialize_T<Net_Server_SignalHandlerConfiguration_t>
  , public Common_ISignal
 {
  public:
-  Net_Server_SignalHandler (long,                                     // timer ID
-                            Common_IControl*,                         // controller handle
-                            Common_IStatistic_T<Stream_Statistic_t>*, // reporter handle
-                            // ---------------------------------------------------------------
-                            bool = true);                             // use reactor ?
+  Net_Server_SignalHandler (bool = true); // use reactor ?
   virtual ~Net_Server_SignalHandler ();
+
+  // implement Common_IInitialize_T
+  virtual bool initialize (const Net_Server_SignalHandlerConfiguration_t&); // configuration
 
   // implement Common_ISignal
   virtual bool handleSignal (int); // signal
@@ -56,10 +56,8 @@ class Net_Server_SignalHandler
   ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler (const Net_Server_SignalHandler&));
   ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler& operator= (const Net_Server_SignalHandler&));
 
-  Common_IControl*                         control_;
-  Common_IStatistic_T<Stream_Statistic_t>* report_;
-  long                                     timerID_;
-  bool                                     useReactor_;
+  Net_Server_SignalHandlerConfiguration_t configuration_;
+  bool                                    useReactor_;
 };
 
 #endif

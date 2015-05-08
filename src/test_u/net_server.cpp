@@ -26,14 +26,17 @@
 #include <string>
 #include <vector>
 
+#include "ace/Get_Opt.h"
+#include "ace/High_Res_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
 #endif
-#include "ace/Get_Opt.h"
-#include "ace/High_Res_Timer.h"
-#include "ace/POSIX_Proactor.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#include "ace/POSIX_Proactor.h"
+#endif
+#include "ace/Reactor.h"
 #include "ace/Sig_Handler.h"
 #include "ace/Signal.h"
 #include "ace/Version.h"
@@ -52,7 +55,6 @@
 #include "common_ui_gtk_manager.h"
 
 #include "stream_allocatorheap.h"
-//#include "stream_defines.h"
 
 #include "net_common_tools.h"
 #include "net_configuration.h"
@@ -88,6 +90,8 @@ do_printUsage (const std::string& programName_in)
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory();
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -192,6 +196,8 @@ do_processArguments (const int& argc_in,
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory ();
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -433,10 +439,12 @@ do_initializeSignals (bool useReactor_in,
 
   if (!useReactor_in)
   {
-    ACE_POSIX_Proactor* proactor_impl =
-        dynamic_cast<ACE_POSIX_Proactor*> (ACE_Proactor::instance ()->implementation ());
-    ACE_ASSERT (proactor_impl);
-    if (proactor_impl->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
+    ACE_Proactor* proactor_p = ACE_Proactor::instance ();
+    ACE_ASSERT (proactor_p);
+    ACE_POSIX_Proactor* proactor_impl_p =
+        dynamic_cast<ACE_POSIX_Proactor*> (proactor_p->implementation ());
+    ACE_ASSERT (proactor_impl_p);
+    if (proactor_impl_p->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
       signals_out.sig_del (COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
   } // end IF
 #endif
@@ -458,9 +466,12 @@ do_work (unsigned int maxNumConnections_in,
          Net_GTK_CBData_t& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
-         Common_SignalActions_t& previousSignalActions_inout)
+         Common_SignalActions_t& previousSignalActions_inout,
+         Net_Server_SignalHandler& signalHandler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
+
+  int result = -1;
 
   // step0a: initialize stream configuration object
   Stream_ModuleConfiguration_t module_configuration;
@@ -527,7 +538,7 @@ do_work (unsigned int maxNumConnections_in,
     return;
   } // end IF
 
-  // step1: init regular (global) stats reporting
+  // step1: initialize regular (global) statistics reporting
   Stream_StatisticHandler_Reactor_t statistics_handler (ACTION_REPORT,
                                                         NET_CONNECTIONMANAGER_SINGLETON::instance (),
                                                         false);
@@ -560,22 +571,24 @@ do_work (unsigned int maxNumConnections_in,
   else
     CBData_in.listenerHandle =
       NET_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
-  // event handler for signals
-  Net_Server_SignalHandler signal_handler (timer_id,
-                                           CBData_in.listenerHandle,
-                                           NET_CONNECTIONMANAGER_SINGLETON::instance (),
-                                           useReactor_in);
-  int result = -1;
+  Net_Server_SignalHandlerConfiguration_t signal_handler_configuration;
+  ACE_OS::memset (&signal_handler_configuration,
+                  0,
+                  sizeof (signal_handler_configuration));
+  signal_handler_configuration.listener = CBData_in.listenerHandle;
+  signal_handler_configuration.statisticReportingHandler =
+      NET_CONNECTIONMANAGER_SINGLETON::instance ();
+  signal_handler_configuration.statisticReportingTimerID = timer_id;
+  signalHandler_in.initialize (signal_handler_configuration);
   const void* act_p = NULL;
   if (!Common_Tools::initializeSignals (signalSet_in,
                                         ignoredSignalSet_in,
-                                        &signal_handler,
+                                        &signalHandler_in,
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
 
-    // clean up
     if (timer_id != -1)
     {
       result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timer_id,
@@ -633,9 +646,6 @@ do_work (unsigned int maxNumConnections_in,
                       timer_id));
       } // end IF
       COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
-      Common_Tools::finalizeSignals (signalSet_in,
-                                     useReactor_in,
-                                     previousSignalActions_inout);
 
       return;
     } // end IF
@@ -677,9 +687,6 @@ do_work (unsigned int maxNumConnections_in,
       if (!UIDefinitionFile_in.empty ())
         COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
       COMMON_TIMERMANAGER_SINGLETON::instance()->stop();
-      Common_Tools::finalizeSignals (signalSet_in,
-                                     useReactor_in,
-                                     previousSignalActions_inout);
 
       return;
     } // end IF
@@ -696,7 +703,7 @@ do_work (unsigned int maxNumConnections_in,
   socket_handler_configuration.messageAllocator = &message_allocator;
   socket_handler_configuration.socketConfiguration =
       configuration.socketConfiguration;
-  Net_ListenerConfiguration_t listener_configuration;
+  Net_Server_ListenerConfiguration_t listener_configuration;
   ACE_OS::memset (&listener_configuration,
                   0,
                   sizeof (listener_configuration));
@@ -741,9 +748,6 @@ do_work (unsigned int maxNumConnections_in,
     if (!UIDefinitionFile_in.empty ())
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
     COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
-    Common_Tools::finalizeSignals (signalSet_in,
-                                   useReactor_in,
-                                   previousSignalActions_inout);
 
     return;
   } // end IF
@@ -780,9 +784,6 @@ do_work (unsigned int maxNumConnections_in,
     if (!UIDefinitionFile_in.empty ())
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
     COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
-    Common_Tools::finalizeSignals (signalSet_in,
-                                   useReactor_in,
-                                   previousSignalActions_inout);
 
     return;
   } // end IF
@@ -803,14 +804,31 @@ do_work (unsigned int maxNumConnections_in,
   {
     if (useReactor_in)
     {
-      result = ACE_Reactor::instance ()->run_reactor_event_loop (0);
+      ACE_Reactor* reactor_p = ACE_Reactor::instance ();
+      ACE_ASSERT (reactor_p);
+      result = reactor_p->run_reactor_event_loop (0);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to handle events: \"%m\", aborting\n")));
     } // end IF
     else
     {
-      result = ACE_Proactor::instance ()->proactor_run_event_loop (0);
+      ACE_Proactor* proactor_p = ACE_Proactor::instance ();
+      ACE_ASSERT (proactor_p);
+      // *NOTE*: unblock [SIGRTMIN,SIGRTMAX] IFF on POSIX AND using the
+      // ACE_POSIX_SIG_Proactor (the default)
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+      ACE_POSIX_Proactor* proactor_impl_p =
+          dynamic_cast<ACE_POSIX_Proactor*> (proactor_p->implementation ());
+      ACE_ASSERT (proactor_impl_p);
+      ACE_POSIX_Proactor::Proactor_Type proactor_type =
+          proactor_impl_p->get_impl_type ();
+      sigset_t original_mask;
+      if (!useReactor_in &&
+          (proactor_type == ACE_POSIX_Proactor::PROACTOR_SIG))
+        Common_Tools::unblockRealtimeSignals (original_mask);
+#endif
+      result = proactor_p->proactor_run_event_loop (0);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to handle events: \"%m\", aborting\n")));
@@ -834,9 +852,6 @@ do_work (unsigned int maxNumConnections_in,
   if (!UIDefinitionFile_in.empty ())
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
   COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
-  Common_Tools::finalizeSignals (signalSet_in,
-                                 useReactor_in,
-                                 previousSignalActions_inout);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -876,7 +891,7 @@ ACE_TMAIN (int argc_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::main"));
 
-//  int result = -1;
+  int result = -1;
 
   // step0: initialize
 //// *PORTABILITY*: on Windows, initialize ACE...
@@ -899,6 +914,8 @@ ACE_TMAIN (int argc_in,
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory ();
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1062,9 +1079,28 @@ ACE_TMAIN (int argc_in,
                         signal_set,
                         ignored_signal_set);
   Common_SignalActions_t previous_signal_actions;
+  sigset_t previous_signal_mask;
+  result = ACE_OS::sigemptyset (&previous_signal_mask);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::sigemptyset(): \"%m\", aborting\n")));
+
+    Common_Tools::finalizeLogging ();
+    //    // *PORTABILITY*: on Windows, need to fini ACE...
+    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    //    result = ACE::fini ();
+    //    if (result == -1)
+    //      ACE_DEBUG ((LM_ERROR,
+    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+    //#endif
+
+    return EXIT_FAILURE;
+  } // end IF
   if (!Common_Tools::preInitializeSignals (signal_set,
                                            use_reactor,
-                                           previous_signal_actions))
+                                           previous_signal_actions,
+                                           previous_signal_mask))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
@@ -1080,14 +1116,18 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
+  Net_Server_SignalHandler signal_handler (use_reactor);
 
   // step1f: handle specific program modes
   if (print_version_and_exit)
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
+    Common_Tools::finalizeSignals (signal_set,
+                                   previous_signal_actions,
+                                   previous_signal_mask);
     Common_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, need to fini ACE...
+    // *PORTABILITY*: on Windows, need to fini ACE...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    result = ACE::fini ();
 //    if (result == -1)
@@ -1105,12 +1145,18 @@ ACE_TMAIN (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   use_fd_based_reactor = (use_reactor && !COMMON_EVENT_WINXX_USE_WFMO_REACTOR);
 #endif
-  if (!Common_Tools::setResourceLimits (use_fd_based_reactor, // file descriptors
-                                        true))                // stack traces
+  bool stack_traces = true;
+  bool use_signal_based_proactor = !use_reactor;
+  if (!Common_Tools::setResourceLimits (use_fd_based_reactor,       // file descriptors
+                                        stack_traces,               // stack traces
+                                        use_signal_based_proactor)) // pending signals
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
 
+    Common_Tools::finalizeSignals (signal_set,
+                                   previous_signal_actions,
+                                   previous_signal_mask);
     Common_Tools::finalizeLogging ();
 //    // *PORTABILITY*: on Windows, need to fini ACE...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1152,7 +1198,8 @@ ACE_TMAIN (int argc_in,
            gtk_cb_user_data,
            signal_set,
            ignored_signal_set,
-           previous_signal_actions);
+           previous_signal_actions,
+           signal_handler);
   timer.stop ();
 
   // debug info
@@ -1178,6 +1225,9 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
+    Common_Tools::finalizeSignals (signal_set,
+                                   previous_signal_actions,
+                                   previous_signal_mask);
     Common_Tools::finalizeLogging ();
 //    // *PORTABILITY*: on Windows, need to fini ACE...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1234,18 +1284,20 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-//// *PORTABILITY*: on Windows, must fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  result = ACE::fini ();
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
-//    return EXIT_FAILURE;
-//  } // end IF
-//#endif
-
+  Common_Tools::finalizeSignals (signal_set,
+                                 previous_signal_actions,
+                                 previous_signal_mask);
   Common_Tools::finalizeLogging ();
+  //// *PORTABILITY*: on Windows, must fini ACE...
+  //#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  //  result = ACE::fini ();
+  //  if (result == -1)
+  //  {
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
+  //    return EXIT_FAILURE;
+  //  } // end IF
+  //#endif
 
   return EXIT_SUCCESS;
 } // end main

@@ -24,22 +24,24 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
+#include "common_iinitialize.h"
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
+#include "net_client_common.h"
 #include "net_client_connector_common.h"
 
 class Net_Client_SignalHandler
- : public Common_SignalHandler,
-   public Common_ISignal
+ : public Common_SignalHandler
+ , public Common_IInitialize_T<Net_Client_SignalHandlerConfiguration_t>
+ , public Common_ISignal
 {
  public:
-  Net_Client_SignalHandler (long,                     // action timer id
-                            const ACE_INET_Addr&,     // peer SAP
-                            Net_Client_IConnector_t*, // connector
-                            // -------------------------------------------
-                            bool);                    // use reactor ?
+  Net_Client_SignalHandler (bool = true); // use reactor ?
   virtual ~Net_Client_SignalHandler ();
+
+  // implement Common_IInitialize_T
+  virtual bool initialize (const Net_Client_SignalHandlerConfiguration_t&); // configuration
 
   // implement Common_ISignal
   virtual bool handleSignal (int); // signal
@@ -51,10 +53,8 @@ class Net_Client_SignalHandler
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler (const Net_Client_SignalHandler&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler& operator= (const Net_Client_SignalHandler&));
 
-  long                     actionTimerID_;
-  Net_Client_IConnector_t* connector_;
-  ACE_INET_Addr            peerAddress_;
-  bool                     useReactor_;
+  Net_Client_SignalHandlerConfiguration_t configuration_;
+  bool                                    useReactor_;
 };
 
 #endif

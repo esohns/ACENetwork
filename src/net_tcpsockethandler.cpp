@@ -184,25 +184,11 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
   // initialize return value
   int result = 0;
 
-  //// *IMPORTANT NOTE*: handle failed connects (e.g. connection refused)
-  //// as well... (see below). This may change in the future, so keep the
-  //// alternate implementation
-  //if (inherited2::reference_counting_policy ().value () ==
-  //    ACE_Event_Handler::Reference_Counting_Policy::DISABLED)
-  //{
-  //  result = inherited2::handle_close ();
-  //  if (result == -1)
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to ACE_Svc_Handler::handle_close(): \"%m\", aborting\n")));
-
-  //  return result;
-  //} // end IF
-
   // *IMPORTANT NOTE*: due to reference counting, the
   // ACE_Svc_Handle::shutdown() method will crash, as it references a
   // connection recycler AFTER removing the connection from the reactor (which
-  // releases a reference). In the case that "this" is the final reference,
-  // this leads to a crash. (see code)
+  // releases (at least one) reference). In the case that "this" is the final
+  // reference, this leads to a crash. (see code)
   // --> avoid invoking ACE_Svc_Handle::shutdown()
   // --> this means that "manual" cleanup is necessary (see below)
 
@@ -212,66 +198,40 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
   // - accept failed (e.g. too many connections)
   // - ... ?
 
-  //  bool already_deleted = false;
   switch (mask_in)
   {
+    // *NOTE*: this is already being removed from the reactor (check stack)
+    //         --> just return
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
       break;
-    case ACE_Event_Handler::EXCEPT_MASK:
-      //if (handle_in == ACE_INVALID_HANDLE) // <-- notification has completed (!useThreadPerConnection)
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("notification completed, continuing\n")));
+    // *NOTE*: currently, socket handler notifications do not register for
+    //         writing --> just return
+    case ACE_Event_Handler::EXCEPT_MASK:     // --> socket has been closed (send failed)
       break;
     case ACE_Event_Handler::ALL_EVENTS_MASK: // - connect failed (e.g. connection refused) /
                                              // - accept failed (e.g. too many connections) /
                                              // - select failed (EBADF see Select_Reactor_T.cpp) /
-                                             // - asynchronous (local) close
+                                             // - user abort
                                              // - ... ?
     {
-      //if (handle_in != ACE_INVALID_HANDLE)
-      //{
-      //  // *TODO*: select case ?
-      //  break;
-      //} // end IF
-      // *TODO*: validate (failed) connect/accept case
-//      else if (!isRegistered_)
-//      {
-//        // (failed) connect/accept case
-
-//        // *IMPORTANT NOTE*: when a connection attempt fails, the reactor
-//        // close()s the connection although it was never open()ed; in that case
-//        // there is no valid socket handle
-//        ACE_HANDLE handle = get_handle ();
-//        if (handle == ACE_INVALID_HANDLE)
-//        {
-//          // (failed) connect case
-
-//          // clean up
-//          decrease ();
-
-//          break;
-//        } // end IF
-
-//        // (failed) accept case
-
-//        // *IMPORTANT NOTE*: when an accept fails (e.g. too many connections),
-//        // this may have been open()ed, so proper clean up will:
-//        // - de-register from the reactor (decreases reference count)
-//        // - close the socket (--> done in dtor (see above))
-//      } // end ELSE IF
-
-      // (failed) accept / asynch abort case
-
-      ACE_Reactor* reactor_p = inherited2::reactor ();
-      ACE_ASSERT (reactor_p);
-      result = reactor_p->remove_handler (this,
-                                          (mask_in |
-                                           ACE_Event_Handler::DONT_CALL));
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d), aborting\n"),
-                    this,
-                    mask_in));
+      // *NOTE*: handle_in == ACE_INVALID_HANDLE
+      //         --> connection failed, no need to deregister from the reactor
+      if (handle_in != ACE_INVALID_HANDLE)
+      {
+        ACE_Reactor* reactor_p = inherited2::reactor ();
+        ACE_ASSERT (reactor_p);
+        //      ACE_Reactor_Mask mask =
+        //          ((mask_in == ACE_Event_Handler::EXCEPT_MASK) ? ACE_Event_Handler::WRITE_MASK
+        //                                                       : mask_in);
+        result = reactor_p->remove_handler (this,
+                                            (mask_in |
+                                             ACE_Event_Handler::DONT_CALL));
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d): \"%m\", aborting\n"),
+                      this,
+                      mask_in));
+      } // end IF
 
       break;
     }

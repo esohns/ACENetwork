@@ -21,6 +21,9 @@
 #ifndef NET_SERVER_COMMON_H
 #define NET_SERVER_COMMON_H
 
+#include "common_istatistic.h"
+
+#include "stream_common.h"
 #include "stream_iallocator.h"
 
 #include "net_configuration.h"
@@ -28,7 +31,7 @@
 
 #include "net_server_ilistener.h"
 
-struct Net_ListenerConfiguration_t
+struct Net_Server_ListenerConfiguration_t
 {
   int                               addressFamily;
   Stream_IAllocator*                allocator;
@@ -40,6 +43,15 @@ struct Net_ListenerConfiguration_t
   bool                              useLoopbackDevice;
 };
 
-typedef Net_Server_IListener_T<Net_ListenerConfiguration_t> Net_Server_IListener_t;
+typedef Net_Server_IListener_T<Net_Server_ListenerConfiguration_t> Net_Server_IListener_t;
+
+typedef Common_IStatistic_T<Stream_Statistic_t> Net_Server_StatisticReportingHandler_t;
+
+struct Net_Server_SignalHandlerConfiguration_t
+{
+  Net_Server_IListener_t*                 listener;
+  Net_Server_StatisticReportingHandler_t* statisticReportingHandler;
+  long                                    statisticReportingTimerID;
+};
 
 #endif

@@ -29,15 +29,10 @@
 #include "net_connection_manager_common.h"
 #include "net_macros.h"
 
-Net_Client_SignalHandler::Net_Client_SignalHandler (long actionTimerID_in,
-                                                    const ACE_INET_Addr& peerSAP_in,
-                                                    Net_Client_IConnector_t* connector_in,
-                                                    bool useReactor_in)
+Net_Client_SignalHandler::Net_Client_SignalHandler (bool useReactor_in)
  : inherited (this,          // event handler handle
               useReactor_in) // use reactor ?
- , actionTimerID_ (actionTimerID_in)
- , connector_ (connector_in)
- , peerAddress_ (peerSAP_in)
+ , configuration_ ()
  , useReactor_ (useReactor_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::Net_Client_SignalHandler"));
@@ -51,9 +46,21 @@ Net_Client_SignalHandler::~Net_Client_SignalHandler ()
 }
 
 bool
+Net_Client_SignalHandler::initialize (const Net_Client_SignalHandlerConfiguration_t& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::initialize"));
+
+  configuration_ = configuration_in;
+
+  return true;
+}
+
+bool
 Net_Client_SignalHandler::handleSignal (int signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::handleSignal"));
+
+  int result = -1;
 
   bool stop_event_dispatching = false;
   bool connect = false;
@@ -108,6 +115,8 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     }
   } // end SWITCH
 
+  // ------------------------------------
+
   // ...abort ?
   if (abort)
   {
@@ -116,12 +125,12 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
   } // end IF
 
   // ...connect ?
-  if (connect && connector_)
+  if (connect && configuration_.connector)
   {
-    bool result = false;
+    bool result_2 = false;
     try
     {
-      result = connector_->connect (peerAddress_);
+      result_2 = configuration_.connector->connect (configuration_.peerAddress);
     }
     catch (...)
     {
@@ -130,13 +139,14 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
                   ACE_TEXT ("caught exception in Net_Client_IConnector::connect(): \"%m\", aborting\n")));
       return false;
     }
-    if (!result)
+    if (!result_2)
     {
       ACE_TCHAR buffer[BUFSIZ];
       ACE_OS::memset(buffer, 0, sizeof (buffer));
-      int result_2 = peerAddress_.addr_to_string (buffer, sizeof (buffer));
+      result = configuration_.peerAddress.addr_to_string (buffer,
+                                                          sizeof (buffer));
       // *PORTABILITY*: tracing in a signal handler context is not portable
-      if (result_2 == -1)
+      if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
       // *PORTABILITY*: tracing in a signal handler context is not portable
@@ -157,31 +167,31 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     // step1: stop all open connections
 
     // stop action timer (might spawn new connections otherwise)
-    if (actionTimerID_ >= 0)
+    if (configuration_.actionTimerID >= 0)
     {
-      const void* act = NULL;
-      if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (actionTimerID_,
-                                                              &act) <= 0)
+      const void* act_p = NULL;
+      result =
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (configuration_.actionTimerID,
+                                                              &act_p);
+      if (result <= 0)
       {
         // *PORTABILITY*: tracing in a signal handler context is not portable
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", aborting\n"),
-                    actionTimerID_));
+                    configuration_.actionTimerID));
 
         // clean up
-        actionTimerID_ = -1;
+        configuration_.actionTimerID = -1;
 
         return false;
       } // end IF
-
-      // clean up
-      actionTimerID_ = -1;
+      configuration_.actionTimerID = -1;
     } // end IF
-    if (connector_)
+    if (configuration_.connector)
     {
       try
       {
-        connector_->abort ();
+        configuration_.connector->abort ();
       }
       catch (...)
       {

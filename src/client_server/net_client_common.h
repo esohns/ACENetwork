@@ -21,4 +21,15 @@
 #ifndef NET_CLIENT_COMMON_H
 #define NET_CLIENT_COMMON_H
 
+#include "ace/INET_Addr.h"
+
+#include "net_client_connector_common.h"
+
+struct Net_Client_SignalHandlerConfiguration_t
+{
+  long                     actionTimerID;
+  Net_Client_IConnector_t* connector;
+  ACE_INET_Addr            peerAddress;
+};
+
 #endif

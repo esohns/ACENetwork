@@ -194,8 +194,8 @@ Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
 
       if (printPongDot_)
       {
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT (".")));
+//        ACE_DEBUG ((LM_DEBUG,
+//                    ACE_TEXT (".")));
         std::cout << '.';
       } // end IF
 

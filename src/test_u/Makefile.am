@@ -6,6 +6,10 @@ AM_CPPFLAGS = \
 
 DEFS = \
   -DBASEDIR=\"$(datadir)/@META_PACKAGE@\"
+if DEBUG
+DEFS += \
+  -DDEBUG_DEBUGGER
+endif
 
 bin_PROGRAMS = \
   net_client \
