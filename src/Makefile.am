@@ -184,5 +184,6 @@ libACENetwork_la_SOURCES = \
   stdafx.h
 
 SUBDIRS = \
+  . \
   client_server \
   test_u
