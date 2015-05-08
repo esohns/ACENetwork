@@ -39,7 +39,7 @@ template <typename ConfigurationType,
 class Net_Server_Listener_T
  : public ACE_Acceptor<HandlerType,
                        ACE_SOCK_ACCEPTOR>
- , public Net_Server_IListener_T<Net_ListenerConfiguration_t>
+ , public Net_Server_IListener_t
  , public Common_IDumpState
 {
   // singleton needs access to the ctor/dtors
@@ -51,7 +51,7 @@ class Net_Server_Listener_T
 
  public:
   // implement Net_Server_IListener_T
-  virtual bool initialize (const Net_ListenerConfiguration_t&);
+  virtual bool initialize (const Net_Server_ListenerConfiguration_t&);
   virtual bool useReactor () const;
 
   bool isInitialized () const;

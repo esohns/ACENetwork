@@ -39,7 +39,7 @@ template <typename ConfigurationType,
           typename HandlerType>
 class Net_Server_AsynchListener_T
  : public ACE_Asynch_Acceptor<HandlerType>
- , public Net_Server_IListener_T<Net_ListenerConfiguration_t>
+ , public Net_Server_IListener_t
  , public Common_IDumpState
 {
   // singleton needs access to the ctor/dtors
@@ -59,7 +59,7 @@ class Net_Server_AsynchListener_T
   virtual int should_reissue_accept (void);
 
   // implement Net_Server_IListener_T
-  virtual bool initialize (const Net_ListenerConfiguration_t&);
+  virtual bool initialize (const Net_Server_ListenerConfiguration_t&);
   virtual bool useReactor () const;
 
   bool isInitialized () const;

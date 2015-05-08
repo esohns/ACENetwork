@@ -36,19 +36,15 @@
 #include "net_connection_manager_common.h"
 #include "net_macros.h"
 
-Net_Server_SignalHandler::Net_Server_SignalHandler (long timerID_in,
-                                                    Common_IControl* controller_in,
-                                                    Common_IStatistic_T<Stream_Statistic_t>* report_in,
-                                                    bool useReactor_in)
+Net_Server_SignalHandler::Net_Server_SignalHandler (bool useReactor_in)
  : inherited (this,          // event handler handle
               useReactor_in) // use reactor ?
- , control_ (controller_in)
- , report_ (report_in)
- , timerID_ (timerID_in)
+ , configuration_ ()
  , useReactor_ (useReactor_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::Net_Server_SignalHandler"));
 
+  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
 Net_Server_SignalHandler::~Net_Server_SignalHandler ()
@@ -58,9 +54,21 @@ Net_Server_SignalHandler::~Net_Server_SignalHandler ()
 }
 
 bool
+Net_Server_SignalHandler::initialize (const Net_Server_SignalHandlerConfiguration_t& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::initialize"));
+
+  configuration_ = configuration_in;
+
+  return true;
+}
+
+bool
 Net_Server_SignalHandler::handleSignal (int signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::handleSignal"));
+
+  int result = -1;
 
   bool stop_event_dispatching = false;
   bool report = false;
@@ -105,12 +113,14 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
     }
   } // end SWITCH
 
+  // ------------------------------------
+
   // report ?
-  if (report && report_)
+  if (report && configuration_.statisticReportingHandler)
   {
     try
     {
-      report_->report ();
+      configuration_.statisticReportingHandler->report ();
     }
     catch (...)
     {
@@ -128,11 +138,11 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
     // --> (try to) terminate in a well-behaved manner
 
     // step1: invoke controller (if any)
-    if (control_)
+    if (configuration_.listener)
     {
       try
       {
-        control_->stop ();
+        configuration_.listener->stop ();
       }
       catch (...)
       {
@@ -143,23 +153,24 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
     } // end IF
 
     // step2: stop timer
-    if (timerID_ >= 0)
+    if (configuration_.statisticReportingTimerID >= 0)
     {
-      if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_,
-                                                              NULL) <= 0)
+      const void* act_p = NULL;
+      result =
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (configuration_.statisticReportingTimerID,
+                                                              &act_p);
+      if (result <= 0)
       {
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", aborting\n"),
-                    timerID_));
+                    configuration_.statisticReportingTimerID));
 
         // clean up
-        timerID_ = -1;
+        configuration_.statisticReportingTimerID = -1;
 
         return false;
       } // end IF
-
-      // clean up
-      timerID_ = -1;
+      configuration_.statisticReportingTimerID = -1;
     } // end IF
 
     // step3: stop/abort/wait for connections

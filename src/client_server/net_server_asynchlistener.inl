@@ -207,7 +207,7 @@ bool
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            HandlerType>::initialize (const Net_ListenerConfiguration_t& configuration_in)
+                            HandlerType>::initialize (const Net_Server_ListenerConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::initialize"));
 

@@ -72,7 +72,7 @@ bool
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      HandlerType>::initialize (const Net_ListenerConfiguration_t& configuration_in)
+                      HandlerType>::initialize (const Net_Server_ListenerConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::initialize"));
 
@@ -162,7 +162,7 @@ Net_Server_Listener_T<ConfigurationType,
     result = inherited::resume ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", aborting")));
+                  ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", returning\n")));
     else
     {
       isListening_ = true;
@@ -178,7 +178,7 @@ Net_Server_Listener_T<ConfigurationType,
   if (!isInitialized_)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, aborting")));
+                ACE_TEXT ("not initialized, returning\n")));
     return;
   } // end IF
 
@@ -205,7 +205,7 @@ Net_Server_Listener_T<ConfigurationType,
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", returning")));
+                ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", returning\n")));
     return;
   } // end IF
   else
@@ -301,7 +301,7 @@ Net_Server_Listener_T<ConfigurationType,
       !buffer_p)
   {
     ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("failed to ACE_Acceptor::info(): \"%m\", aborting\n")));
+               ACE_TEXT("failed to ACE_Acceptor::info(): \"%m\", returning\n")));
     return;
   } // end IF
 

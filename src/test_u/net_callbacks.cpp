@@ -717,7 +717,7 @@ idle_update_info_display_cb (gpointer userData_in)
   } // end lock scope
 
   // enable buttons ?
-  gint current_value = gtk_spin_button_get_value_as_int (spinbutton_p);
+  bool is_sensitive = (gtk_spin_button_get_value_as_int (spinbutton_p) > 0);
   GtkWidget* widget_p = NULL;
   if (!data_p->listenerHandle) // <-- client
   {
@@ -731,7 +731,7 @@ idle_update_info_display_cb (gpointer userData_in)
                   ACE_TEXT ("failed to gtk_builder_get_object(\"%s\"): \"%m\", continuing\n"),
                   ACE_TEXT (NET_CLIENT_UI_GTK_BUTTON_CLOSE_NAME)));
     else
-      gtk_widget_set_sensitive (widget_p, (current_value > 0));
+      gtk_widget_set_sensitive (widget_p, is_sensitive);
   } // end IF
   widget_p =
     //GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
@@ -743,7 +743,7 @@ idle_update_info_display_cb (gpointer userData_in)
                 ACE_TEXT ("failed to gtk_builder_get_object(\"%s\"): \"%m\", continuing\n"),
                 ACE_TEXT (NET_UI_GTK_BUTTON_CLOSEALL_NAME)));
   else
-    gtk_widget_set_sensitive (widget_p, (current_value > 0));
+    gtk_widget_set_sensitive (widget_p, is_sensitive);
   if (!data_p->listenerHandle) // <-- client
   {
     widget_p =
@@ -756,7 +756,7 @@ idle_update_info_display_cb (gpointer userData_in)
                   ACE_TEXT ("failed to gtk_builder_get_object(\"%s\"): \"%m\", continuing\n"),
                   ACE_TEXT (NET_CLIENT_UI_GTK_BUTTON_PING_NAME)));
     else
-      gtk_widget_set_sensitive (widget_p, (current_value > 0));
+      gtk_widget_set_sensitive (widget_p, is_sensitive);
   } // end IF
 
   return TRUE; // G_SOURCE_CONTINUE

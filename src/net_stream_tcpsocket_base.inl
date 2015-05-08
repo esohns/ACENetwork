@@ -655,6 +655,7 @@ Net_StreamTCPSocketBase_T<AddressType,
   switch (mask_in)
   {
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
+    case ACE_Event_Handler::EXCEPT_MASK:     // --> socket has been closed (send failed)
     case ACE_Event_Handler::ALL_EVENTS_MASK: // --> connect failed (e.g. connection refused) /
                                              //     accept failed (e.g. too many connections) /
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
@@ -670,25 +671,22 @@ Net_StreamTCPSocketBase_T<AddressType,
       // step2: purge any pending notifications ?
       // *IMPORTANT NOTE*: if called from a non-reactor context, or when using a
       // a multithreaded reactor, there may still be in-flight notifications
-      // being dispatched at this stage, so this just speeds things up a little
+      // being dispatched at this stage --> this just speeds things up a little
       if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
       {
+        ACE_Reactor* reactor_p = inherited::reactor ();
+        ACE_ASSERT (reactor_p);
         result =
-            inherited::reactor ()->purge_pending_notifications (this,
-                                                                ACE_Event_Handler::ALL_EVENTS_MASK);
+            reactor_p->purge_pending_notifications (this,
+                                                    ACE_Event_Handler::WRITE_MASK);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@): \"%m\", continuing\n"),
+                      ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@, WRITE_MASK): \"%m\", continuing\n"),
                       this));
       } // end IF
 
       break;
     }
-    case ACE_Event_Handler::EXCEPT_MASK:
-      //if (handle_in == ACE_INVALID_HANDLE) // <-- notification has completed (!useThreadPerConnection)
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("notification completed, continuing\n")));
-      break;
     default:
       // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -869,8 +867,9 @@ Net_StreamTCPSocketBase_T<AddressType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK::get_local_addr(): \"%m\", continuing\n")));
   result = inherited::peer_.get_remote_addr (remoteSAP_out);
+  // *NOTE*: peer may have disconnected already --> not an error
   if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
+    ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to ACE_SOCK::get_remote_addr(): \"%m\", continuing\n")));
 }
 
