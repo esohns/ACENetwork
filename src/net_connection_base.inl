@@ -230,14 +230,14 @@ Net_ConnectionBase_T<AddressType,
     // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+                ACE_TEXT ("registered connection [0x%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
                 this, reinterpret_cast<unsigned int> (handle),
                 ACE_TEXT (local_address.c_str ()),
                 ACE_TEXT (buffer),
                 manager_->numConnections ()));
 #else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+                ACE_TEXT ("registered connection [0x%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
                 this, handle,
                 ACE_TEXT (local_address.c_str ()),
                 ACE_TEXT (buffer),
@@ -295,12 +295,12 @@ Net_ConnectionBase_T<AddressType,
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
+                ACE_TEXT ("deregistered connection [0x%@/%u] (total: %u)\n"),
                 this, reinterpret_cast<unsigned int> (handle),
                 manager_->numConnections ()));
 #else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
+                ACE_TEXT ("deregistered connection [0x%@/%d] (total: %d)\n"),
                 this, handle,
                 manager_->numConnections ()));
 #endif

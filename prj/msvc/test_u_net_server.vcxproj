@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\test_u\net_callbacks.cpp" />
+    <ClCompile Include="..\..\src\test_u\net_client_timeouthandler.cpp" />
     <ClCompile Include="..\..\src\test_u\net_eventhandler.cpp" />
     <ClCompile Include="..\..\src\test_u\net_module_eventhandler.cpp" />
     <ClCompile Include="..\..\src\test_u\net_server.cpp" />
@@ -142,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\test_u\net_callbacks.h" />
+    <ClInclude Include="..\..\src\test_u\net_client_timeouthandler.h" />
     <ClInclude Include="..\..\src\test_u\net_common.h" />
     <ClInclude Include="..\..\src\test_u\net_defines.h" />
     <ClInclude Include="..\..\src\test_u\net_eventhandler.h" />

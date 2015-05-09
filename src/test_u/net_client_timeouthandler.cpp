@@ -34,10 +34,11 @@ Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
                                                       Net_Client_IConnector_t* connector_in)
  : inherited (NULL,                           // default reactor
               ACE_Event_Handler::LO_PRIORITY) // priority
- , alternatingMode_ (ALTERNATING_CONNECT)
+ , alternatingModeState_ (ALTERNATING_STATE_CONNECT)
  , connector_ (connector_in)
  , distribution_ (1, 100)
  , generator_ ()
+ , lock_ ()
  , maxNumConnections_ (maxNumConnections_in)
  , mode_ (mode_in)
  , peerAddress_ (remoteSAP_in)
@@ -52,6 +53,37 @@ Net_Client_TimeoutHandler::~Net_Client_TimeoutHandler ()
 
 }
 
+void
+Net_Client_TimeoutHandler::mode (ActionMode_t mode_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::mode"));
+
+  ACE_ASSERT (mode_in < ACTION_MAX);
+
+  {
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+
+    mode_ = mode_in;
+  } // end lock scope
+}
+
+Net_Client_TimeoutHandler::ActionMode_t
+Net_Client_TimeoutHandler::mode () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::mode"));
+
+  // initialize return value(s)
+  ActionMode_t result = ACTION_INVALID;
+
+  {
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+
+    result = mode_;
+  } // end lock scope
+
+  return result;
+}
+
 int
 Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
                                            const void* arg_in)
@@ -59,192 +91,198 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
   NETWORK_TRACE(ACE_TEXT("Net_Client_TimeoutHandler::handle_timeout"));
 
   ACE_UNUSED_ARG (tv_in);
+  ACE_UNUSED_ARG (arg_in);
 
+  Net_InetConnectionManager_t::CONNECTION_T* abort_connection_p = NULL;
+  Net_InetConnectionManager_t::CONNECTION_T* ping_connection_p = NULL;
+  bool do_abort = false;
+  bool do_abort_oldest = false;
+  bool do_abort_youngest = false;
   bool do_connect = false;
+  bool do_ping = false;
   NET_CONNECTIONMANAGER_SINGLETON::instance ()->lock ();
   unsigned int num_connections =
     NET_CONNECTIONMANAGER_SINGLETON::instance ()->numConnections ();
 
-  switch (mode_)
   {
-    case ACTION_NORMAL:
+    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+
+    switch (mode_)
     {
-      do_connect = true;
-      break;
-    }
-    case ACTION_ALTERNATING:
-    {
-      switch (alternatingMode_)
+      case ACTION_NORMAL:
       {
-        case ALTERNATING_CONNECT:
+        do_connect = true;
+
+        break;
+      }
+      case ACTION_ALTERNATING:
+      {
+        switch (alternatingModeState_)
         {
-          // sanity check: max num connections already reached ?
-          // --> abort the oldest one first
-          if (maxNumConnections_ &&
-              (num_connections >= maxNumConnections_))
-            NET_CONNECTIONMANAGER_SINGLETON::instance ()->abortOldestConnection ();
-          do_connect = true;
-          break;
-        }
-        case ALTERNATING_ABORT:
-        {
-          // sanity check
-          if (num_connections == 0)
-            break; // nothing to do...
-
-          // grab a (random) connection handler
-          int index = 0;
-          // *PORTABILITY*: outside glibc, this is not very portable...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-          index = ((::random () % num_connections) + 1);
-#else
-          // *NOTE*: use ACE_OS::rand_r() for improved thread safety !
-          //results_out.push_back((ACE_OS::rand() % range_in) + 1);
-          unsigned int usecs = static_cast<unsigned int> (COMMON_TIME_NOW.usec ());
-          index = ((ACE_OS::rand_r (&usecs) % num_connections) + 1);
-#endif
-
-          Net_InetConnectionManager_t::CONNECTION_T* connection_p =
-            NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (index - 1);
-          if (!connection_p)
+          case ALTERNATING_STATE_CONNECT:
           {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
-                        index - 1, num_connections));
-            return -1;
-          } // end IF
+            // sanity check: max num connections already reached ?
+            // --> abort the oldest one first
+            if (maxNumConnections_ &&
+                (num_connections >= maxNumConnections_))
+              do_abort_oldest = true;
 
-          try
-          {
-            connection_p->close ();
+            do_connect = true;
+
+            break;
           }
-          catch (...)
+          case ALTERNATING_STATE_ABORT:
+          {
+            // sanity check
+            if (num_connections == 0)
+              break; // nothing to do...
+
+            // grab a (random) connection handler
+            int index = 0;
+            // *PORTABILITY*: outside glibc, this is not very portable...
+  #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+            index = ((::random () % num_connections) + 1);
+  #else
+            // *NOTE*: use ACE_OS::rand_r() for improved thread safety !
+            //results_out.push_back((ACE_OS::rand() % range_in) + 1);
+            unsigned int usecs =
+              static_cast<unsigned int> (COMMON_TIME_NOW.usec ());
+            index = ((ACE_OS::rand_r (&usecs) % num_connections) + 1);
+  #endif
+
+            abort_connection_p =
+              NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (index - 1);
+            if (!abort_connection_p)
+            {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
+                          index - 1, num_connections));
+
+              // clean up
+              NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+
+              return -1;
+            } // end IF
+
+            do_abort = true;
+
+            break;
+          }
+          default:
           {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("caught exception in Net_IConnection_T::close(), aborting\n")));
+                        ACE_TEXT ("unknown/invalid alternating state (was: %d), aborting\n"),
+                        alternatingModeState_));
 
             // clean up
-            connection_p->decrease ();
             NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
 
             return -1;
           }
+        } // end SWITCH
 
-          // clean up
-          connection_p->decrease ();
+        // cycle mode
+        int temp = alternatingModeState_;
+        alternatingModeState_ =
+          static_cast<Net_Client_TimeoutHandler::AlternatingModeState_t> (++temp);
+        if (alternatingModeState_ == ALTERNATING_STATE_MAX)
+          alternatingModeState_ = ALTERNATING_STATE_CONNECT;
 
+        break;
+      }
+      case ACTION_STRESS:
+      {
+        // allow some probability for closing connections in between
+        auto dice = std::bind (distribution_, generator_);
+        float dice_roll = static_cast<float> (dice ()) / 100.0F;
+
+        if ((num_connections > 0) &&
+            (dice_roll <= NET_CLIENT_U_TEST_ABORT_PROBABILITY))
+          do_abort_youngest = true;
+
+        // allow some probability for opening connections in between
+        dice_roll = static_cast<float> (dice ()) / 100.0F;
+        if (dice_roll <= NET_CLIENT_U_TEST_CONNECT_PROBABILITY)
+          do_connect = true;
+
+        // ping the server
+
+        // sanity check
+        if ((num_connections == 0) ||
+            ((num_connections == 1) && do_abort_youngest))
           break;
-        }
-        default:
+
+        // grab a (random) connection handler
+        std::uniform_int_distribution<int> distribution (0, num_connections - 1);
+        int dice_roll_2 = distribution (generator_);
+        ping_connection_p =
+          NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (dice_roll_2);
+        if (!ping_connection_p)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("invalid alternating mode (was: %d), aborting\n"),
-                      alternatingMode_));
+                      ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
+                      dice_roll_2, num_connections));
 
           // clean up
           NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
 
           return -1;
-        }
-      } // end SWITCH
+        } // end IF
 
-      int temp = alternatingMode_;
-      alternatingMode_ =
-        static_cast<Net_Client_TimeoutHandler::AlternatingMode_t> (++temp);
-      if (alternatingMode_ == ALTERNATING_MAX)
-        alternatingMode_ = ALTERNATING_CONNECT;
+        do_ping = true;
 
-      break;
-    }
-    case ACTION_STRESS:
-    {
-      // allow some probability for closing connections in between
-      auto dice = std::bind (distribution_, generator_);
-      float dice_roll = static_cast<float> (dice ()) / 100.0F;
-
-      if ((num_connections > 0) &&
-          (dice_roll <= NET_CLIENT_U_TEST_ABORT_PROBABILITY))
-        NET_CONNECTIONMANAGER_SINGLETON::instance ()->abortNewestConnection ();
-
-      // allow some probability for opening connections in between
-      dice_roll = static_cast<float> (dice ()) / 100.0F;
-      if (dice_roll <= NET_CLIENT_U_TEST_CONNECT_PROBABILITY)
-        do_connect = true;
-
-      // ping the server
-
-      // sanity check
-      if (num_connections == 0)
         break;
-
-      // grab a (random) connection handler
-      std::uniform_int_distribution<int> distribution (0, num_connections - 1);
-      int dice_roll_2 = distribution (generator_);
-      Net_InetConnectionManager_t::CONNECTION_T* connection_base_p =
-        NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (dice_roll_2);
-      if (!connection_base_p)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
-                    dice_roll_2, num_connections));
-
-        // clean up
-        NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
-
-        return -1;
-      } // end IF
-      Net_ITransportLayer_t* connection_p =
-        dynamic_cast<Net_ITransportLayer_t*> (connection_base_p);
-      if (!connection_p)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to dynamic_cast<Net_ITransportLayer_t*> (%@), aborting\n"),
-                    connection_base_p));
-
-        // clean up
-        NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
-
-        return -1;
-      } // end IF
-
-      try
-      {
-        connection_p->ping ();
       }
-      catch (...)
+      default:
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_IConnection_T::ping(), aborting\n")));
+                    ACE_TEXT ("unknown/invalid mode (was: %d), aborting\n"),
+                    mode_));
 
         // clean up
-        connection_base_p->decrease ();
-        connection_base_p->close ();
         NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
 
         return -1;
       }
+    } // end SWITCH
+  } // end lock scope
+  NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
 
-      // clean up
-      connection_base_p->decrease ();
+  // ------------------------------------
 
-      break;
+  if (do_abort)
+  {
+    ACE_ASSERT (abort_connection_p);
+    try
+    {
+      abort_connection_p->close ();
     }
-    default:
+    catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid mode (was: %d), aborting\n"),
-                  mode_));
+                  ACE_TEXT ("caught exception in Net_IConnection_T::close(), aborting\n")));
 
       // clean up
-      NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+      abort_connection_p->decrease ();
+      if (ping_connection_p)
+        ping_connection_p->decrease ();
 
       return -1;
     }
-  } // end IF
-  NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
 
-  if (do_connect && connector_)
+    // clean up
+    abort_connection_p->decrease ();
+  } // end IF
+
+  if (do_abort_oldest)
+    NET_CONNECTIONMANAGER_SINGLETON::instance ()->abortOldestConnection ();
+
+  if (do_abort_youngest)
+    NET_CONNECTIONMANAGER_SINGLETON::instance ()->abortYoungestConnection ();
+
+  if (do_connect)
   {
+    ACE_ASSERT (connector_);
     bool result = false;
     try
     {
@@ -254,12 +292,17 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_Client_IConnector_t::connect(), aborting\n")));
+
+      // clean up
+      if (ping_connection_p)
+        ping_connection_p->decrease ();
+
       return -1;
     }
     if (!result)
     {
       ACE_TCHAR buffer[BUFSIZ];
-      ACE_OS::memset(buffer, 0, sizeof (buffer));
+      ACE_OS::memset (buffer, 0, sizeof (buffer));
       int result_2 = peerAddress_.addr_to_string (buffer, sizeof (buffer));
       if (result_2 == -1)
         ACE_DEBUG ((LM_ERROR,
@@ -268,6 +311,42 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
                   ACE_TEXT ("failed to Net_Client_IConnector::connect(\"%s\"), continuing\n"),
                   buffer));
     } // end IF
+  } // end IF
+
+  if (do_ping)
+  {
+    ACE_ASSERT (ping_connection_p);
+    Net_ITransportLayer_t* transportlayer_p =
+      dynamic_cast<Net_ITransportLayer_t*> (ping_connection_p);
+    if (!transportlayer_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to dynamic_cast<Net_ITransportLayer_t*> (0x%@), aborting\n"),
+                  ping_connection_p));
+
+      // clean up
+      ping_connection_p->decrease ();
+
+      return -1;
+    } // end IF
+
+    try
+    {
+      transportlayer_p->ping ();
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Net_ITransportLayer_t::ping(), aborting\n")));
+
+      // clean up
+      ping_connection_p->decrease ();
+
+      return -1;
+    }
+
+    // clean up
+    ping_connection_p->decrease ();
   } // end IF
 
   return 0;

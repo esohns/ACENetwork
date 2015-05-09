@@ -37,8 +37,9 @@ G_MODULE_EXPORT gboolean idle_update_info_display_cb (gpointer);
 G_MODULE_EXPORT gint button_connect_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_close_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_close_all_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT gint togglebutton_test_toggled_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT gint radiobutton_mode_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_ping_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gint togglebutton_stress_toggled_cb (GtkWidget*, gpointer);
 // -----------------------------------------------------------------------------
 G_MODULE_EXPORT gint togglebutton_listen_toggled_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_report_clicked_cb (GtkWidget*, gpointer);

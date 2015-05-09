@@ -33,6 +33,9 @@
     <ClCompile Include="..\..\src\test_u\net_module_eventhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\test_u\net_client_timeouthandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\test_u\net_callbacks.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\test_u\net_module_eventhandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\test_u\net_client_timeouthandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

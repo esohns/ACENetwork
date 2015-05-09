@@ -47,20 +47,23 @@ class Net_Client_TimeoutHandler
     ACTION_INVALID = -1
   };
 
-  enum AlternatingMode_t
+  enum AlternatingModeState_t
   {
-    ALTERNATING_CONNECT = 0,
-    ALTERNATING_ABORT,
+    ALTERNATING_STATE_CONNECT = 0,
+    ALTERNATING_STATE_ABORT,
     // ---------------------
-    ALTERNATING_MAX,
-    ALTERNATING_INVALID = -1
+    ALTERNATING_STATE_MAX,
+    ALTERNATING_STATE_INVALID = -1
   };
 
-  Net_Client_TimeoutHandler (ActionMode_t,             // mode
-                             unsigned int,             // max #connections
-                             const ACE_INET_Addr&,     // remote SAP
+  Net_Client_TimeoutHandler (ActionMode_t,              // mode
+                             unsigned int,              // max #connections
+                             const ACE_INET_Addr&,      // remote SAP
                              Net_Client_IConnector_t*); // connector
   virtual ~Net_Client_TimeoutHandler ();
+
+  void mode (ActionMode_t);
+  ActionMode_t mode () const;
 
   // implement specific behaviour
   virtual int handle_timeout (const ACE_Time_Value&, // current time
@@ -73,10 +76,11 @@ class Net_Client_TimeoutHandler
   ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler (const Net_Client_TimeoutHandler&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler& operator= (const Net_Client_TimeoutHandler&));
 
-  AlternatingMode_t                  alternatingMode_;
+  AlternatingModeState_t             alternatingModeState_;
   Net_Client_IConnector_t*           connector_;
   std::uniform_int_distribution<int> distribution_;
   std::default_random_engine         generator_;
+  mutable ACE_Thread_Mutex           lock_;
   unsigned int                       maxNumConnections_;
   ActionMode_t                       mode_;
   ACE_INET_Addr                      peerAddress_;

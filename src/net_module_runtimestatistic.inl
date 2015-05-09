@@ -154,7 +154,6 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to RPG_Common_Timer_Manager::schedule(), aborting\n")));
-
       return false;
     } // end IF
 //   ACE_DEBUG ((LM_DEBUG,
@@ -190,7 +189,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                                               bool& passMessageDownstream_out)
+                                                                              bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::handleDataMessage"));
 
@@ -211,7 +210,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     messageCounter_++;
 
     // add message to statistic...
-    messageTypeStatistics_[static_cast<ProtocolCommandType> (message_inout->getCommand ())]++;
+    messageTypeStatistics_[message_inout->getCommand ()]++;
   } // end lock scope
 }
 
@@ -271,8 +270,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
         if (localReportingHandlerID_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to RPG_Common_Timer_Manager::schedule(), aborting\n")));
-
+                      ACE_TEXT ("failed to RPG_Common_Timer_Manager::schedule(), returning\n")));
           return;
         } // end IF
         //     ACE_DEBUG ((LM_DEBUG,
@@ -440,12 +438,10 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
     if ((numInboundMessages_ + numOutboundMessages_))
     {
-      // write some output
       ACE_DEBUG ((LM_INFO,
-                  ACE_TEXT ("*** [session: %u] SESSION STATISTICS ***\ntotal # data message(s) (as seen [in/out]): %u/%u\n --> Protocol Info <--\n"),
+                  ACE_TEXT ("*** [session: %u] SESSION STATISTICS ***\ntotal # data message(s) [in/out]: %u/%u\n --> Protocol Info <--\n"),
                   sessionID_,
-                  numInboundMessages_,
-                  numOutboundMessages_));
+                  numInboundMessages_, numOutboundMessages_));
 
       std::string protocol_string;
       for (Net_MessageStatisticIterator_t iterator = messageTypeStatistics_.begin ();
@@ -485,13 +481,17 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::fini_timers"));
 
-  const void* act = NULL;
+  int result = -1;
+
+  const void* act_p = NULL;
   if (cancelAllTimers_in)
   {
     if (resetTimeoutHandlerID_ != -1)
     {
-      if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (resetTimeoutHandlerID_,
-                                                              &act) == -1)
+      result =
+        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (resetTimeoutHandlerID_,
+                                                            &act_p);
+      if (result <= 0)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
                     resetTimeoutHandlerID_));
@@ -501,9 +501,11 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
   if (localReportingHandlerID_ != -1)
   {
-    act = NULL;
-    if (COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (localReportingHandlerID_,
-                                                            &act) == -1)
+    act_p = NULL;
+    result =
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (localReportingHandlerID_,
+                                                          &act_p);
+    if (result <= 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
                   localReportingHandlerID_));
@@ -511,7 +513,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   } // end IF
 }
 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 template <typename TaskSynchType,
           typename TimePolicyType,
@@ -525,7 +527,7 @@ Net_Module_Statistic_ReaderTask_T<TaskSynchType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::Net_Module_Statistic_ReaderTask_T ()
-// : inherited ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_ReaderTask_T::Net_Module_Statistic_ReaderTask_T"));
 
@@ -562,7 +564,7 @@ Net_Module_Statistic_ReaderTask_T<TaskSynchType,
                                   ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::put (ACE_Message_Block* mb_in,
-                                                                 ACE_Time_Value* tv_in)
+                                                                ACE_Time_Value* tv_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_ReaderTask_T::put"));
 

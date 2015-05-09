@@ -148,12 +148,13 @@ Net_TCPSocketHandler::open (void* arg_in)
   {
     // *IMPORTANT NOTE*: this can happen when the connection handle is still
     // registered with the reactor (i.e. the reactor is still processing events
-    // on a file descriptor that has been closed an is now being reused by the
+    // on a file descriptor that has been closed and is now being reused by the
     // system)
+    // *NOTE*: more likely, this happened because the (select) reactor is out of
+    //         "free" (read) slots
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Svc_Handler::open(%@): \"%m\" (handle was: %d), aborting\n"),
-                arg_in,
-                handle));
+                ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@/%d): \"%m\", aborting\n"),
+                arg_in, handle));
     return -1;
   } // end IF
   //// *NOTE*: let the reactor manage this handler...

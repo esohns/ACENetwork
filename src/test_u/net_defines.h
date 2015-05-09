@@ -21,48 +21,57 @@
 #ifndef TEST_U_NET_DEFINES_H
 #define TEST_U_NET_DEFINES_H
 
-#define NET_UI_GTKEVENT_RESOLUTION                200 // ms --> 5 FPS
-#define NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME "spinbutton_connections"
-#define NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME    "spinbutton_messages"
-#define NET_UI_GTK_TEXTVIEW_NAME                  "textview"
-#define NET_UI_GTK_ADJUSTMENT_NAME                "scrolledwindow_vadjustment"
-#define NET_UI_GTK_SCROLLMARK_NAME                "insert"
-#define NET_UI_GTK_BUTTONBOX_ACTIONS_NAME         "vbuttonbox"
-#define NET_UI_GTK_BUTTON_ABOUT_NAME              "about"
-#define NET_UI_GTK_BUTTON_CLEAR_NAME              "clear"
-#define NET_UI_GTK_BUTTON_CLOSEALL_NAME           "close_all"
-#define NET_UI_GTK_BUTTON_REPORT_NAME             "report"
-#define NET_UI_GTK_BUTTON_QUIT_NAME               "quit"
-#define NET_UI_GTK_DIALOG_ABOUT_NAME              "about_dialog"
-#define NET_UI_GTK_DIALOG_MAIN_NAME               "main_dialog"
-#define NET_UI_LOG_FONTDESCRIPTION                "Monospace 8"
-#define NET_UI_LOG_BASE                           "#000000" // black
-//#define NET_UI_LOG_TEXT                           "#FFFFFF" // white
-#define NET_UI_LOG_TEXT                           "#00FF00" // green
+#include "net_client_timeouthandler.h"
+
+#define NET_UI_GTKEVENT_RESOLUTION                     200 // ms --> 5 FPS
+#define NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME      "spinbutton_connections"
+#define NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME         "spinbutton_messages"
+#define NET_UI_GTK_TEXTVIEW_NAME                       "textview"
+#define NET_UI_GTK_ADJUSTMENT_NAME                     "scrolledwindow_vadjustment"
+#define NET_UI_GTK_SCROLLMARK_NAME                     "insert"
+#define NET_UI_GTK_BUTTONBOX_ACTIONS_NAME              "vbuttonbox"
+#define NET_UI_GTK_BUTTON_ABOUT_NAME                   "about"
+#define NET_UI_GTK_BUTTON_CLEAR_NAME                   "clear"
+#define NET_UI_GTK_BUTTON_CLOSEALL_NAME                "close_all"
+#define NET_UI_GTK_BUTTON_REPORT_NAME                  "report"
+#define NET_UI_GTK_BUTTON_QUIT_NAME                    "quit"
+#define NET_UI_GTK_DIALOG_ABOUT_NAME                   "dialog_about"
+#define NET_UI_GTK_DIALOG_MAIN_NAME                    "dialog_main"
+#define NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION          "Monospace 8"
+#define NET_UI_GTK_PANGO_LOG_COLOR_BASE                "#FFFFFF" // white
+#define NET_UI_GTK_PANGO_LOG_COLOR_TEXT                "#000000" // green
 
 // -----------------------------------------------------------------------------
 
-#define NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS   0
-#define NET_CLIENT_DEF_SERVER_HOSTNAME            ACE_LOCALHOST
-#define NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL    0
-#define NET_CLIENT_DEF_SERVER_PING_INTERVAL       0 // ms {0 --> OFF}
-#define NET_CLIENT_DEF_SERVER_STRESS_INTERVAL     50 // ms
+#define NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS        0
+#define NET_CLIENT_DEF_SERVER_HOSTNAME                 ACE_LOCALHOST
+#define NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL         0
+#define NET_CLIENT_DEF_SERVER_PING_INTERVAL            0 // ms {0 --> OFF}
+#define NET_CLIENT_DEF_SERVER_STRESS_INTERVAL          50 // ms
 
-#define NET_CLIENT_UI_FILE                        "net_client.glade"
-#define NET_CLIENT_UI_GTK_BUTTON_CONNECT_NAME     "connect"
-#define NET_CLIENT_UI_GTK_BUTTON_CLOSE_NAME       "close"
-#define NET_CLIENT_UI_GTK_BUTTON_PING_NAME        "ping"
-#define NET_CLIENT_UI_GTK_BUTTON_STRESS_NAME      "stress"
+#define NET_CLIENT_UI_FILE                             "net_client.glade"
+#define NET_CLIENT_UI_GTK_BUTTON_CONNECT_NAME          "connect"
+#define NET_CLIENT_UI_GTK_BUTTON_CLOSE_NAME            "close"
+#define NET_CLIENT_UI_GTK_BUTTON_PING_NAME             "ping"
+#define NET_CLIENT_UI_GTK_BUTTON_TEST_NAME             "test"
+#define NET_CLIENT_UI_GTK_BUTTON_TEST_LABEL_START      "T_est"
+#define NET_CLIENT_UI_GTK_BUTTON_TEST_LABEL_STOP       "S_top"
+#define NET_CLIENT_UI_GTK_IMAGE_START_NAME             "image_start"
+#define NET_CLIENT_UI_GTK_IMAGE_STOP_NAME              "image_stop"
+#define NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_NAME      "radiobutton_normal"
+#define NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_NAME "radiobutton_alternating"
+#define NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_NAME      "radiobutton_stress"
 
 // define behaviour
-#define NET_CLIENT_U_TEST_CONNECT_PROBABILITY     0.2F // 20%
-#define NET_CLIENT_U_TEST_ABORT_PROBABILITY       0.1F // 10%
+#define NET_CLIENT_U_TEST_CONNECT_PROBABILITY          0.2F // 20%
+#define NET_CLIENT_U_TEST_ABORT_PROBABILITY            0.1F // 10%
+#define NET_CLIENT_U_TEST_DEFAULT_MODE                 Net_Client_TimeoutHandler::ACTION_NORMAL
 
 // -----------------------------------------------------------------------------
 
-#define NET_SERVER_UI_FILE                        "net_server.glade"
-#define NET_SERVER_UI_GTK_BUTTON_START_NAME       "start"
-#define NET_SERVER_UI_GTK_BUTTON_STOP_NAME        "stop"
-#define NET_SERVER_UI_GTK_BUTTON_LISTEN_NAME      "listen"
+#define NET_SERVER_UI_FILE                             "net_server.glade"
+//#define NET_SERVER_UI_GTK_BUTTON_START_NAME            "start"
+//#define NET_SERVER_UI_GTK_BUTTON_STOP_NAME             "stop"
+#define NET_SERVER_UI_GTK_BUTTON_LISTEN_NAME           "listen"
 
 #endif

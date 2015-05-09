@@ -54,6 +54,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->timeoutHandler);
 
   //Common_UI_GladeXMLsIterator_t iterator =
   //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -106,7 +107,38 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                              0.0,
                              std::numeric_limits<double>::max ());
 
-  // step3: initialize text view, setup auto-scrolling
+  // step3: initialize options
+  Net_Client_TimeoutHandler::ActionMode_t action_mode =
+    data_p->timeoutHandler->mode ();
+  std::string radio_button_name;
+  switch (action_mode)
+  {
+    case Net_Client_TimeoutHandler::ACTION_NORMAL:
+      radio_button_name = ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_NAME);
+      break;
+    case Net_Client_TimeoutHandler::ACTION_ALTERNATING:
+      radio_button_name = ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_NAME);
+      break;
+    case Net_Client_TimeoutHandler::ACTION_STRESS:
+      radio_button_name = ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_NAME);
+      break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("unknown/invalid mode (was: %d), aborting\n"),
+                  action_mode));
+      return FALSE; // G_SOURCE_REMOVE
+    }
+  } // end SWITCH
+  GtkToggleButton* togglebutton_p =
+    //GTK_TOGGLE_BUTTON (glade_xml_get_widget ((*iterator).second.second,
+    //                                         radio_button_name.c_str ()));
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               radio_button_name.c_str ()));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p, TRUE);
+
+  // step4: initialize text view, setup auto-scrolling
   GtkTextView* view_p =
     //GTK_TEXT_VIEW (glade_xml_get_widget ((*iterator).second.second,
     //                                     ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_TEXTVIEW_NAME)));
@@ -120,12 +152,12 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 ////  gtk_text_view_set_buffer (view_p, buffer_p);
 
   PangoFontDescription* font_description_p =
-    pango_font_description_from_string (ACE_TEXT_ALWAYS_CHAR (NET_UI_LOG_FONTDESCRIPTION));
+    pango_font_description_from_string (ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION));
   if (!font_description_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to pango_font_description_from_string(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (NET_UI_LOG_FONTDESCRIPTION)));
+                ACE_TEXT (NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION)));
     return FALSE; // G_SOURCE_REMOVE
   } // end IF
   // apply font
@@ -138,10 +170,10 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   } // end IF
   rc_style_p->font_desc = font_description_p;
   GdkColor base_colour, text_colour;
-  gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (NET_UI_LOG_BASE),
+  gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PANGO_LOG_COLOR_BASE),
                    &base_colour);
   rc_style_p->base[GTK_STATE_NORMAL] = base_colour;
-  gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (NET_UI_LOG_TEXT),
+  gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PANGO_LOG_COLOR_TEXT),
                    &text_colour);
   rc_style_p->text[GTK_STATE_NORMAL] = text_colour;
   rc_style_p->color_flags[GTK_STATE_NORMAL] =
@@ -160,7 +192,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   //                               TRUE);
   //  g_object_unref (buffer_p);
 
-  // step4: initialize updates
+  // step5: initialize updates
   // schedule asynchronous updates of the log view
   guint event_source_id = g_timeout_add_seconds (1,
                                                  idle_update_log_display_cb,
@@ -186,7 +218,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
     return FALSE; // G_SOURCE_REMOVE
   } // end ELSE
 
-  // step5: disable some functions ?
+  // step6: disable some functions ?
   GtkButton* button_p =
     //GTK_BUTTON (glade_xml_get_widget ((*iterator).second.second,
     //                                  ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_CLOSE_NAME)));
@@ -209,7 +241,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   ACE_ASSERT (button_p);
   gtk_widget_set_sensitive (GTK_WIDGET (button_p), FALSE);
 
-  // step6: (auto-)connect signals/slots
+  // step7: (auto-)connect signals/slots
   // *NOTE*: glade_xml_signal_autoconnect does not work reliably
   //glade_xml_signal_autoconnect(userData_out.xml);
 
@@ -266,12 +298,12 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 
   object_p =
       gtk_builder_get_object ((*iterator).second.second,
-                              ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_STRESS_NAME));
+                              ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_TEST_NAME));
   ACE_ASSERT (object_p);
   result =
       g_signal_connect (object_p,
                         ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                        G_CALLBACK (togglebutton_stress_toggled_cb),
+                        G_CALLBACK (togglebutton_test_toggled_cb),
                         userData_in);
   ACE_ASSERT (result);
 
@@ -307,12 +339,12 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   ACE_ASSERT (result);
   ACE_UNUSED_ARG (result);
 
-  //   // step7: use correct screen
+  //   // step8: use correct screen
   //   if (parentWidget_in)
   //     gtk_window_set_screen (GTK_WINDOW (dialog_p),
   //                            gtk_widget_get_screen (const_cast<GtkWidget*> (//parentWidget_in)));
 
-  // step8: draw main dialog
+  // step9: draw main dialog
   gtk_widget_show_all (dialog_p);
 
   return FALSE; // G_SOURCE_REMOVE
@@ -392,12 +424,12 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 //  g_object_unref (buffer_p);
 
   PangoFontDescription* font_description_p =
-    pango_font_description_from_string (ACE_TEXT_ALWAYS_CHAR (NET_UI_LOG_FONTDESCRIPTION));
+    pango_font_description_from_string (ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION));
   if (!font_description_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to pango_font_description_from_string(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (NET_UI_LOG_FONTDESCRIPTION)));
+                ACE_TEXT (NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION)));
     return FALSE; // G_SOURCE_REMOVE
   } // end IF
   // apply font
@@ -410,10 +442,10 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   } // end IF
   rc_style_p->font_desc = font_description_p;
   GdkColor base_colour, text_colour;
-  gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (NET_UI_LOG_BASE),
+  gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PANGO_LOG_COLOR_BASE),
                    &base_colour);
   rc_style_p->base[GTK_STATE_NORMAL] = base_colour;
-  gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (NET_UI_LOG_TEXT),
+  gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PANGO_LOG_COLOR_TEXT),
                    &text_colour);
   rc_style_p->text[GTK_STATE_NORMAL] = text_colour;
   rc_style_p->color_flags[GTK_STATE_NORMAL] =
@@ -998,10 +1030,10 @@ button_ping_clicked_cb (GtkWidget* widget_in,
 } // button_ping_clicked_cb
 
 G_MODULE_EXPORT gint
-togglebutton_stress_toggled_cb (GtkWidget* widget_in,
-                                gpointer userData_in)
+togglebutton_test_toggled_cb (GtkWidget* widget_in,
+                              gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::togglebutton_stress_toggled_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::togglebutton_test_toggled_cb"));
 
   int result = -1;
 
@@ -1053,15 +1085,87 @@ togglebutton_stress_toggled_cb (GtkWidget* widget_in,
     data_p->timerId = -1;
   } // end ELSE
 
-  // toggle buttons
-  GtkWidget* widget_p =
+  // toggle button image/label
+  bool is_active = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget_in));
+  GtkImage* image_p =
     //GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
-    //                                  ACE_TEXT_ALWAYS_CHAR(NET_UI_GTK_BUTTONBOX_ACTIONS_NAME)));
-    GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_BUTTONBOX_ACTIONS_NAME)));
-  ACE_ASSERT (widget_p);
-  gtk_widget_set_sensitive (widget_p,
-                            !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget_in)));
+    //                                  ACE_TEXT_ALWAYS_CHAR(NET_CLIENT_UI_GTK_IMAGE_START_NAME)));
+    GTK_IMAGE (gtk_builder_get_object ((*iterator).second.second,
+                                       (is_active ? ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_IMAGE_STOP_NAME)
+                                                  : ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_IMAGE_START_NAME))));
+  ACE_ASSERT (image_p);
+  gtk_button_set_image (GTK_BUTTON (widget_in), GTK_WIDGET (image_p));
+  gtk_button_set_label (GTK_BUTTON (widget_in),
+                        (is_active ? ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_TEST_LABEL_STOP)
+                                   : ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_TEST_LABEL_START)));
+
+  return FALSE;
+}
+
+G_MODULE_EXPORT gint
+radiobutton_mode_changed_cb (GtkWidget* widget_in,
+                             gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::radiobutton_mode_changed_cb"));
+
+  int result = -1;
+
+  Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (widget_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->timeoutHandler);
+
+  //Common_UI_GladeXMLsIterator_t iterator =
+  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  Common_UI_GTKBuildersIterator_t iterator =
+    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
+  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+
+  Net_Client_TimeoutHandler::ActionMode_t mode =
+    Net_Client_TimeoutHandler::ACTION_INVALID;
+  GtkButton* button_p = GTK_BUTTON (widget_in);
+  ACE_ASSERT (button_p);
+  const gchar* label_text_p = gtk_button_get_label (button_p);
+  result = ACE_OS::strcmp (label_text_p,
+                           ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_NAME));
+  if (result == 0)
+    mode = Net_Client_TimeoutHandler::ACTION_NORMAL;
+  else
+  {
+    result = ACE_OS::strcmp (label_text_p,
+                             ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_NAME));
+    if (result == 0)
+      mode = Net_Client_TimeoutHandler::ACTION_ALTERNATING;
+    else
+    {
+      result = ACE_OS::strcmp (label_text_p,
+                               ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_NAME));
+      if (result == 0)
+        mode = Net_Client_TimeoutHandler::ACTION_STRESS;
+      else
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown mode (was: \"%s\"), aborting\n"),
+                    ACE_TEXT (label_text_p)));
+        return TRUE; // propagate
+      } // end ELSE
+    } // end ELSE
+  } // end ELSE
+
+  try
+  {
+    data_p->timeoutHandler->mode (mode);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_Client_TimeoutHandler::mode(), aborting\n")));
+    return TRUE; // propagate
+  }
 
   return FALSE;
 }

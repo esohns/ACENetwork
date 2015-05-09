@@ -2,7 +2,7 @@
 <interface>
   <requires lib="gtk+" version="2.24"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkAboutDialog" id="about_dialog">
+  <object class="GtkAboutDialog" id="dialog_about">
     <property name="border_width">5</property>
     <property name="resizable">False</property>
     <property name="destroy_with_parent">True</property>
@@ -36,11 +36,11 @@
       </object>
     </child>
   </object>
-  <object class="GtkImage" id="disconnect_image">
+  <object class="GtkImage" id="image_disconnect">
     <property name="visible">True</property>
     <property name="stock">gtk-disconnect</property>
   </object>
-  <object class="GtkImage" id="listen_image">
+  <object class="GtkImage" id="image_listen">
     <property name="visible">True</property>
     <property name="stock">gtk-connect</property>
   </object>
@@ -60,7 +60,7 @@
     <property name="page_increment">1</property>
   </object>
   <object class="GtkTextBuffer" id="textview_textbuffer"/>
-  <object class="GtkDialog" id="main_dialog">
+  <object class="GtkDialog" id="dialog_main">
     <property name="border_width">5</property>
     <property name="type_hint">dialog</property>
     <property name="deletable">False</property>
@@ -93,7 +93,7 @@
                             <property name="can_focus">True</property>
                             <property name="can_default">True</property>
                             <property name="receives_default">True</property>
-                            <property name="image">listen_image</property>
+                            <property name="image">image_listen</property>
                             <property name="use_underline">True</property>
                             <property name="active">True</property>
                             <signal name="toggled" handler="togglebutton_listen_toggled_cb"/>
@@ -111,7 +111,7 @@
                             <property name="can_focus">True</property>
                             <property name="can_default">True</property>
                             <property name="receives_default">True</property>
-                            <property name="image">disconnect_image</property>
+                            <property name="image">image_disconnect</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
                             <signal name="clicked" handler="button_close_all_clicked_cb"/>
@@ -170,8 +170,6 @@
                             <property name="editable">False</property>
                             <property name="xalign">1</property>
                             <property name="caps_lock_warning">False</property>
-                            <property name="primary_icon_sensitive">True</property>
-                            <property name="secondary_icon_sensitive">True</property>
                             <property name="adjustment">spinbutton_connections_adjustment</property>
                             <property name="snap_to_ticks">True</property>
                             <property name="numeric">True</property>

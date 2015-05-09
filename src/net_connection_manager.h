@@ -97,7 +97,7 @@ class Net_Connection_Manager_T
 
   // ---------------------------------------------------------------------------
   void abortOldestConnection ();
-  void abortNewestConnection ();
+  void abortYoungestConnection ();
   // ---------------------------------------------------------------------------
 
   // implement (part of) Common_IStatistic_T

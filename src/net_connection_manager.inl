@@ -523,9 +523,9 @@ Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::abortNewestConnection ()
+                         StatisticContainerType>::abortYoungestConnection ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortNewestConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortYoungestConnection"));
 
   int result = -1;
 
