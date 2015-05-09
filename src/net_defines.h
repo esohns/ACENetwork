@@ -35,6 +35,7 @@
 #else
 #define NET_INTERFACE_DEFAULT                    "eth0"
 #endif
+#define NET_INTERFACE_DEFAULT_USE_LOOPBACK       false
 
 // addresses
 #define NET_ADDRESS_DEFAULT_PORT                 10001

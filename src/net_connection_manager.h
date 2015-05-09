@@ -70,8 +70,6 @@ class Net_Connection_Manager_T
   void initialize (unsigned int); // maximum number of concurrent connections
 
   // implement Net_IConnectionManager_T
-  //virtual void lock ();
-  //virtual void unlock ();
   virtual void set (const ConfigurationType&, // connection handler (default)
                                               // configuration
                     UserDataType*);           // (stream) user data
@@ -92,6 +90,10 @@ class Net_Connection_Manager_T
   virtual void start ();
   virtual void stop (bool = true); // locked access ?
   virtual bool isRunning () const;
+
+  // implement Common_ILock
+  virtual void lock ();
+  virtual void unlock ();
 
   // ---------------------------------------------------------------------------
   void abortOldestConnection ();

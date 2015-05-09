@@ -41,6 +41,7 @@ class Net_Client_TimeoutHandler;
 enum Net_GTK_Event_t
 {
   NET_GTKEVENT_CONNECT = 0,
+  NET_GTKEVENT_DATA,
   NET_GTKEVENT_DISCONNECT,
   NET_GTKEVENT_STATISTICS,
   // ----------------------

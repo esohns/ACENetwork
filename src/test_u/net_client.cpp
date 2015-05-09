@@ -504,7 +504,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                                                   &heap_allocator,         // heap allocator handle
                                                   true);                   // block ?
   Net_Configuration_t configuration;
-  ACE_OS::memset (&configuration, 0, sizeof (Net_Configuration_t));
+//  ACE_OS::memset (&configuration, 0, sizeof (Net_Configuration_t));
   // ************ connection configuration data ************
   configuration.protocolConfiguration.peerPingInterval =
       ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? 0
@@ -516,11 +516,15 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
 
   configuration.streamConfiguration.bufferSize = STREAM_BUFFER_SIZE;
+  configuration.streamConfiguration.deleteModule = true;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.moduleConfiguration = &module_configuration;
   configuration.streamConfiguration.module =
-      (!UIDefinitionFile_in.empty () ? &event_handler
-                                     : NULL);
+    (!UIDefinitionFile_in.empty () ? &event_handler
+                                   : NULL);
+  configuration.streamConfiguration.moduleConfiguration = &module_configuration;
+  configuration.streamConfiguration.printFinalReport = true;
+  configuration.streamConfiguration.statisticReportingInterval = 0;
+  configuration.streamConfiguration.useThreadPerConnection = false;
 
   //  config.useThreadPerConnection = false;
   //  config.serializeOutput = false;
@@ -1053,8 +1057,7 @@ ACE_TMAIN (int argc_in,
   if (NET_STREAM_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
-  if ((!UI_file.empty () && (alternating_mode || run_stress_test)) ||
-      (use_threadpool && !use_reactor)                             ||
+  if ((use_threadpool && !use_reactor)                             ||
       (run_stress_test && ((server_ping_interval != 0) ||
                            (connection_interval != 0)))            ||
       (alternating_mode && run_stress_test))

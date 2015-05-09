@@ -44,7 +44,7 @@ Net_Server_SignalHandler::Net_Server_SignalHandler (bool useReactor_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::Net_Server_SignalHandler"));
 
-  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
+//  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
 Net_Server_SignalHandler::~Net_Server_SignalHandler ()

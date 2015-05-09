@@ -115,9 +115,6 @@
     <ClInclude Include="..\..\src\client_server\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\libACEStream\prj\msvc\libACEStream.vcxproj">
-      <Project>{c7a3ee44-14f9-413a-b311-5a77ba5a4edd}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\libCommon\prj\msvc\libCommon.vcxproj">
       <Project>{78a90d08-4e40-4ed4-8f75-393ac6526158}</Project>
     </ProjectReference>

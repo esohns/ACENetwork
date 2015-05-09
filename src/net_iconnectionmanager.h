@@ -22,6 +22,7 @@
 #define NET_ICONNECTIONMANAGER_H
 
 #include "common_icontrol.h"
+#include "common_ilock.h"
 
 #include "net_iconnection.h"
 
@@ -32,6 +33,7 @@ template <typename AddressType,
           typename StatisticContainerType>
 class Net_IConnectionManager_T
  : public Common_IControl
+ , public Common_ILock
 {
  public:
   // convenience types
@@ -41,9 +43,6 @@ class Net_IConnectionManager_T
 
   virtual ~Net_IConnectionManager_T () {};
 
-  // *TODO*: (possibly) move these to Common_ILockedGet_T
-  //virtual void lock () = 0;
-  //virtual void unlock () = 0;
   virtual void set (const ConfigurationType&, // connection handler (default)
                                               // configuration
                     UserDataType*) = 0;       // (stream) user data

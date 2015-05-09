@@ -312,10 +312,10 @@
     <None Include="..\..\src\net_udpsockethandler.inl" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\modules\libACEStream\prj\msvc\libACEStream.vcxproj">
+    <ProjectReference Include="..\..\..\libACEStream\prj\msvc\libACEStream.vcxproj">
       <Project>{c7a3ee44-14f9-413a-b311-5a77ba5a4edd}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\modules\libCommon\prj\msvc\libCommon.vcxproj">
+    <ProjectReference Include="..\..\..\libCommon\prj\msvc\libCommon.vcxproj">
       <Project>{78a90d08-4e40-4ed4-8f75-393ac6526158}</Project>
     </ProjectReference>
   </ItemGroup>

@@ -61,7 +61,7 @@ Net_Module_ProtocolHandler::~Net_Module_ProtocolHandler ()
     const void* act_p = NULL;
     result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (pingTimerID_,
                                                                  &act_p);
-    if (result == -1)
+    if (result <= 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("session %u: failed to cancel \"ping\" timer (ID: %d): \"%m\", continuing\n"),
                   sessionID_,
@@ -95,7 +95,7 @@ Net_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
       const void* act_p = NULL;
       result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (pingTimerID_,
                                                                    &act_p);
-      if (result == -1)
+      if (result <= 0)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel \"ping\" timer (ID: %d): \"%m\", continuing\n"),
                     pingTimerID_));
@@ -270,7 +270,7 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
         result =
           COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (pingTimerID_,
                                                               &act_p);
-        if (result == -1)
+        if (result <= 0)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("session %u: failed to cancel \"ping\" timer (id: %d): \"%m\", continuing\n"),
                       sessionID_,

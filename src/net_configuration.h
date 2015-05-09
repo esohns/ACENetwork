@@ -27,8 +27,20 @@
 #include "stream_common.h"
 #include "stream_iallocator.h"
 
+#include "net_defines.h"
+
 struct Net_SocketConfiguration_t
 {
+  Net_SocketConfiguration_t ()
+   : bufferSize ()
+   , peerAddress (ACE_sap_any_cast (const ACE_INET_Addr&))
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+   , netlinkAddress (ACE_sap_any_cast (const ACE_Netlink_Addr&))
+   , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
+#endif
+   , useLoopbackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
+  {};
+
   int                 bufferSize;
   // *TODO*: remove address information (pass as AddressType in open() instead)
   ACE_INET_Addr       peerAddress;

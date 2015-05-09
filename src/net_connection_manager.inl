@@ -49,8 +49,8 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::Net_Connection_Manager_T"));
 
-  // init configuration data
-  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
+  // initialize configuration data
+//  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
 template <typename AddressType,
@@ -105,27 +105,39 @@ Net_Connection_Manager_T<AddressType,
 //               maxNumConnections_));
 }
 
-//template <typename ConfigurationType,
-//          typename StatisticContainerType>
-//void
-//Net_Connection_Manager_T<ConfigurationType,
-//                         StatisticContainerType>::lock ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::lock"));
-//
-//	lock_.acquire ();
-//}
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename StatisticContainerType>
+void
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
+                         UserDataType,
+                         StatisticContainerType>::lock ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::lock"));
 
-//template <typename ConfigurationType,
-//          typename StatisticContainerType>
-//void
-//Net_Connection_Manager_T<ConfigurationType,
-//                         StatisticContainerType>::unlock ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::unlock"));
-//
-//	lock_.release ();
-//}
+  lock_.acquire ();
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename StatisticContainerType>
+void
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
+                         UserDataType,
+                         StatisticContainerType>::unlock ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::unlock"));
+
+  lock_.release ();
+}
 
 template <typename AddressType,
           typename SocketConfigurationType,
@@ -606,7 +618,7 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::report"));
 
-  // init result
+  // initialize result
   StatisticContainerType result;
   ACE_OS::memset (&result, 0, sizeof (result));
 

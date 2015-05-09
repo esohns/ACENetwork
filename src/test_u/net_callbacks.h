@@ -43,6 +43,7 @@ G_MODULE_EXPORT gint togglebutton_stress_toggled_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint togglebutton_listen_toggled_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_report_clicked_cb (GtkWidget*, gpointer);
 // -----------------------------------------------------------------------------
+G_MODULE_EXPORT gint button_clear_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_about_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_quit_clicked_cb (GtkWidget*, gpointer);
 #ifdef __cplusplus

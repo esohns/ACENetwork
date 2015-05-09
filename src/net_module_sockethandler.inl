@@ -302,7 +302,7 @@ Net_Module_SocketHandler_T<StreamStateType,
   // sanity check(s)
   ACE_ASSERT (isInitialized_);
 
-  // step0: init container
+  // step0: initialize container
   ACE_OS::memset (&data_out, 0, sizeof (data_out));
 
   // *TODO*: collect socket statistics information
@@ -803,7 +803,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
   // sanity check(s)
   ACE_ASSERT (isInitialized_);
 
-  // step0: init container
+  // step0: initialize container
   ACE_OS::memset (&data_out, 0, sizeof (data_out));
 
   // *TODO*: collect socket statistics information

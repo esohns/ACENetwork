@@ -21,6 +21,7 @@
 #ifndef NET_CLIENT_TIMEOUTHANDLER_H
 #define NET_CLIENT_TIMEOUTHANDLER_H
 
+#include <random>
 #include <string>
 
 #include "ace/Event_Handler.h"
@@ -72,11 +73,13 @@ class Net_Client_TimeoutHandler
   ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler (const Net_Client_TimeoutHandler&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler& operator= (const Net_Client_TimeoutHandler&));
 
-  AlternatingMode_t        alternatingMode_;
-  Net_Client_IConnector_t* connector_;
-  unsigned int             maxNumConnections_;
-  ActionMode_t             mode_;
-  ACE_INET_Addr            peerAddress_;
+  AlternatingMode_t                  alternatingMode_;
+  Net_Client_IConnector_t*           connector_;
+  std::uniform_int_distribution<int> distribution_;
+  std::default_random_engine         generator_;
+  unsigned int                       maxNumConnections_;
+  ActionMode_t                       mode_;
+  ACE_INET_Addr                      peerAddress_;
 };
 
 #endif

@@ -22,20 +22,23 @@
 #define TEST_U_NET_DEFINES_H
 
 #define NET_UI_GTKEVENT_RESOLUTION                200 // ms --> 5 FPS
-#define NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME "spinbutton"
+#define NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME "spinbutton_connections"
+#define NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME    "spinbutton_messages"
 #define NET_UI_GTK_TEXTVIEW_NAME                  "textview"
 #define NET_UI_GTK_ADJUSTMENT_NAME                "scrolledwindow_vadjustment"
 #define NET_UI_GTK_SCROLLMARK_NAME                "insert"
 #define NET_UI_GTK_BUTTONBOX_ACTIONS_NAME         "vbuttonbox"
 #define NET_UI_GTK_BUTTON_ABOUT_NAME              "about"
+#define NET_UI_GTK_BUTTON_CLEAR_NAME              "clear"
 #define NET_UI_GTK_BUTTON_CLOSEALL_NAME           "close_all"
 #define NET_UI_GTK_BUTTON_REPORT_NAME             "report"
 #define NET_UI_GTK_BUTTON_QUIT_NAME               "quit"
 #define NET_UI_GTK_DIALOG_ABOUT_NAME              "about_dialog"
 #define NET_UI_GTK_DIALOG_MAIN_NAME               "main_dialog"
-#define NET_UI_LOG_FONTDESCRIPTION                "Monospace 10"
+#define NET_UI_LOG_FONTDESCRIPTION                "Monospace 8"
 #define NET_UI_LOG_BASE                           "#000000" // black
-#define NET_UI_LOG_TEXT                           "#FFFFFF" // white
+//#define NET_UI_LOG_TEXT                           "#FFFFFF" // white
+#define NET_UI_LOG_TEXT                           "#00FF00" // green
 
 // -----------------------------------------------------------------------------
 

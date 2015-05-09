@@ -58,8 +58,9 @@ Net_EventHandler::notify (const Net_Message& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
 
-  // *TODO*
-  ACE_UNUSED_ARG (message_in);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (CBData_->stackLock);
+
+  CBData_->eventStack.push_back (NET_GTKEVENT_DATA);
 }
 
 void

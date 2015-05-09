@@ -29,7 +29,7 @@ Net_SocketHandlerBase<ConfigurationType>::Net_SocketHandlerBase ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase::Net_SocketHandlerBase"));
 
-  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
+//  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
 template <typename ConfigurationType>

@@ -499,7 +499,7 @@ do_work (unsigned int maxNumConnections_in,
                                                   true);                   // block ?
 
   Net_Configuration_t configuration;
-  ACE_OS::memset (&configuration, 0, sizeof (Net_Configuration_t));
+//  ACE_OS::memset (&configuration, 0, sizeof (Net_Configuration_t));
   // ************ connection configuration data ************
   configuration.protocolConfiguration.bufferSize = STREAM_BUFFER_SIZE;
   configuration.protocolConfiguration.peerPingInterval = pingInterval_in;
@@ -508,16 +508,18 @@ do_work (unsigned int maxNumConnections_in,
   // ************ socket / stream configuration data ************
   configuration.socketConfiguration.bufferSize =
     NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
-  configuration.streamConfiguration.moduleConfiguration = &module_configuration;
-  //  config.useThreadPerConnection = false;
-  //  config.serializeOutput = false;
 
-  //  config.notificationStrategy = NULL;
   configuration.streamConfiguration.bufferSize = STREAM_BUFFER_SIZE;
+  configuration.streamConfiguration.deleteModule = true;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
                                    : NULL);
+  configuration.streamConfiguration.moduleConfiguration = &module_configuration;
+  configuration.streamConfiguration.printFinalReport = false;
+  configuration.streamConfiguration.statisticReportingInterval =
+    NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL;
+  configuration.streamConfiguration.useThreadPerConnection = false;
 
   //  config.delete_module = false;
   // *WARNING*: set at runtime, by the appropriate connection handler

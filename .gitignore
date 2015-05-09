@@ -47,3 +47,4 @@ Debug_obj/
 ipch/
 *.sdf
 *.suo
+/prj/msvc/*.opensdf
