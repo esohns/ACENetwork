@@ -439,7 +439,8 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 
   // step5: release a reference
   // *IMPORTANT NOTE*: may 'delete this'
-  inherited4::decrease ();
+  //inherited4::decrease ();
+  decrease ();
 
   return result;
 }
@@ -1177,7 +1178,8 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 
   // step5: release a reference
   // *IMPORTANT NOTE*: may 'delete this'
-  inherited4::decrease ();
+  //inherited4::decrease ();
+  decrease ();
 
   return result;
 }

@@ -280,7 +280,23 @@ Net_ConnectionBase_T<AddressType,
                   ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
     }
 
+    OWN_TYPE* this_p = this;
+    unsigned int num_connections = manager_->numConnections () - 1;
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("deregistered connection [0x%@/%u] (total: %u)\n"),
+                this_p, reinterpret_cast<unsigned int> (handle),
+                num_connections));
+#else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("deregistered connection [0x%@/%d] (total: %d)\n"),
+                this_p, handle,
+                num_connections));
+#endif
+
     // (try to) de-register with the connection manager...
+    // *IMPORTANT NOTE*: may delete 'this'
     try
     {
       manager_->deregister (this);
@@ -290,20 +306,7 @@ Net_ConnectionBase_T<AddressType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnectionManager_T::deregister(), continuing\n")));
     }
-    isRegistered_ = false;
-
-    // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("deregistered connection [0x%@/%u] (total: %u)\n"),
-                this, reinterpret_cast<unsigned int> (handle),
-                manager_->numConnections ()));
-#else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("deregistered connection [0x%@/%d] (total: %d)\n"),
-                this, handle,
-                manager_->numConnections ()));
-#endif
+    //isRegistered_ = false;
   } // end IF
 }
 

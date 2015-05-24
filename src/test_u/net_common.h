@@ -33,10 +33,18 @@
 #include "net_configuration.h"
 #include "net_stream_common.h"
 
+#include "net_client_timeouthandler.h"
+
 #include "net_server_common.h"
 
-// forward declaration(s)
-class Net_Client_TimeoutHandler;
+//// forward declaration(s)
+//class Net_Client_TimeoutHandler;
+
+extern unsigned int random_seed;
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+extern struct random_data random_data;
+extern char random_state_buffer[];
+#endif
 
 enum Net_GTK_Event_t
 {

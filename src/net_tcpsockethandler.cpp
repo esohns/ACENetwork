@@ -146,21 +146,23 @@ Net_TCPSocketHandler::open (void* arg_in)
   result = inherited2::open (arg_in);
   if (result == -1)
   {
-    // *IMPORTANT NOTE*: this can happen when the connection handle is still
-    // registered with the reactor (i.e. the reactor is still processing events
-    // on a file descriptor that has been closed and is now being reused by the
-    // system)
+    // *NOTE*: this can happen when the connection handle is still registered
+    //         with the reactor (i.e. the reactor is still processing events on
+    //         a file descriptor that has been closed and is now being reused by
+    //         the system)
     // *NOTE*: more likely, this happened because the (select) reactor is out of
     //         "free" (read) slots
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@/%d): \"%m\", aborting\n"),
-                arg_in, handle));
+    int error = ACE_OS::last_error ();
+    //if (error != ENOMEM)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@/%d): \"%m\", aborting\n"),
+                  arg_in, handle));
     return -1;
   } // end IF
-  //// *NOTE*: let the reactor manage this handler...
-  //if (inherited2::reference_counting_policy ().value () ==
-  //    ACE_Event_Handler::Reference_Counting_Policy::ENABLED)
-  //  remove_reference ();
+  // *NOTE*: let the reactor manage this handler...
+  if (inherited2::reference_counting_policy ().value () ==
+      ACE_Event_Handler::Reference_Counting_Policy::ENABLED)
+    remove_reference ();
 
   // *NOTE*: registered with the reactor (READ_MASK) at this point
 
@@ -216,7 +218,8 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
                                              // - ... ?
     {
       // *NOTE*: handle_in == ACE_INVALID_HANDLE
-      //         --> connection failed, no need to deregister from the reactor
+      //         --> client side: connection failed, no need to deregister from the reactor
+      //         --> server side: too many open connections
       if (handle_in != ACE_INVALID_HANDLE)
       {
         ACE_Reactor* reactor_p = inherited2::reactor ();
@@ -229,7 +232,7 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
                                              ACE_Event_Handler::DONT_CALL));
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d): \"%m\", aborting\n"),
+                      ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@, %d): \"%m\", aborting\n"),
                       this,
                       mask_in));
       } // end IF

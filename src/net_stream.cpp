@@ -282,18 +282,18 @@ Net_Stream::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::ping"));
 
-  Net_Module_ProtocolHandler* protocolHandler_impl = NULL;
-  protocolHandler_impl = dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
-  if (!protocolHandler_impl)
+  Net_Module_ProtocolHandler* protocolHandler_impl_p = NULL;
+  protocolHandler_impl_p =
+    dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
+  if (!protocolHandler_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_ProtocolHandler> failed, returning\n")));
-
     return;
   } // end IF
 
   // delegate to this module...
-  protocolHandler_impl->handleTimeout (NULL);
+  protocolHandler_impl_p->handleTimeout (NULL);
 }
 
 bool

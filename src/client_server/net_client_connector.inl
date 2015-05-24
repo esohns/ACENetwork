@@ -22,7 +22,7 @@
 
 #include "common_defines.h"
 
-#include "net_common.h"
+//#include "net_common.h"
 #include "net_macros.h"
 
 template <typename AddressType,

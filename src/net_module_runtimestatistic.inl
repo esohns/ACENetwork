@@ -24,8 +24,8 @@
 
 #include "common_timer_manager.h"
 
-#include "stream_message_base.h"
 #include "stream_iallocator.h"
+#include "stream_message_base.h"
 
 #include "net_common_tools.h"
 #include "net_macros.h"

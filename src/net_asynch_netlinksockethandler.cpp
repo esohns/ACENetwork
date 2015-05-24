@@ -416,7 +416,7 @@ Net_AsynchNetlinkSocketHandler::initiate_read_dgram ()
 close:
   result = handle_close (inherited2::handle (),
                          ACE_Event_Handler::ALL_EVENTS_MASK);
-  if (!result == -1)
+  if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchNetlinkSocketHandler::handle_close(), continuing\n")));
 }

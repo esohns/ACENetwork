@@ -349,8 +349,17 @@ Net_SocketConnectionBase_T<AddressType,
   result = inherited::open (arg_in);
   if (result == -1)
   {
+    // *NOTE*: this can happen when the connection handle is still registered
+    //         with the reactor (i.e. the reactor is still processing events on
+    //         a file descriptor that has been closed and is now being reused by
+    //         the system)
+    // *NOTE*: more likely, this happened because the (select) reactor is out of
+    //         "free" (read) slots
+    int error = ACE_OS::last_error ();
+    //if (error != 12)
+
     // *NOTE*: perhaps max# connections has been reached
-    //ACE_DEBUG ((LM_DEBUG,
+    //ACE_DEBUG ((LM_ERROR,
     //            ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
     return -1;
   } // end IF

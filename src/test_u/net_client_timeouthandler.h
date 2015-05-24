@@ -21,6 +21,7 @@
 #ifndef NET_CLIENT_TIMEOUTHANDLER_H
 #define NET_CLIENT_TIMEOUTHANDLER_H
 
+#include <functional>
 #include <random>
 #include <string>
 
@@ -78,12 +79,15 @@ class Net_Client_TimeoutHandler
 
   AlternatingModeState_t             alternatingModeState_;
   Net_Client_IConnector_t*           connector_;
-  std::uniform_int_distribution<int> distribution_;
-  std::default_random_engine         generator_;
   mutable ACE_Thread_Mutex           lock_;
   unsigned int                       maxNumConnections_;
   ActionMode_t                       mode_;
   ACE_INET_Addr                      peerAddress_;
+
+  // probability
+  std::uniform_int_distribution<int> randomDistribution_;
+  std::default_random_engine         randomEngine_;
+  std::function<int ()>              randomGenerator_;
 };
 
 #endif

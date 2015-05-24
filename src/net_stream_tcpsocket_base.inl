@@ -223,8 +223,16 @@ Net_StreamTCPSocketBase_T<AddressType,
   result = inherited::open (&inherited2::configuration_.socketConfiguration);
   if (result == -1)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
+    // *NOTE*: this can happen when the connection handle is still registered
+    //         with the reactor (i.e. the reactor is still processing events on
+    //         a file descriptor that has been closed and is now being reused by
+    //         the system)
+    // *NOTE*: more likely, this happened because the (select) reactor is out of
+    //         "free" (read) slots
+    int error = ACE_OS::last_error ();
+    //if (error != ENOMEM)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
     return -1;
   } // end IF
 
@@ -654,12 +662,12 @@ Net_StreamTCPSocketBase_T<AddressType,
 
   switch (mask_in)
   {
-    case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
+    case ACE_Event_Handler::READ_MASK:       // --> socket has been closed (receive failed)
     case ACE_Event_Handler::EXCEPT_MASK:     // --> socket has been closed (send failed)
     case ACE_Event_Handler::ALL_EVENTS_MASK: // --> connect failed (e.g. connection refused) /
                                              //     accept failed (e.g. too many connections) /
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
-                                             //     asynch abort
+                                             //     user abort
     {
       // step1: wait for all workers within the stream (if any)
       if (stream_.isRunning ())
@@ -668,21 +676,30 @@ Net_StreamTCPSocketBase_T<AddressType,
         stream_.waitForCompletion ();
       } // end IF
 
-      // step2: purge any pending notifications ?
-      // *IMPORTANT NOTE*: if called from a non-reactor context, or when using a
-      // a multithreaded reactor, there may still be in-flight notifications
-      // being dispatched at this stage --> this just speeds things up a little
+      // step2: purge any pending (!) notifications ?
       if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
       {
+        // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
+        //                   using a multithreaded reactor, there may still be
+        //                   in-flight notifications being dispatched at this
+        //                   stage. In that case, do not rely on releasing all
+        //                   handler resources "manually", use reference
+        //                   counting instead.
+        //                   --> this just speeds things up a little.
         ACE_Reactor* reactor_p = inherited::reactor ();
         ACE_ASSERT (reactor_p);
         result =
             reactor_p->purge_pending_notifications (this,
-                                                    ACE_Event_Handler::WRITE_MASK);
+                                                    ACE_Event_Handler::ALL_EVENTS_MASK);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@, WRITE_MASK): \"%m\", continuing\n"),
+                      ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(0x%@, ALL_EVENTS_MASK): \"%m\", continuing\n"),
                       this));
+        //else if (result > 0)
+        //  ACE_DEBUG ((LM_DEBUG,
+        //              ACE_TEXT ("flushed %d outbound messages (handle was: %u)\n"),
+        //              result,
+        //              handle_in));
       } // end IF
 
       break;
@@ -704,20 +721,33 @@ Net_StreamTCPSocketBase_T<AddressType,
   } // end SWITCH
 
   // step3: invoke base-class maintenance
-  result = inherited::handle_close (handle_in,
+  bool deregister = inherited2::isRegistered_;
+  // *IMPORTANT NOTE*: use get_handle() here to pass proper handle
+  //                   otherwise, this fails for the usecase "accept failed"
+  //                   (see above)
+  ACE_HANDLE handle = inherited::get_handle ();
+  // *IMPORTANT NOTE*: may delete 'this'
+  result = inherited::handle_close (handle,
                                     mask_in);
   if (result == -1)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to SocketHandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
-                handle_in, mask_in));
+                ACE_TEXT ("failed to SocketHandlerType::handle_close(%d, %d): \"%m\", continuing\n"),
+                handle, mask_in));
 
   // step4: deregister with the connection manager (if any)
-  inherited2::deregister ();
+  if (deregister)
+    inherited2::deregister ();
 
-  // step5: release a reference ?
+  // step5: release a reference (and let the reactor manage the lifecycle) ?
   // *IMPORTANT NOTE*: may 'delete this'
-  // *NOTE*: let the reactor manage this handler from here on...
-  inherited2::decrease ();
+  //inherited2::decrease ();
+  // *IMPORTANT NOTE*: when the connection is closed asynchronously (i.e. user
+  //                   abort), the reactor may currently be reading/writing
+  //                   the socket. This operation will fail, and the reactor
+  //                   will invoke this method again (mask_in == EXCEPT_MASK)
+  //                   --> do not decrease the reference count in that case
+  //if (mask_in != ACE_Event_Handler::EXCEPT_MASK)
+  //  decrease ();
 
   return result;
 }
@@ -730,7 +760,7 @@ template <typename AddressType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
-ACE_Event_Handler::Reference_Count
+unsigned int
 Net_StreamTCPSocketBase_T<AddressType,
                           SocketConfigurationType,
                           ConfigurationType,
@@ -738,11 +768,16 @@ Net_StreamTCPSocketBase_T<AddressType,
                           SessionDataType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::add_reference (void)
+                          SocketHandlerType>::increase ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::add_reference"));
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::increase"));
 
-  return inherited2::increase ();
+  //ACE_Event_Handler::Reference_Count count = inherited2::increase ();
+  ACE_Event_Handler::Reference_Count count = inherited::add_reference ();
+  //  ACE_DEBUG ((LM_DEBUG,
+  //              ACE_TEXT ("%@/%u: added, count: %d\n"), this, id (), count));
+
+  return count;
 }
 
 template <typename AddressType,
@@ -753,7 +788,7 @@ template <typename AddressType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
-ACE_Event_Handler::Reference_Count
+unsigned int
 Net_StreamTCPSocketBase_T<AddressType,
                           SocketConfigurationType,
                           ConfigurationType,
@@ -761,12 +796,87 @@ Net_StreamTCPSocketBase_T<AddressType,
                           SessionDataType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::remove_reference (void)
+                          SocketHandlerType>::decrease ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::remove_reference"));
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::decrease"));
 
-  return inherited2::decrease ();
+  //  void* this_ptr = this;
+  //  unsigned int session_id = id ();
+
+  //ACE_Event_Handler::Reference_Count count = inherited2::decrease ();
+  ACE_Event_Handler::Reference_Count count = inherited::remove_reference ();
+  //  if (count)
+  //    ACE_DEBUG ((LM_DEBUG,
+  //                ACE_TEXT ("%@/%u: removed, count: %d\n"), this_ptr, session_id, count));
+  //  else
+  //    ACE_DEBUG ((LM_DEBUG,
+  //                ACE_TEXT ("%@/%u: removed, count: %d --> deleted !\n"), this_ptr, session_id, count));
+
+  return count;
 }
+
+//template <typename AddressType,
+//          typename SocketConfigurationType,
+//          typename ConfigurationType,
+//          typename UserDataType,
+//          typename SessionDataType,
+//          typename StatisticContainerType,
+//          typename StreamType,
+//          typename SocketHandlerType>
+//ACE_Event_Handler::Reference_Count
+//Net_StreamTCPSocketBase_T<AddressType,
+//                          SocketConfigurationType,
+//                          ConfigurationType,
+//                          UserDataType,
+//                          SessionDataType,
+//                          StatisticContainerType,
+//                          StreamType,
+//                          SocketHandlerType>::add_reference (void)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::add_reference"));
+//
+//  //ACE_Event_Handler::Reference_Count count = inherited2::increase ();
+//  ACE_Event_Handler::Reference_Count count = inherited::add_reference ();
+////  ACE_DEBUG ((LM_DEBUG,
+////              ACE_TEXT ("%@/%u: added, count: %d\n"), this, id (), count));
+//
+//  return count;
+//}
+//
+//template <typename AddressType,
+//          typename SocketConfigurationType,
+//          typename ConfigurationType,
+//          typename UserDataType,
+//          typename SessionDataType,
+//          typename StatisticContainerType,
+//          typename StreamType,
+//          typename SocketHandlerType>
+//ACE_Event_Handler::Reference_Count
+//Net_StreamTCPSocketBase_T<AddressType,
+//                          SocketConfigurationType,
+//                          ConfigurationType,
+//                          UserDataType,
+//                          SessionDataType,
+//                          StatisticContainerType,
+//                          StreamType,
+//                          SocketHandlerType>::remove_reference (void)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::remove_reference"));
+//
+////  void* this_ptr = this;
+////  unsigned int session_id = id ();
+//
+//  //ACE_Event_Handler::Reference_Count count = inherited2::decrease ();
+//  ACE_Event_Handler::Reference_Count count = inherited::remove_reference ();
+////  if (count)
+////    ACE_DEBUG ((LM_DEBUG,
+////                ACE_TEXT ("%@/%u: removed, count: %d\n"), this_ptr, session_id, count));
+////  else
+////    ACE_DEBUG ((LM_DEBUG,
+////                ACE_TEXT ("%@/%u: removed, count: %d --> deleted !\n"), this_ptr, session_id, count));
+//
+//  return count;
+//}
 
 template <typename AddressType,
           typename SocketConfigurationType,
@@ -983,8 +1093,8 @@ Net_StreamTCPSocketBase_T<AddressType,
                 ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
 
   //  step2: release the socket handle
-  // *IMPORTANT NOTE*: this wakes up any reactor threads that may be working on
-  //                   the handle. Makes sure this connection is delete(d) ASAP
+  // *IMPORTANT NOTE*: wakes up any reactor thread(s) that may be working on the
+  //                   handle
   if (handle != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (handle);

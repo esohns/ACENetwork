@@ -5,7 +5,7 @@ AM_CPPFLAGS = \
   -I$(builddir)/../..
 
 DEFS = \
-  -DBASEDIR=\"$(datadir)/@META_PACKAGE@\"
+  -DBASEDIR=\"$(datadir)/@PACKAGE_NAME@\"
 if DEBUG
 DEFS += \
   -DDEBUG_DEBUGGER
@@ -20,13 +20,13 @@ noinst_HEADERS = stdafx.h
 net_client_SOURCES = \
   net_callbacks.cpp \
   net_callbacks.h \
-  net_common.h \
-  net_defines.h \
   net_client.cpp \
   net_client_signalhandler.cpp \
   net_client_signalhandler.h \
   net_client_timeouthandler.cpp \
   net_client_timeouthandler.h \
+  net_common.h \
+  net_defines.h \
   net_eventhandler.cpp \
   net_eventhandler.h \
   net_module_eventhandler.cpp \
@@ -57,6 +57,8 @@ net_client_LDADD = \
 net_server_SOURCES = \
   net_callbacks.cpp \
   net_callbacks.h \
+  net_client_timeouthandler.cpp \
+  net_client_timeouthandler.h \
   net_common.h \
   net_defines.h \
   net_server.cpp \

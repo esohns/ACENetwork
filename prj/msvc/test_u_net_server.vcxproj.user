@@ -4,11 +4,14 @@
     <LocalDebuggerCommandArguments>-g$(ProjectDir)..\..\src\test_u\net_server.glade -i 1000 -l -o -r -s 0 -t</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\..</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment>
+    </LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommandArguments>-g$(ProjectDir)..\..\src\test_u\net_server.glade -i 1000 -l -o -r -s 0 -t</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\..</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerEnvironment>_NO_DEBUG_HEAP=1</LocalDebuggerEnvironment>
+    <LocalDebuggerEnvironment>
+    </LocalDebuggerEnvironment>
   </PropertyGroup>
 </Project>

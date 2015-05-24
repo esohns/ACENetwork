@@ -76,17 +76,17 @@ class Net_Module_ProtocolHandler
   // helper methods
   Net_Message* allocateMessage (unsigned int); // requested size
 
-  // timer stuff
+  // timer
   Common_TimerHandler pingHandler_;
+  unsigned int        pingInterval_;
   long                pingTimerID_;
 
   Stream_IAllocator*  allocator_;
-  unsigned int        sessionID_;
-  unsigned int        counter_;
-  unsigned int        pingInterval_;
   bool                automaticPong_;
-  bool                printPongDot_;
+  unsigned int        counter_;
   bool                isInitialized_;
+  bool                printPongDot_;
+  unsigned int        sessionID_;
 };
 
 // declare module

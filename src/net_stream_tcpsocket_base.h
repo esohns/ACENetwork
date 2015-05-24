@@ -64,12 +64,12 @@ class Net_StreamTCPSocketBase_T
   virtual int handle_close (ACE_HANDLE,
                             ACE_Reactor_Mask);
 
-  virtual ACE_Event_Handler::Reference_Count add_reference (void);
-  // *IMPORTANT NOTE*: this API works as long as the reactor doesn't manage
-  // the lifecycle of the event handler. To avoid unforseen behavior, make sure
-  // that the event handler has been properly deregistered from the reactor
-  // before removing the last reference (delete on zero).
-  virtual ACE_Event_Handler::Reference_Count remove_reference (void);
+  // (partially) override Common_IRefCount
+  // --> use ACE_Event_Handler reference counting
+  virtual unsigned int increase ();
+  virtual unsigned int decrease ();
+  //virtual ACE_Event_Handler::Reference_Count add_reference (void);
+  //virtual ACE_Event_Handler::Reference_Count remove_reference (void);
 
   // implement (part of) Net_IConnection_T
   virtual void info (ACE_HANDLE&,         // return value: handle

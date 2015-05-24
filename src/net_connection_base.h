@@ -78,6 +78,14 @@ class Net_ConnectionBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&));
 
+  // convenience types
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
+                               UserDataType,
+                               SessionDataType,
+                               StatisticContainerType> OWN_TYPE;
+
   // timer
   unsigned int                      statisticCollectionInterval_; // seconds
   Stream_StatisticHandler_Reactor_t statisticCollectHandler_;

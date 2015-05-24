@@ -285,16 +285,6 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                         G_CALLBACK (button_close_all_clicked_cb),
                         userData_in);
   ACE_ASSERT (result);
-  object_p =
-      gtk_builder_get_object ((*iterator).second.second,
-                              ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_PING_NAME));
-  ACE_ASSERT (object_p);
-  result =
-      g_signal_connect (object_p,
-                        ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                        G_CALLBACK (button_ping_clicked_cb),
-                        userData_in);
-  ACE_ASSERT (result);
 
   object_p =
       gtk_builder_get_object ((*iterator).second.second,
@@ -304,6 +294,48 @@ idle_initialize_client_UI_cb (gpointer userData_in)
       g_signal_connect (object_p,
                         ACE_TEXT_ALWAYS_CHAR ("clicked"),
                         G_CALLBACK (togglebutton_test_toggled_cb),
+                        userData_in);
+  ACE_ASSERT (result);
+  //-------------------------------------
+  object_p =
+      gtk_builder_get_object ((*iterator).second.second,
+                              ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_NAME));
+  ACE_ASSERT (object_p);
+  result =
+      g_signal_connect (object_p,
+                        ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                        G_CALLBACK (radiobutton_mode_toggled_cb),
+                        userData_in);
+  ACE_ASSERT (result);
+  object_p =
+      gtk_builder_get_object ((*iterator).second.second,
+                              ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_NAME));
+  ACE_ASSERT (object_p);
+  result =
+      g_signal_connect (object_p,
+                        ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                        G_CALLBACK (radiobutton_mode_toggled_cb),
+                        userData_in);
+  ACE_ASSERT (result);
+  object_p =
+      gtk_builder_get_object ((*iterator).second.second,
+                              ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_NAME));
+  ACE_ASSERT (object_p);
+  result =
+      g_signal_connect (object_p,
+                        ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                        G_CALLBACK (radiobutton_mode_toggled_cb),
+                        userData_in);
+  ACE_ASSERT (result);
+  //-------------------------------------
+  object_p =
+      gtk_builder_get_object ((*iterator).second.second,
+                              ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_PING_NAME));
+  ACE_ASSERT (object_p);
+  result =
+      g_signal_connect (object_p,
+                        ACE_TEXT_ALWAYS_CHAR ("clicked"),
+                        G_CALLBACK (button_ping_clicked_cb),
                         userData_in);
   ACE_ASSERT (result);
 
@@ -807,7 +839,8 @@ idle_update_info_display_cb (gpointer userData_in)
 
   if (update_buttons)
   {
-    bool active_connections = (gtk_spin_button_get_value_as_int (spinbutton_p) > 0);
+    bool active_connections =
+        (gtk_spin_button_get_value_as_int (spinbutton_p) > 0);
     GtkWidget* widget_p = NULL;
     if (!data_p->listenerHandle) // <-- client
     {
@@ -1056,8 +1089,31 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   if (data_p->timerId == -1)
   {
     ACE_Event_Handler* handler_p = data_p->timeoutHandler;
-    ACE_Time_Value interval ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL / 1000),
-                             ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000));
+    ACE_Time_Value interval = ACE_Time_Value::max_time;
+    switch (data_p->timeoutHandler->mode ())
+    {
+      case Net_Client_TimeoutHandler::ActionMode_t::ACTION_ALTERNATING:
+      case Net_Client_TimeoutHandler::ActionMode_t::ACTION_NORMAL:
+      {
+        interval.set ((NET_CLIENT_DEF_SERVER_TEST_INTERVAL / 1000),
+                      ((NET_CLIENT_DEF_SERVER_TEST_INTERVAL % 1000) * 1000));
+        break;
+      }
+      case Net_Client_TimeoutHandler::ActionMode_t::ACTION_STRESS:
+      {
+        interval.set ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL / 1000),
+                      ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000));
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown action mode (was: %d), aborting\n"),
+                    data_p->timeoutHandler->mode ()));
+
+        return FALSE;
+      }
+    } // end SWITCH
     data_p->timerId =
       COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                  // event handler
                                                             NULL,                       // ACT
@@ -1065,7 +1121,7 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
                                                             interval);                  // interval
     if (data_p->timerId == -1)
     {
-      ACE_DEBUG ((LM_DEBUG,
+      ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", aborting\n")));
       return FALSE;
     } // end IF
@@ -1077,7 +1133,7 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
       COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (data_p->timerId,
                                                           &act_p);
     if (result <= 0)
-      ACE_DEBUG ((LM_DEBUG,
+      ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
                   data_p->timerId));
 
@@ -1103,10 +1159,10 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
 }
 
 G_MODULE_EXPORT gint
-radiobutton_mode_changed_cb (GtkWidget* widget_in,
+radiobutton_mode_toggled_cb (GtkWidget* widget_in,
                              gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::radiobutton_mode_changed_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::radiobutton_mode_toggled_cb"));
 
   int result = -1;
 
@@ -1125,25 +1181,31 @@ radiobutton_mode_changed_cb (GtkWidget* widget_in,
   //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
   ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
 
+  // step0: activated ?
+  GtkToggleButton* toggle_button_p = GTK_TOGGLE_BUTTON (widget_in);
+  ACE_ASSERT (toggle_button_p);
+  if (!gtk_toggle_button_get_active (toggle_button_p))
+    return FALSE;
+
   Net_Client_TimeoutHandler::ActionMode_t mode =
     Net_Client_TimeoutHandler::ACTION_INVALID;
   GtkButton* button_p = GTK_BUTTON (widget_in);
   ACE_ASSERT (button_p);
   const gchar* label_text_p = gtk_button_get_label (button_p);
   result = ACE_OS::strcmp (label_text_p,
-                           ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_NAME));
+                           ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_LABEL));
   if (result == 0)
     mode = Net_Client_TimeoutHandler::ACTION_NORMAL;
   else
   {
     result = ACE_OS::strcmp (label_text_p,
-                             ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_NAME));
+                             ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_LABEL));
     if (result == 0)
       mode = Net_Client_TimeoutHandler::ACTION_ALTERNATING;
     else
     {
       result = ACE_OS::strcmp (label_text_p,
-                               ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_NAME));
+                               ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_LABEL));
       if (result == 0)
         mode = Net_Client_TimeoutHandler::ACTION_STRESS;
       else
@@ -1268,7 +1330,7 @@ button_clear_clicked_cb (GtkWidget* widget_in,
   //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
   ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
 
-  GtkTextView* view_p = 
+  GtkTextView* view_p =
     //GTK_TEXT_VIEW (glade_xml_get_widget ((*iterator).second.second,
     //                                     ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_TEXTVIEW_NAME)));
     GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,

@@ -22,6 +22,7 @@
 #include "net_client_timeouthandler.h"
 
 #include "ace/Log_Msg.h"
+#include "ace/Synch.h"
 
 #include "net_defines.h"
 #include "net_common.h"
@@ -36,15 +37,17 @@ Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
               ACE_Event_Handler::LO_PRIORITY) // priority
  , alternatingModeState_ (ALTERNATING_STATE_CONNECT)
  , connector_ (connector_in)
- , distribution_ (1, 100)
- , generator_ ()
  , lock_ ()
  , maxNumConnections_ (maxNumConnections_in)
  , mode_ (mode_in)
  , peerAddress_ (remoteSAP_in)
+ , randomDistribution_ (1, 100)
+ , randomEngine_ ()
+ , randomGenerator_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::Net_Client_TimeoutHandler"));
 
+  randomGenerator_ = std::bind (randomDistribution_, randomEngine_);
 }
 
 Net_Client_TimeoutHandler::~Net_Client_TimeoutHandler ()
@@ -88,11 +91,14 @@ int
 Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
                                            const void* arg_in)
 {
-  NETWORK_TRACE(ACE_TEXT("Net_Client_TimeoutHandler::handle_timeout"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::handle_timeout"));
+
+  int result = -1;
 
   ACE_UNUSED_ARG (tv_in);
   ACE_UNUSED_ARG (arg_in);
 
+  int index = 0;
   Net_InetConnectionManager_t::CONNECTION_T* abort_connection_p = NULL;
   Net_InetConnectionManager_t::CONNECTION_T* ping_connection_p = NULL;
   bool do_abort = false;
@@ -111,7 +117,46 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
     {
       case ACTION_NORMAL:
       {
-        do_connect = true;
+        if (num_connections == 0)
+        {
+          NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+          return 0;
+        } // end IF
+
+        // grab a (random) connection handler
+        // *PORTABILITY*: outside glibc, this is not very portable...
+        // *TODO*: use STL funcionality instead
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+        result = ::random_r (&random_data, &index);
+        if (result == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ::random_r(): \"%s\", aborting\n")));
+
+          // clean up
+          NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+
+          return -1;
+        } // end IF
+        index = (index % num_connections);
+#else
+        index = (ACE_OS::rand_r (&random_seed) % num_connections);
+#endif
+        ping_connection_p =
+          NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (index);
+        if (!ping_connection_p)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
+                      index, num_connections));
+
+          // clean up
+          NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+
+          return -1;
+        } // end IF
+
+        do_ping = true;
 
         break;
       }
@@ -138,25 +183,31 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
               break; // nothing to do...
 
             // grab a (random) connection handler
-            int index = 0;
             // *PORTABILITY*: outside glibc, this is not very portable...
-  #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-            index = ((::random () % num_connections) + 1);
-  #else
-            // *NOTE*: use ACE_OS::rand_r() for improved thread safety !
-            //results_out.push_back((ACE_OS::rand() % range_in) + 1);
-            unsigned int usecs =
-              static_cast<unsigned int> (COMMON_TIME_NOW.usec ());
-            index = ((ACE_OS::rand_r (&usecs) % num_connections) + 1);
-  #endif
+            // *TODO*: use STL funcionality instead
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+            result = ::random_r (&random_data, &index);
+            if (result == -1)
+            {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("failed to ::random_r(): \"%s\", aborting\n")));
 
+              // clean up
+              NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+
+              return -1;
+            } // end IF
+            index = (index % num_connections);
+#else
+            index = (ACE_OS::rand_r (&random_seed) % num_connections);
+#endif
             abort_connection_p =
-              NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (index - 1);
+              NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (index);
             if (!abort_connection_p)
             {
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
-                          index - 1, num_connections));
+                          index, num_connections));
 
               // clean up
               NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
@@ -193,16 +244,15 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
       case ACTION_STRESS:
       {
         // allow some probability for closing connections in between
-        auto dice = std::bind (distribution_, generator_);
-        float dice_roll = static_cast<float> (dice ()) / 100.0F;
+        float probability = static_cast<float> (randomGenerator_ ()) / 100.0F;
 
         if ((num_connections > 0) &&
-            (dice_roll <= NET_CLIENT_U_TEST_ABORT_PROBABILITY))
+            (probability <= NET_CLIENT_U_TEST_ABORT_PROBABILITY))
           do_abort_youngest = true;
 
         // allow some probability for opening connections in between
-        dice_roll = static_cast<float> (dice ()) / 100.0F;
-        if (dice_roll <= NET_CLIENT_U_TEST_CONNECT_PROBABILITY)
+        probability = static_cast<float> (randomGenerator_ ()) / 100.0F;
+        if (probability <= NET_CLIENT_U_TEST_CONNECT_PROBABILITY)
           do_connect = true;
 
         // ping the server
@@ -213,15 +263,33 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
           break;
 
         // grab a (random) connection handler
-        std::uniform_int_distribution<int> distribution (0, num_connections - 1);
-        int dice_roll_2 = distribution (generator_);
+        // *PORTABILITY*: outside glibc, this is not very portable...
+        // *TODO*: use STL funcionality instead
+        //        std::uniform_int_distribution<int> distribution (0, num_connections - 1);
+        //        index = distribution (randomGenerator_);
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+        result = ::random_r (&random_data, &index);
+        if (result == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ::random_r(): \"%s\", aborting\n")));
+
+          // clean up
+          NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+
+          return -1;
+        } // end IF
+        index = (index % num_connections);
+#else
+        index = (ACE_OS::rand_r (&random_seed) % num_connections);
+#endif
         ping_connection_p =
-          NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (dice_roll_2);
+          NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (index);
         if (!ping_connection_p)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
-                      dice_roll_2, num_connections));
+                      index, num_connections));
 
           // clean up
           NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
@@ -283,10 +351,10 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
   if (do_connect)
   {
     ACE_ASSERT (connector_);
-    bool result = false;
+    bool result_2 = false;
     try
     {
-      result = connector_->connect (peerAddress_);
+      result_2 = connector_->connect (peerAddress_);
     }
     catch (...)
     {
@@ -299,16 +367,16 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
 
       return -1;
     }
-    if (!result)
+    if (!result_2)
     {
       ACE_TCHAR buffer[BUFSIZ];
       ACE_OS::memset (buffer, 0, sizeof (buffer));
-      int result_2 = peerAddress_.addr_to_string (buffer, sizeof (buffer));
-      if (result_2 == -1)
+      int result_3 = peerAddress_.addr_to_string (buffer, sizeof (buffer));
+      if (result_3 == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Client_IConnector::connect(\"%s\"), continuing\n"),
+                  ACE_TEXT ("failed to Net_Client_IConnector::connect(\"%s\"): \"%m\", continuing\n"),
                   buffer));
     } // end IF
   } // end IF

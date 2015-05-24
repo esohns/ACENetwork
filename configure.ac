@@ -8,7 +8,7 @@ m4_define([M4_LIBACENETWORK_VERSION_MICRO], [1])
 m4_define([M4_LIBACENETWORK_VERSION_DEVEL], [devel])
 m4_define([M4_LIBACENETWORK_VERSION],
           [M4_LIBACENETWORK_VERSION_MAJOR.M4_LIBACENETWORK_VERSION_MINOR.M4_LIBACENETWORK_VERSION_MICRO[]m4_ifset([M4_LIBACENETWORK_VERSION_DEVEL],-[M4_LIBACENETWORK_VERSION_DEVEL])])
-m4_define([M4_LIBACENETWORK_VERSION_API]  , [1])
+m4_define([M4_LIBACENETWORK_VERSION_API], [1])
 
 # libtool versioning
 m4_define([M4_LIBACENETWORK_LT_VERSION_AGE], [0])
@@ -22,13 +22,13 @@ m4_ifset([M4_LIBACENETWORK_VERSION_DEVEL],
          [AC_DEFINE(HAVE_VERSION_DEVEL, [1], [define if a version suffix is present])])
 
 # (meta-)package name
-m4_define([M4_META_PACKAGE_NAME], [libACENetwork])
+m4_define([M4_PACKAGE_NAME], [libACENetwork])
 
 AC_PREREQ([2.69])
-AC_INIT([M4_META_PACKAGE_NAME],
+AC_INIT([M4_PACKAGE_NAME],
         [M4_LIBACENETWORK_VERSION],
         [eriksohns@123mail.org],
-        [M4_META_PACKAGE_NAME],
+        [M4_PACKAGE_NAME],
         [http://www.github.com/esohns/libACENetwork])
 AC_CONFIG_AUX_DIR([aux_config])
 AC_CONFIG_MACRO_DIR([m4])
@@ -79,9 +79,10 @@ LT_INIT
 m4_define([LIBACENETWORK_CONFIG_H], [libacenetwork_config.h])
 AX_PREFIX_CONFIG_H([LIBACENETWORK_CONFIG_H], [libacenetwork], [config.h])
 
-# define meta-package
-META_PACKAGE_NAME="libACENetwork"
-AC_DEFINE([META_PACKAGE_NAME], ["libACENetwork"], [meta-package-name])
+# define/export package name
+dnl PACKAGE_NAME="M4_PACKAGE_NAME"
+dnl AC_DEFINE([PACKAGE_NAME], ["AC_PACKAGE_NAME"], [meta-package-name])
+dnl AC_SUBST([PACKAGE_NAME], [AC_PACKAGE_NAME])
 
 #AC_LANG([C++])
 

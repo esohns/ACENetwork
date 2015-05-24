@@ -383,7 +383,8 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
 
   // step5: release a reference
   // *IMPORTANT NOTE*: may 'delete this'
-  inherited3::decrease ();
+  //inherited3::decrease ();
+  decrease ();
 
   return result;
 }

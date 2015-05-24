@@ -64,7 +64,7 @@
 #include "net_client_defines.h"
 
 //#ifdef HAVE_CONFIG_H
-//#include "rpg_config.h"
+//#include "libacenetwork_config.h"
 //#endif
 
 #include "net_callbacks.h"
@@ -78,6 +78,13 @@
 
 #include "net_server_defines.h"
 
+// globals
+unsigned int random_seed;
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+struct random_data random_data;
+char random_state_buffer[BUFSIZ];
+#endif
+
 void
 do_printUsage (const std::string& programName_in)
 {
@@ -90,10 +97,6 @@ do_printUsage (const std::string& programName_in)
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -205,10 +208,6 @@ do_processArguments (int argc_in,
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -485,7 +484,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
   Net_EventHandler ui_event_handler (&CBData_in);
   Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
-                                                    NULL);
+                                                NULL);
   Net_Module_EventHandler* eventHandler_impl = NULL;
   eventHandler_impl =
     dynamic_cast<Net_Module_EventHandler*> (event_handler.writer ());
@@ -516,7 +515,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
 
   configuration.streamConfiguration.bufferSize = STREAM_BUFFER_SIZE;
-  configuration.streamConfiguration.deleteModule = true;
+  configuration.streamConfiguration.deleteModule = false;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
@@ -954,20 +953,53 @@ ACE_TMAIN (int argc_in,
   // *PROCESS PROFILE*
   ACE_Profile_Timer process_profile;
   // start profile timer...
-  process_profile.start();
+  process_profile.start ();
 
+  // initialize randomness
+  // *TODO*: use STL functionality here
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("initializing random seed (RAND_MAX = %d)...\n"),
               RAND_MAX));
-
   ACE_Time_Value now = COMMON_TIME_NOW;
+  random_seed = static_cast <unsigned int> (now.sec ());
   // *PORTABILITY*: outside glibc, this is not very portable...
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  ::srandom (now.sec ());
-#else
-  ACE_OS::srand (static_cast<u_int> (now.sec ()));
-#endif
+  ACE_OS::memset (random_state_buffer, 0, sizeof (random_state_buffer));
+  result = ::initstate_r (random_seed,
+                          random_state_buffer, sizeof (random_state_buffer),
+                          &random_data);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initstate_r(): \"%s\", aborting\n")));
 
+    //    // *PORTABILITY*: on Windows, fini ACE...
+    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    //    if (ACE::fini () == -1)
+    //      ACE_DEBUG ((LM_ERROR,
+    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+    //#endif
+
+    return EXIT_FAILURE;
+  } // end IF
+  result = ::srandom_r (random_seed, &random_data);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize random seed: \"%s\", aborting\n")));
+
+    //    // *PORTABILITY*: on Windows, fini ACE...
+    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    //    if (ACE::fini () == -1)
+    //      ACE_DEBUG ((LM_ERROR,
+    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+    //#endif
+
+    return EXIT_FAILURE;
+  } // end IF
+#else
+  ACE_OS::srand (static_cast<u_int> (random_seed));
+#endif
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("initializing random seed...DONE\n")));
 
@@ -975,10 +1007,6 @@ ACE_TMAIN (int argc_in,
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1039,7 +1067,7 @@ ACE_TMAIN (int argc_in,
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
-//    // *PORTABILITY*: on Windows, need to fini ACE...
+//    // *PORTABILITY*: on Windows, fini ACE...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    if (ACE::fini () == -1)
 //      ACE_DEBUG ((LM_ERROR,
