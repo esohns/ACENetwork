@@ -98,21 +98,26 @@ Net_Client_AsynchConnector_T<AddressType,
   // *NOTE*: on error, the addresses are not passed through...
 
   int result = -1;
+  unsigned long error = 0;
 
   // success ?
   result = result_in.success ();
   if (result != 1)
   {
+    error = result_in.error ();
+
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
     int result_2 = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
     if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
-                buffer,
-                ACE_OS::strerror (result_in.error ())));
+    //if (error != ECONNREFUSED) // happens intermittently on Win32
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
+                  buffer,
+                  //ACE_TEXT (ACE_OS::strerror (error))));
+                  ACE::sock_error (error)));
   } // end IF
 
   return ((result == 0) ? -1 : 0);
@@ -345,11 +350,14 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
   // *NOTE*: on error, the addresses are not passed through...
 
   int result = -1;
+  unsigned long error = 0;
 
   // success ?
   result = result_in.success ();
   if (result != 1)
   {
+    error = result_in.error ();
+
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
     int result_2 = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
@@ -359,7 +367,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
                 buffer,
-                ACE_OS::strerror (result_in.error ())));
+                //ACE_TEXT (ACE_OS::strerror (error))));
+                ACE::sock_error (error)));
   } // end IF
 
   return ((result == 0) ? -1 : 0);
@@ -585,11 +594,14 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
   // *NOTE*: on error, the addresses are not passed through...
 
   int result = -1;
+  unsigned longe error = 0;
 
   // success ?
   result = result_in.success ();
   if (result != 1)
   {
+    error = result_in.error ();
+
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
     // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
@@ -600,7 +612,8 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
                 buffer,
-                ACE_OS::strerror (result_in.error ())));
+                //ACE_TEXT (ACE_OS::strerror (error))));
+                ACE::sock_error (error)));
   } // end IF
 
   return ((result == 0) ? -1 : 0);

@@ -254,11 +254,11 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
                        sessionID_));
            return;
         } // end IF
-//        ACE_DEBUG ((LM_DEBUG,
-//                    ACE_TEXT ("session %u: scheduled \"ping\" timer (id: %d), interval: %#T...\n"),
-//                    sessionID_,
-//                    pingTimerID_,
-//                    &interval));
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("session %u: scheduled \"ping\" timer (id: %d), interval: %#T...\n"),
+                    sessionID_,
+                    pingTimerID_,
+                    &interval));
       } // end IF
 
       break;
@@ -276,10 +276,11 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
                       ACE_TEXT ("session %u: failed to cancel \"ping\" timer (id: %d): \"%m\", continuing\n"),
                       sessionID_,
                       pingTimerID_));
-//        ACE_DEBUG ((LM_DEBUG,
-//                    ACE_TEXT ("session %u: cancelled \"ping\" timer (id: %d)\n"),
-//                    sessionID_,
-//                    pingTimerID_));
+        else
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("session %u: cancelled \"ping\" timer (id: %d)\n"),
+                      sessionID_,
+                      pingTimerID_));
         pingTimerID_ = -1;
       } // end IF
 

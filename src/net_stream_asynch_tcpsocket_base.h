@@ -87,6 +87,7 @@ class Net_StreamAsynchTCPSocketBase_T
                                                            // 0 --> DON'T collect statistics
 
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
+  virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 
   StreamType      stream_;
   // *TODO*: handle short writes (more) gracefully...

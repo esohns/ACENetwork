@@ -296,6 +296,7 @@ Net_ConnectionBase_T<AddressType,
 #endif
 
     // (try to) de-register with the connection manager...
+    isRegistered_ = false;
     // *IMPORTANT NOTE*: may delete 'this'
     try
     {
@@ -306,7 +307,6 @@ Net_ConnectionBase_T<AddressType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnectionManager_T::deregister(), continuing\n")));
     }
-    //isRegistered_ = false;
   } // end IF
 }
 

@@ -41,19 +41,19 @@ class Net_Export Net_Common_Tools
 
 //   static const bool selectNetworkInterface(const std::string&, // default interface identifier
 //                                            std::string&);      // return value: interface identifier
-  static bool retrieveLocalIPAddress (const std::string&, // interface identifier
-                                      std::string&);      // return value: IP address (dotted-decimal)
-  static bool retrieveLocalHostname (std::string&); // return value: hostname
-  static bool setSocketBuffer (const ACE_HANDLE&, // socket handle
-                               int,               // option (SO_RCVBUF || SO_SNDBUF)
-                               int);              // size (bytes)
+  static bool getIPAddress (const std::string&, // interface identifier
+                            std::string&);      // return value: IP address (dotted-decimal)
+  static bool getHostname (std::string&); // return value: hostname
+  static bool setSocketBuffer (ACE_HANDLE, // socket handle
+                               int,        // option (SO_RCVBUF || SO_SNDBUF)
+                               int);       // size (bytes)
   // *NOTE*: this should toggle Nagle's algorithm
-  static bool setNoDelay (const ACE_HANDLE&, // socket handle
-                          bool);             // TCP_NODELAY ?
-  static bool setKeepAlive (const ACE_HANDLE&, // socket handle
-                            bool);             // SO_KEEPALIVE ?
-  static bool setLinger (const ACE_HANDLE&, // socket handle
-                         unsigned int);     // seconds {0 --> off}
+  static bool setNoDelay (ACE_HANDLE, // socket handle
+                          bool);      // TCP_NODELAY ?
+  static bool setKeepAlive (ACE_HANDLE, // socket handle
+                            bool);      // SO_KEEPALIVE ?
+  static bool setLinger (ACE_HANDLE,    // socket handle
+                         unsigned int); // seconds {0 --> off}
 
   static Net_IInetConnectionManager_t* getConnectionManager ();
 

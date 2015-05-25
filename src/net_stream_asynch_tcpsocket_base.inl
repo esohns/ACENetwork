@@ -197,7 +197,20 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
 
   // step3: start reading (need to pass any data ?)
   if (messageBlock_in.length () == 0)
-   inherited::initiate_read_stream ();
+  {
+    bool result_2 = inherited::initiate_read_stream ();
+    if (!result_2)
+    {
+      int error = ACE_OS::last_error ();
+      if ((error != ENXIO)               && // happens on Win32
+          (error != EFAULT)              && // *TODO*: happens on Win32
+          (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
+          (error != ERROR_NETNAME_DELETED)) // happens on Win32
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_AsynchTCPSocketHandler::initiate_read_stream(): \"%m\", aborting\n")));
+      goto close;
+    } // end IF
+  } // end IF
   else
   {
     ACE_Message_Block* duplicate_p = messageBlock_in.duplicate ();
@@ -227,7 +240,7 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
     // <complete> for Accept would have already moved the <wr_ptr>
     // forward; update it to the beginning position
     duplicate_p->wr_ptr (duplicate_p->wr_ptr () - bytes_transferred);
-    // invoke ourselves (see handle_read_stream)
+    // invoke ourselves (see handle_read_stream())
     fake_result_p->complete (duplicate_p->length (), // bytes read
                              1,                      // success
                              NULL,                   // ACT
@@ -240,19 +253,21 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   // step4: register with the connection manager (if any)
   if (!inherited3::registerc ())
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    // *NOTE*: perhaps max# connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
     goto close;
   } // end IF
+  // *NOTE*: --> let the proactor manage this handler...
+  //inherited3::decrease ();
 
   return;
 
 close:
-  result = handle_close (handle_in,
-                         ACE_Event_Handler::ALL_EVENTS_MASK);
-  if (result == -1)
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+  close ();
+
+  // *NOTE*: should 'delete this'
+  inherited3::decrease ();
 }
 
 template <typename AddressType,
@@ -295,6 +310,7 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   } // end IF
 
   // start (asynchronous) write
+  inherited3::increase ();
   // *NOTE*: this is a fire-and-forget API for message_block...
 //  if (inherited::outputStream_.write (*buffer_,               // data
   result =
@@ -305,13 +321,18 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
   if (result == -1)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Write_Stream::write(%u): \"%m\", aborting\n"),
+    int error = ACE_OS::last_error ();
+    if ((error != ENOTSOCK)   && // 10038, happens on Win32
+        (error != ECONNRESET) && // 10054, happens on Win32
+        (error != ENOTCONN))     // 10057, happens on Win32
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Asynch_Write_Stream::write(%u): \"%m\", aborting\n"),
 //               buffer_->size ()));
-                message_block_p->size ()));
+                  message_block_p->size ()));
 
     // clean up
     message_block_p->release ();
+    inherited3::decrease ();
 
     return -1;
   } // end IF
@@ -364,27 +385,27 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
       Common_Task_t* task_p =
           const_cast<Common_Module_t*> (module_p)->writer ();
       ACE_ASSERT (task_p);
-      result = task_p->msg_queue ()->flush ();
+      result = task_p->flush (ACE_Task_Flags::ACE_FLUSHALL);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_MessageQueue::flush(): \"%m\", continuing\n")));
+                    ACE_TEXT ("failed to ACE_Task_T::flush(): \"%m\", continuing\n")));
     } // end IF
   } // end IF
 
   // step3: invoke base-class maintenance
-  result = inherited::handle_close (inherited::handle (),
+  result = inherited::handle_close (handle_in,
                                     mask_in);
   if (result == -1)
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to SocketHandlerType::handle_close(): \"%m\", continuing\n")));
 
   // step4: deregister with the connection manager (if any)
-  inherited3::deregister ();
+  if (inherited3::isRegistered_)
+    inherited3::deregister ();
 
-  // step5: release a reference
-  // *IMPORTANT NOTE*: may 'delete this'
+  //// step5: release a reference (and let the reactor manage the lifecycle) ?
+  //// *IMPORTANT NOTE*: may 'delete this'
   //inherited3::decrease ();
-  decrease ();
 
   return result;
 }
@@ -653,14 +674,17 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   {
     // connection closed/reset (by peer) ? --> not an error
     error = result_in.error ();
-    if ((error != ECONNRESET) &&
-        (error != EPIPE)      &&
-        (error != EBADF)      && // local close (), happens on Linux
-        (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+    if ((error != ECONNRESET)              &&
+        (error != EPIPE)                   &&
+        (error != EBADF)                   &&  // local close(), happens on Linux
+        (error != ERROR_NETNAME_DELETED)   &&  // happens on Win32
+        (error != ERROR_OPERATION_ABORTED) &&  // local close(), happens in Win32
+        (error != ERROR_CONNECTION_ABORTED))   // local close(), happens on Win32
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                   result_in.handle (),
-                  error, ACE_TEXT (ACE_OS::strerror (error))));
+                  //error, ACE_TEXT (ACE_OS::strerror (error))));
+                  error, ACE_TEXT (ACE::sock_error (error))));
   } // end IF
 
   switch (result_in.bytes_transferred ())
@@ -669,14 +693,16 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
     {
       // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();
-      if ((error != ECONNRESET) &&
-          (error != EPIPE)      &&
-          (error != EBADF)      && // local close (), happens on Linux
-          (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+      if ((error != ECONNRESET)            &&
+          (error != EPIPE)                 &&
+          (error != EBADF)                 &&  // local close(), happens on Linux
+          (error != ERROR_NETNAME_DELETED) &&  // happens on Win32
+          (error != ERROR_CONNECTION_ABORTED)) // local close(), happens on Win32
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                     result_in.handle (),
-                    error, ACE_TEXT (ACE_OS::strerror (error))));
+                    //error, ACE_TEXT (ACE_OS::strerror (error))));
+                    error, ACE_TEXT (ACE::sock_error (error))));
 
       break;
     }
@@ -706,7 +732,18 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
       } // end IF
 
       // start next read
-      inherited::initiate_read_stream ();
+      bool result_2 = inherited::initiate_read_stream ();
+      if (!result_2)
+      {
+        int error = ACE_OS::last_error ();
+        if ((error != ENXIO)               && // happens on Win32
+            (error != EFAULT)              && // *TODO*: happens on Win32
+            (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
+            (error != ERROR_NETNAME_DELETED)) // happens on Win32
+            ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to Net_AsynchTCPSocketHandler::initiate_read_stream(): \"%m\", aborting\n")));
+        goto close;
+      } // end IF
 
       return;
     }
@@ -715,9 +752,36 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   // clean up
   result_in.message_block ().release ();
 
+close:
   result = handle_close (inherited::handle (),
                          ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+
+  inherited3::decrease ();
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+void
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketHandlerType>::handle_write_stream (const ACE_Asynch_Write_Stream::Result& result_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::handle_write_stream"));
+
+  inherited::handle_write_stream (result_in);
+  inherited3::decrease ();
 }

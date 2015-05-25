@@ -60,7 +60,7 @@ class Net_Export Net_AsynchTCPSocketHandler
   Net_AsynchTCPSocketHandler ();
 
   // helper method(s)
-  void initiate_read_stream ();
+  bool initiate_read_stream ();
 
   virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 
