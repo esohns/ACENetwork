@@ -41,6 +41,7 @@ class IRC_Client_Stream
                         Common_TimePolicy_t,
                         Stream_State_t,
                         IRC_Client_RuntimeStatistic,
+                        IRC_Client_StreamConfiguration,
                         IRC_Client_SessionData,
                         IRC_Client_StreamSessionData_t,
                         IRC_Client_SessionMessage,
@@ -50,11 +51,8 @@ class IRC_Client_Stream
   IRC_Client_Stream ();
   virtual ~IRC_Client_Stream ();
 
-  // initialize stream
-  bool initialize (unsigned int,                            // session ID
-                   const Stream_Configuration_t&,           // stream configuration
-                   const IRC_Client_ProtocolConfiguration&, // protocol configuration
-                   const IRC_Client_SessionData&);          // session data
+  // implement Common_IInitialize_T
+  virtual bool initialize (const IRC_Client_StreamConfiguration&); // configuration
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to myRuntimeStatistic
@@ -70,6 +68,7 @@ class IRC_Client_Stream
                         Common_TimePolicy_t,
                         Stream_State_t,
                         IRC_Client_RuntimeStatistic,
+                        IRC_Client_StreamConfiguration,
                         IRC_Client_SessionData,
                         IRC_Client_StreamSessionData_t,
                         IRC_Client_SessionMessage,

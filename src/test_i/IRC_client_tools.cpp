@@ -1585,6 +1585,8 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::connect"));
 
+  int result = -1;
+
   // sanity check(s)
   ACE_ASSERT (finalModule_in);
 
@@ -1594,21 +1596,33 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
 
   // ************ socket configuration data ************
   configuration.socketConfiguration.bufferSize =
-   NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
-  // ************ protocol config data **************
-  configuration.protocolConfiguration.streamConfiguration.crunchMessageBuffers =
-    IRC_CLIENT_DEF_CRUNCH_MESSAGES;
-  configuration.protocolConfiguration.streamConfiguration.debugScanner =
-   debugScanner_in;
-  configuration.protocolConfiguration.streamConfiguration.debugParser =
-   debugParser_in;
+    NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
+  result =
+    configuration.socketConfiguration.peerAddress.set (serverPortNumber_in,
+                                                       serverHostname_in.c_str (),
+                                                       1,
+                                                       AF_INET);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  // ************ protocol configuration data **************
   configuration.protocolConfiguration.loginOptions = loginOptions_in;
   // ************ stream configuration data ****************
-  configuration.streamConfiguration.messageAllocator = messageAllocator_in;
-  configuration.streamConfiguration.bufferSize = IRC_CLIENT_BUFFER_SIZE;
-  configuration.streamConfiguration.module = finalModule_in;
-  configuration.streamConfiguration.statisticReportingInterval =
+  configuration.streamConfiguration.streamConfiguration.messageAllocator =
+    messageAllocator_in;
+  configuration.streamConfiguration.streamConfiguration.bufferSize =
+    IRC_CLIENT_BUFFER_SIZE;
+  configuration.streamConfiguration.streamConfiguration.deleteModule = true;
+  configuration.streamConfiguration.streamConfiguration.module = finalModule_in;
+  configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
+  configuration.streamConfiguration.crunchMessageBuffers =
+    IRC_CLIENT_DEF_CRUNCH_MESSAGES;
+  configuration.streamConfiguration.debugScanner = debugScanner_in;
+  configuration.streamConfiguration.debugParser = debugParser_in;
 
   IRC_Client_SessionData* session_data_p = NULL;
   ACE_NEW_NORETURN (session_data_p,
@@ -1619,10 +1633,11 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                 ACE_TEXT ("failed to allocator memory: \"%m\", aborting\n")));
     return false;
   } // end IF
+  configuration.streamConfiguration.sessionData = session_data_p;
 
   // *TODO*: memory leak here ? ...
   IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
-                                                                  session_data_p);
+                                                            session_data_p);
 
   // step2: initialize client connector
   Net_SocketHandlerConfiguration_t* socket_handler_configuration_p = NULL;
@@ -1644,19 +1659,18 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
     configuration.socketConfiguration;
   // *TODO*: memory leak here...
   IRC_Client_Connector_t connector (socket_handler_configuration_p,
-                                          IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance (),
-                                          statisticReportingInterval_in);
+                                    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance (),
+                                    statisticReportingInterval_in);
 
   // step3: (try to) connect to the server
-  ACE_INET_Addr peer_address (serverPortNumber_in,
-                              serverHostname_in.c_str ());
-  if (!connector.connect (peer_address))
+  if (!connector.connect (configuration.socketConfiguration.peerAddress))
   {
     // debug info
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    int result = peer_address.addr_to_string (buffer,
-                                              sizeof (buffer));
+    result =
+      configuration.socketConfiguration.peerAddress.addr_to_string (buffer,
+                                                                    sizeof (buffer));
     if (result == -1)
       ACE_DEBUG((LM_ERROR,
                  ACE_TEXT("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));

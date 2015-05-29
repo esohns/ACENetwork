@@ -56,8 +56,8 @@ class IRC_Client_IRCParserDriver
 //   friend class IRC_Client_IRCScanner;
 
  public:
-  IRC_Client_IRCParserDriver (bool = IRC_CLIENT_DEF_TRACE_SCANNING, // debug scanning ?
-                              bool = IRC_CLIENT_DEF_TRACE_PARSING); // debug parsing ?
+  IRC_Client_IRCParserDriver (bool = IRC_CLIENT_DEF_LEX_TRACE,   // debug scanning ?
+                              bool = IRC_CLIENT_DEF_YACC_TRACE); // debug parsing ?
   virtual ~IRC_Client_IRCParserDriver ();
 
   // target data, needs to be set PRIOR to invoking parse() !
@@ -95,23 +95,23 @@ class IRC_Client_IRCParserDriver
   void scan_end ();
 
   // context
-  bool                     myTraceParsing;
-  unsigned int             myCurrentNumMessages;
+  bool                     traceParsing_;
+  unsigned int             currentNumMessages_;
 
   // scanner
-  yyscan_t                 myCurrentScannerState;
-  YY_BUFFER_STATE          myCurrentBufferState;
+  yyscan_t                 currentScannerState_;
+  YY_BUFFER_STATE          currentBufferState_;
 
   // *NOTE*: stores unscanned data, enabling transitions between continuations...
-  ACE_Message_Block*       myCurrentFragment;
-  bool                     myFragmentIsResized;
+  ACE_Message_Block*       currentFragment_;
+  bool                     fragmentIsResized_;
 
   // parser
-  yy::IRC_Client_IRCParser myParser;
+  yy::IRC_Client_IRCParser parser_;
 
   // target
-  IRC_Client_IRCMessage*   myCurrentMessage;
-  bool                     myIsInitialized;
+  IRC_Client_IRCMessage*   currentMessage_;
+  bool                     isInitialized_;
 };
 
 #endif

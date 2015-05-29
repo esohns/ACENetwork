@@ -573,10 +573,12 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
   } // end SWITCH
 }
 
-void
+bool
 IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptions& loginOptions_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::registerConnection"));
+
+  int result = -1;
 
   // "registering" an IRC connection implies the following 4 distinct steps:
   // --> see also RFC1459
@@ -594,30 +596,35 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
 
     if (!connectionIsAlive_)
     {
-//       ACE_DEBUG((LM_DEBUG,
-//                  ACE_TEXT("waiting for connection...\n")));
+      //ACE_DEBUG ((LM_DEBUG,
+      //            ACE_TEXT ("waiting for connection to initialize...\n")));
 
       // *NOTE*: can happen when trying to register IMMEDIATELY after connecting
-      // --> allow a little delay for:
-      // - connection to establish
-      // [- the initial NOTICEs to arrive]
-      // before proceeding...
+      //         --> allow a little delay for:
+      //         - connection to establish
+      //         [- the initial NOTICEs to arrive]
+      //         before proceeding...
       ACE_Time_Value deadline = COMMON_TIME_POLICY () +
                                 ACE_Time_Value (IRC_CLIENT_IRC_MAX_WELCOME_DELAY, 0);
-      if ((condition_.wait (&deadline) == -1) &&
-          (ACE_OS::last_error () != ETIME))
+      result = condition_.wait (&deadline);
+      if (result == -1)
       {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Thread_Condition::wait(), aborting\n")));
-        return;
+        int error = ACE_OS::last_error ();
+        if (error != ETIME)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Thread_Condition::wait(): \"%m\", continuing\n")));
       } // end IF
 
       if (!connectionIsAlive_)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("not (yet ?) connected, aborting\n")));
-        return;
+        return false;
       } // end IF
+
+      // *TODO*: wait for NOTICE ?
+      //ACE_DEBUG ((LM_DEBUG,
+      //            ACE_TEXT ("waiting for initial NOTICE...\n")));
 
 //       ACE_DEBUG((LM_DEBUG,
 //                  ACE_TEXT("proceeding...\n")));
@@ -653,7 +660,7 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
 //                 ACE_TEXT("proceeding...\n")));
 //   } // end IF
 
-  // step3a: init PASS
+  // step3a: initialize PASS
   IRC_Client_IRCMessage* pass_struct_p = NULL;
   ACE_NEW_NORETURN (pass_struct_p,
                     IRC_Client_IRCMessage ());
@@ -667,7 +674,7 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
   // step3b: send it upstream
   sendMessage (pass_struct_p);
 
-  // step4a: init NICK
+  // step4a: initialize NICK
   IRC_Client_IRCMessage* nick_struct_p = NULL;
   ACE_NEW_NORETURN (nick_struct_p,
                     IRC_Client_IRCMessage ());
@@ -681,7 +688,7 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
   // step4b: send it upstream
   sendMessage (nick_struct_p);
 
-  // step5a: init USER
+  // step5a: initialize USER
   IRC_Client_IRCMessage* user_struct_p = NULL;
   ACE_NEW_NORETURN (user_struct_p,
                     IRC_Client_IRCMessage ());
@@ -712,7 +719,7 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid USER <hostname> parameter field type (was: %d), aborting\n"),
                   loginOptions_in.user.hostname.discriminator));
-      return;
+      return false;
     }
   } // end SWITCH
   user_struct_p->params.push_back (loginOptions_in.user.servername);
@@ -721,7 +728,7 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
   // step5b: send it upstream
   sendMessage (user_struct_p);
 
-//   // step5a: init JOIN
+//   // step5a: initialize JOIN
 //   IRC_Client_IRCMessage* join_struct = NULL;
 //   ACE_NEW_NORETURN(join_struct,
 //                    IRC_Client_IRCMessage());
@@ -736,6 +743,8 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
 //
 //   // step5b: send it upstream
 //   sendMessage(join_struct);
+
+  return true;
 }
 
 void
@@ -1367,7 +1376,7 @@ IRC_Client_Module_IRCHandler::clone ()
   {
     IRC_Client_Module_IRCHandler* IRCHandler_impl = NULL;
     IRCHandler_impl =
-      dynamic_cast<IRC_Client_Module_IRCHandler*> (module_p->reader ());
+      dynamic_cast<IRC_Client_Module_IRCHandler*> (module_p->writer ());
     if (!IRCHandler_impl)
     {
       ACE_DEBUG ((LM_ERROR,

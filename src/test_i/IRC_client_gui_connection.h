@@ -100,16 +100,16 @@ class IRC_Client_GUI_Connection
   IRC_Client_GUI_MessageHandler* getHandler (const std::string&); // id (channel/nick)
   void updateModeButtons ();
 
-  connection_cb_data_t CBData_;
-  bool                 isFirstUsersMsg_;
-  std::string          label_;
-  std::string          UIFileDirectory_;
+  IRC_Client_GTK_ConnectionCBData CBData_;
+  bool                            isFirstUsersMsg_;
+  std::string                     label_;
+  std::string                     UIFileDirectory_;
 
-  ACE_Thread_Mutex     lock_;
-  MESSAGE_HANDLERS_T   messageHandlers_;
+  ACE_Thread_Mutex                lock_;
+  MESSAGE_HANDLERS_T              messageHandlers_;
 
-  guint                contextID_;
-  GtkNotebook*         parent_;
+  guint                           contextID_;
+  GtkNotebook*                    parent_;
 };
 
 #endif

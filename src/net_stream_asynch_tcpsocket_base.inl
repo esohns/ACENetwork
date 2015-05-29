@@ -71,22 +71,22 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::~Net_StreamAsynchTCPSocketBase_T"));
 
   // step1: remove enqueued module (if any)
-  if (inherited3::configuration_.streamConfiguration.module)
+  if (inherited3::configuration_.streamConfiguration.streamConfiguration.module)
   {
     Stream_Module_t* module_p =
-      stream_.find (inherited3::configuration_.streamConfiguration.module->name ());
+      stream_.find (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ());
     if (module_p)
     {
       int result =
-        stream_.remove (inherited3::configuration_.streamConfiguration.module->name (),
+        stream_.remove (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name (),
                         ACE_Module_Base::M_DELETE_NONE);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    inherited3::configuration_.streamConfiguration.module->name ()));
+                    inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ()));
     } // end IF
-    if (inherited3::configuration_.streamConfiguration.deleteModule)
-      delete inherited3::configuration_.streamConfiguration.module;
+    if (inherited3::configuration_.streamConfiguration.streamConfiguration.deleteModule)
+      delete inherited3::configuration_.streamConfiguration.streamConfiguration.module;
   } // end IF
 }
 
@@ -118,30 +118,23 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
 
   // step2: initialize/start stream
   // step2a: connect stream head message queue with a notification pipe/queue ?
-  if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
-    inherited3::configuration_.streamConfiguration.notificationStrategy = this;
-  // step2b: initialize final module (if any)
-  if (inherited3::configuration_.streamConfiguration.module)
+  if (!inherited3::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
   {
-//    Common_Module_t* module_p = NULL;
-//    module_p =
-//      dynamic_cast<Common_Module_t*> (inherited3::configuration_.streamConfiguration.module);
-//    if (!module_p)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-//                  ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
-//      goto close;
-//    } // end IF
+    inherited3::configuration_.streamConfiguration.streamConfiguration.notificationStrategy =
+      this;
+  } // end IF
+  // step2b: initialize final module (if any)
+  if (inherited3::configuration_.streamConfiguration.streamConfiguration.module)
+  {
     Stream_IModule_t* imodule_p = NULL;
     // need a downcast...
     imodule_p =
-        dynamic_cast<Stream_IModule_t*> (inherited3::configuration_.streamConfiguration.module);
+      dynamic_cast<Stream_IModule_t*> (inherited3::configuration_.streamConfiguration.streamConfiguration.module);
     if (!imodule_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-                  ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
+                  ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
       goto close;
     } // end IF
     Stream_Module_t* clone_p = NULL;
@@ -153,32 +146,29 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
+                  ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
       goto close;
     }
     if (!clone_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
+                  ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
       goto close;
     }
-    inherited3::configuration_.streamConfiguration.module = clone_p;
-    inherited3::configuration_.streamConfiguration.deleteModule = true;
+    inherited3::configuration_.streamConfiguration.streamConfiguration.module = clone_p;
+    inherited3::configuration_.streamConfiguration.streamConfiguration.deleteModule = true;
   } // end IF
 
-#if defined (_MSC_VER)
-  session_id =
+  // *TODO*: this clearly is a design glitch
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inherited3::configuration_.streamConfiguration.sessionID =
     reinterpret_cast<unsigned int> (handle_in); // (== socket handle)
 #else
-  session_id =
+  inherited3::configuration_.streamConfiguration.sessionID =
     static_cast<unsigned int> (handle_in); // (== socket handle)
 #endif
-  // *TODO*: this clearly is a design glitch
-  if (!stream_.initialize (session_id,
-                           inherited3::configuration_.streamConfiguration,
-                           inherited3::configuration_.protocolConfiguration,
-                           inherited3::configuration_.streamSessionData))
+  if (!stream_.initialize (inherited3::configuration_.streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -378,7 +368,7 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
-  if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
+  if (!inherited3::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
   {
     Stream_Iterator_t iterator (stream_);
     const Stream_Module_t* module_p = NULL;

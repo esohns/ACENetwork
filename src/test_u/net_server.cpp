@@ -480,18 +480,18 @@ do_work (unsigned int maxNumConnections_in,
   Net_EventHandler ui_event_handler (&CBData_in);
   Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
                                                 NULL);
-  Net_Module_EventHandler* eventHandler_impl = NULL;
-  eventHandler_impl =
+  Net_Module_EventHandler* eventHandler_impl_p = NULL;
+  eventHandler_impl_p =
     dynamic_cast<Net_Module_EventHandler*> (event_handler.writer ());
-  if (!eventHandler_impl)
+  if (!eventHandler_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<RPG_Net_Module_EventHandler> failed, returning\n")));
+                ACE_TEXT ("dynamic_cast<Net_Module_EventHandler> failed, returning\n")));
     return;
   } // end IF
-  eventHandler_impl->initialize (&CBData_in.subscribers,
-                                 &CBData_in.subscribersLock);
-  eventHandler_impl->subscribe (&ui_event_handler);
+  eventHandler_impl_p->initialize (&CBData_in.subscribers,
+                                   &CBData_in.subscribersLock);
+  eventHandler_impl_p->subscribe (&ui_event_handler);
 
   Stream_AllocatorHeap heap_allocator;
   Net_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
@@ -499,29 +499,39 @@ do_work (unsigned int maxNumConnections_in,
                                                   true);                   // block ?
 
   Net_Configuration_t configuration;
-//  ACE_OS::memset (&configuration, 0, sizeof (Net_Configuration_t));
-  // ************ connection configuration data ************
-  configuration.protocolConfiguration.bufferSize = STREAM_BUFFER_SIZE;
-  configuration.protocolConfiguration.peerPingInterval = pingInterval_in;
-  configuration.protocolConfiguration.pingAutoAnswer = true;
-  configuration.protocolConfiguration.printPongMessages = true;
-  // ************ socket / stream configuration data ************
+  // ********************** socket configuration data **************************
   configuration.socketConfiguration.bufferSize =
     NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
   configuration.socketConfiguration.linger =
       NET_SERVER_SOCKET_DEFAULT_LINGER;
 
-  configuration.streamConfiguration.bufferSize = STREAM_BUFFER_SIZE;
-  configuration.streamConfiguration.deleteModule = false;
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.module =
+  // ********************** stream configuration data **************************
+  configuration.streamConfiguration.protocolConfiguration =
+    &configuration.protocolConfiguration;
+  configuration.streamConfiguration.streamConfiguration.bufferSize =
+    NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
+  configuration.streamConfiguration.streamConfiguration.deleteModule = false;
+  configuration.streamConfiguration.streamConfiguration.messageAllocator =
+    &message_allocator;
+  configuration.streamConfiguration.streamConfiguration.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
                                    : NULL);
-  configuration.streamConfiguration.moduleConfiguration = &module_configuration;
-  configuration.streamConfiguration.printFinalReport = false;
-  configuration.streamConfiguration.statisticReportingInterval =
+  configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
+    &module_configuration;
+  configuration.streamConfiguration.streamConfiguration.printFinalReport =
+    false;
+  configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
     statisticsReportingInterval_in;
-  configuration.streamConfiguration.useThreadPerConnection = false;
+  configuration.streamConfiguration.streamConfiguration.useThreadPerConnection =
+    false;
+  configuration.streamConfiguration.userData = &configuration.streamSessionData;
+
+  // ******************** protocol configuration data **************************
+  configuration.protocolConfiguration.bufferSize =
+    NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
+  configuration.protocolConfiguration.peerPingInterval = pingInterval_in;
+  configuration.protocolConfiguration.pingAutoAnswer = true;
+  configuration.protocolConfiguration.printPongMessages = true;
 
   //  config.delete_module = false;
   // *WARNING*: set at runtime, by the appropriate connection handler
@@ -535,7 +545,7 @@ do_work (unsigned int maxNumConnections_in,
   // step0b: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (useReactor_in,
                                               useThreadPool_in,
-                                              configuration.streamConfiguration.serializeOutput))
+                                              configuration.streamConfiguration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
@@ -679,17 +689,18 @@ do_work (unsigned int maxNumConnections_in,
 
   // step4c: start listening
   Net_SocketHandlerConfiguration_t socket_handler_configuration;
-  ACE_OS::memset (&socket_handler_configuration,
-                  0,
-                  sizeof (socket_handler_configuration));
-  socket_handler_configuration.bufferSize = STREAM_BUFFER_SIZE;
+  //ACE_OS::memset (&socket_handler_configuration,
+  //                0,
+  //                sizeof (socket_handler_configuration));
+  socket_handler_configuration.bufferSize =
+    NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
   socket_handler_configuration.messageAllocator = &message_allocator;
   socket_handler_configuration.socketConfiguration =
       configuration.socketConfiguration;
   Net_Server_ListenerConfiguration_t listener_configuration;
-  ACE_OS::memset (&listener_configuration,
-                  0,
-                  sizeof (listener_configuration));
+  //ACE_OS::memset (&listener_configuration,
+  //                0,
+  //                sizeof (listener_configuration));
   listener_configuration.addressFamily = ACE_ADDRESS_FAMILY_INET;
   listener_configuration.allocator = &message_allocator;
   listener_configuration.connectionManager =

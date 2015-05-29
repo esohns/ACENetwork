@@ -64,7 +64,8 @@ idle_initialize_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_UI_cb"));
 
-  main_cb_data_t* data_p = static_cast<main_cb_data_t*> (userData_in);
+  IRC_Client_GTK_CBData* data_p =
+    static_cast<IRC_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -238,7 +239,8 @@ connect_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::connect_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  main_cb_data_t* data_p = static_cast<main_cb_data_t*> (userData_in);
+  IRC_Client_GTK_CBData* data_p =
+    static_cast<IRC_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -353,46 +355,57 @@ connect_clicked_cb (GtkWidget* widget_in,
     login_options.nick.resize (IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH);
 
   // step3: create/initialize new final module
-  IRC_Client_Module_IRCHandler_Module* module_p = NULL;
-  ACE_NEW_NORETURN (module_p,
-                    IRC_Client_Module_IRCHandler_Module (ACE_TEXT_ALWAYS_CHAR ("IRCHandler"),
-                                                         NULL));
-  if (!module_p)
+  Stream_Module_t* module_p = NULL;
+  //ACE_NEW_NORETURN (module_p,
+  //                  IRC_Client_Module_IRCHandler_Module (ACE_TEXT_ALWAYS_CHAR ("IRCHandler"),
+  //                                                       NULL));
+  if (data_p->configuration->streamConfiguration.streamConfiguration.module)
   {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-    return;
+    Stream_IModule_t* imodule_p =
+      dynamic_cast<Stream_IModule_t*> (data_p->configuration->streamConfiguration.streamConfiguration.module);
+    if (!imodule_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, returning\n"),
+                  ACE_TEXT (data_p->configuration->streamConfiguration.streamConfiguration.module->name ())));
+      return;
+    } // end IF
+    try
+    {
+      module_p = imodule_p->clone ();
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), continuing\n"),
+                  ACE_TEXT (data_p->configuration->streamConfiguration.streamConfiguration.module->name ())));
+    } // end IF
+    if (!module_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: failed to Stream_IModule::clone(), returning\n"),
+                  ACE_TEXT (data_p->configuration->streamConfiguration.streamConfiguration.module->name ())));
+      return;
+    } // end IF
+  } // end IF
+  IRC_Client_Module_IRCHandler* IRChandler_impl_p = NULL;
+  if (module_p)
+  {
+    IRChandler_impl_p =
+      dynamic_cast<IRC_Client_Module_IRCHandler*> (module_p->writer ());
+    if (!IRChandler_impl_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
+
+      // clean up
+      delete module_p;
+
+      return;
+    } // end IF
   } // end IF
 
-  IRC_Client_Module_IRCHandler* IRChandler_impl = NULL;
-  IRChandler_impl =
-    dynamic_cast<IRC_Client_Module_IRCHandler*> (module_p->reader ());
-  if (!IRChandler_impl)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
-
-    // clean up
-    delete module_p;
-
-    return;
-  } // end IF
-  if (!IRChandler_impl->initialize (data_p->configuration->streamConfiguration.messageAllocator, // message allocator
-                                    IRC_CLIENT_BUFFER_SIZE,                                      // buffer size (bytes)
-                                    true,                                                        // auto-answer server "ping"s ?
-                                    false))                                                      // print ('.') dots for received "pings"...
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", returning\n"),
-                ACE_TEXT (module_p->name ())));
-
-    // clean up
-    delete module_p;
-
-    return;
-  } // end IF
-
-  // step4: create/init new connection handler
+  // step4: create/initialize new connection handler
   // retrieve server tabs handle
   GtkNotebook* notebook_p =
     GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
@@ -401,7 +414,7 @@ connect_clicked_cb (GtkWidget* widget_in,
   IRC_Client_GUI_Connection* connection_p = NULL;
   ACE_NEW_NORETURN (connection_p,
                     IRC_Client_GUI_Connection (&data_p->GTKState,
-                                               IRChandler_impl,
+                                               IRChandler_impl_p,
                                                &data_p->connections,
                                                entry_name,
                                                data_p->UIFileDirectory,
@@ -419,7 +432,7 @@ connect_clicked_cb (GtkWidget* widget_in,
   } // end IF
 
   // step5: connect to the server
-  bool connected = false;
+  bool result = false;
   for (IRC_Client_PortRangesIterator_t port_range_iter = (*phonebook_iterator).second.listeningPorts.begin ();
        port_range_iter != (*phonebook_iterator).second.listeningPorts.end ();
        port_range_iter++)
@@ -430,36 +443,36 @@ connect_clicked_cb (GtkWidget* widget_in,
            current_port <= (*port_range_iter).second;
            current_port++)
     {
-      connected =
-        IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.messageAllocator,                   // message allocator
-                                   login_options,                                                                 // login options
-                                   data_p->configuration->protocolConfiguration.streamConfiguration.debugScanner, // debug scanner ?
-                                   data_p->configuration->protocolConfiguration.streamConfiguration.debugParser,  // debug parser ?
-                                   data_p->configuration->streamConfiguration.statisticReportingInterval,         // statistics reporting interval [seconds: 0 --> OFF]
-                                   (*phonebook_iterator).second.hostName,                                         // server hostname
-                                   current_port,                                                                  // server listening port
-                                   module_p);                                                                     // final module handle
-      if (connected)
+      result =
+        IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
+                                   login_options,                                                                             // login options
+                                   data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
+                                   data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
+                                   data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
+                                   (*phonebook_iterator).second.hostName,                                                     // server hostname
+                                   current_port,                                                                              // server listening port
+                                   module_p);                                                                                 // final module handle
+      if (result)
         break;
     } // end FOR
     else
-      connected =
-        IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.messageAllocator,                   // message allocator
-                                   login_options,                                                                 // login options
-                                   data_p->configuration->protocolConfiguration.streamConfiguration.debugScanner, // debug scanner ?
-                                   data_p->configuration->protocolConfiguration.streamConfiguration.debugParser,  // debug parser ?
-                                   data_p->configuration->streamConfiguration.statisticReportingInterval,         // statistics reporting interval [seconds: 0 --> OFF]
-                                   (*phonebook_iterator).second.hostName,                                         // server hostname
-                                   (*port_range_iter).first,                                                      // server listening port
-                                   module_p);                                                                     // final module handle
-    if (connected)
+      result =
+        IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
+                                   login_options,                                                                             // login options
+                                   data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
+                                   data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
+                                   data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
+                                   (*phonebook_iterator).second.hostName,                                                     // server hostname
+                                   (*port_range_iter).first,                                                                  // server listening port
+                                   module_p);                                                                                 // final module handle
+    if (result)
       break;
 
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to connect to server(\"%s\"), retrying\n"),
                 ACE_TEXT ((*phonebook_iterator).second.hostName.c_str ())));
   } // end FOR
-  if (!connected)
+  if (!result)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to server(\"%s\"), returning\n"),
@@ -476,18 +489,29 @@ connect_clicked_cb (GtkWidget* widget_in,
   //   ACE_DEBUG((LM_DEBUG,
   //              ACE_TEXT("registering...\n")));
 
-  // step6: register our connection with the server
+  // step6: register connection with the server
   try
   {
     // *NOTE*: this entails a little delay waiting for the welcome notice...
-    IRChandler_impl->registerConnection (login_options);
+    result = IRChandler_impl_p->registerConnection (login_options);
   }
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::registerConnection(), continuing\n")));
   }
+  if (!result)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_IIRCControl::registerConnection(), returning\n")));
 
+    // clean up
+    delete connection_p;
+    module_p->close ();
+    delete module_p;
+
+    return;
+  } // end IF
   //   ACE_DEBUG((LM_DEBUG,
   //              ACE_TEXT("registering...DONE\n")));
 
@@ -510,7 +534,8 @@ send_entry_kb_focused_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
-  main_cb_data_t* data_p = static_cast<main_cb_data_t*> (userData_in);
+  IRC_Client_GTK_CBData* data_p =
+    static_cast<IRC_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -538,7 +563,7 @@ send_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::send_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  main_cb_data_t* data_p = static_cast<main_cb_data_t*> (userData_in);
+  IRC_Client_GTK_CBData* data_p = static_cast<IRC_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -687,8 +712,8 @@ disconnect_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::disconnect_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*> (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -716,8 +741,8 @@ nick_entry_kb_focused_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*> (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -746,8 +771,8 @@ change_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::change_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*> (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -817,8 +842,8 @@ usersbox_changed_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::usersbox_changed_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*> (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -886,8 +911,8 @@ refresh_users_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::refresh_users_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*> (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -928,8 +953,8 @@ channel_entry_kb_focused_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*> (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -958,8 +983,8 @@ join_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::join_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*> (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1036,8 +1061,8 @@ channelbox_changed_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::channelbox_changed_cb"));
 
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*> (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -1120,8 +1145,8 @@ refresh_channels_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::refresh_channels_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*> (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1146,8 +1171,8 @@ user_mode_toggled_cb (GtkToggleButton* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::user_mode_toggled_cb"));
 
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*> (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -1266,8 +1291,8 @@ switch_channel_cb (GtkNotebook* notebook_in,
 
   ACE_UNUSED_ARG (notebook_in);
   ACE_UNUSED_ARG (page_in);
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*> (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1293,8 +1318,8 @@ action_away_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_away_cb"));
 
-  connection_cb_data_t* data_p =
-    static_cast<connection_cb_data_t*>(userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*>(userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1397,8 +1422,8 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::channel_mode_toggled_cb"));
 
-  handler_cb_data_t* data_p =
-    static_cast<handler_cb_data_t*> (userData_in);
+  IRC_Client_GTK_HandlerCBData* data_p =
+    static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (toggleButton_in);
@@ -1623,7 +1648,7 @@ topic_clicked_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
-  handler_cb_data_t* data_p = static_cast<handler_cb_data_t*> (userData_in);
+  IRC_Client_GTK_HandlerCBData* data_p = static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1705,7 +1730,7 @@ part_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::part_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  handler_cb_data_t* data_p = static_cast<handler_cb_data_t*> (userData_in);
+  IRC_Client_GTK_HandlerCBData* data_p = static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1742,7 +1767,7 @@ members_clicked_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::members_clicked_cb"));
 
-  handler_cb_data_t* data_p = static_cast<handler_cb_data_t*> (userData_in);
+  IRC_Client_GTK_HandlerCBData* data_p = static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
 
   // supposed to be a context menu -> right-clicked ?
   if (event_in->button != 3)
@@ -1970,7 +1995,7 @@ action_msg_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_msg_cb"));
 
-  handler_cb_data_t* data_p = static_cast<handler_cb_data_t*> (userData_in);
+  IRC_Client_GTK_HandlerCBData* data_p = static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1994,7 +2019,7 @@ action_invite_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_invite_cb"));
 
-  handler_cb_data_t* data_p = static_cast<handler_cb_data_t*> (userData_in);
+  IRC_Client_GTK_HandlerCBData* data_p = static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -2044,7 +2069,7 @@ action_info_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_info_cb"));
 
-  handler_cb_data_t* data_p = static_cast<handler_cb_data_t*> (userData_in);
+  IRC_Client_GTK_HandlerCBData* data_p = static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -2068,7 +2093,7 @@ action_kick_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_kick_cb"));
 
-  handler_cb_data_t* data_p = static_cast<handler_cb_data_t*> (userData_in);
+  IRC_Client_GTK_HandlerCBData* data_p = static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -2100,7 +2125,7 @@ action_ban_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_ban_cb"));
 
-  handler_cb_data_t* data_p = static_cast<handler_cb_data_t*> (userData_in);
+  IRC_Client_GTK_HandlerCBData* data_p = static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);

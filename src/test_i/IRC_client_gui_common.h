@@ -40,8 +40,16 @@ class IRC_Client_GUI_Connection;
 typedef std::map<std::string, IRC_Client_GUI_Connection*> connections_t;
 typedef connections_t::iterator connections_iterator_t;
 
-struct main_cb_data_t
+struct IRC_Client_GTK_CBData
 {
+  inline IRC_Client_GTK_CBData ()
+    : configuration (NULL)
+    , connections ()
+    , GTKState ()
+    , phoneBook ()
+    , UIFileDirectory ()
+  {};
+
   IRC_Client_Configuration* configuration;
   connections_t             connections;
   Common_UI_GTKState        GTKState;
@@ -49,8 +57,18 @@ struct main_cb_data_t
   std::string               UIFileDirectory;
 };
 
-struct connection_cb_data_t
+struct IRC_Client_GTK_ConnectionCBData
 {
+  inline IRC_Client_GTK_ConnectionCBData ()
+   : away (false)
+   , connection (NULL)
+   , connections (NULL)
+   , controller (NULL)
+   , GTKState (NULL)
+   , nickname ()
+   , userModes ()
+  {};
+
   // *TODO*: couldn't it be done without this one ?
   bool                       away;
   IRC_Client_GUI_Connection* connection;
@@ -61,8 +79,17 @@ struct connection_cb_data_t
   IRC_Client_UserModes_t     userModes;
 };
 
-struct handler_cb_data_t
+struct IRC_Client_GTK_HandlerCBData
 {
+  inline IRC_Client_GTK_HandlerCBData ()
+   : channelModes ()
+   , connection (NULL)
+   , controller (NULL)
+   , GTKState (NULL)
+   , id ()
+   , parameters ()
+  {};
+
   IRC_Client_ChannelModes_t  channelModes;
   IRC_Client_GUI_Connection* connection;
   IRC_Client_IIRCControl*    controller;

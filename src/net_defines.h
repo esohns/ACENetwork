@@ -27,6 +27,8 @@
 
 #include "ace/Default_Constants.h"
 
+#include "stream_defines.h"
+
 // interface
 // *PORTABILITY*: interface names are not portable, so let the user choose the
 //                interface from a list on Windows (see select_interface())...
@@ -68,6 +70,7 @@
 
 // stream
 #define NET_STREAM_MAX_MESSAGES                  0  // 0 --> no limits
+#define NET_STREAM_MESSAGE_DATA_BUFFER_SIZE      STREAM_MESSAGE_DATA_BUFFER_SIZE
 #define NET_STREAM_DEFAULT_STATISTICS_COLLECTION 60 // seconds [0 --> OFF]
 #define NET_STREAM_DEFAULT_STATISTICS_REPORTING  0  // seconds [0 --> OFF]
 

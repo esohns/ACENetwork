@@ -45,6 +45,7 @@ class Net_Export Net_Stream
                         Common_TimePolicy_t,
                         Stream_State_t,
                         Stream_Statistic_t,
+                        Net_StreamConfiguration_t,
                         Net_UserData_t,
                         Net_StreamSessionData_t,
                         Net_SessionMessage,
@@ -54,12 +55,8 @@ class Net_Export Net_Stream
   Net_Stream ();
   virtual ~Net_Stream ();
 
-  // initialize stream
-  bool initialize (unsigned int,                       // session ID
-                   Stream_Configuration_t&,            // stream configuration
-                   // *TODO*: implement a generic module initialization method
-                   const Net_ProtocolConfiguration_t&, // protocol configuration
-                   const Net_UserData_t&);             // user data
+  // implement Common_IInitialize_T
+  virtual bool initialize (const Net_StreamConfiguration_t&); // configuration
 
   // *TODO*: re-consider this API
   void ping ();
@@ -74,6 +71,7 @@ class Net_Export Net_Stream
                         Common_TimePolicy_t,
                         Stream_State_t,
                         Stream_Statistic_t,
+                        Net_StreamConfiguration_t,
                         Net_UserData_t,
                         Net_StreamSessionData_t,
                         Net_SessionMessage,

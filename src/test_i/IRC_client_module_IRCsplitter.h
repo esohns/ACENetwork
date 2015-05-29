@@ -61,16 +61,17 @@ class IRC_Client_Module_IRCSplitter
 
   // configuration / initialization
   bool initialize (// *** base class initializers ***
-                   Stream_IAllocator*,  // message allocator
-                   bool = false,     // active object ?
+                   Stream_IAllocator*,     // message allocator
+                   bool = false,           // active object ?
+                   Stream_State_t* = NULL, // stream state handle
                    // *** base class initializers END ***
                    // *NOTE*: this option may be useful for (downstream) parsers that
                    // only work on one CONTIGUOUS buffer (i.e. cannot parse unaligned bits and pieces)
                    // *WARNING*: will NOT work with multithreaded stream processing --> USE WITH CAUTION !
-                   bool = false,     // "crunch" completed messages ?
-                   unsigned int = 0, // statistics collecting interval (second(s))
-                                     // 0 --> DON'T collect statistics
-                   bool = IRC_CLIENT_DEF_TRACE_SCANNING); // trace scanning ?
+                   bool = false,           // "crunch" completed messages ?
+                   unsigned int = 0,       // statistics collecting interval (second(s))
+                                           // 0 --> DON'T collect statistics
+                   bool = IRC_CLIENT_DEF_LEX_TRACE); // trace scanning ?
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (IRC_Client_Message*&, // data message handle

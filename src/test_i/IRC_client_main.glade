@@ -106,7 +106,6 @@
   <object class="GtkWindow" id="main_dialog">
     <property name="visible">True</property>
     <property name="title" translatable="yes">IRC client</property>
-    <property name="window_position">center</property>
     <property name="destroy_with_parent">True</property>
     <signal name="delete_event" handler="quit_activated_cb"/>
     <child>

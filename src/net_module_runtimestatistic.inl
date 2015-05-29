@@ -253,7 +253,11 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     case SESSION_BEGIN:
     {
       // retain session ID for reporting...
-      sessionID_ = message_inout->getState ()->sessionID;
+      // *TODO*: clearly, this isn't good design...
+      const SessionMessageType::STREAM_STATE_TYPE* state_p =
+        message_inout->getState ();
+      ACE_ASSERT (state_p);
+      sessionID_ = state_p->sessionID;
 
       // statistics reporting
       if (reportingInterval_)

@@ -103,16 +103,16 @@ class IRC_Client_GUI_MessageHandler
   void clearMembers ();
   void updateModeButtons ();
 
-  handler_cb_data_t       CBData_;
+  IRC_Client_GTK_HandlerCBData CBData_;
 
-  std::deque<std::string> displayQueue_;
-  ACE_Thread_Mutex        lock_;
+  std::deque<std::string>      displayQueue_;
+  ACE_Thread_Mutex             lock_;
 
-  std::string             builderLabel_;
-  guint                   eventSourceID_;
-  bool                    isFirstMemberListMsg_;
-  GtkNotebook*            parent_;
-  GtkTextView*            view_;
+  std::string                  builderLabel_;
+  guint                        eventSourceID_;
+  bool                         isFirstMemberListMsg_;
+  GtkNotebook*                 parent_;
+  GtkTextView*                 view_;
 };
 
 #endif

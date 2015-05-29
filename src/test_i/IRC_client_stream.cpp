@@ -63,10 +63,7 @@ IRC_Client_Stream::~IRC_Client_Stream ()
 }
 
 bool
-IRC_Client_Stream::initialize (unsigned int sessionID_in,
-                               const Stream_Configuration_t& streamConfiguration_in,
-                               const IRC_Client_ProtocolConfiguration& protocolConfiguration_in,
-                               const IRC_Client_SessionData& sessionData_in)
+IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::initialize"));
 
@@ -78,6 +75,9 @@ IRC_Client_Stream::initialize (unsigned int sessionID_in,
   // - initialize modules
   // - push them onto the stream (tail-first) !
 
+  //  ACE_OS::memset (&inherited::state_, 0, sizeof (inherited::state_));
+  inherited::state_.sessionID = configuration_in.sessionID;
+
   // ******************* Runtime Statistics ************************
   IRC_Client_Module_Statistic_WriterTask_t* runtimeStatistic_impl = NULL;
   runtimeStatistic_impl =
@@ -88,8 +88,8 @@ IRC_Client_Stream::initialize (unsigned int sessionID_in,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_Statistic_WriterTask_t> failed, aborting\n")));
     return false;
   } // end IF
-  if (!runtimeStatistic_impl->initialize (streamConfiguration_in.statisticReportingInterval,
-                                          streamConfiguration_in.messageAllocator))
+  if (!runtimeStatistic_impl->initialize (configuration_in.streamConfiguration.statisticReportingInterval,
+                                          configuration_in.streamConfiguration.messageAllocator))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -138,17 +138,17 @@ IRC_Client_Stream::initialize (unsigned int sessionID_in,
   // ******************* IRC Parser ************************
   IRC_Client_Module_IRCParser* IRCParser_impl = NULL;
   IRCParser_impl =
-   dynamic_cast<IRC_Client_Module_IRCParser*> (IRCParser_.writer());
+    dynamic_cast<IRC_Client_Module_IRCParser*> (IRCParser_.writer ());
   if (!IRCParser_impl)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCParser) failed> (aborting\n")));
     return false;
   } // end IF
-  if (!IRCParser_impl->initialize (streamConfiguration_in.messageAllocator,                           // message allocator
-                                   protocolConfiguration_in.streamConfiguration.crunchMessageBuffers, // "crunch" messages ?
-                                   protocolConfiguration_in.streamConfiguration.debugScanner,         // debug scanner ?
-                                   protocolConfiguration_in.streamConfiguration.debugParser))         // debug parser ?
+  if (!IRCParser_impl->initialize (configuration_in.streamConfiguration.messageAllocator, // message allocator
+                                   configuration_in.crunchMessageBuffers,                 // "crunch" messages ?
+                                   configuration_in.debugScanner,                         // debug scanner ?
+                                   configuration_in.debugParser))                         // debug parser ?
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -168,17 +168,18 @@ IRC_Client_Stream::initialize (unsigned int sessionID_in,
   // ******************* IRC Marshal ************************
   IRC_Client_Module_IRCSplitter* IRCSplitter_impl = NULL;
   IRCSplitter_impl =
-   dynamic_cast<IRC_Client_Module_IRCSplitter*> (IRCMarshal_.reader ());
+   dynamic_cast<IRC_Client_Module_IRCSplitter*> (IRCMarshal_.writer ());
   if (!IRCSplitter_impl)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCSplitter> failed, aborting\n")));
     return false;
   } // end IF
-  if (!IRCSplitter_impl->initialize (streamConfiguration_in.messageAllocator,                    // message allocator
-                                     false,                                                      // "crunch" messages ?
-                                     0,                                                          // DON'T collect statistics
-                                     protocolConfiguration_in.streamConfiguration.debugScanner)) // debug scanning ?
+  if (!IRCSplitter_impl->initialize (configuration_in.streamConfiguration.messageAllocator, // message allocator
+                                     configuration_in.crunchMessageBuffers,                 // "crunch" messages ?
+                                     &(inherited::state_),                                  // state handle
+                                     0,                                                     // DON'T collect statistics
+                                     configuration_in.debugScanner))                        // debug scanning ?
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -188,8 +189,8 @@ IRC_Client_Stream::initialize (unsigned int sessionID_in,
 
   // enqueue the module...
   // *NOTE*: push()ing the module will open() it
-  // --> set the argument that is passed along
-  IRCMarshal_.arg (&const_cast<IRC_Client_SessionData&> (sessionData_in));
+  // --> set the argument that is passed along (head module needs this)
+  IRCMarshal_.arg (const_cast<IRC_Client_StreamConfiguration&> (configuration_in).sessionData);
   if (inherited::push (&IRCMarshal_))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -200,8 +201,8 @@ IRC_Client_Stream::initialize (unsigned int sessionID_in,
 
   // set (session) message allocator
   // *TODO*: clean this up ! --> sanity check
-  ACE_ASSERT (streamConfiguration_in.messageAllocator);
-  inherited::allocator_ = streamConfiguration_in.messageAllocator;
+  ACE_ASSERT (configuration_in.streamConfiguration.messageAllocator);
+  inherited::allocator_ = configuration_in.streamConfiguration.messageAllocator;
 
   inherited::isInitialized_ = true;
 //   inherited::dump_state();

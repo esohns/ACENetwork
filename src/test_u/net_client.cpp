@@ -504,30 +504,39 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                                                   &heap_allocator,         // heap allocator handle
                                                   true);                   // block ?
   Net_Configuration_t configuration;
-//  ACE_OS::memset (&configuration, 0, sizeof (Net_Configuration_t));
-  // ************ connection configuration data ************
-  configuration.protocolConfiguration.peerPingInterval =
-      ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? 0
-                                                                   : serverPingInterval_in);
-  configuration.protocolConfiguration.pingAutoAnswer = true;
-  configuration.protocolConfiguration.printPongMessages =
-      UIDefinitionFile_in.empty ();
-  // ************ socket / stream configuration data ************
+  // ********************** socket configuration data **************************
   configuration.socketConfiguration.bufferSize =
     NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
   configuration.socketConfiguration.linger =
       NET_SOCKET_DEFAULT_LINGER;
 
-  configuration.streamConfiguration.bufferSize = STREAM_BUFFER_SIZE;
-  configuration.streamConfiguration.deleteModule = false;
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.module =
+  // ********************** stream configuration data **************************
+  configuration.streamConfiguration.protocolConfiguration =
+    &configuration.protocolConfiguration;
+  configuration.streamConfiguration.streamConfiguration.bufferSize =
+    NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
+  configuration.streamConfiguration.streamConfiguration.deleteModule = false;
+  configuration.streamConfiguration.streamConfiguration.messageAllocator =
+    &message_allocator;
+  configuration.streamConfiguration.streamConfiguration.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
                                    : NULL);
-  configuration.streamConfiguration.moduleConfiguration = &module_configuration;
-  configuration.streamConfiguration.printFinalReport = true;
-  configuration.streamConfiguration.statisticReportingInterval = 0;
-  configuration.streamConfiguration.useThreadPerConnection = false;
+  configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
+    &module_configuration;
+  configuration.streamConfiguration.streamConfiguration.printFinalReport = true;
+  configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
+    0;
+  configuration.streamConfiguration.streamConfiguration.useThreadPerConnection =
+    false;
+  configuration.streamConfiguration.userData = &configuration.streamSessionData;
+
+  // ******************** protocol configuration data **************************
+  configuration.protocolConfiguration.peerPingInterval =
+    ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? 0
+    : serverPingInterval_in);
+  configuration.protocolConfiguration.pingAutoAnswer = true;
+  configuration.protocolConfiguration.printPongMessages =
+    UIDefinitionFile_in.empty ();
 
   //  config.useThreadPerConnection = false;
   //  config.serializeOutput = false;
@@ -545,7 +554,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // step0b: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (useReactor_in,
                                               useThreadPool_in,
-                                              configuration.streamConfiguration.serializeOutput))
+                                              configuration.streamConfiguration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returing\n")));
@@ -554,7 +563,8 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
   // step0c: initialize client connector
   Net_SocketHandlerConfiguration_t socket_handler_configuration;
-  socket_handler_configuration.bufferSize = STREAM_BUFFER_SIZE;
+  socket_handler_configuration.bufferSize =
+    NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
   socket_handler_configuration.messageAllocator = &message_allocator;
   socket_handler_configuration.socketConfiguration =
     configuration.socketConfiguration;

@@ -42,28 +42,38 @@ struct IRC_Client_SessionData
   ACE_Time_Value              lastCollectionTimestamp;
 };
 
+struct IRC_Client_ProtocolConfiguration
+{
+  inline IRC_Client_ProtocolConfiguration ()
+   : automaticPong (IRC_CLIENT_STREAM_DEF_AUTOPONG)
+   , loginOptions ()
+   , printPingDot (IRC_CLIENT_DEF_PRINT_PINGDOT)
+  {};
+
+  bool                       automaticPong;
+  IRC_Client_IRCLoginOptions loginOptions;
+  bool                       printPingDot;
+};
+
 struct IRC_Client_StreamConfiguration
 {
   inline IRC_Client_StreamConfiguration ()
    : crunchMessageBuffers (IRC_CLIENT_DEF_CRUNCH_MESSAGES)
-   , debugScanner (IRC_CLIENT_DEF_TRACE_SCANNING)
-   , debugParser (IRC_CLIENT_DEF_TRACE_PARSING)
-  {};
-
-  bool crunchMessageBuffers;
-  bool debugScanner;
-  bool debugParser;
-};
-
-struct IRC_Client_ProtocolConfiguration
-{
-  inline IRC_Client_ProtocolConfiguration ()
-   : loginOptions ()
+   , debugScanner (IRC_CLIENT_DEF_LEX_TRACE)
+   , debugParser (IRC_CLIENT_DEF_YACC_TRACE)
+   , sessionID (0)
    , streamConfiguration ()
+   , sessionData (NULL)
+   , protocolConfiguration (NULL)
   {};
 
-  IRC_Client_IRCLoginOptions     loginOptions;
-  IRC_Client_StreamConfiguration streamConfiguration;
+  bool                              crunchMessageBuffers;  // crunch message buffers ?
+  bool                              debugScanner;          // debug yacc ?
+  bool                              debugParser;           // debug lex ?
+  unsigned int                      sessionID;             // session ID
+  Stream_Configuration_t            streamConfiguration;   // stream configuration
+  IRC_Client_SessionData*           sessionData;           // session data
+  IRC_Client_ProtocolConfiguration* protocolConfiguration; // protocol configuration
 };
 
 struct IRC_Client_Configuration
@@ -71,15 +81,15 @@ struct IRC_Client_Configuration
   inline IRC_Client_Configuration ()
    : socketConfiguration ()
    , streamConfiguration ()
-   , streamSessionData ()
+   //, streamSessionData ()
    , protocolConfiguration ()
   {};
 
   // **************************** socket data **********************************
   Net_SocketConfiguration_t        socketConfiguration;
   // **************************** stream data **********************************
-  Stream_Configuration_t           streamConfiguration;
-  IRC_Client_SessionData           streamSessionData;
+  IRC_Client_StreamConfiguration   streamConfiguration;
+  //IRC_Client_SessionData*          streamSessionData;
   // *************************** protocol data *********************************
   IRC_Client_ProtocolConfiguration protocolConfiguration;
 };

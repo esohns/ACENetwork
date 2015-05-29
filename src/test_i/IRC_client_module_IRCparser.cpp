@@ -30,10 +30,10 @@
 IRC_Client_Module_IRCParser::IRC_Client_Module_IRCParser ()
  : inherited ()
  , allocator_ (NULL)
- , debugScanner_ (IRC_CLIENT_DEF_TRACE_SCANNING)    // trace scanning ?
- , debugParser_ (IRC_CLIENT_DEF_TRACE_PARSING)      // trace parsing ?
- , driver_ (IRC_CLIENT_DEF_TRACE_SCANNING,          // trace scanning ?
-            IRC_CLIENT_DEF_TRACE_PARSING)           // trace parsing ?
+ , debugScanner_ (IRC_CLIENT_DEF_LEX_TRACE) // trace scanning ?
+ , debugParser_ (IRC_CLIENT_DEF_YACC_TRACE) // trace parsing ?
+ , driver_ (IRC_CLIENT_DEF_LEX_TRACE,  // trace scanning ?
+            IRC_CLIENT_DEF_YACC_TRACE) // trace parsing ?
  , crunchMessages_ (IRC_CLIENT_DEF_CRUNCH_MESSAGES) // "crunch" messages ?
  , isInitialized_ (false)
 {

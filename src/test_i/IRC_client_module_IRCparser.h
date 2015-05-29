@@ -50,8 +50,8 @@ class IRC_Client_Module_IRCParser
   // configuration / initialization
   bool initialize (Stream_IAllocator*,                    // message allocator
                    bool = IRC_CLIENT_DEF_CRUNCH_MESSAGES, // crunch messages ?
-                   bool = IRC_CLIENT_DEF_TRACE_SCANNING,  // debug scanner ?
-                   bool = IRC_CLIENT_DEF_TRACE_PARSING);  // debug parser ?
+                   bool = IRC_CLIENT_DEF_LEX_TRACE,       // debug scanner ?
+                   bool = IRC_CLIENT_DEF_YACC_TRACE);     // debug parser ?
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (IRC_Client_Message*&, // data message handle

@@ -54,7 +54,7 @@ IRC_Client_Module_IRCSplitter::IRC_Client_Module_IRCSplitter ()
                 ACE_TEXT ("failed to yylex_init(): \"%m\", continuing\n")));
 
   // trace ?
-  IRC_Client_IRCBisect_set_debug ((IRC_CLIENT_DEF_TRACE_SCANNING ? 1 : 0),
+  IRC_Client_IRCBisect_set_debug ((IRC_CLIENT_DEF_LEX_TRACE ? 1 : 0),
                                   scannerContext_);
 }
 
@@ -85,6 +85,8 @@ IRC_Client_Module_IRCSplitter::~IRC_Client_Module_IRCSplitter ()
 bool
 IRC_Client_Module_IRCSplitter::initialize (Stream_IAllocator* allocator_in,
                                            bool isActive_in,
+                                           Stream_State_t* state_in,
+                                           /////////////////////////////////////
                                            bool crunchMessages_in,
                                            unsigned int statisticCollectionInterval_in,
                                            bool traceScanning_in)
@@ -130,6 +132,7 @@ IRC_Client_Module_IRCSplitter::initialize (Stream_IAllocator* allocator_in,
   // set base class initializer(s)
   inherited::allocator_ = allocator_in;
   inherited::isActive_ = isActive_in;
+  inherited::state_ = state_in;
 
   crunchMessages_ = crunchMessages_in;
 
@@ -158,7 +161,7 @@ IRC_Client_Module_IRCSplitter::initialize (Stream_IAllocator* allocator_in,
 
   // *NOTE*: need to clean up timer beyond this point !
 
-  //// init scanner context
+  //// initialize scanner context
   //if (IRCBisectlex_init_extra(&currentNumFrames_, // extra data
   //                            &scannerContext_))  // scanner context handle
   //{

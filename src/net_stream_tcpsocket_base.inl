@@ -75,23 +75,23 @@ Net_StreamTCPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::~Net_StreamTCPSocketBase_T"));
 
-  if (inherited2::configuration_.streamConfiguration.module)
+  if (inherited2::configuration_.streamConfiguration.streamConfiguration.module)
   {
     Stream_Module_t* module_p =
-      stream_.find (inherited2::configuration_.streamConfiguration.module->name ());
+      stream_.find (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ());
     if (module_p)
     {
       int result =
-        stream_.remove (inherited2::configuration_.streamConfiguration.module->name (),
+        stream_.remove (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name (),
                         ACE_Module_Base::M_DELETE_NONE);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
+                    ACE_TEXT (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ())));
     } // end IF
 
-    if (inherited2::configuration_.streamConfiguration.deleteModule)
-      delete inherited2::configuration_.streamConfiguration.module;
+    if (inherited2::configuration_.streamConfiguration.streamConfiguration.deleteModule)
+      delete inherited2::configuration_.streamConfiguration.streamConfiguration.module;
   } // end IF
 
   if (currentReadBuffer_)
@@ -144,25 +144,25 @@ Net_StreamTCPSocketBase_T<AddressType,
   // step1: initialize/start stream
   // step1a: connect stream head message queue with the reactor notification
   // pipe ?
-  if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
+  if (!inherited2::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
   {
     // *NOTE*: must use 'this' (inherited2:: does not work here for some
     //         strange reason)...
-    inherited2::configuration_.streamConfiguration.notificationStrategy =
+    inherited2::configuration_.streamConfiguration.streamConfiguration.notificationStrategy =
       &this->notificationStrategy_;
   } // end IF
   // step1b: initialize final module (if any)
-  if (inherited2::configuration_.streamConfiguration.module)
+  if (inherited2::configuration_.streamConfiguration.streamConfiguration.module)
   {
     Stream_IModule_t* imodule_p = NULL;
     // need a downcast...
     imodule_p =
-        dynamic_cast<Stream_IModule_t*> (inherited2::configuration_.streamConfiguration.module);
+      dynamic_cast<Stream_IModule_t*> (inherited2::configuration_.streamConfiguration.streamConfiguration.module);
     if (!imodule_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Stream_IModule_t*> failed, aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
+                  ACE_TEXT (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ())));
       return -1;
     } // end IF
     Stream_Module_t* clone_p = NULL;
@@ -174,33 +174,31 @@ Net_StreamTCPSocketBase_T<AddressType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
+                  ACE_TEXT (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ())));
       return -1;
     }
     if (!clone_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
+                  ACE_TEXT (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ())));
       return -1;
     }
-    inherited2::configuration_.streamConfiguration.module = clone_p;
-    inherited2::configuration_.streamConfiguration.deleteModule = true;
+    inherited2::configuration_.streamConfiguration.streamConfiguration.module =
+      clone_p;
+    inherited2::configuration_.streamConfiguration.streamConfiguration.deleteModule =
+      true;
   } // end IF
   // step1c: initialize stream
-  unsigned int session_id = 0;
+  // *TODO*: this clearly is a design glitch
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  session_id =
+  inherited2::configuration_.streamConfiguration.sessionID =
     reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #else
-  session_id =
+  inherited2::configuration_.streamConfiguration.sessionID =
     static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #endif
-  // *TODO*: this clearly is a design glitch
-  if (!stream_.initialize (session_id,
-                           inherited2::configuration_.streamConfiguration,
-                           inherited2::configuration_.protocolConfiguration,
-                           inherited2::configuration_.streamSessionData))
+  if (!stream_.initialize (inherited2::configuration_.streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -382,12 +380,12 @@ Net_StreamTCPSocketBase_T<AddressType,
 
   // read some data from the socket
   currentReadBuffer_ =
-      allocateMessage (inherited2::configuration_.streamConfiguration.bufferSize);
+    allocateMessage (inherited2::configuration_.streamConfiguration.streamConfiguration.bufferSize);
   if (!currentReadBuffer_)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                inherited2::configuration_.streamConfiguration.bufferSize));
+                inherited2::configuration_.streamConfiguration.streamConfiguration.bufferSize));
     return -1;
   } // end IF
 
@@ -492,7 +490,7 @@ Net_StreamTCPSocketBase_T<AddressType,
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY be
   // dispatching the reactor notification queue concurrently (most notably,
   // ACE_TP_Reactor) --> enforce proper serialization
-  if (inherited2::configuration_.streamConfiguration.serializeOutput)
+  if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
     sendLock_.acquire ();
 
   if (currentWriteBuffer_ == NULL)
@@ -500,7 +498,7 @@ Net_StreamTCPSocketBase_T<AddressType,
     // send next data chunk from the stream...
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
     // been notified to the reactor
-    if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
+    if (!inherited2::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
       result =
           stream_.get (currentWriteBuffer_,
                        const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
@@ -517,11 +515,11 @@ Net_StreamTCPSocketBase_T<AddressType,
       if ((error != EAGAIN) ||  // <-- connection has been closed
           (error != ESHUTDOWN)) // <-- queue has been deactivated
         ACE_DEBUG ((LM_ERROR,
-                    (inherited2::configuration_.streamConfiguration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
-                                                                                           : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
+                    (inherited2::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
+                                                                                                               : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
 
       // clean up
-      if (inherited2::configuration_.streamConfiguration.serializeOutput)
+      if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
         sendLock_.release ();
 
       return -1;
@@ -530,7 +528,7 @@ Net_StreamTCPSocketBase_T<AddressType,
   ACE_ASSERT (currentWriteBuffer_);
 
   // finished ?
-  if (inherited2::configuration_.streamConfiguration.useThreadPerConnection &&
+  if (inherited2::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection &&
       currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
   {
     currentWriteBuffer_->release ();
@@ -541,7 +539,7 @@ Net_StreamTCPSocketBase_T<AddressType,
 //                   peer_.get_handle ()));
 
     // clean up
-    if (inherited2::configuration_.streamConfiguration.serializeOutput)
+    if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
       sendLock_.release ();
 
     return -1;
@@ -572,7 +570,7 @@ Net_StreamTCPSocketBase_T<AddressType,
       // clean up
       currentWriteBuffer_->release ();
       currentWriteBuffer_ = NULL;
-      if (inherited2::configuration_.streamConfiguration.serializeOutput)
+      if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
         sendLock_.release ();
 
       return -1;
@@ -587,7 +585,7 @@ Net_StreamTCPSocketBase_T<AddressType,
       // clean up
       currentWriteBuffer_->release ();
       currentWriteBuffer_ = NULL;
-      if (inherited2::configuration_.streamConfiguration.serializeOutput)
+      if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
         sendLock_.release ();
 
       return -1;
@@ -624,7 +622,7 @@ Net_StreamTCPSocketBase_T<AddressType,
   if (currentWriteBuffer_)
   {
     // clean up
-    if (inherited2::configuration_.streamConfiguration.serializeOutput)
+    if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
       sendLock_.release ();
 
     return 1;
@@ -635,7 +633,7 @@ Net_StreamTCPSocketBase_T<AddressType,
     //              ACE_TEXT ("failed to ACE_Reactor::schedule_wakeup(): \"%m\", continuing\n")));
 
   // clean up
-  if (inherited2::configuration_.streamConfiguration.serializeOutput)
+  if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
     sendLock_.release ();
 
   return 0;
@@ -683,7 +681,7 @@ Net_StreamTCPSocketBase_T<AddressType,
       } // end IF
 
       // step2: purge any pending (!) notifications ?
-      if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
+      if (!inherited2::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
       {
         // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
         //                   using a multithreaded reactor, there may still be
@@ -1136,13 +1134,13 @@ Net_StreamTCPSocketBase_T<AddressType,
   ACE_Message_Block* message_block_p = NULL;
 
   //if (inherited::configuration_.messageAllocator)
-  if (inherited2::configuration_.streamConfiguration.messageAllocator)
+  if (inherited2::configuration_.streamConfiguration.streamConfiguration.messageAllocator)
   {
 allocate:
     try
     {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited2::configuration_.streamConfiguration.messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (inherited2::configuration_.streamConfiguration.streamConfiguration.messageAllocator->malloc (requestedSize_in));
     }
     catch (...)
     {
@@ -1153,7 +1151,7 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !inherited2::configuration_.streamConfiguration.messageAllocator->block ())
+        !inherited2::configuration_.streamConfiguration.streamConfiguration.messageAllocator->block ())
         goto allocate;
   } // end IF
   else
@@ -1171,9 +1169,9 @@ allocate:
                                          NULL));
   if (!message_block_p)
   {
-    if (inherited2::configuration_.streamConfiguration.messageAllocator)
+    if (inherited2::configuration_.streamConfiguration.streamConfiguration.messageAllocator)
     {
-      if (inherited2::configuration_.streamConfiguration.messageAllocator->block ())
+      if (inherited2::configuration_.streamConfiguration.streamConfiguration.messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     } // end IF

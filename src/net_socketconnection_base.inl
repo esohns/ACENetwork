@@ -72,12 +72,17 @@ Net_SocketConnectionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::~Net_SocketConnectionBase_T"));
 
+  int result = -1;
+
   // wait for our worker (if any)
   // *TODO*: this clearly is a design glitch
-  if (HandlerType::CONNECTION_BASE_T::configuration_.streamConfiguration.useThreadPerConnection)
-    if (inherited::wait () == -1)
+  if (HandlerType::CONNECTION_BASE_T::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
+  {
+    result = inherited::wait ();
+    if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Task_Base::wait(): \"%m\", continuing\n")));
+  } // end IF
 }
 
 //template <typename AddressType,

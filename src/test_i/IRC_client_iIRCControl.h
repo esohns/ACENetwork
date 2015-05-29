@@ -35,7 +35,7 @@ class IRC_Client_IIRCControl
  public:
   inline virtual ~IRC_Client_IIRCControl () {};
 
-  virtual void registerConnection (const IRC_Client_IRCLoginOptions&) = 0; // login details
+  virtual bool registerConnection (const IRC_Client_IRCLoginOptions&) = 0; // login details
   virtual void nick (const std::string&) = 0; // nick
   virtual void quit (const std::string&) = 0; // reason
   virtual void join (const string_list_t&,      // channel(s)

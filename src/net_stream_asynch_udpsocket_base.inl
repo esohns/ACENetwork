@@ -75,22 +75,22 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
 
   // step1: remove enqueued module (if any)
-  if (inherited4::configuration_.streamConfiguration.module)
+  if (inherited4::configuration_.streamConfiguration.streamConfiguration.module)
   {
     Stream_Module_t* module_p =
-      stream_.find (inherited4::configuration_.streamConfiguration.module->name ());
+      stream_.find (inherited4::configuration_.streamConfiguration.streamConfiguration.module->name ());
     if (module_p)
     {
       int result =
-        stream_.remove (inherited4::configuration_.streamConfiguration.module->name (),
+        stream_.remove (inherited4::configuration_.streamConfiguration.streamConfiguration.module->name (),
                         ACE_Module_Base::M_DELETE_NONE);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    inherited4::configuration_.streamConfiguration.module->name ()));
+                    inherited4::configuration_.streamConfiguration.streamConfiguration.module->name ()));
     } // end IF
-    if (inherited4::configuration_.streamConfiguration.deleteModule)
-      delete inherited4::configuration_.streamConfiguration.module;
+    if (inherited4::configuration_.streamConfiguration.streamConfiguration.deleteModule)
+      delete inherited4::configuration_.streamConfiguration.streamConfiguration.module;
   } // end IF
 
 //  if (buffer_)
@@ -153,11 +153,11 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   // step2a: initialize base-class
   // *TODO*: this should not be happening here...
   socket_handler_configuration.bufferSize =
-      inherited4::configuration_.protocolConfiguration.bufferSize;
+    inherited4::configuration_.protocolConfiguration.bufferSize;
   socket_handler_configuration.messageAllocator =
-      inherited4::configuration_.streamConfiguration.messageAllocator;
+    inherited4::configuration_.streamConfiguration.streamConfiguration.messageAllocator;
   socket_handler_configuration.socketConfiguration =
-      inherited4::configuration_.socketConfiguration;
+    inherited4::configuration_.socketConfiguration;
   if (!inherited::initialize (socket_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -170,20 +170,20 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 
   // step3: initialize/start stream
   // step3a: connect stream head message queue with a notification pipe/queue ?
-  if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
-    inherited4::configuration_.streamConfiguration.notificationStrategy = this;
+  if (!inherited4::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
+    inherited4::configuration_.streamConfiguration.streamConfiguration.notificationStrategy = this;
   // step3b: initialize final module (if any)
-  if (inherited4::configuration_.streamConfiguration.module)
+  if (inherited4::configuration_.streamConfiguration.streamConfiguration.module)
   {
     Stream_IModule_t* imodule_p = NULL;
     // need a downcast...
     imodule_p =
-      dynamic_cast<Stream_IModule_t*> (inherited4::configuration_.streamConfiguration.module);
+      dynamic_cast<Stream_IModule_t*> (inherited4::configuration_.streamConfiguration.streamConfiguration.module);
     if (!imodule_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-                  ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
+                  ACE_TEXT (inherited4::configuration_.streamConfiguration.streamConfiguration.module->name ())));
       goto close;
     } // end IF
     Stream_Module_t* clone_p = NULL;
@@ -195,31 +195,28 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
+                  ACE_TEXT (inherited4::configuration_.streamConfiguration.streamConfiguration.module->name ())));
       goto close;
     }
     if (!clone_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
+                  ACE_TEXT (inherited4::configuration_.streamConfiguration.streamConfiguration.module->name ())));
       goto close;
     }
-    inherited4::configuration_.streamConfiguration.module = clone_p;
-    inherited4::configuration_.streamConfiguration.deleteModule = true;
+    inherited4::configuration_.streamConfiguration.streamConfiguration.module = clone_p;
+    inherited4::configuration_.streamConfiguration.streamConfiguration.deleteModule = true;
   } // end IF
-#if defined (_MSC_VER)
-  session_id =
+  // *TODO*: this clearly is a design glitch
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inherited4::configuration_.streamConfiguration.sessionID =
     reinterpret_cast<unsigned int> (inherited2::get_handle ()); // (== socket handle)
 #else
-  session_id =
+  inherited4::configuration_.streamConfiguration.sessionID =
     static_cast<unsigned int> (inherited2::get_handle ()); // (== socket handle)
 #endif
-  // *TODO*: this clearly is a design glitch
-  if (!stream_.initialize (session_id,
-                           inherited4::configuration_.streamConfiguration,
-                           inherited4::configuration_.protocolConfiguration,
-                           inherited4::configuration_.streamSessionData))
+  if (!stream_.initialize (inherited4::configuration_.streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -409,7 +406,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
-  if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
+  if (!inherited4::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
   {
     Stream_Iterator_t iterator (stream_);
     const Stream_Module_t* module_p = NULL;

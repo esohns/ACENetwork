@@ -68,7 +68,7 @@ class IRC_Client_Module_IRCHandler
   // implement IRC_Client_IIRCControl
   virtual void subscribe (IRC_Client_INotify_t*); // new subscriber
   virtual void unsubscribe (IRC_Client_INotify_t*); // existing subscriber
-  virtual void registerConnection (const IRC_Client_IRCLoginOptions&); // login details
+  virtual bool registerConnection (const IRC_Client_IRCLoginOptions&); // login details
   virtual void nick (const std::string&); // nick
   virtual void quit (const std::string&); // reason
   virtual void join (const string_list_t&,  // channel(s)

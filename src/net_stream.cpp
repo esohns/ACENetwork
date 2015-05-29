@@ -43,15 +43,15 @@ Net_Stream::Net_Stream ()
 
   // remember the "owned" ones...
   // *TODO*: clean this up
-  // *NOTE*: one problem is that we need to explicitly close() all
-  // modules which we have NOT enqueued onto the stream (e.g. because init()
-  // failed...)
+  // *NOTE*: one problem is that all modules which have NOT enqueued onto the
+  //         stream (e.g. because initialize() failed...) need to be explicitly
+  //         close()d
   inherited::availableModules_.insert_tail (&socketHandler_);
   inherited::availableModules_.insert_tail (&headerParser_);
   inherited::availableModules_.insert_tail (&runtimeStatistic_);
   inherited::availableModules_.insert_tail (&protocolHandler_);
 
-  // *CHECK* fix ACE bug: modules should initialize their "next" member to NULL !
+  // *CHECK* fix ACE bug: modules should initialize their "next" member to NULL
   inherited::MODULE_T* module = NULL;
   for (ACE_DLList_Iterator<inherited::MODULE_T> iterator (inherited::availableModules_);
        iterator.next (module);
@@ -68,14 +68,12 @@ Net_Stream::~Net_Stream ()
 }
 
 bool
-Net_Stream::initialize (unsigned int sessionID_in,
-                        Stream_Configuration_t& configuration_in,
-                        const Net_ProtocolConfiguration_t& protocolConfiguration_in,
-                        const Net_UserData_t& userData_in)
+Net_Stream::initialize (const Net_StreamConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::initialize"));
 
   // sanity check(s)
+  ACE_ASSERT (configuration_in.protocolConfiguration);
   ACE_ASSERT (!inherited::isInitialized_);
 
   // things to be done here:
@@ -90,11 +88,11 @@ Net_Stream::initialize (unsigned int sessionID_in,
   // ------------------------------------
 
 //  ACE_OS::memset (&inherited::state_, 0, sizeof (inherited::state_));
-  inherited::state_.sessionID = sessionID_in;
+  inherited::state_.sessionID = configuration_in.sessionID;
 
   int result = -1;
   inherited::MODULE_T* module_p = NULL;
-  if (configuration_in.notificationStrategy)
+  if (configuration_in.streamConfiguration.notificationStrategy)
   {
     module_p = inherited::head ();
     if (!module_p)
@@ -110,35 +108,43 @@ Net_Stream::initialize (unsigned int sessionID_in,
                   ACE_TEXT ("no head module reader task found, aborting\n")));
       return false;
     } // end IF
-    task_p->msg_queue ()->notification_strategy (configuration_in.notificationStrategy);
+    inherited::QUEUE_T* queue_p = task_p->msg_queue ();
+    if (!queue_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("no head module reader task queue found, aborting\n")));
+      return false;
+    } // end IF
+    queue_p->notification_strategy (configuration_in.streamConfiguration.notificationStrategy);
   } // end IF
 
-  ACE_ASSERT (configuration_in.moduleConfiguration);
-  configuration_in.moduleConfiguration->streamState = &state_;
+  ACE_ASSERT (configuration_in.streamConfiguration.moduleConfiguration);
+  configuration_in.streamConfiguration.moduleConfiguration->streamState =
+    &state_;
 
   // ---------------------------------------------------------------------------
-  if (configuration_in.module)
+  if (configuration_in.streamConfiguration.module)
   {
     Stream_IModule_t* module_2 =
-      dynamic_cast<Stream_IModule_t*> (configuration_in.module);
+      dynamic_cast<Stream_IModule_t*> (configuration_in.streamConfiguration.module);
     if (!module_2)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("dynamic_cast<Stream_IModule_t> failed, aborting\n")));
       return false;
     } // end IF
-    if (!module_2->initialize (*configuration_in.moduleConfiguration))
+    if (!module_2->initialize (*configuration_in.streamConfiguration.moduleConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Stream_IModule_t::initialize, aborting\n")));
       return false;
     } // end IF
-    result = inherited::push (configuration_in.module);
+    result = inherited::push (configuration_in.streamConfiguration.module);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                  ACE_TEXT (configuration_in.module->name ())));
+                  ACE_TEXT (configuration_in.streamConfiguration.module->name ())));
       return false;
     } // end IF
   } // end IF
@@ -146,7 +152,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   // ---------------------------------------------------------------------------
 
   // ******************* Protocol Handler ************************
-  protocolHandler_.initialize (*configuration_in.moduleConfiguration);
+  protocolHandler_.initialize (*configuration_in.streamConfiguration.moduleConfiguration);
   Net_Module_ProtocolHandler* protocolHandler_impl = NULL;
   protocolHandler_impl =
       dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
@@ -156,10 +162,10 @@ Net_Stream::initialize (unsigned int sessionID_in,
                 ACE_TEXT ("dynamic_cast<Net_Module_ProtocolHandler> failed, aborting\n")));
     return false;
   } // end IF
-  if (!protocolHandler_impl->initialize (configuration_in.messageAllocator,
-                                         protocolConfiguration_in.peerPingInterval,
-                                         protocolConfiguration_in.pingAutoAnswer,
-                                         protocolConfiguration_in.printPongMessages)) // print ('.') for received "pong"s...
+  if (!protocolHandler_impl->initialize (configuration_in.streamConfiguration.messageAllocator,
+                                         configuration_in.protocolConfiguration->peerPingInterval,
+                                         configuration_in.protocolConfiguration->pingAutoAnswer,
+                                         configuration_in.protocolConfiguration->printPongMessages)) // print ('.') for received "pong"s...
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -176,7 +182,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   } // end IF
 
   // ******************* Runtime Statistics ************************
-  runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
+  runtimeStatistic_.initialize (*configuration_in.streamConfiguration.moduleConfiguration);
   Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl = NULL;
   runtimeStatistic_impl =
     dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
@@ -186,9 +192,9 @@ Net_Stream::initialize (unsigned int sessionID_in,
                 ACE_TEXT ("dynamic_cast<Net_Module_RuntimeStatistic> failed, aborting\n")));
     return false;
   } // end IF
-  if (!runtimeStatistic_impl->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
-                                          configuration_in.printFinalReport,           // print final report ?
-                                          configuration_in.messageAllocator))          // message allocator handle
+  if (!runtimeStatistic_impl->initialize (configuration_in.streamConfiguration.statisticReportingInterval, // reporting interval (seconds)
+                                          configuration_in.streamConfiguration.printFinalReport,           // print final report ?
+                                          configuration_in.streamConfiguration.messageAllocator))          // message allocator handle
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -205,7 +211,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   } // end IF
 
   // ******************* Header Parser ************************
-  headerParser_.initialize (*configuration_in.moduleConfiguration);
+  headerParser_.initialize (*configuration_in.streamConfiguration.moduleConfiguration);
   Net_Module_HeaderParser* headerParser_impl = NULL;
   headerParser_impl =
     dynamic_cast<Net_Module_HeaderParser*> (headerParser_.writer ());
@@ -232,7 +238,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   } // end IF
 
   // ******************* Socket Handler ************************
-  socketHandler_.initialize (*configuration_in.moduleConfiguration);
+  socketHandler_.initialize (*configuration_in.streamConfiguration.moduleConfiguration);
   Net_Module_SocketHandler* socketHandler_impl = NULL;
   socketHandler_impl =
     dynamic_cast<Net_Module_SocketHandler*> (socketHandler_.writer ());
@@ -243,8 +249,8 @@ Net_Stream::initialize (unsigned int sessionID_in,
     return false;
   } // end IF
   if (!socketHandler_impl->initialize (&state_,
-                                       configuration_in.messageAllocator,
-                                       configuration_in.useThreadPerConnection,
+                                       configuration_in.streamConfiguration.messageAllocator,
+                                       configuration_in.streamConfiguration.useThreadPerConnection,
                                        NET_STREAM_DEFAULT_STATISTICS_COLLECTION))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -255,7 +261,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
 
   // *NOTE*: push()ing the module will open() it
   // --> set the argument that is passed along
-  socketHandler_.arg (&const_cast<Net_UserData_t&> (userData_in));
+  socketHandler_.arg (&const_cast<Net_StreamConfiguration_t&> (configuration_in).userData);
   result = inherited::push (&socketHandler_);
   if (result == -1)
   {
@@ -268,7 +274,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   // -------------------------------------------------------------
 
   // set (session) message allocator
-  inherited::allocator_ = configuration_in.messageAllocator;
+  inherited::allocator_ = configuration_in.streamConfiguration.messageAllocator;
 
   // OK: all went well
   inherited::isInitialized_ = true;

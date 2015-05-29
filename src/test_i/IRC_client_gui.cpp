@@ -57,6 +57,7 @@
 #include "IRC_client_gui_common.h"
 #include "IRC_client_gui_defines.h"
 #include "IRC_client_messageallocator.h"
+#include "IRC_client_module_IRChandler.h"
 #include "IRC_client_network.h"
 #include "IRC_client_signalhandler.h"
 
@@ -97,7 +98,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::cout << ACE_TEXT ("-d        : debug")
             << ACE_TEXT (" [")
-            << IRC_CLIENT_DEF_TRACE_ENABLED
+            << (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-l        : log to a file")
@@ -175,7 +176,8 @@ do_processArguments (int argc_in,
   configurationFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
 
-  debug_out             = IRC_CLIENT_DEF_TRACE_ENABLED;
+  debug_out             =
+    (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE);
   logToFile_out         = false;
   reportingInterval_out = IRC_CLIENT_DEF_STATSINTERVAL;
 
@@ -378,10 +380,13 @@ do_initializeSignals (bool useReactor_in,
 
 void
 do_work (unsigned int numDispatchThreads_in,
-         main_cb_data_t& userData_in,
+         IRC_Client_GTK_CBData& userData_in,
          const std::string& UIDefinitionFile_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
+
+  // sanity check(s)
+  ACE_ASSERT (userData_in.configuration);
 
   // step1: initialize event dispatch
   bool serialize_output = false;
@@ -390,11 +395,32 @@ do_work (unsigned int numDispatchThreads_in,
                                               serialize_output))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to init event dispatch, returning\n")));
+                ACE_TEXT ("failed to initialize event dispatch, returning\n")));
     return;
   } // end IF
 
-  // step0b: init connection manager
+  // step2a: initialize IRC handler module
+  IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR ("IRCHandler"),
+                                                   NULL);
+  IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
+  IRCHandler_impl_p =
+    dynamic_cast<IRC_Client_Module_IRCHandler*> (IRC_handler.writer ());
+  if (!IRCHandler_impl_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
+    return;
+  } // end IF
+  IRCHandler_impl_p->initialize (userData_in.configuration->streamConfiguration.streamConfiguration.messageAllocator,
+                                 userData_in.configuration->streamConfiguration.streamConfiguration.bufferSize,
+                                 userData_in.configuration->protocolConfiguration.automaticPong,
+                                 userData_in.configuration->protocolConfiguration.printPingDot);
+  userData_in.configuration->streamConfiguration.streamConfiguration.module =
+    &IRC_handler;
+  userData_in.configuration->streamConfiguration.streamConfiguration.deleteModule =
+    false;
+
+  // step2b: initialize connection manager
   IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (std::numeric_limits<unsigned int>::max ());
   IRC_Client_SessionData session_data;
   IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->set (*userData_in.configuration,
@@ -404,7 +430,7 @@ do_work (unsigned int numDispatchThreads_in,
   // *NOTE* handlers register with the connection manager and will self-destruct
   // on disconnects !
 
-  // step1: start GTK event loop
+  // step3: start GTK event loop
   userData_in.GTKState.initializationHook = idle_initialize_UI_cb;
   userData_in.GTKState.finalizationHook = idle_finalize_UI_cb;
   userData_in.GTKState.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
@@ -1113,21 +1139,22 @@ ACE_TMAIN (int argc_in,
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
 #endif // #ifdef DEBUG_DEBUGGER
 
-  std::string configuration_file = configuration_path;
+  std::string configuration_file       = configuration_path;
   configuration_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
 
-  bool debug                      = IRC_CLIENT_DEF_TRACE_ENABLED;
-  bool log_to_file                = false;
-  unsigned int reporting_interval = IRC_CLIENT_DEF_STATSINTERVAL;
+  bool debug                           =
+    (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE);
+  bool log_to_file                     = false;
+  unsigned int reporting_interval      = IRC_CLIENT_DEF_STATSINTERVAL;
 
-  std::string phonebook_file = configuration_path;
+  std::string phonebook_file           = configuration_path;
   phonebook_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebook_file += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_SERVERS_FILE);
 
-  bool trace_information       = false;
+  bool trace_information               = false;
 
-  std::string UIFile_directory = configuration_path;
+  std::string UIFile_directory         = configuration_path;
   UIFile_directory += ACE_DIRECTORY_SEPARATOR_CHAR_A;
 
   bool print_version_and_exit          = false;
@@ -1290,14 +1317,14 @@ ACE_TMAIN (int argc_in,
   IRC_Client_Configuration configuration;
 //  ACE_OS::memset (&configuration, 0, sizeof (configuration));
 
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.statisticReportingInterval =
+  configuration.streamConfiguration.streamConfiguration.messageAllocator =
+    &message_allocator;
+  configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
    reporting_interval;
-  configuration.protocolConfiguration.streamConfiguration.debugScanner =
-    IRC_CLIENT_DEF_TRACE_SCANNING;
-  configuration.protocolConfiguration.streamConfiguration.debugParser = debug;
+  configuration.streamConfiguration.debugScanner = IRC_CLIENT_DEF_LEX_TRACE;
+  configuration.streamConfiguration.debugParser = debug;
 
-  main_cb_data_t user_data;
+  IRC_Client_GTK_CBData user_data;
   user_data.configuration = &configuration;
   user_data.UIFileDirectory = UIFile_directory;
 //   userData.phoneBook;

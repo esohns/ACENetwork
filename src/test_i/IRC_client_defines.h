@@ -21,6 +21,7 @@
 #ifndef IRC_CLIENT_DEFINES_H
 #define IRC_CLIENT_DEFINES_H
 
+// protocol
 // "\0\0"
 #define YY_END_OF_BUFFER_CHAR                    0
 #define IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE     2
@@ -29,9 +30,9 @@
 #define IRC_CLIENT_IRC_FRAME_BOUNDARY_SIZE       2
 #define IRC_CLIENT_IRC_FRAME_MAXSIZE             512
 
-// seconds
-#define IRC_CLIENT_IRC_MAX_WELCOME_DELAY         3
+#define IRC_CLIENT_IRC_MAX_WELCOME_DELAY         3 // seconds
 
+// stream
 // *NOTE*: according to RFC1459, IRC messages SHALL not exceed 512 bytes.
 // - a size of 512 bytes will allow "crunching" messages into a single buffer
 //   --> while this arguably "wastes" some memory, it allows [easier/more robust]
@@ -57,8 +58,11 @@
 #define IRC_CLIENT_DEF_CRUNCH_MESSAGES           true
 
 // output more debugging information
-#define IRC_CLIENT_DEF_TRACE_SCANNING            false
-#define IRC_CLIENT_DEF_TRACE_PARSING             false
+#define IRC_CLIENT_DEF_LEX_TRACE                 false
+#define IRC_CLIENT_DEF_YACC_TRACE                false
+
+//#define IRC_CLIENT_STREAM_DEF_TRACE_ENABLED       false
+#define IRC_CLIENT_STREAM_DEF_AUTOPONG           true
 
 // // default IRC configuration
 // *NOTE*: bitset: "1100" [2]: +w; [3]: +i (see rfc2812 3.1.3/3.1.5 and rfc1459 4.1.3)
@@ -68,7 +72,7 @@
 #define IRC_CLIENT_DEF_IRC_SERVERNAME            "*"
 
 #define IRC_CLIENT_CNF_DEF_INI_FILE              "IRC_client.ini"
-// ini section headers
+// .ini section headers
 #define IRC_CLIENT_CNF_LOGIN_SECTION_HEADER      "login"
 #define IRC_CLIENT_CNF_CONNECTION_SECTION_HEADER "connections"
 
@@ -100,9 +104,10 @@
 
 // *NOTE*: these conform to RFC1459, but servers may allow use different sizes
 // e.g. NICKLEN option, ...
-#define IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH        9
-#define IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH     200
+#define IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH       9
+#define IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH    200
 
-#define IRC_CLIENT_DEF_TRACE_ENABLED              false
+// UI/output
+#define IRC_CLIENT_DEF_PRINT_PINGDOT             false
 
 #endif

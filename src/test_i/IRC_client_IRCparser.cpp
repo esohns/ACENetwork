@@ -553,48 +553,48 @@ namespace yy {
       {
           case 5:
 
-    { driver->myCurrentMessage->prefix.origin = *(yysemantic_stack_[(3) - (2)].sval);
+    { driver->currentMessage_->prefix.origin = *(yysemantic_stack_[(3) - (2)].sval);
 /*                                                                ACE_DEBUG((LM_DEBUG,
                                                                            ACE_TEXT("set origin: \"%s\"\n"),
-                                                                                                                                             driver->myCurrentMessage->prefix.origin.c_str())); */
+                                                                                                                                             driver->currentMessage_->prefix.origin.c_str())); */
                                                               }
     break;
 
   case 6:
 
-    { driver->myCurrentMessage->prefix.user = *(yysemantic_stack_[(3) - (2)].sval);
+    { driver->currentMessage_->prefix.user = *(yysemantic_stack_[(3) - (2)].sval);
 /*                                                                ACE_DEBUG((LM_DEBUG,
                                                                            ACE_TEXT("set user: \"%s\"\n"),
-                                                                                                                                                      driver->myCurrentMessage->prefix.user.c_str())); */
+                                                                                                                                                      driver->currentMessage_->prefix.user.c_str())); */
                                                               }
     break;
 
   case 7:
 
-    { driver->myCurrentMessage->prefix.host = *(yysemantic_stack_[(3) - (2)].sval);
+    { driver->currentMessage_->prefix.host = *(yysemantic_stack_[(3) - (2)].sval);
 /*                                                                ACE_DEBUG((LM_DEBUG,
                                                                            ACE_TEXT("set host: \"%s\"\n"),
-                                                                           driver.myCurrentMessage->prefix.host.c_str())); */
+                                                                           driver.currentMessage_->prefix.host.c_str())); */
                                                               }
     break;
 
   case 10:
 
-    { ACE_ASSERT(driver->myCurrentMessage->command.string == NULL);
-                                                                ACE_NEW_NORETURN(driver->myCurrentMessage->command.string,
+    { ACE_ASSERT(driver->currentMessage_->command.string == NULL);
+                                                                ACE_NEW_NORETURN(driver->currentMessage_->command.string,
                                                                                  std::string(*(yysemantic_stack_[(1) - (1)].sval)));
-                                                                ACE_ASSERT(driver->myCurrentMessage->command.string);
-                                                                driver->myCurrentMessage->command.discriminator = IRC_Client_IRCMessage::Command::STRING;
+                                                                ACE_ASSERT(driver->currentMessage_->command.string);
+                                                                driver->currentMessage_->command.discriminator = IRC_Client_IRCMessage::Command::STRING;
 /*                                                                ACE_DEBUG((LM_DEBUG,
                                                                              ACE_TEXT("set command: \"%s\"\n"),
-                                                                             driver->myCurrentMessage->command.string->c_str())); */
+                                                                             driver->currentMessage_->command.string->c_str())); */
                                                               }
     break;
 
   case 11:
 
-    { driver->myCurrentMessage->command.numeric = static_cast<IRC_Client_IRCNumeric_t>((yysemantic_stack_[(1) - (1)].ival));
-                                                                driver->myCurrentMessage->command.discriminator = IRC_Client_IRCMessage::Command::NUMERIC;
+    { driver->currentMessage_->command.numeric = static_cast<IRC_Client_IRCNumeric_t>((yysemantic_stack_[(1) - (1)].ival));
+                                                                driver->currentMessage_->command.discriminator = IRC_Client_IRCMessage::Command::NUMERIC;
 /*                                                                ACE_DEBUG((LM_DEBUG,
                                                                              ACE_TEXT("set command (numeric): %d\n"),
                                                                              $1)); */
@@ -603,19 +603,19 @@ namespace yy {
 
   case 14:
 
-    { driver->myCurrentMessage->params.push_front(*(yysemantic_stack_[(2) - (1)].sval));
+    { driver->currentMessage_->params.push_front(*(yysemantic_stack_[(2) - (1)].sval));
 /*                                                                ACE_DEBUG((LM_DEBUG,
                                                                              ACE_TEXT("set param: \"%s\"\n"),
-                                                                             driver->myCurrentMessage->params.front().c_str())); */
+                                                                             driver->currentMessage_->params.front().c_str())); */
                                                               }
     break;
 
   case 16:
 
-    { driver->myCurrentMessage->params.push_front(*(yysemantic_stack_[(1) - (1)].sval));
+    { driver->currentMessage_->params.push_front(*(yysemantic_stack_[(1) - (1)].sval));
 /*                                                                ACE_DEBUG((LM_DEBUG,
                                                                              ACE_TEXT("set final param: \"%s\"\n"),
-                                                                             driver->myCurrentMessage->params.front().c_str())); */
+                                                                             driver->currentMessage_->params.front().c_str())); */
                                                               }
     break;
 

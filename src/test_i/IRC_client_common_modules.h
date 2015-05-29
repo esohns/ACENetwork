@@ -60,8 +60,8 @@ DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                             // task sync
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                  // task synch type
                           Common_TimePolicy_t,           // time policy
                           IRC_Client_Configuration,      // configuration type
-                          IRC_Client_Module_IRCSplitter, // reader type
-                          IRC_Client_Module_IRCStreamer, // writer type
+                          IRC_Client_Module_IRCStreamer, // reader type
+                          IRC_Client_Module_IRCSplitter, // writer type
                           IRC_Client_Module_IRCMarshal); // name
 
 #endif

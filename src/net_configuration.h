@@ -25,7 +25,7 @@
 #include "ace/Netlink_Addr.h"
 
 #include "stream_common.h"
-#include "stream_defines.h"
+//#include "stream_defines.h"
 #include "stream_iallocator.h"
 
 #include "net_defines.h"
@@ -58,7 +58,7 @@ struct Net_SocketConfiguration_t
 struct Net_SocketHandlerConfiguration_t
 {
   inline Net_SocketHandlerConfiguration_t ()
-   : bufferSize (STREAM_BUFFER_SIZE)
+   : bufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , messageAllocator (NULL)
    , socketConfiguration ()
   {};
@@ -71,7 +71,7 @@ struct Net_SocketHandlerConfiguration_t
 struct Net_ProtocolConfiguration_t
 {
   inline Net_ProtocolConfiguration_t ()
-   : bufferSize (STREAM_BUFFER_SIZE)
+   : bufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , peerPingInterval (0)
    , pingAutoAnswer (true)
    , printPongMessages (true)
@@ -93,6 +93,21 @@ struct Net_UserData_t
   void* userData;
 };
 
+struct Net_StreamConfiguration_t
+{
+  inline Net_StreamConfiguration_t ()
+   : protocolConfiguration (NULL)
+   , sessionID (0)
+   , streamConfiguration ()
+   , userData (NULL)
+  {};
+
+  Net_ProtocolConfiguration_t* protocolConfiguration; // protocol configuration
+  unsigned int                 sessionID;             // session ID
+  Stream_Configuration_t       streamConfiguration;   // stream configuration
+  Net_UserData_t*              userData;              // user data
+};
+
 struct Net_Configuration_t
 {
   inline Net_Configuration_t ()
@@ -105,7 +120,7 @@ struct Net_Configuration_t
   // **************************** socket data **********************************
   Net_SocketConfiguration_t   socketConfiguration;
   // **************************** stream data **********************************
-  Stream_Configuration_t      streamConfiguration;
+  Net_StreamConfiguration_t   streamConfiguration;
   Net_UserData_t              streamSessionData;
   // *************************** protocol data *********************************
   Net_ProtocolConfiguration_t protocolConfiguration;
