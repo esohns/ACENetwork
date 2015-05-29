@@ -594,7 +594,7 @@ Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
   // *NOTE*: on error, the addresses are not passed through...
 
   int result = -1;
-  unsigned longe error = 0;
+  unsigned long error = 0;
 
   // success ?
   result = result_in.success ();

@@ -207,6 +207,8 @@ AC_CONFIG_FILES([Makefile
                  scripts/Makefile
                  src/Makefile
                  src/client_server/Makefile
+                 src/test_i/Makefile
                  src/test_u/Makefile])
 
 AC_OUTPUT
+

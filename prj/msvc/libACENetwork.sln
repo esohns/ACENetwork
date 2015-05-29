@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libCommon", "..\..\..\libCo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libCommon_UI", "..\..\..\libCommon\prj\msvc\libCommon_UI.vcxproj", "{06296185-3E70-472E-8B65-6F552AB1E283}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_i_IRC_client", "test_i_IRC_client.vcxproj", "{0B95C0C3-3A85-4C11-B888-E2F369843C1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -57,6 +59,10 @@ Global
 		{06296185-3E70-472E-8B65-6F552AB1E283}.Debug|Win32.Build.0 = Debug|Win32
 		{06296185-3E70-472E-8B65-6F552AB1E283}.Release|Win32.ActiveCfg = Release|Win32
 		{06296185-3E70-472E-8B65-6F552AB1E283}.Release|Win32.Build.0 = Release|Win32
+		{0B95C0C3-3A85-4C11-B888-E2F369843C1D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0B95C0C3-3A85-4C11-B888-E2F369843C1D}.Debug|Win32.Build.0 = Debug|Win32
+		{0B95C0C3-3A85-4C11-B888-E2F369843C1D}.Release|Win32.ActiveCfg = Release|Win32
+		{0B95C0C3-3A85-4C11-B888-E2F369843C1D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -51,9 +51,9 @@
 
 // socket
 #define NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE   ACE_DEFAULT_MAX_SOCKET_BUFSIZ
-#define NET_SOCKET_DEFAULT_LINGER                10 // seconds {0 --> off}
-#define NET_SOCKET_DEFAULT_TCP_NODELAY           true
-#define NET_SOCKET_DEFAULT_TCP_KEEPALIVE         false
+#define NET_SOCKET_DEFAULT_LINGER                true  // SO_LINGER
+#define NET_SOCKET_DEFAULT_TCP_NODELAY           true  // SO_NODELAY
+#define NET_SOCKET_DEFAULT_TCP_KEEPALIVE         false // SO_KEEPALIVE
 
 // connection / handler
 #define NET_CONNECTION_MAXIMUM_NUMBER_OF_OPEN    10

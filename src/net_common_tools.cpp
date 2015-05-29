@@ -640,15 +640,15 @@ Net_Common_Tools::getIPAddress (const std::string& interfaceIdentifier_in,
   return true;
 }
 
-//bool
-//Net_Common_Tools::getHostname (std::string& hostname_out)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getHostname"));
-//
-//  hostname_out = Common_Tools::getHostName ();
-//
-//  return true;
-//}
+bool
+Net_Common_Tools::getHostname (std::string& hostname_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getHostname"));
+
+  hostname_out = Common_Tools::getHostName ();
+
+  return !hostname_out.empty ();
+}
 
 bool
 Net_Common_Tools::setSocketBuffer (ACE_HANDLE handle_in,
@@ -877,19 +877,44 @@ Net_Common_Tools::setKeepAlive (ACE_HANDLE handle_in,
 
 bool
 Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
-                             unsigned int seconds_in)
+                             bool on_in,
+                             int seconds_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setLinger"));
 
-  linger optval;
-  optval.l_onoff = ((seconds_in > 0) ? 1 : 0);
-  optval.l_linger = static_cast<int> (seconds_in);
+  int result = -1;
+  struct linger optval;
+  ACE_OS::memset (&optval, 0, sizeof (optval));
   int optlen = sizeof (optval);
-  if (ACE_OS::setsockopt (handle_in,
-                          SOL_SOCKET,
-                          SO_LINGER,
-                          reinterpret_cast<const char*> (&optval),
-                          optlen))
+  result = ACE_OS::getsockopt (handle_in,
+                               SOL_SOCKET,
+                               SO_LINGER,
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result == -1)
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%@, SO_LINGER): \"%m\", aborting\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, SO_LINGER): \"%m\", aborting\n"),
+                handle_in));
+#endif
+    return false;
+  } // end IF
+
+  optval.l_onoff = (on_in ? 1 : 0);
+  if (seconds_in != -1)
+    optval.l_linger = seconds_in;
+  result = ACE_OS::setsockopt (handle_in,
+                               SOL_SOCKET,
+                               SO_LINGER,
+                               reinterpret_cast<const char*> (&optval),
+                               optlen);
+  if (result == -1)
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -901,41 +926,15 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
                 ACE_TEXT ("failed to ACE_OS::setsockopt(%d, SO_LINGER): \"%m\", aborting\n"),
                 handle_in));
 #endif
-
     return false;
   } // end IF
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("setsockopt(%d, SO_LINGER): %s (%d second(s))\n"),
+//              handle_in,
+//              (optval.l_onoff ? ACE_TEXT ("on") : ACE_TEXT ("off")),
+//              optval.l_linger));
 
-  // validate result
-  ACE_OS::memset(&optval, 0, sizeof(optval));
-  if (ACE_OS::getsockopt(handle_in,
-                         SOL_SOCKET,
-                         SO_LINGER,
-                         reinterpret_cast<char*>(&optval),
-                         &optlen))
-  {
-    // *PORTABILITY*
-#if defined(ACE_WIN32) || defined(ACE_WIN64)
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("failed to ACE_OS::getsockopt(%@, SO_LINGER): \"%m\", aborting\n"),
-               handle_in));
-#else
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("failed to ACE_OS::getsockopt(%d, SO_LINGER): \"%m\", aborting\n"),
-               handle_in));
-#endif
-
-    return false;
-  } // end IF
-
-  //ACE_DEBUG((LM_DEBUG,
-  //           ACE_TEXT("setsockopt(%d, SO_LINGER): %s\n"),
-  //           handle_in,
-  //           ((seconds_in > 0) ? ((optval.l_onoff == 1) ? "on" : "off")
-  //                             : ((optval.l_onoff == 0) ? "off" : "on"))));
-
-  return ((seconds_in > 0) ? ((optval.l_onoff == 1) &&
-                              (optval.l_linger == static_cast<int>(seconds_in)))
-                           : (optval.l_onoff == 0));
+  return (result == 0);
 }
 
 Net_IInetConnectionManager_t*

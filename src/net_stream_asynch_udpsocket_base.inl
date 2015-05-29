@@ -77,7 +77,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   // step1: remove enqueued module (if any)
   if (inherited4::configuration_.streamConfiguration.module)
   {
-    Common_Module_t* module_p =
+    Stream_Module_t* module_p =
       stream_.find (inherited4::configuration_.streamConfiguration.module->name ());
     if (module_p)
     {
@@ -186,7 +186,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
                   ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
       goto close;
     } // end IF
-    Common_Module_t* clone_p = NULL;
+    Stream_Module_t* clone_p = NULL;
     try
     {
       clone_p = imodule_p->clone ();
@@ -412,13 +412,13 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
   {
     Stream_Iterator_t iterator (stream_);
-    const Common_Module_t* module_p = NULL;
+    const Stream_Module_t* module_p = NULL;
     result = iterator.next (module_p);
     if (result == 1)
     {
       ACE_ASSERT (module_p);
-      Common_Task_t* task_p =
-          const_cast<Common_Module_t*> (module_p)->writer ();
+      Stream_Task_t* task_p =
+          const_cast<Stream_Module_t*> (module_p)->writer ();
       ACE_ASSERT (task_p);
       result = task_p->msg_queue ()->flush ();
       if (result == -1)
@@ -440,7 +440,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   // step5: release a reference
   // *IMPORTANT NOTE*: may 'delete this'
   //inherited4::decrease ();
-  decrease ();
+  this->decrease ();
 
   return result;
 }
@@ -826,7 +826,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   // step1: remove enqueued module (if any)
   if (inherited4::configuration_.streamConfiguration.module)
   {
-    Common_Module_t* module_p =
+    Stream_Module_t* module_p =
       stream_.find (inherited4::configuration_.streamConfiguration.module->name ());
     if (module_p)
     {
@@ -934,7 +934,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
                   ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
       goto close;
     } // end IF
-    Common_Module_t* clone_p = NULL;
+    Stream_Module_t* clone_p = NULL;
     try
     {
       clone_p = imodule_p->clone ();
@@ -1153,12 +1153,13 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
   {
     Stream_Iterator_t iterator (stream_);
-    const Common_Module_t* module_p = NULL;
+    const Stream_Module_t* module_p = NULL;
     result = iterator.next (module_p);
     if (result == 1)
     {
       ACE_ASSERT (module_p);
-      Common_Task_t* task_p = const_cast<Common_Module_t*> (module_p)->writer ();
+      Stream_Task_t* task_p =
+          const_cast<Stream_Module_t*> (module_p)->writer ();
       ACE_ASSERT (task_p);
       if (task_p->msg_queue ()->flush () == -1)
         ACE_DEBUG ((LM_ERROR,
@@ -1179,7 +1180,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   // step5: release a reference
   // *IMPORTANT NOTE*: may 'delete this'
   //inherited4::decrease ();
-  decrease ();
+  this->decrease ();
 
   return result;
 }

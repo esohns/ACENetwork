@@ -26,7 +26,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch.h"
 
-#include "common.h"
+//#include "common.h"
 #include "common_inotify.h"
 #include "common_isubscribe.h"
 #include "common_iclone.h"
@@ -46,7 +46,7 @@ class Net_Module_MessageHandler_T
                                  MessageType>
  , public Common_ISubscribe_T<Common_INotify_T<ConfigurationType,
                                                MessageType> >
- , public Common_IClone_T<Common_Module_t>
+ , public Common_IClone_T<Stream_Module_t>
 {
  public:
   typedef Common_INotify_T<ConfigurationType,

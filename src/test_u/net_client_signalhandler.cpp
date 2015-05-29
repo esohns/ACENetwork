@@ -32,7 +32,7 @@
 Net_Client_SignalHandler::Net_Client_SignalHandler (bool useReactor_in)
  : inherited (this,          // event handler handle
               useReactor_in) // use reactor ?
- , configuration_ ()
+ , configuration_ (NULL)
  , useReactor_ (useReactor_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::Net_Client_SignalHandler"));
@@ -50,7 +50,8 @@ Net_Client_SignalHandler::initialize (const Net_Client_SignalHandlerConfiguratio
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::initialize"));
 
-  configuration_ = configuration_in;
+  configuration_ =
+      &const_cast<Net_Client_SignalHandlerConfiguration_t&> (configuration_in);
 
   return true;
 }
@@ -61,6 +62,9 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::handleSignal"));
 
   int result = -1;
+
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
 
   bool stop_event_dispatching = false;
   bool connect = false;
@@ -125,12 +129,13 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
   } // end IF
 
   // ...connect ?
-  if (connect && configuration_.connector)
+  if (connect && configuration_->connector)
   {
     bool result_2 = false;
     try
     {
-      result_2 = configuration_.connector->connect (configuration_.peerAddress);
+      result_2 =
+          configuration_->connector->connect (configuration_->peerAddress);
     }
     catch (...)
     {
@@ -143,8 +148,8 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     {
       ACE_TCHAR buffer[BUFSIZ];
       ACE_OS::memset(buffer, 0, sizeof (buffer));
-      result = configuration_.peerAddress.addr_to_string (buffer,
-                                                          sizeof (buffer));
+      result = configuration_->peerAddress.addr_to_string (buffer,
+                                                           sizeof (buffer));
       // *PORTABILITY*: tracing in a signal handler context is not portable
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
@@ -167,31 +172,31 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     // step1: stop all open connections
 
     // stop action timer (might spawn new connections otherwise)
-    if (configuration_.actionTimerID >= 0)
+    if (configuration_->actionTimerId >= 0)
     {
       const void* act_p = NULL;
       result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (configuration_.actionTimerID,
-                                                              &act_p);
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (configuration_->actionTimerId,
+                                                                    &act_p);
       if (result <= 0)
       {
         // *PORTABILITY*: tracing in a signal handler context is not portable
         ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", aborting\n"),
-                    configuration_.actionTimerID));
+                    ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", aborting\n"),
+                    configuration_->actionTimerId));
 
         // clean up
-        configuration_.actionTimerID = -1;
+        configuration_->actionTimerId = -1;
 
         return false;
       } // end IF
-      configuration_.actionTimerID = -1;
+      configuration_->actionTimerId = -1;
     } // end IF
-    if (configuration_.connector)
+    if (configuration_->connector)
     {
       try
       {
-        configuration_.connector->abort ();
+        configuration_->connector->abort ();
       }
       catch (...)
       {

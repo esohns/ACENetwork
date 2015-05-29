@@ -27,7 +27,7 @@
 
 struct Net_Client_SignalHandlerConfiguration_t
 {
-  long                     actionTimerID;
+  long                     actionTimerId;
   Net_Client_IConnector_t* connector;
   ACE_INET_Addr            peerAddress;
 };

@@ -5,6 +5,7 @@ AM_CPPFLAGS = \
   -I$(builddir)/../..
 
 DEFS = \
+  -DHAVE_CONFIG_H \
   -DBASEDIR=\"$(datadir)/@PACKAGE_NAME@\"
 if DEBUG
 DEFS += \

@@ -1,6 +1,6 @@
 #!/bin/sh
-# author:      Erik Sohns <erik.sohns@web.de>
-# this script gathers the RPG libraries in one place for in-source-tree
+# author:      Erik Sohns <eriksohns@123mail.org>
+# this script gathers the dependent libraries in one place for in-source-tree
 # debugging
 # *NOTE*: it is neither portable nor particularly stable !
 # parameters:   - $1 [BUILD] {"debug" || "debug_tracing" || "release" || ...}

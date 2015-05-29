@@ -80,7 +80,7 @@ Net_StreamUDPSocketBase_T<AddressType,
   // clean up
   if (inherited3::configuration_.streamConfiguration.module)
   {
-    Common_Module_t* module_p =
+    Stream_Module_t* module_p =
       stream_.find (inherited3::configuration_.streamConfiguration.module->name ());
     if (module_p)
     {
@@ -172,7 +172,7 @@ Net_StreamUDPSocketBase_T<AddressType,
                   ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
       return -1;
     } // end IF
-    Common_Module_t* clone_p = NULL;
+    Stream_Module_t* clone_p = NULL;
     try
     {
       clone_p = imodule_p->clone ();
@@ -767,7 +767,7 @@ Net_StreamUDPSocketBase_T<AddressType,
   // step5: release a reference
   // *IMPORTANT NOTE*: may 'delete this'
   //inherited3::decrease ();
-  decrease ();
+  this->decrease ();
 
   return result;
 }
@@ -1126,7 +1126,7 @@ Net_StreamUDPSocketBase_T<AddressType,
   // clean up
   if (inherited3::configuration_.streamConfiguration.module)
   {
-    Common_Module_t* module_p =
+    Stream_Module_t* module_p =
       stream_.find (inherited3::configuration_.streamConfiguration.module->name ());
     if (module_p)
     {
@@ -1220,7 +1220,7 @@ Net_StreamUDPSocketBase_T<AddressType,
                   ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
       return -1;
     } // end IF
-    Common_Module_t* clone_p = NULL;
+    Stream_Module_t* clone_p = NULL;
     try
     {
       clone_p = imodule_p->clone ();
@@ -1800,7 +1800,7 @@ Net_StreamUDPSocketBase_T<AddressType,
   // step5: release a reference
   // *IMPORTANT NOTE*: may 'delete this'
   //inherited3::decrease ();
-  decrease ();
+  this->decrease ();
 
   return result;
 }

@@ -137,13 +137,14 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
 //  } // end IF
   ACE_ASSERT (arg_in);
 
-  Net_SocketConfiguration_t* configuration_p =
+  Net_SocketConfiguration_t* socket_configuration_p =
       reinterpret_cast<Net_SocketConfiguration_t*> (arg_in);
+  ACE_ASSERT (socket_configuration_p);
 
   // step1: open socket
-  ACE_INET_Addr local_SAP (configuration_p->peerAddress.get_port_number (),
-                           (configuration_p->useLoopbackDevice ? INADDR_LOOPBACK
-                                                               : INADDR_ANY));
+  ACE_INET_Addr local_SAP (socket_configuration_p->peerAddress.get_port_number (),
+                           (socket_configuration_p->useLoopbackDevice ? INADDR_LOOPBACK
+                                                                      : INADDR_ANY));
   result = inherited2::peer_.open (local_SAP,                // local SAP
                                    ACE_PROTOCOL_FAMILY_INET, // protocol family
                                    0,                        // protocol
@@ -165,14 +166,14 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
   } // end IF
 
   // step2: tweak socket
-  if (configuration_p->bufferSize)
+  if (socket_configuration_p->bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (SVC_HANDLER_T::get_handle (),
                                             SO_RCVBUF,
-                                            configuration_p->bufferSize))
+                                            socket_configuration_p->bufferSize))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
-                  configuration_p->bufferSize,
+                  socket_configuration_p->bufferSize,
                   SVC_HANDLER_T::get_handle ()));
       return -1;
     } // end IF
@@ -199,12 +200,13 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
 // *CHECK*
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
   if (!Net_Common_Tools::setLinger (SVC_HANDLER_T::get_handle (),
-                                    NET_SOCKET_DEFAULT_LINGER))
+                                    socket_configuration_p->linger,
+                                    -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s) (handle was: %d), aborting\n"),
-                ((NET_SOCKET_DEFAULT_LINGER > 0) ? ACE_TEXT ("true")
-                                                 : ACE_TEXT ("false")),
+                ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
+                (socket_configuration_p->linger ? ACE_TEXT ("true")
+                                                : ACE_TEXT ("false")),
                 SVC_HANDLER_T::get_handle ()));
     return -1;
   } // end IF

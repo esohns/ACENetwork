@@ -21,7 +21,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
-#include "common_timer_manager.h"
+#include "common_timer_manager_common.h"
 
 #include "net_macros.h"
 
@@ -59,13 +59,13 @@ Net_ConnectionBase_T<AddressType,
     ACE_ASSERT (statisticCollectHandlerID_ == -1);
     ACE_Event_Handler* handler_p = &statisticCollectHandler_;
     statisticCollectHandlerID_ =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                  // event handler
-                                                            NULL,                       // argument
-                                                            COMMON_TIME_NOW + interval, // first wakeup time
-                                                            interval);                  // interval
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
+                                                                  NULL,                       // argument
+                                                                  COMMON_TIME_NOW + interval, // first wakeup time
+                                                                  interval);                  // interval
     if (statisticCollectHandlerID_ == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Timer_Manager::schedule(), continuing\n")));
+                  ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(), continuing\n")));
 //    else
 //      ACE_DEBUG ((LM_DEBUG,
 //                  ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
@@ -138,8 +138,8 @@ Net_ConnectionBase_T<AddressType,
   {
     const void* act_p = NULL;
     result =
-        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statisticCollectHandlerID_,
-                                                            &act_p);
+        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (statisticCollectHandlerID_,
+                                                                  &act_p);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
@@ -285,12 +285,12 @@ Net_ConnectionBase_T<AddressType,
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("deregistered connection [0x%@/%u] (total: %u)\n"),
+                ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
                 this_p, reinterpret_cast<unsigned int> (handle),
                 num_connections));
 #else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("deregistered connection [0x%@/%d] (total: %d)\n"),
+                ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
                 this_p, handle,
                 num_connections));
 #endif

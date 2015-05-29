@@ -356,7 +356,7 @@ Net_SocketConnectionBase_T<AddressType,
     // *NOTE*: more likely, this happened because the (select) reactor is out of
     //         "free" (read) slots
     int error = ACE_OS::last_error ();
-    //if (error != 12)
+    if (error);
 
     // *NOTE*: perhaps max# connections has been reached
     //ACE_DEBUG ((LM_ERROR,

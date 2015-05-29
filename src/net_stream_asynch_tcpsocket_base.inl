@@ -73,7 +73,7 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   // step1: remove enqueued module (if any)
   if (inherited3::configuration_.streamConfiguration.module)
   {
-    Common_Module_t* module_p =
+    Stream_Module_t* module_p =
       stream_.find (inherited3::configuration_.streamConfiguration.module->name ());
     if (module_p)
     {
@@ -111,7 +111,6 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::open"));
 
-  int result = -1;
   unsigned int session_id = 0;
 
   // step1: tweak socket, initialize I/O, ...
@@ -145,7 +144,7 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
                   ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
       goto close;
     } // end IF
-    Common_Module_t* clone_p = NULL;
+    Stream_Module_t* clone_p = NULL;
     try
     {
       clone_p = imodule_p->clone ();
@@ -198,14 +197,18 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   // step3: start reading (need to pass any data ?)
   if (messageBlock_in.length () == 0)
   {
-    bool result_2 = inherited::initiate_read_stream ();
-    if (!result_2)
+    bool result = inherited::initiate_read_stream ();
+    if (!result)
     {
       int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       if ((error != ENXIO)               && // happens on Win32
           (error != EFAULT)              && // *TODO*: happens on Win32
           (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
           (error != ERROR_NETNAME_DELETED)) // happens on Win32
+#else
+      if (error)
+#endif
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_AsynchTCPSocketHandler::initiate_read_stream(): \"%m\", aborting\n")));
       goto close;
@@ -267,7 +270,8 @@ close:
   close ();
 
   // *NOTE*: should 'delete this'
-  inherited3::decrease ();
+//  inherited3::decrease ();
+  this->decrease ();
 }
 
 template <typename AddressType,
@@ -377,13 +381,13 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
   {
     Stream_Iterator_t iterator (stream_);
-    const Common_Module_t* module_p = NULL;
+    const Stream_Module_t* module_p = NULL;
     result = iterator.next (module_p);
     if (result == 1)
     {
       ACE_ASSERT (module_p);
-      Common_Task_t* task_p =
-          const_cast<Common_Module_t*> (module_p)->writer ();
+      Stream_Task_t* task_p =
+          const_cast<Stream_Module_t*> (module_p)->writer ();
       ACE_ASSERT (task_p);
       result = task_p->flush (ACE_Task_Flags::ACE_FLUSHALL);
       if (result == -1)
@@ -674,17 +678,20 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   {
     // connection closed/reset (by peer) ? --> not an error
     error = result_in.error ();
-    if ((error != ECONNRESET)              &&
-        (error != EPIPE)                   &&
-        (error != EBADF)                   &&  // local close(), happens on Linux
-        (error != ERROR_NETNAME_DELETED)   &&  // happens on Win32
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if ((error != ERROR_NETNAME_DELETED)   &&  // happens on Win32
         (error != ERROR_OPERATION_ABORTED) &&  // local close(), happens in Win32
         (error != ERROR_CONNECTION_ABORTED))   // local close(), happens on Win32
+#else
+    if ((error != ECONNRESET) &&
+        (error != EPIPE)      &&
+        (error != EBADF)) // local close(), happens on Linux
+#endif
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
+                  ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
                   result_in.handle (),
-                  //error, ACE_TEXT (ACE_OS::strerror (error))));
-                  error, ACE_TEXT (ACE::sock_error (error))));
+                  //ACE_TEXT (ACE_OS::strerror (error))));
+                  ACE_TEXT (ACE::sock_error (error))));
   } // end IF
 
   switch (result_in.bytes_transferred ())
@@ -693,16 +700,19 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
     {
       // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();
-      if ((error != ECONNRESET)            &&
-          (error != EPIPE)                 &&
-          (error != EBADF)                 &&  // local close(), happens on Linux
-          (error != ERROR_NETNAME_DELETED) &&  // happens on Win32
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if ((error != ERROR_NETNAME_DELETED) &&  // happens on Win32
           (error != ERROR_CONNECTION_ABORTED)) // local close(), happens on Win32
+#else
+      if ((error != ECONNRESET) &&
+          (error != EPIPE)      &&
+          (error != EBADF)) // local close(), happens on Linux
+#endif
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
+                    ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
                     result_in.handle (),
-                    //error, ACE_TEXT (ACE_OS::strerror (error))));
-                    error, ACE_TEXT (ACE::sock_error (error))));
+                    //ACE_TEXT (ACE_OS::strerror (error))));
+                    ACE_TEXT (ACE::sock_error (error))));
 
       break;
     }
@@ -736,11 +746,15 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
       if (!result_2)
       {
         int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         if ((error != ENXIO)               && // happens on Win32
             (error != EFAULT)              && // *TODO*: happens on Win32
             (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
             (error != ERROR_NETNAME_DELETED)) // happens on Win32
-            ACE_DEBUG ((LM_ERROR,
+#else
+        if (error)
+#endif
+          ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to Net_AsynchTCPSocketHandler::initiate_read_stream(): \"%m\", aborting\n")));
         goto close;
       } // end IF

@@ -77,7 +77,7 @@ Net_StreamTCPSocketBase_T<AddressType,
 
   if (inherited2::configuration_.streamConfiguration.module)
   {
-    Common_Module_t* module_p =
+    Stream_Module_t* module_p =
       stream_.find (inherited2::configuration_.streamConfiguration.module->name ());
     if (module_p)
     {
@@ -165,7 +165,7 @@ Net_StreamTCPSocketBase_T<AddressType,
                   ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
       return -1;
     } // end IF
-    Common_Module_t* clone_p = NULL;
+    Stream_Module_t* clone_p = NULL;
     try
     {
       clone_p = imodule_p->clone ();
@@ -217,7 +217,19 @@ Net_StreamTCPSocketBase_T<AddressType,
     return -1;
   } // end IF
 
-  // step2: tweak socket, register I/O handle with the reactor, ...
+  // step2: register with the connection manager (if any)
+  // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
+  //                   a race condition might occur when using multi-threaded
+  //                   proactors/reactors
+  if (!inherited2::registerc ())
+  {
+    // *NOTE*: perhaps max# connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    return -1;
+  } // end IF
+
+  // step3: tweak socket, register I/O handle with the reactor, ...
   // *NOTE*: as soon as this returns, data starts arriving at handle_input()
   int result = -1;
   result = inherited::open (&inherited2::configuration_.socketConfiguration);
@@ -230,18 +242,10 @@ Net_StreamTCPSocketBase_T<AddressType,
     // *NOTE*: more likely, this happened because the (select) reactor is out of
     //         "free" (read) slots
     int error = ACE_OS::last_error ();
-    //if (error != ENOMEM)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
-    return -1;
-  } // end IF
+    if (error);
 
-  // step3: register with the connection manager (if any)
-  if (!inherited2::registerc ())
-  {
-    // *NOTE*: perhaps max# connections has been reached
-    //ACE_DEBUG ((LM_ERROR,
-    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
     return -1;
   } // end IF
 
@@ -663,6 +667,8 @@ Net_StreamTCPSocketBase_T<AddressType,
   switch (mask_in)
   {
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed (receive failed)
+//    case ACE_Event_Handler::ACCEPT_MASK:
+    case ACE_Event_Handler::WRITE_MASK:      // --> socket has been closed (send failed) (DevPoll)
     case ACE_Event_Handler::EXCEPT_MASK:     // --> socket has been closed (send failed)
     case ACE_Event_Handler::ALL_EVENTS_MASK: // --> connect failed (e.g. connection refused) /
                                              //     accept failed (e.g. too many connections) /

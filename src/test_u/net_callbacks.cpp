@@ -1075,6 +1075,7 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
 
   // sanity check(s)
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->signalHandlerConfiguration);
   ACE_ASSERT (data_p->timeoutHandler);
 
   //Common_UI_GladeXMLsIterator_t iterator =
@@ -1086,7 +1087,7 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
 
   // schedule action interval timer ?
-  if (data_p->timerId == -1)
+  if (data_p->signalHandlerConfiguration->actionTimerId == -1)
   {
     ACE_Event_Handler* handler_p = data_p->timeoutHandler;
     ACE_Time_Value interval = ACE_Time_Value::max_time;
@@ -1110,16 +1111,15 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown action mode (was: %d), aborting\n"),
                     data_p->timeoutHandler->mode ()));
-
         return FALSE;
       }
     } // end SWITCH
-    data_p->timerId =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                  // event handler
-                                                            NULL,                       // ACT
-                                                            COMMON_TIME_NOW + interval, // first wakeup time
-                                                            interval);                  // interval
-    if (data_p->timerId == -1)
+    data_p->signalHandlerConfiguration->actionTimerId =
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
+                                                                  NULL,                       // ACT
+                                                                  COMMON_TIME_NOW + interval, // first wakeup time
+                                                                  interval);                  // interval
+    if (data_p->signalHandlerConfiguration->actionTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", aborting\n")));
@@ -1130,15 +1130,15 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   {
     const void* act_p = NULL;
     result =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (data_p->timerId,
-                                                          &act_p);
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (data_p->signalHandlerConfiguration->actionTimerId,
+                                                                &act_p);
     if (result <= 0)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                  data_p->timerId));
+                  ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", continuing\n"),
+                  data_p->signalHandlerConfiguration->actionTimerId));
 
     // clean up
-    data_p->timerId = -1;
+    data_p->signalHandlerConfiguration->actionTimerId = -1;
   } // end ELSE
 
   // toggle button image/label
@@ -1173,13 +1173,13 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->timeoutHandler);
 
-  //Common_UI_GladeXMLsIterator_t iterator =
-  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
-  Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
-  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+//  //Common_UI_GladeXMLsIterator_t iterator =
+//  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+//  Common_UI_GTKBuildersIterator_t iterator =
+//    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+//  // sanity check(s)
+//  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
+//  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
 
   // step0: activated ?
   GtkToggleButton* toggle_button_p = GTK_TOGGLE_BUTTON (widget_in);

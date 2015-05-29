@@ -76,10 +76,10 @@ Net_Stream::initialize (unsigned int sessionID_in,
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::initialize"));
 
   // sanity check(s)
-  ACE_ASSERT (!isInitialized_);
+  ACE_ASSERT (!inherited::isInitialized_);
 
   // things to be done here:
-  // [- init base class]
+  // [- initialize base class]
   // ------------------------------------
   // - initialize notification strategy (if any)
   // ------------------------------------
@@ -179,7 +179,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
   Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl = NULL;
   runtimeStatistic_impl =
-      dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
+    dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
   if (!runtimeStatistic_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -208,7 +208,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   headerParser_.initialize (*configuration_in.moduleConfiguration);
   Net_Module_HeaderParser* headerParser_impl = NULL;
   headerParser_impl =
-      dynamic_cast<Net_Module_HeaderParser*> (headerParser_.writer ());
+    dynamic_cast<Net_Module_HeaderParser*> (headerParser_.writer ());
   if (!headerParser_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -235,7 +235,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
   socketHandler_.initialize (*configuration_in.moduleConfiguration);
   Net_Module_SocketHandler* socketHandler_impl = NULL;
   socketHandler_impl =
-      dynamic_cast<Net_Module_SocketHandler*> (socketHandler_.writer ());
+    dynamic_cast<Net_Module_SocketHandler*> (socketHandler_.writer ());
   if (!socketHandler_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -272,7 +272,7 @@ Net_Stream::initialize (unsigned int sessionID_in,
 
   // OK: all went well
   inherited::isInitialized_ = true;
-//   inherited::dump_state ();
+  //inherited::dump_state ();
 
   return true;
 }
@@ -338,12 +338,12 @@ Net_Stream::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::report"));
 
-//   Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl = NULL;
-//   runtimeStatistic_impl = dynamic_cast<Net_Module_Statistic_WriterTask_t*> (//runtimeStatistic_.writer ());
+//   Net_Module_Statistic_ReaderTask_t* runtimeStatistic_impl = NULL;
+//   runtimeStatistic_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());
 //   if (!runtimeStatistic_impl)
 //   {
 //     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_t> failed, returning\n")));
+//                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_ReaderTask_t> failed, returning\n")));
 //
 //     return;
 //   } // end IF

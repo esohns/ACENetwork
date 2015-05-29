@@ -47,4 +47,7 @@
 #define NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL          10000 // ms [0 --> OFF]
 //#define NET_SERVER_DEFAULT_TCP_KEEPALIVE              0  // seconds [0 --> no timeout]
 
+// *** socket ***
+#define NET_SERVER_SOCKET_DEFAULT_LINGER                 false  // SO_LINGER
+
 #endif

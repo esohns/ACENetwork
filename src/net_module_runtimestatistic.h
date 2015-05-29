@@ -75,7 +75,7 @@ class Net_Module_Statistic_ReaderTask_T
                                             SessionMessageType,
                                             ProtocolMessageType,
                                             ProtocolCommandType,
-                                            StatisticContainerType> Net_Module_Statistic_WriterTask_t;
+                                            StatisticContainerType> WRITER_TASK_TYPE;
   typedef ProtocolMessageType Net_MessageType_t;
   typedef ProtocolCommandType Net_CommandType_t;
 
@@ -146,7 +146,7 @@ class Net_Module_Statistic_WriterTask_T
 
   // helper method(s)
   void final_report () const;
-  void fini_timers (bool = true); // cancel both timers ? (false --> cancel only myLocalReportingHandlerID)
+  void fini_timers (bool = true); // cancel both timers ? (false --> cancel only localReportingHandlerID_)
 
   bool                              isInitialized_;
 

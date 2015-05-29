@@ -52,8 +52,10 @@ class Net_Export Net_Common_Tools
                           bool);      // TCP_NODELAY ?
   static bool setKeepAlive (ACE_HANDLE, // socket handle
                             bool);      // SO_KEEPALIVE ?
-  static bool setLinger (ACE_HANDLE,    // socket handle
-                         unsigned int); // seconds {0 --> off}
+  static bool setLinger (ACE_HANDLE,  // socket handle
+                         bool,        // on ? : off
+                         int = -1);  // seconds {0  --> send RST on close,
+                                     //          -1 --> reuse current value}
 
   static Net_IInetConnectionManager_t* getConnectionManager ();
 

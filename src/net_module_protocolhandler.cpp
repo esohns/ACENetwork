@@ -23,8 +23,8 @@
 
 #include <iostream>
 
-#include "common.h"
-#include "common_timer_manager.h"
+//#include "common.h"
+#include "common_timer_manager_common.h"
 
 #include "stream_iallocator.h"
 
@@ -59,8 +59,9 @@ Net_Module_ProtocolHandler::~Net_Module_ProtocolHandler ()
   if (pingTimerID_ != -1)
   {
     const void* act_p = NULL;
-    result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (pingTimerID_,
-                                                                 &act_p);
+    result =
+        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (pingTimerID_,
+                                                                  &act_p);
     if (result <= 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("session %u: failed to cancel \"ping\" timer (ID: %d): \"%m\", continuing\n"),
@@ -93,8 +94,9 @@ Net_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
     if (pingTimerID_ != -1)
     {
       const void* act_p = NULL;
-      result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (pingTimerID_,
-                                                                   &act_p);
+      result =
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (pingTimerID_,
+                                                                    &act_p);
       if (result <= 0)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel \"ping\" timer (ID: %d): \"%m\", continuing\n"),
@@ -243,10 +245,10 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
         ACE_ASSERT (pingTimerID_ == -1);
         ACE_Event_Handler* handler_p = &pingHandler_;
         pingTimerID_ =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                  // event handler
-                                                                NULL,                       // ACT
-                                                                COMMON_TIME_NOW + interval, // first wakeup time
-                                                                interval);                  // interval
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
+                                                                      NULL,                       // ACT
+                                                                      COMMON_TIME_NOW + interval, // first wakeup time
+                                                                      interval);                  // interval
         if (pingTimerID_ == -1)
         {
            ACE_DEBUG ((LM_ERROR,
@@ -269,8 +271,8 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
       {
         const void* act_p = NULL;
         result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (pingTimerID_,
-                                                              &act_p);
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (pingTimerID_,
+                                                                    &act_p);
         if (result <= 0)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("session %u: failed to cancel \"ping\" timer (id: %d): \"%m\", continuing\n"),

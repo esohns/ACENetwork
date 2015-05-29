@@ -31,6 +31,7 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
 #endif
+#include "ace/Log_Msg.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -41,7 +42,7 @@
 #include "ace/Signal.h"
 #include "ace/Version.h"
 
-#ifdef RPG_ENABLE_VALGRIND_SUPPORT
+#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
 #include "valgrind/valgrind.h"
 #endif
 
@@ -65,9 +66,9 @@
 #include "net_server_common_tools.h"
 #include "net_server_listener_common.h"
 
-//#ifdef HAVE_CONFIG_H
-//#include "libacenetwork_config.h"
-//#endif
+#ifdef HAVE_CONFIG_H
+#include "libacenetwork_config.h"
+#endif
 
 #include "net_callbacks.h"
 #include "net_common.h"
@@ -507,6 +508,8 @@ do_work (unsigned int maxNumConnections_in,
   // ************ socket / stream configuration data ************
   configuration.socketConfiguration.bufferSize =
     NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
+  configuration.socketConfiguration.linger =
+      NET_SERVER_SOCKET_DEFAULT_LINGER;
 
   configuration.streamConfiguration.bufferSize = STREAM_BUFFER_SIZE;
   configuration.streamConfiguration.deleteModule = false;
@@ -540,6 +543,12 @@ do_work (unsigned int maxNumConnections_in,
   } // end IF
 
   // step1: initialize regular (global) statistics reporting
+  Common_Timer_Manager_t* timer_manager_p =
+      COMMON_TIMERMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (timer_manager_p);
+  Common_TimerConfiguration_t timer_configuration;
+  timer_manager_p->initialize (timer_configuration);
+  timer_manager_p->start ();
   Stream_StatisticHandler_Reactor_t statistics_handler (ACTION_REPORT,
                                                         NET_CONNECTIONMANAGER_SINGLETON::instance (),
                                                         false);
@@ -550,17 +559,17 @@ do_work (unsigned int maxNumConnections_in,
     ACE_Time_Value interval (statisticsReportingInterval_in,
                              0);
     timer_id =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                  // event handler
-                                                            NULL,                       // ACT
-                                                            COMMON_TIME_NOW + interval, // first wakeup time
-                                                            interval);                  // interval
+      timer_manager_p->schedule_timer (handler_p,                  // event handler
+                                       NULL,                       // ACT
+                                       COMMON_TIME_NOW + interval, // first wakeup time
+                                       interval);                  // interval
     if (timer_id == -1)
     {
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
 
       // clean up
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+      timer_manager_p->stop ();
 
       return;
     } // end IF
@@ -581,7 +590,6 @@ do_work (unsigned int maxNumConnections_in,
       NET_CONNECTIONMANAGER_SINGLETON::instance ();
   signal_handler_configuration.statisticReportingTimerID = timer_id;
   signalHandler_in.initialize (signal_handler_configuration);
-  const void* act_p = NULL;
   if (!Common_Tools::initializeSignals (signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -590,16 +598,8 @@ do_work (unsigned int maxNumConnections_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
 
-    if (timer_id != -1)
-    {
-      result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timer_id,
-                                                                   &act_p);
-      if (result <= 0)
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                    timer_id));
-    } // end IF
-    COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+    // clean up
+    timer_manager_p->stop ();
 
     return;
   } // end IF
@@ -637,16 +637,7 @@ do_work (unsigned int maxNumConnections_in,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
 
       // clean up
-      if (timer_id != -1)
-      {
-        result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timer_id,
-                                                                     &act_p);
-        if (result <= 0)
-          ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                      timer_id));
-      } // end IF
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+      timer_manager_p->stop ();
 
       return;
     } // end IF
@@ -668,15 +659,6 @@ do_work (unsigned int maxNumConnections_in,
                   ACE_TEXT ("failed to start event dispatch, returning\n")));
 
       // clean up
-      if (timer_id != -1)
-      {
-        result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timer_id,
-                                                                     &act_p);
-        if (result <= 0)
-          ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                      timer_id));
-      } // end IF
       //		{ // synch access
       //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -687,7 +669,7 @@ do_work (unsigned int maxNumConnections_in,
       //		} // end lock scope
       if (!UIDefinitionFile_in.empty ())
         COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
-      COMMON_TIMERMANAGER_SINGLETON::instance()->stop();
+      timer_manager_p->stop ();
 
       return;
     } // end IF
@@ -729,15 +711,6 @@ do_work (unsigned int maxNumConnections_in,
       Common_Tools::finalizeEventDispatch (useReactor_in,
                                            !useReactor_in,
                                            group_id);
-    if (timer_id != -1)
-    {
-      result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timer_id,
-                                                                   &act_p);
-      if (result <= 0)
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                    timer_id));
-    } // end IF
     //		{ // synch access
     //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -748,7 +721,7 @@ do_work (unsigned int maxNumConnections_in,
     //		} // end lock scope
     if (!UIDefinitionFile_in.empty ())
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
-    COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+    timer_manager_p->stop ();
 
     return;
   } // end IF
@@ -765,15 +738,6 @@ do_work (unsigned int maxNumConnections_in,
       Common_Tools::finalizeEventDispatch (useReactor_in,
                                            !useReactor_in,
                                            group_id);
-    if (timer_id != -1)
-    {
-      result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timer_id,
-                                                                   &act_p);
-      if (result <= 0)
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                    timer_id));
-    } // end IF
     //		{ // synch access
     //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -784,7 +748,7 @@ do_work (unsigned int maxNumConnections_in,
     //		} // end lock scope
     if (!UIDefinitionFile_in.empty ())
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
-    COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+    timer_manager_p->stop ();
 
     return;
   } // end IF
@@ -852,7 +816,7 @@ do_work (unsigned int maxNumConnections_in,
   //		} // end lock scope
   if (!UIDefinitionFile_in.empty ())
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
-  COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+  timer_manager_p->stop ();
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -863,27 +827,47 @@ do_printVersion (const std::string& programName_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_printVersion"));
 
-  std::cout << programName_in
-#ifdef HAVE_CONFIG_H
-            << ACE_TEXT(" : ")
-            << RPG_VERSION
-#endif
-            << std::endl;
+  std::ostringstream converter;
 
-  // create version string...
+  // compiler version string...
+  converter << ACE::compiler_major_version ();
+  converter << ACE_TEXT (".");
+  converter << ACE::compiler_minor_version ();
+  converter << ACE_TEXT (".");
+  converter << ACE::compiler_beta_version ();
+
+  std::cout << programName_in
+            << ACE_TEXT (" compiled on ")
+            << ACE::compiler_name ()
+            << ACE_TEXT (" ")
+            << converter.str ()
+            << std::endl << std::endl;
+
+  std::cout << ACE_TEXT ("libraries: ")
+            << std::endl
+#ifdef HAVE_CONFIG_H
+            << ACE_TEXT (LIBACENETWORK_PACKAGE)
+            << ACE_TEXT (": ")
+            << ACE_TEXT (LIBACENETWORK_PACKAGE_VERSION)
+            << std::endl
+#endif
+  ;
+
+  converter.str ("");
+  // ACE version string...
+  converter << ACE::major_version ();
+  converter << ACE_TEXT (".");
+  converter << ACE::minor_version ();
+  converter << ACE_TEXT (".");
+  converter << ACE::beta_version ();
+
   // *NOTE*: cannot use ACE_VERSION, as it doesn't contain the (potential) beta
   // version number... Need this, as the library soname is compared to this
   // string
-  std::ostringstream version_number;
-  version_number << ACE::major_version ();
-  version_number << ACE_TEXT (".");
-  version_number << ACE::minor_version ();
-  version_number << ACE_TEXT (".");
-
-  std::cout << ACE_TEXT ("ACE: ") << version_number.str () << std::endl;
-//   std::cout << "ACE: "
+  std::cout << ACE_TEXT ("ACE: ")
 //             << ACE_VERSION
-//             << std::endl;
+            << converter.str ()
+            << std::endl;
 }
 
 int
@@ -1114,7 +1098,7 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 
-  // step1e: pre-initialize signal handling
+  // step1e: (pre-)initialize signal handling
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
   do_initializeSignals (use_reactor,

@@ -36,6 +36,8 @@ include_HEADERS = \
   net_message_base.h \
   net_message_base.inl \
   net_module_headerparser.h \
+  net_module_messagehandler.h \
+  net_module_messagehandler.inl \
   net_module_protocolhandler.h \
   net_module_runtimestatistic.h \
   net_module_runtimestatistic.inl \
@@ -116,6 +118,9 @@ libACENetwork_la_SOURCES = \
   net_message_base.inl \
   net_module_headerparser.cpp \
   net_module_headerparser.h \
+  net_module_messagehandler.cpp \
+  net_module_messagehandler.h \
+  net_module_messagehandler.inl \
   net_module_protocolhandler.cpp \
   net_module_protocolhandler.h \
   net_module_runtimestatistic.cpp \
@@ -186,4 +191,6 @@ libACENetwork_la_SOURCES = \
 SUBDIRS = \
   . \
   client_server \
+  test_i \
   test_u
+

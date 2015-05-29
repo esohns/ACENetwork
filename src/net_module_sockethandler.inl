@@ -20,7 +20,7 @@
 
 #include "ace/Log_Msg.h"
 
-#include "common_timer_manager.h"
+#include "common_timer_manager_common.h"
 
 #include "stream_session_message_base.h"
 
@@ -74,8 +74,9 @@ Net_Module_SocketHandler_T<StreamStateType,
   if (timerID_ != -1)
   {
     const void* act_p = NULL;
-    result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_,
-                                                                 &act_p);
+    result =
+        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
+                                                                  &act_p);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
@@ -120,8 +121,9 @@ Net_Module_SocketHandler_T<StreamStateType,
     if (timerID_ != -1)
     {
       const void* act_p = NULL;
-      result = COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_,
-                                                                   &act_p);
+      result =
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
+                                                                    &act_p);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
@@ -240,14 +242,14 @@ Net_Module_SocketHandler_T<StreamStateType,
         ACE_ASSERT (timerID_ == -1);
         ACE_Event_Handler* handler_p = &statisticCollectionHandler_;
         timerID_ =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                   // event handler
-                                                                 NULL,                       // argument
-                                                                 COMMON_TIME_NOW + interval, // first wakeup time
-                                                                 interval);                  // interval
+            COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
+                                                                        NULL,                       // argument
+                                                                        COMMON_TIME_NOW + interval, // first wakeup time
+                                                                        interval);                  // interval
         if (timerID_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to Common_Timer_Manager::schedule(), aborting\n")));
+                      ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(): \"%m\", aborting\n")));
           return;
         } // end IF
         ACE_DEBUG ((LM_DEBUG,
@@ -267,8 +269,8 @@ Net_Module_SocketHandler_T<StreamStateType,
       {
         const void* act_p = NULL;
         result =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_,
-                                                                &act_p);
+            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
+                                                                      &act_p);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
@@ -600,8 +602,8 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
     const void* act = NULL;
     int result = -1;
     result =
-        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_,
-                                                            &act);
+        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
+                                                                  &act);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
@@ -638,11 +640,11 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
     // clean up
     if (timerID_ != -1)
     {
-      const void* act = NULL;
+      const void* act_p = NULL;
       int result = -1;
       result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_,
-                                                              &act);
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
+                                                                    &act_p);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
@@ -744,14 +746,14 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
         ACE_ASSERT (timerID_ == -1);
         ACE_Event_Handler* handler_p = &statisticCollectionHandler_;
         timerID_ =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                  // event handler
-                                                                  NULL,                       // argument
-                                                                  COMMON_TIME_NOW + interval, // first wakeup time
-                                                                  interval);                  // interval
+            COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
+                                                                        NULL,                       // argument
+                                                                        COMMON_TIME_NOW + interval, // first wakeup time
+                                                                        interval);                  // interval
         if (timerID_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to Common_Timer_Manager::schedule(), returning\n")));
+                      ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(): \"%m\", returning\n")));
           return;
         } // end IF
 //        ACE_DEBUG ((LM_DEBUG,
@@ -770,8 +772,10 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
       if (timerID_ != -1)
       {
         int result = -1;
+        const void* act_p = NULL;
         result =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (timerID_);
+            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
+                                                                      &act_p);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),

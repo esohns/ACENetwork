@@ -22,7 +22,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/Time_Value.h"
 
-#include "common_timer_manager.h"
+#include "common_timer_manager_common.h"
 
 #include "stream_iallocator.h"
 #include "stream_message_base.h"
@@ -146,14 +146,14 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     ACE_Time_Value interval (1, 0); // one second interval
     ACE_Event_Handler* event_handler_p = &resetTimeoutHandler_;
     resetTimeoutHandlerID_ =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (event_handler_p,                  // event handler
-                                                            NULL,                             // ACT
-                                                            COMMON_TIME_NOW + interval, // first wakeup time
-                                                            interval);                        // interval
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (event_handler_p,                  // event handler
+                                                                  NULL,                             // ACT
+                                                                  COMMON_TIME_NOW + interval, // first wakeup time
+                                                                  interval);                        // interval
     if (resetTimeoutHandlerID_ == -1)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to RPG_Common_Timer_Manager::schedule(), aborting\n")));
+                  ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(): \"%m\", aborting\n")));
       return false;
     } // end IF
 //   ACE_DEBUG ((LM_DEBUG,
@@ -263,14 +263,14 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
         ACE_ASSERT (localReportingHandlerID_ == -1);
         ACE_Event_Handler* event_handler_p = &localReportingHandler_;
         localReportingHandlerID_ =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (event_handler_p,                  // event handler
-                                                                NULL,                             // act
-                                                                COMMON_TIME_NOW + interval, // first wakeup time
-                                                                interval);                        // interval
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (event_handler_p,                  // event handler
+                                                                      NULL,                             // act
+                                                                      COMMON_TIME_NOW + interval, // first wakeup time
+                                                                      interval);                        // interval
         if (localReportingHandlerID_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to RPG_Common_Timer_Manager::schedule(), returning\n")));
+                      ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(): \"%m\", returning\n")));
           return;
         } // end IF
         //     ACE_DEBUG ((LM_DEBUG,
@@ -489,8 +489,8 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     if (resetTimeoutHandlerID_ != -1)
     {
       result =
-        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (resetTimeoutHandlerID_,
-                                                            &act_p);
+        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (resetTimeoutHandlerID_,
+                                                                  &act_p);
       if (result <= 0)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
@@ -503,8 +503,8 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   {
     act_p = NULL;
     result =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (localReportingHandlerID_,
-                                                          &act_p);
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (localReportingHandlerID_,
+                                                                &act_p);
     if (result <= 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
@@ -576,8 +576,8 @@ Net_Module_Statistic_ReaderTask_T<TaskSynchType,
                 ACE_TEXT ("no sibling task: \"%m\", aborting\n")));
     return -1;
   } // end IF
-  Net_Module_Statistic_WriterTask_t* sibling_p =
-    dynamic_cast<Net_Module_Statistic_WriterTask_t*> (sibling_base_p);
+  WRITER_TASK_TYPE* sibling_p =
+    dynamic_cast<WRITER_TASK_TYPE*> (sibling_base_p);
   if (!sibling_p)
   {
     ACE_DEBUG ((LM_ERROR,

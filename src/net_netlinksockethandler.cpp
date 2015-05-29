@@ -141,6 +141,7 @@ Net_NetlinkSocketHandler::open (void* arg_in)
   int result = -1;
   Net_SocketConfiguration_t* socket_configuration_p =
       reinterpret_cast<Net_SocketConfiguration_t*> (arg_in);
+  ACE_ASSERT (socket_configuration_p);
 
   // step1: open socket
   result =
@@ -197,12 +198,13 @@ Net_NetlinkSocketHandler::open (void* arg_in)
     return -1;
   } // end IF
   if (!Net_Common_Tools::setLinger (get_handle (),
-                                    NET_SOCKET_DEFAULT_LINGER))
+                                    socket_configuration_p->linger,
+                                    -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s) (handle was: %d), aborting\n"),
-                ((NET_SOCKET_DEFAULT_LINGER > 0) ? ACE_TEXT ("true")
-                                                 : ACE_TEXT ("false")),
+                ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
+                (socket_configuration_p->linger ? ACE_TEXT ("true")
+                                                : ACE_TEXT ("false")),
                 get_handle ()));
     return -1;
   } // end IF

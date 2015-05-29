@@ -53,8 +53,8 @@ class Net_Client_SignalHandler
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler (const Net_Client_SignalHandler&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler& operator= (const Net_Client_SignalHandler&));
 
-  Net_Client_SignalHandlerConfiguration_t configuration_;
-  bool                                    useReactor_;
+  Net_Client_SignalHandlerConfiguration_t* configuration_;
+  bool                                     useReactor_;
 };
 
 #endif

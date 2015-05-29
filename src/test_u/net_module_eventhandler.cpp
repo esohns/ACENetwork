@@ -36,21 +36,20 @@ Net_Module_EventHandler::~Net_Module_EventHandler ()
 
 }
 
-Common_Module_t*
+Stream_Module_t*
 Net_Module_EventHandler::clone ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_EventHandler::clone"));
 
   // initialize return value(s)
-  Common_Module_t* module_p = NULL;
+  Stream_Module_t* module_p = NULL;
 
   ACE_NEW_NORETURN (module_p,
                     Net_Module_EventHandler_Module (ACE_TEXT_ALWAYS_CHAR (inherited::name ()),
                     NULL));
   if (!module_p)
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory(%u): %m, aborting\n"),
-                sizeof (Net_Module_EventHandler_Module)));
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
   else
   {
     Net_Module_EventHandler* eventHandler_impl = NULL;

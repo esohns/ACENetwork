@@ -96,6 +96,7 @@ Net_TCPSocketHandler::open (void* arg_in)
 
   Net_SocketConfiguration_t* socket_configuration_p =
       reinterpret_cast<Net_SocketConfiguration_t*> (arg_in);
+  ACE_ASSERT (socket_configuration_p);
 
   // step1: tweak socket
   ACE_HANDLE handle = inherited2::get_handle ();
@@ -132,12 +133,13 @@ Net_TCPSocketHandler::open (void* arg_in)
     return -1;
   } // end IF
   if (!Net_Common_Tools::setLinger (handle,
-                                    NET_SOCKET_DEFAULT_LINGER))
+                                    socket_configuration_p->linger,
+                                    -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s) (handle was: %d), aborting\n"),
-                ((NET_SOCKET_DEFAULT_LINGER > 0) ? ACE_TEXT ("true")
-                                                 : ACE_TEXT ("false")),
+                ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
+                (socket_configuration_p->linger ? ACE_TEXT ("true")
+                                                : ACE_TEXT ("false")),
                 handle));
     return -1;
   } // end IF
@@ -153,7 +155,7 @@ Net_TCPSocketHandler::open (void* arg_in)
     // *NOTE*: more likely, this happened because the (select) reactor is out of
     //         "free" (read) slots
     int error = ACE_OS::last_error ();
-    //if (error != ENOMEM)
+    if (error)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@/%d): \"%m\", aborting\n"),
                   arg_in, handle));
@@ -207,8 +209,7 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
     //         --> just return
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
       break;
-    // *NOTE*: currently, socket handler notifications do not register for
-    //         writing --> just return
+    case ACE_Event_Handler::WRITE_MASK:      // --> socket has been closed (send failed) (DevPoll)
     case ACE_Event_Handler::EXCEPT_MASK:     // --> socket has been closed (send failed)
       break;
     case ACE_Event_Handler::ALL_EVENTS_MASK: // - connect failed (e.g. connection refused) /

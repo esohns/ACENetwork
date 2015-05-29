@@ -185,17 +185,23 @@ Net_Server_Listener_T<ConfigurationType,
   // not running --> start listening
   ACE_INET_Addr local_sap;
   if (useLoopback_)
-    local_sap.set (listeningPort_, // local SAP
-                   // *PORTABILITY*: disambiguation needed under Windows
-                   ACE_LOCALHOST,  // hostname
-                   1,              // encode ?
-                   AF_INET);       // address family
+    result = local_sap.set (listeningPort_, // local SAP
+                            // *PORTABILITY*: disambiguation needed under Win32
+                            ACE_LOCALHOST,  // hostname
+                            1,              // encode ?
+                            AF_INET);       // address family
   else
-    local_sap.set (listeningPort_,                       // local SAP
-                   // *TODO*: bind to specific interface/address ?
-                   static_cast<ACE_UINT32> (INADDR_ANY), // hostname
-                   1,                                    // encode ?
-                   0);                                   // map IPv6 to IPv4 ?
+    result = local_sap.set (listeningPort_,                       // local SAP
+                            // *TODO*: bind to specific interface/address ?
+                            static_cast<ACE_UINT32> (INADDR_ANY), // hostname
+                            1,                                    // encode ?
+                            0);                                   // map IPv6 to IPv4 ?
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+    return;
+  } // end IF
   result = inherited::open (local_sap,                // local SAP
                             ACE_Reactor::instance (), // corresp. reactor
                             ACE_NONBLOCK,             // flags (use non-blocking sockets !)
@@ -211,9 +217,17 @@ Net_Server_Listener_T<ConfigurationType,
   else
     isOpen_ = true;
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("started listening (port: %u)...\n"),
+              ACE_TEXT ("0x%@: started listening (port: %u)...\n"),
+              inherited::get_handle (),
               listeningPort_));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%d: started listening (port: %u)...\n"),
+              inherited::get_handle (),
+              listeningPort_));
+#endif
 
   isListening_ = true;
 }
@@ -297,14 +311,12 @@ Net_Server_Listener_T<ConfigurationType,
 
   ACE_TCHAR* buffer_p = NULL;
   result = inherited::info (&buffer_p, BUFSIZ);
-  if ((result == -1) ||
-      !buffer_p)
+  if ((result == -1) || !buffer_p)
   {
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT("failed to ACE_Acceptor::info(): \"%m\", returning\n")));
     return;
   } // end IF
-
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
               buffer_p));

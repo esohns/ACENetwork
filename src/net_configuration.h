@@ -25,35 +25,44 @@
 #include "ace/Netlink_Addr.h"
 
 #include "stream_common.h"
+#include "stream_defines.h"
 #include "stream_iallocator.h"
 
 #include "net_defines.h"
 
 struct Net_SocketConfiguration_t
 {
-  Net_SocketConfiguration_t ()
-   : bufferSize ()
+  inline Net_SocketConfiguration_t ()
+   : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
+   , linger (NET_SOCKET_DEFAULT_LINGER)
+ #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+    , netlinkAddress (ACE_sap_any_cast (const ACE_Netlink_Addr&))
+    , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
+ #endif
    , peerAddress (ACE_sap_any_cast (const ACE_INET_Addr&))
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-   , netlinkAddress (ACE_sap_any_cast (const ACE_Netlink_Addr&))
-   , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
-#endif
    , useLoopbackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
   int                 bufferSize;
+  bool                linger;
   // *TODO*: remove address information (pass as AddressType in open() instead)
-  ACE_INET_Addr       peerAddress;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
   ACE_Netlink_Addr    netlinkAddress;
   int                 netlinkProtocol;
 #endif
+  ACE_INET_Addr       peerAddress;
   bool                useLoopbackDevice;
   // *TODO*: add network interface specifier (interface index on linux, (G)UID on windows)
 };
 
 struct Net_SocketHandlerConfiguration_t
 {
+  inline Net_SocketHandlerConfiguration_t ()
+   : bufferSize (STREAM_BUFFER_SIZE)
+   , messageAllocator (NULL)
+   , socketConfiguration ()
+  {};
+
   int                       bufferSize; // pdu size (if fixed)
   Stream_IAllocator*        messageAllocator;
   Net_SocketConfiguration_t socketConfiguration;
@@ -61,6 +70,13 @@ struct Net_SocketHandlerConfiguration_t
 
 struct Net_ProtocolConfiguration_t
 {
+  inline Net_ProtocolConfiguration_t ()
+   : bufferSize (STREAM_BUFFER_SIZE)
+   , peerPingInterval (0)
+   , pingAutoAnswer (true)
+   , printPongMessages (true)
+  {};
+
   int          bufferSize; // pdu size (if fixed)
   unsigned int peerPingInterval; // ms {0 --> OFF}
   bool         pingAutoAnswer;
@@ -70,11 +86,22 @@ struct Net_ProtocolConfiguration_t
 // *NOTE*: I speculate that this is the main reason that C# was ever invented !
 struct Net_UserData_t
 {
+  inline Net_UserData_t ()
+   : userData (NULL)
+  {};
+
   void* userData;
 };
 
 struct Net_Configuration_t
 {
+  inline Net_Configuration_t ()
+   : socketConfiguration ()
+   , streamConfiguration ()
+   , streamSessionData ()
+   , protocolConfiguration ()
+  {};
+
   // **************************** socket data **********************************
   Net_SocketConfiguration_t   socketConfiguration;
   // **************************** stream data **********************************

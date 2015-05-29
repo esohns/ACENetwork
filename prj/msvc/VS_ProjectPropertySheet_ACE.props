@@ -5,7 +5,7 @@
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\projects\ACE_wrappers</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\projects\ATCD\ACE</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>D:\projects\ACE_wrappers\lib</AdditionalLibraryDirectories>

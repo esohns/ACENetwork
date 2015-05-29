@@ -51,7 +51,7 @@ class Net_Module_EventHandler
   virtual ~Net_Module_EventHandler ();
 
   // implement Common_IClone_T
-  virtual Common_Module_t* clone ();
+  virtual Stream_Module_t* clone ();
 
  private:
   typedef Net_Module_MessageHandler_T<Stream_ModuleConfiguration_t,

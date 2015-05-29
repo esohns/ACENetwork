@@ -30,6 +30,7 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
 #endif
+#include "ace/Log_Msg.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -40,7 +41,7 @@
 #include "ace/Signal.h"
 #include "ace/Version.h"
 
-#ifdef RPG_ENABLE_VALGRIND_SUPPORT
+#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
 #include "valgrind/valgrind.h"
 #endif
 
@@ -63,9 +64,9 @@
 #include "net_client_connector_common.h"
 #include "net_client_defines.h"
 
-//#ifdef HAVE_CONFIG_H
-//#include "libacenetwork_config.h"
-//#endif
+#ifdef HAVE_CONFIG_H
+#include "libacenetwork_config.h"
+#endif
 
 #include "net_callbacks.h"
 #include "net_common.h"
@@ -124,10 +125,10 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  //#if defined(_DEBUG) && !defined(DEBUG_RELEASE)
-  //  path += ACE_TEXT_ALWAYS_CHAR("net");
-  //  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  //#endif
+//#if defined(_DEBUG) && !defined(DEBUG_RELEASE)
+//  path += ACE_TEXT_ALWAYS_CHAR("net");
+//  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+//#endif
   path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
   std::cout << ACE_TEXT ("-g[[STRING]] : UI file [\"")
             << path
@@ -223,10 +224,10 @@ do_processArguments (int argc_in,
   maxNumConnections_out = NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  //#if defined(_DEBUG) && !defined(DEBUG_RELEASE)
-  //  path += ACE_TEXT_ALWAYS_CHAR("net");
-  //  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  //#endif
+//#if defined(_DEBUG) && !defined(DEBUG_RELEASE)
+//  path += ACE_TEXT_ALWAYS_CHAR("net");
+//  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+//#endif
   path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
   UIFile_out = path;
   useThreadPool_out = NET_EVENT_USE_THREADPOOL;
@@ -509,10 +510,13 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
       ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? 0
                                                                    : serverPingInterval_in);
   configuration.protocolConfiguration.pingAutoAnswer = true;
-  configuration.protocolConfiguration.printPongMessages = true;
+  configuration.protocolConfiguration.printPongMessages =
+      UIDefinitionFile_in.empty ();
   // ************ socket / stream configuration data ************
   configuration.socketConfiguration.bufferSize =
     NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
+  configuration.socketConfiguration.linger =
+      NET_SOCKET_DEFAULT_LINGER;
 
   configuration.streamConfiguration.bufferSize = STREAM_BUFFER_SIZE;
   configuration.streamConfiguration.deleteModule = false;
@@ -587,15 +591,40 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                                                      &configuration.streamSessionData);
 
   // step0e: initialize action timer
-  ACE_INET_Addr peer_address (serverPortNumber_in,
-                              serverHostname_in.c_str (),
-                              AF_INET);
+  Net_Client_SignalHandlerConfiguration_t signal_handler_configuration;
+  //  ACE_OS::memset (&signal_handler_configuration,
+  //                  0,
+  //                  sizeof (signal_handler_configuration));
+  signal_handler_configuration.actionTimerId = -1;
+  signal_handler_configuration.connector = connector_p;
+  result =
+      signal_handler_configuration.peerAddress.set (serverPortNumber_in,
+                                                    serverHostname_in.c_str (),
+                                                    1,
+                                                    AF_INET);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+
+    // clean up
+    delete connector_p;
+
+    return;
+  } // end IF
+  CBData_in.signalHandlerConfiguration = &signal_handler_configuration;
+
   Net_Client_TimeoutHandler timeout_handler (actionMode_in,
                                              maxNumConnections_in,
-                                             peer_address,
+                                             signal_handler_configuration.peerAddress,
                                              connector_p);
   CBData_in.timeoutHandler = &timeout_handler;
-  CBData_in.timerId = -1;
+  Common_Timer_Manager_t* timer_manager_p =
+      COMMON_TIMERMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (timer_manager_p);
+  Common_TimerConfiguration_t timer_configuration;
+  timer_manager_p->initialize (timer_configuration);
+  timer_manager_p->start ();
   if (UIDefinitionFile_in.empty () && (connectionInterval_in > 0))
   {
     // schedule action interval timer
@@ -604,33 +633,25 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                                                                                           : connectionInterval_in),
                              ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000)
                                                                                           : 0));
-    CBData_in.timerId =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                  // event handler
-                                                            NULL,                       // ACT
-                                                            COMMON_TIME_NOW + interval, // first wakeup time
-                                                            interval);                  // interval
-    if (CBData_in.timerId == -1)
+    signal_handler_configuration.actionTimerId =
+        timer_manager_p->schedule_timer (handler_p,                  // event handler
+                                         NULL,                       // ACT
+                                         COMMON_TIME_NOW + interval, // first wakeup time
+                                         interval);                  // interval
+    if (signal_handler_configuration.actionTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", aborting\n")));
 
       // clean up
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+      timer_manager_p->stop ();
       delete connector_p;
 
       return;
     } // end IF
   } // end IF
-  const void* act_p = NULL;
 
   // step0e: initialize signal handling
-  Net_Client_SignalHandlerConfiguration_t signal_handler_configuration;
-//  ACE_OS::memset (&signal_handler_configuration,
-//                  0,
-//                  sizeof (signal_handler_configuration));
-  signal_handler_configuration.actionTimerID = CBData_in.timerId;
-  signal_handler_configuration.connector = connector_p;
-  signal_handler_configuration.peerAddress.set (peer_address);
   signalHandler_in.initialize (signal_handler_configuration);
   if (!Common_Tools::initializeSignals (signalSet_in,
                                         ignoredSignalSet_in,
@@ -641,17 +662,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                 ACE_TEXT ("failed to Common_Tools::initializeSignals(), aborting\n")));
 
     // clean up
-    if (CBData_in.timerId != -1)
-    {
-      result =
-        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (CBData_in.timerId,
-                                                            &act_p);
-      if (result <= 0)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                    CBData_in.timerId));
-    } // end IF
-    COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+    timer_manager_p->stop ();
     connector_p->abort ();
     delete connector_p;
 
@@ -680,17 +691,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                   ACE_TEXT ("failed to start GTK event dispatch, aborting\n")));
 
       // clean up
-      if (CBData_in.timerId != -1)
-      {
-        result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (CBData_in.timerId,
-                                                              &act_p);
-        if (result <= 0)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                      CBData_in.timerId));
-      } // end IF
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+      timer_manager_p->stop ();
       connector_p->abort ();
       delete connector_p;
 
@@ -714,16 +715,6 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                   ACE_TEXT ("failed to start event dispatch, aborting\n")));
 
       // clean up
-      if (CBData_in.timerId != -1)
-      {
-        result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (CBData_in.timerId,
-                                                              &act_p);
-        if (result <= 0)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                      CBData_in.timerId));
-      } // end IF
   //		{ // synch access
   //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -734,7 +725,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   //		} // end lock scope
       if (!UIDefinitionFile_in.empty ())
         COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+      timer_manager_p->stop ();
       connector_p->abort ();
       delete connector_p;
 
@@ -747,7 +738,8 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // step5c: connect immediately ?
   if (UIDefinitionFile_in.empty () && (connectionInterval_in == 0))
   {
-    bool result_2 = connector_p->connect (peer_address);
+    bool result_2 =
+        connector_p->connect (signal_handler_configuration.peerAddress);
     if (!useReactor_in)
     {
       ACE_Time_Value delay (1, 0);
@@ -760,8 +752,9 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     {
       char buffer[BUFSIZ];
       ACE_OS::memset (buffer, 0, sizeof (buffer));
-      result = peer_address.addr_to_string (buffer,
-                                            sizeof (buffer));
+      result =
+          signal_handler_configuration.peerAddress.addr_to_string (buffer,
+                                                                   sizeof (buffer));
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string: \"%m\", continuing\n")));
@@ -775,16 +768,6 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
         Common_Tools::finalizeEventDispatch (useReactor_in,
                                              !useReactor_in,
                                              group_id);
-      if (CBData_in.timerId != -1)
-      {
-        result =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (CBData_in.timerId,
-                                                                &act_p);
-        if (result <= 0)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                      CBData_in.timerId));
-      } // end IF
       //		{ // synch access
       //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -793,7 +776,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
       //					 iterator++)
       //				g_source_remove(*iterator);
       //		} // end lock scope
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+      timer_manager_p->stop ();
       connector_p->abort ();
       delete connector_p;
 
@@ -880,7 +863,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   //					 iterator++)
   //				g_source_remove(*iterator);
   //		} // end lock scope
-  COMMON_TIMERMANAGER_SINGLETON::instance ()->stop ();
+  timer_manager_p->stop ();
 
 //  connection_manager_p->abort ();
   NET_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
@@ -908,27 +891,47 @@ do_printVersion (const std::string& programName_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_printVersion"));
 
-  std::cout << programName_in
-#ifdef HAVE_CONFIG_H
-            << ACE_TEXT(" : ")
-            << RPG_VERSION
-#endif
-            << std::endl;
+  std::ostringstream converter;
 
-  // create version string...
+  // compiler version string...
+  converter << ACE::compiler_major_version ();
+  converter << ACE_TEXT (".");
+  converter << ACE::compiler_minor_version ();
+  converter << ACE_TEXT (".");
+  converter << ACE::compiler_beta_version ();
+
+  std::cout << programName_in
+            << ACE_TEXT (" compiled on ")
+            << ACE::compiler_name ()
+            << ACE_TEXT (" ")
+            << converter.str ()
+            << std::endl << std::endl;
+
+  std::cout << ACE_TEXT ("libraries: ")
+            << std::endl
+#ifdef HAVE_CONFIG_H
+            << ACE_TEXT (LIBACENETWORK_PACKAGE)
+            << ACE_TEXT (": ")
+            << ACE_TEXT (LIBACENETWORK_PACKAGE_VERSION)
+            << std::endl
+#endif
+  ;
+
+  converter.str ("");
+  // ACE version string...
+  converter << ACE::major_version ();
+  converter << ACE_TEXT (".");
+  converter << ACE::minor_version ();
+  converter << ACE_TEXT (".");
+  converter << ACE::beta_version ();
+
   // *NOTE*: cannot use ACE_VERSION, as it doesn't contain the (potential) beta
   // version number... Need this, as the library soname is compared to this
   // string
-  std::ostringstream version_number;
-  version_number << ACE::major_version();
-  version_number << ACE_TEXT(".");
-  version_number << ACE::minor_version();
-  version_number << ACE_TEXT(".");
-
-  std::cout << ACE_TEXT("ACE: ") << version_number.str() << std::endl;
-//   std::cout << "ACE: "
+  std::cout << ACE_TEXT ("ACE: ")
 //             << ACE_VERSION
-//             << std::endl;
+            << converter.str ()
+            << std::endl;
 }
 
 int

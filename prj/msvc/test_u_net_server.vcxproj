@@ -58,8 +58,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>BASEDIR="$(ProgramFiles.Replace('\', "\\"))\\$(SolutionName)";RPG_NET_HAS_DLL;RPG_COMMON_HAS_DLL;DEBUG_DEBUGGER;WIN32;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG_DEBUGGER;BASEDIR="$(ProgramFiles.Replace('\', "\\"))\\$(SolutionName)";HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <BrowseInformation>false</BrowseInformation>
@@ -70,7 +70,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\projects\yarp\Yarp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/FORCE:MULTIPLE /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
       <SubSystem>Windows</SubSystem>
@@ -91,8 +91,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RPG_COMMON_HAS_DLL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>BASEDIR="$(ProgramFiles.Replace('\', "\\"))\\$(SolutionName)";HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
@@ -102,7 +102,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Temp\ACE_wrappers\lib;C:\Temp\SDL\lib\x86;C:\Temp\Gtk\lib;C:\Temp\libglade\lib;C:\Temp\libgnome-dev_2.24.1-1_win32\lib;C:\Temp\libgnomeui-dev-2.22.1\lib;C:\Temp\yarp\Yarp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ACE.lib;SDLmain.lib;SDL.lib;SDL_mixer.lib;SDL_ttf.lib;pango-1.0.lib;gobject-2.0.lib;gthread-2.0.lib;glib-2.0.lib;gtk-win32-2.0.lib;gdk-win32-2.0.lib;libglade-2.0.dll.a;libgnomeui-2.dll.a;libgnome-2.dll.a;rpg_dice.lib;rpg_common.lib;rpg_net.lib;rpg_net_server.lib;rpg_client.lib</AdditionalDependencies>
       <AdditionalOptions>/FORCE:MULTIPLE /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
       <SubSystem>Windows</SubSystem>

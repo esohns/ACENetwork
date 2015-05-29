@@ -21,6 +21,7 @@
 
 #include "net_asynch_tcpsockethandler.h"
 
+#include "ace/Log_Msg.h"
 #include "ace/OS.h"
 #include "ace/OS_Memory.h"
 #include "ace/Proactor.h"
@@ -95,14 +96,15 @@ Net_AsynchTCPSocketHandler::open (ACE_HANDLE handle_in,
     goto close;
   } // end IF
   if (!Net_Common_Tools::setLinger (handle_in,
-                                    NET_SOCKET_DEFAULT_LINGER))
+                                    inherited::configuration_.socketConfiguration.linger,
+                                    -1))
   {
-    error = ACE_OS::last_error ();
+    int error = ACE_OS::last_error ();
     if (error != ENOTSOCK) // <-- socket has been closed asynchronously
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s) (handle was: %d), aborting\n"),
-                  ((NET_SOCKET_DEFAULT_LINGER > 0) ? ACE_TEXT ("true")
-                                                   : ACE_TEXT ("false")),
+                  ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
+                  (inherited::configuration_.socketConfiguration.linger ? ACE_TEXT ("true")
+                                                                        : ACE_TEXT ("false")),
                   handle_in));
     goto close;
   } // end IF
@@ -215,10 +217,11 @@ Net_AsynchTCPSocketHandler::notify (void)
   {
     // *IMPORTANT NOTE*: socket may have closed in the meantime...
     int error = ACE_OS::last_error ();
-    if ((error != ENOTSOCK) && // 10038, happens on Win32
-        (error != ENOTCONN))   // 10057, happens on Win32
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_AsynchTCPSocketHandler::handle_output(): \"%m\", aborting\n")));
+    if ((error != ENOTSOCK)   && // 10038, happens on Win32
+        (error != ECONNRESET) && // 10054, happens on Win32
+        (error != ENOTCONN))     // 10057, happens on Win32
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchTCPSocketHandler::handle_output(): \"%m\", aborting\n")));
   } // end IF
 
   return result;
@@ -389,10 +392,14 @@ Net_AsynchTCPSocketHandler::initiate_read_stream ()
   if (result == -1)
   {
     int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != ENXIO)               && // happens on Win32
         (error != EFAULT)              && // *TODO*: happens on Win32
         (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
         (error != ERROR_NETNAME_DELETED)) // happens on Win32
+#else
+    if (error)
+#endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Read_Stream::read(%u): \"%m\", aborting\n"),
                   message_block_p->size ()));
