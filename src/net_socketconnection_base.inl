@@ -25,8 +25,6 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-//#include "net_client_connector_common.h"
-
 template <typename AddressType,
           typename SocketConfigurationType,
           typename HandlerType,
@@ -34,7 +32,8 @@ template <typename AddressType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 Net_SocketConnectionBase_T<AddressType,
                            SocketConfigurationType,
                            HandlerType,
@@ -42,8 +41,9 @@ Net_SocketConnectionBase_T<AddressType,
                            SocketHandlerConfigurationType,
                            UserDataType,
                            SessionDataType,
-                           StatisticContainerType>::Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                unsigned int statisticsCollectionInterval_in)
+                           StatisticContainerType,
+                           StreamType>::Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                    unsigned int statisticsCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticsCollectionInterval_in)
  //, inherited2 ()
@@ -60,7 +60,8 @@ template <typename AddressType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 Net_SocketConnectionBase_T<AddressType,
                            SocketConfigurationType,
                            HandlerType,
@@ -68,7 +69,8 @@ Net_SocketConnectionBase_T<AddressType,
                            SocketHandlerConfigurationType,
                            UserDataType,
                            SessionDataType,
-                           StatisticContainerType>::~Net_SocketConnectionBase_T ()
+                           StatisticContainerType,
+                           StreamType>::~Net_SocketConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::~Net_SocketConnectionBase_T"));
 
@@ -141,7 +143,8 @@ template <typename AddressType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_SocketConnectionBase_T<AddressType,
                            SocketConfigurationType,
@@ -150,7 +153,8 @@ Net_SocketConnectionBase_T<AddressType,
                            SocketHandlerConfigurationType,
                            UserDataType,
                            SessionDataType,
-                           StatisticContainerType>::ping ()
+                           StatisticContainerType,
+                           StreamType>::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::ping"));
 
@@ -285,7 +289,8 @@ template <typename AddressType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 int
 Net_SocketConnectionBase_T<AddressType,
                            SocketConfigurationType,
@@ -294,7 +299,8 @@ Net_SocketConnectionBase_T<AddressType,
                            SocketHandlerConfigurationType,
                            UserDataType,
                            SessionDataType,
-                           StatisticContainerType>::open (void* arg_in)
+                           StatisticContainerType,
+                           StreamType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::open"));
 
@@ -413,7 +419,8 @@ template <typename AddressType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 int
 Net_SocketConnectionBase_T<AddressType,
                            SocketConfigurationType,
@@ -422,7 +429,8 @@ Net_SocketConnectionBase_T<AddressType,
                            SocketHandlerConfigurationType,
                            UserDataType,
                            SessionDataType,
-                           StatisticContainerType>::close (u_long arg_in)
+                           StatisticContainerType,
+                           StreamType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::close"));
 
@@ -637,7 +645,8 @@ template <typename AddressType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 Net_AsynchSocketConnectionBase_T<AddressType,
                                  SocketConfigurationType,
                                  HandlerType,
@@ -645,8 +654,9 @@ Net_AsynchSocketConnectionBase_T<AddressType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
                                  SessionDataType,
-                                 StatisticContainerType>::Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                            unsigned int statisticsCollectionInterval_in)
+                                 StatisticContainerType,
+                                 StreamType>::Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                unsigned int statisticsCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticsCollectionInterval_in)
  //, inherited2 ()
@@ -664,7 +674,8 @@ template <typename AddressType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 Net_AsynchSocketConnectionBase_T<AddressType,
                                  SocketConfigurationType,
                                  HandlerType,
@@ -672,7 +683,8 @@ Net_AsynchSocketConnectionBase_T<AddressType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
                                  SessionDataType,
-                                 StatisticContainerType>::~Net_AsynchSocketConnectionBase_T ()
+                                 StatisticContainerType,
+                                 StreamType>::~Net_AsynchSocketConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::~Net_AsynchSocketConnectionBase_T"));
 
@@ -685,7 +697,8 @@ template <typename AddressType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_AsynchSocketConnectionBase_T<AddressType,
                                  SocketConfigurationType,
@@ -694,7 +707,8 @@ Net_AsynchSocketConnectionBase_T<AddressType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
                                  SessionDataType,
-                                 StatisticContainerType>::ping ()
+                                 StatisticContainerType,
+                                 StreamType>::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::ping"));
 
@@ -708,7 +722,8 @@ template <typename AddressType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_AsynchSocketConnectionBase_T<AddressType,
                                  SocketConfigurationType,
@@ -717,8 +732,9 @@ Net_AsynchSocketConnectionBase_T<AddressType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
                                  SessionDataType,
-                                 StatisticContainerType>::open (ACE_HANDLE handle_in,
-                                                                ACE_Message_Block& messageBlock_in)
+                                 StatisticContainerType,
+                                 StreamType>::open (ACE_HANDLE handle_in,
+                                                    ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::open"));
 

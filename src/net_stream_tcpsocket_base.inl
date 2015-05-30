@@ -1022,7 +1022,7 @@ template <typename AddressType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
-void
+const StreamType&
 Net_StreamTCPSocketBase_T<AddressType,
                           SocketConfigurationType,
                           ConfigurationType,
@@ -1030,39 +1030,11 @@ Net_StreamTCPSocketBase_T<AddressType,
                           SessionDataType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::dump_state () const
+                          SocketHandlerType>::stream () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::stream"));
 
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
-  info (handle,
-        local_inet_address,
-        peer_inet_address);
-
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  if (local_inet_address.addr_to_string (buffer,
-    sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-  if (peer_inet_address.addr_to_string (buffer,
-    sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address = buffer;
-
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
-              id (), handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
+  return stream_;
 }
 
 template <typename AddressType,
@@ -1108,6 +1080,57 @@ Net_StreamTCPSocketBase_T<AddressType,
                   handle));
 //    inherited::handle (ACE_INVALID_HANDLE);
   } // end IF
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+void
+Net_StreamTCPSocketBase_T<AddressType,
+                          SocketConfigurationType,
+                          ConfigurationType,
+                          UserDataType,
+                          SessionDataType,
+                          StatisticContainerType,
+                          StreamType,
+                          SocketHandlerType>::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::dump_state"));
+
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  if (local_inet_address.addr_to_string (buffer,
+    sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string peer_address;
+  if (peer_inet_address.addr_to_string (buffer,
+    sizeof (buffer)) == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    peer_address = buffer;
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
+              id (), handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (peer_address.c_str ())));
 }
 
 template <typename AddressType,

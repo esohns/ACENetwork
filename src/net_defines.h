@@ -65,7 +65,7 @@
 // event dispatch
 // default event dispatcher (default: use asynch I/O (proactor))
 #define NET_EVENT_USE_REACTOR                    false
-#define NET_EVENT_USE_THREADPOOL                 false // use ACE_TP_Reactor ?
+#define NET_EVENT_USE_THREAD_POOL                false // multi-threaded event dispatch ?
 #define NET_EVENT_TASK_GROUP_ID                  100
 
 // stream

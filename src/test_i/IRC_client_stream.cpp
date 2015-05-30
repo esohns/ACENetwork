@@ -78,6 +78,67 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   //  ACE_OS::memset (&inherited::state_, 0, sizeof (inherited::state_));
   inherited::state_.sessionID = configuration_in.sessionID;
 
+  int result = -1;
+  inherited::MODULE_T* module_p = NULL;
+  if (configuration_in.streamConfiguration.notificationStrategy)
+  {
+    module_p = inherited::head ();
+    if (!module_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("no head module found, aborting\n")));
+      return false;
+    } // end IF
+    inherited::TASK_T* task_p = module_p->reader ();
+    if (!task_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("no head module reader task found, aborting\n")));
+      return false;
+    } // end IF
+    inherited::QUEUE_T* queue_p = task_p->msg_queue ();
+    if (!queue_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("no head module reader task queue found, aborting\n")));
+      return false;
+    } // end IF
+    queue_p->notification_strategy (configuration_in.streamConfiguration.notificationStrategy);
+  } // end IF
+
+  ACE_ASSERT (configuration_in.streamConfiguration.moduleConfiguration);
+  configuration_in.streamConfiguration.moduleConfiguration->streamState =
+    &state_;
+
+  // ---------------------------------------------------------------------------
+  if (configuration_in.streamConfiguration.module)
+  {
+    Stream_IModule_t* module_2 =
+      dynamic_cast<Stream_IModule_t*> (configuration_in.streamConfiguration.module);
+    if (!module_2)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("dynamic_cast<Stream_IModule_t> failed, aborting\n")));
+      return false;
+    } // end IF
+    if (!module_2->initialize (*configuration_in.streamConfiguration.moduleConfiguration))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Stream_IModule_t::initialize, aborting\n")));
+      return false;
+    } // end IF
+    result = inherited::push (configuration_in.streamConfiguration.module);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT (configuration_in.streamConfiguration.module->name ())));
+      return false;
+    } // end IF
+  } // end IF
+
+  // ---------------------------------------------------------------------------
+
   // ******************* Runtime Statistics ************************
   IRC_Client_Module_Statistic_WriterTask_t* runtimeStatistic_impl = NULL;
   runtimeStatistic_impl =
@@ -175,11 +236,13 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCSplitter> failed, aborting\n")));
     return false;
   } // end IF
-  if (!IRCSplitter_impl->initialize (configuration_in.streamConfiguration.messageAllocator, // message allocator
-                                     configuration_in.crunchMessageBuffers,                 // "crunch" messages ?
-                                     &(inherited::state_),                                  // state handle
-                                     0,                                                     // DON'T collect statistics
-                                     configuration_in.debugScanner))                        // debug scanning ?
+  if (!IRCSplitter_impl->initialize (configuration_in.streamConfiguration.messageAllocator,       // message allocator
+                                     configuration_in.streamConfiguration.useThreadPerConnection, // active ?
+                                     &(inherited::state_),                                        // state handle
+                                     ///////////////////////////////////////////
+                                     configuration_in.crunchMessageBuffers,                       // "crunch" messages ?
+                                     0,                                                           // DON'T collect statistics
+                                     configuration_in.debugScanner))                              // debug scanning ?
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),

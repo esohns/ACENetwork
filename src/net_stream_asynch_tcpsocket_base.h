@@ -44,7 +44,8 @@ class Net_StreamAsynchTCPSocketBase_T
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType>
+                               StatisticContainerType,
+                               StreamType>
 {
  public:
   typedef Net_ConnectionBase_T<AddressType,
@@ -52,7 +53,8 @@ class Net_StreamAsynchTCPSocketBase_T
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType> CONNECTION_BASE_T;
+                               StatisticContainerType,
+                               StreamType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchTCPSocketBase_T ();
 
@@ -69,6 +71,7 @@ class Net_StreamAsynchTCPSocketBase_T
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
   virtual unsigned int id () const;
+  virtual const StreamType& stream () const;
   virtual void close ();
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
@@ -80,7 +83,8 @@ class Net_StreamAsynchTCPSocketBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType,
+                                   StreamType> ICONNECTION_MANAGER_T;
 
   Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                    unsigned int = 0);      // statistics collecting interval (second(s))
@@ -101,7 +105,8 @@ class Net_StreamAsynchTCPSocketBase_T
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType> inherited3;
+                               StatisticContainerType,
+                               StreamType> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&));

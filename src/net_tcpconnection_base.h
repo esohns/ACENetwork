@@ -41,6 +41,7 @@
 template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
+          typename StreamType,
           typename HandlerType>
 class Net_TCPConnectionBase_T
  : public Net_SocketConnectionBase_T<ACE_INET_Addr,
@@ -50,17 +51,20 @@ class Net_TCPConnectionBase_T
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t>
+                                     Stream_Statistic_t,
+                                     StreamType>
  , public Net_TransportLayer_TCP
 {
  friend class ACE_Acceptor<Net_TCPConnectionBase_T<ConfigurationType,
                                                    UserDataType,
                                                    SessionDataType,
+                                                   StreamType,
                                                    HandlerType>,
                            ACE_SOCK_ACCEPTOR>;
  friend class ACE_Connector<Net_TCPConnectionBase_T<ConfigurationType,
                                                     UserDataType,
                                                     SessionDataType,
+                                                    StreamType,
                                                     HandlerType>,
                             ACE_SOCK_CONNECTOR>;
 
@@ -69,7 +73,8 @@ class Net_TCPConnectionBase_T
                                    Net_SocketConfiguration_t,
                                    ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t,
+                                   StreamType> ICONNECTION_MANAGER_T;
 
   Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                            unsigned int = 0);      // statistics collecting interval (second(s))
@@ -84,7 +89,8 @@ class Net_TCPConnectionBase_T
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t> inherited;
+                                     Stream_Statistic_t,
+                                     StreamType> inherited;
 
   Net_TCPConnectionBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_TCPConnectionBase_T (const Net_TCPConnectionBase_T&));
@@ -96,6 +102,7 @@ class Net_TCPConnectionBase_T
 template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
+          typename StreamType,
           typename HandlerType>
 class Net_AsynchTCPConnectionBase_T
  : public Net_AsynchSocketConnectionBase_T<ACE_INET_Addr,
@@ -105,16 +112,19 @@ class Net_AsynchTCPConnectionBase_T
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t>
+                                           Stream_Statistic_t,
+                                           StreamType>
  , public Net_TransportLayer_TCP
 {
  friend class ACE_Asynch_Acceptor<Net_AsynchTCPConnectionBase_T<ConfigurationType,
                                                                 UserDataType,
                                                                 SessionDataType,
+                                                                StreamType,
                                                                 HandlerType> >;
  friend class ACE_Asynch_Connector<Net_AsynchTCPConnectionBase_T<ConfigurationType,
                                                                  UserDataType,
                                                                  SessionDataType,
+                                                                 StreamType,
                                                                  HandlerType> >;
 
  public:
@@ -122,7 +132,8 @@ class Net_AsynchTCPConnectionBase_T
                                    Net_SocketConfiguration_t,
                                    ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t,
+                                   StreamType> ICONNECTION_MANAGER_T;
 
   Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                  unsigned int = 0);      // statistics collecting interval (second(s))
@@ -137,7 +148,8 @@ class Net_AsynchTCPConnectionBase_T
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t> inherited;
+                                           Stream_Statistic_t,
+                                           StreamType> inherited;
 
   Net_AsynchTCPConnectionBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnectionBase_T (const Net_AsynchTCPConnectionBase_T&));

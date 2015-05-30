@@ -126,7 +126,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("\"] {\"\" --> no GUI}")
             << std::endl;
   std::cout << ACE_TEXT ("-h           : use thread-pool [")
-            << NET_EVENT_USE_THREADPOOL
+            << NET_EVENT_USE_THREAD_POOL
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-i [VALUE]   : client ping interval (ms) [")
@@ -217,7 +217,7 @@ do_processArguments (const int& argc_in,
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
   UIFile_out = path;
-  useThreadPool_out = NET_EVENT_USE_THREADPOOL;
+  useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
   clientPingInterval_out =
     NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
@@ -975,7 +975,7 @@ ACE_TMAIN (int argc_in,
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
   std::string UI_file = path;
-  bool use_threadpool = NET_EVENT_USE_THREADPOOL;
+  bool use_threadpool = NET_EVENT_USE_THREAD_POOL;
   unsigned int ping_interval = NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
   bool log_to_file = false;

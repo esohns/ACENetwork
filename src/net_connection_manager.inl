@@ -33,12 +33,14 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::Net_Connection_Manager_T ()
+                         StatisticContainerType,
+                         StreamType>::Net_Connection_Manager_T ()
  : condition_ (lock_)
  , configuration_ ()
  , connections_ ()
@@ -57,12 +59,14 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::~Net_Connection_Manager_T ()
+                         StatisticContainerType,
+                         StreamType>::~Net_Connection_Manager_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::~Net_Connection_Manager_T"));
 
@@ -88,13 +92,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::initialize (unsigned int maxNumConnections_in)
+                         StatisticContainerType,
+                         StreamType>::initialize (unsigned int maxNumConnections_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::initialize"));
 
@@ -109,13 +115,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::lock ()
+                         StatisticContainerType,
+                         StreamType>::lock ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::lock"));
 
@@ -126,13 +134,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::unlock ()
+                         StatisticContainerType,
+                         StreamType>::unlock ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::unlock"));
 
@@ -143,14 +153,16 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::set (const ConfigurationType& configuration_in,
-                                                       UserDataType* userData_in)
+                         StatisticContainerType,
+                         StreamType>::set (const ConfigurationType& configuration_in,
+                                           UserDataType* userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::set"));
 
@@ -164,14 +176,16 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::get (ConfigurationType& configuration_out,
-                                                       UserDataType*& userData_out) const
+                         StatisticContainerType,
+                         StreamType>::get (ConfigurationType& configuration_out,
+                                           UserDataType*& userData_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
@@ -183,15 +197,18 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 Net_IConnection_T<AddressType,
                   ConfigurationType,
-                  StatisticContainerType>*
+                  StatisticContainerType,
+                  StreamType>*
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::operator[] (unsigned int index_in) const
+                         StatisticContainerType,
+                         StreamType>::operator[] (unsigned int index_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::operator[]"));
 
@@ -223,13 +240,57 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
+Net_IConnection_T<AddressType,
+                  ConfigurationType,
+                  StatisticContainerType,
+                  StreamType>*
+Net_Connection_Manager_T<AddressType,
+                         SocketConfigurationType,
+                         ConfigurationType,
+                         UserDataType,
+                         StatisticContainerType,
+                         StreamType>::get (ACE_HANDLE handle_in) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
+  //ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+
+  CONNECTION_T* connection_p = NULL;
+  for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
+       iterator.next (connection_p);
+       iterator.advance ())
+    if (connection_p->id () == static_cast<unsigned int> (handle_in))
+      break;
+  if (!connection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid handle (was: %u), aborting\n"),
+                handle_in));
+    return NULL;
+  } // end IF
+
+  // increase reference count
+  connection_p->increase ();
+
+  return connection_p;
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename StatisticContainerType,
+          typename StreamType>
 bool
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::registerc (CONNECTION_T* connection_in)
+                         StatisticContainerType,
+                         StreamType>::registerc (CONNECTION_T* connection_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::registerc"));
 
@@ -252,13 +313,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::deregister (CONNECTION_T* connection_in)
+                         StatisticContainerType,
+                         StreamType>::deregister (CONNECTION_T* connection_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::deregister"));
 
@@ -302,13 +365,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 unsigned int
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::numConnections () const
+                         StatisticContainerType,
+                         StreamType>::numConnections () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::numConnections"));
 
@@ -322,13 +387,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::start ()
+                         StatisticContainerType,
+                         StreamType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
 
@@ -342,13 +409,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::stop (bool lockedAccess_in)
+                         StatisticContainerType,
+                         StreamType>::stop (bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
 
@@ -363,13 +432,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 bool
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::isRunning () const
+                         StatisticContainerType,
+                         StreamType>::isRunning () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
 
@@ -383,13 +454,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::abort ()
+                         StatisticContainerType,
+                         StreamType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abort"));
 
@@ -443,13 +516,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::wait () const
+                         StatisticContainerType,
+                         StreamType>::wait () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::wait"));
 
@@ -472,13 +547,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::abortOldestConnection ()
+                         StatisticContainerType,
+                         StreamType>::abortOldestConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortOldestConnection"));
 
@@ -524,13 +601,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::abortYoungestConnection ()
+                         StatisticContainerType,
+                         StreamType>::abortYoungestConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortYoungestConnection"));
 
@@ -577,13 +656,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 bool
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::collect (StatisticContainerType& data_out)
+                         StatisticContainerType,
+                         StreamType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::collect"));
 
@@ -623,13 +704,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::report () const
+                         StatisticContainerType,
+                         StreamType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::report"));
 
@@ -665,13 +748,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_Connection_Manager_T<AddressType,
                          SocketConfigurationType,
                          ConfigurationType,
                          UserDataType,
-                         StatisticContainerType>::dump_state () const
+                         StatisticContainerType,
+                         StreamType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::dump_state"));
 

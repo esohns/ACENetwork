@@ -32,7 +32,8 @@
 
 template <typename AddressType,
           typename ConfigurationType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 class Net_IConnection_T
  : public Common_IInitialize_T<ConfigurationType>
  , public Common_IStatistic_T<StatisticContainerType>
@@ -40,12 +41,14 @@ class Net_IConnection_T
  , public Common_IDumpState
 {
  public:
-  virtual ~Net_IConnection_T () {};
+  inline virtual ~Net_IConnection_T () {};
 
   virtual void info (ACE_HANDLE&,             // return value: I/O handle
                      AddressType&,            // return value: local SAP
                      AddressType&) const = 0; // return value: remote SAP
   virtual unsigned int id () const = 0;
+
+  virtual const StreamType& stream () const = 0;
 
   virtual void close () = 0;
 };
@@ -53,11 +56,13 @@ class Net_IConnection_T
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 class Net_ISocketConnection_T
  : virtual public Net_IConnection_T<AddressType,
                                     ConfigurationType,
-                                    StatisticContainerType>
+                                    StatisticContainerType,
+                                    StreamType>
  , virtual public Net_ITransportLayer_T<SocketConfigurationType>
 {
  public:

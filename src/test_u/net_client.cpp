@@ -135,7 +135,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("\"] {\"\" --> no GUI}")
             << std::endl;
   std::cout << ACE_TEXT ("-h           : use thread-pool [\"")
-            << NET_EVENT_USE_THREADPOOL
+            << NET_EVENT_USE_THREAD_POOL
             << ACE_TEXT ("\"]")
             << std::endl;
   std::cout << ACE_TEXT ("-i [VALUE]   : connection interval (s) [")
@@ -230,7 +230,7 @@ do_processArguments (int argc_in,
 //#endif
   path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
   UIFile_out = path;
-  useThreadPool_out = NET_EVENT_USE_THREADPOOL;
+  useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
   connectionInterval_out = NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
   logToFile_out = false;
   serverHostname_out = NET_CLIENT_DEF_SERVER_HOSTNAME;
@@ -524,6 +524,9 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
     &module_configuration;
   configuration.streamConfiguration.streamConfiguration.printFinalReport = true;
+  // *TODO*: is this correct ?
+  configuration.streamConfiguration.streamConfiguration.serializeOutput =
+      useThreadPool_in;
   configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
     0;
   configuration.streamConfiguration.streamConfiguration.useThreadPerConnection =
@@ -602,10 +605,6 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
   // step0e: initialize action timer
   Net_Client_SignalHandlerConfiguration_t signal_handler_configuration;
-  //  ACE_OS::memset (&signal_handler_configuration,
-  //                  0,
-  //                  sizeof (signal_handler_configuration));
-  signal_handler_configuration.actionTimerId = -1;
   signal_handler_configuration.connector = connector_p;
   result =
       signal_handler_configuration.peerAddress.set (serverPortNumber_in,
@@ -709,7 +708,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     } // end IF
   } // end IF
 
-  // step5b: initialize worker(s)
+  // step1b: initialize worker(s)
   int group_id = -1;
   // *NOTE*: this variable needs to stay on the working stack, it's passed to
   //         the worker(s) (if any)
@@ -745,7 +744,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                 ACE_TEXT ("started event dispatch...\n")));
   } // end IF
 
-  // step5c: connect immediately ?
+  // step1c: connect immediately ?
   if (UIDefinitionFile_in.empty () && (connectionInterval_in == 0))
   {
     bool result_2 =
@@ -796,7 +795,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
   // *NOTE*: from this point on, clean up any remote connections !
 
-  // step6: dispatch events
+  // step2: dispatch events
   // *NOTE*: when using a thread pool, handle things differently...
   if (useThreadPool_in &&
       (numDispatchThreads_in > 1))
@@ -815,7 +814,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
       result = reactor_p->run_reactor_event_loop (0);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to handle events: \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to handle events: \"%m\", continuing\n")));
     } // end IF
     else
     {
@@ -837,7 +836,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
       result = proactor_p->proactor_run_event_loop (0);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to handle events: \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to handle events: \"%m\", continuing\n")));
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
       // reset signal mask
       for (int i = ACE_SIGRTMIN;
@@ -848,8 +847,8 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
         if (result == -1)
         {
           ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT ("failed to ACE_OS::sigaddset(): \"%m\", returning\n")));
-          return;
+                      ACE_TEXT ("failed to ACE_OS::sigaddset(): \"%m\", aborting\n")));
+          break;
         } // end IF
       } // end FOR
       result = ACE_OS::thr_sigsetmask (SIG_SETMASK,
@@ -858,11 +857,10 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 #endif
     } // end ELSE
   } // end ELSE
-
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished event dispatch...\n")));
 
-  // step7: clean up
+  // step3: clean up
   if (!UIDefinitionFile_in.empty ())
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
   //		{ // synch access
@@ -1040,7 +1038,7 @@ ACE_TMAIN (int argc_in,
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
   std::string UI_file = path;
-  bool use_threadpool = NET_EVENT_USE_THREADPOOL;
+  bool use_threadpool = NET_EVENT_USE_THREAD_POOL;
   unsigned int connection_interval =
    NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
   bool log_to_file = false;

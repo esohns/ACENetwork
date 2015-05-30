@@ -184,4 +184,6 @@ struct IRC_Client_PhoneBook
   ACE_Date_Time         timestamp;
 };
 
+
+
 #endif

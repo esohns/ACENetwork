@@ -49,7 +49,8 @@ class Net_StreamUDPSocketBase_T
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType>
+                               StatisticContainerType,
+                               StreamType>
 {
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
@@ -83,13 +84,15 @@ class Net_StreamUDPSocketBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType,
+                                   StreamType> ICONNECTION_MANAGER_T;
   typedef Net_ConnectionBase_T<AddressType,
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType> CONNECTION_BASE_T;
+                               StatisticContainerType,
+                               StreamType> CONNECTION_BASE_T;
 
   Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
@@ -114,7 +117,8 @@ class Net_StreamUDPSocketBase_T
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType> inherited3;
+                               StatisticContainerType,
+                               StreamType> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));
@@ -147,7 +151,8 @@ class Net_StreamUDPSocketBase_T<AddressType,
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType>
+                               StatisticContainerType,
+                               StreamType>
 {
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
@@ -181,13 +186,15 @@ class Net_StreamUDPSocketBase_T<AddressType,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType,
+                                   StreamType> ICONNECTION_MANAGER_T;
   typedef Net_ConnectionBase_T<AddressType,
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType> CONNECTION_BASE_T;
+                               StatisticContainerType,
+                               StreamType> CONNECTION_BASE_T;
 
   Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
@@ -212,7 +219,8 @@ class Net_StreamUDPSocketBase_T<AddressType,
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType> inherited3;
+                               StatisticContainerType,
+                               StreamType> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));

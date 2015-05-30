@@ -340,10 +340,10 @@ do_work (IRC_Client_Configuration& configuration_in,
   // step1: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (NET_EVENT_USE_REACTOR,
                                               numDispatchThreads_in,
-                                              configuration_in.streamConfiguration.serializeOutput))
+                                              configuration_in.streamConfiguration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to init event dispatch, returning\n")));
+                ACE_TEXT ("failed to initialize event dispatch, returning\n")));
     return;
   } // end IF
 
@@ -351,7 +351,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   Net_SocketHandlerConfiguration_t socket_handler_configuration;
   socket_handler_configuration.bufferSize = IRC_CLIENT_BUFFER_SIZE;
   socket_handler_configuration.messageAllocator =
-    configuration_in.streamConfiguration.messageAllocator;
+    configuration_in.streamConfiguration.streamConfiguration.messageAllocator;
   socket_handler_configuration.socketConfiguration =
     configuration_in.socketConfiguration;
   Net_Client_IConnector_t* connector_p = NULL;
@@ -988,18 +988,20 @@ ACE_TMAIN (int argc_in,
       NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
 
   // ************ stream configuration data ****************
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.bufferSize = IRC_CLIENT_BUFFER_SIZE;
-  configuration.streamConfiguration.module = &IRC_handler_module;
-  configuration.streamConfiguration.statisticReportingInterval = 0; // == off
+  configuration.streamConfiguration.streamConfiguration.messageAllocator =
+      &message_allocator;
+  configuration.streamConfiguration.streamConfiguration.bufferSize =
+      IRC_CLIENT_BUFFER_SIZE;
+  configuration.streamConfiguration.streamConfiguration.module
+      = &IRC_handler_module;
+  configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
+      0; // == off
+  configuration.streamConfiguration.crunchMessageBuffers =
+      IRC_CLIENT_DEF_CRUNCH_MESSAGES;
+  configuration.streamConfiguration.debugScanner = debug_parser;
+  configuration.streamConfiguration.debugParser = debug_parser;
 
   // ************ protocol configuration data **************
-  configuration.protocolConfiguration.streamConfiguration.crunchMessageBuffers =
-    IRC_CLIENT_DEF_CRUNCH_MESSAGES;
-  configuration.protocolConfiguration.streamConfiguration.debugScanner =
-   debug_parser;
-  configuration.protocolConfiguration.streamConfiguration.debugParser =
-   debug_parser;
   configuration.protocolConfiguration.loginOptions = login_options;
 
   ACE_High_Res_Timer timer;

@@ -53,7 +53,8 @@ class Net_StreamAsynchUDPSocketBase_T
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType>
+                               StatisticContainerType,
+                               StreamType>
 {
  public:
   typedef Net_ConnectionBase_T<AddressType,
@@ -61,7 +62,8 @@ class Net_StreamAsynchUDPSocketBase_T
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType> CONNECTION_BASE_T;
+                               StatisticContainerType,
+                               StreamType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchUDPSocketBase_T ();
 
@@ -88,7 +90,8 @@ class Net_StreamAsynchUDPSocketBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType,
+                                   StreamType> ICONNECTION_MANAGER_T;
 
   Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                    unsigned int = 0);      // statistics collecting interval (second(s))
@@ -110,7 +113,8 @@ class Net_StreamAsynchUDPSocketBase_T
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType> inherited4;
+                               StatisticContainerType,
+                               StreamType> inherited4;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
@@ -145,7 +149,8 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType>
+                               StatisticContainerType,
+                               StreamType>
 {
  public:
   typedef Net_ConnectionBase_T<AddressType,
@@ -153,7 +158,8 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType> CONNECTION_BASE_T;
+                               StatisticContainerType,
+                               StreamType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchUDPSocketBase_T ();
 
@@ -180,7 +186,8 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType,
+                                   StreamType> ICONNECTION_MANAGER_T;
 
   Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                    unsigned int = 0);      // statistics collecting interval (second(s))
@@ -202,7 +209,8 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType> inherited4;
+                               StatisticContainerType,
+                               StreamType> inherited4;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));

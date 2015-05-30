@@ -111,8 +111,6 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::open"));
 
-  unsigned int session_id = 0;
-
   // step1: tweak socket, initialize I/O, ...
   inherited::open (handle_in, messageBlock_in);
 
@@ -433,6 +431,126 @@ template <typename AddressType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
+void
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketHandlerType>::info (ACE_HANDLE& handle_out,
+                                                          AddressType& localSAP_out,
+                                                          AddressType& remoteSAP_out) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::info"));
+
+  handle_out = inherited::handle ();
+  localSAP_out = inherited::localSAP_;
+  remoteSAP_out = inherited::remoteSAP_;
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+unsigned int
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketHandlerType>::id () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::id"));
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return reinterpret_cast<unsigned int> (inherited::handle ());
+#else
+  return static_cast<unsigned int> (inherited::handle ());
+#endif
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+const StreamType&
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketHandlerType>::stream () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::stream"));
+
+  return stream_;
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
+void
+Net_StreamAsynchTCPSocketBase_T<AddressType,
+                                SocketConfigurationType,
+                                ConfigurationType,
+                                UserDataType,
+                                SessionDataType,
+                                StatisticContainerType,
+                                StreamType,
+                                SocketHandlerType>::close ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::close"));
+
+  int result = -1;
+
+  // step1: shutdown operations
+  ACE_HANDLE handle = inherited::handle ();
+  // *NOTE*: may 'delete this'
+  result = handle_close (handle,
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+
+  //  step2: release the socket handle
+  if (handle != ACE_INVALID_HANDLE)
+  {
+    result = ACE_OS::closesocket (handle);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                  handle));
+//    inherited::handle (ACE_INVALID_HANDLE);
+  } // end IF
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketHandlerType>
 bool
 Net_StreamAsynchTCPSocketBase_T<AddressType,
                                 SocketConfigurationType,
@@ -487,103 +605,6 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
   }
-}
-
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename ConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename SocketHandlerType>
-void
-Net_StreamAsynchTCPSocketBase_T<AddressType,
-                                SocketConfigurationType,
-                                ConfigurationType,
-                                UserDataType,
-                                SessionDataType,
-                                StatisticContainerType,
-                                StreamType,
-                                SocketHandlerType>::close ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::close"));
-
-  int result = -1;
-
-  // step1: shutdown operations
-  ACE_HANDLE handle = inherited::handle ();
-  // *NOTE*: may 'delete this'
-  result = handle_close (handle,
-                         ACE_Event_Handler::ALL_EVENTS_MASK);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
-
-  //  step2: release the socket handle
-  if (handle != ACE_INVALID_HANDLE)
-  {
-    result = ACE_OS::closesocket (handle);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  handle));
-//    inherited::handle (ACE_INVALID_HANDLE);
-  } // end IF
-}
-
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename ConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename SocketHandlerType>
-void
-Net_StreamAsynchTCPSocketBase_T<AddressType,
-                                SocketConfigurationType,
-                                ConfigurationType,
-                                UserDataType,
-                                SessionDataType,
-                                StatisticContainerType,
-                                StreamType,
-                                SocketHandlerType>::info (ACE_HANDLE& handle_out,
-                                                          AddressType& localSAP_out,
-                                                          AddressType& remoteSAP_out) const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::info"));
-
-  handle_out = inherited::handle ();
-  localSAP_out = inherited::localSAP_;
-  remoteSAP_out = inherited::remoteSAP_;
-}
-
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename ConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename SocketHandlerType>
-unsigned int
-Net_StreamAsynchTCPSocketBase_T<AddressType,
-                                SocketConfigurationType,
-                                ConfigurationType,
-                                UserDataType,
-                                SessionDataType,
-                                StatisticContainerType,
-                                StreamType,
-                                SocketHandlerType>::id () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::id"));
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<unsigned int> (inherited::handle ());
-#else
-  return static_cast<unsigned int> (inherited::handle ());
-#endif
 }
 
 template <typename AddressType,

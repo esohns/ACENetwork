@@ -41,6 +41,10 @@ m4/ltversion.m4
 m4/lt~obsolete.m4
 m4/ltoptions.m4
 
+# kdevelop
+.kdev4/
+
+# MSVC
 Debug/
 Release/
 Debug_obj/
@@ -48,3 +52,5 @@ ipch/
 *.sdf
 *.suo
 /prj/msvc/*.opensdf
+*.vcxproj.user
+

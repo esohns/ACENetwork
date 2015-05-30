@@ -37,13 +37,15 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 class Net_Connection_Manager_T
  : public Net_IConnectionManager_T<AddressType,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType>
+                                   StatisticContainerType,
+                                   StreamType>
  , public Common_IStatistic_T<StatisticContainerType>
  , public Common_IDumpState
 {
@@ -52,7 +54,8 @@ class Net_Connection_Manager_T
                                                       SocketConfigurationType,
                                                       ConfigurationType,
                                                       UserDataType,
-                                                      StatisticContainerType>,
+                                                      StatisticContainerType,
+                                                      StreamType>,
                              ACE_Recursive_Thread_Mutex>;
 
   //// needs access to (de-)register itself with the singleton
@@ -64,7 +67,8 @@ class Net_Connection_Manager_T
   // convenience types
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
-                            StatisticContainerType> CONNECTION_T;
+                            StatisticContainerType,
+                            StreamType> CONNECTION_T;
 
   // configuration / initialization
   void initialize (unsigned int); // maximum number of concurrent connections
@@ -77,7 +81,8 @@ class Net_Connection_Manager_T
                                            // connection handler configuration
                     UserDataType*&) const; // return value: (stream) user data
 
-  virtual CONNECTION_T* operator[] (unsigned int) const;
+  virtual CONNECTION_T* operator[] (unsigned int) const; // index
+  virtual CONNECTION_T* get (ACE_HANDLE) const; // socket handle
 
   virtual bool registerc (CONNECTION_T*); // connection handle
   virtual void deregister (CONNECTION_T*); // connection handle
@@ -112,7 +117,8 @@ class Net_Connection_Manager_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType> SELF_T;
+                                   StatisticContainerType,
+                                   StreamType> SELF_T;
 
   typedef ACE_DLList<CONNECTION_T> CONNECTION_CONTAINER_T;
   typedef ACE_DLList_Iterator<CONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;

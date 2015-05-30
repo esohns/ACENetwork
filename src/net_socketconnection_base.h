@@ -35,13 +35,15 @@ template <typename AddressType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 class Net_SocketConnectionBase_T
  : public HandlerType
  , public Net_ISocketConnection_T<AddressType,
                                   SocketConfigurationType,
                                   ConfigurationType,
-                                  StatisticContainerType>
+                                  StatisticContainerType,
+                                  StreamType>
 {
  public:
   virtual ~Net_SocketConnectionBase_T ();
@@ -69,7 +71,8 @@ class Net_SocketConnectionBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType,
+                                   StreamType> ICONNECTION_MANAGER_T;
 
   Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                               unsigned int = 0);      // statistics collecting interval (second(s))
@@ -95,13 +98,15 @@ template <typename AddressType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 class Net_AsynchSocketConnectionBase_T
  : public HandlerType
  , public Net_ISocketConnection_T<AddressType,
                                   SocketConfigurationType,
                                   ConfigurationType,
-                                  StatisticContainerType>
+                                  StatisticContainerType,
+                                  StreamType>
 {
  public:
   virtual ~Net_AsynchSocketConnectionBase_T ();
@@ -119,7 +124,8 @@ class Net_AsynchSocketConnectionBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType,
+                                   StreamType> ICONNECTION_MANAGER_T;
 
   Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                     unsigned int = 0);      // statistics collecting interval (second(s))

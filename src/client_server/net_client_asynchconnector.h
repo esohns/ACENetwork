@@ -44,6 +44,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
+          typename StreamType,
           typename HandlerType>
 class Net_Client_AsynchConnector_T
  : public ACE_Asynch_Connector<HandlerType>
@@ -55,7 +56,8 @@ class Net_Client_AsynchConnector_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t,
+                                   StreamType> ICONNECTION_MANAGER_T;
 
   Net_Client_AsynchConnector_T (const HandlerConfigurationType*, // socket handler configuration handle
                                 ICONNECTION_MANAGER_T*,          // connection manager handle
@@ -72,7 +74,7 @@ class Net_Client_AsynchConnector_T
   virtual bool useReactor () const; // ? : uses proactor
   virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
-  virtual bool connect (const AddressType&);
+  virtual ACE_HANDLE connect (const AddressType&);
 
  protected:
   // override default creation strategy
@@ -98,13 +100,15 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    HandlerConfigurationType,
                                    UserDataType,
                                    SessionDataType,
+                                   StreamType,
                                    Net_AsynchUDPConnection_T<UserDataType,
                                                              SessionDataType,
                                                              HandlerType> >
@@ -119,7 +123,8 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t,
+                                   StreamType> ICONNECTION_MANAGER_T;
   typedef Net_AsynchUDPConnection_T<UserDataType,
                                     SessionDataType,
                                     HandlerType> CONNECTION_T;
@@ -140,7 +145,7 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
   virtual bool useReactor () const; // ? : uses proactor
   virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
-  virtual bool connect (const ACE_INET_Addr&);
+  virtual ACE_HANDLE connect (const ACE_INET_Addr&);
 
  protected:
   // override default creation strategy
@@ -172,13 +177,15 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    HandlerConfigurationType,
                                    UserDataType,
                                    SessionDataType,
+                                   StreamType,
                                    HandlerType>
  : public ACE_Asynch_Connector<HandlerType>
  , public Net_Client_IConnector_T<ACE_Netlink_Addr,
@@ -189,7 +196,8 @@ class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t,
+                                   StreamType> ICONNECTION_MANAGER_T;
 
   // *TODO*: pass HandlerConfigurationType instead
   Net_Client_AsynchConnector_T (const HandlerConfigurationType*, // socket handler configuration handle
@@ -207,7 +215,7 @@ class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
   virtual bool useReactor () const; // ? : uses proactor
   virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
-  virtual bool connect (const ACE_Netlink_Addr&);
+  virtual ACE_HANDLE connect (const ACE_Netlink_Addr&);
 
  protected:
   // override default creation strategy

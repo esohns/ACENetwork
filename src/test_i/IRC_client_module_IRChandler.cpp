@@ -480,9 +480,8 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       IRC_Client_Module_IRCHandler_Module* module_p =
         dynamic_cast<IRC_Client_Module_IRCHandler_Module*> (inherited::module ());
       ACE_ASSERT (module_p);
-      Stream_ModuleConfiguration_t* configuration_p = NULL;
-      module_p->get (configuration_p);
-      ACE_ASSERT (configuration_p);
+      const Stream_ModuleConfiguration_t& module_configuration =
+          module_p->get ();
 
       {
         ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
@@ -502,7 +501,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
         {
           try
           {
-            (*iter++)->start (*configuration_p);
+            (*iter++)->start (module_configuration);
           }
           catch (...)
           {
@@ -1309,6 +1308,8 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Client_IRCMessage*& command_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::sendMessage"));
 
+  int result = -1;
+
   // step1: get a message buffer
   IRC_Client_Message* message_p = allocateMessage (bufferSize_);
   if (!message_p)
@@ -1343,7 +1344,8 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Client_IRCMessage*& command_in)
     return;
   } // end IF
 
-  if (reply (message_p, NULL) == -1)
+  result = inherited::reply (message_p, NULL);
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Task::reply(): \"%m\", returning\n")));

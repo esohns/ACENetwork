@@ -25,7 +25,6 @@
 #include "ace/Netlink_Addr.h"
 
 #include "stream_common.h"
-//#include "stream_defines.h"
 #include "stream_iallocator.h"
 
 #include "net_defines.h"

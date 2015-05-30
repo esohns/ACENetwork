@@ -30,14 +30,16 @@ template <typename AddressType,
           typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
                      SessionDataType,
-                     StatisticContainerType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                    unsigned int statisticCollectionInterval_in)
+                     StatisticContainerType,
+                     StreamType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                        unsigned int statisticCollectionInterval_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
  , configuration_ ()
@@ -121,13 +123,15 @@ template <typename AddressType,
           typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
                      SessionDataType,
-                     StatisticContainerType>::~Net_ConnectionBase_T ()
+                     StatisticContainerType,
+                     StreamType>::~Net_ConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
 
@@ -162,14 +166,16 @@ template <typename AddressType,
           typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 bool
 Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
                      SessionDataType,
-                     StatisticContainerType>::registerc ()
+                     StatisticContainerType,
+                     StreamType>::registerc ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::registerc"));
 
@@ -253,14 +259,16 @@ template <typename AddressType,
           typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 void
 Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
                      SessionDataType,
-                     StatisticContainerType>::deregister ()
+                     StatisticContainerType,
+                     StreamType>::deregister ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::deregister"));
 
@@ -315,14 +323,16 @@ template <typename AddressType,
           typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 bool
 Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
                      SessionDataType,
-                     StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
+                     StatisticContainerType,
+                     StreamType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));
 

@@ -21,6 +21,8 @@
 #ifndef NET_CLIENT_ICONNECTOR_H
 #define NET_CLIENT_ICONNECTOR_H
 
+#include "ace/Global_Macros.h"
+
 template <typename AddressType,
           typename ConfigurationType> // socket handler configuration
 class Net_Client_IConnector_T
@@ -33,7 +35,7 @@ class Net_Client_IConnector_T
   virtual const ConfigurationType* getConfiguration () const = 0;
 
   virtual void abort () = 0; // shutdown
-  virtual bool connect (const AddressType&) = 0;
+  virtual ACE_HANDLE connect (const AddressType&) = 0;
 };
 
 //template <typename AddressType,
@@ -46,7 +48,7 @@ class Net_Client_IConnector_T
 //  virtual const ConfigurationType* getConfiguration () const = 0;
 //
 //  virtual void abort () = 0; // shutdown
-//  virtual void connect (const AddressType&) = 0;
+//  virtual connect (const AddressType&) = 0;
 //};
 
 #endif

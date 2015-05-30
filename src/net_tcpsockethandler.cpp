@@ -164,7 +164,7 @@ Net_TCPSocketHandler::open (void* arg_in)
   // *NOTE*: let the reactor manage this handler...
   if (inherited2::reference_counting_policy ().value () ==
       ACE_Event_Handler::Reference_Counting_Policy::ENABLED)
-    remove_reference ();
+    inherited2::remove_reference ();
 
   // *NOTE*: registered with the reactor (READ_MASK) at this point
 
@@ -212,7 +212,7 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
     case ACE_Event_Handler::WRITE_MASK:      // --> socket has been closed (send failed) (DevPoll)
     case ACE_Event_Handler::EXCEPT_MASK:     // --> socket has been closed (send failed)
       break;
-    case ACE_Event_Handler::ALL_EVENTS_MASK: // - connect failed (e.g. connection refused) /
+    case ACE_Event_Handler::ALL_EVENTS_MASK: // - connect failed (e.g. connection refused/timed out) /
                                              // - accept failed (e.g. too many connections) /
                                              // - select failed (EBADF see Select_Reactor_T.cpp) /
                                              // - user abort
@@ -221,6 +221,18 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
       // *NOTE*: handle_in == ACE_INVALID_HANDLE
       //         --> client side: connection failed, no need to deregister from the reactor
       //         --> server side: too many open connections
+      int error = ACE_OS::last_error ();
+      if ((mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) &&
+          (error == ETIMEDOUT)) // <-- failed to connect: timed out
+      {
+        // *IMPORTANT NOTE*: the connection hasn't been open()ed / registered
+        //                   --> remove the (final) reference manually
+        inherited2::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+        result = inherited2::remove_reference ();
+        ACE_ASSERT (result == 0);
+        break;
+      } // end IF
+
       if (handle_in != ACE_INVALID_HANDLE)
       {
         ACE_Reactor* reactor_p = inherited2::reactor ();

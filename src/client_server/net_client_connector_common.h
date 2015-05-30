@@ -24,6 +24,7 @@
 #include "ace/INET_Addr.h"
 
 #include "net_configuration.h"
+#include "net_stream.h"
 #include "net_stream_common.h"
 #include "net_tcpconnection.h"
 
@@ -40,6 +41,7 @@ typedef Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                      Net_SocketHandlerConfiguration_t,
                                      Net_UserData_t,
                                      Net_StreamSessionData_t,
+                                     Net_Stream,
                                      Net_AsynchTCPConnection> Net_Client_AsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_INET_Addr,
                                Net_SocketConfiguration_t,
@@ -47,6 +49,7 @@ typedef Net_Client_Connector_T<ACE_INET_Addr,
                                Net_SocketHandlerConfiguration_t,
                                Net_UserData_t,
                                Net_StreamSessionData_t,
+                               Net_Stream,
                                Net_TCPConnection> Net_Client_Connector_t;
 
 #endif

@@ -36,7 +36,8 @@
 #include "IRC_client_gui_connection.h"
 #include "IRC_client_gui_defines.h"
 #include "IRC_client_gui_messagehandler.h"
-#include "IRC_client_module_IRChandler.h"
+#include "IRC_client_iIRCControl.h"
+#include "IRC_client_network.h"
 #include "IRC_client_tools.h"
 
 #ifdef __cplusplus
@@ -354,85 +355,56 @@ connect_clicked_cb (GtkWidget* widget_in,
   if (login_options.nick.size () > IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH)
     login_options.nick.resize (IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH);
 
-  // step3: create/initialize new final module
-  Stream_Module_t* module_p = NULL;
-  //ACE_NEW_NORETURN (module_p,
-  //                  IRC_Client_Module_IRCHandler_Module (ACE_TEXT_ALWAYS_CHAR ("IRCHandler"),
-  //                                                       NULL));
-  if (data_p->configuration->streamConfiguration.streamConfiguration.module)
-  {
-    Stream_IModule_t* imodule_p =
-      dynamic_cast<Stream_IModule_t*> (data_p->configuration->streamConfiguration.streamConfiguration.module);
-    if (!imodule_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, returning\n"),
-                  ACE_TEXT (data_p->configuration->streamConfiguration.streamConfiguration.module->name ())));
-      return;
-    } // end IF
-    try
-    {
-      module_p = imodule_p->clone ();
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), continuing\n"),
-                  ACE_TEXT (data_p->configuration->streamConfiguration.streamConfiguration.module->name ())));
-    } // end IF
-    if (!module_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to Stream_IModule::clone(), returning\n"),
-                  ACE_TEXT (data_p->configuration->streamConfiguration.streamConfiguration.module->name ())));
-      return;
-    } // end IF
-  } // end IF
-  IRC_Client_Module_IRCHandler* IRChandler_impl_p = NULL;
-  if (module_p)
-  {
-    IRChandler_impl_p =
-      dynamic_cast<IRC_Client_Module_IRCHandler*> (module_p->writer ());
-    if (!IRChandler_impl_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
+//  // step3: create/initialize new final module
+//  Stream_Module_t* module_p = NULL;
+//  if (data_p->configuration->streamConfiguration.streamConfiguration.module)
+//  {
+//    Stream_IModule_t* imodule_p =
+//      dynamic_cast<Stream_IModule_t*> (data_p->configuration->streamConfiguration.streamConfiguration.module);
+//    if (!imodule_p)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, returning\n"),
+//                  ACE_TEXT (data_p->configuration->streamConfiguration.streamConfiguration.module->name ())));
+//      return;
+//    } // end IF
+//    try
+//    {
+//      module_p = imodule_p->clone ();
+//    }
+//    catch (...)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), continuing\n"),
+//                  ACE_TEXT (data_p->configuration->streamConfiguration.streamConfiguration.module->name ())));
+//    } // end IF
+//    if (!module_p)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("%s: failed to Stream_IModule::clone(), returning\n"),
+//                  ACE_TEXT (data_p->configuration->streamConfiguration.streamConfiguration.module->name ())));
+//      return;
+//    } // end IF
+//  } // end IF
+//  IRC_Client_IIRCControl* IRCControl_p = NULL;
+//  if (module_p)
+//  {
+//    IRCControl_p =
+//      dynamic_cast<IRC_Client_IIRCControl*> (module_p->writer ());
+//    if (!IRCControl_p)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("dynamic_cast<IRC_Client_IIRCControl> failed, returning\n")));
 
-      // clean up
-      delete module_p;
+//      // clean up
+//      delete module_p;
 
-      return;
-    } // end IF
-  } // end IF
+//      return;
+//    } // end IF
+//  } // end IF
 
-  // step4: create/initialize new connection handler
-  // retrieve server tabs handle
-  GtkNotebook* notebook_p =
-    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR ("main_server_tabs")));
-  ACE_ASSERT (notebook_p);
-  IRC_Client_GUI_Connection* connection_p = NULL;
-  ACE_NEW_NORETURN (connection_p,
-                    IRC_Client_GUI_Connection (&data_p->GTKState,
-                                               IRChandler_impl_p,
-                                               &data_p->connections,
-                                               entry_name,
-                                               data_p->UIFileDirectory,
-                                               notebook_p));
-  if (!connection_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-
-    // clean up
-    module_p->close ();
-    delete module_p;
-
-    return;
-  } // end IF
-
-  // step5: connect to the server
-  bool result = false;
+  // step4: connect to the server
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
   for (IRC_Client_PortRangesIterator_t port_range_iter = (*phonebook_iterator).second.listeningPorts.begin ();
        port_range_iter != (*phonebook_iterator).second.listeningPorts.end ();
        port_range_iter++)
@@ -443,7 +415,7 @@ connect_clicked_cb (GtkWidget* widget_in,
            current_port <= (*port_range_iter).second;
            current_port++)
     {
-      result =
+      handle =
         IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
                                    login_options,                                                                             // login options
                                    data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
@@ -451,12 +423,13 @@ connect_clicked_cb (GtkWidget* widget_in,
                                    data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
                                    (*phonebook_iterator).second.hostName,                                                     // server hostname
                                    current_port,                                                                              // server listening port
-                                   module_p);                                                                                 // final module handle
-      if (result)
+                                   *(data_p->configuration->streamConfiguration.streamConfiguration.moduleConfiguration),     // module configuration
+                                   data_p->configuration->streamConfiguration.streamConfiguration.module);                    // final module handle
+      if (handle != ACE_INVALID_HANDLE)
         break;
     } // end FOR
     else
-      result =
+      handle =
         IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
                                    login_options,                                                                             // login options
                                    data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
@@ -464,24 +437,90 @@ connect_clicked_cb (GtkWidget* widget_in,
                                    data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
                                    (*phonebook_iterator).second.hostName,                                                     // server hostname
                                    (*port_range_iter).first,                                                                  // server listening port
-                                   module_p);                                                                                 // final module handle
-    if (result)
+                                   *(data_p->configuration->streamConfiguration.streamConfiguration.moduleConfiguration),     // module configuration
+                                   data_p->configuration->streamConfiguration.streamConfiguration.module);                    // final module handle
+    if (handle != ACE_INVALID_HANDLE)
       break;
 
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to connect to server(\"%s\"), retrying\n"),
                 ACE_TEXT ((*phonebook_iterator).second.hostName.c_str ())));
   } // end FOR
-  if (!result)
+  if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to server(\"%s\"), returning\n"),
                 ACE_TEXT ((*phonebook_iterator).second.hostName.c_str ())));
+    return;
+  } // end IF
+
+  IRC_Client_Connection_Manager_t::CONNECTION_T* connection_p =
+      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->get (handle);
+  if (!connection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_Connection_Manager_t::get(%u), aborting\n"),
+                handle));
+  } // end IF
+  const IRC_Client_Stream& stream = connection_p->stream ();
+  Stream_Iterator_t iterator_2 (stream);
+  const Stream_Module_t* module_p = NULL;
+  for (const Stream_Module_t* current_p = NULL;
+       iterator_2.next (current_p) != 0;
+       iterator_2.advance ())
+    if (current_p != const_cast<IRC_Client_Stream&> (stream).tail ())
+      module_p = current_p;
+  ACE_ASSERT (module_p);
+  IRC_Client_IIRCControl* IRCControl_p =
+      dynamic_cast<IRC_Client_IIRCControl*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  if (!IRCControl_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("dynamic_cast<IRC_Client_IIRCControl> failed, returning\n")));
 
     // clean up
-    delete connection_p;
-    module_p->close ();
-    delete module_p;
+    connection_p->close ();
+    connection_p->decrease ();
+
+    return;
+  } // end IF
+
+  // step4: create/initialize new connection handler
+  // retrieve server tabs handle
+  GtkNotebook* notebook_p =
+    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR ("main_server_tabs")));
+  ACE_ASSERT (notebook_p);
+  IRC_Client_GUI_Connection* connection_2 = NULL;
+  ACE_NEW_NORETURN (connection_2,
+                    IRC_Client_GUI_Connection (&data_p->GTKState,
+                                               IRCControl_p,
+                                               &data_p->connections,
+                                               entry_name,
+                                               data_p->UIFileDirectory,
+                                               notebook_p));
+  if (!connection_2)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+
+    // clean up
+    connection_p->close ();
+    connection_p->decrease ();
+
+    return;
+  } // end IF
+  if (!connection_2->isInitialized_)
+  {
+    // most probable reason: connection to this server already exists
+    // *TODO*: prevent this upstream
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize connection, returning\n")));
+
+    // clean up
+    connection_p->close ();
+    connection_p->decrease ();
+    delete connection_2;
 
     return;
   } // end IF
@@ -490,10 +529,11 @@ connect_clicked_cb (GtkWidget* widget_in,
   //              ACE_TEXT("registering...\n")));
 
   // step6: register connection with the server
+  bool result = false;
   try
   {
-    // *NOTE*: this entails a little delay waiting for the welcome notice...
-    result = IRChandler_impl_p->registerConnection (login_options);
+    // *NOTE*: this entails a little delay (waiting for the welcome notice...)
+    result = IRCControl_p->registerConnection (login_options);
   }
   catch (...)
   {
@@ -506,14 +546,16 @@ connect_clicked_cb (GtkWidget* widget_in,
                 ACE_TEXT ("failed to IRC_Client_IIRCControl::registerConnection(), returning\n")));
 
     // clean up
-    delete connection_p;
-    module_p->close ();
-    delete module_p;
+    connection_p->close ();
+    connection_p->decrease ();
+    delete connection_2;
 
     return;
   } // end IF
   //   ACE_DEBUG((LM_DEBUG,
   //              ACE_TEXT("registering...DONE\n")));
+
+  connection_p->decrease ();
 
   // step7: remember this connection
   // synch access
@@ -521,7 +563,7 @@ connect_clicked_cb (GtkWidget* widget_in,
     ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->GTKState.lock);
 
     // *TODO*: who deletes the module ? (the stream won't do it !)
-    data_p->connections.insert (std::make_pair (entry_name, connection_p));
+    data_p->connections.insert (std::make_pair (entry_name, connection_2));
   } // end lock scope
 }
 

@@ -80,6 +80,8 @@ class IRC_Client_GUI_Connection
   void createMessageHandler (const std::string&); // channel/nick
   void terminateMessageHandler (const std::string&); // channel/nick
 
+  bool isInitialized_;
+
  private:
   typedef std::map<std::string,
                    IRC_Client_GUI_MessageHandler* > MESSAGE_HANDLERS_T;

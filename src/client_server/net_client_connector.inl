@@ -22,7 +22,6 @@
 
 #include "common_defines.h"
 
-//#include "net_common.h"
 #include "net_macros.h"
 
 template <typename AddressType,
@@ -31,6 +30,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
+          typename StreamType,
           typename HandlerType>
 Net_Client_Connector_T<AddressType,
                        SocketConfigurationType,
@@ -38,6 +38,7 @@ Net_Client_Connector_T<AddressType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::Net_Client_Connector_T (const HandlerConfigurationType* configuration_in,
                                                              ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                              unsigned int statisticCollectionInterval_in)
@@ -58,6 +59,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
+          typename StreamType,
           typename HandlerType>
 Net_Client_Connector_T<AddressType,
                        SocketConfigurationType,
@@ -65,6 +67,7 @@ Net_Client_Connector_T<AddressType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
@@ -77,6 +80,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
+          typename StreamType,
           typename HandlerType>
 bool
 Net_Client_Connector_T<AddressType,
@@ -85,6 +89,7 @@ Net_Client_Connector_T<AddressType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::useReactor () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
@@ -98,6 +103,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
+          typename StreamType,
           typename HandlerType>
 void
 Net_Client_Connector_T<AddressType,
@@ -106,6 +112,7 @@ Net_Client_Connector_T<AddressType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
@@ -122,14 +129,16 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
+          typename StreamType,
           typename HandlerType>
-bool
+ACE_HANDLE
 Net_Client_Connector_T<AddressType,
                        SocketConfigurationType,
                        ConfigurationType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::connect (const AddressType& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
@@ -157,10 +166,11 @@ Net_Client_Connector_T<AddressType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Connector::connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));
-    return false;
+    return ACE_INVALID_HANDLE;
   } // end IF
+  ACE_ASSERT (handler_p);
 
-  return true;
+  return handler_p->get_handle ();
 }
 
 template <typename AddressType,
@@ -169,6 +179,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
+          typename StreamType,
           typename HandlerType>
 const HandlerConfigurationType*
 Net_Client_Connector_T<AddressType,
@@ -177,6 +188,7 @@ Net_Client_Connector_T<AddressType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
@@ -190,6 +202,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename UserDataType,
           typename SessionDataType,
+          typename StreamType,
           typename HandlerType>
 int
 Net_Client_Connector_T<AddressType,
@@ -198,6 +211,7 @@ Net_Client_Connector_T<AddressType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::make_svc_handler (HandlerType*& handler_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
@@ -223,13 +237,15 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 Net_Client_Connector_T<ACE_INET_Addr,
                        SocketConfigurationType,
                        ConfigurationType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
                                            HandlerType> >::Net_Client_Connector_T (const HandlerConfigurationType* configuration_in,
@@ -248,13 +264,15 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 Net_Client_Connector_T<ACE_INET_Addr,
                        SocketConfigurationType,
                        ConfigurationType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
                                            HandlerType> >::~Net_Client_Connector_T ()
@@ -268,7 +286,8 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 bool
 Net_Client_Connector_T<ACE_INET_Addr,
                        SocketConfigurationType,
@@ -276,9 +295,10 @@ Net_Client_Connector_T<ACE_INET_Addr,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        Net_UDPConnection_T<UserDataType,
-                       SessionDataType,
-                       HandlerType> >::useReactor () const
+                                           SessionDataType,
+                                           HandlerType> >::useReactor () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
 
@@ -290,7 +310,8 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 void
 Net_Client_Connector_T<ACE_INET_Addr,
                        SocketConfigurationType,
@@ -298,6 +319,7 @@ Net_Client_Connector_T<ACE_INET_Addr,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
                                            HandlerType> >::abort ()
@@ -311,14 +333,16 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
-bool
+          typename SessionDataType,
+          typename StreamType>
+ACE_HANDLE
 Net_Client_Connector_T<ACE_INET_Addr,
                        SocketConfigurationType,
                        ConfigurationType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
                                            HandlerType> >::connect (const ACE_INET_Addr& address_in)
@@ -333,7 +357,7 @@ Net_Client_Connector_T<ACE_INET_Addr,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_Connector_T<Net_UDPConnection>::make_svc_handler(): \"%m\", aborting\n")));
-    return false;
+    return ACE_INVALID_HANDLE;
   } // end IF
   ACE_ASSERT (handler_p);
 
@@ -352,10 +376,14 @@ Net_Client_Connector_T<ACE_INET_Addr,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Connector::connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));
-    return false;
+
+//    // clean up
+//    delete handler_p;
+
+    return ACE_INVALID_HANDLE;
   } // end IF
 
-  return true;
+  return handler_p->get_handle ();
 }
 
 template <typename SocketConfigurationType,
@@ -363,7 +391,8 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 const HandlerConfigurationType*
 Net_Client_Connector_T<ACE_INET_Addr,
                        SocketConfigurationType,
@@ -371,6 +400,7 @@ Net_Client_Connector_T<ACE_INET_Addr,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        Net_UDPConnection_T<UserDataType,
                                            SessionDataType,
                                            HandlerType> >::getConfiguration () const
@@ -385,7 +415,8 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 int
 Net_Client_Connector_T<ACE_INET_Addr,
                        SocketConfigurationType,
@@ -393,9 +424,10 @@ Net_Client_Connector_T<ACE_INET_Addr,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        Net_UDPConnection_T<UserDataType,
-                       SessionDataType,
-                       HandlerType> >::make_svc_handler (CONNECTION_T*& handler_out)
+                                           SessionDataType,
+                                           HandlerType> >::make_svc_handler (CONNECTION_T*& handler_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
 
@@ -421,13 +453,15 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 Net_Client_Connector_T<ACE_Netlink_Addr,
                        SocketConfigurationType,
                        ConfigurationType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::Net_Client_Connector_T (const HandlerConfigurationType* configuration_in,
                                                              ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                              unsigned int statisticCollectionInterval_in)
@@ -444,13 +478,15 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 Net_Client_Connector_T<ACE_Netlink_Addr,
                        SocketConfigurationType,
                        ConfigurationType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
@@ -462,7 +498,8 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 bool
 Net_Client_Connector_T<ACE_Netlink_Addr,
                        SocketConfigurationType,
@@ -470,6 +507,7 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::useReactor () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
@@ -482,7 +520,8 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 void
 Net_Client_Connector_T<ACE_Netlink_Addr,
                        SocketConfigurationType,
@@ -490,6 +529,7 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
@@ -501,14 +541,16 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
-bool
+          typename SessionDataType,
+          typename StreamType>
+ACE_HANDLE
 Net_Client_Connector_T<ACE_Netlink_Addr,
                        SocketConfigurationType,
                        ConfigurationType,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::connect (const ACE_Netlink_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
@@ -521,7 +563,7 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_Connector_T::make_svc_handler(): \"%m\", aborting\n")));
-    return false;
+    return ACE_INVALID_HANDLE;
   } // end IF
   ACE_ASSERT (handler_p);
 
@@ -541,10 +583,14 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::open(\"%s\"): \"%m\", aborting\n"),
                 buffer));
-    return false;
+
+//    // clean up
+//    delete handler_p;
+
+    return ACE_INVALID_HANDLE;
   } // end IF
 
-  return true;
+  return handler_p->get_handle ();
 }
 
 template <typename SocketConfigurationType,
@@ -552,7 +598,8 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 const HandlerConfigurationType*
 Net_Client_Connector_T<ACE_Netlink_Addr,
                        SocketConfigurationType,
@@ -560,6 +607,7 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::getConfiguration"));
@@ -572,7 +620,8 @@ template <typename SocketConfigurationType,
           typename ConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType>
+          typename SessionDataType,
+          typename StreamType>
 int
 Net_Client_Connector_T<ACE_Netlink_Addr,
                        SocketConfigurationType,
@@ -580,6 +629,7 @@ Net_Client_Connector_T<ACE_Netlink_Addr,
                        HandlerConfigurationType,
                        UserDataType,
                        SessionDataType,
+                       StreamType,
                        HandlerType>::make_svc_handler (HandlerType*& handler_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));

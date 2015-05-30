@@ -34,33 +34,41 @@
 #include "net_connection_manager.h"
 #include "net_exports.h"
 #include "net_iconnectionmanager.h"
+//#include "net_stream.h"
 #include "net_stream_common.h"
+
+// forward declarations
+class Net_Stream;
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
                                  Net_SocketConfiguration_t,
                                  Net_Configuration_t,
                                  Net_UserData_t,
-                                 Stream_Statistic_t> Net_INetlinkConnectionManager_t;
+                                 Stream_Statistic_t,
+                                 Net_Stream> Net_INetlinkConnectionManager_t;
 #endif
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_SocketConfiguration_t,
                                  Net_Configuration_t,
                                  Net_UserData_t,
-                                 Stream_Statistic_t> Net_IInetConnectionManager_t;
+                                 Stream_Statistic_t,
+                                 Net_Stream> Net_IInetConnectionManager_t;
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 typedef Net_Connection_Manager_T<ACE_Netlink_Addr,
                                  Net_SocketConfiguration_t,
                                  Net_Configuration_t,
                                  Net_UserData_t,
-                                 Stream_Statistic_t> Net_NetlinkConnectionManager_t;
+                                 Stream_Statistic_t,
+                                 Net_Stream> Net_NetlinkConnectionManager_t;
 #endif
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  Net_SocketConfiguration_t,
                                  Net_Configuration_t,
                                  Net_UserData_t,
-                                 Stream_Statistic_t> Net_InetConnectionManager_t;
+                                 Stream_Statistic_t,
+                                 Net_Stream> Net_InetConnectionManager_t;
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 NET_SINGLETON_DECLARE (ACE_Singleton,

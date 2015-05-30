@@ -56,14 +56,16 @@ class IRC_Client_Tools
 
   static bool isValidIRCChannelName (const std::string&); // string
 
-  static bool connect (Stream_IAllocator*,                // message allocator
-                       const IRC_Client_IRCLoginOptions&, // login options
-                       bool,                              // debug scanner ?
-                       bool,                              // debug parser ?
-                       unsigned int,                      // statistics reporting interval (0: OFF)
-                       const std::string&,                // hostname
-                       unsigned short,                    // port
-                       Stream_Module_t*);                 // final module
+  // *IMPORTANT NOTE*: fire-and-forget the final module !
+  static ACE_HANDLE connect (Stream_IAllocator*,                  // message allocator
+                             const IRC_Client_IRCLoginOptions&,   // login options
+                             bool,                                // debug scanner ?
+                             bool,                                // debug parser ?
+                             unsigned int,                        // statistics reporting interval (0: OFF)
+                             const std::string&,                  // hostname
+                             unsigned short,                      // port
+                             const Stream_ModuleConfiguration_t&, // module configuration
+                             Stream_Module_t*&);                  // final module
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools ());

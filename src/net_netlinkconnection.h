@@ -31,6 +31,7 @@
 #include "net_configuration.h"
 #include "net_socket_common.h"
 #include "net_socketconnection_base.h"
+#include "net_stream.h"
 #include "net_stream_common.h"
 #include "net_transportlayer_netlink.h"
 
@@ -51,7 +52,8 @@ class Net_NetlinkConnection_T
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t>
+                                     Stream_Statistic_t,
+                                     Net_Stream>
  , public Net_TransportLayer_Netlink
 {
   friend class ACE_Connector<HandlerType,
@@ -62,7 +64,8 @@ class Net_NetlinkConnection_T
                                    Net_SocketConfiguration_t,
                                    Net_Configuration_t,
                                    UserDataType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t,
+                                   Net_Stream> ICONNECTION_MANAGER_T;
 
    Net_NetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
                             unsigned int = 0);      // statistics collecting interval (second(s))
@@ -98,7 +101,8 @@ class Net_NetlinkConnection_T
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t> inherited;
+                                     Stream_Statistic_t,
+                                     Net_Stream> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 
   // *TODO*: remove this ASAP
@@ -121,7 +125,8 @@ class Net_AsynchNetlinkConnection_T
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t>
+                                           Stream_Statistic_t,
+                                           Net_Stream>
  , public Net_TransportLayer_Netlink
 {
   friend class ACE_Asynch_Connector<Net_AsynchNetlinkConnection_T<UserDataType,
@@ -133,7 +138,8 @@ class Net_AsynchNetlinkConnection_T
                                    Net_SocketConfiguration_t,
                                    Net_Configuration_t,
                                    UserDataType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t,
+                                   Net_Stream> ICONNECTION_MANAGER_T;
 
   Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                  unsigned int = 0);      // statistics collecting interval (second(s))
@@ -170,7 +176,8 @@ class Net_AsynchNetlinkConnection_T
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t> inherited;
+                                           Stream_Statistic_t,
+                                           Net_Stream> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 
   // *TODO*: remove this ASAP

@@ -34,12 +34,14 @@
 #include "net_configuration.h"
 #include "net_exports.h"
 #include "net_socket_common.h"
+#include "net_stream.h"
 #include "net_tcpconnection_base.h"
 
 class Net_Export Net_TCPConnection
  : public Net_TCPConnectionBase_T<Net_Configuration_t,
                                   Net_UserData_t,
                                   Net_StreamSessionData_t,
+                                  Net_Stream,
                                   Net_TCPHandler_t>
 {
  friend class ACE_Acceptor<Net_TCPConnection, ACE_SOCK_ACCEPTOR>;
@@ -50,7 +52,8 @@ class Net_Export Net_TCPConnection
                                     Net_SocketConfiguration_t,
                                     Net_Configuration_t,
                                     Net_UserData_t,
-                                    Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                    Stream_Statistic_t,
+                                    Net_Stream> ICONNECTION_MANAGER_T;
 
   Net_TCPConnection (ICONNECTION_MANAGER_T*, // connection manager handle
                      unsigned int = 0);      // statistics collecting interval (second(s))
@@ -61,6 +64,7 @@ class Net_Export Net_TCPConnection
   typedef Net_TCPConnectionBase_T<Net_Configuration_t,
                                   Net_UserData_t,
                                   Net_StreamSessionData_t,
+                                  Net_Stream,
                                   Net_TCPHandler_t> inherited;
 
   Net_TCPConnection ();
@@ -74,6 +78,7 @@ class Net_Export Net_AsynchTCPConnection
  : public Net_AsynchTCPConnectionBase_T<Net_Configuration_t,
                                         Net_UserData_t,
                                         Net_StreamSessionData_t,
+                                        Net_Stream,
                                         Net_AsynchTCPHandler_t>
 {
  friend class ACE_Asynch_Acceptor<Net_AsynchTCPConnection>;
@@ -84,7 +89,8 @@ class Net_Export Net_AsynchTCPConnection
                                    Net_SocketConfiguration_t,
                                    Net_Configuration_t,
                                    Net_UserData_t,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t,
+                                   Net_Stream> ICONNECTION_MANAGER_T;
 
   Net_AsynchTCPConnection (ICONNECTION_MANAGER_T*, // connection manager handle
                            unsigned int = 0);      // statistics collecting interval (second(s))
@@ -95,6 +101,7 @@ class Net_Export Net_AsynchTCPConnection
   typedef Net_AsynchTCPConnectionBase_T<Net_Configuration_t,
                                         Net_UserData_t,
                                         Net_StreamSessionData_t,
+                                        Net_Stream,
                                         Net_AsynchTCPHandler_t> inherited;
 
   Net_AsynchTCPConnection ();

@@ -32,6 +32,7 @@
 #include "net_configuration.h"
 #include "net_connection_manager_common.h"
 #include "net_socketconnection_base.h"
+#include "net_stream.h"
 #include "net_stream_common.h"
 #include "net_transportlayer_udp.h"
 
@@ -46,7 +47,8 @@ class Net_UDPConnection_T
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t>
+                                     Stream_Statistic_t,
+                                     Net_Stream>
  , public Net_TransportLayer_UDP
 {
   friend class ACE_Connector<Net_UDPConnection_T<UserDataType,
@@ -59,7 +61,8 @@ class Net_UDPConnection_T
                                    Net_SocketConfiguration_t,
                                    Net_Configuration_t,
                                    UserDataType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t,
+                                   Net_Stream> ICONNECTION_MANAGER_T;
 
   Net_UDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
                        unsigned int = 0);      // statistics collecting interval (second(s))
@@ -85,7 +88,8 @@ class Net_UDPConnection_T
                                      Net_SocketHandlerConfiguration_t,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t> inherited;
+                                     Stream_Statistic_t,
+                                     Net_Stream> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T ());
@@ -106,7 +110,8 @@ class Net_AsynchUDPConnection_T
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t>
+                                           Stream_Statistic_t,
+                                           Net_Stream>
  , public Net_TransportLayer_UDP
 {
   friend class ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
@@ -118,7 +123,8 @@ class Net_AsynchUDPConnection_T
                                    Net_SocketConfiguration_t,
                                    Net_Configuration_t,
                                    UserDataType,
-                                   Stream_Statistic_t> ICONNECTION_MANAGER_T;
+                                   Stream_Statistic_t,
+                                   Net_Stream> ICONNECTION_MANAGER_T;
 
   Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
@@ -141,7 +147,8 @@ class Net_AsynchUDPConnection_T
                                            Net_SocketHandlerConfiguration_t,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t> inherited;
+                                           Stream_Statistic_t,
+                                           Net_Stream> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
   Net_AsynchUDPConnection_T ();

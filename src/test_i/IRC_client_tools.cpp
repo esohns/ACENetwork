@@ -1573,7 +1573,7 @@ IRC_Client_Tools::concatParams (const IRC_Client_Parameters_t& params_in,
   return result;
 }
 
-bool
+ACE_HANDLE
 IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                            const IRC_Client_IRCLoginOptions& loginOptions_in,
                            bool debugScanner_in,
@@ -1581,14 +1581,12 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                            unsigned int statisticReportingInterval_in,
                            const std::string& serverHostname_in,
                            unsigned short serverPortNumber_in,
-                           Stream_Module_t* finalModule_in)
+                           const Stream_ModuleConfiguration_t& moduleConfiguration_in,
+                           Stream_Module_t*& finalModule_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::connect"));
 
   int result = -1;
-
-  // sanity check(s)
-  ACE_ASSERT (finalModule_in);
 
   // step1: setup configuration passed to processing stream
   IRC_Client_Configuration configuration;
@@ -1606,23 +1604,35 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-    return false;
+
+    // clean up
+    delete finalModule_inout;
+    finalModule_inout = NULL;
+
+    return ACE_INVALID_HANDLE;
   } // end IF
-  // ************ protocol configuration data **************
-  configuration.protocolConfiguration.loginOptions = loginOptions_in;
   // ************ stream configuration data ****************
   configuration.streamConfiguration.streamConfiguration.messageAllocator =
     messageAllocator_in;
   configuration.streamConfiguration.streamConfiguration.bufferSize =
     IRC_CLIENT_BUFFER_SIZE;
-  configuration.streamConfiguration.streamConfiguration.deleteModule = true;
-  configuration.streamConfiguration.streamConfiguration.module = finalModule_in;
+  if (finalModule_inout)
+  {
+    configuration.streamConfiguration.streamConfiguration.deleteModule = true;
+    configuration.streamConfiguration.streamConfiguration.module =
+        finalModule_inout;
+  } // end IF
+  configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
+      &const_cast<Stream_ModuleConfiguration_t&> (moduleConfiguration_in);
   configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   configuration.streamConfiguration.crunchMessageBuffers =
     IRC_CLIENT_DEF_CRUNCH_MESSAGES;
   configuration.streamConfiguration.debugScanner = debugScanner_in;
   configuration.streamConfiguration.debugParser = debugParser_in;
+
+  // ************ protocol configuration data **************
+  configuration.protocolConfiguration.loginOptions = loginOptions_in;
 
   IRC_Client_SessionData* session_data_p = NULL;
   ACE_NEW_NORETURN (session_data_p,
@@ -1631,13 +1641,14 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocator memory: \"%m\", aborting\n")));
-    return false;
+
+    // clean up
+    delete finalModule_inout;
+    finalModule_inout = NULL;
+
+    return ACE_INVALID_HANDLE;
   } // end IF
   configuration.streamConfiguration.sessionData = session_data_p;
-
-  // *TODO*: memory leak here ? ...
-  IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
-                                                            session_data_p);
 
   // step2: initialize client connector
   Net_SocketHandlerConfiguration_t* socket_handler_configuration_p = NULL;
@@ -1646,24 +1657,32 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
   if (!socket_handler_configuration_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocator memory: \"%m\", aborting\n")));
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
     // clean up
+    delete finalModule_inout;
+    finalModule_inout = NULL;
     delete session_data_p;
 
-    return false;
+    return ACE_INVALID_HANDLE;
   } // end IF
   socket_handler_configuration_p->bufferSize = IRC_CLIENT_BUFFER_SIZE;
   socket_handler_configuration_p->messageAllocator = messageAllocator_in;
   socket_handler_configuration_p->socketConfiguration =
     configuration.socketConfiguration;
-  // *TODO*: memory leak here...
+  // *TODO*: memory leak socket handler configuration here...
   IRC_Client_Connector_t connector (socket_handler_configuration_p,
                                     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance (),
                                     statisticReportingInterval_in);
 
+  // *TODO*: memory leak final module/session data here ? ...
+  IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
+                                                            session_data_p);
+
   // step3: (try to) connect to the server
-  if (!connector.connect (configuration.socketConfiguration.peerAddress))
+  ACE_HANDLE handle =
+      connector.connect (configuration.socketConfiguration.peerAddress);
+  if (handle == ACE_INVALID_HANDLE)
   {
     // debug info
     ACE_TCHAR buffer[BUFSIZ];
@@ -1677,11 +1696,11 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));
-    return false;
+    return ACE_INVALID_HANDLE;
   } // end IF
 
   // *NOTE* handlers automagically register with the connection manager and
   // will also de-register and self-destruct on disconnects !
 
-  return true;
+  return handle;
 }

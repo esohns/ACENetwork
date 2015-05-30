@@ -30,7 +30,8 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 class Net_IConnectionManager_T
  : public Common_IControl
  , public Common_ILock
@@ -39,7 +40,8 @@ class Net_IConnectionManager_T
   // convenience types
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
-                            StatisticContainerType> CONNECTION_T;
+                            StatisticContainerType,
+                            StreamType> CONNECTION_T;
 
   virtual ~Net_IConnectionManager_T () {};
 
@@ -52,6 +54,7 @@ class Net_IConnectionManager_T
 
   // *WARNING*: if (!= NULL) callers must decrease() the returned handle
   virtual CONNECTION_T* operator[] (unsigned int) const = 0; // index
+  virtual CONNECTION_T* get (ACE_HANDLE) const = 0; // socket handle
 
   // *NOTE*: 'register' is a reserved keyword
   virtual bool registerc (CONNECTION_T*) = 0; // connection handle

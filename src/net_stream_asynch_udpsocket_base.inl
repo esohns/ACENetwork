@@ -123,7 +123,6 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
-  unsigned int session_id = 0;
   Net_SocketHandlerConfiguration_t socket_handler_configuration;
 
   // step1: open socket

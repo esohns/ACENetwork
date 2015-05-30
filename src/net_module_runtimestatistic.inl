@@ -254,7 +254,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     {
       // retain session ID for reporting...
       // *TODO*: clearly, this isn't good design...
-      const SessionMessageType::STREAM_STATE_TYPE* state_p =
+      const typename SessionMessageType::STREAM_STATE_TYPE* state_p =
         message_inout->getState ();
       ACE_ASSERT (state_p);
       sessionID_ = state_p->sessionID;

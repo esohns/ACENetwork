@@ -38,9 +38,6 @@
 
 #include "net_server_common.h"
 
-//// forward declaration(s)
-//class Net_Client_TimeoutHandler;
-
 extern unsigned int random_seed;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 extern struct random_data random_data;

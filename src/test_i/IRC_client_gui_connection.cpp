@@ -43,7 +43,8 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
                                                       const std::string& label_in,
                                                       const std::string& UIFileDirectory_in,
                                                       GtkNotebook* parent_in)
- : CBData_ ()
+ : isInitialized_ (false)
+ , CBData_ ()
  , isFirstUsersMsg_ (true)
  , label_ (label_in)
  , UIFileDirectory_ (UIFileDirectory_in)
@@ -459,6 +460,8 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
     CBData_.GTKState->builders[label_] =
         std::make_pair (ui_definition_filename, builder_p);
   } // end lock scope
+
+  isInitialized_ = true;
 }
 
 IRC_Client_GUI_Connection::~IRC_Client_GUI_Connection ()

@@ -36,12 +36,14 @@ template <typename AddressType,
           typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StreamType>
 class Net_ConnectionBase_T
  : public Common_ReferenceCounterBase
  , virtual public Net_IConnection_T<AddressType,
                                     ConfigurationType,
-                                    StatisticContainerType>
+                                    StatisticContainerType,
+                                    StreamType>
 {
  public:
   // implement (part of) Net_IConnection_T
@@ -52,7 +54,8 @@ class Net_ConnectionBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   StatisticContainerType> ICONNECTION_MANAGER_T;
+                                   StatisticContainerType,
+                                   StreamType> ICONNECTION_MANAGER_T;
 
   Net_ConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                         unsigned int = 0);      // statistics collecting interval (second(s))
@@ -72,7 +75,8 @@ class Net_ConnectionBase_T
   typedef Common_ReferenceCounterBase inherited;
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
-                            StatisticContainerType> inherited2;
+                            StatisticContainerType,
+                            StreamType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&));
@@ -84,7 +88,8 @@ class Net_ConnectionBase_T
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
-                               StatisticContainerType> OWN_TYPE;
+                               StatisticContainerType,
+                               StreamType> OWN_TYPE;
 
   // timer
   unsigned int                      statisticCollectionInterval_; // seconds
