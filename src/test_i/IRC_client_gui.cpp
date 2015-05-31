@@ -110,18 +110,22 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-r [VALUE]: reporting interval (seconds: 0 --> OFF)")
-            << ACE_TEXT (" [")
-            << IRC_CLIENT_DEF_STATSINTERVAL
-            << ACE_TEXT ("]")
-            << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_SERVERS_FILE);
-  std::cout << ACE_TEXT ("-s [FILE] : server config file")
+  std::cout << ACE_TEXT ("-p [FILE] : servers configuration file")
             << ACE_TEXT (" [\"")
             << path
             << ACE_TEXT ("\"]")
+            << std::endl;
+  std::cout << ACE_TEXT ("-r        : use reactor [")
+            << NET_EVENT_USE_REACTOR
+            << ACE_TEXT ("]")
+            << std::endl;
+  std::cout << ACE_TEXT ("-s [VALUE]: reporting interval (seconds: 0 --> OFF)")
+            << ACE_TEXT (" [")
+            << IRC_CLIENT_DEF_STATSINTERVAL
+            << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-t        : trace information")
             << ACE_TEXT (" [")
@@ -153,8 +157,9 @@ do_processArguments (int argc_in,
                      bool& debug_out,
                      bool& useThreadpool_out,
                      bool& logToFile_out,
-                     unsigned int& reportingInterval_out,
                      std::string& phonebookFile_out,
+                     bool& useReactor_out,
+                     unsigned int& reportingInterval_out,
                      bool& traceInformation_out,
                      std::string& UIFileDirectory_out,
                      bool& printVersionAndExit_out,
@@ -177,32 +182,35 @@ do_processArguments (int argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
-  configurationFile_out = configuration_path;
-  configurationFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configurationFile_out += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
+  configurationFile_out    = configuration_path;
+  configurationFile_out   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configurationFile_out   += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
 
-  debug_out             =
+  debug_out                =
     (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE);
-  useThreadpool_out     = NET_EVENT_USE_THREAD_POOL;
+  useThreadpool_out        = NET_EVENT_USE_THREAD_POOL;
 
-  logToFile_out         = false;
-  reportingInterval_out = IRC_CLIENT_DEF_STATSINTERVAL;
+  logToFile_out            = false;
 
-  phonebookFile_out = configuration_path;
-  phonebookFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  phonebookFile_out +=
+  phonebookFile_out        = configuration_path;
+  phonebookFile_out       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  phonebookFile_out       +=
    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_SERVERS_FILE);
+
+  useReactor_out           = NET_EVENT_USE_REACTOR;
+
+  reportingInterval_out    = IRC_CLIENT_DEF_STATSINTERVAL;
 
   traceInformation_out     = false;
 
-  UIFileDirectory_out = configuration_path;
+  UIFileDirectory_out      = configuration_path;
 
   printVersionAndExit_out  = false;
   numThreadPoolThreads_out = IRC_CLIENT_DEF_NUM_TP_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("c:dhlr:s:tu:vx:"),
+                              ACE_TEXT ("c:dhlp:rs:tu:vx:"),
                               1, // skip command name
                               1, // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -234,17 +242,22 @@ do_processArguments (int argc_in,
         logToFile_out = true;
         break;
       }
+      case 'p':
+      {
+        phonebookFile_out = argumentParser.opt_arg ();
+        break;
+      }
       case 'r':
+      {
+        useReactor_out = true;
+        break;
+      }
+      case 's':
       {
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter.clear ();
         converter << argumentParser.opt_arg ();
         converter >> reportingInterval_out;
-        break;
-      }
-      case 's':
-      {
-        phonebookFile_out = argumentParser.opt_arg ();
         break;
       }
       case 't':
@@ -454,7 +467,7 @@ do_work (bool useThreadPool_in,
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  Common_TimerConfiguration_t timer_configuration;
+  Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
 
@@ -551,41 +564,47 @@ do_work (bool useThreadPool_in,
     {
       ACE_Proactor* proactor_p = ACE_Proactor::instance ();
       ACE_ASSERT (proactor_p);
-      // *NOTE*: unblock [SIGRTMIN,SIGRTMAX] IFF on POSIX AND using the
-      // ACE_POSIX_SIG_Proactor (the default)
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-      ACE_POSIX_Proactor* proactor_impl_p =
-          dynamic_cast<ACE_POSIX_Proactor*> (proactor_p->implementation ());
-      ACE_ASSERT (proactor_impl_p);
-      ACE_POSIX_Proactor::Proactor_Type proactor_type =
-          proactor_impl_p->get_impl_type ();
-      sigset_t original_mask, realtime_signals;
-      if (!useReactor_in &&
-          (proactor_type == ACE_POSIX_Proactor::PROACTOR_SIG))
-        Common_Tools::unblockRealtimeSignals (original_mask);
-#endif
+//      // *NOTE*: unblock [SIGRTMIN,SIGRTMAX] IFF on POSIX AND using the
+//      // ACE_POSIX_SIG_Proactor (the default)
+//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+//      ACE_POSIX_Proactor* proactor_impl_p =
+//          dynamic_cast<ACE_POSIX_Proactor*> (proactor_p->implementation ());
+//      if (!proactor_impl_p)
+//      {
+//        ACE_DEBUG ((LM_DEBUG,
+//                    ACE_TEXT ("dynamic_cast<ACE_POSIX_Proactor> failed, continuing\n")));
+//        goto _continue;
+//      } // end IF
+//      ACE_POSIX_Proactor::Proactor_Type proactor_type =
+//          proactor_impl_p->get_impl_type ();
+//      sigset_t original_mask, realtime_signals;
+//      if (!useReactor_in &&
+//          (proactor_type == ACE_POSIX_Proactor::PROACTOR_SIG))
+//        Common_Tools::unblockRealtimeSignals (original_mask);
+//_continue:
+//#endif
       result = proactor_p->proactor_run_event_loop (0);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to handle events: \"%m\", continuing\n")));
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-      // reset signal mask
-      for (int i = ACE_SIGRTMIN;
-           i <= ACE_SIGRTMAX;
-           i++)
-      {
-        result = ACE_OS::sigaddset (&realtime_signals, i);
-        if (result == -1)
-        {
-          ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT ("failed to ACE_OS::sigaddset(): \"%m\", aborting\n")));
-          break;
-        } // end IF
-      } // end FOR
-      result = ACE_OS::thr_sigsetmask (SIG_SETMASK,
-                                       &original_mask,
-                                       NULL);
-#endif
+//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+//      // reset signal mask
+//      for (int i = ACE_SIGRTMIN;
+//           i <= ACE_SIGRTMAX;
+//           i++)
+//      {
+//        result = ACE_OS::sigaddset (&realtime_signals, i);
+//        if (result == -1)
+//        {
+//          ACE_DEBUG ((LM_DEBUG,
+//                      ACE_TEXT ("failed to ACE_OS::sigaddset(): \"%m\", aborting\n")));
+//          break;
+//        } // end IF
+//      } // end FOR
+//      result = ACE_OS::thr_sigsetmask (SIG_SETMASK,
+//                                       &original_mask,
+//                                       NULL);
+//#endif
     } // end ELSE
   } // end ELSE
   ACE_DEBUG ((LM_DEBUG,
@@ -1210,15 +1229,20 @@ ACE_TMAIN (int argc_in,
   int result = -1;
 
   // step1: initialize libraries
-//  // *PORTABILITY*: on Windows, init ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  if (ACE::init () == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
-//    return EXIT_FAILURE;
-//  } // end IF
-//#endif
+  // *PORTABILITY*: on Windows, init ACE...
+  // *IMPORTANT NOTE*: when linking with SDL, things go wrong:
+  //                   ACE_TMAIN --> main --> SDL_main --> ...
+  // --> ACE::init is not called automatically (see OS_main.cpp:74),
+  //     which would call WSAStartup(); do it manually (doesn't hurt anyway)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = ACE::init ();
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
+    return EXIT_FAILURE;
+  } // end IF
+#endif
 
   // *PROCESS PROFILE*
   ACE_Profile_Timer process_profile;
@@ -1250,11 +1274,14 @@ ACE_TMAIN (int argc_in,
     (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE);
   bool use_thread_pool                 = NET_EVENT_USE_THREAD_POOL;
   bool log_to_file                     = false;
-  unsigned int reporting_interval      = IRC_CLIENT_DEF_STATSINTERVAL;
 
   std::string phonebook_file           = configuration_path;
   phonebook_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebook_file += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_SERVERS_FILE);
+
+  bool use_reactor                     = NET_EVENT_USE_REACTOR;
+
+  unsigned int reporting_interval      = IRC_CLIENT_DEF_STATSINTERVAL;
 
   bool trace_information               = false;
 
@@ -1269,8 +1296,9 @@ ACE_TMAIN (int argc_in,
                             debug,
                             use_thread_pool,
                             log_to_file,
-                            reporting_interval,
                             phonebook_file,
+                            use_reactor,
+                            reporting_interval,
                             trace_information,
                             UIFile_directory,
                             print_version_and_exit,
@@ -1279,15 +1307,13 @@ ACE_TMAIN (int argc_in,
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
-//      return EXIT_FAILURE;
-//    } // end IF
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1305,15 +1331,13 @@ ACE_TMAIN (int argc_in,
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
-//      return EXIT_FAILURE;
-//    } // end IF
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1332,12 +1356,13 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeLogging(), aborting\n")));
 
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1345,7 +1370,7 @@ ACE_TMAIN (int argc_in,
   // step4: (pre-)initialize signal handling
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
-  do_initializeSignals (NET_EVENT_USE_REACTOR,
+  do_initializeSignals (use_reactor,
                         false,
                         signal_set,
                         ignored_signal_set);
@@ -1358,13 +1383,13 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE_OS::sigemptyset(): \"%m\", aborting\n")));
 
     Common_Tools::finalizeLogging ();
-    //    // *PORTABILITY*: on Windows, need to fini ACE...
-    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    //    result = ACE::fini ();
-    //    if (result == -1)
-    //      ACE_DEBUG ((LM_ERROR,
-    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-    //#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1377,17 +1402,17 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
 
     Common_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
-  IRC_Client_SignalHandler signal_handler (NET_EVENT_USE_REACTOR);
+  IRC_Client_SignalHandler signal_handler (use_reactor);
 
   // step5: handle specific program modes
   if (print_version_and_exit)
@@ -1400,12 +1425,10 @@ ACE_TMAIN (int argc_in,
     Common_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, fini ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (ACE::fini () == -1)
-    {
+    result = ACE::fini ();
+    if (result == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
-      return EXIT_FAILURE;
-    } // end IF
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
 #endif
 
     return EXIT_SUCCESS;
@@ -1448,13 +1471,13 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1501,7 +1524,7 @@ ACE_TMAIN (int argc_in,
   ACE_High_Res_Timer timer;
   timer.start ();
   do_work (use_thread_pool,
-           NET_EVENT_USE_REACTOR,
+           use_reactor,
            num_thread_pool_threads,
            user_data,
            ui_definition_filename,
@@ -1536,12 +1559,13 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1589,21 +1613,23 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
+  // step8: clean up
   Common_Tools::finalizeSignals (signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Tools::finalizeLogging ();
 
-  // step8: finalize libraries
-  //  // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  if (ACE::fini () == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
-//    return EXIT_FAILURE;
-//  } // end IF
-//#endif
+  // step9: finalize libraries
+  // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = ACE::fini ();
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
+    return EXIT_FAILURE;
+  } // end IF
+#endif
 
   return EXIT_SUCCESS;
 } // end main

@@ -906,6 +906,8 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::button_connect_clicked_cb"));
 
+  int result = -1;
+
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
   //Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
@@ -926,7 +928,8 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 #else
   signal = SIGBREAK;
 #endif
-  if (ACE_OS::raise (signal) == -1)
+  result = ACE_OS::raise (signal);
+  if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::raise(%S): \"%m\", continuing\n"),
                 signal));
@@ -1400,6 +1403,8 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::button_quit_clicked_cb"));
 
+  int result = -1;
+
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
   //Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
@@ -1421,7 +1426,8 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   //} // end lock scope
 
   // step2: initiate shutdown sequence
-  if (ACE_OS::raise (SIGINT) == -1)
+  result = ACE_OS::raise (SIGINT);
+  if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::raise(%S): \"%m\", continuing\n"),
                 SIGINT));

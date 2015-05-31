@@ -25,6 +25,8 @@
 #include "ace/Proactor.h"
 #include "ace/Reactor.h"
 
+#include "common_tools.h"
+
 #include "net_macros.h"
 
 #include "IRC_client_common.h"
@@ -63,7 +65,8 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::handleSignal"));
 
   int result = -1;
-  bool stop_event_dispatching = false;
+
+  bool shutdown = false;
   bool connect_to_server = false;
   bool abort_oldest = false;
   switch (signal_in)
@@ -77,11 +80,12 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
 #endif
     {
 //       // *PORTABILITY*: tracing in a signal handler context is not portable
+//       // *TODO*
 //       ACE_DEBUG((LM_DEBUG,
 //                  ACE_TEXT("shutting down...\n")));
 
       // shutdown...
-      stop_event_dispatching = true;
+      shutdown = true;
 
       break;
     }
@@ -111,38 +115,34 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
     }
     default:
     {
-      //// *PORTABILITY*: tracing in a signal handler context is not portable
-      //ACE_DEBUG((LM_ERROR,
-      //           ACE_TEXT("received unknown signal: \"%S\", continuing\n"),
-      //           signal_in));
-
-      break;
+      // *PORTABILITY*: tracing in a signal handler context is not portable
+      // *TODO*
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown signal: \"%S\", aborting\n"),
+                  signal_in));
+      return false;
     }
   } // end SWITCH
 
   // ...abort ?
   if (abort_oldest)
-  {
-    // release an existing connection...
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortOldestConnection ();
-  } // end IF
 
   // ...connect ?
   if (connect_to_server && configuration_->connector)
   {
-    bool result_2 = false;
+    ACE_HANDLE handle = ACE_INVALID_HANDLE;
     try
     {
-      result_2 = configuration_->connector->connect (configuration_->peerAddress);
+      handle = configuration_->connector->connect (configuration_->peerAddress);
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_Client_IConnector_t::connect(): \"%m\", continuing\n")));
     }
-    if (!result_2)
+    if (handle == ACE_INVALID_HANDLE)
     {
-      // debug info
       ACE_TCHAR buffer[BUFSIZ];
       ACE_OS::memset(buffer, 0, sizeof (buffer));
       result = configuration_->peerAddress.addr_to_string (buffer,
@@ -150,10 +150,12 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
       if (result == -1)
       {
         // *PORTABILITY*: tracing in a signal handler context is not portable
+        // *TODO*
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
       } // end IF
       // *PORTABILITY*: tracing in a signal handler context is not portable
+      // *TODO*
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Client_IConnector_t::connect(\"%s\"): \"%m\", continuing\n"),
                   buffer));
@@ -164,28 +166,12 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
   } // end IF
 
   // ...shutdown ?
-  if (stop_event_dispatching)
+  if (shutdown)
   {
-    // stop everything, i.e.
-    // - leave reactor event loop handling signals, sockets, (maintenance) timers...
-    // - break out of any (blocking) calls
-    // --> (try to) terminate in a well-behaved manner
-
-    // stop reactor
-    ACE_Reactor* reactor_p = inherited::reactor ();
-    ACE_ASSERT (reactor_p);
-    ACE_Proactor* proactor_p = ACE_Proactor::instance ();
-    ACE_ASSERT (proactor_p);
-    if ((reactor_p->end_event_loop () == -1) ||
-        (proactor_p->end_event_loop () == -1))
-    {
-      //// *PORTABILITY*: tracing in a signal handler context is not portable
-      //ACE_DEBUG((LM_ERROR,
-      //           ACE_TEXT("failed to terminate event handling: \"%m\", continuing\n")));
-    } // end IF
-
-    // de-register from the reactor...
-    return false;
+    // stop reactor (&& proactor, if applicable)
+    Common_Tools::finalizeEventDispatch (true,         // stop reactor ?
+                                         !useReactor_, // stop proactor ?
+                                         -1);          // group ID (--> don't block !)
   } // end IF
 
   return true;

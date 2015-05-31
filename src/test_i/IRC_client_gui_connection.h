@@ -61,7 +61,7 @@ class IRC_Client_GUI_Connection
                              GtkNotebook*);           // parent widget
   virtual~IRC_Client_GUI_Connection ();
 
-  // implement RPG_Net_Protocol_INotify_t
+  // implement Net_Protocol_INotify_t
   virtual void start (const Stream_ModuleConfiguration_t&);
   virtual void notify (const IRC_Client_IRCMessage&);
   virtual void end ();
@@ -72,13 +72,15 @@ class IRC_Client_GUI_Connection
   IRC_Client_IIRCControl* getController ();
   std::string getNickname () const;
 
-  // *WARNING*: callers need protection
-  // - by the main thread (servicing the gtk_main event loop)
-  // - protected by gdk_threads_enter/gdk_threads_leave
+  // *WARNING*: callers may need protection from:
+  //            - the thread(s) servicing the UI (GTK) event loop
+  //            - the event dispatch thread(s) (reactor/proactor)
   std::string getActiveID (); // *NOTE*: can be a channel/nick !
-  IRC_Client_GUI_MessageHandler* getActiveHandler ();
+  IRC_Client_GUI_MessageHandler* getActiveHandler (bool = true); // locked access ?
   void createMessageHandler (const std::string&); // channel/nick
   void terminateMessageHandler (const std::string&); // channel/nick
+
+  std::string getLabel () const;
 
   bool isInitialized_;
 
@@ -92,12 +94,11 @@ class IRC_Client_GUI_Connection
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_Connection& operator= (const IRC_Client_GUI_Connection&));
 
   // helper methods
-  bool forward (const std::string&,  // channel/nick
+  void forward (const std::string&,  // channel/nick
                 const std::string&); // message text
   void log (const std::string&);
   void log (const IRC_Client_IRCMessage&);
   void error (const IRC_Client_IRCMessage&);
-  std::string getLabel () const;
 
   IRC_Client_GUI_MessageHandler* getHandler (const std::string&); // id (channel/nick)
   void updateModeButtons ();

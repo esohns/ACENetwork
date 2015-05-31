@@ -16,6 +16,7 @@ include_HEADERS = \
   net_client_asynchconnector.h \
   net_client_common.h \
   net_client_connector.h \
+  net_client_connector_common.h \
   net_client_defines.h \
   net_client_exports.h \
   net_client_iconnector.h \
@@ -41,6 +42,7 @@ libACENetwork_Client_la_SOURCES = \
   net_client_connector.cpp \
   net_client_connector.h \
   net_client_connector.inl \
+  net_client_connector_common.h \
   net_client_defines.h \
   net_client_exports.h \
   net_client_iconnector.h \

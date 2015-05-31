@@ -58,7 +58,7 @@ IRC_Client_IRCMessage::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCMessage::dump_state"));
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("%s"),
               ACE_TEXT (IRC_Client_Tools::dump (*this).c_str ())));
 }

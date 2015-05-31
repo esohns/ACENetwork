@@ -75,13 +75,15 @@ Net_StreamTCPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::~Net_StreamTCPSocketBase_T"));
 
+  int result = -1;
+
   if (inherited2::configuration_.streamConfiguration.streamConfiguration.module)
   {
     Stream_Module_t* module_p =
       stream_.find (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ());
     if (module_p)
     {
-      int result =
+      result =
         stream_.remove (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name (),
                         ACE_Module_Base::M_DELETE_NONE);
       if (result == -1)
@@ -331,9 +333,15 @@ Net_StreamTCPSocketBase_T<AddressType,
       {
         result = ACE_OS::closesocket (handle);
         if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                      handle));
+        {
+          int error = ACE_OS::last_error ();
+          // *TODO*: on Win32, ACE_OS::close (--> ::CloseHandle) throws an
+          //         exception, so this looks like a resource leak...
+          if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                        handle));
+        } // end IF
         //    inherited::handle (ACE_INVALID_HANDLE);
       } // end IF
 
@@ -1075,10 +1083,16 @@ Net_StreamTCPSocketBase_T<AddressType,
   {
     result = ACE_OS::closesocket (handle);
     if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  handle));
-//    inherited::handle (ACE_INVALID_HANDLE);
+    {
+      int error = ACE_OS::last_error ();
+      // *TODO*: on Win32, ACE_OS::close (--> ::CloseHandle) throws an
+      //         exception, so this looks like a resource leak...
+      if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
+        ACE_DEBUG ((LM_ERROR,
+        ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+        handle));
+    } // end IF
+    //    inherited::handle (ACE_INVALID_HANDLE);
   } // end IF
 }
 

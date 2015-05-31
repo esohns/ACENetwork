@@ -55,6 +55,7 @@ struct IRC_Client_GTK_CBData
   Common_UI_GTKState        GTKState;
   IRC_Client_PhoneBook      phoneBook;
   std::string               UIFileDirectory;
+
 };
 
 struct IRC_Client_GTK_ConnectionCBData

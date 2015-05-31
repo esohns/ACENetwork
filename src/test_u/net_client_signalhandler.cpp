@@ -66,7 +66,7 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
   // sanity check(s)
   ACE_ASSERT (configuration_);
 
-  bool stop_event_dispatching = false;
+  bool shutdown = false;
   bool connect = false;
   bool abort = false;
   switch (signal_in)
@@ -77,11 +77,12 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     case SIGQUIT:
 #endif
     {
+//       // *PORTABILITY*: tracing in a signal handler context is not portable
+//       // *TODO*
       //ACE_DEBUG((LM_DEBUG,
       //           ACE_TEXT("shutting down...\n")));
 
-      // shutdown...
-      stop_event_dispatching = true;
+      shutdown = true;
 
       break;
     }
@@ -112,6 +113,7 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     default:
     {
       // *PORTABILITY*: tracing in a signal handler context is not portable
+      // *TODO*
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("received invalid/unknown signal: \"%S\", aborting\n"),
                   signal_in));
@@ -123,75 +125,62 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
 
   // ...abort ?
   if (abort)
-  {
-    // release an existing connection...
     NET_CONNECTIONMANAGER_SINGLETON::instance ()->abortOldestConnection ();
-  } // end IF
 
   // ...connect ?
   if (connect && configuration_->connector)
   {
-    bool result_2 = false;
+    ACE_HANDLE handle = ACE_INVALID_HANDLE;
     try
     {
-      result_2 =
-          configuration_->connector->connect (configuration_->peerAddress);
+      handle = configuration_->connector->connect (configuration_->peerAddress);
     }
     catch (...)
     {
       // *PORTABILITY*: tracing in a signal handler context is not portable
+      // *TODO*
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_Client_IConnector::connect(): \"%m\", aborting\n")));
-      return false;
+                  ACE_TEXT ("caught exception in Net_Client_IConnector::connect(): \"%m\", continuing\n")));
     }
-    if (!result_2)
+    if (handle == ACE_INVALID_HANDLE)
     {
       ACE_TCHAR buffer[BUFSIZ];
       ACE_OS::memset(buffer, 0, sizeof (buffer));
       result = configuration_->peerAddress.addr_to_string (buffer,
                                                            sizeof (buffer));
       // *PORTABILITY*: tracing in a signal handler context is not portable
+      // *TODO*
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
       // *PORTABILITY*: tracing in a signal handler context is not portable
+      // *TODO*
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Client_IConnector::connect(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to Net_Client_IConnector::connect(\"%s\"): \"%m\", continuing\n"),
                   buffer));
-      return false;
     } // end IF
   } // end IF
 
   // ...shutdown ?
-  if (stop_event_dispatching)
+  if (shutdown)
   {
-    // stop everything, i.e.
-    // - leave reactor event loop handling signals, sockets, (maintenance) timers...
-    // --> (try to) terminate in a well-behaved manner
-
-    // step1: stop all open connections
-
-    // stop action timer (might spawn new connections otherwise)
+    // step1: stop action timer (if any)
     if (configuration_->actionTimerId >= 0)
     {
       const void* act_p = NULL;
       result =
           COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (configuration_->actionTimerId,
                                                                     &act_p);
+      // *PORTABILITY*: tracing in a signal handler context is not portable
+      // *TODO*
       if (result <= 0)
-      {
-        // *PORTABILITY*: tracing in a signal handler context is not portable
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", aborting\n"),
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", continuing\n"),
                     configuration_->actionTimerId));
-
-        // clean up
-        configuration_->actionTimerId = -1;
-
-        return false;
-      } // end IF
       configuration_->actionTimerId = -1;
     } // end IF
+
+    // step2: cancel connection attempts (if any)
     if (configuration_->connector)
     {
       try
@@ -201,9 +190,9 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
       catch (...)
       {
         // *PORTABILITY*: tracing in a signal handler context is not portable
+        // *TODO*
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_Client_IConnector_t::abort(), aborting\n")));
-        return false;
+                    ACE_TEXT ("caught exception in Net_Client_IConnector_t::abort(), continuing\n")));
       }
     } // end IF
 

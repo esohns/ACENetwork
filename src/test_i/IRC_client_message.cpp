@@ -233,7 +233,8 @@ allocate:
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Stream_IAllocator::calloc(0), aborting\n")));
+                  ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), aborting\n"),
+                  sizeof (IRC_Client_Message)));
       return NULL;
     }
 
@@ -263,9 +264,7 @@ allocate:
   // increment the reference counts of all the continuation messages
   if (inherited::cont_)
   {
-    message_p->cont_ = inherited::cont_-> duplicate ();
-
-    // If things go wrong, release all of our resources and return
+    message_p->cont_ = inherited::cont_->duplicate ();
     if (!message_p->cont_)
     {
       ACE_DEBUG ((LM_ERROR,

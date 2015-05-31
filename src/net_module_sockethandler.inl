@@ -340,10 +340,6 @@ Net_Module_SocketHandler_T<StreamStateType,
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
-
-#if defined (_MSC_VER)
-  ACE_NOTREACHED (true);
-#endif
 }
 
 template <typename StreamStateType,

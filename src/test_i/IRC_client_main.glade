@@ -148,6 +148,7 @@
                 <property name="shadow_type">etched-out</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
+                <signal name="changed" handler="main_send_entry_changed_cb"/>
                 <signal name="focus_in_event" handler="send_entry_kb_focused_cb"/>
               </object>
               <packing>

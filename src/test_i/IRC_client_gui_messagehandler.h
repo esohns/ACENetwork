@@ -55,9 +55,9 @@ class IRC_Client_GUI_MessageHandler
 
   bool isServerLog () const;
 
-  // *WARNING*: to be called from gtk_main context ONLY (trigger with g_idle_add())
-  // DO NOT USE DO NOT USE DO NOT USE DO NOT USE DO NOT USE DO NOT USE DO NOT USE !
-  // [cannot make this a private member :-(]
+  // *WARNING*: to be called from gtk_main context ONLY (trigger with
+  //            g_idle_add())
+  // [cannot make this private :-(]
   void update ();
 
 //   const std::string getChannel() const;
@@ -97,7 +97,7 @@ class IRC_Client_GUI_MessageHandler
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler ());
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler (const IRC_Client_GUI_MessageHandler&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler& operator=(const IRC_Client_GUI_MessageHandler&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler& operator= (const IRC_Client_GUI_MessageHandler&));
 
   // helper methods
   void clearMembers ();

@@ -556,7 +556,7 @@ do_work (unsigned int maxNumConnections_in,
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  Common_TimerConfiguration_t timer_configuration;
+  Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
   Stream_StatisticHandler_Reactor_t statistics_handler (ACTION_REPORT,

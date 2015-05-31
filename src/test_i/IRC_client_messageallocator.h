@@ -21,7 +21,7 @@
 #ifndef IRC_CLIENT_MESSAGEALLOCATOR_H
 #define IRC_CLIENT_MESSAGEALLOCATOR_H
 
-#include "stream_cachedmessageallocatorheap_base.h"
+#include "stream_cachedmessageallocator.h"
 
 #include "IRC_client_message.h"
 #include "IRC_client_sessionmessage.h"
@@ -30,8 +30,8 @@
 class ACE_Allocator;
 
 class IRC_Client_MessageAllocator
- : public Stream_CachedMessageAllocatorHeapBase_T<IRC_Client_Message,
-                                                  IRC_Client_SessionMessage>
+ : public Stream_CachedMessageAllocator_T<IRC_Client_Message,
+                                          IRC_Client_SessionMessage>
 {
  public:
   IRC_Client_MessageAllocator (unsigned int,    // total number of concurrent messages
@@ -39,8 +39,8 @@ class IRC_Client_MessageAllocator
   virtual ~IRC_Client_MessageAllocator ();
 
  private:
-  typedef Stream_CachedMessageAllocatorHeapBase_T<IRC_Client_Message,
-                                                  IRC_Client_SessionMessage> inherited;
+  typedef Stream_CachedMessageAllocator_T<IRC_Client_Message,
+                                          IRC_Client_SessionMessage> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_MessageAllocator (const IRC_Client_MessageAllocator&));
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_MessageAllocator& operator= (const IRC_Client_MessageAllocator&));

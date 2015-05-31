@@ -105,13 +105,12 @@ Net_Message::duplicate (void) const
 
   // create a new Net_Message that contains unique copies of
   // the message block fields, but a (reference counted) "shallow" duplicate of
-  // the same datablock
+  // the datablock
 
   // if there is no allocator, use the standard new and delete calls.
   if (!inherited::message_block_allocator_)
-    ACE_NEW_RETURN (message_p,
-                    Net_Message (*this),
-                    NULL);
+    ACE_NEW_NORETURN (message_p,
+                      Net_Message (*this));
   else // otherwise, use the existing message_block_allocator
   {
     Stream_IAllocator* allocator_p =
@@ -121,24 +120,27 @@ allocate:
     try
     {
       // *NOTE*: the argument to malloc SHOULDN'T really matter, as this will be
-      // a "shallow" copy referencing the same datablock...
-      ACE_NEW_MALLOC_RETURN (message_p,
-                             static_cast<Net_Message*> (inherited::message_block_allocator_->calloc (sizeof (Net_Message))),
-                             Net_Message (*this),
-                             NULL);
+      //         a "shallow" copy which just references our data block...
+      // *IMPORTANT NOTE*: cached allocators require the object size as argument
+      //                   to malloc() (instead of its internal "capacity()" !)
+      // *TODO*: (depending on the allocator implementation) this senselessly
+      // allocates a datablock anyway, only to immediately release it again...
+      ACE_NEW_MALLOC_NORETURN (message_p,
+                               static_cast<Net_Message*> (inherited::message_block_allocator_->calloc (sizeof (Net_Message))),
+                               Net_Message (*this));
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), aborting\n"),
-                  inherited::capacity ()));
+                  sizeof (Net_Message)));
       return NULL;
     }
 
     // keep retrying ?
     if (!message_p &&
         !allocator_p->block ())
-        goto allocate;
+      goto allocate;
   } // end ELSE
   if (!message_p)
   {

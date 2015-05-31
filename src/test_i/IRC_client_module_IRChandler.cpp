@@ -106,35 +106,34 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::handleDataMessage"));
 
-  // don't care (implies yes per default, if we're part of a stream)
+  // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
-  ACE_ASSERT (message_inout->getData ());
+  const IRC_Client_IRCMessage* message_data_p = message_inout->getData ();
+  ACE_ASSERT (message_data_p);
 
-//   // debug info
 //   try
 //   {
-//     message_inout->getData()->dump_state();
+//     message_data_p->dump_state ();
 //   }
 //   catch (...)
 //   {
 //     ACE_DEBUG((LM_ERROR,
-//                ACE_TEXT("caught exception in RPG_Common_IDumpState::dump_state(), continuing\n")));
+//                ACE_TEXT("caught exception in Common_IDumpState::dump_state(), continuing\n")));
 //   }
 
-  switch (message_inout->getData ()->command.discriminator)
+  switch (message_data_p->command.discriminator)
   {
     case IRC_Client_IRCMessage::Command::NUMERIC:
     {
-//       // debug info
 //       ACE_DEBUG((LM_DEBUG,
 //                  ACE_TEXT("[%u]: received \"%s\" [%u]\n"),
 //                  message_inout->getID(),
 //                  IRC_Client_Tools::IRCCode2String(message_inout->getData()->command.numeric).c_str(),
 //                  message_inout->getData()->command.numeric));
 
-      switch (message_inout->getData ()->command.numeric)
+      switch (message_data_p->command.numeric)
       {
         // *NOTE* these are the "regular" (== known) codes
         // [sent by ircd-hybrid-7.2.3 and others]...
@@ -172,23 +171,21 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
         case IRC_Client_IRC_Codes::RPL_MOTDSTART:            // 375
         case IRC_Client_IRC_Codes::RPL_ENDOFMOTD:            // 376
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:           // 401
+        case IRC_Client_IRC_Codes::ERR_NOMOTD:               // 422
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:        // 433
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:       // 461
         case IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP:     // 465
         case IRC_Client_IRC_Codes::ERR_BADCHANNAME:          // 479
         case IRC_Client_IRC_Codes::ERR_CHANOPRIVSNEEDED:     // 482
         case IRC_Client_IRC_Codes::ERR_UMODEUNKNOWNFLAG:     // 501
-        {
-
           break;
-        }
         default:
         {
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("[%u]: received unknown (numeric) command/reply: \"%s\" (%u), continuing\n"),
                       message_inout->getID (),
-                      ACE_TEXT (IRC_Client_Tools::IRCCode2String (message_inout->getData ()->command.numeric).c_str ()),
-                      message_inout->getData ()->command.numeric));
+                      ACE_TEXT (IRC_Client_Tools::IRCCode2String (message_data_p->command.numeric).c_str ()),
+                      message_data_p->command.numeric));
 
           break;
         }
@@ -198,7 +195,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
     }
     case IRC_Client_IRCMessage::Command::STRING:
     {
-      switch (IRC_Client_Tools::IRCCommandString2Type (*message_inout->getData ()->command.string))
+      switch (IRC_Client_Tools::IRCCommandString2Type (*message_data_p->command.string))
       {
         case IRC_Client_IRCMessage::NICK:
         {
@@ -333,7 +330,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
                               std::string (IRC_Client_Message::CommandType2String (IRC_Client_IRCMessage::PONG)));
             ACE_ASSERT (reply_struct_p->command.string);
             reply_struct_p->command.discriminator = IRC_Client_IRCMessage::Command::STRING;
-            reply_struct_p->params.push_back (message_inout->getData ()->params.back ());
+            reply_struct_p->params.push_back (message_data_p->params.back ());
 
             // step1: send it upstream
             sendMessage (reply_struct_p);
@@ -351,7 +348,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"PONG\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_data_p->params.back().c_str()));
 
           break;
         }
@@ -365,7 +362,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"ERROR\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_data_p->params.back().c_str()));
 
           break;
         }
@@ -401,7 +398,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("[%u]: received unknown command (was: \"%s\"), continuing\n"),
                       message_inout->getID (),
-                      ACE_TEXT (message_inout->getData ()->command.string->c_str ())));
+                      ACE_TEXT (message_data_p->command.string->c_str ())));
 
           break;
         }
@@ -414,7 +411,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: invalid command type (was: %u), continuing\n"),
                   message_inout->getID (),
-                  message_inout->getData ()->command.discriminator));
+                  message_data_p->command.discriminator));
 
       break;
     }
@@ -422,22 +419,24 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
 
   // refer the data back to our subscriber(s)
 
-  // synch access to our subscribers
+  // synch access to subscribers
   {
     ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (lock_);
 
     // *WARNING* if the user unsubscribes() within the callback
     // BAD THINGS (TM) WILL happen, because the current iter WILL be invalidated
-    // --> use a slightly modified for-loop (advance first and THEN invoke the callback,
-    // works for MOST containers)
+    // --> use a slightly modified for-loop (advance first and THEN invoke the
+    //     callback, works for MOST containers)
     // *NOTE*: this can only happen due to the ACE_RECURSIVE_Thread_Mutex
-    // we use as a lock in order to avoid deadlocks in precisely this situation...
+    //         used as a lock in order to avoid deadlocks in precisely this
+    //         situation...
     for (SubscribersIterator_t iter = subscribers_.begin ();
-         iter != subscribers_.end ();)
+         iter != subscribers_.end ();
+        )
     {
       try
       {
-        (*iter++)->notify (*message_inout->getData ());
+        (*iter++)->notify (*message_data_p);
       }
       catch (...)
       {

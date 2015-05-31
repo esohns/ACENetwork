@@ -631,7 +631,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  Common_TimerConfiguration_t timer_configuration;
+  Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
   if (UIDefinitionFile_in.empty () && (connectionInterval_in > 0))

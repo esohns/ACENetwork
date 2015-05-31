@@ -35,7 +35,7 @@ class IRC_Client_SessionMessage;
 template <typename MessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 template <typename MessageType,
-          typename SessionMessageType> class Stream_CachedMessageAllocatorHeapBase_T;
+          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
 class IRC_Client_Message
  : public Stream_DataMessageBase_T<IRC_Client_IRCMessage,
@@ -44,8 +44,8 @@ class IRC_Client_Message
   // enable access to specific private ctors...
   friend class Stream_MessageAllocatorHeapBase_T<IRC_Client_Message,
                                                  IRC_Client_SessionMessage>;
-  friend class Stream_CachedMessageAllocatorHeapBase_T<IRC_Client_Message,
-                                                       IRC_Client_SessionMessage>;
+  friend class Stream_CachedMessageAllocator_T<IRC_Client_Message,
+                                               IRC_Client_SessionMessage>;
 
  public:
   IRC_Client_Message (unsigned int); // size

@@ -47,6 +47,7 @@
 #include "libacenetwork_config.h"
 #endif
 
+#include "net_client_connector_common.h"
 //#include "net_common.h"
 #include "net_defines.h"
 

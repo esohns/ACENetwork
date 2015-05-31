@@ -91,6 +91,10 @@ allocate:
     {
       // *NOTE*: instruct the allocator to return a session message by passing 0 as
       //         argument to malloc()...
+      // *IMPORTANT NOTE*: cached allocators require the object size as argument
+      //                   to malloc() (instead of its internal "capacity()" !)
+      // *TODO*: (depending on the allocator implementation) this senselessly
+      // allocates a datablock anyway, only to immediately release it again...
       ACE_NEW_MALLOC_NORETURN (message_p,
                                static_cast<IRC_Client_SessionMessage*> (inherited::message_block_allocator_->calloc (0)),
                                IRC_Client_SessionMessage (*this));

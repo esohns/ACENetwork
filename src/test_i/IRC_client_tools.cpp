@@ -37,7 +37,7 @@
 #include "IRC_client_network.h"
 
 std::string
-IRC_Client_Tools::dump(const IRC_Client_IRCMessage& message_in)
+IRC_Client_Tools::dump (const IRC_Client_IRCMessage& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::dump"));
 
@@ -48,24 +48,22 @@ IRC_Client_Tools::dump(const IRC_Client_IRCMessage& message_in)
     converter << ACE_TEXT_ALWAYS_CHAR ("PREFIX [origin: \"")
               << message_in.prefix.origin
               << ACE_TEXT_ALWAYS_CHAR ("\"]");
-    if (!message_in.prefix.user.empty())
+    if (!message_in.prefix.user.empty ())
       converter << ACE_TEXT_ALWAYS_CHAR (", [user: \"")
                 << message_in.prefix.user
                 << ACE_TEXT_ALWAYS_CHAR ("\"]");
-    if (!message_in.prefix.host.empty())
+    if (!message_in.prefix.host.empty ())
       converter << ACE_TEXT_ALWAYS_CHAR (", [host: \"")
                 << message_in.prefix.host
                 << ACE_TEXT_ALWAYS_CHAR ("\"]");
     converter << ACE_TEXT_ALWAYS_CHAR (" \\PREFIX") << std::endl;
   } // end IF
-  converter << ACE_TEXT_ALWAYS_CHAR ("COMMAND ");
+  converter << ACE_TEXT_ALWAYS_CHAR ("COMMAND [");
   switch (message_in.command.discriminator)
   {
     case IRC_Client_IRCMessage::Command::STRING:
     {
-      converter << ACE_TEXT_ALWAYS_CHAR ("[\"")
-                << message_in.command.string
-                << ACE_TEXT_ALWAYS_CHAR ("\"]");
+      converter << message_in.command.string;
       break;
     }
     case IRC_Client_IRCMessage::Command::NUMERIC:
@@ -91,7 +89,7 @@ IRC_Client_Tools::dump(const IRC_Client_IRCMessage& message_in)
       return std::string ();
     }
   } // end SWITCH
-  converter << ACE_TEXT_ALWAYS_CHAR (" \\COMMAND") << std::endl;
+  converter << ACE_TEXT_ALWAYS_CHAR ("] \\COMMAND") << std::endl;
   if (!message_in.params.empty ())
   {
     converter << ACE_TEXT_ALWAYS_CHAR ("PARAMS") << std::endl;
@@ -1581,8 +1579,9 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                            unsigned int statisticReportingInterval_in,
                            const std::string& serverHostname_in,
                            unsigned short serverPortNumber_in,
-                           const Stream_ModuleConfiguration_t& moduleConfiguration_in,
-                           Stream_Module_t*& finalModule_inout)
+                           bool deleteModule_in,
+                           const Stream_Module_t* finalModule_inout,
+                           const Stream_ModuleConfiguration_t* moduleConfiguration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::connect"));
 
@@ -1618,12 +1617,13 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
     IRC_CLIENT_BUFFER_SIZE;
   if (finalModule_inout)
   {
-    configuration.streamConfiguration.streamConfiguration.deleteModule = true;
+    configuration.streamConfiguration.streamConfiguration.deleteModule =
+      deleteModule_in;
     configuration.streamConfiguration.streamConfiguration.module =
-        finalModule_inout;
+      const_cast<Stream_Module_t*> (finalModule_inout);
+    configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
+      const_cast<Stream_ModuleConfiguration_t*> (moduleConfiguration_in);
   } // end IF
-  configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
-      &const_cast<Stream_ModuleConfiguration_t&> (moduleConfiguration_in);
   configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   configuration.streamConfiguration.crunchMessageBuffers =
