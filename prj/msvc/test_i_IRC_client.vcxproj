@@ -128,9 +128,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\test_i\IRC_client.ini" />
-    <None Include="..\..\src\test_i\IRC_client_channel_tab.glade" />
+    <None Include="..\..\src\test_i\IRC_client_channel.glade" />
+    <None Include="..\..\src\test_i\IRC_client_connection.glade" />
     <None Include="..\..\src\test_i\IRC_client_main.glade" />
-    <None Include="..\..\src\test_i\IRC_client_server_page.glade" />
     <None Include="..\..\src\test_i\servers.ini" />
   </ItemGroup>
   <ItemGroup>

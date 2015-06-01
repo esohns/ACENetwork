@@ -6,27 +6,30 @@
     <property name="label">OK</property>
     <property name="short_label">OK</property>
     <property name="stock_id">gtk-ok</property>
+    <property name="is_important">True</property>
   </object>
   <object class="GtkAction" id="action_cancel">
     <property name="label">Cancel</property>
     <property name="short_label">Cancel</property>
     <property name="stock_id">gtk-cancel</property>
+    <property name="is_important">True</property>
   </object>
-  <object class="GtkDialog" id="main_entry_dialog">
+  <object class="GtkDialog" id="dialog_entry_main">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">please insert data...</property>
     <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">normal</property>
-    <property name="decorated">False</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
     <property name="deletable">False</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="main_entry_vbox">
+      <object class="GtkVBox" id="vbox_dialog_entry_main">
         <property name="visible">True</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkEntry" id="main_entry_entry">
+          <object class="GtkEntry" id="entry_dialog_entry_main">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="has_focus">True</property>
@@ -46,15 +49,16 @@
           </packing>
         </child>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="main_entry_action_area">
+          <object class="GtkHButtonBox" id="hbuttonbox_dialog_entry_main">
             <property name="visible">True</property>
             <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="main_entry_cancel_button">
+              <object class="GtkButton" id="button_cancel_dialog_entry_main">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_cancel</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
@@ -66,12 +70,13 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="main_entry_accept_button">
+              <object class="GtkButton" id="button_accept_dialog_entry_main">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_accept</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
@@ -93,26 +98,26 @@
       </object>
     </child>
     <action-widgets>
-      <action-widget response="1">main_entry_cancel_button</action-widget>
-      <action-widget response="0">main_entry_accept_button</action-widget>
+      <action-widget response="1">button_cancel_dialog_entry_main</action-widget>
+      <action-widget response="0">button_accept_dialog_entry_main</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkTreeStore" id="main_servers_treestore">
+  <object class="GtkTreeStore" id="treestore_servers">
     <columns>
       <!-- column-name text -->
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkWindow" id="main_dialog">
+  <object class="GtkWindow" id="window_main">
     <property name="visible">True</property>
     <property name="title" translatable="yes">IRC client</property>
     <property name="destroy_with_parent">True</property>
     <signal name="delete_event" handler="quit_activated_cb"/>
     <child>
-      <object class="GtkVBox" id="main_vbox">
+      <object class="GtkVBox" id="vbox_main">
         <property name="visible">True</property>
         <child>
-          <object class="GtkNotebook" id="main_server_tabs">
+          <object class="GtkNotebook" id="notebook_connections">
             <property name="can_focus">True</property>
             <property name="tab_pos">left</property>
             <property name="show_border">False</property>
@@ -134,11 +139,11 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="main_send_hbox">
+          <object class="GtkHBox" id="hbox_send">
             <property name="visible">True</property>
             <property name="sensitive">False</property>
             <child>
-              <object class="GtkEntry" id="main_send_entry">
+              <object class="GtkEntry" id="entry_send">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="max_length">480</property>
@@ -146,9 +151,7 @@
                 <property name="activates_default">True</property>
                 <property name="truncate_multiline">True</property>
                 <property name="shadow_type">etched-out</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
-                <signal name="changed" handler="main_send_entry_changed_cb"/>
+                <signal name="changed" handler="entry_send_changed_cb"/>
                 <signal name="focus_in_event" handler="send_entry_kb_focused_cb"/>
               </object>
               <packing>
@@ -156,16 +159,16 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="main_send_button">
+              <object class="GtkButton" id="button_send">
                 <property name="label">_Send</property>
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can_focus">True</property>
                 <property name="can_default">True</property>
-                <property name="receives_default">False</property>
-                <property name="image">send_button_image</property>
+                <property name="receives_default">True</property>
+                <property name="image">button_send_image</property>
                 <property name="use_underline">True</property>
                 <property name="focus_on_click">False</property>
-                <signal name="clicked" handler="send_clicked_cb"/>
+                <signal name="clicked" handler="button_send_clicked_cb"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -182,22 +185,23 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHButtonBox" id="main_hbuttonbox">
+          <object class="GtkHButtonBox" id="hbuttonbox_main">
             <property name="visible">True</property>
             <property name="homogeneous">True</property>
             <property name="layout_style">start</property>
             <child>
-              <object class="GtkButton" id="main_connect_button">
+              <object class="GtkButton" id="button_connect">
                 <property name="label">gtk-connect</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="has_focus">True</property>
+                <property name="is_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
-                <signal name="clicked" handler="connect_clicked_cb"/>
+                <signal name="clicked" handler="button_connect_clicked_cb"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -206,15 +210,15 @@
               </packing>
             </child>
             <child>
-              <object class="GtkComboBox" id="main_servers_combobox">
+              <object class="GtkComboBox" id="combobox_servers">
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
-                <property name="model">main_servers_treestore</property>
+                <property name="model">treestore_servers</property>
                 <property name="has_frame">False</property>
                 <property name="focus_on_click">False</property>
                 <child>
-                  <object class="GtkCellRendererText" id="main_servers_cellrenderertext"/>
+                  <object class="GtkCellRendererText" id="cellrenderertext_servers"/>
                   <attributes>
                     <attribute name="text">0</attribute>
                   </attributes>
@@ -227,20 +231,37 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="main_quit_buton">
+              <object class="GtkButton" id="button_about">
+                <property name="label" translatable="yes">gtk-about</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <property name="focus_on_click">False</property>
+                <signal name="clicked" handler="button_about_clicked_cb"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
+                <property name="secondary">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_quit">
                 <property name="label">gtk-quit</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
-                <signal name="clicked" handler="quit_activated_cb"/>
+                <signal name="clicked" handler="button_quit_clicked_cb"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
                 <property name="pack_type">end</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
                 <property name="secondary">True</property>
               </packing>
             </child>
@@ -252,7 +273,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkStatusbar" id="main_statusbar">
+          <object class="GtkStatusbar" id="statusbar">
             <property name="visible">True</property>
           </object>
           <packing>
@@ -264,7 +285,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkImage" id="send_button_image">
+  <object class="GtkImage" id="button_send_image">
     <property name="visible">True</property>
     <property name="stock">gtk-execute</property>
   </object>

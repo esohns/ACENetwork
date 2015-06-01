@@ -112,7 +112,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_SERVERS_FILE);
+  path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_SERVERS);
   std::cout << ACE_TEXT ("-p [FILE] : servers configuration file")
             << ACE_TEXT (" [\"")
             << path
@@ -195,7 +195,7 @@ do_processArguments (int argc_in,
   phonebookFile_out        = configuration_path;
   phonebookFile_out       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebookFile_out       +=
-   ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_SERVERS_FILE);
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_SERVERS);
 
   useReactor_out           = NET_EVENT_USE_REACTOR;
 
@@ -1277,7 +1277,7 @@ ACE_TMAIN (int argc_in,
 
   std::string phonebook_file           = configuration_path;
   phonebook_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  phonebook_file += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_SERVERS_FILE);
+  phonebook_file += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_SERVERS);
 
   bool use_reactor                     = NET_EVENT_USE_REACTOR;
 
@@ -1321,7 +1321,7 @@ ACE_TMAIN (int argc_in,
   // assemble FQ filename (Glade-UI XML)
   std::string ui_definition_filename = UIFile_directory;
   ui_definition_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  ui_definition_filename += IRC_CLIENT_GUI_DEF_UI_MAIN_FILE;
+  ui_definition_filename += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_MAIN_FILE);
 
   // step2b: validate argument(s)
   if (!Common_File_Tools::isReadable (configuration_file)    ||
