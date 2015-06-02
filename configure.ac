@@ -182,12 +182,11 @@ AC_CHECK_FUNCS([strerror])
 #AC_CHECK_FUNCS([memset])
 
 # checks for libraries
-dnl libgnomeui-2.0 >= 1.110.0
-PKG_CHECK_MODULES([pkg_libs_gtkglade], [libpng gmodule-export-2.0 gthread-2.0 gtk+-2.0 libglade-2.0])
 AM_COND_IF([VALGRIND_SUPPORT],
-           [PKG_CHECK_MODULES([pkg_libs_valgrind], [valgrind])])
-dnl AC_SUBST(PKG_GTK_GLADE_CFLAGS)
-dnl AC_SUBST(PKG_GTK_GLADE_LIBS)
+           [PKG_CHECK_MODULES([PKGVALGRIND], [valgrind])])
+PKG_CHECK_MODULES([PKGSDL], [sdl SDL_mixer])
+dnl libgnomeui-2.0 >= 1.110.0
+PKG_CHECK_MODULES([PKGGTK], [libpng gmodule-export-2.0 gthread-2.0 gtk+-2.0 libglade-2.0])
 
 # checks for other libraries (non-pkg-config)
 # FIXME: Replace `main' with a function in `-lpthread':
@@ -207,8 +206,8 @@ AC_CONFIG_FILES([Makefile
                  scripts/Makefile
                  src/Makefile
                  src/client_server/Makefile
-                 src/test_i/Makefile
-                 src/test_u/Makefile])
+                 test_i/Makefile
+                 test_u/Makefile])
 
 AC_OUTPUT
 

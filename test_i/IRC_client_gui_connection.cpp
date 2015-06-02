@@ -601,7 +601,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LABEL_NICK)));
           ACE_ASSERT (label_p);
           // --> see Pango Text Attribute Markup Language...
-          std::string nickname_string = ACE_TEXT_ALWAYS_CHAR ("<b><i>nickname</b></i> ");
+          std::string nickname_string = ACE_TEXT_ALWAYS_CHAR ("<b><i>nickname</i></b> ");
           nickname_string += message_in.params.front ();
           gtk_label_set_markup (label_p,
                                 nickname_string.c_str ());

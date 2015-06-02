@@ -2,7 +2,12 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = \
   -I$(top_srcdir)/../../modules/ATCD/ACE \
-  -I$(builddir)/../..
+  $(PKGSDL_CFLAGS) \
+  $(PKGGTK_CFLAGS)
+if VALGRIND_SUPPORT
+AM_CPPFLAGS += \
+  $(PKGVALGRIND_CFLAGS)
+endif
 
 DEFS = \
   -DHAVE_CONFIG_H \
@@ -67,21 +72,23 @@ IRC_client_CPPFLAGS = \
   -I$(top_srcdir)/src \
   -I$(top_srcdir)/src/client_server \
   -I$(top_srcdir)/3rd_party/bison \
-  $(pkg_libs_gtkglade_CFLAGS)
+  -I$(builddir)/../..
 IRC_client_LDFLAGS = \
   -L$(abs_top_srcdir)/modules/ATCD/ACE/build/linux/lib \
-  -L$(abs_builddir)/../../modules/libCommon/src/.libs \
-  -L$(abs_builddir)/../../modules/libCommon/src/ui/.libs \
-  -L$(abs_builddir)/../../modules/libACEStream/src/.libs \
-  -L$(abs_builddir)/../../src/.libs \
-  $(pkg_libs_gtkglade_LDFLAGS)
+  $(PKGSDL_LDFLAGS) \
+  $(PKGGTK_LDFLAGS) \
+  -L$(abs_builddir)/../modules/libCommon/src/.libs \
+  -L$(abs_builddir)/../modules/libCommon/src/ui/.libs \
+  -L$(abs_builddir)/../modules/libACEStream/src/.libs \
+  -L$(abs_builddir)/../src/.libs
 IRC_client_LDADD = \
   -lACE \
+  $(PKGSDL_LIBS) \
+  $(PKGGTK_LIBS) \
   -lCommon \
   -lCommon_UI \
   -lACEStream \
-  -lACENetwork \
-  $(pkg_libs_gtkglade_LIBS)
+  -lACENetwork
 
 IRC_client_gui_SOURCES = \
   IRC_client_defines.h \
@@ -141,28 +148,31 @@ IRC_client_gui_CPPFLAGS = \
   -I$(top_srcdir)/src \
   -I$(top_srcdir)/src/client_server \
   -I$(top_srcdir)/3rd_party/bison \
-  $(pkg_libs_gtkglade_CFLAGS)
+  -I$(builddir)/../..
 IRC_client_gui_LDFLAGS = \
   -L$(abs_top_srcdir)/modules/ATCD/ACE/build/linux/lib \
-  -L$(abs_builddir)/../../modules/libCommon/src/.libs \
-  -L$(abs_builddir)/../../modules/libCommon/src/ui/.libs \
-  -L$(abs_builddir)/../../modules/libACEStream/src/.libs \
-  -L$(abs_builddir)/../../src/.libs \
-  $(pkg_libs_gtkglade_LDFLAGS)
+  $(PKGSDL_LDFLAGS) \
+  $(PKGGTK_LDFLAGS) \
+  -L$(abs_builddir)/../modules/libCommon/src/.libs \
+  -L$(abs_builddir)/../modules/libCommon/src/ui/.libs \
+  -L$(abs_builddir)/../modules/libACEStream/src/.libs \
+  -L$(abs_builddir)/../src/.libs
 IRC_client_gui_LDADD = \
   -lACE \
+  $(PKGSDL_LIBS) \
+  $(PKGGTK_LIBS) \
   -lCommon \
   -lCommon_UI \
   -lACEStream \
-  -lACENetwork \
-  $(pkg_libs_gtkglade_LIBS) \
-  -lSDL_mixer
+  -lACENetwork
 
 configdir = $(datadir)/@PACKAGE_NAME@/config
 config_DATA = \
-  IRC_client.ini \
-  IRC_client_channel_tab.glade \
+  IRC_client_channel.glade \
+  IRC_client_connection.glade \
   IRC_client_main.glade \
-  IRC_client_server_page.glade \
+  IRC_client.ini \
   servers.ini
-EXTRA_DIST = $(config_DATA)
+
+EXTRA_DIST = \
+  $(config_DATA)

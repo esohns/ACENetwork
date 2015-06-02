@@ -1,15 +1,13 @@
 ACLOCAL_AMFLAGS = \
   -I m4
 
-DEFS = \
-  -DCOMMON_HAS_DLL \
+DEFS += \
+  -DHAVE_CONFIG_H \
   -DNET_BUILD_DLL=1 \
   -DMETA_PACKAGE=\"@PACKAGE_NAME@\"
 
 AM_CPPFLAGS = \
-  -I$(top_srcdir)/../ATCD/ACE \
-  -I$(top_srcdir)/../libCommon/src \
-  -I$(top_srcdir)/../libACEStream/src
+  -I$(top_srcdir)/../ATCD/ACE
 
 noinst_HEADERS = \
   stdafx.h
@@ -188,9 +186,13 @@ libACENetwork_la_SOURCES = \
   stdafx.cpp \
   stdafx.h
 
+libACENetwork_la_CPPFLAGS = \
+  $(AM_CPPFLAGS) \
+  -I$(top_srcdir)/../libCommon/src \
+  -I$(top_srcdir)/../libACEStream/src
+libACENetwork_la_LDFLAGS = \
+  -version-info @LIBACENETWORK_LT_VERSION_INFO@
+
 SUBDIRS = \
   . \
-  client_server \
-  test_i \
-  test_u
-
+  client_server

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 3.4.0, 2015-05-30T22:14:13. -->
+<!-- Written by QtCreator 3.4.0, 2015-06-02T23:45:52. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -232,10 +232,10 @@
      <value type="QString">LD_LIBRARY_PATH=/mnt/win_d/projects/yarp/modules/libACENetwork/build/debug/lib</value>
     </valuelist>
     <value type="QString" key="ProjectExplorer.CustomExecutableRunConfiguration.Arguments">-l -r -t</value>
-    <value type="QString" key="ProjectExplorer.CustomExecutableRunConfiguration.Executable">/mnt/win_d/projects/yarp/modules/libACENetwork/build/debug/src/test_i/.libs/IRC_client_gui</value>
+    <value type="QString" key="ProjectExplorer.CustomExecutableRunConfiguration.Executable">/mnt/win_d/projects/yarp/modules/libACENetwork/build/debug/test_i/.libs/IRC_client_gui</value>
     <value type="bool" key="ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal">false</value>
     <value type="QString" key="ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory">%{buildDir}</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Run /mnt/win_d/projects/yarp/modules/libACENetwork/build/debug/src/test_i/.libs/IRC_client_gui</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Run /mnt/win_d/projects/yarp/modules/libACENetwork/build/debug/test_i/.libs/IRC_client_gui</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">IRC client (GUI) (reactor)</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.CustomExecutableRunConfiguration</value>
     <value type="uint" key="RunConfiguration.QmlDebugServerPort">3768</value>

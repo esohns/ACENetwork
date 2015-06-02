@@ -2,7 +2,12 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = \
   -I$(top_srcdir)/../../modules/ATCD/ACE \
-  -I$(builddir)/../..
+  $(PKGSDL_CFLAGS) \
+  $(PKGGTK_CFLAGS)
+if VALGRIND_SUPPORT
+AM_CPPFLAGS += \
+  $(PKGVALGRIND_CFLAGS)
+endif
 
 DEFS = \
   -DHAVE_CONFIG_H \
@@ -39,21 +44,21 @@ net_client_CPPFLAGS = \
   -I$(top_srcdir)/modules/libACEStream/src \
   -I$(top_srcdir)/src \
   -I$(top_srcdir)/src/client_server \
-  $(pkg_libs_gtkglade_CFLAGS)
+  -I$(builddir)/../..
 net_client_LDFLAGS = \
   -L$(abs_top_srcdir)/modules/ATCD/ACE/build/linux/lib \
-  -L$(abs_builddir)/../../modules/libCommon/src/.libs \
-  -L$(abs_builddir)/../../modules/libCommon/src/ui/.libs \
-  -L$(abs_builddir)/../../modules/libACEStream/src/.libs \
-  -L$(abs_builddir)/../../src/.libs \
-  $(pkg_libs_gtkglade_LDFLAGS)
+  $(PKGGTK_LDFLAGS) \
+  -L$(abs_builddir)/../modules/libCommon/src/.libs \
+  -L$(abs_builddir)/../modules/libCommon/src/ui/.libs \
+  -L$(abs_builddir)/../modules/libACEStream/src/.libs \
+  -L$(abs_builddir)/../src/.libs
 net_client_LDADD = \
   -lACE \
+  $(PKGGTK_LIBS) \
   -lCommon \
   -lCommon_UI \
   -lACEStream \
-  -lACENetwork \
-  $(pkg_libs_gtkglade_LIBS)
+  -lACENetwork
 
 net_server_SOURCES = \
   net_callbacks.cpp \
@@ -76,27 +81,28 @@ net_server_CPPFLAGS = \
   -I$(top_srcdir)/modules/libACEStream/src \
   -I$(top_srcdir)/src \
   -I$(top_srcdir)/src/client_server \
-  $(pkg_libs_gtkglade_CFLAGS)
+  -I$(builddir)/../..
 net_server_LDFLAGS = \
   -L$(abs_top_srcdir)/modules/ATCD/ACE/build/linux/lib \
-  -L$(abs_builddir)/../../modules/libCommon/src/.libs \
-  -L$(abs_builddir)/../../modules/libCommon/src/ui/.libs \
-  -L$(abs_builddir)/../../modules/libACEStream/src/.libs \
-  -L$(abs_builddir)/../../src/.libs \
-  -L$(abs_builddir)/../../src/client_server/.libs \
-  $(pkg_libs_gtkglade_LDFLAGS)
+  $(PKGGTK_LDFLAGS) \
+  -L$(abs_builddir)/../modules/libCommon/src/.libs \
+  -L$(abs_builddir)/../modules/libCommon/src/ui/.libs \
+  -L$(abs_builddir)/../modules/libACEStream/src/.libs \
+  -L$(abs_builddir)/../src/.libs \
+  -L$(abs_builddir)/../src/client_server/.libs
 net_server_LDADD = \
   -lACE \
+  $(PKGGTK_LIBS) \
   -lCommon \
   -lCommon_UI \
   -lACEStream \
   -lACENetwork \
-  -lACENetwork_Server \
-  $(pkg_libs_gtkglade_LIBS)
+  -lACENetwork_Server
 
 configdir = $(confdir)
 config_DATA = \
   net_client.glade \
   net_server.glade
 
-EXTRA_DIST = $(config_DATA)
+EXTRA_DIST = \
+  $(config_DATA)
