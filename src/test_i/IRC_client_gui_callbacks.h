@@ -37,15 +37,17 @@ gboolean update_display (gpointer);
 //------------------------------------------------------------------------------
 G_MODULE_EXPORT gboolean idle_initialize_UI_cb (gpointer);
 G_MODULE_EXPORT gboolean idle_finalize_UI_cb (gpointer);
+
 // main
-G_MODULE_EXPORT void connect_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT void main_send_entry_changed_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gboolean send_entry_kb_focused_cb (GtkWidget*, GdkEventFocus*, gpointer);
-G_MODULE_EXPORT void send_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gint quit_activated_cb (GtkWidget*, GdkEvent*, gpointer);
+G_MODULE_EXPORT void button_about_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void button_connect_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void button_send_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void button_quit_clicked_cb (GtkWidget*, GdkEvent*, gpointer);
+G_MODULE_EXPORT void entry_send_changed_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT gboolean entry_send_kb_focused_cb (GtkWidget*, GdkEventFocus*, gpointer);
 
 // IRC_Client_GUI_Connection
-G_MODULE_EXPORT void disconnect_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void button_disconnect_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gboolean nick_entry_kb_focused_cb (GtkWidget*, GdkEventFocus*, gpointer);
 G_MODULE_EXPORT void change_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void usersbox_changed_cb (GtkWidget*, gpointer);

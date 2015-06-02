@@ -79,42 +79,46 @@ struct IRC_Client_IRCLoginOptions
 };
 
 // see (RFC1459 section 4.2.3.1)
+//            b - set a ban mask to keep users out
+//            i - invite-only channel flag
+//            k - set a channel key (password)
+//            l - set the user limit to channel
+//            m - moderated channel
+//            n - no messages to channel from clients on the outside
 //            o - give/take channel operator privileges
 //            p - private channel flag
 //            s - secret channel flag
-//            i - invite-only channel flag
 //            t - topic settable by channel operator only flag
-//            n - no messages to channel from clients on the outside
-//            m - moderated channel
-//            l - set the user limit to channel
-//            b - set a ban mask to keep users out
 //            v - give/take the ability to speak on a moderated channel
-//            k - set a channel key (password)
 // see (RFC2812 section 4.2 and following)
 //            a - anonymous channel ('&!'-channels only)
 //            i - invite-only channel flag
+//            k - set a channel key (password)
+//            l - set the user limit to channel
 //            m - moderated channel
 //            n - no messages to channel from clients on the outside
-//            q - quiet channel (server use only)
 //            p - private channel flag
-//            s - secret channel flag
+//            q - quiet channel (server use only)
 //            r - server reop flag ('!'-channels only)
+//            s - secret channel flag
 //            t - topic settable by channel operator only flag
-//            l - set the user limit to channel
-//            k - set a channel key (password)
+// *NOTE*: see also: https://www.alien.net.au/irc/chanmodes.html
 enum IRC_Client_ChannelMode
 {
-  CHANNELMODE_PASSWORD = 0,
-  CHANNELMODE_VOICE,
-  CHANNELMODE_BAN,
-  CHANNELMODE_USERLIMIT,
-  CHANNELMODE_MODERATED,
-  CHANNELMODE_BLOCKFOREIGNMSGS,
-  CHANNELMODE_RESTRICTEDTOPIC,
-  CHANNELMODE_INVITEONLY,
-  CHANNELMODE_SECRET,
-  CHANNELMODE_PRIVATE,
-  CHANNELMODE_OPERATOR,
+  CHANNELMODE_ANONYMOUS = 0,    // 'a'
+  CHANNELMODE_BAN,              // 'b'
+  CHANNELMODE_INVITEONLY,       // 'i'
+  CHANNELMODE_PASSWORD,         // 'k'
+  CHANNELMODE_USERLIMIT,        // 'l'
+  CHANNELMODE_MODERATED,        // 'm'
+  CHANNELMODE_BLOCKFOREIGNMSGS, // 'n'
+  CHANNELMODE_OPERATOR,         // 'o'
+  CHANNELMODE_PRIVATE,          // 'p'
+  CHANNELMODE_QUIET,            // 'q'
+  CHANNELMODE_REOP,             // 'r'
+  CHANNELMODE_SECRET,           // 's'
+  CHANNELMODE_RESTRICTEDTOPIC,  // 't'
+  CHANNELMODE_VOICE,            // 'v'
   //
   CHANNELMODE_MAX,
   CHANNELMODE_INVALID
@@ -134,15 +138,16 @@ typedef std::bitset<11> IRC_Client_ChannelModes_t;
 //            o - operator flag
 //            O - local operator flag
 //            s - marks a user for receipt of server notices
+// *NOTE*: see also: https://www.alien.net.au/irc/usermodes.html
 enum IRC_Client_UserMode
 {
-  USERMODE_LOCALOPERATOR = 0,
-  USERMODE_OPERATOR,
-  USERMODE_RESTRICTEDCONN,
-  USERMODE_RECVWALLOPS,
-  USERMODE_RECVNOTICES,
-  USERMODE_INVISIBLE,
-  USERMODE_AWAY,
+  USERMODE_AWAY = 0,           // 'a'
+  USERMODE_INVISIBLE,          // 'i'
+  USERMODE_OPERATOR,           // 'o'
+  USERMODE_LOCALOPERATOR,      // 'O'
+  USERMODE_RESTRICTEDCONN,     // 'r'
+  USERMODE_RECVNOTICES,        // 's'
+  USERMODE_RECVWALLOPS,        // 'w'
   //
   USERMODE_MAX,
   USERMODE_INVALID

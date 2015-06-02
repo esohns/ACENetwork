@@ -268,12 +268,12 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (entry_p);
   gulong result = g_signal_connect (entry_p,
                                     ACE_TEXT_ALWAYS_CHAR ("focus-in-event"),
-                                    G_CALLBACK (send_entry_kb_focused_cb),
+                                    G_CALLBACK (entry_send_kb_focused_cb),
                                     userData_in);
   ACE_ASSERT (result);
   result = g_signal_connect (entry_p,
                              ACE_TEXT_ALWAYS_CHAR ("changed"),
-                             G_CALLBACK (main_send_entry_changed_cb),
+                             G_CALLBACK (entry_send_changed_cb),
                              userData_in);
   ACE_ASSERT (result);
   GtkButton* button_p =
@@ -282,7 +282,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (button_p);
   result = g_signal_connect (button_p,
                              ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                             G_CALLBACK (send_clicked_cb),
+                             G_CALLBACK (button_send_clicked_cb),
                              userData_in);
   ACE_ASSERT (result);
   button_p =
@@ -291,7 +291,16 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (button_p);
   result = g_signal_connect (button_p,
                              ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                             G_CALLBACK (connect_clicked_cb),
+                             G_CALLBACK (button_connect_clicked_cb),
+                             userData_in);
+  ACE_ASSERT (result);
+  button_p =
+    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_BUTTON_ABOUT)));
+  ACE_ASSERT (button_p);
+  result = g_signal_connect (button_p,
+                             ACE_TEXT_ALWAYS_CHAR ("clicked"),
+                             G_CALLBACK (button_about_clicked_cb),
                              userData_in);
   ACE_ASSERT (result);
   button_p =
@@ -300,7 +309,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (button_p);
   result = g_signal_connect (button_p,
                              ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                             G_CALLBACK (quit_activated_cb),
+                             G_CALLBACK (button_quit_clicked_cb),
                              NULL);
   ACE_ASSERT (result);
 
@@ -318,7 +327,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   // connect default signals
   result = g_signal_connect (window_p,
                              ACE_TEXT_ALWAYS_CHAR ("delete-event"),
-                             G_CALLBACK (quit_activated_cb),
+                             G_CALLBACK (button_quit_clicked_cb),
                              window_p);
   ACE_ASSERT (result);
   //   g_signal_connect(window_p,
@@ -378,10 +387,40 @@ idle_finalize_UI_cb (gpointer userData_in)
 }
 
 void
-connect_clicked_cb (GtkWidget* widget_in,
-                    gpointer userData_in)
+button_about_clicked_cb (GtkWidget* widget_in,
+                         gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::connect_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_about_clicked_cb"));
+
+  ACE_UNUSED_ARG (widget_in);
+  IRC_Client_GTK_CBData* data_p =
+    static_cast<IRC_Client_GTK_CBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+
+  Common_UI_GTKBuildersIterator_t iterator =
+    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+
+  // retrieve about dialog handle
+  GtkDialog* dialog_p =
+    GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_DIALOG_ABOUT)));
+  ACE_ASSERT (dialog_p);
+
+  // run dialog
+  gint response_id = gtk_dialog_run (dialog_p);
+  gtk_widget_hide (GTK_WIDGET (dialog_p));
+}
+
+void
+button_connect_clicked_cb (GtkWidget* widget_in,
+                           gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::button_connect_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   IRC_Client_GTK_CBData* data_p =
@@ -715,10 +754,10 @@ connect_clicked_cb (GtkWidget* widget_in,
 }
 
 void
-main_send_entry_changed_cb (GtkWidget* widget_in,
-                            gpointer userData_in)
+entry_send_changed_cb (GtkWidget* widget_in,
+                       gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::main_send_entry_changed_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::entry_send_changed_cb"));
 
   IRC_Client_GTK_CBData* data_p =
     static_cast<IRC_Client_GTK_CBData*> (userData_in);
@@ -744,11 +783,11 @@ main_send_entry_changed_cb (GtkWidget* widget_in,
 }
 
 gboolean
-send_entry_kb_focused_cb (GtkWidget* widget_in,
+entry_send_kb_focused_cb (GtkWidget* widget_in,
                           GdkEventFocus* event_in,
                           gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::send_entry_kb_focused_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::entry_send_kb_focused_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
@@ -775,10 +814,10 @@ send_entry_kb_focused_cb (GtkWidget* widget_in,
 }
 
 void
-send_clicked_cb (GtkWidget* widget_in,
-                 gpointer userData_in)
+button_send_clicked_cb (GtkWidget* widget_in,
+                        gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::send_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_send_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   IRC_Client_GTK_CBData* data_p =
@@ -899,12 +938,12 @@ send_clicked_cb (GtkWidget* widget_in,
                                 -1);      // delete everything
 }
 
-gint
-quit_activated_cb (GtkWidget* widget_in,
-                   GdkEvent* event_in,
-                   gpointer userData_in)
+void
+button_quit_clicked_cb (GtkWidget* widget_in,
+                        GdkEvent* event_in,
+                        gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::quit_activated_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_quit_clicked_cb"));
 
   int result = -1;
 
@@ -938,15 +977,13 @@ quit_activated_cb (GtkWidget* widget_in,
 
   // step3: stop GTK event processing
   COMMON_UI_GTK_MANAGER_SINGLETON::instance()->close (1);
-
-  return FALSE;
 }
 
 void
-disconnect_clicked_cb (GtkWidget* widget_in,
-                       gpointer userData_in)
+button_disconnect_clicked_cb (GtkWidget* widget_in,
+                              gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::disconnect_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_disconnect_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
   IRC_Client_GTK_ConnectionCBData* data_p =
@@ -1561,7 +1598,8 @@ user_mode_toggled_cb (GtkToggleButton* widget_in,
 
   IRC_Client_UserMode mode = USERMODE_INVALID;
   // find out which button toggled...
-  const gchar* name_p = gtk_widget_get_name (GTK_WIDGET (widget_in));
+  const gchar* name_p = gtk_buildable_get_name (GTK_BUILDABLE (widget_in));
+  //const gchar* name_p = gtk_widget_get_name (GTK_WIDGET (widget_in));
   result = ACE_OS::strcmp (name_p,
                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR));
   if (result == 0)
@@ -1605,8 +1643,8 @@ user_mode_toggled_cb (GtkToggleButton* widget_in,
               else
               {
                 ACE_DEBUG ((LM_ERROR,
-                            ACE_TEXT ("unknown/invalid user mode toggled (was: %@), returning\n"),
-                            widget_in));
+                            ACE_TEXT ("unknown/invalid user mode toggled (was: 0x%@/\"%s\"), returning\n"),
+                            widget_in, ACE_TEXT (name_p)));
                 return;
               } // end ELSE
             } // end ELSE

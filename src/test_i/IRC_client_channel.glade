@@ -31,8 +31,8 @@
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <child>
-                          <object class="GtkToggleButton" id="togglebutton_key">
-                            <property name="label" translatable="yes">_key</property>
+                          <object class="GtkToggleButton" id="togglebutton_anonymous">
+                            <property name="label" translatable="yes">_anonymous</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -46,11 +46,12 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="togglebutton_voice">
-                            <property name="label" translatable="yes">_voice</property>
+                          <object class="GtkToggleButton" id="togglebutton_ban">
+                            <property name="label" translatable="yes">_ban</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">b</property>
                             <property name="relief">none</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
@@ -61,11 +62,12 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="togglebutton_ban">
-                            <property name="label" translatable="yes">_ban</property>
+                          <object class="GtkToggleButton" id="togglebutton_inviteonly">
+                            <property name="label" translatable="yes">_invite</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">invite-only (i)</property>
                             <property name="relief">none</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
@@ -76,11 +78,12 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="togglebutton_userlimit">
-                            <property name="label" translatable="yes">user_limit</property>
+                          <object class="GtkToggleButton" id="togglebutton_key">
+                            <property name="label" translatable="yes">_key</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">k</property>
                             <property name="relief">none</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
@@ -91,11 +94,12 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="togglebutton_moderated">
-                            <property name="label" translatable="yes">_moderated</property>
+                          <object class="GtkToggleButton" id="togglebutton_userlimit">
+                            <property name="label" translatable="yes">_limit</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">user limit (l)</property>
                             <property name="relief">none</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
@@ -106,11 +110,12 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="togglebutton_blockforeign">
-                            <property name="label" translatable="yes">block _foreign</property>
+                          <object class="GtkToggleButton" id="togglebutton_moderated">
+                            <property name="label" translatable="yes">_moderated</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">m</property>
                             <property name="relief">none</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
@@ -121,11 +126,12 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="togglebutton_restricttopic">
-                            <property name="label" translatable="yes">restrict _topic</property>
+                          <object class="GtkToggleButton" id="togglebutton_blockforeign">
+                            <property name="label" translatable="yes">foreig_n</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">block foreign messages (n)</property>
                             <property name="relief">none</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
@@ -136,11 +142,12 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="togglebutton_inviteonly">
-                            <property name="label" translatable="yes">_invite only</property>
+                          <object class="GtkToggleButton" id="togglebutton_operator">
+                            <property name="label" translatable="yes">_operator</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">o</property>
                             <property name="relief">none</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
@@ -151,11 +158,12 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="togglebutton_secret">
-                            <property name="label" translatable="yes">_secret</property>
+                          <object class="GtkToggleButton" id="togglebutton_private">
+                            <property name="label" translatable="yes">_private</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">p</property>
                             <property name="relief">none</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
@@ -166,8 +174,8 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="togglebutton_private">
-                            <property name="label" translatable="yes">_private</property>
+                          <object class="GtkToggleButton" id="togglebutton_quiet">
+                            <property name="label" translatable="yes">_quiet</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -181,8 +189,8 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="togglebutton_operator">
-                            <property name="label" translatable="yes">_operator</property>
+                          <object class="GtkToggleButton" id="togglebutton_reop">
+                            <property name="label" translatable="yes">_reop</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -193,6 +201,54 @@
                           </object>
                           <packing>
                             <property name="position">10</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_secret">
+                            <property name="label" translatable="yes">_secret</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">s</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">11</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_restricttopic">
+                            <property name="label" translatable="yes">_topic</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">restrict topic (t)</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">12</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_voice">
+                            <property name="label" translatable="yes">_voice</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">v</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">13</property>
                           </packing>
                         </child>
                       </object>
@@ -377,7 +433,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="button_tab_channel_close">
+          <object class="GtkButton" id="button_close">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="receives_default">False</property>
@@ -433,7 +489,7 @@
             <property name="visible">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="button_dialog_page_channel_entry_accept">
+              <object class="GtkButton" id="button_accept">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
@@ -451,7 +507,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="button_dialog_page_channel_entry_cancel">
+              <object class="GtkButton" id="button_cancel">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -476,8 +532,8 @@
       </object>
     </child>
     <action-widgets>
-      <action-widget response="0">button_dialog_page_channel_entry_accept</action-widget>
-      <action-widget response="1">button_dialog_page_channel_entry_cancel</action-widget>
+      <action-widget response="0">button_accept</action-widget>
+      <action-widget response="1">button_cancel</action-widget>
     </action-widgets>
   </object>
   <object class="GtkAction" id="action_cancel">

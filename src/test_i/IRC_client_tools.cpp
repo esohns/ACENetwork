@@ -1230,31 +1230,37 @@ IRC_Client_Tools::IRCChannelModeChar2ChannelMode (char mode_in)
 
   switch (mode_in)
   {
-    case 'k':
-      result = CHANNELMODE_PASSWORD; break;
-    case 'v':
-      result = CHANNELMODE_VOICE; break;
+    case 'a':
+      result = CHANNELMODE_ANONYMOUS; break;
     case 'b':
       result = CHANNELMODE_BAN; break;
+    case 'i':
+      result = CHANNELMODE_INVITEONLY; break;
+    case 'k':
+      result = CHANNELMODE_PASSWORD; break;
     case 'l':
       result = CHANNELMODE_USERLIMIT; break;
     case 'm':
       result = CHANNELMODE_MODERATED; break;
     case 'n':
       result = CHANNELMODE_BLOCKFOREIGNMSGS; break;
-    case 't':
-      result = CHANNELMODE_RESTRICTEDTOPIC; break;
-    case 'i':
-      result = CHANNELMODE_INVITEONLY; break;
-    case 's':
-      result = CHANNELMODE_SECRET; break;
-    case 'p':
-      result = CHANNELMODE_PRIVATE; break;
     case 'o':
       result = CHANNELMODE_OPERATOR; break;
+    case 'p':
+      result = CHANNELMODE_PRIVATE; break;
+    case 'q':
+      result = CHANNELMODE_QUIET; break;
+    case 'r':
+      result = CHANNELMODE_REOP; break;
+    case 's':
+      result = CHANNELMODE_SECRET; break;
+    case 't':
+      result = CHANNELMODE_RESTRICTEDTOPIC; break;
+    case 'v':
+      result = CHANNELMODE_VOICE; break;
     default:
     {
-      ACE_DEBUG ((LM_ERROR,
+      ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("unknown/invalid channel mode (was: \"%c\"), aborting\n"),
                   mode_in));
       break;
@@ -1274,23 +1280,23 @@ IRC_Client_Tools::IRCUserModeChar2UserMode (char mode_in)
 
   switch (mode_in)
   {
-    case 'O':
-      result = USERMODE_LOCALOPERATOR; break;
-    case 'o':
-      result = USERMODE_OPERATOR; break;
-    case 'r':
-      result = USERMODE_RESTRICTEDCONN; break;
-    case 'w':
-      result = USERMODE_RECVWALLOPS; break;
-    case 's':
-      result = USERMODE_RECVNOTICES; break;
-    case 'i':
-      result = USERMODE_INVISIBLE; break;
     case 'a':
       result = USERMODE_AWAY; break;
+    case 'i':
+      result = USERMODE_INVISIBLE; break;
+    case 'o':
+      result = USERMODE_OPERATOR; break;
+    case 'O':
+      result = USERMODE_LOCALOPERATOR; break;
+    case 'r':
+      result = USERMODE_RESTRICTEDCONN; break;
+    case 's':
+      result = USERMODE_RECVNOTICES; break;
+    case 'w':
+      result = USERMODE_RECVWALLOPS; break;
     default:
     {
-      ACE_DEBUG ((LM_ERROR,
+      ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("unknown/invalid user mode (was: \"%c\"), aborting\n"),
                   mode_in));
       break;
@@ -1310,32 +1316,38 @@ IRC_Client_Tools::IRCChannelMode2String (const IRC_Client_ChannelMode& mode_in)
 
   switch (mode_in)
   {
-    case CHANNELMODE_PASSWORD:
-      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_PASSWORD"); break;
-    case CHANNELMODE_VOICE:
-      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_VOICE"); break;
+    case CHANNELMODE_ANONYMOUS:
+      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_ANONYMOUS"); break;
     case CHANNELMODE_BAN:
       result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_BAN"); break;
+    case CHANNELMODE_INVITEONLY:
+      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_INVITEONLY"); break;
+    case CHANNELMODE_PASSWORD:
+      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_PASSWORD"); break;
     case CHANNELMODE_USERLIMIT:
       result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_USERLIMIT"); break;
     case CHANNELMODE_MODERATED:
       result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_MODERATED"); break;
     case CHANNELMODE_BLOCKFOREIGNMSGS:
       result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_BLOCKFOREIGNMSGS"); break;
-    case CHANNELMODE_RESTRICTEDTOPIC:
-      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_RESTRICTEDTOPIC"); break;
-    case CHANNELMODE_INVITEONLY:
-      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_INVITEONLY"); break;
-    case CHANNELMODE_SECRET:
-      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_SECRET"); break;
-    case CHANNELMODE_PRIVATE:
-      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_PRIVATE"); break;
     case CHANNELMODE_OPERATOR:
       result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_OPERATOR"); break;
+    case CHANNELMODE_PRIVATE:
+      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_PRIVATE"); break;
+    case CHANNELMODE_QUIET:
+      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_QUIET"); break;
+    case CHANNELMODE_REOP:
+      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_REOP"); break;
+    case CHANNELMODE_SECRET:
+      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_SECRET"); break;
+    case CHANNELMODE_RESTRICTEDTOPIC:
+      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_RESTRICTEDTOPIC"); break;
+    case CHANNELMODE_VOICE:
+      result = ACE_TEXT_ALWAYS_CHAR ("CHANNELMODE_VOICE"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid channel mode (was: %d), aborting\n"),
+                  ACE_TEXT ("unknown/invalid channel mode (was: %d), aborting\n"),
                   mode_in));
       break;
     }
@@ -1354,20 +1366,20 @@ IRC_Client_Tools::IRCUserMode2String (const IRC_Client_UserMode& mode_in)
 
   switch (mode_in)
   {
-    case USERMODE_LOCALOPERATOR:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_LOCALOPERATOR"); break;
-    case USERMODE_OPERATOR:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_OPERATOR"); break;
-    case USERMODE_RESTRICTEDCONN:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_RESTRICTEDCONN"); break;
-    case USERMODE_RECVWALLOPS:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_RECVWALLOPS"); break;
-    case USERMODE_RECVNOTICES:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_RECVNOTICES"); break;
-    case USERMODE_INVISIBLE:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_INVISIBLE"); break;
     case USERMODE_AWAY:
       result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_AWAY"); break;
+    case USERMODE_INVISIBLE:
+      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_INVISIBLE"); break;
+    case USERMODE_OPERATOR:
+      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_OPERATOR"); break;
+    case USERMODE_LOCALOPERATOR:
+      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_LOCALOPERATOR"); break;
+    case USERMODE_RESTRICTEDCONN:
+      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_RESTRICTEDCONN"); break;
+    case USERMODE_RECVNOTICES:
+      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_RECVNOTICES"); break;
+    case USERMODE_RECVWALLOPS:
+      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_RECVWALLOPS"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1393,7 +1405,7 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
     case IRC_Client_IRCMessage::Command::STRING:
     {
       IRC_Client_IRCMessage::CommandType command =
-          IRC_Client_Tools::IRCCommandString2Type(*message_in.command.string);
+        IRC_Client_Tools::IRCCommandString2Type (*message_in.command.string);
       switch (command)
       {
         case IRC_Client_IRCMessage::NICK:
@@ -1412,8 +1424,8 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
         }
         case IRC_Client_IRCMessage::NOTICE:
         {
-          result = IRC_Client_Tools::concatParams (message_in.params,
-                                                   1);
+          result = IRC_Client_Tools::stringify (message_in.params,
+                                                1);
           break;
         }
         case IRC_Client_IRCMessage::MODE:
@@ -1430,7 +1442,7 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRCMessage::USERS:
         case IRC_Client_IRCMessage::USERHOST:
         {
-          result = IRC_Client_Tools::concatParams (message_in.params);
+          result = IRC_Client_Tools::stringify (message_in.params);
           break;
         }
         default:
@@ -1465,16 +1477,17 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::RPL_MOTD:          // 372
         case IRC_Client_IRC_Codes::RPL_MOTDSTART:     // 375
         case IRC_Client_IRC_Codes::RPL_ENDOFMOTD:     // 376
+        case IRC_Client_IRC_Codes::ERR_NOMOTD:        // 422
         case IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
         case IRC_Client_IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         {
-          result = IRC_Client_Tools::concatParams (message_in.params,
-                                                   -1);
+          result = IRC_Client_Tools::stringify (message_in.params,
+                                                -1);
           break;
         }
         case IRC_Client_IRC_Codes::RPL_BANLIST:       // 367
         {
-          result = IRC_Client_Tools::concatParams (message_in.params);
+          result = IRC_Client_Tools::stringify (message_in.params);
           break;
         }
         case IRC_Client_IRC_Codes::RPL_MYINFO:        //   4
@@ -1494,20 +1507,20 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::ERR_BADCHANNAME:   // 479
         case IRC_Client_IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
         {
-          result = IRC_Client_Tools::concatParams (message_in.params,
-                                                   1);
+          result = IRC_Client_Tools::stringify (message_in.params,
+                                                1);
           break;
         }
         case IRC_Client_IRC_Codes::RPL_ENDOFWHO:      // 315
         {
-          result = IRC_Client_Tools::concatParams (message_in.params,
-                                                   2);
+          result = IRC_Client_Tools::stringify (message_in.params,
+                                                2);
           break;
         }
         case IRC_Client_IRC_Codes::RPL_WHOREPLY:      // 352
         {
-          result = IRC_Client_Tools::concatParams (message_in.params,
-                                                   5);
+          result = IRC_Client_Tools::stringify (message_in.params,
+                                                5);
           break;
         }
         default:
@@ -1515,7 +1528,7 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid (numeric) command (was: %u [\"%s\"]), aborting\n"),
                       message_in.command.numeric,
-                      ACE_TEXT (IRC_Client_Tools::IRCCode2String(message_in.command.numeric).c_str ())));
+                      ACE_TEXT (IRC_Client_Tools::IRCCode2String (message_in.command.numeric).c_str ())));
 
           message_in.dump_state ();
 
@@ -1541,15 +1554,15 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
 }
 
 std::string
-IRC_Client_Tools::concatParams (const IRC_Client_Parameters_t& params_in,
-                                int index_in)
+IRC_Client_Tools::stringify (const IRC_Client_Parameters_t& params_in,
+                             int index_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::concatParams"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::stringify"));
 
   std::string result;
 
   // sanity check(s)
-  if (params_in.empty() ||
+  if (params_in.empty () ||
       (index_in > static_cast<int> ((params_in.size () - 1))))
     return result;
 

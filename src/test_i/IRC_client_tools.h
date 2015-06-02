@@ -76,8 +76,8 @@ class IRC_Client_Tools
   // helper methods
   static IRC_Client_UserMode IRCUserModeChar2UserMode (char);
   static IRC_Client_ChannelMode IRCChannelModeChar2ChannelMode (char);
-  static std::string concatParams (const IRC_Client_Parameters_t&, // parameters
-                                   int = 0);                       // starting index (-1: LAST parameter)
+  static std::string stringify (const IRC_Client_Parameters_t&, // parameters
+                                int = 0);                       // starting index (-1: LAST parameter)
 };
 
 #endif

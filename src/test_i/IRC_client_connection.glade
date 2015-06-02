@@ -14,7 +14,7 @@
     <property name="stock_id">gtk-cancel</property>
     <property name="is_important">True</property>
   </object>
-  <object class="GtkDialog" id="dialog_entry_connection">
+  <object class="GtkDialog" id="dialog_page_connection_entry">
     <property name="title" translatable="yes">please insert data...</property>
     <property name="modal">True</property>
     <property name="window_position">center</property>
@@ -24,10 +24,10 @@
     <property name="skip_pager_hint">True</property>
     <property name="deletable">False</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="vbox_dialog_entry_connection">
+      <object class="GtkVBox" id="vbox_dialog_page_connection_entry">
         <property name="visible">True</property>
         <child>
-          <object class="GtkEntry" id="entry_dialog_entry_connection">
+          <object class="GtkEntry" id="entry_dialog_page_connection_entry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="has_focus">True</property>
@@ -42,12 +42,12 @@
           </packing>
         </child>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="hbuttonbox_dialog_entry">
+          <object class="GtkHButtonBox" id="hbuttonbox_dialog_page_connection_entry">
             <property name="visible">True</property>
             <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="dialog_entry_button_cancel">
+              <object class="GtkButton" id="button_cancel">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -64,7 +64,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="dialog_entry_button_accept">
+              <object class="GtkButton" id="button_accept">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
@@ -92,8 +92,8 @@
       </object>
     </child>
     <action-widgets>
-      <action-widget response="1">dialog_entry_button_cancel</action-widget>
-      <action-widget response="0">dialog_entry_button_accept</action-widget>
+      <action-widget response="1">button_cancel</action-widget>
+      <action-widget response="0">button_accept</action-widget>
     </action-widgets>
   </object>
   <object class="GtkImage" id="button_disconnect_image">
@@ -115,7 +115,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="button_tab_connection_close">
+          <object class="GtkButton" id="button_close">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="receives_default">False</property>
@@ -401,11 +401,13 @@
                     <property name="sensitive">False</property>
                     <property name="homogeneous">True</property>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_notices">
-                        <property name="label" translatable="yes">_notices</property>
+                      <object class="GtkToggleButton" id="togglebutton_away">
+                        <property name="label" translatable="yes">_away</property>
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">a</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -416,12 +418,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_localoperator">
-                        <property name="label" translatable="yes">_local operator</property>
+                      <object class="GtkToggleButton" id="togglebutton_invisible">
+                        <property name="label" translatable="yes">_invisible</property>
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">i</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -432,12 +434,13 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_operator">
-                        <property name="label" translatable="yes">o_perator</property>
+                      <object class="GtkToggleButton" id="togglebutton_localoperator">
+                        <property name="label" translatable="yes">_local</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">local operator (O)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -448,11 +451,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_restricted">
-                        <property name="label" translatable="yes">_restricted</property>
+                      <object class="GtkToggleButton" id="togglebutton_notices">
+                        <property name="label" translatable="yes">notice_s</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">receive server notices (s)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -463,11 +467,13 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_wallops">
-                        <property name="label" translatable="yes">_wallops</property>
+                      <object class="GtkToggleButton" id="togglebutton_operator">
+                        <property name="label" translatable="yes">_operator</property>
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">o</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -478,11 +484,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_invisible">
-                        <property name="label" translatable="yes">_invisible</property>
+                      <object class="GtkToggleButton" id="togglebutton_restricted">
+                        <property name="label" translatable="yes">_restricted</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">restricted user connection (r)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -493,12 +500,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_away">
-                        <property name="label" translatable="yes">awa_y</property>
+                      <object class="GtkToggleButton" id="togglebutton_wallops">
+                        <property name="label" translatable="yes">_wallops</property>
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">receive wallops (w)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>

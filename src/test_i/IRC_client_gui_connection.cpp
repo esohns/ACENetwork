@@ -165,7 +165,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
   ACE_ASSERT (button_p);
   gulong result_2 = g_signal_connect (button_p,
                                       ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                                      G_CALLBACK (disconnect_clicked_cb),
+                                      G_CALLBACK (button_disconnect_clicked_cb),
                                       &CBData_);
   ACE_ASSERT (result_2);
   GtkEntry* entry_p =
@@ -1071,6 +1071,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::RPL_MOTDSTART:        // 375
         case IRC_Client_IRC_Codes::RPL_ENDOFMOTD:        // 376
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:       // 401
+        case IRC_Client_IRC_Codes::ERR_NOMOTD:           // 422
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:    // 433
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:   // 461
         case IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
@@ -1126,9 +1127,8 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LABEL_NICK)));
           ACE_ASSERT (label_p);
           // --> see Pango Text Attribute Markup Language...
-          std::string nickname_string = ACE_TEXT_ALWAYS_CHAR ("nickname: <b>");
+          std::string nickname_string = ACE_TEXT_ALWAYS_CHAR ("<b><i>nickname</i></b> ");
           nickname_string += CBData_.nickname;
-          nickname_string += ACE_TEXT_ALWAYS_CHAR ("</b>");
           gtk_label_set_markup (label_p,
                                 nickname_string.c_str ());
 
@@ -1909,22 +1909,10 @@ IRC_Client_GUI_Connection::updateModeButtons ()
   // display (changed) user modes
   GtkToggleButton* togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_OPERATOR]);
-  togglebutton_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
-  ACE_ASSERT (togglebutton_p);
-  gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_RECVWALLOPS]);
-  togglebutton_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
-  ACE_ASSERT (togglebutton_p);
-  gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_RECVNOTICES]);
+                                CBData_.userModes[USERMODE_AWAY]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)));
@@ -1933,10 +1921,16 @@ IRC_Client_GUI_Connection::updateModeButtons ()
                                 CBData_.userModes[USERMODE_INVISIBLE]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_LOCALOPERATOR]);
+                                CBData_.userModes[USERMODE_RECVNOTICES]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                CBData_.userModes[USERMODE_OPERATOR]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
@@ -1945,10 +1939,16 @@ IRC_Client_GUI_Connection::updateModeButtons ()
                                 CBData_.userModes[USERMODE_RESTRICTEDCONN]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_AWAY]);
+                                CBData_.userModes[USERMODE_LOCALOPERATOR]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                CBData_.userModes[USERMODE_RECVWALLOPS]);
 
   gdk_threads_leave ();
 }
