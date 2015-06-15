@@ -548,7 +548,7 @@ IRC_Client_GUI_Connection::~IRC_Client_GUI_Connection ()
 }
 
 void
-IRC_Client_GUI_Connection::start (const Stream_ModuleConfiguration_t& configuration_in)
+IRC_Client_GUI_Connection::start (const Stream_ModuleConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::start"));
 
@@ -879,7 +879,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           ACE_ASSERT (message_in.params.size () >= 8);
           std::advance (iterator_2, 5); // nick position
           std::string nick = *iterator_2;
-          iterator++;
+          iterator_2++;
           bool away = ((*iterator_2).find (ACE_TEXT_ALWAYS_CHAR ("G"), 0) == 0);
           bool is_IRCoperator =
             ((*iterator_2).find (ACE_TEXT_ALWAYS_CHAR ("*"), 1) == 1);

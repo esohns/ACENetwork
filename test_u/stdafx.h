@@ -10,12 +10,15 @@
 #endif
 
 // C RunTime Header Files
-#include <iostream>
-#include <string>
+//#include <iostream>
+//#include <string>
 
 // System Library Header Files
+#include "ace/iosfwd.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
 // Local Header Files
 #include "net_macros.h"
+
+//using namespace std;

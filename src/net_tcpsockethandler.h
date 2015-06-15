@@ -33,7 +33,7 @@
 #include "net_sockethandler_base.h"
 
 class Net_Export Net_TCPSocketHandler
- : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t>
+ : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration>
  , public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
 {
  public:
@@ -51,7 +51,7 @@ class Net_Export Net_TCPSocketHandler
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
+  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration> inherited;
   typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler (const Net_TCPSocketHandler&));

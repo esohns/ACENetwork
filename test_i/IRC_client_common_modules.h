@@ -41,13 +41,13 @@ typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           IRC_Client_SessionMessage,
                                           IRC_Client_Message,
                                           IRC_Client_CommandType_t,
-                                          IRC_Client_RuntimeStatistic> IRC_Client_Module_Statistic_ReaderTask_t;
+                                          IRC_Client_RuntimeStatistic_t> IRC_Client_Module_Statistic_ReaderTask_t;
 typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
                                           IRC_Client_SessionMessage,
                                           IRC_Client_Message,
                                           IRC_Client_CommandType_t,
-                                          IRC_Client_RuntimeStatistic> IRC_Client_Module_Statistic_WriterTask_t;
+                                          IRC_Client_RuntimeStatistic_t> IRC_Client_Module_Statistic_WriterTask_t;
 
 // declare module(s)
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                             // task synch type

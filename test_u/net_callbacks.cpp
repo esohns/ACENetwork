@@ -50,7 +50,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_client_UI_cb"));
 
-  Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -387,7 +387,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_server_UI_cb"));
 
-  Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -650,7 +650,7 @@ idle_update_log_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
 
-  Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -743,7 +743,7 @@ idle_update_info_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
 
-  Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -910,7 +910,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
-  //Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  //Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   //// sanity check(s)
   //ACE_ASSERT (data_p);
@@ -945,7 +945,7 @@ button_close_clicked_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
-  //Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  //Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   //// sanity check(s)
   //ACE_ASSERT (data_p);
@@ -979,7 +979,7 @@ button_close_all_clicked_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
-  //Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  //Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   //// sanity check(s)
   //ACE_ASSERT (data_p);
@@ -1074,7 +1074,7 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   int result = -1;
 
   ACE_UNUSED_ARG (widget_in);
-  Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1169,7 +1169,7 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
 
   int result = -1;
 
-  Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -1243,7 +1243,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::togglebutton_listen_toggled_cb"));
 
-  Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -1320,7 +1320,7 @@ button_clear_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_clear_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1356,7 +1356,7 @@ button_about_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_about_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1407,7 +1407,7 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
-  //Net_GTK_CBData_t* data_p = static_cast<Net_GTK_CBData_t*> (userData_in);
+  //Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
   //// sanity check(s)
   //ACE_ASSERT (data_p);
 

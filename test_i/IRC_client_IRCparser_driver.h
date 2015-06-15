@@ -25,6 +25,8 @@
 
 #include "ace/Global_Macros.h"
 
+#include "location.hh"
+
 #include "IRC_client_defines.h"
 #include "IRC_client_IRCparser.h"
 
@@ -34,14 +36,20 @@ class ACE_Message_Block;
 typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 
-// tell flex the lexer's prototype ...
+// tell flex of the lexer's prototype ...
+extern yy::IRC_Client_IRCParser::token_type
+IRC_Client_IRCScanner_lex (yy::IRC_Client_IRCParser::semantic_type* yylval,
+                           yy::IRC_Client_IRCParser::location_type* yylloc,
+                           IRC_Client_IRCParserDriver* driver,
+                           unsigned int* messageCounter,
+                           yyscan_t yyscanner);
 #define YY_DECL \
-yy::IRC_Client_IRCParser::token_type                                             \
-IRC_Client_IRCScanner_lex(yy::IRC_Client_IRCParser::semantic_type* yylval,       \
-                                yy::IRC_Client_IRCParser::location_type* yylloc, \
-                                IRC_Client_IRCParserDriver* driver,              \
-                                unsigned int* messageCounter,                    \
-                                yyscan_t yyscanner)
+yy::IRC_Client_IRCParser::token_type                                 \
+IRC_Client_IRCScanner_lex (yy::IRC_Client_IRCParser::semantic_type* yylval, \
+                           yy::IRC_Client_IRCParser::location_type* yylloc, \
+                           IRC_Client_IRCParserDriver* driver, \
+                           unsigned int* messageCounter, \
+                           yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 YY_DECL;
 

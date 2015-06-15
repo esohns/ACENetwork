@@ -262,7 +262,11 @@ Net_Connection_Manager_T<AddressType,
   for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
        iterator.next (connection_p);
        iterator.advance ())
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if (connection_p->id () == reinterpret_cast<unsigned int> (handle_in))
+#else
     if (connection_p->id () == static_cast<unsigned int> (handle_in))
+#endif
       break;
   if (!connection_p)
   {

@@ -29,9 +29,9 @@
 
 #include "net_defines.h"
 
-struct Net_SocketConfiguration_t
+struct Net_SocketConfiguration
 {
-  inline Net_SocketConfiguration_t ()
+  inline Net_SocketConfiguration ()
    : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
    , linger (NET_SOCKET_DEFAULT_LINGER)
  #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -54,22 +54,22 @@ struct Net_SocketConfiguration_t
   // *TODO*: add network interface specifier (interface index on linux, (G)UID on windows)
 };
 
-struct Net_SocketHandlerConfiguration_t
+struct Net_SocketHandlerConfiguration
 {
-  inline Net_SocketHandlerConfiguration_t ()
+  inline Net_SocketHandlerConfiguration ()
    : bufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , messageAllocator (NULL)
    , socketConfiguration ()
   {};
 
-  int                       bufferSize; // pdu size (if fixed)
-  Stream_IAllocator*        messageAllocator;
-  Net_SocketConfiguration_t socketConfiguration;
+  int                     bufferSize; // pdu size (if fixed)
+  Stream_IAllocator*      messageAllocator;
+  Net_SocketConfiguration socketConfiguration;
 };
 
-struct Net_ProtocolConfiguration_t
+struct Net_ProtocolConfiguration
 {
-  inline Net_ProtocolConfiguration_t ()
+  inline Net_ProtocolConfiguration ()
    : bufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , peerPingInterval (0)
    , pingAutoAnswer (true)
@@ -83,33 +83,33 @@ struct Net_ProtocolConfiguration_t
 };
 
 // *NOTE*: I speculate that this is the main reason that C# was ever invented !
-struct Net_UserData_t
+struct Net_UserData
 {
-  inline Net_UserData_t ()
+  inline Net_UserData ()
    : userData (NULL)
   {};
 
   void* userData;
 };
 
-struct Net_StreamConfiguration_t
+struct Net_StreamConfiguration
 {
-  inline Net_StreamConfiguration_t ()
+  inline Net_StreamConfiguration ()
    : protocolConfiguration (NULL)
    , sessionID (0)
    , streamConfiguration ()
    , userData (NULL)
   {};
 
-  Net_ProtocolConfiguration_t* protocolConfiguration; // protocol configuration
-  unsigned int                 sessionID;             // session ID
-  Stream_Configuration_t       streamConfiguration;   // stream configuration
-  Net_UserData_t*              userData;              // user data
+  Net_ProtocolConfiguration* protocolConfiguration; // protocol configuration
+  unsigned int               sessionID;             // session ID
+  Stream_Configuration       streamConfiguration;   // stream configuration
+  Net_UserData*              userData;              // user data
 };
 
-struct Net_Configuration_t
+struct Net_Configuration
 {
-  inline Net_Configuration_t ()
+  inline Net_Configuration ()
    : socketConfiguration ()
    , streamConfiguration ()
    , streamSessionData ()
@@ -117,12 +117,12 @@ struct Net_Configuration_t
   {};
 
   // **************************** socket data **********************************
-  Net_SocketConfiguration_t   socketConfiguration;
+  Net_SocketConfiguration   socketConfiguration;
   // **************************** stream data **********************************
-  Net_StreamConfiguration_t   streamConfiguration;
-  Net_UserData_t              streamSessionData;
+  Net_StreamConfiguration   streamConfiguration;
+  Net_UserData              streamSessionData;
   // *************************** protocol data *********************************
-  Net_ProtocolConfiguration_t protocolConfiguration;
+  Net_ProtocolConfiguration protocolConfiguration;
 };
 
 #endif

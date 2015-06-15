@@ -26,7 +26,7 @@
 /* %endif */
 
 /* %if-c-only */
-
+    
 /* %endif */
 
 /* %if-c-only */
@@ -58,7 +58,7 @@
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
- * if you want the limit (max/min) macros for int types.
+ * if you want the limit (max/min) macros for int types. 
  */
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
@@ -75,10 +75,9 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t;
+typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -108,6 +107,8 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
+
+#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -194,13 +195,21 @@ typedef void* yyscan_t;
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
 
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE IRC_Client_IRCscanner_restart(yyin ,yyscanner )
+#define YY_NEW_FILE IRC_Client_IRCScanner_restart(yyin ,yyscanner )
 
 #define YY_END_OF_BUFFER_CHAR 0
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -226,7 +235,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
     /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
      *       access to the local variable yy_act. Since yyless() is a macro, it would break
-     *       existing scanners that call yyless() from OUTSIDE IRC_Client_IRCscanner_lex.
+     *       existing scanners that call yyless() from OUTSIDE IRC_Client_IRCScanner_lex. 
      *       One obvious solution it to make yy_act a global. I tried that, and saw
      *       a 5% performance hit in a non-yylineno scanner, because yy_act is
      *       normally declared as a register variable-- so it is not worth it.
@@ -238,14 +247,14 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
                     if ( yytext[yyl] == '\n' )\
                         --yylineno;\
             }while(0)
-
+    
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
 	do \
 		{ \
 		/* Undo effects of setting up yytext. */ \
-				int yyless_macro_arg = (n); \
-				YY_LESS_LINENO(yyless_macro_arg);\
+        int yyless_macro_arg = (n); \
+        YY_LESS_LINENO(yyless_macro_arg);\
 		*yy_cp = yyg->yy_hold_char; \
 		YY_RESTORE_YY_MORE_OFFSET \
 		yyg->yy_c_buf_p = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
@@ -305,7 +314,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-
+    
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -322,7 +331,7 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via IRC_Client_IRCscanner_restart()), so that the user can continue scanning by
+	 * (via IRC_Client_IRCScanner_restart()), so that the user can continue scanning by
 	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
@@ -363,38 +372,38 @@ struct yy_buffer_state
 
 /* %endif */
 
-void IRC_Client_IRCscanner_restart (FILE *input_file ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Client_IRCscanner__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner_pop_buffer_state (yyscan_t yyscanner );
+void IRC_Client_IRCScanner_restart (FILE *input_file ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE IRC_Client_IRCScanner__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_pop_buffer_state (yyscan_t yyscanner );
 
-static void IRC_Client_IRCscanner_ensure_buffer_stack (yyscan_t yyscanner );
-static void IRC_Client_IRCscanner__load_buffer_state (yyscan_t yyscanner );
-static void IRC_Client_IRCscanner__init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
+static void IRC_Client_IRCScanner_ensure_buffer_stack (yyscan_t yyscanner );
+static void IRC_Client_IRCScanner__load_buffer_state (yyscan_t yyscanner );
+static void IRC_Client_IRCScanner__init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
 
-#define YY_FLUSH_BUFFER IRC_Client_IRCscanner__flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
+#define YY_FLUSH_BUFFER IRC_Client_IRCScanner__flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
 
-YY_BUFFER_STATE IRC_Client_IRCscanner__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Client_IRCscanner__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Client_IRCscanner__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE IRC_Client_IRCScanner__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE IRC_Client_IRCScanner__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE IRC_Client_IRCScanner__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
 /* %endif */
 
-void *IRC_Client_IRCscanner_alloc (yy_size_t ,yyscan_t yyscanner );
-void *IRC_Client_IRCscanner_realloc (void *,yy_size_t ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner_free (void * ,yyscan_t yyscanner );
+void *IRC_Client_IRCScanner_alloc (yy_size_t ,yyscan_t yyscanner );
+void *IRC_Client_IRCScanner_realloc (void *,yy_size_t ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_free (void * ,yyscan_t yyscanner );
 
-#define yy_new_buffer IRC_Client_IRCscanner__create_buffer
+#define yy_new_buffer IRC_Client_IRCScanner__create_buffer
 
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-				IRC_Client_IRCscanner_ensure_buffer_stack (yyscanner); \
+        IRC_Client_IRCScanner_ensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-						IRC_Client_IRCscanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            IRC_Client_IRCScanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
@@ -402,9 +411,9 @@ void IRC_Client_IRCscanner_free (void * ,yyscan_t yyscanner );
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-				IRC_Client_IRCscanner_ensure_buffer_stack (yyscanner); \
+        IRC_Client_IRCScanner_ensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-						IRC_Client_IRCscanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            IRC_Client_IRCScanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
@@ -414,7 +423,7 @@ void IRC_Client_IRCscanner_free (void * ,yyscan_t yyscanner );
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
 
-#define IRC_Client_IRCscanner_wrap(n) 1
+#define IRC_Client_IRCScanner_wrap(n) 1
 #define YY_SKIP_YYWRAP
 
 #define FLEX_DEBUG
@@ -2210,7 +2219,7 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
  * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
-  yyg->yytext_ptr = yy_bp; \
+	yyg->yytext_ptr = yy_bp; \
 /* %% [2.0] code to fiddle yytext and yyleng for yymore() goes here \ */\
 	yyleng = (size_t) (yy_cp - yy_bp); \
 	yyg->yy_hold_char = *yy_cp; \
@@ -2222,7 +2231,7 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
 #define YY_NUM_RULES 23
 #define YY_END_OF_BUFFER 24
 /* This struct is not used in this scanner,
-	 but its presence is necessary. */
+   but its presence is necessary. */
 struct yy_trans_info
 	{
 	flex_int32_t yy_verify;
@@ -2241,7 +2250,7 @@ static yyconst flex_int16_t yy_accept[56] =
 /* Table of booleans, true if rule could match eol. */
 static yyconst flex_int32_t yy_rule_can_match_eol[24] =
     {   0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 1, 0, 0,     };
 
 static yyconst yy_state_type yy_NUL_trans[56] =
@@ -2268,27 +2277,27 @@ static yyconst flex_int16_t yy_rule_linenum[23] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 ".\\IRCscanner.l"
+#line 1 "./IRCscanner.l"
 /* *NOTE*: this version of the scanner is rather straight-forward, as it assumes
-a continuous buffer containing the whole frame and hence makes no provisions for
-switching buffers, backing-up and the like. In this sense, it is optimized for
-speed and efficiency */
-#line 7 ".\\IRCscanner.l"
+           a continuous buffer containing the whole frame and hence makes no
+           provisions for switching buffers, backing-up and the like. In this
+           sense, it is optimized for speed and efficiency */
+#line 7 "./IRCscanner.l"
 #include "stdafx.h"
 
 #include <stdlib.h>
 
-#include <string>
 #include <sstream>
+#include <string>
 
-#include <ace/OS_Memory.h>
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
+#include "ace/OS_Memory.h"
 
 #include "IRC_client_IRCparser_driver.h"
 
-/* By default IRC_Client_IRCscanner_lex returns int, we use token_type.
-   Unfortunately yyterminate by default returns 0, which is
-   not of token_type. */
+/* *NOTE*: instead of the default (int), this IRC_Client_IRCScanner_lex returns token_type.
+           Unfortunately, yyterminate by default returns 0, which is not of
+           token_type. This %define solves that issue. */
 #define yyterminate() return yy::IRC_Client_IRCParser::token::END
 #define YY_NO_UNISTD_H 1
 /* %option c++ yyclass="IRC_Client_IRCScanner" stack noline bison-bridge bison-locations */
@@ -2336,13 +2345,13 @@ And so on...
 
 
 
-#line 88 ".\\IRCscanner.l"
+#line 88 "./IRCscanner.l"
 #define YY_USER_ACTION yylloc->columns(yyleng);
 /* *NOTE*: it seems that the following "exceptions" are allowed:
            - the trailing param does NOT need a ':' prefix IF it doesn't contain
              <SPACE>s...
 */
-#line 2346 "irc_client_IRCscanner.cpp"
+#line 2355 "IRC_client_IRCscanner.cpp"
 
 #define INITIAL 0
 #define prefix 1
@@ -2412,9 +2421,9 @@ static int yy_init_globals (yyscan_t yyscanner );
 
 /* %if-reentrant */
 
-int IRC_Client_IRCscanner_lex_init (yyscan_t* scanner);
+int IRC_Client_IRCScanner_lex_init (yyscan_t* scanner);
 
-int IRC_Client_IRCscanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int IRC_Client_IRCScanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
 /* %endif */
 
@@ -2423,31 +2432,31 @@ int IRC_Client_IRCscanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* s
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int IRC_Client_IRCscanner_lex_destroy (yyscan_t yyscanner );
+int IRC_Client_IRCScanner_lex_destroy (yyscan_t yyscanner );
 
-int IRC_Client_IRCscanner_get_debug (yyscan_t yyscanner );
+int IRC_Client_IRCScanner_get_debug (yyscan_t yyscanner );
 
-void IRC_Client_IRCscanner_set_debug (int debug_flag ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_set_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE IRC_Client_IRCscanner_get_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE IRC_Client_IRCScanner_get_extra (yyscan_t yyscanner );
 
-void IRC_Client_IRCscanner_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
-FILE *IRC_Client_IRCscanner_get_in (yyscan_t yyscanner );
+FILE *IRC_Client_IRCScanner_get_in (yyscan_t yyscanner );
 
-void IRC_Client_IRCscanner_set_in  (FILE * in_str ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_set_in  (FILE * in_str ,yyscan_t yyscanner );
 
-FILE *IRC_Client_IRCscanner_get_out (yyscan_t yyscanner );
+FILE *IRC_Client_IRCScanner_get_out (yyscan_t yyscanner );
 
-void IRC_Client_IRCscanner_set_out  (FILE * out_str ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-int IRC_Client_IRCscanner_get_leng (yyscan_t yyscanner );
+int IRC_Client_IRCScanner_get_leng (yyscan_t yyscanner );
 
-char *IRC_Client_IRCscanner_get_text (yyscan_t yyscanner );
+char *IRC_Client_IRCScanner_get_text (yyscan_t yyscanner );
 
-int IRC_Client_IRCscanner_get_lineno (yyscan_t yyscanner );
+int IRC_Client_IRCScanner_get_lineno (yyscan_t yyscanner );
 
-void IRC_Client_IRCscanner_set_lineno (int line_number ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_set_lineno (int line_number ,yyscan_t yyscanner );
 
 /* %if-bison-bridge */
 /* %endif */
@@ -2458,9 +2467,9 @@ void IRC_Client_IRCscanner_set_lineno (int line_number ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int IRC_Client_IRCscanner_wrap (yyscan_t yyscanner );
+extern "C" int IRC_Client_IRCScanner_wrap (yyscan_t yyscanner );
 #else
-extern int IRC_Client_IRCscanner_wrap (yyscan_t yyscanner );
+extern int IRC_Client_IRCScanner_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -2498,7 +2507,12 @@ static int input (yyscan_t yyscanner );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -2507,7 +2521,7 @@ static int input (yyscan_t yyscanner );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO fwrite( yytext, yyleng, 1, yyout )
+#define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
 /* %endif */
 /* %if-c++-only C++ definition */
 /* %endif */
@@ -2578,9 +2592,9 @@ static int input (yyscan_t yyscanner );
 #define YY_DECL_IS_OURS 1
 /* %if-c-only Standard (non-C++) definition */
 
-extern int IRC_Client_IRCscanner_lex (yyscan_t yyscanner);
+extern int IRC_Client_IRCScanner_lex (yyscan_t yyscanner);
 
-#define YY_DECL int IRC_Client_IRCscanner_lex (yyscan_t yyscanner)
+#define YY_DECL int IRC_Client_IRCScanner_lex (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only C++ definition */
 /* %endif */
@@ -2600,7 +2614,7 @@ extern int IRC_Client_IRCscanner_lex (yyscan_t yyscanner);
 
 /* %% [6.0] YY_RULE_SETUP definition goes here */
 #define YY_RULE_SETUP \
-  YY_USER_ACTION
+	YY_USER_ACTION
 
 /* %not-for-header */
 
@@ -2611,10 +2625,10 @@ YY_DECL
 	register yy_state_type yy_current_state;
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 /* %% [7.0] user's declarations go here */
-#line 96 ".\\IRCscanner.l"
+#line 96 "./IRCscanner.l"
 
 
   yylloc->step();
@@ -2622,7 +2636,7 @@ YY_DECL
   std::stringstream converter;
 
 
-#line 2626 "irc_client_IRCscanner.cpp"
+#line 2640 "IRC_client_IRCscanner.cpp"
 
 	if ( !yyg->yy_init )
 		{
@@ -2650,12 +2664,12 @@ YY_DECL
 /* %endif */
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			IRC_Client_IRCscanner_ensure_buffer_stack (yyscanner);
+			IRC_Client_IRCScanner_ensure_buffer_stack (yyscanner);
 			YY_CURRENT_BUFFER_LVALUE =
-				IRC_Client_IRCscanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+				IRC_Client_IRCScanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
 		}
 
-		IRC_Client_IRCscanner__load_buffer_state(yyscanner );
+		IRC_Client_IRCScanner__load_buffer_state(yyscanner );
 		}
 
 	while ( 1 )		/* loops until end-of-file is reached */
@@ -2700,12 +2714,12 @@ yy_find_action:
 			int yyl;
 			for ( yyl = 0; yyl < yyleng; ++yyl )
 				if ( yytext[yyl] == '\n' )
-
+					   
     do{ yylineno++;
         yycolumn=0;
     }while(0)
 ;
-      }
+			}
 
 do_action:	/* This label is used only to access EOF actions. */
 
@@ -2716,10 +2730,10 @@ do_action:	/* This label is used only to access EOF actions. */
 				fprintf( stderr, "--scanner backing up\n" );
 			else if ( yy_act < 23 )
 				fprintf( stderr, "--accepting rule at line %ld (\"%s\")\n",
-								 (long)yy_rule_linenum[yy_act], yytext );
+				         (long)yy_rule_linenum[yy_act], yytext );
 			else if ( yy_act == 23 )
 				fprintf( stderr, "--accepting default rule (\"%s\")\n",
-								 yytext );
+				         yytext );
 			else if ( yy_act == 24 )
 				fprintf( stderr, "--(end of buffer or a NUL)\n" );
 			else
@@ -2738,176 +2752,176 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 104 ".\\IRCscanner.l"
+#line 104 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(prefix);
                              yylval->ival = 1;
                              return yy::IRC_Client_IRCParser::token_type(yytext[0]); }
-  YY_BREAK
+	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 108 ".\\IRCscanner.l"
+#line 108 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(end_of_frame);
                              yylval->ival = 1; }
-  YY_BREAK
+	YY_BREAK
 // end <INITIAL>
 
 case 3:
 YY_RULE_SETUP
-#line 113 ".\\IRCscanner.l"
+#line 113 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(command);
                              yylval->ival = yyleng;
                              return yy::IRC_Client_IRCParser::token::SPACE; }
-  YY_BREAK
+	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 117 ".\\IRCscanner.l"
+#line 117 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(user);
                              yylval->ival = 1;
                              return yy::IRC_Client_IRCParser::token_type(yytext[0]); }
-  YY_BREAK
+	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 121 ".\\IRCscanner.l"
+#line 121 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(host);
                              yylval->ival = 1;
                              return yy::IRC_Client_IRCParser::token_type(yytext[0]); }
-  YY_BREAK
+	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 125 ".\\IRCscanner.l"
+#line 125 "./IRCscanner.l"
 { yylloc->step();
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
                              yylval->sval->append(yytext, yyleng);
                              return yy::IRC_Client_IRCParser::token::ORIGIN; }
-  YY_BREAK
+	YY_BREAK
 // end <prefix>
 
 case 7:
 YY_RULE_SETUP
-#line 132 ".\\IRCscanner.l"
+#line 132 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(command);
                              yylval->ival = yyleng;
                              return yy::IRC_Client_IRCParser::token::SPACE; }
-  YY_BREAK
+	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 136 ".\\IRCscanner.l"
+#line 136 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(host);
                              yylval->ival = 1;
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
                              return yy::IRC_Client_IRCParser::token_type(yytext[0]); }
-  YY_BREAK
+	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 142 ".\\IRCscanner.l"
+#line 142 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(prefix);
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
                              yylval->sval->append(yytext, yyleng);
                              return yy::IRC_Client_IRCParser::token::USER; }
-  YY_BREAK
+	YY_BREAK
 // end <user>
 
 case 10:
 YY_RULE_SETUP
-#line 150 ".\\IRCscanner.l"
+#line 150 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(command);
                              yylval->ival = yyleng;
                              return yy::IRC_Client_IRCParser::token::SPACE; }
-  YY_BREAK
+	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 154 ".\\IRCscanner.l"
+#line 154 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(prefix);
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
                              yylval->sval->append(yytext, yyleng);
                              return yy::IRC_Client_IRCParser::token::HOST; }
-  YY_BREAK
+	YY_BREAK
 // end <host>
 
 case 12:
 YY_RULE_SETUP
-#line 162 ".\\IRCscanner.l"
+#line 162 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(params);
                              yylval->ival = yyleng;
                              return yy::IRC_Client_IRCParser::token::SPACE; }
-  YY_BREAK
+	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 166 ".\\IRCscanner.l"
+#line 166 "./IRCscanner.l"
 { yylloc->step();
                              converter.str(ACE_TEXT_ALWAYS_CHAR(""));
                              converter.clear();
                              converter << yytext;
                              converter >> yylval->ival;
                              return yy::IRC_Client_IRCParser::token::CMD_NUMERIC; }
-  YY_BREAK
+	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 172 ".\\IRCscanner.l"
+#line 172 "./IRCscanner.l"
 { yylloc->step();
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
                              yylval->sval->append(yytext, yyleng);
                              return yy::IRC_Client_IRCParser::token::CMD_STRING; }
-  YY_BREAK
+	YY_BREAK
 // end <INITIAL, command>
 
 case 15:
 YY_RULE_SETUP
-#line 179 ".\\IRCscanner.l"
+#line 179 "./IRCscanner.l"
 { yylloc->step();
                              yylval->ival = yyleng;
                              return yy::IRC_Client_IRCParser::token::SPACE; }
-  YY_BREAK
+	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 182 ".\\IRCscanner.l"
+#line 182 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(trailing);
                              yylval->ival = 1;
                              return yy::IRC_Client_IRCParser::token_type(yytext[0]); }
-  YY_BREAK
+	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 186 ".\\IRCscanner.l"
+#line 186 "./IRCscanner.l"
 { yylloc->step(); /* *NOTE*: non-compliant (see above) */
-														 BEGIN(end_of_frame); }
+                             BEGIN(end_of_frame); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 188 ".\\IRCscanner.l"
+#line 188 "./IRCscanner.l"
 { yylloc->step();
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
                              yylval->sval->append(yytext, yyleng);
                              return yy::IRC_Client_IRCParser::token::PARAM; }
-  YY_BREAK
+	YY_BREAK
 // end <params>
 
 case 19:
 YY_RULE_SETUP
-#line 195 ".\\IRCscanner.l"
+#line 195 "./IRCscanner.l"
 { yylloc->step();
-														 BEGIN(end_of_frame); }
+                             BEGIN(end_of_frame); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 197 ".\\IRCscanner.l"
+#line 197 "./IRCscanner.l"
 { yylloc->step();
                              if (yyleng > 0)
                              {
@@ -2917,18 +2931,18 @@ YY_RULE_SETUP
                                return yy::IRC_Client_IRCParser::token::PARAM;
                              } // end IF
                            }
-  YY_BREAK
+	YY_BREAK
 // end <trailing>
 
 case 21:
 /* rule 21 can match eol */
 YY_RULE_SETUP
-#line 208 ".\\IRCscanner.l"
+#line 208 "./IRCscanner.l"
 { yylloc->step();
                              BEGIN(INITIAL);
                              yylval->ival = 2;
                              (*messageCounter)++; }
-  YY_BREAK
+	YY_BREAK
 
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(prefix):
@@ -2938,12 +2952,12 @@ case YY_STATE_EOF(command):
 case YY_STATE_EOF(params):
 case YY_STATE_EOF(trailing):
 case YY_STATE_EOF(end_of_frame):
-#line 213 ".\\IRCscanner.l"
+#line 213 "./IRCscanner.l"
 { yyterminate(); }
-  YY_BREAK
+	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 214 ".\\IRCscanner.l"
+#line 214 "./IRCscanner.l"
 { yylloc->step();
 
                              // debug info
@@ -2952,14 +2966,14 @@ YY_RULE_SETUP
                              error_message += ACE_TEXT("\", aborting");
                              driver->error(*yylloc, error_message);
 
-														 yyterminate(); }
+                             yyterminate(); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 223 ".\\IRCscanner.l"
+#line 223 "./IRCscanner.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 2963 "irc_client_IRCscanner.cpp"
+#line 2977 "IRC_client_IRCscanner.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2975,7 +2989,7 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
 			 * just pointed yyin at a new source and called
-			 * IRC_Client_IRCscanner_lex().  If so, then we have to assure
+			 * IRC_Client_IRCScanner_lex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
@@ -3036,7 +3050,7 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 				{
 				yyg->yy_did_buffer_switch_on_eof = 0;
 
-				if ( IRC_Client_IRCscanner_wrap(yyscanner ) )
+				if ( IRC_Client_IRCScanner_wrap(yyscanner ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
@@ -3089,7 +3103,7 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-} /* end of IRC_Client_IRCscanner_lex */
+} /* end of IRC_Client_IRCScanner_lex */
 /* %ok-for-header */
 
 /* %if-c++-only */
@@ -3112,7 +3126,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	register char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
 	register char *source = yyg->yytext_ptr;
 	register int number_to_move, i;
@@ -3180,7 +3194,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					IRC_Client_IRCscanner_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
+					IRC_Client_IRCScanner_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
 				}
 			else
 				/* Can't grow it, we don't own it. */
@@ -3212,7 +3226,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			IRC_Client_IRCscanner_restart(yyin  ,yyscanner);
+			IRC_Client_IRCScanner_restart(yyin  ,yyscanner);
 			}
 
 		else
@@ -3229,7 +3243,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	if ((yy_size_t) (yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
 		yy_size_t new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) IRC_Client_IRCscanner_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) IRC_Client_IRCScanner_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
 	}
@@ -3248,14 +3262,14 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c-only */
 /* %not-for-header */
 
-		static yy_state_type yy_get_previous_state (yyscan_t yyscanner)
+    static yy_state_type yy_get_previous_state (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
 	register yy_state_type yy_current_state;
 	register char *yy_cp;
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 /* %% [15.0] code to get the start state into yy_current_state goes here */
 	yy_current_state = yyg->yy_start;
@@ -3290,10 +3304,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-  register int yy_is_jam;
+	register int yy_is_jam;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner; /* This var may be unused depending upon options. */
 /* %% [17.0] code to find the next state, and perhaps do backing up, goes here */
-  register char *yy_cp = yyg->yy_c_buf_p;
+	register char *yy_cp = yyg->yy_c_buf_p;
 
 	yy_current_state = yy_NUL_trans[yy_current_state];
 	yy_is_jam = (yy_current_state == 0);
@@ -3326,10 +3340,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-  int c;
+	int c;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  *yyg->yy_c_buf_p = yyg->yy_hold_char;
+	*yyg->yy_c_buf_p = yyg->yy_hold_char;
 
 	if ( *yyg->yy_c_buf_p == YY_END_OF_BUFFER_CHAR )
 		{
@@ -3360,13 +3374,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 					 */
 
 					/* Reset buffer status. */
-					IRC_Client_IRCscanner_restart(yyin ,yyscanner);
+					IRC_Client_IRCScanner_restart(yyin ,yyscanner);
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( IRC_Client_IRCscanner_wrap(yyscanner ) )
+					if ( IRC_Client_IRCScanner_wrap(yyscanner ) )
 						return EOF;
 
 					if ( ! yyg->yy_did_buffer_switch_on_eof )
@@ -3390,14 +3404,14 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	yyg->yy_hold_char = *++yyg->yy_c_buf_p;
 
 /* %% [19.0] update BOL and yylineno */
-  if ( c == '\n' )
-
+	if ( c == '\n' )
+		   
     do{ yylineno++;
         yycolumn=0;
     }while(0)
 ;
 
-  return c;
+	return c;
 }
 /* %if-c-only */
 #endif	/* ifndef YY_NO_INPUT */
@@ -3409,21 +3423,21 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
  * @note This function does not reset the start condition to @c INITIAL .
  */
 /* %if-c-only */
-    void IRC_Client_IRCscanner_restart  (FILE * input_file , yyscan_t yyscanner)
+    void IRC_Client_IRCScanner_restart  (FILE * input_file , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  if ( ! YY_CURRENT_BUFFER ){
-        IRC_Client_IRCscanner_ensure_buffer_stack (yyscanner);
-    YY_CURRENT_BUFFER_LVALUE =
-            IRC_Client_IRCscanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
-  }
+	if ( ! YY_CURRENT_BUFFER ){
+        IRC_Client_IRCScanner_ensure_buffer_stack (yyscanner);
+		YY_CURRENT_BUFFER_LVALUE =
+            IRC_Client_IRCScanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+	}
 
-	IRC_Client_IRCscanner__init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
-	IRC_Client_IRCscanner__load_buffer_state(yyscanner );
+	IRC_Client_IRCScanner__init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
+	IRC_Client_IRCScanner__load_buffer_state(yyscanner );
 }
 
 /** Switch to a different input buffer.
@@ -3431,19 +3445,19 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  */
 /* %if-c-only */
-    void IRC_Client_IRCscanner__switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
+    void IRC_Client_IRCScanner__switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	/* TODO. We should be able to replace this entire function body
 	 * with
-	 *		IRC_Client_IRCscanner_pop_buffer_state();
-	 *		IRC_Client_IRCscanner_push_buffer_state(new_buffer);
-		 */
-	IRC_Client_IRCscanner_ensure_buffer_stack (yyscanner);
+	 *		IRC_Client_IRCScanner_pop_buffer_state();
+	 *		IRC_Client_IRCScanner_push_buffer_state(new_buffer);
+     */
+	IRC_Client_IRCScanner_ensure_buffer_stack (yyscanner);
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
@@ -3456,23 +3470,23 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	IRC_Client_IRCscanner__load_buffer_state(yyscanner );
+	IRC_Client_IRCScanner__load_buffer_state(yyscanner );
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (IRC_Client_IRCscanner_wrap()) processing, but the only time this flag
-	 * is looked at is after IRC_Client_IRCscanner_wrap() is called, so it's safe
+	 * EOF (IRC_Client_IRCScanner_wrap()) processing, but the only time this flag
+	 * is looked at is after IRC_Client_IRCScanner_wrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
 /* %if-c-only */
-static void IRC_Client_IRCscanner__load_buffer_state  (yyscan_t yyscanner)
+static void IRC_Client_IRCScanner__load_buffer_state  (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
 	yyg->yytext_ptr = yyg->yy_c_buf_p = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
 	yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
@@ -3486,44 +3500,44 @@ static void IRC_Client_IRCscanner__load_buffer_state  (yyscan_t yyscanner)
  * @return the allocated buffer state.
  */
 /* %if-c-only */
-    YY_BUFFER_STATE IRC_Client_IRCscanner__create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
+    YY_BUFFER_STATE IRC_Client_IRCScanner__create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
 	YY_BUFFER_STATE b;
-
-	b = (YY_BUFFER_STATE) IRC_Client_IRCscanner_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+    
+	b = (YY_BUFFER_STATE) IRC_Client_IRCScanner_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCscanner__create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCScanner__create_buffer()" );
 
 	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) IRC_Client_IRCscanner_alloc(b->yy_buf_size + 2 ,yyscanner );
+	b->yy_ch_buf = (char *) IRC_Client_IRCScanner_alloc(b->yy_buf_size + 2 ,yyscanner );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCscanner__create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCScanner__create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	IRC_Client_IRCscanner__init_buffer(b,file ,yyscanner);
+	IRC_Client_IRCScanner__init_buffer(b,file ,yyscanner);
 
 	return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with IRC_Client_IRCscanner__create_buffer()
+ * @param b a buffer created with IRC_Client_IRCScanner__create_buffer()
  * @param yyscanner The scanner object.
  */
 /* %if-c-only */
-    void IRC_Client_IRCscanner__delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void IRC_Client_IRCScanner__delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if ( ! b )
 		return;
@@ -3532,9 +3546,9 @@ static void IRC_Client_IRCscanner__load_buffer_state  (yyscan_t yyscanner)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		IRC_Client_IRCscanner_free((void *) b->yy_ch_buf ,yyscanner );
+		IRC_Client_IRCScanner_free((void *) b->yy_ch_buf ,yyscanner );
 
-	IRC_Client_IRCscanner_free((void *) b ,yyscanner );
+	IRC_Client_IRCScanner_free((void *) b ,yyscanner );
 }
 
 /* %if-c-only */
@@ -3546,25 +3560,25 @@ static void IRC_Client_IRCscanner__load_buffer_state  (yyscan_t yyscanner)
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a IRC_Client_IRCscanner_restart() or at EOF.
+ * such as during a IRC_Client_IRCScanner_restart() or at EOF.
  */
 /* %if-c-only */
-    static void IRC_Client_IRCscanner__init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
+    static void IRC_Client_IRCScanner__init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 
 {
-  int oerrno = errno;
+	int oerrno = errno;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  IRC_Client_IRCscanner__flush_buffer(b ,yyscanner);
+	IRC_Client_IRCScanner__flush_buffer(b ,yyscanner);
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then IRC_Client_IRCscanner__init_buffer was _probably_
-     * called from IRC_Client_IRCscanner_restart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then IRC_Client_IRCScanner__init_buffer was _probably_
+     * called from IRC_Client_IRCScanner_restart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -3575,11 +3589,11 @@ static void IRC_Client_IRCscanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c-only */
 
         b->yy_is_interactive = 0;
-
+    
 /* %endif */
 /* %if-c++-only */
 /* %endif */
-  errno = oerrno;
+	errno = oerrno;
 }
 
 /** Discard all buffered characters. On the next scan, YY_INPUT will be called.
@@ -3587,12 +3601,12 @@ static void IRC_Client_IRCscanner__load_buffer_state  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  */
 /* %if-c-only */
-    void IRC_Client_IRCscanner__flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void IRC_Client_IRCScanner__flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if ( ! b )
 		return;
 
@@ -3611,7 +3625,7 @@ static void IRC_Client_IRCscanner__load_buffer_state  (yyscan_t yyscanner)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		IRC_Client_IRCscanner__load_buffer_state(yyscanner );
+		IRC_Client_IRCScanner__load_buffer_state(yyscanner );
 }
 
 /* %if-c-or-c++ */
@@ -3622,18 +3636,18 @@ static void IRC_Client_IRCscanner__load_buffer_state  (yyscan_t yyscanner)
  *  @param yyscanner The scanner object.
  */
 /* %if-c-only */
-void IRC_Client_IRCscanner_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
+void IRC_Client_IRCScanner_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (new_buffer == NULL)
 		return;
 
-	IRC_Client_IRCscanner_ensure_buffer_stack(yyscanner);
+	IRC_Client_IRCScanner_ensure_buffer_stack(yyscanner);
 
-	/* This block is copied from IRC_Client_IRCscanner__switch_to_buffer. */
+	/* This block is copied from IRC_Client_IRCScanner__switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
@@ -3647,8 +3661,8 @@ void IRC_Client_IRCscanner_push_buffer_state (YY_BUFFER_STATE new_buffer , yysca
 		yyg->yy_buffer_stack_top++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-	/* copied from IRC_Client_IRCscanner__switch_to_buffer. */
-	IRC_Client_IRCscanner__load_buffer_state(yyscanner );
+	/* copied from IRC_Client_IRCScanner__switch_to_buffer. */
+	IRC_Client_IRCScanner__load_buffer_state(yyscanner );
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 /* %endif */
@@ -3659,22 +3673,22 @@ void IRC_Client_IRCscanner_push_buffer_state (YY_BUFFER_STATE new_buffer , yysca
  *  @param yyscanner The scanner object.
  */
 /* %if-c-only */
-void IRC_Client_IRCscanner_pop_buffer_state (yyscan_t yyscanner)
+void IRC_Client_IRCScanner_pop_buffer_state (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (!YY_CURRENT_BUFFER)
 		return;
 
-	IRC_Client_IRCscanner__delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
+	IRC_Client_IRCScanner__delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
 	YY_CURRENT_BUFFER_LVALUE = NULL;
 	if (yyg->yy_buffer_stack_top > 0)
 		--yyg->yy_buffer_stack_top;
 
 	if (YY_CURRENT_BUFFER) {
-		IRC_Client_IRCscanner__load_buffer_state(yyscanner );
+		IRC_Client_IRCScanner__load_buffer_state(yyscanner );
 		yyg->yy_did_buffer_switch_on_eof = 1;
 	}
 }
@@ -3685,29 +3699,29 @@ void IRC_Client_IRCscanner_pop_buffer_state (yyscan_t yyscanner)
  *  Guarantees space for at least one push.
  */
 /* %if-c-only */
-static void IRC_Client_IRCscanner_ensure_buffer_stack (yyscan_t yyscanner)
+static void IRC_Client_IRCScanner_ensure_buffer_stack (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
-  int num_to_alloc;
+	int num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  if (!yyg->yy_buffer_stack) {
+	if (!yyg->yy_buffer_stack) {
 
 		/* First allocation is just for 2 elements, since we don't know if this
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
-				 */
+         */
 		num_to_alloc = 1;
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)IRC_Client_IRCscanner_alloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)IRC_Client_IRCScanner_alloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCscanner_ensure_buffer_stack()" );
-
+			YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCScanner_ensure_buffer_stack()" );
+								  
 		memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-
+				
 		yyg->yy_buffer_stack_max = num_to_alloc;
 		yyg->yy_buffer_stack_top = 0;
 		return;
@@ -3719,12 +3733,12 @@ static void IRC_Client_IRCscanner_ensure_buffer_stack (yyscan_t yyscanner)
 		int grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)IRC_Client_IRCscanner_realloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)IRC_Client_IRCScanner_realloc
 								(yyg->yy_buffer_stack,
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCscanner_ensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCScanner_ensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -3738,21 +3752,21 @@ static void IRC_Client_IRCscanner_ensure_buffer_stack (yyscan_t yyscanner)
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
  * @param yyscanner The scanner object.
- * @return the newly allocated buffer state object.
+ * @return the newly allocated buffer state object. 
  */
-YY_BUFFER_STATE IRC_Client_IRCscanner__scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
+YY_BUFFER_STATE IRC_Client_IRCScanner__scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
-
+    
 	if ( size < 2 ||
-			 base[size-2] != YY_END_OF_BUFFER_CHAR ||
-			 base[size-1] != YY_END_OF_BUFFER_CHAR )
+	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
+	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
 		return 0;
 
-	b = (YY_BUFFER_STATE) IRC_Client_IRCscanner_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) IRC_Client_IRCScanner_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCscanner__scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCScanner__scan_buffer()" );
 
 	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
@@ -3764,57 +3778,57 @@ YY_BUFFER_STATE IRC_Client_IRCscanner__scan_buffer  (char * base, yy_size_t  siz
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	IRC_Client_IRCscanner__switch_to_buffer(b ,yyscanner );
+	IRC_Client_IRCScanner__switch_to_buffer(b ,yyscanner );
 
 	return b;
 }
 /* %endif */
 
 /* %if-c-only */
-/** Setup the input buffer state to scan a string. The next call to IRC_Client_IRCscanner_lex() will
+/** Setup the input buffer state to scan a string. The next call to IRC_Client_IRCScanner_lex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       IRC_Client_IRCscanner__scan_bytes() instead.
+ *       IRC_Client_IRCScanner__scan_bytes() instead.
  */
-YY_BUFFER_STATE IRC_Client_IRCscanner__scan_string (yyconst char * yystr , yyscan_t yyscanner)
+YY_BUFFER_STATE IRC_Client_IRCScanner__scan_string (yyconst char * yystr , yyscan_t yyscanner)
 {
-
-  return IRC_Client_IRCscanner__scan_bytes(yystr,strlen(yystr) ,yyscanner);
+    
+	return IRC_Client_IRCScanner__scan_bytes(yystr,strlen(yystr) ,yyscanner);
 }
 /* %endif */
 
 /* %if-c-only */
-/** Setup the input buffer state to scan the given bytes. The next call to IRC_Client_IRCscanner_lex() will
+/** Setup the input buffer state to scan the given bytes. The next call to IRC_Client_IRCScanner_lex() will
  * scan from a @e copy of @a bytes.
- * @param bytes the byte buffer to scan
- * @param len the number of bytes in the buffer pointed to by @a bytes.
+ * @param yybytes the byte buffer to scan
+ * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE IRC_Client_IRCscanner__scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE IRC_Client_IRCScanner__scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 	char *buf;
 	yy_size_t n;
 	int i;
-
+    
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
-	buf = (char *) IRC_Client_IRCscanner_alloc(n ,yyscanner );
+	buf = (char *) IRC_Client_IRCScanner_alloc(n ,yyscanner );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCscanner__scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in IRC_Client_IRCScanner__scan_bytes()" );
 
 	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = IRC_Client_IRCscanner__scan_buffer(buf,n ,yyscanner);
+	b = IRC_Client_IRCScanner__scan_buffer(buf,n ,yyscanner);
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in IRC_Client_IRCscanner__scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in IRC_Client_IRCScanner__scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -3832,7 +3846,7 @@ YY_BUFFER_STATE IRC_Client_IRCscanner__scan_bytes  (yyconst char * yybytes, int 
 /* %if-c-only */
 static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 {
-			(void) fprintf( stderr, "%s\n", msg );
+    	(void) fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 /* %endif */
@@ -3846,8 +3860,8 @@ static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 	do \
 		{ \
 		/* Undo effects of setting up yytext. */ \
-				int yyless_macro_arg = (n); \
-				YY_LESS_LINENO(yyless_macro_arg);\
+        int yyless_macro_arg = (n); \
+        YY_LESS_LINENO(yyless_macro_arg);\
 		yytext[yyleng] = yyg->yy_hold_char; \
 		yyg->yy_c_buf_p = yytext + yyless_macro_arg; \
 		yyg->yy_hold_char = *yyg->yy_c_buf_p; \
@@ -3864,7 +3878,7 @@ static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 /** Get the user-defined data for this scanner.
  * @param yyscanner The scanner object.
  */
-YY_EXTRA_TYPE IRC_Client_IRCscanner_get_extra  (yyscan_t yyscanner)
+YY_EXTRA_TYPE IRC_Client_IRCScanner_get_extra  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyextra;
@@ -3875,33 +3889,33 @@ YY_EXTRA_TYPE IRC_Client_IRCscanner_get_extra  (yyscan_t yyscanner)
 /** Get the current line number.
  * @param yyscanner The scanner object.
  */
-int IRC_Client_IRCscanner_get_lineno  (yyscan_t yyscanner)
+int IRC_Client_IRCScanner_get_lineno  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
+    
         if (! YY_CURRENT_BUFFER)
             return 0;
-
+    
     return yylineno;
 }
 
 /** Get the current column number.
  * @param yyscanner The scanner object.
  */
-int IRC_Client_IRCscanner_get_column  (yyscan_t yyscanner)
+int IRC_Client_IRCScanner_get_column  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
+    
         if (! YY_CURRENT_BUFFER)
             return 0;
-
+    
     return yycolumn;
 }
 
 /** Get the input stream.
  * @param yyscanner The scanner object.
  */
-FILE *IRC_Client_IRCscanner_get_in  (yyscan_t yyscanner)
+FILE *IRC_Client_IRCScanner_get_in  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyin;
@@ -3910,7 +3924,7 @@ FILE *IRC_Client_IRCscanner_get_in  (yyscan_t yyscanner)
 /** Get the output stream.
  * @param yyscanner The scanner object.
  */
-FILE *IRC_Client_IRCscanner_get_out  (yyscan_t yyscanner)
+FILE *IRC_Client_IRCScanner_get_out  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyout;
@@ -3919,7 +3933,7 @@ FILE *IRC_Client_IRCscanner_get_out  (yyscan_t yyscanner)
 /** Get the length of the current token.
  * @param yyscanner The scanner object.
  */
-int IRC_Client_IRCscanner_get_leng  (yyscan_t yyscanner)
+int IRC_Client_IRCScanner_get_leng  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyleng;
@@ -3929,7 +3943,7 @@ int IRC_Client_IRCscanner_get_leng  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  */
 
-char *IRC_Client_IRCscanner_get_text  (yyscan_t yyscanner)
+char *IRC_Client_IRCScanner_get_text  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yytext;
@@ -3941,7 +3955,7 @@ char *IRC_Client_IRCscanner_get_text  (yyscan_t yyscanner)
  * @param user_defined The data to be associated with this scanner.
  * @param yyscanner The scanner object.
  */
-void IRC_Client_IRCscanner_set_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
+void IRC_Client_IRCScanner_set_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyextra = user_defined ;
@@ -3953,14 +3967,14 @@ void IRC_Client_IRCscanner_set_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yys
  * @param line_number
  * @param yyscanner The scanner object.
  */
-void IRC_Client_IRCscanner_set_lineno (int  line_number , yyscan_t yyscanner)
+void IRC_Client_IRCScanner_set_lineno (int  line_number , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "IRC_Client_IRCscanner_set_lineno called with no buffer" , yyscanner);
-
+           yy_fatal_error( "IRC_Client_IRCScanner_set_lineno called with no buffer" , yyscanner); 
+    
     yylineno = line_number;
 }
 
@@ -3968,14 +3982,14 @@ void IRC_Client_IRCscanner_set_lineno (int  line_number , yyscan_t yyscanner)
  * @param line_number
  * @param yyscanner The scanner object.
  */
-void IRC_Client_IRCscanner_set_column (int  column_no , yyscan_t yyscanner)
+void IRC_Client_IRCScanner_set_column (int  column_no , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "IRC_Client_IRCscanner_set_column called with no buffer" , yyscanner);
-
+           yy_fatal_error( "IRC_Client_IRCScanner_set_column called with no buffer" , yyscanner); 
+    
     yycolumn = column_no;
 }
 
@@ -3983,27 +3997,27 @@ void IRC_Client_IRCscanner_set_column (int  column_no , yyscan_t yyscanner)
  * input buffer.
  * @param in_str A readable stream.
  * @param yyscanner The scanner object.
- * @see IRC_Client_IRCscanner__switch_to_buffer
+ * @see IRC_Client_IRCScanner__switch_to_buffer
  */
-void IRC_Client_IRCscanner_set_in (FILE *  in_str , yyscan_t yyscanner)
+void IRC_Client_IRCScanner_set_in (FILE *  in_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyin = in_str ;
 }
 
-void IRC_Client_IRCscanner_set_out (FILE *  out_str , yyscan_t yyscanner)
+void IRC_Client_IRCScanner_set_out (FILE *  out_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyout = out_str ;
 }
 
-int IRC_Client_IRCscanner_get_debug  (yyscan_t yyscanner)
+int IRC_Client_IRCScanner_get_debug  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yy_flex_debug;
 }
 
-void IRC_Client_IRCscanner_set_debug (int  bdebug , yyscan_t yyscanner)
+void IRC_Client_IRCScanner_set_debug (int  bdebug , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yy_flex_debug = bdebug ;
@@ -4019,12 +4033,12 @@ void IRC_Client_IRCscanner_set_debug (int  bdebug , yyscan_t yyscanner)
 
 /* User-visible API */
 
-/* IRC_Client_IRCscanner_lex_init is special because it creates the scanner itself, so it is
+/* IRC_Client_IRCScanner_lex_init is special because it creates the scanner itself, so it is
  * the ONLY reentrant function that doesn't take the scanner as the last argument.
  * That's why we explicitly handle the declaration, instead of using our macros.
  */
 
-int IRC_Client_IRCscanner_lex_init(yyscan_t* ptr_yy_globals)
+int IRC_Client_IRCScanner_lex_init(yyscan_t* ptr_yy_globals)
 
 {
     if (ptr_yy_globals == NULL){
@@ -4032,7 +4046,7 @@ int IRC_Client_IRCscanner_lex_init(yyscan_t* ptr_yy_globals)
         return 1;
     }
 
-    *ptr_yy_globals = (yyscan_t) IRC_Client_IRCscanner_alloc ( sizeof( struct yyguts_t ), NULL );
+    *ptr_yy_globals = (yyscan_t) IRC_Client_IRCScanner_alloc ( sizeof( struct yyguts_t ), NULL );
 
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
@@ -4045,39 +4059,39 @@ int IRC_Client_IRCscanner_lex_init(yyscan_t* ptr_yy_globals)
     return yy_init_globals ( *ptr_yy_globals );
 }
 
-/* IRC_Client_IRCscanner_lex_init_extra has the same functionality as IRC_Client_IRCscanner_lex_init, but follows the
+/* IRC_Client_IRCScanner_lex_init_extra has the same functionality as IRC_Client_IRCScanner_lex_init, but follows the
  * convention of taking the scanner as the last argument. Note however, that
  * this is a *pointer* to a scanner, as it will be allocated by this call (and
  * is the reason, too, why this function also must handle its own declaration).
- * The user defined value in the first argument will be available to IRC_Client_IRCscanner_alloc in
+ * The user defined value in the first argument will be available to IRC_Client_IRCScanner_alloc in
  * the yyextra field.
  */
 
-int IRC_Client_IRCscanner_lex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
+int IRC_Client_IRCScanner_lex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
 
 {
     struct yyguts_t dummy_yyguts;
 
-    IRC_Client_IRCscanner_set_extra (yy_user_defined, &dummy_yyguts);
+    IRC_Client_IRCScanner_set_extra (yy_user_defined, &dummy_yyguts);
 
     if (ptr_yy_globals == NULL){
         errno = EINVAL;
         return 1;
     }
-
-    *ptr_yy_globals = (yyscan_t) IRC_Client_IRCscanner_alloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
-
+	
+    *ptr_yy_globals = (yyscan_t) IRC_Client_IRCScanner_alloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
+	
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
         return 1;
     }
-
+    
     /* By setting to 0xAA, we expose bugs in
     yy_init_globals. Leave at 0x00 for releases. */
     memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
-
-    IRC_Client_IRCscanner_set_extra (yy_user_defined, *ptr_yy_globals);
-
+    
+    IRC_Client_IRCScanner_set_extra (yy_user_defined, *ptr_yy_globals);
+    
     return yy_init_globals ( *ptr_yy_globals );
 }
 
@@ -4088,7 +4102,7 @@ static int yy_init_globals (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from IRC_Client_IRCscanner_lex_destroy(), so don't allocate here.
+     * This function is called from IRC_Client_IRCScanner_lex_destroy(), so don't allocate here.
      */
 
     yyg->yy_buffer_stack = 0;
@@ -4112,40 +4126,40 @@ static int yy_init_globals (yyscan_t yyscanner)
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * IRC_Client_IRCscanner_lex_init()
+     * IRC_Client_IRCScanner_lex_init()
      */
     return 0;
 }
 /* %endif */
 
 /* %if-c-only SNIP! this currently causes conflicts with the c++ scanner */
-/* IRC_Client_IRCscanner_lex_destroy is for both reentrant and non-reentrant scanners. */
-int IRC_Client_IRCscanner_lex_destroy  (yyscan_t yyscanner)
+/* IRC_Client_IRCScanner_lex_destroy is for both reentrant and non-reentrant scanners. */
+int IRC_Client_IRCScanner_lex_destroy  (yyscan_t yyscanner)
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-		/* Pop the buffer stack, destroying each element. */
+    /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		IRC_Client_IRCscanner__delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
+		IRC_Client_IRCScanner__delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
 		YY_CURRENT_BUFFER_LVALUE = NULL;
-		IRC_Client_IRCscanner_pop_buffer_state(yyscanner);
+		IRC_Client_IRCScanner_pop_buffer_state(yyscanner);
 	}
 
 	/* Destroy the stack itself. */
-	IRC_Client_IRCscanner_free(yyg->yy_buffer_stack ,yyscanner);
+	IRC_Client_IRCScanner_free(yyg->yy_buffer_stack ,yyscanner);
 	yyg->yy_buffer_stack = NULL;
 
     /* Destroy the start condition stack. */
-        IRC_Client_IRCscanner_free(yyg->yy_start_stack ,yyscanner );
+        IRC_Client_IRCScanner_free(yyg->yy_start_stack ,yyscanner );
         yyg->yy_start_stack = NULL;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * IRC_Client_IRCscanner_lex() is called, initialization will occur. */
+     * IRC_Client_IRCScanner_lex() is called, initialization will occur. */
     yy_init_globals( yyscanner);
 
 /* %if-reentrant */
     /* Destroy the main struct (reentrant only). */
-    IRC_Client_IRCscanner_free ( yyscanner , yyscanner );
+    IRC_Client_IRCScanner_free ( yyscanner , yyscanner );
     yyscanner = NULL;
 /* %endif */
     return 0;
@@ -4176,12 +4190,12 @@ static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 }
 #endif
 
-void *IRC_Client_IRCscanner_alloc (yy_size_t  size , yyscan_t yyscanner)
+void *IRC_Client_IRCScanner_alloc (yy_size_t  size , yyscan_t yyscanner)
 {
 	return (void *) malloc( size );
 }
 
-void *IRC_Client_IRCscanner_realloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
+void *IRC_Client_IRCScanner_realloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 {
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
@@ -4193,9 +4207,9 @@ void *IRC_Client_IRCscanner_realloc  (void * ptr, yy_size_t  size , yyscan_t yys
 	return (void *) realloc( (char *) ptr, size );
 }
 
-void IRC_Client_IRCscanner_free (void * ptr , yyscan_t yyscanner)
+void IRC_Client_IRCScanner_free (void * ptr , yyscan_t yyscanner)
 {
-	free( (char *) ptr );	/* see IRC_Client_IRCscanner_realloc() for (char *) cast */
+	free( (char *) ptr );	/* see IRC_Client_IRCScanner_realloc() for (char *) cast */
 }
 
 /* %if-tables-serialization definitions */
@@ -4205,7 +4219,7 @@ void IRC_Client_IRCscanner_free (void * ptr , yyscan_t yyscanner)
 
 /* %ok-for-header */
 
-#line 223 ".\\IRCscanner.l"
+#line 223 "./IRCscanner.l"
 
 
 
@@ -4220,7 +4234,7 @@ void IRC_Client_IRCscanner_free (void * ptr , yyscan_t yyscanner)
 //
 //   struct yyguts_t* yyg = ACE_static_cast(struct yyguts_t*, yyscanner);
 //
-//   IRC_Client_IRCParserDriver* driver = IRCScannerget_extra(yyscanner);
+//   IRC_Client_IRCParserDriver* driver = IRC_Client_IRCscanner_get_extra (yyscanner);
 //   // sanity check
 //   ACE_ASSERT(driver);
 //   if (!driver->moreData())

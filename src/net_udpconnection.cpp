@@ -27,17 +27,17 @@
 
 // export (common) template instances
 #if defined (_MSC_VER)
-template Net_Export class Net_UDPConnection_T<Net_UserData_t,
+template Net_Export class Net_UDPConnection_T<Net_UserData,
                                               Net_StreamSessionData_t,
                                               Net_UDPHandler_t>;
-template Net_Export class Net_AsynchUDPConnection_T<Net_UserData_t,
+template Net_Export class Net_AsynchUDPConnection_T<Net_UserData,
                                                     Net_StreamSessionData_t,
                                                     Net_AsynchUDPHandler_t>;
 #else
-template class Net_UDPConnection_T<Net_UserData_t,
+template class Net_UDPConnection_T<Net_UserData,
                                    Net_StreamSessionData_t,
                                    Net_UDPHandler_t>;
-template class Net_AsynchUDPConnection_T<Net_UserData_t,
+template class Net_AsynchUDPConnection_T<Net_UserData,
                                          Net_StreamSessionData_t,
                                          Net_AsynchUDPHandler_t>;
 #endif

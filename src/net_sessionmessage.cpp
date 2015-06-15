@@ -26,8 +26,8 @@
 
 #include "net_macros.h"
 
-Net_SessionMessage::Net_SessionMessage (Stream_SessionMessageType_t messageType_in,
-                                        Stream_State_t* streamState_in,
+Net_SessionMessage::Net_SessionMessage (Stream_SessionMessageType messageType_in,
+                                        Stream_State* streamState_in,
                                         Net_StreamSessionData_t*& sessionData_inout)
  : inherited (messageType_in,
               streamState_in,

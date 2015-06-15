@@ -19,18 +19,21 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <string>
-#include <iostream>
-#include <sstream>
+//#include <iostream>
 #include <map>
+#include <sstream>
+#include <string>
 
 #include "ace/Configuration.h"
 #include "ace/Configuration_Import_Export.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
+#include "ace/iosfwd.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
 #endif
+#include "ace/POSIX_Proactor.h"
+#include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
 #include "ace/Sig_Handler.h"
 #include "ace/Signal.h"
@@ -52,6 +55,8 @@
 #endif
 #include "net_defines.h"
 
+#include "IRC_common.h"
+
 #include "IRC_client_defines.h"
 #include "IRC_client_gui_callbacks.h"
 #include "IRC_client_gui_common.h"
@@ -67,7 +72,7 @@ do_printUsage (const std::string& programName_in)
   NETWORK_TRACE (ACE_TEXT ("::do_printUsage"));
 
   // enable verbatim boolean output
-  std::cout.setf (ios::boolalpha);
+  std::cout.setf (std::ios::boolalpha);
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
@@ -157,7 +162,7 @@ do_processArguments (int argc_in,
                      bool& logToFile_out,
                      std::string& phonebookFile_out,
                      bool& useReactor_out,
-                     unsigned int& reportingInterval_out,
+                     unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
                      std::string& UIFileDirectory_out,
                      bool& printVersionAndExit_out,
@@ -178,31 +183,32 @@ do_processArguments (int argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
-  configurationFile_out    = configuration_path;
-  configurationFile_out   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configurationFile_out   += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
+  configurationFile_out          = configuration_path;
+  configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configurationFile_out         +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
 
-  debug_out                =
+  debug_out                      =
     (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE);
-  useThreadpool_out        = NET_EVENT_USE_THREAD_POOL;
+  useThreadpool_out              = NET_EVENT_USE_THREAD_POOL;
 
-  logToFile_out            = false;
+  logToFile_out                  = false;
 
-  phonebookFile_out        = configuration_path;
-  phonebookFile_out       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  phonebookFile_out       +=
+  phonebookFile_out              = configuration_path;
+  phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  phonebookFile_out             +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_SERVERS);
 
-  useReactor_out           = NET_EVENT_USE_REACTOR;
+  useReactor_out                 = NET_EVENT_USE_REACTOR;
 
-  reportingInterval_out    = IRC_CLIENT_DEF_STATSINTERVAL;
+  statisticReportingInterval_out = IRC_CLIENT_DEF_STATSINTERVAL;
 
-  traceInformation_out     = false;
+  traceInformation_out           = false;
 
-  UIFileDirectory_out      = configuration_path;
+  UIFileDirectory_out            = configuration_path;
 
-  printVersionAndExit_out  = false;
-  numThreadPoolThreads_out = IRC_CLIENT_DEF_NUM_TP_THREADS;
+  printVersionAndExit_out        = false;
+  numThreadPoolThreads_out       = IRC_CLIENT_DEF_NUM_TP_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
@@ -253,7 +259,7 @@ do_processArguments (int argc_in,
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter.clear ();
         converter << argumentParser.opt_arg ();
-        converter >> reportingInterval_out;
+        converter >> statisticReportingInterval_out;
         break;
       }
       case 't':
@@ -273,8 +279,8 @@ do_processArguments (int argc_in,
       }
       case 'x':
       {
-        converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
         converter << argumentParser.opt_arg ();
         converter >> numThreadPoolThreads_out;
         break;
@@ -418,12 +424,12 @@ do_work (bool useThreadPool_in,
   ACE_ASSERT (userData_in.configuration);
 
   // step1: initialize IRC handler module
-  Stream_ModuleConfiguration_t module_configuration;
+  Stream_ModuleConfiguration module_configuration;
   ACE_OS::memset (&module_configuration, 0, sizeof (module_configuration));
   userData_in.configuration->streamConfiguration.streamConfiguration.moduleConfiguration =
       &module_configuration;
 
-  IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR ("IRCHandler"),
+  IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_HANDLER_MODULE_NAME),
                                                    NULL);
   IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
   IRCHandler_impl_p =
@@ -513,96 +519,28 @@ do_work (bool useThreadPool_in,
   // *NOTE*: this variable needs to stay on the working stack, it's passed to
   //         the worker(s) (if any)
   bool use_reactor = useReactor_in;
-  if (useThreadPool_in &&
-      (numDispatchThreads_in > 1))
+  if (!Common_Tools::startEventDispatch (use_reactor,
+                                         numDispatchThreads_in,
+                                         group_id))
   {
-    if (!Common_Tools::startEventDispatch (use_reactor,
-                                           numDispatchThreads_in,
-                                           group_id))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to start event dispatch, returning\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
 
-      // clean up
-      timer_manager_p->stop ();
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+    // clean up
+    timer_manager_p->stop ();
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
 
-      return;
-    } // end IF
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("started event dispatch...\n")));
+    return;
   } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("started event dispatch...\n")));
 
   // *NOTE*: from this point on, clean up any remote connections !
 
   // step7: dispatch events
-  // *NOTE*: when using a thread pool, handle things differently...
-  if (useThreadPool_in &&
-      (numDispatchThreads_in > 1))
-  {
-    if (ACE_Thread_Manager::instance ()->wait_grp (group_id) == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
-                  group_id));
-  } // end IF
-  else
-  {
-    if (useReactor_in)
-    {
-      ACE_Reactor* reactor_p = ACE_Reactor::instance ();
-      ACE_ASSERT (reactor_p);
-      result = reactor_p->run_reactor_event_loop (0);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to handle events: \"%m\", continuing\n")));
-    } // end IF
-    else
-    {
-      ACE_Proactor* proactor_p = ACE_Proactor::instance ();
-      ACE_ASSERT (proactor_p);
-//      // *NOTE*: unblock [SIGRTMIN,SIGRTMAX] IFF on POSIX AND using the
-//      // ACE_POSIX_SIG_Proactor (the default)
-//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-//      ACE_POSIX_Proactor* proactor_impl_p =
-//          dynamic_cast<ACE_POSIX_Proactor*> (proactor_p->implementation ());
-//      if (!proactor_impl_p)
-//      {
-//        ACE_DEBUG ((LM_DEBUG,
-//                    ACE_TEXT ("dynamic_cast<ACE_POSIX_Proactor> failed, continuing\n")));
-//        goto _continue;
-//      } // end IF
-//      ACE_POSIX_Proactor::Proactor_Type proactor_type =
-//          proactor_impl_p->get_impl_type ();
-//      sigset_t original_mask, realtime_signals;
-//      if (!useReactor_in &&
-//          (proactor_type == ACE_POSIX_Proactor::PROACTOR_SIG))
-//        Common_Tools::unblockRealtimeSignals (original_mask);
-//_continue:
-//#endif
-      result = proactor_p->proactor_run_event_loop (0);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to handle events: \"%m\", continuing\n")));
-//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-//      // reset signal mask
-//      for (int i = ACE_SIGRTMIN;
-//           i <= ACE_SIGRTMAX;
-//           i++)
-//      {
-//        result = ACE_OS::sigaddset (&realtime_signals, i);
-//        if (result == -1)
-//        {
-//          ACE_DEBUG ((LM_DEBUG,
-//                      ACE_TEXT ("failed to ACE_OS::sigaddset(): \"%m\", aborting\n")));
-//          break;
-//        } // end IF
-//      } // end FOR
-//      result = ACE_OS::thr_sigsetmask (SIG_SETMASK,
-//                                       &original_mask,
-//                                       NULL);
-//#endif
-    } // end ELSE
-  } // end ELSE
+  Common_Tools::dispatchEvents (useReactor_in,
+                                !useReactor_in,
+                                group_id);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished event dispatch...\n")));
 
@@ -1147,7 +1085,7 @@ do_parseConfigurationFile (const std::string& configFilename_in,
       IRC_Client_PortRange_t port_range;
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
-      converter << val_string_value;
+      converter << val_string_value.c_str ();
       converter >> port_range.first;
 //       port_range.first = static_cast<unsigned short> (port);
       port_range.second = port_range.first;
@@ -1196,8 +1134,9 @@ do_printVersion (const std::string& programName_in)
             << ACE_TEXT (LIBACENETWORK_PACKAGE)
             << ACE_TEXT (": ")
             << ACE_TEXT (LIBACENETWORK_PACKAGE_VERSION)
-            << std::endl;
+            << std::endl
 #endif
+            ;
 
   converter.str ("");
   // ACE version string...
@@ -1428,7 +1367,7 @@ ACE_TMAIN (int argc_in,
     return EXIT_SUCCESS;
   } // end IF
 
-  // step5: initialize configuration objects
+  // step6: initialize configuration objects
 
   // initialize protocol configuration
   Stream_CachedAllocatorHeap heap_allocator (NET_STREAM_MAX_MESSAGES,
@@ -1479,7 +1418,8 @@ ACE_TMAIN (int argc_in,
   {
     configuration.protocolConfiguration.loginOptions.user.hostname.discriminator =
       IRC_Client_IRCLoginOptions::User::Hostname::STRING;
-    configuration.protocolConfiguration.loginOptions.user.hostname.string = &hostname;
+    configuration.protocolConfiguration.loginOptions.user.hostname.string =
+      &hostname;
   } // end IF
   else
   {
@@ -1497,7 +1437,7 @@ ACE_TMAIN (int argc_in,
   Common_Tools::getCurrentUserName (configuration.protocolConfiguration.loginOptions.user.username,
                                     configuration.protocolConfiguration.loginOptions.user.realname);
 
-  // parse configuration file(s) (if any)
+  // step7: parse configuration file(s) (if any)
   if (!phonebook_file.empty ())
     do_parsePhonebookFile (phonebook_file,
                            user_data.phoneBook);
@@ -1506,7 +1446,7 @@ ACE_TMAIN (int argc_in,
                                configuration.protocolConfiguration.loginOptions,
                                user_data.phoneBook);
 
-  // step6: initialize GTK UI
+  // step8: initialize GTK UI
   Common_UI_GtkBuilderDefinition ui_definition (argc_in,
                                                 argv_in);
   COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
@@ -1514,7 +1454,7 @@ ACE_TMAIN (int argc_in,
                                                             &user_data.GTKState,
                                                             &ui_definition);
 
-  // step7: do work
+  // step9: do work
   ACE_High_Res_Timer timer;
   timer.start ();
   do_work (use_thread_pool,
@@ -1607,13 +1547,13 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-  // step8: clean up
+  // step10: clean up
   Common_Tools::finalizeSignals (signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Tools::finalizeLogging ();
 
-  // step9: finalize libraries
+  // step11: finalize libraries
   // *PORTABILITY*: on Windows, fini ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE::fini ();

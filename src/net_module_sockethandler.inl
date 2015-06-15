@@ -297,7 +297,7 @@ Net_Module_SocketHandler_T<StreamStateType,
                            SessionDataContainerType,
                            SessionMessageType,
                            ProtocolMessageType,
-                           ProtocolHeaderType>::collect (Stream_Statistic_t& data_out)
+                           ProtocolHeaderType>::collect (Stream_Statistic& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::collect"));
 
@@ -524,7 +524,7 @@ Net_Module_SocketHandler_T<StreamStateType,
                            SessionDataContainerType,
                            SessionMessageType,
                            ProtocolMessageType,
-                           ProtocolHeaderType>::putStatisticsMessage (const Stream_Statistic_t& statistic_in,
+                           ProtocolHeaderType>::putStatisticsMessage (const Stream_Statistic& statistic_in,
                                                                       const ACE_Time_Value& collectionTime_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::putStatisticsMessage"));
@@ -796,7 +796,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
                               SessionDataType,
                               SessionDataContainerType,
                               SessionMessageType,
-                              ProtocolMessageType>::collect (Stream_Statistic_t& data_out)
+                              ProtocolMessageType>::collect (Stream_Statistic& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::collect"));
 
@@ -886,7 +886,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
                               SessionDataType,
                               SessionDataContainerType,
                               SessionMessageType,
-                              ProtocolMessageType>::putStatisticsMessage (const Stream_Statistic_t& statistic_in,
+                              ProtocolMessageType>::putStatisticsMessage (const Stream_Statistic& statistic_in,
                                                                           const ACE_Time_Value& collectionTime_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::putStatisticsMessage"));

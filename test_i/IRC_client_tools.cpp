@@ -25,6 +25,7 @@
 
 #include "common.h"
 
+#include "stream_common.h"
 #include "stream_iallocator.h"
 
 #include "net_defines.h"
@@ -1594,7 +1595,7 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                            unsigned short serverPortNumber_in,
                            bool deleteModule_in,
                            const Stream_Module_t* finalModule_inout,
-                           const Stream_ModuleConfiguration_t* moduleConfiguration_in)
+                           const Stream_ModuleConfiguration* moduleConfiguration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::connect"));
 
@@ -1635,7 +1636,7 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
     configuration.streamConfiguration.streamConfiguration.module =
       const_cast<Stream_Module_t*> (finalModule_inout);
     configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
-      const_cast<Stream_ModuleConfiguration_t*> (moduleConfiguration_in);
+      const_cast<Stream_ModuleConfiguration*> (moduleConfiguration_in);
   } // end IF
   configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
@@ -1664,9 +1665,9 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
   configuration.streamConfiguration.sessionData = session_data_p;
 
   // step2: initialize client connector
-  Net_SocketHandlerConfiguration_t* socket_handler_configuration_p = NULL;
+  Net_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
   ACE_NEW_NORETURN (socket_handler_configuration_p,
-                    Net_SocketHandlerConfiguration_t ());
+                    Net_SocketHandlerConfiguration ());
   if (!socket_handler_configuration_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -1712,8 +1713,8 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
     return ACE_INVALID_HANDLE;
   } // end IF
 
-  // *NOTE* handlers automagically register with the connection manager and
-  // will also de-register and self-destruct on disconnects !
+  // *NOTE*: handlers automagically register with the connection manager and
+  //         will also de-register and self-destruct on disconnects !
 
   return handle;
 }

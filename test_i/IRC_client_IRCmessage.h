@@ -23,6 +23,7 @@
 
 #include <list>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "ace/Global_Macros.h"
@@ -126,13 +127,13 @@ class IRC_Client_IRCMessage
     {
       union
       {
-        std::string*                         string;
         IRC_Client_IRC_Codes::RFC1459Numeric numeric;
+        std::string*                         string;
       };
       enum discriminator_t
       {
-        STRING = 0,
-        NUMERIC,
+        NUMERIC = 0,
+        STRING,
         INVALID
       };
       discriminator_t discriminator;

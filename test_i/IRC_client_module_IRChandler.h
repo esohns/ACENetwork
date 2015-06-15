@@ -123,10 +123,9 @@ class IRC_Client_Module_IRCHandler
   typedef std::list<IRC_Client_INotify_t*> Subscribers_t;
   typedef Subscribers_t::iterator SubscribersIterator_t;
 
-  // lock to protect mySubscribers and myConnectionIsAlive (!)
-  // *NOTE*: make this recursive so that users may unsubscribe from within the
-  // notification callbacks...
-  // *WARNING*: consider race conditions here
+  // lock  subscribers_ and connectionIsAlive_
+  // *NOTE*: this lock needs to be recursive to prevent deadlocks when users
+  //         unsubscribe from within the notification callbacks
   ACE_Recursive_Thread_Mutex             lock_;
   Subscribers_t                          subscribers_;
 
@@ -137,8 +136,9 @@ class IRC_Client_Module_IRCHandler
   bool                                   printPingPongDot_;
 
   // *NOTE*: obviously, there is a delay between connection establishment and
-  // reception of the welcome NOTICE: let the users wait for it so they can
-  // safely start registering connections
+  //         reception of the welcome NOTICE: let the users wait for it so they
+  //         can start registering connections in accordance with the IRC
+  //         protocol (*TODO*: reference)
   ACE_Thread_Mutex                       conditionLock_;
   ACE_Thread_Condition<ACE_Thread_Mutex> condition_;
   bool                                   connectionIsAlive_;
@@ -148,7 +148,7 @@ class IRC_Client_Module_IRCHandler
 // declare module
 DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                  // task synch type
                               Common_TimePolicy_t,           // time policy
-                              Stream_ModuleConfiguration_t,  // configuration type
+                              Stream_ModuleConfiguration,    // configuration type
                               IRC_Client_Module_IRCHandler); // writer type
 
 #endif

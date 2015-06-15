@@ -41,17 +41,23 @@ IRC_Client_Stream::IRC_Client_Stream ()
   // *NOTE*: one problem is that we need to explicitly close() all
   // modules which we have NOT enqueued onto the stream (e.g. because init()
   // failed...)
-  inherited::availableModules_.insert_tail (&IRCMarshal_);
-  inherited::availableModules_.insert_tail (&IRCParser_);
-  inherited::availableModules_.insert_tail (&runtimeStatistic_);
+  inherited::availableModules_.push_front (&IRCMarshal_);
+  inherited::availableModules_.push_front (&IRCParser_);
+  inherited::availableModules_.push_front (&runtimeStatistic_);
+  //inherited::availableModules_.insert_tail (&IRCMarshal_);
+  //inherited::availableModules_.insert_tail (&IRCParser_);
+  //inherited::availableModules_.insert_tail (&runtimeStatistic_);
 
-  // fix ACE bug: modules should initialize their "next" member to NULL !
-//   for (MODULE_CONTAINERITERATOR_TYPE iter = myAvailableModules.begin();
-  inherited::MODULE_T* module_p = NULL;
-  for (ACE_DLList_Iterator<inherited::MODULE_T> iterator (inherited::availableModules_);
-       iterator.next (module_p);
-       iterator.advance ())
-    module_p->next (NULL);
+  // *TODO*: fix ACE bug: modules should initialize their "next" member to NULL
+  //inherited::MODULE_T* module_p = NULL;
+  //for (ACE_DLList_Iterator<inherited::MODULE_T> iterator (inherited::availableModules_);
+  //     iterator.next (module_p);
+  //     iterator.advance ())
+  //  module_p->next (NULL);
+  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::availableModules_.begin ();
+       iterator != inherited::availableModules_.end ();
+       iterator++)
+    (*iterator)->next (NULL);
 }
 
 IRC_Client_Stream::~IRC_Client_Stream ()
@@ -274,7 +280,7 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
 }
 
 bool
-IRC_Client_Stream::collect (IRC_Client_RuntimeStatistic& data_out)
+IRC_Client_Stream::collect (IRC_Client_RuntimeStatistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::collect"));
 

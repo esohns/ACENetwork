@@ -123,7 +123,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
-  Net_SocketHandlerConfiguration_t socket_handler_configuration;
+  Net_SocketHandlerConfiguration socket_handler_configuration;
 
   // step1: open socket
   ACE_INET_Addr local_SAP (inherited4::configuration_.socketConfiguration.peerAddress.get_port_number (),

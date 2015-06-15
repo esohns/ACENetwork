@@ -94,8 +94,8 @@ Net_TCPSocketHandler::open (void* arg_in)
   // sanity check(s)
   ACE_ASSERT (arg_in);
 
-  Net_SocketConfiguration_t* socket_configuration_p =
-      reinterpret_cast<Net_SocketConfiguration_t*> (arg_in);
+  Net_SocketConfiguration* socket_configuration_p =
+      reinterpret_cast<Net_SocketConfiguration*> (arg_in);
   ACE_ASSERT (socket_configuration_p);
 
   // step1: tweak socket

@@ -3,9 +3,9 @@
 //      are changed infrequently
 //
 #if defined _MSC_VER
-#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
+#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 
-// *NOTE*: workaround quirky MSVC...
+// *NOTE*: work around quirky MSVC...
 #define NOMINMAX
 
 // Windows Header Files
@@ -13,12 +13,15 @@
 #endif
 
 // C RunTime Header Files
-#include <string>
-#include <iostream>
+//#include <iostream>
+//#include <string>
 
 // System Library Header Files
+#include "ace/iosfwd.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
 // Local Header Files
-#include "common_macros.h"
+#include "net_macros.h"
+
+using namespace std;

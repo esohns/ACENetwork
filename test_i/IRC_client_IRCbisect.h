@@ -1,6 +1,6 @@
-#ifndef IRC_CLIENT_IRCBisect_HEADER_H
-#define IRC_CLIENT_IRCBisect_HEADER_H 1
-#define IRC_CLIENT_IRCBisect_IN_HEADER 1
+#ifndef IRC_Client_IRCBisect_HEADER_H
+#define IRC_Client_IRCBisect_HEADER_H 1
+#define IRC_Client_IRCBisect_IN_HEADER 1
 
 #line 6 "IRC_client_IRCbisect.h"
 
@@ -24,7 +24,7 @@
 /* %endif */
 
 /* %if-c-only */
-
+    
 /* %endif */
 
 /* %if-c-only */
@@ -56,7 +56,7 @@
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
- * if you want the limit (max/min) macros for int types.
+ * if you want the limit (max/min) macros for int types. 
  */
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
@@ -73,10 +73,9 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t;
+typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -106,6 +105,8 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
+
+#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -148,7 +149,7 @@ typedef void* yyscan_t;
 #endif
 
 /* For convenience, these vars (plus the bison vars far below)
-	 are macros in the reentrant scanner. */
+   are macros in the reentrant scanner. */
 #define yyin yyg->yyin_r
 #define yyout yyg->yyout_r
 #define yyextra yyg->yyextra_r
@@ -165,7 +166,15 @@ typedef void* yyscan_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 #ifndef YY_TYPEDEF_YY_BUFFER_STATE
@@ -231,7 +240,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-
+    
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -776,7 +785,12 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Number of entries by which start-condition stack grows. */
@@ -828,9 +842,9 @@ extern int IRC_Client_IRCBisect_lex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 39 ".\\IRCbisect.l"
+#line 39 "./IRCbisect.l"
 
 
-#line 835 "irc_client_IRCbisect.h"
+#line 849 "IRC_client_IRCbisect.h"
 #undef IRC_Client_IRCBisect_IN_HEADER
 #endif /* IRC_Client_IRCBisect_HEADER_H */

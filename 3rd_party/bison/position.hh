@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.7.12-4996.  */
+/* A Bison parser, made by GNU Bison 2.4.2.  */
 
 /* Positions for Bison parsers in C++
    
-      Copyright (C) 2002-2007, 2009-2013 Free Software Foundation, Inc.
+      Copyright (C) 2002-2007, 2009-2010 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -35,20 +35,12 @@
  ** Define the yy::position class.
  */
 
-#ifndef YY_RPG_MAP_SCANNER_POSITION_HH_INCLUDED
-# define YY_RPG_MAP_SCANNER_POSITION_HH_INCLUDED
+#ifndef BISON_POSITION_HH
+# define BISON_POSITION_HH
 
-# include <algorithm> // std::max
 # include <iostream>
 # include <string>
-
-# ifndef YY_NULL
-#  if defined __cplusplus && 201103L <= __cplusplus
-#   define YY_NULL nullptr
-#  else
-#   define YY_NULL 0
-#  endif
-# endif
+# include <algorithm>
 
 
 namespace yy {
@@ -59,42 +51,38 @@ namespace yy {
   public:
 
     /// Construct a position.
-    explicit position (std::string* f = YY_NULL,
-                       unsigned int l = 1u,
-                       unsigned int c = 1u)
-      : filename (f)
-      , line (l)
-      , column (c)
+    position ()
+      : filename (0), line (1), column (1)
     {
     }
 
 
     /// Initialization.
-    void initialize (std::string* fn = YY_NULL,
-                     unsigned int l = 1u,
-                     unsigned int c = 1u)
+    inline void initialize (std::string* fn)
     {
       filename = fn;
-      line = l;
-      column = c;
+      line = 1;
+      column = 1;
     }
 
     /** \name Line and Column related manipulators
      ** \{ */
+  public:
     /// (line related) Advance to the COUNT next lines.
-    void lines (int count = 1)
+    inline void lines (int count = 1)
     {
-      column = 1u;
+      column = 1;
       line += count;
     }
 
     /// (column related) Advance to the COUNT next columns.
-    void columns (int count = 1)
+    inline void columns (int count = 1)
     {
       column = std::max (1u, column + count);
     }
     /** \} */
 
+  public:
     /// File name to which this position refers.
     std::string* filename;
     /// Current line number.
@@ -104,7 +92,7 @@ namespace yy {
   };
 
   /// Add and assign a position.
-  inline position&
+  inline const position&
   operator+= (position& res, const int width)
   {
     res.columns (width);
@@ -120,7 +108,7 @@ namespace yy {
   }
 
   /// Add and assign a position.
-  inline position&
+  inline const position&
   operator-= (position& res, const int width)
   {
     return res += -width;
@@ -155,9 +143,8 @@ namespace yy {
    ** \param ostr the destination output stream
    ** \param pos a reference to the position to redirect
    */
-  template <typename YYChar>
-  inline std::basic_ostream<YYChar>&
-  operator<< (std::basic_ostream<YYChar>& ostr, const position& pos)
+  inline std::ostream&
+  operator<< (std::ostream& ostr, const position& pos)
   {
     if (pos.filename)
       ostr << *pos.filename << ':';
@@ -167,4 +154,4 @@ namespace yy {
 
 } // yy
 
-#endif /* !YY_RPG_MAP_SCANNER_POSITION_HH_INCLUDED  */
+#endif // not BISON_POSITION_HH

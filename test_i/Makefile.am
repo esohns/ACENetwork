@@ -1,6 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = \
+  -I/usr/include/c++/3.4.6/backward \
   -I$(top_srcdir)/../../modules/ATCD/ACE \
   $(PKGSDL_CFLAGS) \
   $(PKGGTK_CFLAGS)
@@ -24,6 +25,12 @@ bin_PROGRAMS = \
 noinst_HEADERS = stdafx.h
 
 IRC_client_SOURCES = \
+  FILE_Stream.cpp \
+  FILE_Stream.h \
+  FILE_Stream.inl \
+  IOStream_alt_T.cpp \
+  IOStream_alt_T.h \
+  IOStream_alt_T.inl \
   IRC_client.cpp \
   IRC_client_common.h \
   IRC_client_common_modules.h \
@@ -41,6 +48,8 @@ IRC_client_SOURCES = \
   IRC_client_IRCparser_driver.h \
   IRC_client_IRCscanner.cpp \
   IRC_client_IRCscanner.h \
+  IRC_client_IRCsession.cpp \
+  IRC_client_IRCsession.h \
   IRC_client_message.cpp \
   IRC_client_message.h \
   IRC_client_messageallocator.cpp \
@@ -64,6 +73,8 @@ IRC_client_SOURCES = \
   IRC_client_tools.cpp \
   IRC_client_tools.h \
   IRC_common.h
+#  stdafx.cpp \
+#  stdafx.h
 IRC_client_CPPFLAGS = \
   $(AM_CPPFLAGS) \
   -I$(top_srcdir)/modules/libCommon/src \
@@ -140,6 +151,8 @@ IRC_client_gui_SOURCES = \
   IRC_client_tools.cpp \
   IRC_client_tools.h \
   IRC_common.h
+#  stdafx.cpp \
+#  stdafx.h
 IRC_client_gui_CPPFLAGS = \
   $(AM_CPPFLAGS) \
   -I$(top_srcdir)/modules/libCommon/src \

@@ -2,16 +2,26 @@
 # Please report any problem to KDevelop Team <kdevelop-devel@kdevelop.org>
 # Thanks to Matthias Saou for his explanations on http://freshrpms.net/docs/fight.html
 
-Name: Yarp
+Name: libACENetwork
 Version: 0.1
 Release: 1
 Vendor: N/A
-Summary: (yet another ?) role-playing game system framework...
+Summary: (wrapper) library for network functionality, based on the ACE framework
+(see: http://www.cs.wustl.edu/~schmidt/ACE.html). Specifically, the library
+encapsulates descriptor-based (network) event propagation logic (i.e. user-space
+dispatching APIs), as implemented and found on several common operating system
+platforms. The library forsees dispatching these events using dedicated threads,
+which facilitates efficient processing of data and communication protocols. In
+conjunction with other (modularized) functionality
+(see e.g.: https://github.com/esohns/libACEStream), this facilitates a modular
+(i.e. less monolithic), and therefore reusable application design, which cleanly
+separates network data from application-specific processing (i.e. business
+logic).
 License: LGPL
 Distribution: N/A
 #Icon: N/A
 Group: Development/Libraries
-Packager: Erik Sohns <erik.sohns@web.de>
+Packager: Erik Sohns <eriksohns@123mail.org>
 BuildRoot: %{_tmppath}/%{name}-root
 Source: %{name}-%{version}.tar.gz
 Provides: %{name}
@@ -20,30 +30,24 @@ AutoReqProv: yes
 Prefix: /usr/local
 
 %description
-(yet another ?) role-playing game system framework...
+(wrapper) library for network functionality, based on the ACE framework
 
 %prep
 %setup -q
-#autoreconf -i
-#cd tools/XML2CppCode
-#autoreconf -i
-#mkdir build
-#cd build
-#../configure
-#make; make install
+./autogen.sh
 
 %build
 mkdir build
 cd build
 ../configure
 cd ..
-./scripts/generate_all_bindings.sh
+./scripts/generate_bindings.sh
 cd build
 make
 
 %install
-rm -rf %{buildroot}
-cd build
+#rm -rf %{buildroot}
+#cd build
 %makeinstall
 
 %clean
@@ -58,10 +62,10 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-, root, root)
-%doc AUTHORS COPYING INSTALL ChangeLog NEWS README TODO
+%doc AUTHORS ChangeLog INSTALL LICENSE NEWS README TODO
 %{_bindir}/*
 %{_includedir}/*
 %{_libdir}/*
-%{_datadir}/RPG
+%{_datadir}/libACENetwork
 
 %changelog

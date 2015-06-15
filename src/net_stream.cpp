@@ -46,17 +46,25 @@ Net_Stream::Net_Stream ()
   // *NOTE*: one problem is that all modules which have NOT enqueued onto the
   //         stream (e.g. because initialize() failed...) need to be explicitly
   //         close()d
-  inherited::availableModules_.insert_tail (&socketHandler_);
-  inherited::availableModules_.insert_tail (&headerParser_);
-  inherited::availableModules_.insert_tail (&runtimeStatistic_);
-  inherited::availableModules_.insert_tail (&protocolHandler_);
+  inherited::availableModules_.push_front (&socketHandler_);
+  inherited::availableModules_.push_front (&headerParser_);
+  inherited::availableModules_.push_front (&runtimeStatistic_);
+  inherited::availableModules_.push_front (&protocolHandler_);
+  //inherited::availableModules_.insert_tail (&socketHandler_);
+  //inherited::availableModules_.insert_tail (&headerParser_);
+  //inherited::availableModules_.insert_tail (&runtimeStatistic_);
+  //inherited::availableModules_.insert_tail (&protocolHandler_);
 
-  // *CHECK* fix ACE bug: modules should initialize their "next" member to NULL
-  inherited::MODULE_T* module = NULL;
-  for (ACE_DLList_Iterator<inherited::MODULE_T> iterator (inherited::availableModules_);
-       iterator.next (module);
-       iterator.advance ())
-    module->next (NULL);
+  // *TODO* fix ACE bug: modules should initialize their "next" member to NULL
+  //inherited::MODULE_T* module_p = NULL;
+  //for (ACE_DLList_Iterator<inherited::MODULE_T> iterator (inherited::availableModules_);
+  //     iterator.next (module_p);
+  //     iterator.advance ())
+  //  module_p->next (NULL);
+  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::availableModules_.begin ();
+       iterator != inherited::availableModules_.end ();
+       iterator++)
+     (*iterator)->next (NULL);
 }
 
 Net_Stream::~Net_Stream ()
@@ -68,7 +76,7 @@ Net_Stream::~Net_Stream ()
 }
 
 bool
-Net_Stream::initialize (const Net_StreamConfiguration_t& configuration_in)
+Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::initialize"));
 
@@ -261,7 +269,7 @@ Net_Stream::initialize (const Net_StreamConfiguration_t& configuration_in)
 
   // *NOTE*: push()ing the module will open() it
   // --> set the argument that is passed along
-  socketHandler_.arg (&const_cast<Net_StreamConfiguration_t&> (configuration_in).userData);
+  socketHandler_.arg (&const_cast<Net_StreamConfiguration&> (configuration_in).userData);
   result = inherited::push (&socketHandler_);
   if (result == -1)
   {
@@ -303,7 +311,7 @@ Net_Stream::ping ()
 }
 
 bool
-Net_Stream::collect (Stream_Statistic_t& data_out)
+Net_Stream::collect (Stream_Statistic& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::collect"));
 

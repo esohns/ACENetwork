@@ -1,6 +1,9 @@
 // *NOTE*: uncomment the line corresponding to your platform !
 #include "ace/config-win32.h"
 
+// *NOTE*: needed for ACE_IOStream
+#define ACE_HAS_STANDARD_CPP_LIBRARY 1
+
 // *NOTE*: don't use the regular pipe-based mechanism,
 // it has several drawbacks (see relevant documentation)
 #define ACE_HAS_REACTOR_NOTIFICATION_QUEUE

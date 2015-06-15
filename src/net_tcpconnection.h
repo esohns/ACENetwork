@@ -38,8 +38,8 @@
 #include "net_tcpconnection_base.h"
 
 class Net_Export Net_TCPConnection
- : public Net_TCPConnectionBase_T<Net_Configuration_t,
-                                  Net_UserData_t,
+ : public Net_TCPConnectionBase_T<Net_Configuration,
+                                  Net_UserData,
                                   Net_StreamSessionData_t,
                                   Net_Stream,
                                   Net_TCPHandler_t>
@@ -49,10 +49,10 @@ class Net_Export Net_TCPConnection
 
  public:
    typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                    Net_SocketConfiguration_t,
-                                    Net_Configuration_t,
-                                    Net_UserData_t,
-                                    Stream_Statistic_t,
+                                    Net_SocketConfiguration,
+                                    Net_Configuration,
+                                    Net_UserData,
+                                    Stream_Statistic,
                                     Net_Stream> ICONNECTION_MANAGER_T;
 
   Net_TCPConnection (ICONNECTION_MANAGER_T*, // connection manager handle
@@ -61,8 +61,8 @@ class Net_Export Net_TCPConnection
   virtual ~Net_TCPConnection ();
 
  private:
-  typedef Net_TCPConnectionBase_T<Net_Configuration_t,
-                                  Net_UserData_t,
+  typedef Net_TCPConnectionBase_T<Net_Configuration,
+                                  Net_UserData,
                                   Net_StreamSessionData_t,
                                   Net_Stream,
                                   Net_TCPHandler_t> inherited;
@@ -75,8 +75,8 @@ class Net_Export Net_TCPConnection
 /////////////////////////////////////////
 
 class Net_Export Net_AsynchTCPConnection
- : public Net_AsynchTCPConnectionBase_T<Net_Configuration_t,
-                                        Net_UserData_t,
+ : public Net_AsynchTCPConnectionBase_T<Net_Configuration,
+                                        Net_UserData,
                                         Net_StreamSessionData_t,
                                         Net_Stream,
                                         Net_AsynchTCPHandler_t>
@@ -86,10 +86,10 @@ class Net_Export Net_AsynchTCPConnection
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   Net_SocketConfiguration_t,
-                                   Net_Configuration_t,
-                                   Net_UserData_t,
-                                   Stream_Statistic_t,
+                                   Net_SocketConfiguration,
+                                   Net_Configuration,
+                                   Net_UserData,
+                                   Stream_Statistic,
                                    Net_Stream> ICONNECTION_MANAGER_T;
 
   Net_AsynchTCPConnection (ICONNECTION_MANAGER_T*, // connection manager handle
@@ -98,8 +98,8 @@ class Net_Export Net_AsynchTCPConnection
   virtual ~Net_AsynchTCPConnection ();
 
  private:
-  typedef Net_AsynchTCPConnectionBase_T<Net_Configuration_t,
-                                        Net_UserData_t,
+  typedef Net_AsynchTCPConnectionBase_T<Net_Configuration,
+                                        Net_UserData,
                                         Net_StreamSessionData_t,
                                         Net_Stream,
                                         Net_AsynchTCPHandler_t> inherited;

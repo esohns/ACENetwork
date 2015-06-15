@@ -21,4 +21,6 @@
 #ifndef IRC_COMMON_H
 #define IRC_COMMON_H
 
+#define IRC_HANDLER_MODULE_NAME "IRCHandler"
+
 #endif

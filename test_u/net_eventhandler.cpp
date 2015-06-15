@@ -30,7 +30,7 @@
 
 #include "net_common.h"
 
-Net_EventHandler::Net_EventHandler (Net_GTK_CBData_t* CBData_in)
+Net_EventHandler::Net_EventHandler (Net_GTK_CBData* CBData_in)
  : CBData_ (CBData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::Net_EventHandler"));
@@ -44,7 +44,7 @@ Net_EventHandler::~Net_EventHandler ()
 }
 
 void
-Net_EventHandler::start (const Stream_ModuleConfiguration_t& configuration_in)
+Net_EventHandler::start (const Stream_ModuleConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::start"));
 

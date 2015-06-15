@@ -43,10 +43,10 @@
 class Net_Export Net_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        Stream_State_t,
-                        Stream_Statistic_t,
-                        Net_StreamConfiguration_t,
-                        Net_UserData_t,
+                        Stream_State,
+                        Stream_Statistic,
+                        Net_StreamConfiguration,
+                        Net_UserData,
                         Net_StreamSessionData_t,
                         Net_SessionMessage,
                         Net_Message>
@@ -56,23 +56,23 @@ class Net_Export Net_Stream
   virtual ~Net_Stream ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Net_StreamConfiguration_t&); // configuration
+  virtual bool initialize (const Net_StreamConfiguration&); // configuration
 
   // *TODO*: re-consider this API
   void ping ();
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (Stream_Statistic_t&); // return value: statistic data
+  virtual bool collect (Stream_Statistic&); // return value: statistic data
   virtual void report () const;
 
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        Stream_State_t,
-                        Stream_Statistic_t,
-                        Net_StreamConfiguration_t,
-                        Net_UserData_t,
+                        Stream_State,
+                        Stream_Statistic,
+                        Net_StreamConfiguration,
+                        Net_UserData,
                         Net_StreamSessionData_t,
                         Net_SessionMessage,
                         Net_Message> inherited;
@@ -83,7 +83,7 @@ class Net_Export Net_Stream
   // finalize stream
   // *NOTE*: need this to clean up queued modules if something goes wrong during
   //         initialize () !
-  bool finalize (const Stream_Configuration_t&); // configuration
+  bool finalize (const Stream_Configuration&); // configuration
 
   // modules
   Net_Module_SocketHandler_Module    socketHandler_;

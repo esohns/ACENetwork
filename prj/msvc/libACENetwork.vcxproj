@@ -58,7 +58,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;NET_BUILD_DLL;WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBACENETWORK_EXPORTS;%(PreprocessorDefinitions);%(PreprocessorDefinitions);%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;D:\projects\yarp\modules\libACENetwork\3rd_party\msvc;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ShowIncludes>
       </ShowIncludes>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -85,7 +85,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;NET_BUILD_DLL;WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBACENETWORK_EXPORTS;%(PreprocessorDefinitions);%(PreprocessorDefinitions);%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ShowIncludes>
       </ShowIncludes>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>

@@ -21,8 +21,10 @@
 
 #include "IRC_client_module_IRChandler.h"
 
-#include <iostream>
+//#include <iostream>
 #include <sstream>
+
+#include "ace/iosfwd.h"
 
 #include "common_timer_manager.h"
 
@@ -479,7 +481,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       IRC_Client_Module_IRCHandler_Module* module_p =
         dynamic_cast<IRC_Client_Module_IRCHandler_Module*> (inherited::module ());
       ACE_ASSERT (module_p);
-      const Stream_ModuleConfiguration_t& module_configuration =
+      const Stream_ModuleConfiguration& module_configuration =
           module_p->get ();
 
       {
@@ -790,7 +792,7 @@ IRC_Client_Module_IRCHandler::nick (const std::string& nick_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::nick"));
 
-  // step1: init NICK
+  // step1: initialize NICK
   IRC_Client_IRCMessage* nick_struct_p = NULL;
   ACE_NEW_NORETURN (nick_struct_p,
                     IRC_Client_IRCMessage ());
@@ -811,7 +813,7 @@ IRC_Client_Module_IRCHandler::quit (const std::string& reason_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::quit"));
 
-  // step1: init QUIT
+  // step1: initialize QUIT
   IRC_Client_IRCMessage* quit_struct_p = NULL;
   ACE_NEW_NORETURN (quit_struct_p,
                     IRC_Client_IRCMessage ());
@@ -833,7 +835,7 @@ IRC_Client_Module_IRCHandler::join (const string_list_t& channels_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::join"));
 
-  // step1: init JOIN
+  // step1: initialize JOIN
   IRC_Client_IRCMessage* join_struct_p = NULL;
   ACE_NEW_NORETURN (join_struct_p,
                     IRC_Client_IRCMessage ());
@@ -875,7 +877,7 @@ IRC_Client_Module_IRCHandler::part (const string_list_t& channels_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::part"));
 
-  // step1: init PART
+  // step1: initialize PART
   IRC_Client_IRCMessage* part_struct_p = NULL;
   ACE_NEW_NORETURN (part_struct_p,
                     IRC_Client_IRCMessage ());
@@ -898,7 +900,7 @@ IRC_Client_Module_IRCHandler::mode (const std::string& target_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::mode"));
 
-  // step1: init MODE
+  // step1: initialize MODE
   IRC_Client_IRCMessage* mode_struct_p = NULL;
   ACE_NEW_NORETURN (mode_struct_p,
                     IRC_Client_IRCMessage ());
@@ -926,14 +928,14 @@ IRC_Client_Module_IRCHandler::mode (const std::string& target_in,
 
 void
 IRC_Client_Module_IRCHandler::topic (const std::string& channel_in,
-                                           const std::string& topic_in)
+                                     const std::string& topic_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::topic"));
 
   // sanity check(s)
   ACE_ASSERT (!topic_in.empty ());
 
-  // step1: init TOPIC
+  // step1: initialize TOPIC
   IRC_Client_IRCMessage* topic_struct_p = NULL;
   ACE_NEW_NORETURN (topic_struct_p,
                     IRC_Client_IRCMessage ());
@@ -955,7 +957,7 @@ IRC_Client_Module_IRCHandler::names (const string_list_t& channels_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::names"));
 
-  // step1: init NAMES
+  // step1: initialize NAMES
   IRC_Client_IRCMessage* names_struct_p = NULL;
   ACE_NEW_NORETURN (names_struct_p,
                     IRC_Client_IRCMessage ());
@@ -980,11 +982,11 @@ IRC_Client_Module_IRCHandler::names (const string_list_t& channels_in)
 }
 
 void
-IRC_Client_Module_IRCHandler::list(const string_list_t& channels_in)
+IRC_Client_Module_IRCHandler::list (const string_list_t& channels_in)
 {
-  NETWORK_TRACE(ACE_TEXT("IRC_Client_Module_IRCHandler::list"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::list"));
 
-  // step1: init LIST
+  // step1: initialize LIST
   IRC_Client_IRCMessage* list_struct_p = NULL;
   ACE_NEW_NORETURN (list_struct_p,
                     IRC_Client_IRCMessage ());
@@ -1010,11 +1012,11 @@ IRC_Client_Module_IRCHandler::list(const string_list_t& channels_in)
 
 void
 IRC_Client_Module_IRCHandler::invite (const std::string& nick_in,
-                                            const std::string& channel_in)
+                                      const std::string& channel_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::invite"));
 
-  // step1: init INVITE
+  // step1: initialize INVITE
   IRC_Client_IRCMessage* invite_struct_p = NULL;
   ACE_NEW_NORETURN (invite_struct_p,
                     IRC_Client_IRCMessage ());
@@ -1033,12 +1035,12 @@ IRC_Client_Module_IRCHandler::invite (const std::string& nick_in,
 
 void
 IRC_Client_Module_IRCHandler::kick (const std::string& channel_in,
-                                          const std::string& nick_in,
-                                          const std::string& comment_in)
+                                    const std::string& nick_in,
+                                    const std::string& comment_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::kick"));
 
-  // step1: init KICK
+  // step1: initialize KICK
   IRC_Client_IRCMessage* kick_struct_p = NULL;
   ACE_NEW_NORETURN (kick_struct_p,
                     IRC_Client_IRCMessage ());
@@ -1059,7 +1061,7 @@ IRC_Client_Module_IRCHandler::kick (const std::string& channel_in,
 
 void
 IRC_Client_Module_IRCHandler::send (const string_list_t& receivers_in,
-                                          const std::string& message_in)
+                                    const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::send"));
 
@@ -1067,7 +1069,7 @@ IRC_Client_Module_IRCHandler::send (const string_list_t& receivers_in,
   if (message_in.empty ())
     return; // nothing to do...
 
-  // step1: init PRIVMSG
+  // step1: initialize PRIVMSG
   IRC_Client_IRCMessage* msg_struct_p = NULL;
   ACE_NEW_NORETURN (msg_struct_p,
                     IRC_Client_IRCMessage ());
@@ -1098,7 +1100,7 @@ IRC_Client_Module_IRCHandler::who (const std::string& name_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::who"));
 
-  // step1: init WHOIS
+  // step1: initialize WHOIS
   IRC_Client_IRCMessage* who_struct_p = NULL;
   ACE_NEW_NORETURN (who_struct_p,
                     IRC_Client_IRCMessage ());
@@ -1118,11 +1120,11 @@ IRC_Client_Module_IRCHandler::who (const std::string& name_in,
 
 void
 IRC_Client_Module_IRCHandler::whois (const std::string& servername_in,
-                                           const string_list_t& nicknames_in)
+                                     const string_list_t& nicknames_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::whois"));
 
-  // step1: init WHOIS
+  // step1: initialize WHOIS
   IRC_Client_IRCMessage* whois_struct_p = NULL;
   ACE_NEW_NORETURN (whois_struct_p,
                     IRC_Client_IRCMessage ());
@@ -1147,7 +1149,7 @@ IRC_Client_Module_IRCHandler::whowas (const std::string& nick_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::whowas"));
 
-  // step1: init WHOWAS
+  // step1: initialize WHOWAS
   IRC_Client_IRCMessage* whowas_struct_p = NULL;
   ACE_NEW_NORETURN (whowas_struct_p,
                     IRC_Client_IRCMessage ());
@@ -1155,7 +1157,8 @@ IRC_Client_Module_IRCHandler::whowas (const std::string& nick_in,
   ACE_NEW_NORETURN (whowas_struct_p->command.string,
                     std::string (IRC_Client_Message::CommandType2String (IRC_Client_IRCMessage::WHOWAS)));
   ACE_ASSERT (whowas_struct_p->command.string);
-  whowas_struct_p->command.discriminator = IRC_Client_IRCMessage::Command::STRING;
+  whowas_struct_p->command.discriminator =
+    IRC_Client_IRCMessage::Command::STRING;
 
   whowas_struct_p->params.push_back (nick_in);
   if (count_in)
@@ -1178,7 +1181,7 @@ IRC_Client_Module_IRCHandler::away (const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::away"));
 
-  // step1: init AWAY
+  // step1: initialize AWAY
   IRC_Client_IRCMessage* away_struct_p = NULL;
   ACE_NEW_NORETURN (away_struct_p,
                     IRC_Client_IRCMessage ());
@@ -1202,7 +1205,7 @@ IRC_Client_Module_IRCHandler::users (const std::string& server_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::users"));
 
-  // step1: init USERS
+  // step1: initialize USERS
   IRC_Client_IRCMessage* users_struct_p = NULL;
   ACE_NEW_NORETURN (users_struct_p,
                     IRC_Client_IRCMessage ());
@@ -1224,7 +1227,7 @@ IRC_Client_Module_IRCHandler::userhost (const string_list_t& nicknames_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::userhost"));
 
-  // step1: init USERHOST
+  // step1: initialize USERHOST
   IRC_Client_IRCMessage* userhost_struct_p = NULL;
   ACE_NEW_NORETURN (userhost_struct_p,
                     IRC_Client_IRCMessage ());

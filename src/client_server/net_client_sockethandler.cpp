@@ -22,8 +22,9 @@
 #include "net_client_sockethandler.h"
 
 #include <string>
-#include <iostream>
+//#include <iostream>
 
+#include "ace/streams.h"
 #include "ace/Reactor.h"
 
 #include "net_common_tools.h"

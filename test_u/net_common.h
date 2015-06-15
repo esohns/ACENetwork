@@ -44,7 +44,7 @@ extern struct random_data random_data;
 extern char random_state_buffer[];
 #endif
 
-enum Net_GTK_Event_t
+enum Net_GTK_Event
 {
   NET_GTKEVENT_CONNECT = 0,
   NET_GTKEVENT_DATA,
@@ -54,12 +54,12 @@ enum Net_GTK_Event_t
   NET_GTKEVENT_MAX,
   NET_GKTEVENT_INVALID
 };
-typedef std::deque<Net_GTK_Event_t> Net_GTK_Events_t;
+typedef std::deque<Net_GTK_Event> Net_GTK_Events_t;
 typedef Net_GTK_Events_t::const_iterator Net_GTK_EventsIterator_t;
 
-struct Net_GTK_CBData_t
+struct Net_GTK_CBData
 {
-  inline Net_GTK_CBData_t ()
+  inline Net_GTK_CBData ()
    : allowUserRuntimeStatistic (true)
    , eventStack ()
    , GTKState ()

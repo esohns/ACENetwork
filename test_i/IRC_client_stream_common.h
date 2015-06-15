@@ -31,7 +31,7 @@
 
 typedef Stream_SessionDataBase_T<IRC_Client_SessionData> IRC_Client_StreamSessionData_t;
 
-typedef Common_INotify_T<Stream_ModuleConfiguration_t,
+typedef Common_INotify_T<Stream_ModuleConfiguration,
                          IRC_Client_IRCMessage> IRC_Client_INotify_t;
 
 #endif

@@ -85,7 +85,7 @@ IRC_Client_Module_IRCSplitter::~IRC_Client_Module_IRCSplitter ()
 bool
 IRC_Client_Module_IRCSplitter::initialize (Stream_IAllocator* allocator_in,
                                            bool isActive_in,
-                                           Stream_State_t* state_in,
+                                           Stream_State* state_in,
                                            /////////////////////////////////////
                                            bool crunchMessages_in,
                                            unsigned int statisticCollectionInterval_in,
@@ -486,7 +486,7 @@ IRC_Client_Module_IRCSplitter::handleSessionMessage (IRC_Client_SessionMessage*&
 }
 
 bool
-IRC_Client_Module_IRCSplitter::collect (IRC_Client_RuntimeStatistic& data_out)
+IRC_Client_Module_IRCSplitter::collect (IRC_Client_RuntimeStatistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCSplitter::collect"));
 
@@ -497,7 +497,7 @@ IRC_Client_Module_IRCSplitter::collect (IRC_Client_RuntimeStatistic& data_out)
   ACE_ASSERT (isInitialized_);
 
   // step1: init info container POD
-  ACE_OS::memset (&data_out, 0, sizeof (IRC_Client_RuntimeStatistic));
+  ACE_OS::memset (&data_out, 0, sizeof (IRC_Client_RuntimeStatistic_t));
 
   // *IMPORTANT NOTE*: information is collected by the statistic module
   //                   (if any)
@@ -528,7 +528,7 @@ IRC_Client_Module_IRCSplitter::report () const
 }
 
 bool
-IRC_Client_Module_IRCSplitter::putStatisticsMessage (const IRC_Client_RuntimeStatistic& info_in,
+IRC_Client_Module_IRCSplitter::putStatisticsMessage (const IRC_Client_RuntimeStatistic_t& info_in,
                                                      const ACE_Time_Value& collectionTime_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCSplitter::putStatisticsMessage"));

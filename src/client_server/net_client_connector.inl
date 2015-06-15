@@ -222,7 +222,7 @@ Net_Client_Connector_T<AddressType,
   // default behavior
   ACE_NEW_NORETURN (handler_out,
                     HandlerType (interfaceHandle_,
-                    statisticCollectionInterval_));
+                                 statisticCollectionInterval_));
   if (!handler_out)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

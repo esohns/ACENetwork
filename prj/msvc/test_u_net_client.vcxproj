@@ -60,7 +60,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;D:\projects\yarp\modules\libACENetwork\3rd_party\msvc;$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG_DEBUGGER;BASEDIR="$(ProgramFiles.Replace('\', "\\"))\\$(SolutionName)";HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
@@ -95,7 +95,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>BASEDIR="$(ProgramFiles.Replace('\', "\\"))\\$(SolutionName)";HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -136,29 +136,31 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\test_u\net_callbacks.cpp" />
-    <ClCompile Include="..\..\src\test_u\net_client.cpp" />
-    <ClCompile Include="..\..\src\test_u\net_client_signalhandler.cpp" />
-    <ClCompile Include="..\..\src\test_u\net_client_timeouthandler.cpp" />
-    <ClCompile Include="..\..\src\test_u\net_eventhandler.cpp" />
-    <ClCompile Include="..\..\src\test_u\net_module_eventhandler.cpp" />
-    <ClCompile Include="..\..\src\test_u\stdafx.cpp">
+    <ClCompile Include="..\..\test_u\net_callbacks.cpp" />
+    <ClCompile Include="..\..\test_u\net_client.cpp" />
+    <ClCompile Include="..\..\test_u\net_client_signalhandler.cpp" />
+    <ClCompile Include="..\..\test_u\net_client_timeouthandler.cpp" />
+    <ClCompile Include="..\..\test_u\net_eventhandler.cpp" />
+    <ClCompile Include="..\..\test_u\net_module_eventhandler.cpp" />
+    <ClCompile Include="..\..\test_u\net_server_signalhandler.cpp" />
+    <ClCompile Include="..\..\test_u\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\test_u\net_callbacks.h" />
-    <ClInclude Include="..\..\src\test_u\net_client_signalhandler.h" />
-    <ClInclude Include="..\..\src\test_u\net_client_timeouthandler.h" />
-    <ClInclude Include="..\..\src\test_u\net_common.h" />
-    <ClInclude Include="..\..\src\test_u\net_defines.h" />
-    <ClInclude Include="..\..\src\test_u\net_eventhandler.h" />
-    <ClInclude Include="..\..\src\test_u\net_module_eventhandler.h" />
-    <ClInclude Include="..\..\src\test_u\stdafx.h" />
+    <ClInclude Include="..\..\test_u\net_callbacks.h" />
+    <ClInclude Include="..\..\test_u\net_client_signalhandler.h" />
+    <ClInclude Include="..\..\test_u\net_client_timeouthandler.h" />
+    <ClInclude Include="..\..\test_u\net_common.h" />
+    <ClInclude Include="..\..\test_u\net_defines.h" />
+    <ClInclude Include="..\..\test_u\net_eventhandler.h" />
+    <ClInclude Include="..\..\test_u\net_module_eventhandler.h" />
+    <ClInclude Include="..\..\test_u\net_server_signalhandler.h" />
+    <ClInclude Include="..\..\test_u\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\test_u\net_client.glade" />
+    <None Include="..\..\test_u\net_client.glade" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

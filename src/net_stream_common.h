@@ -36,13 +36,13 @@
 #include "net_configuration.h"
 #include "net_message.h"
 
-typedef Stream_SessionDataBase_T<Net_UserData_t> Net_StreamSessionData_t;
+typedef Stream_SessionDataBase_T<Net_UserData> Net_StreamSessionData_t;
 
 typedef Stream_IModule<ACE_MT_SYNCH,
                        Common_TimePolicy_t,
-                       Stream_ModuleConfiguration_t> Net_IModule_t;
+                       Stream_ModuleConfiguration> Net_IModule_t;
 
-typedef Common_INotify_T<Stream_ModuleConfiguration_t,
+typedef Common_INotify_T<Stream_ModuleConfiguration,
                          Net_Message> Net_INotify_t;
 typedef std::list<Net_INotify_t*> Net_Subscribers_t;
 typedef Net_Subscribers_t::iterator Net_SubscribersIterator_t;

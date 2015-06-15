@@ -39,7 +39,7 @@ class Net_Message;
 //          typename SessionMessageType> class Stream_MessageAllocatorHeapBase;
 
 class Net_Export Net_SessionMessage
- : public Stream_SessionMessageBase_T<Stream_State_t,
+ : public Stream_SessionMessageBase_T<Stream_State,
                                       Net_StreamSessionData_t>
 {
 //  // enable access to private ctor(s)...
@@ -48,9 +48,9 @@ class Net_Export Net_SessionMessage
 
  public:
   // *NOTE*: assume lifetime responsibility for the second argument !
-  Net_SessionMessage (Stream_SessionMessageType_t, // session message type
-                      Stream_State_t*,             // stream state handle
-                      Net_StreamSessionData_t*&);  // session data handle
+  Net_SessionMessage (Stream_SessionMessageType,  // session message type
+                      Stream_State*,              // stream state handle
+                      Net_StreamSessionData_t*&); // session data handle
     // *NOTE*: to be used by message allocators...
   Net_SessionMessage (ACE_Allocator*); // message allocator
   Net_SessionMessage (ACE_Data_Block*, // data block
@@ -62,7 +62,7 @@ class Net_Export Net_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<Stream_State_t,
+  typedef Stream_SessionMessageBase_T<Stream_State,
                                       Net_StreamSessionData_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage ());

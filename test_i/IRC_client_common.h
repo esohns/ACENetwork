@@ -28,6 +28,10 @@
 #include <vector>
 
 #include "ace/Date_Time.h"
+//#include "ace/IOStream.h"
+
+#include "FILE_Stream.h"
+#include "IOStream_alt_T.h"
 
 struct IRC_Client_IRCLoginOptions
 {
@@ -189,6 +193,22 @@ struct IRC_Client_PhoneBook
   ACE_Date_Time         timestamp;
 };
 
+struct IRC_Client_SessionState
+{
+  inline IRC_Client_SessionState ()
+   : channelModes ()
+   , isFirstMessage (false)
+   , nickname ()
+   , userModes ()
+  {};
 
+  IRC_Client_ChannelModes_t channelModes;
+  bool                      isFirstMessage;
+  std::string               nickname;
+  IRC_Client_UserModes_t    userModes;
+};
+
+//  ACE_IOStream<ACE_FILE_Stream> output_;
+typedef ACE_IOStream_alt_T<ACE_FILE_Stream> IRC_Client_IOStream_t;
 
 #endif

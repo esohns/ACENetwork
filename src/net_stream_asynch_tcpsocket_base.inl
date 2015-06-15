@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "ace/Log_Msg.h"
+#include "ace/Stream.h"
 
 #include "stream_common.h"
 

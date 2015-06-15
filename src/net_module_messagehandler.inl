@@ -202,7 +202,7 @@ Net_Module_MessageHandler_T<ConfigurationType,
       Net_IModule_t* module_p =
        dynamic_cast<Net_IModule_t*> (inherited::module ());
       ACE_ASSERT (module_p);
-      const Stream_ModuleConfiguration_t& module_configuration =
+      const Stream_ModuleConfiguration& module_configuration =
           module_p->get ();
 
       // synch access

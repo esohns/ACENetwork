@@ -90,9 +90,9 @@ class Net_Module_ProtocolHandler
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                 // task synch type
-                              Common_TimePolicy_t,          // time policy type
-                              Stream_ModuleConfiguration_t, // configuration type
-                              Net_Module_ProtocolHandler);  // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                // task synch type
+                              Common_TimePolicy_t,         // time policy type
+                              Stream_ModuleConfiguration,  // configuration type
+                              Net_Module_ProtocolHandler); // writer type
 
 #endif

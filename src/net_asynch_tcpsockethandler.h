@@ -33,7 +33,7 @@
 #include "net_sockethandler_base.h"
 
 class Net_Export Net_AsynchTCPSocketHandler
- : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t>
+ : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration>
  , public ACE_Service_Handler
  , public ACE_Notification_Strategy
 {
@@ -70,7 +70,7 @@ class Net_Export Net_AsynchTCPSocketHandler
   ACE_INET_Addr           remoteSAP_;
 
  private:
-  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
+  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration> inherited;
   typedef ACE_Service_Handler inherited2;
   typedef ACE_Notification_Strategy inherited3;
 

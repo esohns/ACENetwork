@@ -34,7 +34,7 @@ class ACE_Data_Block;
 class ACE_Message_Block;
 
 class IRC_Client_SessionMessage
- : public Stream_SessionMessageBase_T<Stream_State_t,
+ : public Stream_SessionMessageBase_T<Stream_State,
                                       IRC_Client_StreamSessionData_t>
 {
 //  // enable access to private ctor(s)...
@@ -43,8 +43,8 @@ class IRC_Client_SessionMessage
 
  public:
   // *NOTE*: assume lifetime responsibility for the second argument !
-  IRC_Client_SessionMessage (Stream_SessionMessageType_t,             // session message type
-                             Stream_State_t*,                         // stream state handle
+  IRC_Client_SessionMessage (Stream_SessionMessageType,         // session message type
+                             Stream_State*,                     // stream state handle
                              IRC_Client_StreamSessionData_t*&); // session data handle
     // *NOTE*: to be used by message allocators...
   IRC_Client_SessionMessage (ACE_Allocator*); // message allocator
@@ -57,7 +57,7 @@ class IRC_Client_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<Stream_State_t,
+  typedef Stream_SessionMessageBase_T<Stream_State,
                                       IRC_Client_StreamSessionData_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_SessionMessage ());

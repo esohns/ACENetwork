@@ -7,6 +7,7 @@ DEFS += \
   -DMETA_PACKAGE=\"@PACKAGE_NAME@\"
 
 AM_CPPFLAGS = \
+  -I/usr/include/c++/3.4.6/backward \
   -I$(top_srcdir)/../ATCD/ACE
 
 noinst_HEADERS = \
@@ -182,9 +183,9 @@ libACENetwork_la_SOURCES = \
   net_udpconnection.inl \
   net_udpsockethandler.cpp \
   net_udpsockethandler.h \
-  net_udpsockethandler.inl \
-  stdafx.cpp \
-  stdafx.h
+  net_udpsockethandler.inl
+#  stdafx.cpp \
+#  stdafx.h
 
 libACENetwork_la_CPPFLAGS = \
   $(AM_CPPFLAGS) \

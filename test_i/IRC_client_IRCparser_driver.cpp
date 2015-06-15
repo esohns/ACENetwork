@@ -50,17 +50,19 @@ IRC_Client_IRCParserDriver::IRC_Client_IRCParserDriver (bool traceScanning_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCParserDriver::IRC_Client_IRCParserDriver"));
 
-  if (IRC_Client_IRCscanner_lex_init_extra (this, &currentScannerState_))
+  if (IRC_Client_IRCScanner_lex_init_extra (this, &currentScannerState_))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to yylex_init_extra: \"%m\", continuing\n")));
   ACE_ASSERT (currentScannerState_);
   parser_.set (currentScannerState_);
 
   // trace ?
-  IRC_Client_IRCscanner_set_debug ((traceScanning_in ? 1 : 0),
+  IRC_Client_IRCScanner_set_debug ((traceScanning_in ? 1 : 0),
                                    currentScannerState_);
+#if YYDEBUG
   parser_.set_debug_level (traceParsing_in ? 1
                                            : 0); // binary (see bison manual)
+#endif
 }
 
 IRC_Client_IRCParserDriver::~IRC_Client_IRCParserDriver ()
@@ -68,7 +70,7 @@ IRC_Client_IRCParserDriver::~IRC_Client_IRCParserDriver ()
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCParserDriver::~IRC_Client_IRCParserDriver"));
 
   // finalize lex scanner
-  if (IRC_Client_IRCscanner_lex_destroy (currentScannerState_))
+  if (IRC_Client_IRCScanner_lex_destroy (currentScannerState_))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to yylex_destroy: \"%m\", continuing\n")));
 }
@@ -87,10 +89,12 @@ IRC_Client_IRCParserDriver::initialize (IRC_Client_IRCMessage& message_in,
   currentMessage_ = &message_in;
 
   // trace ?
-  IRC_Client_IRCscanner_set_debug ((traceScanning_in ? 1 : 0),
+  IRC_Client_IRCScanner_set_debug ((traceScanning_in ? 1 : 0),
                                    currentScannerState_);
+#if YYDEBUG
   parser_.set_debug_level (traceParsing_in ? 1 
                                            : 0); // binary (see bison manual)
+#endif
 
   // OK
   isInitialized_ = true;
@@ -135,8 +139,12 @@ IRC_Client_IRCParserDriver::parse (ACE_Message_Block* data_in,
     // finalize buffer/scanner
     scan_end ();
 
+    int debug_level = 0;
+#if YYDEBUG
+    debug_level = parser_.debug_level ();
+#endif
     // debug info
-    if (parser_.debug_level ())
+    if (debug_level)
     {
       try
       {
@@ -145,7 +153,7 @@ IRC_Client_IRCParserDriver::parse (ACE_Message_Block* data_in,
       catch (...)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in RPG_Common_IDumpState::dump_state(), continuing\n")));
+                    ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
       }
     } // end IF
 //   } while (currentFragment_);
@@ -171,27 +179,25 @@ IRC_Client_IRCParserDriver::switchBuffer ()
 
   // clean state
   ACE_ASSERT (currentBufferState_);
-  IRC_Client_IRCscanner__delete_buffer (currentBufferState_,
+  IRC_Client_IRCScanner__delete_buffer (currentBufferState_,
                                         currentScannerState_);
   currentBufferState_ = NULL;
 
-  // init next buffer
+  // initialize next buffer
   //currentBufferState_ = IRCScanner_scan_bytes(currentFragment_->rd_ptr(),
   //                                             currentFragment_->length(),
   //                                             myScannerContext);
-//   if (currentBufferState_ == NULL)
+//   if (!currentBufferState_)
 //   {
 //     ACE_DEBUG((LM_ERROR,
 //                ACE_TEXT("failed to ::IRCScanner_scan_bytes(%@, %d), aborting\n"),
 //                currentFragment_->rd_ptr(),
 //                currentFragment_->length()));
-//
-//     // what else can we do ?
 //     return false;
 //   } // end IF
 
 //  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
-  IRC_Client_IRCscanner__switch_to_buffer (currentBufferState_,
+  IRC_Client_IRCScanner__switch_to_buffer (currentBufferState_,
                                            currentScannerState_);
 
 //   ACE_DEBUG((LM_DEBUG,
@@ -213,7 +219,7 @@ IRC_Client_IRCParserDriver::getDebugScanner () const
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCParserDriver::getDebugScanner"));
 
-  return (IRC_Client_IRCscanner_get_debug (currentScannerState_) != 0);
+  return (IRC_Client_IRCScanner_get_debug (currentScannerState_) != 0);
 }
 
 void
@@ -250,7 +256,7 @@ IRC_Client_IRCParserDriver::error (const yy::location& location_in,
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in RPG_Common_IDumpState::dump_state(), continuing\n")));
+                ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
   }
 
 //   std::clog << location_in << ": " << message_in << std::endl;
@@ -286,14 +292,14 @@ IRC_Client_IRCParserDriver::scan_begin (bool useYYScanBuffer_in)
   if (useYYScanBuffer_in)
   {
     currentBufferState_ =
-      IRC_Client_IRCscanner__scan_buffer (currentFragment_->rd_ptr (),
+      IRC_Client_IRCScanner__scan_buffer (currentFragment_->rd_ptr (),
                                           (currentFragment_->length () + IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE),
                                           currentScannerState_);
   } // end IF
   else
   {
     currentBufferState_ =
-      IRC_Client_IRCscanner__scan_bytes (currentFragment_->rd_ptr (),
+      IRC_Client_IRCScanner__scan_bytes (currentFragment_->rd_ptr (),
                                          currentFragment_->length (),
                                          currentScannerState_);
   } // end ELSE
@@ -307,7 +313,7 @@ IRC_Client_IRCParserDriver::scan_begin (bool useYYScanBuffer_in)
   } // end IF
 
   // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
-  IRC_Client_IRCscanner__switch_to_buffer (currentBufferState_,
+  IRC_Client_IRCScanner__switch_to_buffer (currentBufferState_,
                                            currentScannerState_);
 
   return true;
@@ -332,7 +338,7 @@ IRC_Client_IRCParserDriver::scan_end ()
 //   } // end IF
 
   // clean state
-  IRC_Client_IRCscanner__delete_buffer (currentBufferState_,
+  IRC_Client_IRCScanner__delete_buffer (currentBufferState_,
                                         currentScannerState_);
   currentBufferState_ = NULL;
 

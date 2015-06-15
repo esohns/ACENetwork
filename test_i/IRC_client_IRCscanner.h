@@ -1,6 +1,6 @@
-#ifndef IRC_CLIENT_IRCscanner_HEADER_H
-#define IRC_CLIENT_IRCscanner_HEADER_H 1
-#define IRC_CLIENT_IRCscanner_IN_HEADER 1
+#ifndef IRC_Client_IRCScanner_HEADER_H
+#define IRC_Client_IRCScanner_HEADER_H 1
+#define IRC_Client_IRCScanner_IN_HEADER 1
 
 #line 6 "IRC_client_IRCscanner.h"
 
@@ -24,7 +24,7 @@
 /* %endif */
 
 /* %if-c-only */
-
+    
 /* %endif */
 
 /* %if-c-only */
@@ -56,7 +56,7 @@
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
- * if you want the limit (max/min) macros for int types.
+ * if you want the limit (max/min) macros for int types. 
  */
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
@@ -73,10 +73,9 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t;
+typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -106,6 +105,8 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
+
+#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -148,7 +149,7 @@ typedef void* yyscan_t;
 #endif
 
 /* For convenience, these vars (plus the bison vars far below)
-	 are macros in the reentrant scanner. */
+   are macros in the reentrant scanner. */
 #define yyin yyg->yyin_r
 #define yyout yyg->yyout_r
 #define yyextra yyg->yyextra_r
@@ -165,7 +166,15 @@ typedef void* yyscan_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 #ifndef YY_TYPEDEF_YY_BUFFER_STATE
@@ -231,7 +240,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-
+    
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -254,28 +263,28 @@ struct yy_buffer_state
 
 /* %endif */
 
-void IRC_Client_IRCscanner_restart (FILE *input_file ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Client_IRCscanner__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner_pop_buffer_state (yyscan_t yyscanner );
+void IRC_Client_IRCScanner_restart (FILE *input_file ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE IRC_Client_IRCScanner__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_pop_buffer_state (yyscan_t yyscanner );
 
-YY_BUFFER_STATE IRC_Client_IRCscanner__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Client_IRCscanner__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Client_IRCscanner__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE IRC_Client_IRCScanner__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE IRC_Client_IRCScanner__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE IRC_Client_IRCScanner__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
 /* %endif */
 
-void *IRC_Client_IRCscanner_alloc (yy_size_t ,yyscan_t yyscanner );
-void *IRC_Client_IRCscanner_realloc (void *,yy_size_t ,yyscan_t yyscanner );
-void IRC_Client_IRCscanner_free (void * ,yyscan_t yyscanner );
+void *IRC_Client_IRCScanner_alloc (yy_size_t ,yyscan_t yyscanner );
+void *IRC_Client_IRCScanner_realloc (void *,yy_size_t ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_free (void * ,yyscan_t yyscanner );
 
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
 
-#define IRC_Client_IRCscanner_wrap(n) 1
+#define IRC_Client_IRCScanner_wrap(n) 1
 #define YY_SKIP_YYWRAP
 
 #define FLEX_DEBUG
@@ -2093,9 +2102,9 @@ static yyconst flex_int16_t yy_nxt[][256] =
 
 /* %if-reentrant */
 
-int IRC_Client_IRCscanner_lex_init (yyscan_t* scanner);
+int IRC_Client_IRCScanner_lex_init (yyscan_t* scanner);
 
-int IRC_Client_IRCscanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int IRC_Client_IRCScanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
 /* %endif */
 
@@ -2104,31 +2113,31 @@ int IRC_Client_IRCscanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* s
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int IRC_Client_IRCscanner_lex_destroy (yyscan_t yyscanner );
+int IRC_Client_IRCScanner_lex_destroy (yyscan_t yyscanner );
 
-int IRC_Client_IRCscanner_get_debug (yyscan_t yyscanner );
+int IRC_Client_IRCScanner_get_debug (yyscan_t yyscanner );
 
-void IRC_Client_IRCscanner_set_debug (int debug_flag ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_set_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE IRC_Client_IRCscanner_get_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE IRC_Client_IRCScanner_get_extra (yyscan_t yyscanner );
 
-void IRC_Client_IRCscanner_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
-FILE *IRC_Client_IRCscanner_get_in (yyscan_t yyscanner );
+FILE *IRC_Client_IRCScanner_get_in (yyscan_t yyscanner );
 
-void IRC_Client_IRCscanner_set_in  (FILE * in_str ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_set_in  (FILE * in_str ,yyscan_t yyscanner );
 
-FILE *IRC_Client_IRCscanner_get_out (yyscan_t yyscanner );
+FILE *IRC_Client_IRCScanner_get_out (yyscan_t yyscanner );
 
-void IRC_Client_IRCscanner_set_out  (FILE * out_str ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-int IRC_Client_IRCscanner_get_leng (yyscan_t yyscanner );
+int IRC_Client_IRCScanner_get_leng (yyscan_t yyscanner );
 
-char *IRC_Client_IRCscanner_get_text (yyscan_t yyscanner );
+char *IRC_Client_IRCScanner_get_text (yyscan_t yyscanner );
 
-int IRC_Client_IRCscanner_get_lineno (yyscan_t yyscanner );
+int IRC_Client_IRCScanner_get_lineno (yyscan_t yyscanner );
 
-void IRC_Client_IRCscanner_set_lineno (int line_number ,yyscan_t yyscanner );
+void IRC_Client_IRCScanner_set_lineno (int line_number ,yyscan_t yyscanner );
 
 /* %if-bison-bridge */
 /* %endif */
@@ -2139,9 +2148,9 @@ void IRC_Client_IRCscanner_set_lineno (int line_number ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int IRC_Client_IRCscanner_wrap (yyscan_t yyscanner );
+extern "C" int IRC_Client_IRCScanner_wrap (yyscan_t yyscanner );
 #else
-extern int IRC_Client_IRCscanner_wrap (yyscan_t yyscanner );
+extern int IRC_Client_IRCScanner_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -2170,7 +2179,12 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Number of entries by which start-condition stack grows. */
@@ -2190,9 +2204,9 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #define YY_DECL_IS_OURS 1
 /* %if-c-only Standard (non-C++) definition */
 
-extern int IRC_Client_IRCscanner_lex (yyscan_t yyscanner);
+extern int IRC_Client_IRCScanner_lex (yyscan_t yyscanner);
 
-#define YY_DECL int IRC_Client_IRCscanner_lex (yyscan_t yyscanner)
+#define YY_DECL int IRC_Client_IRCScanner_lex (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only C++ definition */
 /* %endif */
@@ -2222,9 +2236,9 @@ extern int IRC_Client_IRCscanner_lex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 223 ".\\IRCscanner.l"
+#line 223 "./IRCscanner.l"
 
 
-#line 2229 "irc_client_IRCscanner.h"
-#undef IRC_Client_IRCscanner_IN_HEADER
-#endif /* IRC_Client_IRCscanner_HEADER_H */
+#line 2243 "IRC_client_IRCscanner.h"
+#undef IRC_Client_IRCScanner_IN_HEADER
+#endif /* IRC_Client_IRCScanner_HEADER_H */

@@ -242,7 +242,7 @@ Net_StreamTCPSocketBase_T<AddressType,
     // *NOTE*: more likely, this happened because the (select) reactor is out of
     //         "free" (read) slots
     int error = ACE_OS::last_error ();
-    if (error);
+    ACE_UNUSED_ARG (error);
 
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));

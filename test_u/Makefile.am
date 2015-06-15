@@ -1,6 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = \
+  -I/usr/include/c++/3.4.6/backward \
   -I$(top_srcdir)/../../modules/ATCD/ACE \
   $(PKGSDL_CFLAGS) \
   $(PKGGTK_CFLAGS)

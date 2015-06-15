@@ -52,7 +52,7 @@ class Net_Client_Connector_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t,
+                                   Stream_Statistic,
                                    StreamType> ICONNECTION_MANAGER_T;
 
   Net_Client_Connector_T (const HandlerConfigurationType*, // socket handler configuration handle
@@ -112,7 +112,7 @@ class Net_Client_Connector_T<ACE_INET_Addr,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t,
+                                   Stream_Statistic,
                                    StreamType> ICONNECTION_MANAGER_T;
   typedef Net_UDPConnection_T<UserDataType,
                               SessionDataType,
@@ -176,7 +176,7 @@ class Net_Client_Connector_T<ACE_Netlink_Addr,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t,
+                                   Stream_Statistic,
                                    StreamType> ICONNECTION_MANAGER_T;
 
   Net_Client_Connector_T (const HandlerConfigurationType*, // configuration handle

@@ -25,7 +25,7 @@
 #include "net_iconnection.h"
 #include "net_itransportlayer.h"
 
-typedef Net_ITransportLayer_T<Net_SocketConfiguration_t> Net_ITransportLayer_t;
+typedef Net_ITransportLayer_T<Net_SocketConfiguration> Net_ITransportLayer_t;
 
 
 

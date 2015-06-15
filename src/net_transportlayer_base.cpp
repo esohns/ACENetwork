@@ -23,8 +23,8 @@
 
 #include "net_macros.h"
 
-Net_InetTransportLayer_Base::Net_InetTransportLayer_Base (Net_ClientServerRole_t role_in,
-                                                          Net_TransportLayer_t transportLayer_in)
+Net_InetTransportLayer_Base::Net_InetTransportLayer_Base (Net_ClientServerRole role_in,
+                                                          Net_TransportLayerType transportLayer_in)
  : clientServerRole_ (role_in)
  , transportLayer_ (transportLayer_in)
 {
@@ -38,7 +38,7 @@ Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base ()
 
 }
 
-Net_ClientServerRole_t
+Net_ClientServerRole
 Net_InetTransportLayer_Base::role ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::role"));
@@ -47,8 +47,8 @@ Net_InetTransportLayer_Base::role ()
 }
 
 bool
-Net_InetTransportLayer_Base::initialize (Net_ClientServerRole_t role_in,
-                                         const Net_SocketConfiguration_t& configuration_in)
+Net_InetTransportLayer_Base::initialize (Net_ClientServerRole role_in,
+                                         const Net_SocketConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::initialize"));
 
@@ -84,8 +84,8 @@ Net_NetlinkTransportLayer_Base::~Net_NetlinkTransportLayer_Base ()
 }
 
 bool
-Net_NetlinkTransportLayer_Base::initialize (Net_ClientServerRole_t role_in,
-                                            const Net_SocketConfiguration_t& configuration_in)
+Net_NetlinkTransportLayer_Base::initialize (Net_ClientServerRole role_in,
+                                            const Net_SocketConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::initialize"));
 

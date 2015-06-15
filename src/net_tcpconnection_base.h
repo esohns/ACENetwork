@@ -45,13 +45,13 @@ template <typename ConfigurationType,
           typename HandlerType>
 class Net_TCPConnectionBase_T
  : public Net_SocketConnectionBase_T<ACE_INET_Addr,
-                                     Net_SocketConfiguration_t,
+                                     Net_SocketConfiguration,
                                      HandlerType,
                                      ConfigurationType,
-                                     Net_SocketHandlerConfiguration_t,
+                                     Net_SocketHandlerConfiguration,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t,
+                                     Stream_Statistic,
                                      StreamType>
  , public Net_TransportLayer_TCP
 {
@@ -70,10 +70,10 @@ class Net_TCPConnectionBase_T
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   Net_SocketConfiguration_t,
+                                   Net_SocketConfiguration,
                                    ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t,
+                                   Stream_Statistic,
                                    StreamType> ICONNECTION_MANAGER_T;
 
   Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
@@ -83,13 +83,13 @@ class Net_TCPConnectionBase_T
 
  private:
   typedef Net_SocketConnectionBase_T<ACE_INET_Addr,
-                                     Net_SocketConfiguration_t,
+                                     Net_SocketConfiguration,
                                      HandlerType,
                                      ConfigurationType,
-                                     Net_SocketHandlerConfiguration_t,
+                                     Net_SocketHandlerConfiguration,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t,
+                                     Stream_Statistic,
                                      StreamType> inherited;
 
   Net_TCPConnectionBase_T ();
@@ -106,13 +106,13 @@ template <typename ConfigurationType,
           typename HandlerType>
 class Net_AsynchTCPConnectionBase_T
  : public Net_AsynchSocketConnectionBase_T<ACE_INET_Addr,
-                                           Net_SocketConfiguration_t,
+                                           Net_SocketConfiguration,
                                            HandlerType,
                                            ConfigurationType,
-                                           Net_SocketHandlerConfiguration_t,
+                                           Net_SocketHandlerConfiguration,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t,
+                                           Stream_Statistic,
                                            StreamType>
  , public Net_TransportLayer_TCP
 {
@@ -129,10 +129,10 @@ class Net_AsynchTCPConnectionBase_T
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   Net_SocketConfiguration_t,
+                                   Net_SocketConfiguration,
                                    ConfigurationType,
                                    UserDataType,
-                                   Stream_Statistic_t,
+                                   Stream_Statistic,
                                    StreamType> ICONNECTION_MANAGER_T;
 
   Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
@@ -142,13 +142,13 @@ class Net_AsynchTCPConnectionBase_T
 
  private:
   typedef Net_AsynchSocketConnectionBase_T<ACE_INET_Addr,
-                                           Net_SocketConfiguration_t,
+                                           Net_SocketConfiguration,
                                            HandlerType,
                                            ConfigurationType,
-                                           Net_SocketHandlerConfiguration_t,
+                                           Net_SocketHandlerConfiguration,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t,
+                                           Stream_Statistic,
                                            StreamType> inherited;
 
   Net_AsynchTCPConnectionBase_T ();

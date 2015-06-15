@@ -413,6 +413,7 @@ button_about_clicked_cb (GtkWidget* widget_in,
 
   // run dialog
   gint response_id = gtk_dialog_run (dialog_p);
+  ACE_UNUSED_ARG (response_id);
   gtk_widget_hide (GTK_WIDGET (dialog_p));
 }
 

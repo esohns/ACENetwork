@@ -84,6 +84,15 @@ class Net_StreamTCPSocketBase_T
   virtual void report () const;
   virtual void dump_state () const;
 
+  // convenient types
+  typedef Net_ConnectionBase_T<AddressType,
+                               SocketConfigurationType,
+                               ConfigurationType,
+                               UserDataType,
+                               SessionDataType,
+                               StatisticContainerType,
+                               StreamType> CONNECTION_BASE_T;
+
  protected:
   typedef Net_IConnectionManager_T<AddressType,
                                    SocketConfigurationType,
@@ -92,13 +101,6 @@ class Net_StreamTCPSocketBase_T
                                    StatisticContainerType,
                                    StreamType> ICONNECTION_MANAGER_T;
   typedef SocketHandlerType SOCKET_HANDLER_T;
-  typedef Net_ConnectionBase_T<AddressType,
-                               SocketConfigurationType,
-                               ConfigurationType,
-                               UserDataType,
-                               SessionDataType,
-                               StatisticContainerType,
-                               StreamType> CONNECTION_BASE_T;
 
   Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))

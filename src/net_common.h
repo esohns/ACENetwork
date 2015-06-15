@@ -26,7 +26,7 @@
 #include "net_message.h"
 #include "net_sessionmessage.h"
 
-enum Net_ClientServerRole_t
+enum Net_ClientServerRole
 {
   ROLE_INVALID = -1,
   ROLE_CLIENT = 0,
@@ -35,7 +35,7 @@ enum Net_ClientServerRole_t
   ROLE_MAX
 };
 
-enum Net_TransportLayer_t
+enum Net_TransportLayerType
 {
   TRANSPORTLAYER_INVALID = -1,
   TRANSPORTLAYER_IP_BROADCAST = 0,

@@ -21,7 +21,9 @@
 
 #include "net_module_protocolhandler.h"
 
-#include <iostream>
+//#include <iostream>
+
+#include "ace/streams.h"
 
 //#include "common.h"
 #include "common_timer_manager_common.h"
@@ -233,7 +235,7 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
   {
     case SESSION_BEGIN:
     {
-      const Stream_State_t* state_p = message_inout->getState ();
+      const Stream_State* state_p = message_inout->getState ();
       ACE_ASSERT (state_p);
       sessionID_ = state_p->sessionID;
 

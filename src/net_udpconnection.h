@@ -41,13 +41,13 @@ template <typename UserDataType,
           typename HandlerType>
 class Net_UDPConnection_T
  : public Net_SocketConnectionBase_T<ACE_INET_Addr,
-                                     Net_SocketConfiguration_t,
+                                     Net_SocketConfiguration,
                                      HandlerType,
-                                     Net_Configuration_t,
-                                     Net_SocketHandlerConfiguration_t,
+                                     Net_Configuration,
+                                     Net_SocketHandlerConfiguration,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t,
+                                     Stream_Statistic,
                                      Net_Stream>
  , public Net_TransportLayer_UDP
 {
@@ -58,10 +58,10 @@ class Net_UDPConnection_T
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   Net_SocketConfiguration_t,
-                                   Net_Configuration_t,
+                                   Net_SocketConfiguration,
+                                   Net_Configuration,
                                    UserDataType,
-                                   Stream_Statistic_t,
+                                   Stream_Statistic,
                                    Net_Stream> ICONNECTION_MANAGER_T;
 
   Net_UDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
@@ -82,13 +82,13 @@ class Net_UDPConnection_T
 
  private:
   typedef Net_SocketConnectionBase_T<ACE_INET_Addr,
-                                     Net_SocketConfiguration_t,
+                                     Net_SocketConfiguration,
                                      HandlerType,
-                                     Net_Configuration_t,
-                                     Net_SocketHandlerConfiguration_t,
+                                     Net_Configuration,
+                                     Net_SocketHandlerConfiguration,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t,
+                                     Stream_Statistic,
                                      Net_Stream> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
@@ -104,13 +104,13 @@ template <typename UserDataType,
           typename HandlerType>
 class Net_AsynchUDPConnection_T
  : public Net_AsynchSocketConnectionBase_T<ACE_INET_Addr,
-                                           Net_SocketConfiguration_t,
+                                           Net_SocketConfiguration,
                                            HandlerType,
-                                           Net_Configuration_t,
-                                           Net_SocketHandlerConfiguration_t,
+                                           Net_Configuration,
+                                           Net_SocketHandlerConfiguration,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t,
+                                           Stream_Statistic,
                                            Net_Stream>
  , public Net_TransportLayer_UDP
 {
@@ -120,10 +120,10 @@ class Net_AsynchUDPConnection_T
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   Net_SocketConfiguration_t,
-                                   Net_Configuration_t,
+                                   Net_SocketConfiguration,
+                                   Net_Configuration,
                                    UserDataType,
-                                   Stream_Statistic_t,
+                                   Stream_Statistic,
                                    Net_Stream> ICONNECTION_MANAGER_T;
 
   Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
@@ -141,13 +141,13 @@ class Net_AsynchUDPConnection_T
 
  private:
   typedef Net_AsynchSocketConnectionBase_T<ACE_INET_Addr,
-                                           Net_SocketConfiguration_t,
+                                           Net_SocketConfiguration,
                                            HandlerType,
-                                           Net_Configuration_t,
-                                           Net_SocketHandlerConfiguration_t,
+                                           Net_Configuration,
+                                           Net_SocketHandlerConfiguration,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t,
+                                           Stream_Statistic,
                                            Net_Stream> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 

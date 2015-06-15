@@ -159,8 +159,8 @@ Net_AsynchTCPSocketHandler::act (const void* act_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler::act"));
 
-  const Net_SocketHandlerConfiguration_t* configuration_p =
-    reinterpret_cast<const Net_SocketHandlerConfiguration_t*> (act_in);
+  const Net_SocketHandlerConfiguration* configuration_p =
+    reinterpret_cast<const Net_SocketHandlerConfiguration*> (act_in);
   ACE_ASSERT (configuration_p);
   inherited::initialize (*configuration_p);
 }

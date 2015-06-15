@@ -49,6 +49,9 @@ class Net_ConnectionBase_T
   // implement (part of) Net_IConnection_T
   virtual bool initialize (const ConfigurationType&); // handler configuration
 
+  // convenient types
+  typedef StreamType STREAM_T;
+
  protected:
   typedef Net_IConnectionManager_T<AddressType,
                                    SocketConfigurationType,

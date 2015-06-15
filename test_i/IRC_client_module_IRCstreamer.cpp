@@ -21,6 +21,8 @@
 
 #include "IRC_client_module_IRCstreamer.h"
 
+#include "ace/Task.h"
+
 #include "net_macros.h"
 
 #include "IRC_client_defines.h"

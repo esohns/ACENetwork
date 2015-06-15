@@ -20,12 +20,13 @@
 #include "stdafx.h"
 
 #include <fstream>
-#include <iostream>
+//#include <iostream>
 #include <limits>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "ace/streams.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -92,7 +93,7 @@ do_printUsage (const std::string& programName_in)
   NETWORK_TRACE (ACE_TEXT ("::do_printUsage"));
 
   // enable verbatim boolean output
-  std::cout.setf (ios::boolalpha);
+  std::cout.setf (std::ios::boolalpha);
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
@@ -463,7 +464,7 @@ do_work (unsigned int maxNumConnections_in,
          bool useReactor_in,
          unsigned int statisticsReportingInterval_in,
          unsigned int numDispatchThreads_in,
-         Net_GTK_CBData_t& CBData_in,
+         Net_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -474,31 +475,30 @@ do_work (unsigned int maxNumConnections_in,
   int result = -1;
 
   // step0a: initialize stream configuration object
-  Stream_ModuleConfiguration_t module_configuration;
+  Stream_ModuleConfiguration module_configuration;
   ACE_OS::memset (&module_configuration, 0, sizeof (module_configuration));
 
   Net_EventHandler ui_event_handler (&CBData_in);
   Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
                                                 NULL);
-  Net_Module_EventHandler* eventHandler_impl_p = NULL;
-  eventHandler_impl_p =
+  Net_Module_EventHandler* event_handler_p =
     dynamic_cast<Net_Module_EventHandler*> (event_handler.writer ());
-  if (!eventHandler_impl_p)
+  if (!event_handler_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_EventHandler> failed, returning\n")));
     return;
   } // end IF
-  eventHandler_impl_p->initialize (&CBData_in.subscribers,
-                                   &CBData_in.subscribersLock);
-  eventHandler_impl_p->subscribe (&ui_event_handler);
+  event_handler_p->initialize (&CBData_in.subscribers,
+                               &CBData_in.subscribersLock);
+  event_handler_p->subscribe (&ui_event_handler);
 
   Stream_AllocatorHeap heap_allocator;
   Net_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                   &heap_allocator,         // heap allocator handle
                                                   true);                   // block ?
 
-  Net_Configuration_t configuration;
+  Net_Configuration configuration;
   // ********************** socket configuration data **************************
   configuration.socketConfiguration.bufferSize =
     NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
@@ -616,7 +616,7 @@ do_work (unsigned int maxNumConnections_in,
 
   // step3: initialize connection manager
   NET_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (maxNumConnections_in);
-  Net_UserData_t session_data;
+  Net_UserData session_data;
   NET_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
                                                      &session_data);
 
@@ -688,7 +688,7 @@ do_work (unsigned int maxNumConnections_in,
   } // end IF
 
   // step4c: start listening
-  Net_SocketHandlerConfiguration_t socket_handler_configuration;
+  Net_SocketHandlerConfiguration socket_handler_configuration;
   //ACE_OS::memset (&socket_handler_configuration,
   //                0,
   //                sizeof (socket_handler_configuration));
@@ -1066,7 +1066,7 @@ ACE_TMAIN (int argc_in,
   if (num_dispatch_threads == 0)
     num_dispatch_threads = 1;
 
-  Net_GTK_CBData_t gtk_cb_user_data;
+  Net_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.allowUserRuntimeStatistic =
     (statistics_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                           // iff regular reporting

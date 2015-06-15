@@ -39,8 +39,8 @@
 class IRC_Client_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        Stream_State_t,
-                        IRC_Client_RuntimeStatistic,
+                        Stream_State,
+                        IRC_Client_RuntimeStatistic_t,
                         IRC_Client_StreamConfiguration,
                         IRC_Client_SessionData,
                         IRC_Client_StreamSessionData_t,
@@ -56,7 +56,7 @@ class IRC_Client_Stream
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to myRuntimeStatistic
-  virtual bool collect (IRC_Client_RuntimeStatistic&); // return value: statistic data
+  virtual bool collect (IRC_Client_RuntimeStatistic_t&); // return value: statistic data
   // this is just a dummy (use statisticsReportingInterval instead)
   virtual void report () const;
 
@@ -66,15 +66,14 @@ class IRC_Client_Stream
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        Stream_State_t,
-                        IRC_Client_RuntimeStatistic,
+                        Stream_State,
+                        IRC_Client_RuntimeStatistic_t,
                         IRC_Client_StreamConfiguration,
                         IRC_Client_SessionData,
                         IRC_Client_StreamSessionData_t,
                         IRC_Client_SessionMessage,
                         IRC_Client_Message> inherited;
 
-//   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream ());
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream (const IRC_Client_Stream&));
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream& operator= (const IRC_Client_Stream&));
 

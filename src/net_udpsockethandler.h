@@ -32,7 +32,7 @@
 
 template <typename SocketType>
 class Net_UDPSocketHandler_T
- : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t>
+ : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration>
  , public ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>
 {
  public:
@@ -62,7 +62,7 @@ class Net_UDPSocketHandler_T
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
+  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration> inherited;
   typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&));

@@ -35,7 +35,7 @@ class Net_Export Net_TransportLayer_IP_Broadcast
 // , public ACE_SOCK_Dgram_Bcast
 {
  public:
-  Net_TransportLayer_IP_Broadcast (Net_ClientServerRole_t);
+  Net_TransportLayer_IP_Broadcast (Net_ClientServerRole);
   virtual ~Net_TransportLayer_IP_Broadcast ();
 
 //  // override some transport layer-based members
@@ -57,7 +57,7 @@ class Net_Export Net_TransportLayer_IP_Multicast
 // , public ACE_SOCK_Dgram_Mcast
 {
  public:
-  Net_TransportLayer_IP_Multicast (Net_ClientServerRole_t);
+  Net_TransportLayer_IP_Multicast (Net_ClientServerRole);
   virtual ~Net_TransportLayer_IP_Multicast ();
 
 //  // override some transport layer-based members

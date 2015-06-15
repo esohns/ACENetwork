@@ -27,7 +27,7 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-Net_TransportLayer_IP_Broadcast::Net_TransportLayer_IP_Broadcast (Net_ClientServerRole_t clientServerRole_in)
+Net_TransportLayer_IP_Broadcast::Net_TransportLayer_IP_Broadcast (Net_ClientServerRole clientServerRole_in)
  : inherited (clientServerRole_in,
               TRANSPORTLAYER_IP_BROADCAST)
 // , inherited2 ()
@@ -56,7 +56,7 @@ Net_TransportLayer_IP_Broadcast::~Net_TransportLayer_IP_Broadcast ()
 
 /////////////////////////////////////////
 
-Net_TransportLayer_IP_Multicast::Net_TransportLayer_IP_Multicast (Net_ClientServerRole_t clientServerRole_in)
+Net_TransportLayer_IP_Multicast::Net_TransportLayer_IP_Multicast (Net_ClientServerRole clientServerRole_in)
  : inherited (clientServerRole_in,
               TRANSPORTLAYER_IP_MULTICAST)
 // , inherited2 (ACE_SOCK_Dgram_Mcast::DEFOPTS)

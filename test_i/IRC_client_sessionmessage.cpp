@@ -26,8 +26,8 @@
 
 #include "net_macros.h"
 
-IRC_Client_SessionMessage::IRC_Client_SessionMessage (Stream_SessionMessageType_t messageType_in,
-                                                      Stream_State_t* streamState_in,
+IRC_Client_SessionMessage::IRC_Client_SessionMessage (Stream_SessionMessageType messageType_in,
+                                                      Stream_State* streamState_in,
                                                       IRC_Client_StreamSessionData_t*& sessionData_inout)
  : inherited (messageType_in,
               streamState_in,

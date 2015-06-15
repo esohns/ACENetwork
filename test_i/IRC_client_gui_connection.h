@@ -61,8 +61,8 @@ class IRC_Client_GUI_Connection
                              GtkNotebook*);           // parent widget
   virtual~IRC_Client_GUI_Connection ();
 
-  // implement Net_Protocol_INotify_t
-  virtual void start (const Stream_ModuleConfiguration_t&);
+  // implement IRC_Client_INotify_t
+  virtual void start (const Stream_ModuleConfiguration&);
   virtual void notify (const IRC_Client_IRCMessage&);
   virtual void end ();
 

@@ -29,25 +29,25 @@
 #include "net_itransportlayer.h"
 
 class Net_Export Net_InetTransportLayer_Base
- : virtual public Net_ITransportLayer_T<Net_SocketConfiguration_t>
+ : virtual public Net_ITransportLayer_T<Net_SocketConfiguration>
 {
  public:
   virtual ~Net_InetTransportLayer_Base ();
 
   // implement (part of) Net_ITransportLayer_T
-  virtual Net_ClientServerRole_t role ();
+  virtual Net_ClientServerRole role ();
 
  protected:
-  Net_InetTransportLayer_Base (Net_ClientServerRole_t,
-                               Net_TransportLayer_t);
+  Net_InetTransportLayer_Base (Net_ClientServerRole,
+                               Net_TransportLayerType);
 
   // implement (part of) Net_ITransportLayer_T
-  virtual bool initialize (Net_ClientServerRole_t,            // role
-                           const Net_SocketConfiguration_t&); // configuration
+  virtual bool initialize (Net_ClientServerRole,            // role
+                           const Net_SocketConfiguration&); // configuration
   virtual void finalize ();
 
-  Net_ClientServerRole_t clientServerRole_;
-  Net_TransportLayer_t   transportLayer_;
+  Net_ClientServerRole   clientServerRole_;
+  Net_TransportLayerType transportLayer_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_InetTransportLayer_Base ());
@@ -57,21 +57,21 @@ class Net_Export Net_InetTransportLayer_Base
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 class Net_Export Net_NetlinkTransportLayer_Base
- : virtual public Net_ITransportLayer_T<Net_SocketConfiguration_t>
+ : virtual public Net_ITransportLayer_T<Net_SocketConfiguration>
 {
  public:
   virtual ~Net_NetlinkTransportLayer_Base ();
 
   // implement (part of) Net_ITransportLayer_T
-  virtual bool initialize (Net_ClientServerRole_t,            // role
-                           const Net_SocketConfiguration_t&); // configuration
+  virtual bool initialize (Net_ClientServerRole,            // role
+                           const Net_SocketConfiguration&); // configuration
   virtual void finalize ();
 
  protected:
   Net_NetlinkTransportLayer_Base ();
 
-  Net_ClientServerRole_t clientServerRole_;
-  Net_TransportLayer_t   transportLayer_;
+  Net_ClientServerRole   clientServerRole_;
+  Net_TransportLayerType transportLayer_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base (const Net_NetlinkTransportLayer_Base&));

@@ -32,14 +32,14 @@
 #include "net_server_exports.h"
 #include "net_server_listener.h"
 
-typedef Net_Server_AsynchListener_T<Net_Configuration_t,
-                                    Net_SocketHandlerConfiguration_t,
-                                    Net_UserData_t,
+typedef Net_Server_AsynchListener_T<Net_Configuration,
+                                    Net_SocketHandlerConfiguration,
+                                    Net_UserData,
                                     Net_AsynchTCPConnection> Net_Server_AsynchListener_t;
 
-typedef Net_Server_Listener_T<Net_Configuration_t,
-                              Net_SocketHandlerConfiguration_t,
-                              Net_UserData_t,
+typedef Net_Server_Listener_T<Net_Configuration,
+                              Net_SocketHandlerConfiguration,
+                              Net_UserData,
                               Net_TCPConnection> Net_Server_Listener_t;
 
 typedef ACE_Singleton<Net_Server_AsynchListener_t,

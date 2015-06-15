@@ -24,19 +24,19 @@
 #include "common_inotify.h"
 
 // forward declaration(s)
-struct Stream_ModuleConfiguration_t;
-struct Net_GTK_CBData_t;
+struct Stream_ModuleConfiguration;
+struct Net_GTK_CBData;
 class Net_Message;
 
 class Net_EventHandler
- : public Common_INotify_T<Stream_ModuleConfiguration_t, Net_Message>
+ : public Common_INotify_T<Stream_ModuleConfiguration, Net_Message>
 {
  public:
-  Net_EventHandler (Net_GTK_CBData_t*); // GTK state
+  Net_EventHandler (Net_GTK_CBData*); // GTK state
   virtual ~Net_EventHandler ();
 
   // implement Common_INotify_T
-  virtual void start (const Stream_ModuleConfiguration_t&);
+  virtual void start (const Stream_ModuleConfiguration&);
   virtual void notify (const Net_Message&);
   virtual void end ();
 
@@ -45,7 +45,7 @@ class Net_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Net_EventHandler (const Net_EventHandler&));
   ACE_UNIMPLEMENTED_FUNC (Net_EventHandler& operator=(const Net_EventHandler&));
 
-  Net_GTK_CBData_t* CBData_;
+  Net_GTK_CBData* CBData_;
 };
 
 #endif

@@ -15,56 +15,62 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\test_u\net_callbacks.cpp">
+    <ClCompile Include="..\..\test_u\net_callbacks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\test_u\net_eventhandler.cpp">
+    <ClCompile Include="..\..\test_u\net_client_signalhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\test_u\net_server.cpp">
+    <ClCompile Include="..\..\test_u\net_client_timeouthandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\test_u\net_server_signalhandler.cpp">
+    <ClCompile Include="..\..\test_u\net_eventhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\test_u\stdafx.cpp">
+    <ClCompile Include="..\..\test_u\net_module_eventhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\test_u\net_module_eventhandler.cpp">
+    <ClCompile Include="..\..\test_u\net_server.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\test_u\net_client_timeouthandler.cpp">
+    <ClCompile Include="..\..\test_u\net_server_signalhandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\test_u\net_callbacks.h">
+    <ClInclude Include="..\..\test_u\net_callbacks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\test_u\net_common.h">
+    <ClInclude Include="..\..\test_u\net_client_signalhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\test_u\net_defines.h">
+    <ClInclude Include="..\..\test_u\net_client_timeouthandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\test_u\net_eventhandler.h">
+    <ClInclude Include="..\..\test_u\net_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\test_u\net_server_signalhandler.h">
+    <ClInclude Include="..\..\test_u\net_defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\test_u\stdafx.h">
+    <ClInclude Include="..\..\test_u\net_eventhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\test_u\net_module_eventhandler.h">
+    <ClInclude Include="..\..\test_u\net_module_eventhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\test_u\net_client_timeouthandler.h">
+    <ClInclude Include="..\..\test_u\net_server_signalhandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test_u\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\test_u\net_server.glade">
+    <None Include="..\..\test_u\net_server.glade">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

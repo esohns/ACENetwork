@@ -33,21 +33,21 @@
 #include "net_client_iconnector.h"
 
 typedef Net_Client_IConnector_T<ACE_INET_Addr,
-                                Net_SocketHandlerConfiguration_t> Net_Client_IConnector_t;
+                                Net_SocketHandlerConfiguration> Net_Client_IConnector_t;
 
 typedef Net_Client_AsynchConnector_T<ACE_INET_Addr,
-                                     Net_SocketConfiguration_t,
-                                     Net_Configuration_t,
-                                     Net_SocketHandlerConfiguration_t,
-                                     Net_UserData_t,
+                                     Net_SocketConfiguration,
+                                     Net_Configuration,
+                                     Net_SocketHandlerConfiguration,
+                                     Net_UserData,
                                      Net_StreamSessionData_t,
                                      Net_Stream,
                                      Net_AsynchTCPConnection> Net_Client_AsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_INET_Addr,
-                               Net_SocketConfiguration_t,
-                               Net_Configuration_t,
-                               Net_SocketHandlerConfiguration_t,
-                               Net_UserData_t,
+                               Net_SocketConfiguration,
+                               Net_Configuration,
+                               Net_SocketHandlerConfiguration,
+                               Net_UserData,
                                Net_StreamSessionData_t,
                                Net_Stream,
                                Net_TCPConnection> Net_Client_Connector_t;

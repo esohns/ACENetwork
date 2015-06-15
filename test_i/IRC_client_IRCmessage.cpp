@@ -21,6 +21,8 @@
 
 #include "IRC_client_IRCmessage.h"
 
+#include "ace/Log_Msg.h"
+
 #include "IRC_client_tools.h"
 
 #include "net_macros.h"

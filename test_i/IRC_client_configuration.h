@@ -30,7 +30,10 @@
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
 
-typedef Stream_Statistic_t IRC_Client_RuntimeStatistic;
+// forward declarations
+class IRC_Client_IIRCControl;
+
+typedef Stream_Statistic IRC_Client_RuntimeStatistic_t;
 struct IRC_Client_SessionData
 {
   inline IRC_Client_SessionData ()
@@ -38,8 +41,8 @@ struct IRC_Client_SessionData
    , lastCollectionTimestamp (ACE_Time_Value::zero)
   {};
 
-  IRC_Client_RuntimeStatistic currentStatistics;
-  ACE_Time_Value              lastCollectionTimestamp;
+  IRC_Client_RuntimeStatistic_t currentStatistics;
+  ACE_Time_Value                lastCollectionTimestamp;
 };
 
 struct IRC_Client_ProtocolConfiguration
@@ -71,7 +74,7 @@ struct IRC_Client_StreamConfiguration
   bool                              debugScanner;          // debug yacc ?
   bool                              debugParser;           // debug lex ?
   unsigned int                      sessionID;             // session ID
-  Stream_Configuration_t            streamConfiguration;   // stream configuration
+  Stream_Configuration              streamConfiguration;   // stream configuration
   IRC_Client_SessionData*           sessionData;           // session data
   IRC_Client_ProtocolConfiguration* protocolConfiguration; // protocol configuration
 };
@@ -86,12 +89,14 @@ struct IRC_Client_Configuration
   {};
 
   // **************************** socket data **********************************
-  Net_SocketConfiguration_t        socketConfiguration;
+  Net_SocketConfiguration          socketConfiguration;
   // **************************** stream data **********************************
   IRC_Client_StreamConfiguration   streamConfiguration;
   //IRC_Client_SessionData*          streamSessionData;
   // *************************** protocol data *********************************
   IRC_Client_ProtocolConfiguration protocolConfiguration;
+  // ***************************************************************************
+  IRC_Client_IIRCControl*          controller;
 };
 
 #endif

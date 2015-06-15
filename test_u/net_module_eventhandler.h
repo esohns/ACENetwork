@@ -42,7 +42,7 @@ class Net_SessionMessage;
 class Net_Message;
 
 class Net_Module_EventHandler
- : public Net_Module_MessageHandler_T<Stream_ModuleConfiguration_t,
+ : public Net_Module_MessageHandler_T<Stream_ModuleConfiguration,
                                       Net_SessionMessage,
                                       Net_Message>
 {
@@ -54,7 +54,7 @@ class Net_Module_EventHandler
   virtual Stream_Module_t* clone ();
 
  private:
-  typedef Net_Module_MessageHandler_T<Stream_ModuleConfiguration_t,
+  typedef Net_Module_MessageHandler_T<Stream_ModuleConfiguration,
                                       Net_SessionMessage,
                                       Net_Message> inherited;
 
@@ -63,9 +63,9 @@ class Net_Module_EventHandler
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                 // task synch type
-                              Common_TimePolicy_t,          // time policy
-                              Stream_ModuleConfiguration_t, // configuration type
-                              Net_Module_EventHandler);     // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,               // task synch type
+                              Common_TimePolicy_t,        // time policy
+                              Stream_ModuleConfiguration, // configuration type
+                              Net_Module_EventHandler);   // writer type
 
 #endif

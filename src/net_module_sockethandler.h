@@ -46,7 +46,7 @@ class Net_Module_SocketHandler_T
                                       SessionDataContainerType,
                                       SessionMessageType,
                                       ProtocolMessageType>
- , public Common_IStatistic_T<Stream_Statistic_t>
+ , public Common_IStatistic_T<Stream_Statistic>
 {
  public:
   Net_Module_SocketHandler_T ();
@@ -73,7 +73,7 @@ class Net_Module_SocketHandler_T
 
   // implement Common_IStatistic
   // *NOTE*: implements regular (timer-based) statistics collection
-  virtual bool collect (Stream_Statistic_t&); // return value: (currently unused !)
+  virtual bool collect (Stream_Statistic&); // return value: (currently unused !)
   virtual void report () const;
 
  private:
@@ -91,8 +91,8 @@ class Net_Module_SocketHandler_T
   // helper methods
   bool bisectMessages (ProtocolMessageType*&); // return value: complete message (chain)
 //   Net_Message* allocateMessage(const unsigned int&); // requested size
-  bool putStatisticsMessage (const Stream_Statistic_t&, // statistics info
-                             const ACE_Time_Value&) const;  // statistics generation time
+  bool putStatisticsMessage (const Stream_Statistic&,      // statistics info
+                             const ACE_Time_Value&) const; // statistics generation time
 
   // protocol
   ProtocolMessageType*              currentBuffer_;
@@ -122,7 +122,7 @@ class Net_Module_UDPSocketHandler_T
                                       SessionDataContainerType,
                                       SessionMessageType,
                                       ProtocolMessageType>
- , public Common_IStatistic_T<Stream_Statistic_t>
+ , public Common_IStatistic_T<Stream_Statistic>
 {
  public:
   Net_Module_UDPSocketHandler_T ();
@@ -149,7 +149,7 @@ class Net_Module_UDPSocketHandler_T
 
   // implement Common_IStatistic
   // *NOTE*: implements regular (timer-based) statistics collection
-  virtual bool collect (Stream_Statistic_t&); // return value: (currently unused !)
+  virtual bool collect (Stream_Statistic&); // return value: (currently unused !)
   virtual void report () const;
 
  private:
@@ -165,8 +165,8 @@ class Net_Module_UDPSocketHandler_T
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T& operator= (const Net_Module_UDPSocketHandler_T&));
 
   // helper methods
-  bool putStatisticsMessage (const Stream_Statistic_t&, // statistics info
-                             const ACE_Time_Value&) const;  // statistics generation time
+  bool putStatisticsMessage (const Stream_Statistic&,      // statistics info
+                             const ACE_Time_Value&) const; // statistics generation time
 
   bool                              isInitialized_;
 

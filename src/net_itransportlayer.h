@@ -29,11 +29,11 @@ class Net_ITransportLayer_T
  public:
   inline virtual ~Net_ITransportLayer_T () {};
 
-  virtual Net_ClientServerRole_t role () = 0;
+  virtual Net_ClientServerRole role () = 0;
   virtual void ping () = 0;
 
  protected:
-  virtual bool initialize (Net_ClientServerRole_t,        // role
+  virtual bool initialize (Net_ClientServerRole,          // role
                            const ConfigurationType&) = 0; // configuration
   virtual void finalize () = 0;
 };
