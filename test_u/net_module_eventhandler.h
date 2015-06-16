@@ -22,20 +22,20 @@
 #define NET_MODULE_EVENTHANDLER_H
 
 #include "ace/Global_Macros.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
-#include "common.h"
-#include "common_isubscribe.h"
 #include "common_iclone.h"
+#include "common_isubscribe.h"
+#include "common_time_common.h"
 
 #include "stream_common.h"
-#include "stream_task_base_synch.h"
 #include "stream_streammodule_base.h"
+#include "stream_task_base_synch.h"
 
 #include "net_common.h"
 #include "net_message.h"
-#include "net_sessionmessage.h"
 #include "net_module_messagehandler.h"
+#include "net_sessionmessage.h"
 
 // forward declaration(s)
 class Net_SessionMessage;

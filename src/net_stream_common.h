@@ -25,9 +25,9 @@
 
 #include "ace/Synch_Traits.h"
 
-#include "common.h"
 #include "common_inotify.h"
 #include "common_isubscribe.h"
+#include "common_time_common.h"
 
 #include "stream_common.h"
 #include "stream_imodule.h"
@@ -38,9 +38,9 @@
 
 typedef Stream_SessionDataBase_T<Net_UserData> Net_StreamSessionData_t;
 
-typedef Stream_IModule<ACE_MT_SYNCH,
-                       Common_TimePolicy_t,
-                       Stream_ModuleConfiguration> Net_IModule_t;
+typedef Stream_IModule_T<ACE_MT_SYNCH,
+                         Common_TimePolicy_t,
+                         Stream_ModuleConfiguration> Net_IModule_t;
 
 typedef Common_INotify_T<Stream_ModuleConfiguration,
                          Net_Message> Net_INotify_t;

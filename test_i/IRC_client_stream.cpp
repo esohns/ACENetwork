@@ -119,18 +119,18 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   // ---------------------------------------------------------------------------
   if (configuration_in.streamConfiguration.module)
   {
-    Stream_IModule_t* module_2 =
-      dynamic_cast<Stream_IModule_t*> (configuration_in.streamConfiguration.module);
+    inherited::IMODULE_T* module_2 =
+      dynamic_cast<inherited::IMODULE_T*> (configuration_in.streamConfiguration.module);
     if (!module_2)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("dynamic_cast<Stream_IModule_t> failed, aborting\n")));
+                  ACE_TEXT ("dynamic_cast<Stream_IModule_T> failed, aborting\n")));
       return false;
     } // end IF
-    if (!module_2->initialize (*configuration_in.streamConfiguration.moduleConfiguration))
+    if (!module_2->initialize (configuration_in.streamModuleConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Stream_IModule_t::initialize, aborting\n")));
+                  ACE_TEXT ("failed to Stream_IModule_T::initialize, aborting\n")));
       return false;
     } // end IF
     result = inherited::push (configuration_in.streamConfiguration.module);

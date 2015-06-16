@@ -46,13 +46,13 @@ template <typename UserDataType,
           typename HandlerType>
 class Net_NetlinkConnection_T
  : public Net_SocketConnectionBase_T<ACE_Netlink_Addr,
-                                     Net_SocketConfiguration_t,
+                                     Net_SocketConfiguration,
                                      HandlerType,
-                                     Net_Configuration_t,
-                                     Net_SocketHandlerConfiguration_t,
+                                     Net_Configuration,
+                                     Net_SocketHandlerConfiguration,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t,
+                                     Stream_Statistic,
                                      Net_Stream>
  , public Net_TransportLayer_Netlink
 {
@@ -61,10 +61,10 @@ class Net_NetlinkConnection_T
 
  public:
   typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
-                                   Net_SocketConfiguration_t,
-                                   Net_Configuration_t,
+                                   Net_SocketConfiguration,
+                                   Net_Configuration,
                                    UserDataType,
-                                   Stream_Statistic_t,
+                                   Stream_Statistic,
                                    Net_Stream> ICONNECTION_MANAGER_T;
 
    Net_NetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
@@ -84,8 +84,8 @@ class Net_NetlinkConnection_T
                              ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
    // override / implement (part of) Net_INetlinkTransportLayer
-   virtual bool initialize (Net_ClientServerRole_t,            // role
-                            const Net_SocketConfiguration_t&); // socket configuration
+   virtual bool initialize (Net_ClientServerRole,            // role
+                            const Net_SocketConfiguration&); // socket configuration
    virtual void finalize ();
    virtual void info (ACE_HANDLE&,              // return value: handle
                       ACE_Netlink_Addr&,        // return value: local SAP
@@ -95,13 +95,13 @@ class Net_NetlinkConnection_T
 
  private:
   typedef Net_SocketConnectionBase_T<ACE_Netlink_Addr,
-                                     Net_SocketConfiguration_t,
+                                     Net_SocketConfiguration,
                                      HandlerType,
-                                     Net_Configuration_t,
-                                     Net_SocketHandlerConfiguration_t,
+                                     Net_Configuration,
+                                     Net_SocketHandlerConfiguration,
                                      UserDataType,
                                      SessionDataType,
-                                     Stream_Statistic_t,
+                                     Stream_Statistic,
                                      Net_Stream> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 
@@ -119,13 +119,13 @@ template <typename UserDataType,
           typename HandlerType>
 class Net_AsynchNetlinkConnection_T
  : public Net_AsynchSocketConnectionBase_T<ACE_Netlink_Addr,
-                                           Net_SocketConfiguration_t,
+                                           Net_SocketConfiguration,
                                            HandlerType,
-                                           Net_Configuration_t,
-                                           Net_SocketHandlerConfiguration_t,
+                                           Net_Configuration,
+                                           Net_SocketHandlerConfiguration,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t,
+                                           Stream_Statistic,
                                            Net_Stream>
  , public Net_TransportLayer_Netlink
 {
@@ -135,10 +135,10 @@ class Net_AsynchNetlinkConnection_T
 
  public:
   typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
-                                   Net_SocketConfiguration_t,
-                                   Net_Configuration_t,
+                                   Net_SocketConfiguration,
+                                   Net_Configuration,
                                    UserDataType,
-                                   Stream_Statistic_t,
+                                   Stream_Statistic,
                                    Net_Stream> ICONNECTION_MANAGER_T;
 
   Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
@@ -147,8 +147,8 @@ class Net_AsynchNetlinkConnection_T
   virtual ~Net_AsynchNetlinkConnection_T ();
 
   // implement (part of) Net_INetlinkTransportLayer
-  virtual bool initialize (Net_ClientServerRole_t,            // role
-                           const Net_SocketConfiguration_t&); // configuration
+  virtual bool initialize (Net_ClientServerRole,            // role
+                           const Net_SocketConfiguration&); // configuration
   virtual void finalize ();
   virtual void info (ACE_HANDLE&,              // return value: handle
                      ACE_Netlink_Addr&,        // return value: local SAP
@@ -170,13 +170,13 @@ class Net_AsynchNetlinkConnection_T
 
  private:
   typedef Net_AsynchSocketConnectionBase_T<ACE_Netlink_Addr,
-                                           Net_SocketConfiguration_t,
+                                           Net_SocketConfiguration,
                                            HandlerType,
-                                           Net_Configuration_t,
-                                           Net_SocketHandlerConfiguration_t,
+                                           Net_Configuration,
+                                           Net_SocketHandlerConfiguration,
                                            UserDataType,
                                            SessionDataType,
-                                           Stream_Statistic_t,
+                                           Stream_Statistic,
                                            Net_Stream> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 

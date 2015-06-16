@@ -110,4 +110,7 @@
 // UI/output
 #define IRC_CLIENT_DEF_PRINT_PINGDOT             false
 
+// client
+#define IRC_CLIENT_DEF_CONNECTION_TIMEOUT        2 // second(s)
+
 #endif

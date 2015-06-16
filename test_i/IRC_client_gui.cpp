@@ -424,10 +424,9 @@ do_work (bool useThreadPool_in,
   ACE_ASSERT (userData_in.configuration);
 
   // step1: initialize IRC handler module
-  Stream_ModuleConfiguration module_configuration;
-  ACE_OS::memset (&module_configuration, 0, sizeof (module_configuration));
+  IRC_Client_StreamModuleConfiguration module_configuration;
   userData_in.configuration->streamConfiguration.streamConfiguration.moduleConfiguration =
-      &module_configuration;
+      &module_configuration.moduleConfiguration;
 
   IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_HANDLER_MODULE_NAME),
                                                    NULL);
@@ -440,7 +439,8 @@ do_work (bool useThreadPool_in,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
     return;
   } // end IF
-  IRCHandler_impl_p->initialize (userData_in.configuration->streamConfiguration.streamConfiguration.messageAllocator,
+  IRCHandler_impl_p->initialize (NULL,
+                                 userData_in.configuration->streamConfiguration.streamConfiguration.messageAllocator,
                                  userData_in.configuration->streamConfiguration.streamConfiguration.bufferSize,
                                  userData_in.configuration->protocolConfiguration.automaticPong,
                                  userData_in.configuration->protocolConfiguration.printPingDot);
@@ -532,8 +532,6 @@ do_work (bool useThreadPool_in,
 
     return;
   } // end IF
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("started event dispatch...\n")));
 
   // *NOTE*: from this point on, clean up any remote connections !
 
@@ -541,8 +539,6 @@ do_work (bool useThreadPool_in,
   Common_Tools::dispatchEvents (useReactor_in,
                                 !useReactor_in,
                                 group_id);
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("finished event dispatch...\n")));
 
   // step8: clean up
   COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();

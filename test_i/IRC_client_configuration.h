@@ -30,9 +30,6 @@
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
 
-// forward declarations
-class IRC_Client_IIRCControl;
-
 typedef Stream_Statistic IRC_Client_RuntimeStatistic_t;
 struct IRC_Client_SessionData
 {
@@ -58,6 +55,17 @@ struct IRC_Client_ProtocolConfiguration
   bool                       printPingDot;
 };
 
+struct IRC_Client_StreamModuleConfiguration
+{
+  inline IRC_Client_StreamModuleConfiguration ()
+   : connection (NULL)
+   , moduleConfiguration ()
+  {};
+
+  IRC_Client_IConnection_t*  connection;
+  Stream_ModuleConfiguration moduleConfiguration;
+};
+
 struct IRC_Client_StreamConfiguration
 {
   inline IRC_Client_StreamConfiguration ()
@@ -66,17 +74,19 @@ struct IRC_Client_StreamConfiguration
    , debugParser (IRC_CLIENT_DEF_YACC_TRACE)
    , sessionID (0)
    , streamConfiguration ()
+   , streamModuleConfiguration ()
    , sessionData (NULL)
    , protocolConfiguration (NULL)
   {};
 
-  bool                              crunchMessageBuffers;  // crunch message buffers ?
-  bool                              debugScanner;          // debug yacc ?
-  bool                              debugParser;           // debug lex ?
-  unsigned int                      sessionID;             // session ID
-  Stream_Configuration              streamConfiguration;   // stream configuration
-  IRC_Client_SessionData*           sessionData;           // session data
-  IRC_Client_ProtocolConfiguration* protocolConfiguration; // protocol configuration
+  bool                                 crunchMessageBuffers;      // crunch message buffers ?
+  bool                                 debugScanner;              // debug yacc ?
+  bool                                 debugParser;               // debug lex ?
+  unsigned int                         sessionID;                 // session ID
+  Stream_Configuration                 streamConfiguration;       // stream configuration
+  IRC_Client_StreamModuleConfiguration streamModuleConfiguration; // stream module configuration
+  IRC_Client_SessionData*              sessionData;               // session data
+  IRC_Client_ProtocolConfiguration*    protocolConfiguration;     // protocol configuration
 };
 
 struct IRC_Client_Configuration
@@ -96,7 +106,6 @@ struct IRC_Client_Configuration
   // *************************** protocol data *********************************
   IRC_Client_ProtocolConfiguration protocolConfiguration;
   // ***************************************************************************
-  IRC_Client_IIRCControl*          controller;
 };
 
 #endif

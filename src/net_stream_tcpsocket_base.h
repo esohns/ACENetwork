@@ -25,7 +25,11 @@
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
+
+#include "common_time_common.h"
+
+#include "stream_imodule.h"
 
 #include "net_connection_base.h"
 #include "net_iconnectionmanager.h"
@@ -33,6 +37,7 @@
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
+          typename ModuleConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
@@ -94,13 +99,17 @@ class Net_StreamTCPSocketBase_T
                                StreamType> CONNECTION_BASE_T;
 
  protected:
+  typedef SocketHandlerType SOCKET_HANDLER_T;
+
   typedef Net_IConnectionManager_T<AddressType,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
                                    StatisticContainerType,
                                    StreamType> ICONNECTION_MANAGER_T;
-  typedef SocketHandlerType SOCKET_HANDLER_T;
+  typedef Stream_IModule_T<ACE_MT_SYNCH,
+                           Common_TimePolicy_t,
+                           ModuleConfigurationType> IMODULE_T;
 
   Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
@@ -108,7 +117,7 @@ class Net_StreamTCPSocketBase_T
 
   ACE_Message_Block* currentReadBuffer_;
   ACE_Message_Block* currentWriteBuffer_;
-  ACE_Thread_Mutex   sendLock_;
+  ACE_SYNCH_MUTEX    sendLock_;
   StreamType         stream_;
 
   // helper method(s)

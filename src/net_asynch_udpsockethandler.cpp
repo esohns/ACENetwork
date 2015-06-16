@@ -57,6 +57,8 @@ Net_AsynchUDPSocketHandler::open (ACE_HANDLE handle_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler::open"));
 
+  int result = -1;
+
   // sanity check(s)
   ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
 
@@ -98,11 +100,14 @@ Net_AsynchUDPSocketHandler::open (ACE_HANDLE handle_in,
   } // end IF
 
   // step2: init i/o streams
-  inherited2::proactor (ACE_Proactor::instance ());
-  if (inputStream_.open (*this,
-                         handle_in,
-                         NULL,
-                         inherited2::proactor ()) == -1)
+  ACE_Proactor* proactor_p = ACE_Proactor::instance ();
+  ACE_ASSERT (proactor_p);
+  inherited2::proactor (proactor_p);
+  result = inputStream_.open (*this,
+                              handle_in,
+                              NULL,
+                              proactor_p);
+  if (result == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to init input stream (handle was: %d), aborting\n"),
@@ -114,10 +119,11 @@ Net_AsynchUDPSocketHandler::open (ACE_HANDLE handle_in,
 
     return;
   } // end IF
-  if (outputStream_.open (*this,
-                          handle_in,
-                          NULL,
-                          inherited2::proactor ()) == -1)
+  result = outputStream_.open (*this,
+                               handle_in,
+                               NULL,
+                               proactor_p);
+  if (result == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to init output stream (handle was: %d), aborting\n"),

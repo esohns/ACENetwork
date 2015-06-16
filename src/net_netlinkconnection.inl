@@ -67,8 +67,8 @@ template <typename UserDataType,
 bool
 Net_NetlinkConnection_T<UserDataType,
                         SessionDataType,
-                        HandlerType>::initialize (Net_ClientServerRole_t role_in,
-                                                  const Net_SocketConfiguration_t& configuration_in)
+                        HandlerType>::initialize (Net_ClientServerRole role_in,
+                                                  const Net_SocketConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::initialize"));
 
@@ -770,8 +770,8 @@ template <typename UserDataType,
 bool
 Net_AsynchNetlinkConnection_T<UserDataType,
                               SessionDataType,
-                              HandlerType>::initialize (Net_ClientServerRole_t role_in,
-                                                        const Net_SocketConfiguration_t& configuration_in)
+                              HandlerType>::initialize (Net_ClientServerRole role_in,
+                                                        const Net_SocketConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::initialize"));
 

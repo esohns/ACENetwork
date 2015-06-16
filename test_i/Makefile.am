@@ -72,7 +72,10 @@ IRC_client_SOURCES = \
   IRC_client_stream_common.h \
   IRC_client_tools.cpp \
   IRC_client_tools.h \
-  IRC_common.h
+  IRC_common.h \
+  Streambuf_alt.cpp \
+  Streambuf_alt.h \
+  Streambuf_alt.inl
 #  stdafx.cpp \
 #  stdafx.h
 IRC_client_CPPFLAGS = \

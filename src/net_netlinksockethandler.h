@@ -45,7 +45,7 @@ class ACE_SOCK_NETLINK
 };
 
 class Net_Export Net_NetlinkSocketHandler
- : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t>
+ : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration>
  , public ACE_Svc_Handler<ACE_SOCK_NETLINK, ACE_MT_SYNCH>
 {
  public:
@@ -72,7 +72,7 @@ class Net_Export Net_NetlinkSocketHandler
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration_t> inherited;
+  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration> inherited;
   typedef ACE_Svc_Handler<ACE_SOCK_NETLINK, ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler (const Net_NetlinkSocketHandler&));

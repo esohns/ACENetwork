@@ -1595,7 +1595,7 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                            unsigned short serverPortNumber_in,
                            bool deleteModule_in,
                            const Stream_Module_t* finalModule_inout,
-                           const Stream_ModuleConfiguration* moduleConfiguration_in)
+                           const IRC_Client_StreamModuleConfiguration* moduleConfiguration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::connect"));
 
@@ -1636,7 +1636,7 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
     configuration.streamConfiguration.streamConfiguration.module =
       const_cast<Stream_Module_t*> (finalModule_inout);
     configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
-      const_cast<Stream_ModuleConfiguration*> (moduleConfiguration_in);
+      const_cast<Stream_ModuleConfiguration*> (&moduleConfiguration_in->moduleConfiguration);
   } // end IF
   configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;

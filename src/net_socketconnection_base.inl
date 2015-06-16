@@ -306,8 +306,8 @@ Net_SocketConnectionBase_T<AddressType,
 
   int result = -1;
 
-  //// *TODO*: client-side, arg_in is a handle to the connector instance...
-  ////         server-side, arg_in is a handle to the acceptor instance...
+  // *TODO*: client-side, arg_in is a handle to the connector instance...
+  //         server-side, arg_in is a handle to the acceptor instance...
   //const SocketHandlerConfigurationType* configuration_p = NULL;
   //switch (role ())
   //{
@@ -340,7 +340,7 @@ Net_SocketConnectionBase_T<AddressType,
 
   ConfigurationType* configuration_p = NULL;
   if (!inherited::manager_)
-    configuration_p = reinterpret_cast<ConfigurationType*> (arg_in);
+    configuration_p = reinterpret_cast<ConfigurationType*> (arg_in); // *BUG*: see *TODO* above
   else
     configuration_p = &(HandlerType::CONNECTION_BASE_T::configuration_);
   // sanity check(s)
@@ -591,6 +591,40 @@ Net_SocketConnectionBase_T<AddressType,
 //  return result;
 //}
 
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
+          typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType>
+void
+Net_SocketConnectionBase_T<AddressType,
+                           SocketConfigurationType,
+                           HandlerType,
+                           ConfigurationType,
+                           SocketHandlerConfigurationType,
+                           UserDataType,
+                           SessionDataType,
+                           StatisticContainerType,
+                           StreamType>::open (ACE_HANDLE handle_in,
+                                              ACE_Message_Block& messageBlock_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::open"));
+
+  ACE_UNUSED_ARG (handle_in);
+  ACE_UNUSED_ARG (messageBlock_in);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+#if defined (_MSC_VER)
+  ACE_NOTREACHED (true);
+#endif
+}
+
 //template <typename HandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
@@ -780,3 +814,35 @@ Net_AsynchSocketConnectionBase_T<AddressType,
 //  configuration_ =
 //      reinterpret_cast<ConfigurationType*> (const_cast<void*> (act_in));
 //}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename HandlerType,
+          typename ConfigurationType,
+          typename SocketHandlerConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType>
+int
+Net_AsynchSocketConnectionBase_T<AddressType,
+                                 SocketConfigurationType,
+                                 HandlerType,
+                                 ConfigurationType,
+                                 SocketHandlerConfigurationType,
+                                 UserDataType,
+                                 SessionDataType,
+                                 StatisticContainerType,
+                                 StreamType>::open (void* arg_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::open"));
+
+  ACE_UNUSED_ARG (arg_in);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (-1);
+
+#if defined (_MSC_VER)
+  ACE_NOTREACHED (true);
+#endif
+}

@@ -221,6 +221,7 @@ Net_Client_AsynchConnector_T<AddressType,
     return ACE_INVALID_HANDLE;
   } // end IF
 
+  // *TODO*: return the "wait" handle of the asynchronous connect object
   return 0;
 }
 

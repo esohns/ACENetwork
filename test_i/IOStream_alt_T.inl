@@ -18,10 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-//#include "ace/Handle_Set.h"
-//#include "ace/OS_NS_errno.h"
-//#include "ace/OS_NS_sys_select.h"
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <class STREAM>

@@ -145,7 +145,6 @@ class IRC_Client_IRCMessage
   private:
    typedef Common_ReferenceCounterBase inherited;
 
-//   ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCMessage ());
    ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCMessage (const IRC_Client_IRCMessage&));
    ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCMessage& operator= (const IRC_Client_IRCMessage&));
    virtual ~IRC_Client_IRCMessage ();

@@ -595,25 +595,27 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   {
     // port range ?
     if ((*port_range_iter).first < (*port_range_iter).second)
+    {
       for (unsigned short current_port = (*port_range_iter).first;
            current_port <= (*port_range_iter).second;
            current_port++)
-    {
-      handle =
-        IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
-                                   login_options,                                                                             // login options
-                                   data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
-                                   data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
-                                   data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
-                                   (*phonebook_iterator).second.hostName,                                                     // server hostname
-                                   current_port,                                                                              // server listening port
-                                   data_p->configuration->streamConfiguration.streamConfiguration.deleteModule,               // delete final module ?
-                                   data_p->configuration->streamConfiguration.streamConfiguration.module,                     // final module handle
-                                   data_p->configuration->streamConfiguration.streamConfiguration.moduleConfiguration);       // module configuration
+      {
+        handle =
+          IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
+                                     login_options,                                                                             // login options
+                                     data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
+                                     data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
+                                     data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
+                                     (*phonebook_iterator).second.hostName,                                                     // server hostname
+                                     current_port,                                                                              // server listening port
+                                     data_p->configuration->streamConfiguration.streamConfiguration.deleteModule,               // delete final module ?
+                                     data_p->configuration->streamConfiguration.streamConfiguration.module,                     // final module handle
+                                     &data_p->configuration->streamConfiguration.streamModuleConfiguration);                    // module configuration
 
-      if (handle != ACE_INVALID_HANDLE)
-        break;
-    } // end FOR
+        if (handle != ACE_INVALID_HANDLE)
+          break;
+      } // end FOR
+    } // end IF
     else
       handle =
         IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
@@ -625,7 +627,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                                    (*port_range_iter).first,                                                                  // server listening port
                                    data_p->configuration->streamConfiguration.streamConfiguration.deleteModule,               // delete final module ?
                                    data_p->configuration->streamConfiguration.streamConfiguration.module,                     // final module handle
-                                   data_p->configuration->streamConfiguration.streamConfiguration.moduleConfiguration);       // module configuration
+                                   &data_p->configuration->streamConfiguration.streamModuleConfiguration);                    // module configuration
     if (handle != ACE_INVALID_HANDLE)
       break;
 

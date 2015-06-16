@@ -139,8 +139,8 @@ Net_NetlinkSocketHandler::open (void* arg_in)
 //  } // end IF
 
   int result = -1;
-  Net_SocketConfiguration_t* socket_configuration_p =
-      reinterpret_cast<Net_SocketConfiguration_t*> (arg_in);
+  Net_SocketConfiguration* socket_configuration_p =
+      reinterpret_cast<Net_SocketConfiguration*> (arg_in);
   ACE_ASSERT (socket_configuration_p);
 
   // step1: open socket

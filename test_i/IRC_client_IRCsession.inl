@@ -23,10 +23,27 @@ IRC_Client_IRCSession_T<ConnectionType>::IRC_Client_IRCSession_T (IRC_Client_ICo
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::IRC_Client_IRCSession_T"));
 
+}
+
+template <typename ConnectionType>
+IRC_Client_IRCSession_T<ConnectionType>::~IRC_Client_IRCSession_T ()
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::~IRC_Client_IRCSession_T"));
+
+}
+
+template <typename ConnectionType>
+void
+IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleConfiguration& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::start"));
+
+  ACE_UNUSED_ARG (configuration_in);
+
   // retrieve controller handle
   const IRC_Client_Stream& stream_r = inherited::stream ();
-  const inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T* module_p = NULL;
-  for (inherited::CONNECTION_BASE_T::STREAM_T::ITERATOR_T iterator (stream_r);
+  const typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T* module_p = NULL;
+  for (typename inherited::CONNECTION_BASE_T::STREAM_T::ITERATOR_T iterator (stream_r);
        (iterator.next (module_p) != 0);
        iterator.advance ())
     if (ACE_OS::strcmp (module_p->name (),
@@ -39,28 +56,12 @@ IRC_Client_IRCSession_T<ConnectionType>::IRC_Client_IRCSession_T (IRC_Client_ICo
   else
   {
     controller_ =
-      dynamic_cast<IRC_Client_IIRCControl*> (const_cast<inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
+      dynamic_cast<IRC_Client_IIRCControl*> (const_cast<typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
     if (!controller_)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<IRC_Client_IIRCControl*> failed, continuing\n"),
                   ACE_TEXT (module_p->name ())));
   } // end ELSE
-}
-
-template <typename ConnectionType>
-IRC_Client_IRCSession_T<ConnectionType>::~IRC_Client_IRCSession_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::~IRC_Client_IRCSession_T"));
-
-}
-
-template <typename ConnectionType>
-void
-IRC_Client_IRCSession_T<ConnectionType>::start (const Stream_ModuleConfiguration& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::start"));
-
-  ACE_UNUSED_ARG (configuration_in);
 
   //   ACE_DEBUG((LM_DEBUG,
   //              ACE_TEXT("connected...\n")));
@@ -230,12 +231,16 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           std::string nick = *iterator_2;
           iterator_2++;
           bool away = ((*iterator_2).find (ACE_TEXT_ALWAYS_CHAR ("G"), 0) == 0);
+          ACE_UNUSED_ARG (away);
           bool is_IRCoperator =
             ((*iterator_2).find (ACE_TEXT_ALWAYS_CHAR ("*"), 1) == 1);
+          ACE_UNUSED_ARG (is_IRCoperator);
           bool is_operator =
             ((*iterator_2).find (ACE_TEXT_ALWAYS_CHAR ("@"), 2) != std::string::npos);
+          ACE_UNUSED_ARG (is_operator);
           bool is_voiced =
             ((*iterator_2).find (ACE_TEXT_ALWAYS_CHAR ("+"), 2) != std::string::npos);
+          ACE_UNUSED_ARG (is_voiced);
           unsigned int hop_count = 0;
           std::string real_name;
           std::stringstream converter;
@@ -266,7 +271,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           std::string::size_type last_position = 0;
           std::string nick;
           string_list_t list;
-          bool is_operator = false;
+//          bool is_operator = false;
           do
           {
             current_position =
@@ -527,13 +532,69 @@ IRC_Client_IRCSession_T<ConnectionType>::end ()
 }
 
 template <typename ConnectionType>
+int
+IRC_Client_IRCSession_T<ConnectionType>::open (void* arg_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::open"));
+
+  // step0: intialize configuration object
+  IRC_Client_Configuration* configuration_p = NULL;
+  if (!inherited::manager_)
+  {
+    IRC_Client_Connector_t* connector_p =
+      reinterpret_cast<IRC_Client_Connector_t*> (arg_in);
+    ACE_ASSERT (connector_p);
+    const Net_SocketHandlerConfiguration* socket_handler_configuration_p =
+      connector_p->getConfiguration ();
+    ACE_ASSERT (socket_handler_configuration_p);
+    //configuration_p = socket_handler_configuration_p->configuration;
+  } // end IF
+  else
+    configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
+  // sanity check(s)
+  ACE_ASSERT (configuration_p);
+  configuration_p->streamConfiguration.streamModuleConfiguration.connection =
+    this;
+
+  // step1: initialize/start stream, tweak socket, register reading data with
+  //        reactor, ...
+  return inherited::open (arg_in);
+}
+
+template <typename ConnectionType>
+void
+IRC_Client_IRCSession_T<ConnectionType>::open (ACE_HANDLE handle_in,
+                                               ACE_Message_Block& messageBlock_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::open"));
+
+  // step0: intialize configuration object
+  IRC_Client_Configuration* configuration_p = NULL;
+  if (!inherited::manager_)
+    //configuration_p = reinterpret_cast<IRC_Client_Configuration*> (inherited::act ());
+  //else
+    configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
+  // sanity check(s)
+  ACE_ASSERT (configuration_p);
+  configuration_p->streamConfiguration.streamModuleConfiguration.connection =
+    this;
+
+  // step1: initialize/start stream, tweak socket, register reading data with
+  //        reactor, ...
+  inherited::open (handle_in,
+                   messageBlock_in);
+}
+
+template <typename ConnectionType>
 void
 IRC_Client_IRCSession_T<ConnectionType>::error (const IRC_Client_IRCMessage& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::error"));
 
   std::string message_text = IRC_Client_Tools::IRCMessage2String (message_in);
-  log (message_text);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("received error message: \"%s\"\n"),
+              ACE_TEXT (message_text.c_str ())));
 }
 
 template <typename ConnectionType>
@@ -543,6 +604,8 @@ IRC_Client_IRCSession_T<ConnectionType>::log (const std::string& messageText_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::log"));
 
   output_ << messageText_in;
+//  const char* char_p = messageText_in.c_str ();
+//  output_ << char_p;
 }
 
 template <typename ConnectionType>

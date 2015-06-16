@@ -24,7 +24,11 @@
 #include "ace/config-lite.h"
 #include "ace/Event_Handler.h"
 #include "ace/Message_Block.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
+
+#include "common_time_common.h"
+
+#include "stream_imodule.h"
 
 #include "net_connection_base.h"
 #include "net_connection_common.h"
@@ -35,6 +39,7 @@
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
+          typename ModuleConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
@@ -79,13 +84,7 @@ class Net_StreamUDPSocketBase_T
   virtual void report () const;
   virtual void dump_state () const;
 
- protected:
-  typedef Net_IConnectionManager_T<AddressType,
-                                   SocketConfigurationType,
-                                   ConfigurationType,
-                                   UserDataType,
-                                   StatisticContainerType,
-                                   StreamType> ICONNECTION_MANAGER_T;
+  // convenient types
   typedef Net_ConnectionBase_T<AddressType,
                                SocketConfigurationType,
                                ConfigurationType,
@@ -94,12 +93,23 @@ class Net_StreamUDPSocketBase_T
                                StatisticContainerType,
                                StreamType> CONNECTION_BASE_T;
 
+ protected:
+  typedef Net_IConnectionManager_T<AddressType,
+                                   SocketConfigurationType,
+                                   ConfigurationType,
+                                   UserDataType,
+                                   StatisticContainerType,
+                                   StreamType> ICONNECTION_MANAGER_T;
+  typedef Stream_IModule_T<ACE_MT_SYNCH,
+                           Common_TimePolicy_t,
+                           ModuleConfigurationType> IMODULE_T;
+
   Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistics collecting interval (second(s))
                                                      // 0 --> DON'T collect statistics
 
   ACE_Message_Block* currentWriteBuffer_;
-  ACE_Thread_Mutex   sendLock_;
+  ACE_SYNCH_MUTEX    sendLock_;
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY
   // dispatch the reactor notification queue concurrently (most notably,
   // ACE_TP_Reactor) --> enforce proper serialization
@@ -132,6 +142,7 @@ class Net_StreamUDPSocketBase_T
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
+          typename ModuleConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
@@ -139,6 +150,7 @@ template <typename AddressType,
 class Net_StreamUDPSocketBase_T<AddressType,
                                 SocketConfigurationType,
                                 ConfigurationType,
+                                ModuleConfigurationType,
                                 UserDataType,
                                 SessionDataType,
                                 StatisticContainerType,
@@ -201,7 +213,7 @@ class Net_StreamUDPSocketBase_T<AddressType,
                                                      // 0 --> DON'T collect statistics
 
   ACE_Message_Block* currentWriteBuffer_;
-  ACE_Thread_Mutex   sendLock_;
+  ACE_SYNCH_MUTEX    sendLock_;
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY
   // dispatch the reactor notification queue concurrently (most notably,
   // ACE_TP_Reactor) --> enforce proper serialization

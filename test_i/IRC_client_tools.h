@@ -40,7 +40,7 @@ class ACE_Module;
 typedef ACE_Module<ACE_MT_SYNCH,
                    Common_TimePolicy_t> Stream_Module_t;
 //class Stream_Module_t;
-struct Stream_ModuleConfiguration;
+struct IRC_Client_StreamModuleConfiguration;
 
 class IRC_Client_Tools
 {
@@ -65,16 +65,16 @@ class IRC_Client_Tools
 
   static bool isValidIRCChannelName (const std::string&); // string
 
-  static ACE_HANDLE connect (Stream_IAllocator*,                        // message allocator
-                             const IRC_Client_IRCLoginOptions&,         // login options
-                             bool,                                      // debug scanner ?
-                             bool,                                      // debug parser ?
-                             unsigned int,                              // statistics reporting interval (0: OFF)
-                             const std::string&,                        // hostname
-                             unsigned short,                            // port
-                             bool = false,                              // delete module
-                             const Stream_Module_t* = NULL,             // final module
-                             const Stream_ModuleConfiguration* = NULL); // module configuration
+  static ACE_HANDLE connect (Stream_IAllocator*,                                  // message allocator
+                             const IRC_Client_IRCLoginOptions&,                   // login options
+                             bool,                                                // debug scanner ?
+                             bool,                                                // debug parser ?
+                             unsigned int,                                        // statistics reporting interval (0: OFF)
+                             const std::string&,                                  // hostname
+                             unsigned short,                                      // port
+                             bool = false,                                        // delete module
+                             const Stream_Module_t* = NULL,                       // final module
+                             const IRC_Client_StreamModuleConfiguration* = NULL); // module configuration
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools ());

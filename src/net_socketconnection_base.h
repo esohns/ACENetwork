@@ -78,6 +78,11 @@ class Net_SocketConnectionBase_T
                               unsigned int = 0);      // statistics collecting interval (second(s))
                                                       // 0 --> DON'T collect statistics
 
+  // helper methods
+  // *IMPORTANT NOTE*: dummy stub to integrate asynch/synch connection handlers
+  virtual void open (ACE_HANDLE,          // handle
+                     ACE_Message_Block&); // (initial) data (if any)
+
  private:
   typedef HandlerType inherited;
 
@@ -85,7 +90,7 @@ class Net_SocketConnectionBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T& operator= (const Net_SocketConnectionBase_T&));
 
-//  // helper methods
+  // helper methods
 //  void shutdown ();
 };
 
@@ -130,6 +135,10 @@ class Net_AsynchSocketConnectionBase_T
   Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                     unsigned int = 0);      // statistics collecting interval (second(s))
                                                             // 0 --> DON'T collect statistics
+
+  // helper methods
+  // *IMPORTANT NOTE*: dummy stub to integrate asynch/synch connection handlers
+  virtual int open (void*); // arg
 
   const ConfigurationType* configuration_;
 

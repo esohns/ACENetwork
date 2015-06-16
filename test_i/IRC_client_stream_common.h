@@ -23,7 +23,6 @@
 
 #include "common_inotify.h"
 
-#include "stream_common.h"
 #include "stream_session_data_base.h"
 
 #include "IRC_client_configuration.h"
@@ -31,7 +30,7 @@
 
 typedef Stream_SessionDataBase_T<IRC_Client_SessionData> IRC_Client_StreamSessionData_t;
 
-typedef Common_INotify_T<Stream_ModuleConfiguration,
+typedef Common_INotify_T<IRC_Client_StreamModuleConfiguration,
                          IRC_Client_IRCMessage> IRC_Client_INotify_t;
 
 #endif

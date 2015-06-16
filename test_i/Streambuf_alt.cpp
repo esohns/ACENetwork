@@ -381,8 +381,8 @@ ACE_Streambuf_alt::sync (void)
 
   if (out_waiting ())
     return syncout ();
-  else
-    return 0;
+
+  return 0;
 }
 
 // flushbuf
@@ -461,8 +461,8 @@ ACE_Streambuf_alt::get_one_byte (void)
         this->timeout_ = 1;
       return EOF;
     }
-  else
-    return 1;
+
+  return 1;
 }
 
 // This will be called when the read (get) buffer has been exhausted

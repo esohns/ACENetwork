@@ -21,6 +21,8 @@
 #ifndef IRC_CLIENT_IRCSESSION_H
 #define IRC_CLIENT_IRCSESSION_H
 
+#include "ace/Asynch_Connector.h"
+#include "ace/config-macros.h"
 #include "ace/Connector.h"
 #include "ace/Global_Macros.h"
 
@@ -32,6 +34,7 @@
 #include "IRC_client_stream_common.h"
 
 // forward declarations
+class ACE_Message_Block;
 class IRC_Client_IIRCControl;
 
 template <typename ConnectionType>
@@ -41,6 +44,7 @@ class IRC_Client_IRCSession_T
 {
  friend class ACE_Connector<IRC_Client_IRCSession_T<ConnectionType>,
                             ACE_SOCK_CONNECTOR>;
+ friend class ACE_Asynch_Connector<IRC_Client_IRCSession_T<ConnectionType> >;
 
  public:
   IRC_Client_IRCSession_T (IRC_Client_IConnection_Manager_t* = NULL, // connection manager handle
@@ -49,18 +53,22 @@ class IRC_Client_IRCSession_T
   virtual ~IRC_Client_IRCSession_T ();
 
   // implement IRC_Client_INotify_t
-  virtual void start (const Stream_ModuleConfiguration&);
+  virtual void start (const IRC_Client_StreamModuleConfiguration&);
   virtual void notify (const IRC_Client_IRCMessage&);
   virtual void end ();
 
  private:
   typedef ConnectionType inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T ());
+//  ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T ());
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T (const IRC_Client_IRCSession_T&));
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T& operator= (const IRC_Client_IRCSession_T&));
 
   // helper methods
+  virtual int open (void*); // arg
+  virtual void open (ACE_HANDLE,          // (socket) handle
+                     ACE_Message_Block&); // initial data (if any)
+
   void error (const IRC_Client_IRCMessage&);
   void log (const IRC_Client_IRCMessage&);
   void log (const std::string&);

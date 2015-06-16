@@ -23,9 +23,9 @@
 
 #include "ace/Log_Msg.h"
 
-#include "IRC_client_tools.h"
-
 #include "net_macros.h"
+
+#include "IRC_client_tools.h"
 
 IRC_Client_IRCMessage::IRC_Client_IRCMessage ()
  : inherited (1,

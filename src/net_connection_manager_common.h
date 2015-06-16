@@ -26,25 +26,37 @@
 #include "ace/Netlink_Addr.h"
 #endif
 #include "ace/Singleton.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 #include "stream_common.h"
 
 #include "net_configuration.h"
 #include "net_connection_manager.h"
 #include "net_exports.h"
+//#include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 #include "net_stream_common.h"
 
 // forward declarations
 class Net_Stream;
 
+//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+//typedef Net_IConnection_T<ACE_Netlink_Addr,
+//                          Net_Configuration,
+//                          Stream_Statistic,
+//                          Net_Stream> Net_INetlinkConnection_t;
+//#endif
+//typedef Net_IConnection_T<ACE_INET_Addr,
+//                          Net_Configuration,
+//                          Stream_Statistic,
+//                          Net_Stream> Net_IConnection_t;
+
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
-                                 Net_SocketConfiguration_t,
-                                 Net_Configuration_t,
-                                 Net_UserData_t,
-                                 Stream_Statistic_t,
+                                 Net_SocketConfiguration,
+                                 Net_Configuration,
+                                 Net_UserData,
+                                 Stream_Statistic,
                                  Net_Stream> Net_INetlinkConnectionManager_t;
 #endif
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
@@ -72,14 +84,14 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 NET_SINGLETON_DECLARE (ACE_Singleton,
                        Net_NetlinkConnectionManager_t,
-                       ACE_Recursive_Thread_Mutex);
+                       ACE_SYNCH_RECURSIVE_MUTEX);
 typedef ACE_Singleton<Net_NetlinkConnectionManager_t,
-                      ACE_Recursive_Thread_Mutex> NET_NETLINKCONNECTIONMANAGER_SINGLETON;
+                      ACE_SYNCH_RECURSIVE_MUTEX> NET_NETLINKCONNECTIONMANAGER_SINGLETON;
 #endif
 typedef ACE_Singleton<Net_InetConnectionManager_t,
-                      ACE_Recursive_Thread_Mutex> NET_CONNECTIONMANAGER_SINGLETON;
+                      ACE_SYNCH_RECURSIVE_MUTEX> NET_CONNECTIONMANAGER_SINGLETON;
 NET_SINGLETON_DECLARE (ACE_Singleton,
                        Net_InetConnectionManager_t,
-                       ACE_Recursive_Thread_Mutex);
+                       ACE_SYNCH_RECURSIVE_MUTEX);
 
 #endif

@@ -37,8 +37,7 @@
 
 #  include "ace/Global_Macros.h"
 #  include "ace/iosfwd.h"
-//#  include "ace/IOStream.h"
-//#  include "ace/Time_Value.h"
+#  include "ace/IOStream.h"
 
 #  if defined (ACE_LACKS_IOSTREAM_FX)
 #   include "ace/os_include/os_ctype.h"
@@ -52,10 +51,10 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // forward declarations
 class ACE_Time_Value;
 
-//#  if defined (ACE_HAS_STRING_CLASS)
-//template <class STREAM> STREAM & operator>> (STREAM &stream, ACE_Quoted_String &str);
-//template <class STREAM> STREAM & operator<< (STREAM &stream, ACE_Quoted_String &str);
-//#  endif /* defined (ACE_HAS_STRING_CLASS) */
+#  if defined (ACE_HAS_STRING_CLASS)
+template <class STREAM> STREAM & operator>> (STREAM &stream, ACE_Quoted_String &str);
+template <class STREAM> STREAM & operator<< (STREAM &stream, ACE_Quoted_String &str);
+#  endif /* defined (ACE_HAS_STRING_CLASS) */
 
 /**
  * @class ACE_IOStream_alt_T
@@ -132,11 +131,7 @@ public:
 
 #  endif /* ACE_HAS_STRING_CLASS */
   // = Using the macros to provide get/set operators.
-  // *NOTE*: due to limitations of the GET/PUT macros,
-  //         only output is supported at this time
-  //         (see above)
   GETPUT_FUNC_SET (ACE_IOStream_alt_T<STREAM>)
-  //PUT_FUNC_SET (ACE_IOStream_alt_T<STREAM>)
 
 #  if defined (ACE_LACKS_IOSTREAM_FX)
   virtual int ipfx (int noskip = 0)

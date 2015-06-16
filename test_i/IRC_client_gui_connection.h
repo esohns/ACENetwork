@@ -62,7 +62,7 @@ class IRC_Client_GUI_Connection
   virtual~IRC_Client_GUI_Connection ();
 
   // implement IRC_Client_INotify_t
-  virtual void start (const Stream_ModuleConfiguration&);
+  virtual void start (const IRC_Client_StreamModuleConfiguration&);
   virtual void notify (const IRC_Client_IRCMessage&);
   virtual void end ();
 

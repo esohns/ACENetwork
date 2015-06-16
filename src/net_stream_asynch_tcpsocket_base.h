@@ -26,11 +26,14 @@
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
 
+#include "stream_imodule.h"
+
 #include "net_connection_base.h"
 
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
+          typename ModuleConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StatisticContainerType,
@@ -85,6 +88,9 @@ class Net_StreamAsynchTCPSocketBase_T
                                    UserDataType,
                                    StatisticContainerType,
                                    StreamType> ICONNECTION_MANAGER_T;
+  typedef Stream_IModule_T<ACE_MT_SYNCH,
+                           Common_TimePolicy_t,
+                           ModuleConfigurationType> IMODULE_T;
 
   Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                    unsigned int = 0);      // statistics collecting interval (second(s))

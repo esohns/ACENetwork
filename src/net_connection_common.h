@@ -27,6 +27,4 @@
 
 typedef Net_ITransportLayer_T<Net_SocketConfiguration> Net_ITransportLayer_t;
 
-
-
 #endif

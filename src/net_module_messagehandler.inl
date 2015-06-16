@@ -88,7 +88,7 @@ Net_Module_MessageHandler_T<ConfigurationType,
   else
   {
     ACE_NEW_NORETURN (lock_,
-                      ACE_Recursive_Thread_Mutex (NULL, NULL));
+                      ACE_SYNCH_RECURSIVE_MUTEX (NULL, NULL));
     if (!lock_)
     {
       ACE_DEBUG ((LM_CRITICAL,
@@ -152,14 +152,14 @@ Net_Module_MessageHandler_T<ConfigurationType,
 
   // synch access
   {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (*lock_);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (*lock_);
 
     // *WARNING* if users unsubscribe() within the callback Bad Things (TM)
     // would happen, as the current iter would be invalidated
     // --> use a slightly modified for-loop (advance first and THEN invoke the
     // callback (*NOTE*: works for MOST containers...)
     // *NOTE*: this works due to the ACE_RECURSIVE_Thread_Mutex used as a lock...
-    for (SUBSCRIBERSITERATOR_T iterator = subscribers_->begin ();
+    for (SUBSCRIBERS_ITERATOR_T iterator = subscribers_->begin ();
          iterator != subscribers_->end ();
          )
     {
@@ -207,14 +207,14 @@ Net_Module_MessageHandler_T<ConfigurationType,
 
       // synch access
       {
-        ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (*lock_);
+        ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (*lock_);
 
         // *WARNING* if users unsubscribe() within the callback Bad Things (TM)
         // would happen, as the current iterator would be invalidated
         // --> use a slightly modified for-loop (advance first and THEN invoke
         //     the callback (*NOTE*: works for MOST containers...)
         // *NOTE*: this works because the lock is recursive
-        for (SUBSCRIBERSITERATOR_T iterator = subscribers_->begin ();
+        for (SUBSCRIBERS_ITERATOR_T iterator = subscribers_->begin ();
              iterator != subscribers_->end ();
              )
         {
@@ -238,14 +238,14 @@ Net_Module_MessageHandler_T<ConfigurationType,
 
       // synch access
       {
-        ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (*lock_);
+        ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (*lock_);
 
         // *WARNING* if users unsubscribe() within the callback Bad Things (TM)
         // would happen, as the current iter would be invalidated
         // --> use a slightly modified for-loop (advance first and THEN invoke the
         // callback (*NOTE*: works for MOST containers...)
         // *NOTE*: this works due to the ACE_RECURSIVE_Thread_Mutex used as a lock...
-        for (SUBSCRIBERSITERATOR_T iterator = subscribers_->begin ();
+        for (SUBSCRIBERS_ITERATOR_T iterator = subscribers_->begin ();
              iterator != subscribers_->end ();
              )
         {
@@ -290,7 +290,7 @@ Net_Module_MessageHandler_T<ConfigurationType,
   //} // end IF
 
   // synch access to subscribers
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (*lock_);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (*lock_);
 
   subscribers_->push_back (interfaceHandle_in);
 }
@@ -310,9 +310,9 @@ Net_Module_MessageHandler_T<ConfigurationType,
   ACE_ASSERT (interfaceHandle_in);
 
   // synch access to subscribers
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (*lock_);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (*lock_);
 
-  SUBSCRIBERSITERATOR_T iterator = subscribers_->begin ();
+  SUBSCRIBERS_ITERATOR_T iterator = subscribers_->begin ();
   for (;
        iterator != subscribers_->end ();
        iterator++)

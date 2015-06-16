@@ -28,10 +28,20 @@
 #include <vector>
 
 #include "ace/Date_Time.h"
-//#include "ace/IOStream.h"
+#include "ace/INET_Addr.h"
+
+#include "stream_common.h"
+
+#include "net_defines.h"
+#include "net_iconnection.h"
 
 #include "FILE_Stream.h"
+//#include "IRC_client_configuration.h"
 #include "IOStream_alt_T.h"
+
+// forward declarations
+struct IRC_Client_Configuration;
+class IRC_Client_Stream;
 
 struct IRC_Client_IRCLoginOptions
 {
@@ -210,5 +220,23 @@ struct IRC_Client_SessionState
 
 //  ACE_IOStream<ACE_FILE_Stream> output_;
 typedef ACE_IOStream_alt_T<ACE_FILE_Stream> IRC_Client_IOStream_t;
+
+struct IRC_Client_ThreadData
+{
+  inline IRC_Client_ThreadData ()
+   : groupID (-1)
+   , useProactor (!NET_EVENT_USE_REACTOR)
+   , useReactor (NET_EVENT_USE_REACTOR)
+  {};
+
+  int groupID;
+  bool useProactor;
+  bool useReactor;
+};
+
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          IRC_Client_Configuration,
+                          Stream_Statistic,
+                          IRC_Client_Stream> IRC_Client_IConnection_t;
 
 #endif

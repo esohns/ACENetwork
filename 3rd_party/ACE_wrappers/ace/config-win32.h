@@ -17,3 +17,20 @@
 //         flags (sets /EHsc instead of /EHa), leading to memory leaks
 //         --> as a workaround, disable SEH
 #undef ACE_HAS_WIN32_STRUCTURAL_EXCEPTIONS
+
+// *NOTE*: ACE_IOStream support requires these definitions
+//#define ACE_USES_OLD_IOSTREAMS
+//#undef ACE_LACKS_ACE_IOSTREAM
+// *NOTE*: <iostream> from compat-gcc-34-c++ (3.4.6) has no support for
+//         iostream::ipfx/ipsx, and MSVC complains about the declarations
+//#define ACE_LACKS_IOSTREAM_FX
+
+#define ACE_LACKS_LINEBUFFERED_STREAMBUF
+#define ACE_LACKS_UNBUFFERED_STREAMBUF
+// *NOTE*: recent gcc iostream::operator>> implementations do not support
+//         pointer-type arguments any more; this disables the corresponding
+//         (macro) code in IOStream.h
+// *NOTE*: MSVC complains about the generated code as well...
+// *TODO*: remove this define and add platform/compiler-specific #ifdefs to
+//         IOStream.h
+#define ACE_LACKS_SIGNED_CHAR

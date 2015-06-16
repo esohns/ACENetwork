@@ -548,7 +548,7 @@ IRC_Client_GUI_Connection::~IRC_Client_GUI_Connection ()
 }
 
 void
-IRC_Client_GUI_Connection::start (const Stream_ModuleConfiguration& configuration_in)
+IRC_Client_GUI_Connection::start (const IRC_Client_StreamModuleConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::start"));
 

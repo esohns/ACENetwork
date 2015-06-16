@@ -33,7 +33,7 @@
 
 #if !defined (__ACE_INLINE__)
 //#include "ace/IOStream_T.inl"
-#include "IOStream_alt_T.inl"
+//#include "IOStream_alt_T.inl"
 #endif /* !__ACE_INLINE__ */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

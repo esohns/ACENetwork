@@ -24,9 +24,8 @@
 #include <list>
 
 #include "ace/Global_Macros.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
-//#include "common.h"
 #include "common_inotify.h"
 #include "common_isubscribe.h"
 #include "common_iclone.h"
@@ -72,8 +71,8 @@ class Net_Module_MessageHandler_T
  protected:
    // *NOTE*: recursive so that users may unsubscribe from within the
    // notification callbacks...
-   ACE_Recursive_Thread_Mutex* lock_;
-   SUBSCRIBERS_T*              subscribers_;
+   ACE_SYNCH_RECURSIVE_MUTEX* lock_;
+   SUBSCRIBERS_T*             subscribers_;
 
  private:
   typedef Stream_TaskBaseSynch_T<Common_TimePolicy_t,
@@ -82,13 +81,13 @@ class Net_Module_MessageHandler_T
 
   typedef Net_Module_MessageHandler_T<ConfigurationType,
                                       SessionMessageType,
-                                      MessageType> OWN_T;
-  typedef typename SUBSCRIBERS_T::iterator SUBSCRIBERSITERATOR_T;
+                                      MessageType> OWN_TYPE_T;
+  typedef typename SUBSCRIBERS_T::iterator SUBSCRIBERS_ITERATOR_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Module_MessageHandler_T (const Net_Module_MessageHandler_T&));
   ACE_UNIMPLEMENTED_FUNC (Net_Module_MessageHandler_T& operator= (const Net_Module_MessageHandler_T&));
 
-  bool                         delete_;
+  bool                        delete_;
 };
 
 #include "net_module_messagehandler.inl"

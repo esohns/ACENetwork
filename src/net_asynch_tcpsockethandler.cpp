@@ -60,6 +60,7 @@ Net_AsynchTCPSocketHandler::open (ACE_HANDLE handle_in,
 
   int result = -1;
   int error = 0;
+  ACE_Proactor* proactor_p = NULL;
 
   // step1: tweak socket
   if (inherited::configuration_.socketConfiguration.bufferSize)
@@ -110,11 +111,13 @@ Net_AsynchTCPSocketHandler::open (ACE_HANDLE handle_in,
   } // end IF
 
   // step2: initialize i/o streams
-  inherited2::proactor (ACE_Proactor::instance ());
-  result = inputStream_.open (*this,                    // event handler
-                              handle_in,                // handle
-                              NULL,                     // completion key
-                              inherited2::proactor ()); // proactor
+  proactor_p = ACE_Proactor::instance ();
+  ACE_ASSERT (proactor_p);
+  inherited2::proactor (proactor_p);
+  result = inputStream_.open (*this,       // event handler
+                              handle_in,   // handle
+                              NULL,        // completion key
+                              proactor_p); // proactor
   if (result == -1)
   {
     ACE_ERROR ((LM_ERROR,
@@ -122,10 +125,10 @@ Net_AsynchTCPSocketHandler::open (ACE_HANDLE handle_in,
                 handle_in));
     goto close;
   } // end IF
-  result = outputStream_.open (*this,                    // event handler
-                               handle_in,                // handle
-                               NULL,                     // completion key
-                               inherited2::proactor ()); // proactor
+  result = outputStream_.open (*this,       // event handler
+                               handle_in,   // handle
+                               NULL,        // completion key
+                               proactor_p); // proactor
   if (result == -1)
   {
     ACE_ERROR ((LM_ERROR,

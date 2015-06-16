@@ -22,7 +22,7 @@
 #define ACE_FILE_STREAM_H
 #include /**/ "ace/pre.h"
 
-#include "ace/config-macros.h"
+//#include "ace/config-macros.h"
 #include "ace/FILE_IO.h"
 #include "ace/Versioned_Namespace.h"
 

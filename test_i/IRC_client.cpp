@@ -85,10 +85,6 @@ do_printUsage (const std::string& programName_in)
   std::cout << ACE_TEXT ("currently available options:") << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-#if defined (DEBUG_DEBUGGER)
-  path += ACE_TEXT_ALWAYS_CHAR ("protocol");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-#endif
   path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
   std::cout << ACE_TEXT ("-c [FILE]   : configuration file")
             << ACE_TEXT (" [\"")
@@ -350,18 +346,28 @@ event_manager_termination_function (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::event_manager_termination_function"));
 
-  int group_id = *static_cast<int*> (arg_in);
-
+  IRC_Client_ThreadData* thread_data_p =
+    static_cast<IRC_Client_ThreadData*> (arg_in);
+  ACE_ASSERT (thread_data_p);
   int result = -1;
-  ACE_Time_Value delay (1, 0);
+  ACE_Time_Value delay (IRC_CLIENT_DEF_CONNECTION_TIMEOUT, 0);
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("waiting for connection...(%#T)\n"),
+              &delay));
+
   result = ACE_OS::sleep (delay);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::sleep: \"%m\", continuing\n")));
 
-  Common_Tools::finalizeEventDispatch (NET_EVENT_USE_REACTOR,
-                                       !NET_EVENT_USE_REACTOR,
-                                       group_id);
+  Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
+                                       thread_data_p->useProactor,
+                                       -1);
+                                       //thread_data_p->groupID);
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("waiting for connection...DONE\n")));
 
   return NULL;
 }
@@ -379,10 +385,9 @@ do_work (IRC_Client_Configuration& configuration_in,
   int result = -1;
 
   // step1: initialize IRC handler module
-  Stream_ModuleConfiguration module_configuration;
-  ACE_OS::memset (&module_configuration, 0, sizeof (module_configuration));
+  IRC_Client_StreamModuleConfiguration module_configuration;
   configuration_in.streamConfiguration.streamConfiguration.moduleConfiguration =
-    &module_configuration;
+    &module_configuration.moduleConfiguration;
 
   IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_HANDLER_MODULE_NAME),
                                                    NULL);
@@ -395,7 +400,8 @@ do_work (IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
     return;
   } // end IF
-  IRCHandler_impl_p->initialize (configuration_in.streamConfiguration.streamConfiguration.messageAllocator,
+  IRCHandler_impl_p->initialize (NULL,
+                                 configuration_in.streamConfiguration.streamConfiguration.messageAllocator,
                                  configuration_in.streamConfiguration.streamConfiguration.bufferSize,
                                  configuration_in.protocolConfiguration.automaticPong,
                                  configuration_in.protocolConfiguration.printPingDot);
@@ -424,7 +430,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   Net_Client_IConnector_t* connector_p = NULL;
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  if (NET_EVENT_USE_REACTOR)
+  if (useReactor_in)
     ACE_NEW_NORETURN (connector_p,
                       IRC_Client_SessionConnector_t (&socket_handler_configuration,
                                                      connection_manager_p,
@@ -497,13 +503,11 @@ do_work (IRC_Client_Configuration& configuration_in,
 
     return;
   } // end IF
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("started event dispatch...\n")));
 
   // step5b: (try to) connect to the server
-  bool result_2 =
+  ACE_HANDLE handle =
       connector_p->connect (signal_handler_configuration.peerAddress);
-  if (!result_2)
+  if (handle == ACE_INVALID_HANDLE)
   {
     // debug info
     ACE_TCHAR buffer[BUFSIZ];
@@ -530,6 +534,10 @@ do_work (IRC_Client_Configuration& configuration_in,
   // *NOTE*: from this point, clean up any remote connections
 
   // step6a: wait for connection
+  IRC_Client_ThreadData thread_data;
+  thread_data.groupID = group_id;
+  thread_data.useProactor = !useReactor_in;
+  thread_data.useReactor = useReactor_in;
   ACE_thread_t thread_id = -1;
   ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
   //char thread_name[BUFSIZ];
@@ -537,7 +545,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   char* thread_name_p = NULL;
   ACE_NEW_NORETURN (thread_name_p,
                     char[BUFSIZ]);
-  if (thread_name_p)
+  if (!thread_name_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
@@ -557,7 +565,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   ACE_ASSERT (thread_manager_p);
   result =
     thread_manager_p->spawn (::event_manager_termination_function, // function
-                             &group_id,                            // argument
+                             &thread_data,                         // argument
                              (THR_NEW_LWP      |
                               THR_JOINABLE     |
                               THR_INHERIT_SCHED),                  // flags
@@ -622,8 +630,6 @@ do_work (IRC_Client_Configuration& configuration_in,
   Common_Tools::dispatchEvents (useReactor_in,
                                 !useReactor_in,
                                 group_id);
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("finished event dispatch...\n")));
 
   // step7: clean up
   connection_manager_p->abort ();

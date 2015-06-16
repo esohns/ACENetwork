@@ -18,8 +18,9 @@
 
 // System Library Header Files
 #include "ace/iosfwd.h"
-#include "ace/Log_Msg.h"
-#include "ace/OS.h"
+#include "ace/streams.h"
+//#include "ace/Log_Msg.h"
+//#include "ace/OS.h"
 
 // Local Header Files
 #include "net_macros.h"

@@ -39,6 +39,7 @@
 // Needed on Windows for streambuf
 // FUZZ: disable check_for_streams_include
 #include "ace/streams.h"
+//#include "ace/iosfwd.h"
 
 #include "ace/Time_Value.h"
 
@@ -159,7 +160,7 @@ public:
 
 protected:
   ACE_Streambuf_alt (u_int streambuf_size,
-                 int io_mode);
+                     int io_mode);
 
   /// Sync both input and output. See syncin/syncout below for
   /// descriptions.
@@ -264,7 +265,8 @@ protected:
 
   virtual ACE_HANDLE get_handle (void);
 
-#  if defined (ACE_HAS_STANDARD_CPP_LIBRARY) && (ACE_HAS_STANDARD_CPP_LIBRARY != 0) && !defined (ACE_USES_OLD_IOSTREAMS)
+//#  if defined (ACE_HAS_STANDARD_CPP_LIBRARY) && (ACE_HAS_STANDARD_CPP_LIBRARY != 0) && !defined (ACE_USES_OLD_IOSTREAMS)
+#  if defined (ACE_HAS_STANDARD_CPP_LIBRARY) && (ACE_HAS_STANDARD_CPP_LIBRARY != 0)
   char *base (void) const
     {
       return cur_mode_ == get_mode_ ? eback_saved_
@@ -338,7 +340,7 @@ protected:
 
 #  if defined (__ACE_INLINE__)
 //#    include "ace/IOStream_T.inl"
-#    include "Streambuf_alt.inl"
+//#    include "Streambuf_alt.inl"
 #  endif /* __ACE_INLINE__ */
 
 ACE_END_VERSIONED_NAMESPACE_DECL
