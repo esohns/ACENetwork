@@ -30,7 +30,7 @@ class Net_Client_IConnector_T
  public:
   virtual ~Net_Client_IConnector_T () {};
 
-  virtual bool useReactor () const = 0; // ? : uses proactor
+  //virtual bool useReactor () const = 0; // ? : uses proactor
 
   virtual const ConfigurationType* getConfiguration () const = 0;
 

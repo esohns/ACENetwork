@@ -56,7 +56,7 @@ class Net_Module_MessageHandler_T
   virtual ~Net_Module_MessageHandler_T ();
 
   void initialize (SUBSCRIBERS_T* = NULL,               // subscribers (handle)
-                   ACE_Recursive_Thread_Mutex* = NULL); // subscribers lock
+                   ACE_SYNCH_RECURSIVE_MUTEX* = NULL); // subscribers lock
 
   // implement (part of) Stream_ITaskBase_T
   virtual void handleDataMessage (MessageType*&, // data message handle

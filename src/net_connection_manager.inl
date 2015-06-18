@@ -24,7 +24,7 @@
 #include "ace/OS.h"
 
 #include "common_defines.h"
-#include "common_timer_manager.h"
+//#include "common_timer_manager.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -761,7 +761,7 @@ Net_Connection_Manager_T<AddressType,
     ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
     // aggregate data from active connections
-    if (!const_cast<SELF_T*> (this)->collect (result))
+    if (!const_cast<OWN_TYPE_T*> (this)->collect (result))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_IStatistic::collect(), returning\n")));

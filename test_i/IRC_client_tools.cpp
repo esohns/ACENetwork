@@ -1423,6 +1423,34 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
           result += message_in.params.back ();
           break;
         }
+        case IRC_Client_IRCMessage::JOIN:
+        {
+          result = '"';
+          result += message_in.prefix.origin;
+          result += ACE_TEXT_ALWAYS_CHAR ("\" (");
+          result += message_in.prefix.user;
+          result += '@';
+          result += message_in.prefix.host;
+          result += ACE_TEXT_ALWAYS_CHAR (") has joined channel \"");
+          result += message_in.params.back ();
+          result += '"';
+          break;
+        }
+        case IRC_Client_IRCMessage::PART:
+        {
+          result = '"';
+          result = message_in.prefix.origin;
+          result += ACE_TEXT_ALWAYS_CHAR ("\" (");
+          result += message_in.prefix.user;
+          result += '@';
+          result += message_in.prefix.host;
+          result += ACE_TEXT_ALWAYS_CHAR (") has left channel \"");
+          result += message_in.params.front ();
+          result += ACE_TEXT_ALWAYS_CHAR ("\" (reason: \"");
+          result += message_in.params.back ();
+          result += ACE_TEXT_ALWAYS_CHAR ("\")");
+          break;
+        }
         case IRC_Client_IRCMessage::NOTICE:
         {
           result = IRC_Client_Tools::stringify (message_in.params,
@@ -1666,9 +1694,9 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
   configuration.streamConfiguration.sessionData = session_data_p;
 
   // step2: initialize client connector
-  Net_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
+  IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
   ACE_NEW_NORETURN (socket_handler_configuration_p,
-                    Net_SocketHandlerConfiguration ());
+                    IRC_Client_SocketHandlerConfiguration ());
   if (!socket_handler_configuration_p)
   {
     ACE_DEBUG ((LM_CRITICAL,

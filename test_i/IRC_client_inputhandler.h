@@ -26,17 +26,22 @@
 
 #include "common_iinitialize.h"
 
-struct IRC_Client_InputHandlerConfiguration
-{
+#include "net_defines.h"
 
-};
+#include "IRC_client_configuration.h"
+#include "IRC_client_defines.h"
+
+// forward declarations
+class ACE_Message_Block;
+struct IRC_Client_SessionState;
 
 class IRC_Client_InputHandler
  : public ACE_Event_Handler
  , public Common_IInitialize_T<IRC_Client_InputHandlerConfiguration>
 {
  public:
-  IRC_Client_InputHandler (bool = true); // use reactor ?
+  IRC_Client_InputHandler (IRC_Client_SessionState*,      // state handle
+                           bool = NET_EVENT_USE_REACTOR); // use reactor ?
   virtual ~IRC_Client_InputHandler ();
 
   // implement Common_IInitialize_T
@@ -56,9 +61,13 @@ class IRC_Client_InputHandler
   virtual int handle_close (ACE_HANDLE,
                             ACE_Reactor_Mask);
 
-  IRC_Client_InputHandlerConfiguration* configuration_;
-  bool                                  registered_;
-  bool                                  useReactor_;
+  ACE_Message_Block* allocateMessage (unsigned int = IRC_CLIENT_BUFFER_SIZE); // size
+
+  IRC_Client_InputHandlerConfiguration configuration_;
+  ACE_Message_Block*                   currentReadBuffer_;
+  bool                                 registered_;
+  IRC_Client_SessionState*             state_;
+  bool                                 useReactor_;
 };
 
 #endif

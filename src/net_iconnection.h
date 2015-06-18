@@ -24,6 +24,7 @@
 #include "ace/config-macros.h"
 
 #include "common_idumpstate.h"
+#include "common_iget.h"
 #include "common_iinitialize.h"
 #include "common_irefcount.h"
 #include "common_istatistic.h"
@@ -35,7 +36,8 @@ template <typename AddressType,
           typename StatisticContainerType,
           typename StreamType>
 class Net_IConnection_T
- : public Common_IInitialize_T<ConfigurationType>
+ : public Common_IGet_T<ConfigurationType>
+ , public Common_IInitialize_T<ConfigurationType>
  , public Common_IStatistic_T<StatisticContainerType>
  , virtual public Common_IRefCount
  , public Common_IDumpState

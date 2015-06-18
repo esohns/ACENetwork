@@ -24,7 +24,7 @@
 #include <deque>
 #include <vector>
 
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 #include "common.h"
 
@@ -78,9 +78,9 @@ struct Net_GTK_CBData
   Net_Server_IListener_t*                  listenerHandle;             // *NOTE*: server only !
   Common_MessageStack_t                    logStack;
   Net_Client_SignalHandlerConfiguration_t* signalHandlerConfiguration; // *NOTE*: client only !
-  ACE_Recursive_Thread_Mutex               stackLock;
+  ACE_SYNCH_RECURSIVE_MUTEX                stackLock;
   Net_Subscribers_t                        subscribers;
-  ACE_Recursive_Thread_Mutex               subscribersLock;
+  ACE_SYNCH_RECURSIVE_MUTEX                subscribersLock;
   Net_Client_TimeoutHandler*               timeoutHandler;             // *NOTE*: client only !
 };
 

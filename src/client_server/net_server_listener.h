@@ -24,7 +24,7 @@
 #include "ace/Acceptor.h"
 #include "ace/Global_Macros.h"
 #include "ace/Singleton.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 #include "ace/SOCK_Acceptor.h"
 
 #include "common_idumpstate.h"
@@ -47,7 +47,7 @@ class Net_Server_Listener_T
                                                    SocketHandlerConfigurationType,
                                                    UserDataType,
                                                    HandlerType>,
-                             ACE_Recursive_Thread_Mutex>;
+                             ACE_SYNCH_RECURSIVE_MUTEX>;
 
  public:
   // implement Net_Server_IListener_T

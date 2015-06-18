@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_TCP_SOCKETHANDLER_H
-#define NET_TCP_SOCKETHANDLER_H
+#ifndef NET_TCP_SOCKETHANDLER_T_H
+#define NET_TCP_SOCKETHANDLER_T_H
 
 #include "ace/config-macros.h"
 #include "ace/Global_Macros.h"
@@ -28,12 +28,11 @@
 #include "ace/Synch_Traits.h"
 #include "ace/SOCK_Stream.h"
 
-#include "net_configuration.h"
-#include "net_exports.h"
 #include "net_sockethandler_base.h"
 
-class Net_Export Net_TCPSocketHandler
- : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration>
+template <typename ConfigurationType>
+class Net_TCPSocketHandler_T
+ : public Net_SocketHandlerBase<ConfigurationType>
  , public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
 {
  public:
@@ -45,17 +44,20 @@ class Net_Export Net_TCPSocketHandler
                             ACE_Reactor_Mask); // event mask
 
  protected:
-  Net_TCPSocketHandler ();
-  virtual ~Net_TCPSocketHandler ();
+  Net_TCPSocketHandler_T ();
+  virtual ~Net_TCPSocketHandler_T ();
 
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration> inherited;
+  typedef Net_SocketHandlerBase<ConfigurationType> inherited;
   typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH> inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler (const Net_TCPSocketHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler& operator= (const Net_TCPSocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T (const Net_TCPSocketHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T& operator= (const Net_TCPSocketHandler_T&));
 };
+
+// include template implementation
+#include "net_tcpsockethandler.inl"
 
 #endif

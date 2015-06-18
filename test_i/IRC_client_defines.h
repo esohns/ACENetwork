@@ -31,7 +31,8 @@
 #define IRC_CLIENT_IRC_FRAME_MAXSIZE             512
 
 #define IRC_CLIENT_IRC_MAX_NOTICE_DELAY          3  // seconds
-#define IRC_CLIENT_IRC_MAX_WELCOME_DELAY         30 // seconds
+// *NOTE*: some servers perform DNS address resolution, which can take a while
+#define IRC_CLIENT_IRC_MAX_WELCOME_DELAY         60 // seconds
 
 // stream
 // *NOTE*: according to RFC1459, IRC messages SHALL not exceed 512 bytes.
@@ -112,7 +113,8 @@
 #define IRC_CLIENT_DEF_PRINT_PINGDOT             false
 
 // client
-#define IRC_CLIENT_DEF_CONNECTION_TIMEOUT        2 // second(s)
-#define IRC_CLIENT_DEF_SESSION_LOG               "IRC_client_session"
+#define IRC_CLIENT_CONNECTION_DEF_TIMEOUT        2 // second(s)
+#define IRC_CLIENT_SESSION_LOG_FILENAME_PREFIX   "IRC_client_session"
+#define IRC_CLIENT_SESSION_DEF_LOG               false // log to file ? : stdout
 
 #endif

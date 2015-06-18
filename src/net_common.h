@@ -23,11 +23,6 @@
 
 #include "ace/Svc_Handler.h"
 
-#include "stream_messageallocatorheap_base.h"
-
-#include "net_message.h"
-#include "net_sessionmessage.h"
-
 enum Net_ClientServerRole
 {
   NET_ROLE_INVALID = -1,
@@ -48,9 +43,6 @@ enum Net_TransportLayerType
   ///////////////////////////////////////
   NET_TRANSPORTLAYER_MAX
 };
-
-typedef Stream_MessageAllocatorHeapBase_T<Net_Message,
-                                          Net_SessionMessage> Net_StreamMessageAllocator_t;
 
 // *NOTE*: this extends ACE_Svc_Handler_Close (see Svc_Handler.h)
 enum Net_Connection_CloseReason

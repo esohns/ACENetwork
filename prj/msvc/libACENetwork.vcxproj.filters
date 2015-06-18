@@ -328,5 +328,20 @@
     <None Include="..\..\src\net_tcpconnection_base.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="..\..\src\net_asynch_netlinksockethandler.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\net_asynch_tcpsockethandler.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\net_asynch_udpsockethandler.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\net_netlinksockethandler.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\net_tcpsockethandler.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

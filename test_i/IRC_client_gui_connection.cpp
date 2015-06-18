@@ -854,6 +854,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         }
         case IRC_Client_IRC_Codes::RPL_NOTOPIC:          // 331
         case IRC_Client_IRC_Codes::RPL_TOPIC:            // 332
+        case IRC_Client_IRC_Codes::RPL_TOPICWHOTIME:     // 333
         {
           // retrieve message handler
           MESSAGE_HANDLERSITERATOR_T handler_iterator =

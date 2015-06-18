@@ -26,13 +26,15 @@ template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StreamType,
-          typename HandlerType>
+          typename HandlerType,
+          typename HandlerConfigurationType>
 Net_TCPConnectionBase_T<ConfigurationType,
                         UserDataType,
                         SessionDataType,
                         StreamType,
-                        HandlerType>::Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                               unsigned int statisticCollectionInterval_in)
+                        HandlerType,
+                        HandlerConfigurationType>::Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                            unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -44,12 +46,14 @@ template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StreamType,
-          typename HandlerType>
+          typename HandlerType,
+          typename HandlerConfigurationType>
 Net_TCPConnectionBase_T<ConfigurationType,
                         UserDataType,
                         SessionDataType,
                         StreamType,
-                        HandlerType>::Net_TCPConnectionBase_T ()
+                        HandlerType,
+                        HandlerConfigurationType>::Net_TCPConnectionBase_T ()
  : inherited (NULL,
               0)
 {
@@ -61,12 +65,14 @@ template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StreamType,
-          typename HandlerType>
+          typename HandlerType,
+          typename HandlerConfigurationType>
 Net_TCPConnectionBase_T<ConfigurationType,
                         UserDataType,
                         SessionDataType,
                         StreamType,
-                        HandlerType>::~Net_TCPConnectionBase_T ()
+                        HandlerType,
+                        HandlerConfigurationType>::~Net_TCPConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::~Net_TCPConnectionBase_T"));
 
@@ -78,13 +84,15 @@ template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StreamType,
-          typename HandlerType>
+          typename HandlerType,
+          typename HandlerConfigurationType>
 Net_AsynchTCPConnectionBase_T<ConfigurationType,
                               UserDataType,
                               SessionDataType,
                               StreamType,
-                              HandlerType>::Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                           unsigned int statisticCollectionInterval_in)
+                              HandlerType,
+                              HandlerConfigurationType>::Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                        unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -96,12 +104,14 @@ template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StreamType,
-          typename HandlerType>
+          typename HandlerType,
+          typename HandlerConfigurationType>
 Net_AsynchTCPConnectionBase_T<ConfigurationType,
                               UserDataType,
                               SessionDataType,
                               StreamType,
-                              HandlerType>::Net_AsynchTCPConnectionBase_T ()
+                              HandlerType,
+                              HandlerConfigurationType>::Net_AsynchTCPConnectionBase_T ()
  : inherited (NULL,
               0)
 {
@@ -113,12 +123,14 @@ template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StreamType,
-          typename HandlerType>
+          typename HandlerType,
+          typename HandlerConfigurationType>
 Net_AsynchTCPConnectionBase_T<ConfigurationType,
                               UserDataType,
                               SessionDataType,
                               StreamType,
-                              HandlerType>::~Net_AsynchTCPConnectionBase_T ()
+                              HandlerType,
+                              HandlerConfigurationType>::~Net_AsynchTCPConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::~Net_AsynchTCPConnectionBase_T"));
 

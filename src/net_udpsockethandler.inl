@@ -30,8 +30,10 @@
 #include "net_iconnectionmanager.h"
 #include "net_macros.h"
 
-template <typename SocketType>
-Net_UDPSocketHandler_T<SocketType>::Net_UDPSocketHandler_T ()//MANAGER_T* manager_in)
+template <typename SocketType,
+          typename ConfigurationType>
+Net_UDPSocketHandler_T<SocketType,
+                       ConfigurationType>::Net_UDPSocketHandler_T ()//MANAGER_T* manager_in)
  : inherited2 (NULL,                     // no specific thread manager
                NULL,                     // no specific message queue
                ACE_Reactor::instance ()) // default reactor
@@ -63,8 +65,10 @@ Net_UDPSocketHandler_T<SocketType>::Net_UDPSocketHandler_T ()//MANAGER_T* manage
 //  } // end IF
 }
 
-template <typename SocketType>
-Net_UDPSocketHandler_T<SocketType>::~Net_UDPSocketHandler_T ()
+template <typename SocketType,
+          typename ConfigurationType>
+Net_UDPSocketHandler_T<SocketType,
+                       ConfigurationType>::~Net_UDPSocketHandler_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::~Net_UDPSocketHandler_T"));
 
@@ -120,9 +124,11 @@ Net_UDPSocketHandler_T<SocketType>::~Net_UDPSocketHandler_T ()
 //  return 0;
 //}
 
-template <typename SocketType>
+template <typename SocketType,
+          typename ConfigurationType>
 int
-Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
+Net_UDPSocketHandler_T<SocketType,
+                       ConfigurationType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::open"));
 
@@ -231,10 +237,12 @@ Net_UDPSocketHandler_T<SocketType>::open (void* arg_in)
   return 0;
 }
 
-template <typename SocketType>
+template <typename SocketType,
+          typename ConfigurationType>
 int
-Net_UDPSocketHandler_T<SocketType>::handle_close (ACE_HANDLE handle_in,
-                                                  ACE_Reactor_Mask mask_in)
+Net_UDPSocketHandler_T<SocketType,
+                       ConfigurationType>::handle_close (ACE_HANDLE handle_in,
+                                                         ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::handle_close"));
 
@@ -316,21 +324,17 @@ Net_UDPSocketHandler_T<SocketType>::handle_close (ACE_HANDLE handle_in,
                       ACE_TEXT ("failed to ACE_SOCK_IO::close (): %d, continuing\n")));
       } // end IF
 
-      ACE_ASSERT (inherited2::reactor ());
-      //result =
-      // inherited2::reactor ()->remove_handler (this,
-      //                                        (mask_in |
-      //                                         ACE_Event_Handler::DONT_CALL));
+      ACE_Reactor* reactor_p = inherited2::reactor ();
+      ACE_ASSERT (reactor_p);
       result =
-        inherited2::reactor ()->remove_handler (handle_in,
-                                                (mask_in |
-                                                 ACE_Event_Handler::DONT_CALL));
+        reactor_p->remove_handler (handle_in,
+                                   (mask_in |
+                                    ACE_Event_Handler::DONT_CALL));
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d), continuing\n"),
                     this,
                     mask_in));
-
       break;
     }
     default:

@@ -326,6 +326,27 @@ template <typename AddressType,
           typename SessionDataType,
           typename StatisticContainerType,
           typename StreamType>
+const ConfigurationType&
+Net_ConnectionBase_T<AddressType,
+                     SocketConfigurationType,
+                     ConfigurationType,
+                     UserDataType,
+                     SessionDataType,
+                     StatisticContainerType,
+                     StreamType>::get () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::get"));
+
+  return configuration_;
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType>
 bool
 Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,

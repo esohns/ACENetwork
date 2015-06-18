@@ -616,7 +616,7 @@ do_work (unsigned int maxNumConnections_in,
 
   // step3: initialize connection manager
   NET_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (maxNumConnections_in);
-  Net_UserData session_data;
+  Net_StreamUserData session_data;
   NET_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
                                                      &session_data);
 

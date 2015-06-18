@@ -26,11 +26,13 @@
 
 #include "stream_common.h"
 
-#include "net_client_exports.h"
+#include "net_configuration.h"
 #include "net_tcpsockethandler.h"
 
+#include "net_client_exports.h"
+
 class Net_Client_Export Net_Client_SocketHandler
- : public Net_TCPSocketHandler
+ : public Net_TCPSocketHandler_T<Net_SocketHandlerConfiguration>
 {
  public:
   Net_Client_SocketHandler ();
@@ -44,9 +46,8 @@ class Net_Client_Export Net_Client_SocketHandler
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef Net_TCPSocketHandler inherited;
+  typedef Net_TCPSocketHandler_T<Net_SocketHandlerConfiguration> inherited;
 
-  //ACE_UNIMPLEMENTED_FUNC (Net_Client_SocketHandler ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SocketHandler (const Net_Client_SocketHandler&));
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SocketHandler& operator= (const Net_Client_SocketHandler&));
 };

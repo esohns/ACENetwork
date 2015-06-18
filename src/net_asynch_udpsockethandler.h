@@ -28,17 +28,16 @@
 #include "ace/Message_Block.h"
 #include "ace/Notification_Strategy.h"
 
-#include "net_configuration.h"
-#include "net_exports.h"
 #include "net_sockethandler_base.h"
 
-class Net_Export Net_AsynchUDPSocketHandler
- : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration>
+template <typename ConfigurationType>
+class Net_AsynchUDPSocketHandler_T
+ : public Net_SocketHandlerBase<ConfigurationType>
  , public ACE_Service_Handler
  , public ACE_Notification_Strategy
 {
  public:
-  virtual ~Net_AsynchUDPSocketHandler ();
+  virtual ~Net_AsynchUDPSocketHandler_T ();
 
   // override some handler method(s)
   virtual void open (ACE_HANDLE,          // (socket) handle
@@ -53,7 +52,7 @@ class Net_Export Net_AsynchUDPSocketHandler
                       ACE_Reactor_Mask);  // mask
 
  protected:
-  Net_AsynchUDPSocketHandler ();
+  Net_AsynchUDPSocketHandler_T ();
 
   // helper method(s)
   void initiate_read_dgram ();
@@ -69,15 +68,18 @@ class Net_Export Net_AsynchUDPSocketHandler
 //  ACE_INET_Addr           remoteSAP_;
 
  private:
-  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration> inherited;
+  typedef Net_SocketHandlerBase<ConfigurationType> inherited;
   typedef ACE_Service_Handler inherited2;
   typedef ACE_Notification_Strategy inherited3;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler (const Net_AsynchUDPSocketHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler& operator= (const Net_AsynchUDPSocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T (const Net_AsynchUDPSocketHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T& operator= (const Net_AsynchUDPSocketHandler_T&));
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
 };
+
+// include template implementation
+#include "net_asynch_udpsockethandler.inl"
 
 #endif

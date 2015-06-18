@@ -416,7 +416,7 @@ Net_StreamTCPSocketBase_T<AddressType,
     allocateMessage (inherited2::configuration_.streamConfiguration.streamConfiguration.bufferSize);
   if (!currentReadBuffer_)
   {
-    ACE_DEBUG ((LM_CRITICAL,
+    ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
                 inherited2::configuration_.streamConfiguration.streamConfiguration.bufferSize));
     return -1;
@@ -442,7 +442,7 @@ Net_StreamTCPSocketBase_T<AddressType,
           (error != ENOTSOCK)   &&
           (error != ECONNABORTED)) // <-- connection abort()ed locally
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Stream::recv(): \"%m\", returning\n")));
+                    ACE_TEXT ("failed to ACE_SOCK_Stream::recv(): \"%m\", aborting\n")));
 
       // clean up
       currentReadBuffer_->release ();
@@ -477,7 +477,7 @@ Net_StreamTCPSocketBase_T<AddressType,
     }
   } // end SWITCH
 
-  // push the buffer onto our stream for processing
+  // push the buffer onto the stream for processing
   // *NOTE*: the stream assumes ownership of the buffer
   result = stream_.put (currentReadBuffer_);
   if (result == -1)
@@ -1220,7 +1220,8 @@ allocate:
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(0), aborting\n")));
+                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
+                  requestedSize_in));
       return NULL;
     }
 

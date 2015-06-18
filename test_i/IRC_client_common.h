@@ -29,6 +29,7 @@
 
 #include "ace/Date_Time.h"
 #include "ace/INET_Addr.h"
+#include "ace/Synch_Traits.h"
 
 #include "stream_common.h"
 
@@ -207,14 +208,18 @@ struct IRC_Client_PhoneBook
 struct IRC_Client_SessionState
 {
   inline IRC_Client_SessionState ()
-   : channelModes ()
+   : channel ()
+   , channelModes ()
    , isFirstMessage (false)
+   , lock ()
    , nickname ()
    , userModes ()
   {};
 
+  std::string               channel;
   IRC_Client_ChannelModes_t channelModes;
   bool                      isFirstMessage;
+  ACE_SYNCH_MUTEX           lock;
   std::string               nickname;
   IRC_Client_UserModes_t    userModes;
 };

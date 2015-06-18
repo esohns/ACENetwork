@@ -42,13 +42,14 @@ template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StreamType,
-          typename HandlerType>
+          typename HandlerType,
+          typename HandlerConfigurationType>
 class Net_TCPConnectionBase_T
  : public Net_SocketConnectionBase_T<ACE_INET_Addr,
                                      Net_SocketConfiguration,
                                      HandlerType,
                                      ConfigurationType,
-                                     Net_SocketHandlerConfiguration,
+                                     HandlerConfigurationType,
                                      UserDataType,
                                      SessionDataType,
                                      Stream_Statistic,
@@ -59,13 +60,15 @@ class Net_TCPConnectionBase_T
                                                    UserDataType,
                                                    SessionDataType,
                                                    StreamType,
-                                                   HandlerType>,
+                                                   HandlerType,
+                                                   HandlerConfigurationType>,
                            ACE_SOCK_ACCEPTOR>;
  friend class ACE_Connector<Net_TCPConnectionBase_T<ConfigurationType,
                                                     UserDataType,
                                                     SessionDataType,
                                                     StreamType,
-                                                    HandlerType>,
+                                                    HandlerType,
+                                                    HandlerConfigurationType>,
                             ACE_SOCK_CONNECTOR>;
 
  public:
@@ -86,7 +89,7 @@ class Net_TCPConnectionBase_T
                                      Net_SocketConfiguration,
                                      HandlerType,
                                      ConfigurationType,
-                                     Net_SocketHandlerConfiguration,
+                                     HandlerConfigurationType,
                                      UserDataType,
                                      SessionDataType,
                                      Stream_Statistic,
@@ -103,13 +106,14 @@ template <typename ConfigurationType,
           typename UserDataType,
           typename SessionDataType,
           typename StreamType,
-          typename HandlerType>
+          typename HandlerType,
+          typename HandlerConfigurationType>
 class Net_AsynchTCPConnectionBase_T
  : public Net_AsynchSocketConnectionBase_T<ACE_INET_Addr,
                                            Net_SocketConfiguration,
                                            HandlerType,
                                            ConfigurationType,
-                                           Net_SocketHandlerConfiguration,
+                                           HandlerConfigurationType,
                                            UserDataType,
                                            SessionDataType,
                                            Stream_Statistic,
@@ -120,12 +124,14 @@ class Net_AsynchTCPConnectionBase_T
                                                                 UserDataType,
                                                                 SessionDataType,
                                                                 StreamType,
-                                                                HandlerType> >;
+                                                                HandlerType,
+                                                                HandlerConfigurationType> >;
  friend class ACE_Asynch_Connector<Net_AsynchTCPConnectionBase_T<ConfigurationType,
                                                                  UserDataType,
                                                                  SessionDataType,
                                                                  StreamType,
-                                                                 HandlerType> >;
+                                                                 HandlerType,
+                                                                 HandlerConfigurationType> >;
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
@@ -145,7 +151,7 @@ class Net_AsynchTCPConnectionBase_T
                                            Net_SocketConfiguration,
                                            HandlerType,
                                            ConfigurationType,
-                                           Net_SocketHandlerConfiguration,
+                                           HandlerConfigurationType,
                                            UserDataType,
                                            SessionDataType,
                                            Stream_Statistic,

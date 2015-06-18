@@ -21,7 +21,7 @@
 
 #include "net_eventhandler.h"
 
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 #include "stream_common.h"
 
@@ -48,7 +48,7 @@ Net_EventHandler::start (const Stream_ModuleConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::start"));
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (CBData_->stackLock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 
   CBData_->eventStack.push_back (NET_GTKEVENT_CONNECT);
 }
@@ -58,7 +58,7 @@ Net_EventHandler::notify (const Net_Message& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (CBData_->stackLock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 
   CBData_->eventStack.push_back (NET_GTKEVENT_DATA);
 }
@@ -68,7 +68,7 @@ Net_EventHandler::end ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::end"));
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (CBData_->stackLock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 
   CBData_->eventStack.push_back (NET_GTKEVENT_DISCONNECT);
 }

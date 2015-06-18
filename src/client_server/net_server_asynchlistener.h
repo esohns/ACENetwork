@@ -26,7 +26,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_idumpstate.h"
 
@@ -47,7 +47,7 @@ class Net_Server_AsynchListener_T
                                                          SocketHandlerConfigurationType,
                                                          UserDataType,
                                                          HandlerType>,
-                             ACE_Recursive_Thread_Mutex>;
+                             ACE_SYNCH_RECURSIVE_MUTEX>;
 
  public:
   virtual int accept (size_t = 0,          // bytes to read

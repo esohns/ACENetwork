@@ -62,7 +62,7 @@ class Net_Client_Connector_T
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  virtual bool useReactor () const; // ? : uses proactor
+  //virtual bool useReactor () const; // ? : uses proactor
   virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual ACE_HANDLE connect (const AddressType&);
@@ -103,7 +103,8 @@ class Net_Client_Connector_T<ACE_INET_Addr,
                              StreamType,
                              Net_UDPConnection_T<UserDataType,
                                                  SessionDataType,
-                                                 HandlerType> >
+                                                 HandlerType,
+                                                 HandlerConfigurationType> >
  : public Net_Client_IConnector_T<ACE_INET_Addr,
                                   HandlerConfigurationType>
 {
@@ -116,7 +117,8 @@ class Net_Client_Connector_T<ACE_INET_Addr,
                                    StreamType> ICONNECTION_MANAGER_T;
   typedef Net_UDPConnection_T<UserDataType,
                               SessionDataType,
-                              HandlerType> CONNECTION_T;
+                              HandlerType,
+                              HandlerConfigurationType> CONNECTION_T;
 
   Net_Client_Connector_T (const HandlerConfigurationType*, // configuration handle
                           ICONNECTION_MANAGER_T*,          // connection manager handle
@@ -125,7 +127,7 @@ class Net_Client_Connector_T<ACE_INET_Addr,
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  virtual bool useReactor () const; // ? : uses proactor
+  //virtual bool useReactor () const; // ? : uses proactor
   // *TODO*: why is it necessary to provide an implementation when there is (a
   //         more generic) one available ? (gcc complains about abort() and
   //         getConfiguration())
@@ -186,7 +188,7 @@ class Net_Client_Connector_T<ACE_Netlink_Addr,
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  virtual bool useReactor () const; // ? : uses proactor
+  //virtual bool useReactor () const; // ? : uses proactor
   virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual ACE_HANDLE connect (const ACE_Netlink_Addr&);

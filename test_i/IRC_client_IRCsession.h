@@ -31,8 +31,6 @@
 
 #include "stream_common.h"
 
-#include "net_defines.h"
-
 #include "IRC_client_common.h"
 #include "IRC_client_inputhandler.h"
 #include "IRC_client_IRCmessage.h"
@@ -55,10 +53,8 @@ class IRC_Client_IRCSession_T
 
  public:
   IRC_Client_IRCSession_T (IRC_Client_IConnection_Manager_t* = NULL, // connection manager handle
-                           unsigned int = 0,                         // statistics collecting interval (second(s))
+                           unsigned int = 0);                        // statistics collecting interval (second(s))
                                                                      // 0 --> DON'T collect statistics
-                           bool = false,                             // log to file ? : stdout
-                           bool = NET_EVENT_USE_REACTOR);            // use reactor ?
   virtual ~IRC_Client_IRCSession_T ();
 
   // implement IRC_Client_INotify_t

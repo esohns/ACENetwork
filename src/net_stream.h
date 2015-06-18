@@ -47,7 +47,7 @@ class Net_Export Net_Stream
                         Stream_Statistic,
                         Net_StreamConfiguration,
                         Stream_ModuleConfiguration,
-                        Net_UserData,
+                        Net_StreamUserData,
                         Net_StreamSessionData_t,
                         Net_SessionMessage,
                         Net_Message>
@@ -74,7 +74,7 @@ class Net_Export Net_Stream
                         Stream_Statistic,
                         Net_StreamConfiguration,
                         Stream_ModuleConfiguration,
-                        Net_UserData,
+                        Net_StreamUserData,
                         Net_StreamSessionData_t,
                         Net_SessionMessage,
                         Net_Message> inherited;

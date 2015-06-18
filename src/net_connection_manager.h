@@ -21,7 +21,7 @@
 #ifndef NET_CONNECTION_MANAGER_H
 #define NET_CONNECTION_MANAGER_H
 
-#include "ace/Condition_T.h"
+//#include "ace/Condition_T.h"
 #include "ace/Containers_T.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
@@ -56,12 +56,7 @@ class Net_Connection_Manager_T
                                                       UserDataType,
                                                       StatisticContainerType,
                                                       StreamType>,
-                             ACE_Recursive_Thread_Mutex>;
-
-  //// needs access to (de-)register itself with the singleton
-  //friend class Net_SocketHandlerBase_T<ConfigurationType,
-  //                                     SessionDataType,
-  //                                     StatisticContainerType>;
+                             ACE_SYNCH_MUTEX>;
 
  public:
   // convenience types
@@ -118,7 +113,7 @@ class Net_Connection_Manager_T
                                    ConfigurationType,
                                    UserDataType,
                                    StatisticContainerType,
-                                   StreamType> SELF_T;
+                                   StreamType> OWN_TYPE_T;
 
   typedef ACE_DLList<CONNECTION_T> CONNECTION_CONTAINER_T;
   typedef ACE_DLList_Iterator<CONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;

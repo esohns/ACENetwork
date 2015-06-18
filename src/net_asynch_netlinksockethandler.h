@@ -28,17 +28,16 @@
 #include "ace/Netlink_Addr.h"
 #include "ace/Notification_Strategy.h"
 
-#include "net_configuration.h"
-#include "net_exports.h"
 #include "net_sockethandler_base.h"
 
-class Net_Export Net_AsynchNetlinkSocketHandler
- : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration>
+template <typename ConfigurationType>
+class Net_AsynchNetlinkSocketHandler_T
+ : public Net_SocketHandlerBase<ConfigurationType>
  , public ACE_Service_Handler
  , public ACE_Notification_Strategy
 {
  public:
-  virtual ~Net_AsynchNetlinkSocketHandler ();
+  virtual ~Net_AsynchNetlinkSocketHandler_T ();
 
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
@@ -54,7 +53,7 @@ class Net_Export Net_AsynchNetlinkSocketHandler
                       ACE_Reactor_Mask);  // mask
 
  protected:
-  Net_AsynchNetlinkSocketHandler ();
+  Net_AsynchNetlinkSocketHandler_T ();
 
   // helper method(s)
   void initiate_read_dgram ();
@@ -67,15 +66,18 @@ class Net_Export Net_AsynchNetlinkSocketHandler
   ACE_Netlink_Addr       remoteSAP_;
 
  private:
-  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration> inherited;
+  typedef Net_SocketHandlerBase<ConfigurationType> inherited;
   typedef ACE_Service_Handler inherited2;
   typedef ACE_Notification_Strategy inherited3;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkSocketHandler (const Net_AsynchNetlinkSocketHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkSocketHandler& operator= (const Net_AsynchNetlinkSocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkSocketHandler_T (const Net_AsynchNetlinkSocketHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkSocketHandler_T& operator= (const Net_AsynchNetlinkSocketHandler_T&));
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
 };
+
+// include template implementation
+#include "net_asynch_netlinksockethandler.inl"
 
 #endif

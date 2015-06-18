@@ -38,13 +38,14 @@
 
 template <typename UserDataType,
           typename SessionDataType,
-          typename HandlerType>
+          typename HandlerType,
+          typename HandlerConfigurationType>
 class Net_UDPConnection_T
  : public Net_SocketConnectionBase_T<ACE_INET_Addr,
                                      Net_SocketConfiguration,
                                      HandlerType,
                                      Net_Configuration,
-                                     Net_SocketHandlerConfiguration,
+                                     HandlerConfigurationType,
                                      UserDataType,
                                      SessionDataType,
                                      Stream_Statistic,
@@ -53,7 +54,8 @@ class Net_UDPConnection_T
 {
   friend class ACE_Connector<Net_UDPConnection_T<UserDataType,
                                                  SessionDataType,
-                                                 HandlerType>,
+                                                 HandlerType,
+                                                 HandlerConfigurationType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
@@ -85,7 +87,7 @@ class Net_UDPConnection_T
                                      Net_SocketConfiguration,
                                      HandlerType,
                                      Net_Configuration,
-                                     Net_SocketHandlerConfiguration,
+                                     HandlerConfigurationType,
                                      UserDataType,
                                      SessionDataType,
                                      Stream_Statistic,
@@ -101,13 +103,14 @@ class Net_UDPConnection_T
 
 template <typename UserDataType,
           typename SessionDataType,
-          typename HandlerType>
+          typename HandlerType,
+          typename HandlerConfigurationType>
 class Net_AsynchUDPConnection_T
  : public Net_AsynchSocketConnectionBase_T<ACE_INET_Addr,
                                            Net_SocketConfiguration,
                                            HandlerType,
                                            Net_Configuration,
-                                           Net_SocketHandlerConfiguration,
+                                           HandlerConfigurationType,
                                            UserDataType,
                                            SessionDataType,
                                            Stream_Statistic,
@@ -116,7 +119,8 @@ class Net_AsynchUDPConnection_T
 {
   friend class ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
                                                               SessionDataType,
-                                                              HandlerType> >;
+                                                              HandlerType,
+                                                              HandlerConfigurationType> >;
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
@@ -144,7 +148,7 @@ class Net_AsynchUDPConnection_T
                                            Net_SocketConfiguration,
                                            HandlerType,
                                            Net_Configuration,
-                                           Net_SocketHandlerConfiguration,
+                                           HandlerConfigurationType,
                                            UserDataType,
                                            SessionDataType,
                                            Stream_Statistic,

@@ -47,7 +47,8 @@ class Net_ConnectionBase_T
 {
  public:
   // implement (part of) Net_IConnection_T
-  virtual bool initialize (const ConfigurationType&); // handler configuration
+  virtual const ConfigurationType& get () const; // return value: type
+  virtual bool initialize (const ConfigurationType&); // configuration
   virtual Net_Connection_Status status () const;
 
   // convenient types

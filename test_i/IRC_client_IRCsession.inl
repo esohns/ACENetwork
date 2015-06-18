@@ -25,9 +25,7 @@
 
 template <typename ConnectionType>
 IRC_Client_IRCSession_T<ConnectionType>::IRC_Client_IRCSession_T (IRC_Client_IConnection_Manager_t* interfaceHandle_in,
-                                                                  unsigned int statisticCollectionInterval_in,
-                                                                  bool logToFile_in,
-                                                                  bool useReactor_in)
+                                                                  unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
  , close_ (false)
@@ -38,42 +36,6 @@ IRC_Client_IRCSession_T<ConnectionType>::IRC_Client_IRCSession_T (IRC_Client_ICo
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::IRC_Client_IRCSession_T"));
 
-  int result = -1;
-
-  ACE_NEW_NORETURN (inputHandler_,
-                    IRC_Client_InputHandler (useReactor_in));
-  if (!inputHandler_)
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", continuing\n")));
-
-  if (logToFile_in)
-  {
-    std::string filename = Common_File_Tools::getLogDirectory ();
-    filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-    filename += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SESSION_LOG);
-    filename += COMMON_LOG_FILENAME_SUFFIX;
-    ACE_FILE_Addr address;
-    result = address.set (ACE_TEXT (filename.c_str ()));
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_FILE_Addr::set(\"%s\"): \"%m\", continuing\n"),
-                  ACE_TEXT (filename.c_str ())));
-    ACE_FILE_Connector connector;
-    result = connector.connect (output_,
-                                address,
-                                NULL,
-                                ACE_Addr::sap_any,
-                                O_CREAT | O_TEXT | O_TRUNC | O_WRONLY,
-                                ACE_DEFAULT_FILE_PERMS);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_FILE_Connector::connect(\"%s\"): \"%m\", continuing\n"),
-                  ACE_TEXT (filename.c_str ())));
-    else
-      close_ = true;
-  } // end IF
-  else
-    output_.set_handle (ACE_STDOUT);
 }
 
 template <typename ConnectionType>
@@ -121,9 +83,9 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::start"));
 
-  ACE_UNUSED_ARG (configuration_in);
+  int result = -1;
 
-  // step1: retrieve controller handle
+  // step0a: retrieve controller handle
   const IRC_Client_Stream& stream_r = inherited::stream ();
   const typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T* module_p = NULL;
   for (typename inherited::CONNECTION_BASE_T::STREAM_T::ITERATOR_T iterator (stream_r);
@@ -135,7 +97,7 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("module \"%s\" not found, aborting\n"),
+                ACE_TEXT ("module \"%s\" not found, returning\n"),
                 ACE_TEXT (IRC_HANDLER_MODULE_NAME)));
 
     // close connection
@@ -148,7 +110,7 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
   if (!controller_)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<IRC_Client_IIRCControl*> failed, aborting\n"),
+                ACE_TEXT ("%s: dynamic_cast<IRC_Client_IIRCControl*> failed, returning\n"),
                 ACE_TEXT (module_p->name ())));
 
     // close connection
@@ -157,12 +119,95 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
     return;
   } // end ELSE
 
-  // step2: set initial nickname
-  IRC_Client_Configuration* configuration_p =
-    &(inherited::CONNECTION_BASE_T::configuration_);
+  // step0b: set initial nickname
+  IRC_Client_Configuration* configuration_p = NULL;
+  if (!inherited::manager_)
+  {
+    ACE_ASSERT (configuration_in.connection);
+    const IRC_Client_Configuration& configuration_r =
+      configuration_in.connection->get ();
+    configuration_p = &const_cast<IRC_Client_Configuration&> (configuration_r);
+  } // end IF
+  else
+    configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
   // sanity check(s)
   ACE_ASSERT (configuration_p);
   state_.nickname = configuration_p->protocolConfiguration.loginOptions.nick;
+
+  // step1: initialize output
+  if (configuration_p->logToFile)
+  {
+    std::string filename = Common_File_Tools::getLogDirectory ();
+    filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    filename += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_SESSION_LOG_FILENAME_PREFIX);
+    filename += COMMON_LOG_FILENAME_SUFFIX;
+    ACE_FILE_Addr address;
+    result = address.set (ACE_TEXT (filename.c_str ()));
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_FILE_Addr::set(\"%s\"): \"%m\", returning\n"),
+                  ACE_TEXT (filename.c_str ())));
+
+      // close connection
+      inherited::close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
+
+      return;
+    } // end IF
+    ACE_FILE_Connector connector;
+    result = connector.connect (output_,
+                                address,
+                                NULL,
+                                ACE_Addr::sap_any,
+                                O_CREAT | O_TEXT | O_TRUNC | O_WRONLY,
+                                ACE_DEFAULT_FILE_PERMS);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_FILE_Connector::connect(\"%s\"): \"%m\", returning\n"),
+                  ACE_TEXT (filename.c_str ())));
+
+      // close connection
+      inherited::close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
+
+      return;
+    } // end IF
+    close_ = true;
+  } // end IF
+  else
+    output_.set_handle (ACE_STDOUT);
+
+  // step2: initialize input
+  if (!inputHandler_)
+  {
+    ACE_NEW_NORETURN (inputHandler_,
+                      IRC_Client_InputHandler (&state_,
+                      configuration_p->useReactor));
+    if (!inputHandler_)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+
+      // close connection
+      inherited::close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
+
+      return;
+    } // end IF
+    IRC_Client_InputHandlerConfiguration input_handler_configuration;
+    input_handler_configuration.controller = controller_;
+    input_handler_configuration.streamConfiguration =
+      &configuration_p->streamConfiguration.streamConfiguration;
+    if (!inputHandler_->initialize (input_handler_configuration))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to IRC_Client_InputHandler::initialize(): \"%m\", returning\n")));
+
+      // close connection
+      inherited::close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
+
+      return;
+    } // end IF
+  } // end IF
 }
 
 template <typename ConnectionType>
@@ -316,9 +361,8 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
         }
         case IRC_Client_IRC_Codes::RPL_NOTOPIC:          // 331
         case IRC_Client_IRC_Codes::RPL_TOPIC:            // 332
-        {
+        case IRC_Client_IRC_Codes::RPL_TOPICWHOTIME:     // 333
           break;
-        }
         case IRC_Client_IRC_Codes::RPL_WHOREPLY:         // 352
         {
           // bisect user information from parameter strings
@@ -479,13 +523,12 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           // there are two possibilities:
           // - reply from a successful join request
           // - stranger entering the channel
+          log (message_in);
 
           // reply from a successful join request ?
           if (message_in.prefix.origin == state_.nickname)
           {
-            ACE_DEBUG ((LM_DEBUG,
-                        ACE_TEXT ("joined channel: \"%s\"...\n"),
-                        ACE_TEXT (message_in.params.front ().c_str ())));
+            state_.channel = message_in.params.front ();
             break;
           } // end IF
 
@@ -497,13 +540,12 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           // there are two possibilities:
           // - reply from a (successful) part request
           // - someone left a common channel
+          log (message_in);
 
           // reply from a successful part request ?
           if (message_in.prefix.origin == state_.nickname)
           {
-            ACE_DEBUG ((LM_DEBUG,
-                        ACE_TEXT ("left channel: \"%s\"...\n"),
-                        ACE_TEXT (message_in.params.front ().c_str ())));
+            state_.channel.clear ();
             break;
           } // end IF
 
@@ -515,6 +557,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           // there are two possibilities:
           // - user mode message
           // - channel mode message
+          log (message_in);
 
           // retrieve mode string
           IRC_Client_ParametersIterator_t param_iterator =
@@ -534,28 +577,21 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
                                      state_.channelModes);
           } // end ELSE
 
-          // log this event
-          log (message_in);
-
           break;
         }
         case IRC_Client_IRCMessage::TOPIC:
         {
-          // log this event
           log (message_in);
-
           break;
         }
         case IRC_Client_IRCMessage::KICK:
         {
-          // retrieve nickname string
-          IRC_Client_ParametersIterator_t param_iterator =
-            message_in.params.begin ();
-          param_iterator++;
-
-          // log this event
           log (message_in);
 
+          //// retrieve nickname string
+          //IRC_Client_ParametersIterator_t param_iterator =
+          //  message_in.params.begin ();
+          //param_iterator++;
           break;
         }
         case IRC_Client_IRCMessage::PRIVMSG:
@@ -581,7 +617,6 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
             // part of an existing conversation ?
           } // end IF
 
-          // channel/nick message ?
           log (message_text);
 
           break;
@@ -664,7 +699,7 @@ IRC_Client_IRCSession_T<ConnectionType>::open (void* arg_in)
     IRC_Client_Connector_t* connector_p =
       reinterpret_cast<IRC_Client_Connector_t*> (arg_in);
     ACE_ASSERT (connector_p);
-    const Net_SocketHandlerConfiguration* socket_handler_configuration_p =
+    const IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p =
       connector_p->getConfiguration ();
     ACE_ASSERT (socket_handler_configuration_p);
     //configuration_p = socket_handler_configuration_p->configuration;

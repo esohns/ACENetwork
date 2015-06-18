@@ -111,10 +111,12 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                    StreamType,
                                    Net_AsynchUDPConnection_T<UserDataType,
                                                              SessionDataType,
-                                                             HandlerType> >
+                                                             HandlerType,
+                                                             HandlerConfigurationType> >
  : public ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
                                                          SessionDataType,
-                                                         HandlerType> >
+                                                         HandlerType,
+                                                         HandlerConfigurationType> >
  , public Net_Client_IConnector_T<ACE_INET_Addr,
                                   HandlerConfigurationType>
 {
@@ -127,9 +129,9 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                    StreamType> ICONNECTION_MANAGER_T;
   typedef Net_AsynchUDPConnection_T<UserDataType,
                                     SessionDataType,
-                                    HandlerType> CONNECTION_T;
+                                    HandlerType,
+                                    HandlerConfigurationType> CONNECTION_T;
 
-  // *TODO*: pass HandlerConfigurationType instead
   Net_Client_AsynchConnector_T (const HandlerConfigurationType*, // socket handler configuration handle
                                 ICONNECTION_MANAGER_T*,          // connection manager handle
                                 unsigned int = 0);               // statistics collecting interval (second(s))
@@ -152,12 +154,14 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
   //virtual CONNECTION_T* make_handler (void);
    virtual Net_AsynchUDPConnection_T<UserDataType,
                                      SessionDataType,
-                                     HandlerType>* make_handler (void);
+                                     HandlerType,
+                                     HandlerConfigurationType>* make_handler (void);
 
  private:
   typedef ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
                                                          SessionDataType,
-                                                         HandlerType> > inherited;
+                                                         HandlerType,
+                                                         HandlerConfigurationType> > inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&));
@@ -199,7 +203,6 @@ class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                                    Stream_Statistic,
                                    StreamType> ICONNECTION_MANAGER_T;
 
-  // *TODO*: pass HandlerConfigurationType instead
   Net_Client_AsynchConnector_T (const HandlerConfigurationType*, // socket handler configuration handle
                                 ICONNECTION_MANAGER_T*,          // connection manager handle
                                 unsigned int = 0);               // statistics collecting interval (second(s))
@@ -212,7 +215,7 @@ class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
                                    const ACE_Netlink_Addr&);          // local address
 
   // implement Net_Client_IConnector_T
-  virtual bool useReactor () const; // ? : uses proactor
+  //virtual bool useReactor () const; // ? : uses proactor
   virtual const HandlerConfigurationType* getConfiguration () const;
   virtual void abort ();
   virtual ACE_HANDLE connect (const ACE_Netlink_Addr&);

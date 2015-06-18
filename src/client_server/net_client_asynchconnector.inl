@@ -305,7 +305,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              StreamType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       HandlerType> >::Net_Client_AsynchConnector_T (const HandlerConfigurationType* configuration_in,
+                                                       HandlerType,
+                                                       HandlerConfigurationType> >::Net_Client_AsynchConnector_T (const HandlerConfigurationType* configuration_in,
                                                                                                      ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                                                      unsigned int statisticCollectionInterval_in)
  : configuration_ (configuration_in)
@@ -341,7 +342,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              StreamType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       HandlerType> >::~Net_Client_AsynchConnector_T ()
+                                                       HandlerType,
+                                                       HandlerConfigurationType> >::~Net_Client_AsynchConnector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::~Net_Client_AsynchConnector_T"));
 
@@ -364,9 +366,10 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              StreamType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       HandlerType> >::validate_connection (const ACE_Asynch_Connect::Result& result_in,
-                                                                                            const ACE_INET_Addr& remoteSAP_in,
-                                                                                            const ACE_INET_Addr& localSAP_in)
+                                                       HandlerType,
+                                                       HandlerConfigurationType> >::validate_connection (const ACE_Asynch_Connect::Result& result_in,
+                                                                                                         const ACE_INET_Addr& remoteSAP_in,
+                                                                                                         const ACE_INET_Addr& localSAP_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
@@ -397,29 +400,29 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
   return ((result == 0) ? -1 : 0);
 }
 
-template <typename SocketConfigurationType,
-          typename HandlerType,
-          typename ConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
-          typename StreamType>
-bool
-Net_Client_AsynchConnector_T<ACE_INET_Addr,
-                             SocketConfigurationType,
-                             ConfigurationType,
-                             HandlerConfigurationType,
-                             UserDataType,
-                             SessionDataType,
-                             StreamType,
-                             Net_AsynchUDPConnection_T<UserDataType,
-                                                       SessionDataType,
-                                                       HandlerType> >::useReactor () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::useReactor"));
-
-  return false;
-}
+//template <typename SocketConfigurationType,
+//          typename HandlerType,
+//          typename ConfigurationType,
+//          typename HandlerConfigurationType,
+//          typename UserDataType,
+//          typename SessionDataType,
+//          typename StreamType>
+//bool
+//Net_Client_AsynchConnector_T<ACE_INET_Addr,
+//                             SocketConfigurationType,
+//                             ConfigurationType,
+//                             HandlerConfigurationType,
+//                             UserDataType,
+//                             SessionDataType,
+//                             StreamType,
+//                             Net_AsynchUDPConnection_T<UserDataType,
+//                                                       SessionDataType,
+//                                                       HandlerType> >::useReactor () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::useReactor"));
+//
+//  return false;
+//}
 
 template <typename SocketConfigurationType,
           typename HandlerType,
@@ -438,7 +441,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              StreamType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       HandlerType> >::getConfiguration () const
+                                                       HandlerType,
+                                                       HandlerConfigurationType> >::getConfiguration () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::getConfiguration"));
 
@@ -462,7 +466,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              StreamType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       HandlerType> >::abort ()
+                                                       HandlerType,
+                                                       HandlerConfigurationType> >::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::abort"));
 
@@ -491,7 +496,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              StreamType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       HandlerType> >::connect (const ACE_INET_Addr& address_in)
+                                                       HandlerType,
+                                                       HandlerConfigurationType> >::connect (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
@@ -524,7 +530,8 @@ template <typename SocketConfigurationType,
           typename StreamType>
 Net_AsynchUDPConnection_T<UserDataType,
                           SessionDataType,
-                          HandlerType>*
+                          HandlerType,
+                          HandlerConfigurationType>*
 Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
@@ -534,7 +541,8 @@ Net_Client_AsynchConnector_T<ACE_INET_Addr,
                              StreamType,
                              Net_AsynchUDPConnection_T<UserDataType,
                                                        SessionDataType,
-                                                       HandlerType> >::make_handler (void)
+                                                       HandlerType,
+                                                       HandlerConfigurationType> >::make_handler (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::make_handler"));
 

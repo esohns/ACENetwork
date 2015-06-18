@@ -29,9 +29,6 @@
 #include "ace/Svc_Handler.h"
 #include "ace/Synch_Traits.h"
 
-#include "net_common.h"
-#include "net_configuration.h"
-#include "net_exports.h"
 #include "net_sockethandler_base.h"
 
 // *NOTE*: should be added to ACE so Svc_Handler can be parametrized with
@@ -44,8 +41,9 @@ class ACE_SOCK_NETLINK
   typedef ACE_Netlink_Addr PEER_ADDR;
 };
 
-class Net_Export Net_NetlinkSocketHandler
- : public Net_SocketHandlerBase<Net_SocketHandlerConfiguration>
+template <typename ConfigurationType>
+class Net_NetlinkSocketHandler_T
+ : public Net_SocketHandlerBase<ConfigurationType>
  , public ACE_Svc_Handler<ACE_SOCK_NETLINK, ACE_MT_SYNCH>
 {
  public:
@@ -66,17 +64,20 @@ class Net_Export Net_NetlinkSocketHandler
  protected:
   typedef ACE_Svc_Handler<ACE_SOCK_NETLINK, ACE_MT_SYNCH> SVC_HANDLER_T;
 
-  Net_NetlinkSocketHandler ();
-  virtual ~Net_NetlinkSocketHandler ();
+  Net_NetlinkSocketHandler_T ();
+  virtual ~Net_NetlinkSocketHandler_T ();
 
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef Net_SocketHandlerBase<Net_SocketHandlerConfiguration> inherited;
+  typedef Net_SocketHandlerBase<ConfigurationType> inherited;
   typedef ACE_Svc_Handler<ACE_SOCK_NETLINK, ACE_MT_SYNCH> inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler (const Net_NetlinkSocketHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler& operator= (const Net_NetlinkSocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler_T (const Net_NetlinkSocketHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler_T& operator= (const Net_NetlinkSocketHandler_T&));
 };
+
+// include template implementation
+#include "net_netlinksockethandler.inl"
 
 #endif

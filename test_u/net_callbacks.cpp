@@ -21,6 +21,8 @@
 
 #include "net_callbacks.h"
 
+#include "ace/Synch_Traits.h"
+
 #include "glade/glade.h"
 
 #include "common_timer_manager.h"
@@ -678,7 +680,7 @@ idle_update_log_display_cb (gpointer userData_in)
 
   gchar* converted_text = NULL;
   { // synch access
-    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (data_p->stackLock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->stackLock);
 
     // sanity check
     if (data_p->logStack.empty ())
@@ -759,7 +761,7 @@ idle_update_info_display_cb (gpointer userData_in)
   bool update_buttons = false;
   GtkSpinButton* spinbutton_p = NULL;
   { // synch access
-    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard (data_p->stackLock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->stackLock);
 
     if (data_p->eventStack.empty ())
       return TRUE; // G_SOURCE_CONTINUE

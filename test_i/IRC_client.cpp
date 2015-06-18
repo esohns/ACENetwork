@@ -350,13 +350,14 @@ connection_setup_function (void* arg_in)
     static_cast<IRC_Client_ThreadData*> (arg_in);
   ACE_ASSERT (thread_data_p);
   int result = -1;
-  ACE_Time_Value delay (IRC_CLIENT_DEF_CONNECTION_TIMEOUT, 0);
+  ACE_Time_Value delay (IRC_CLIENT_CONNECTION_DEF_TIMEOUT, 0);
 
   // step1: wait for connection
   result = ACE_OS::sleep (delay);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::sleep: \"%m\", continuing\n")));
+                ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+                &delay));
 
   Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
                                        thread_data_p->useProactor,
@@ -591,13 +592,13 @@ do_work (IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step3: initialize client connector
-  Net_SocketHandlerConfiguration socket_handler_configuration;
+  IRC_Client_SocketHandlerConfiguration socket_handler_configuration;
   socket_handler_configuration.bufferSize = IRC_CLIENT_BUFFER_SIZE;
   socket_handler_configuration.messageAllocator =
     configuration_in.streamConfiguration.streamConfiguration.messageAllocator;
   socket_handler_configuration.socketConfiguration =
     configuration_in.socketConfiguration;
-  Net_Client_IConnector_t* connector_p = NULL;
+  IRC_Client_IClientConnector_t* connector_p = NULL;
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   if (configuration_in.useReactor)
@@ -1214,7 +1215,7 @@ ACE_TMAIN (int argc_in,
                                                  &heap_allocator);
 
   IRC_Client_Configuration configuration;
-
+  ///////////////////////////////////////
   configuration.streamConfiguration.streamConfiguration.bufferSize =
     IRC_CLIENT_BUFFER_SIZE;
   configuration.streamConfiguration.streamConfiguration.messageAllocator =
@@ -1223,7 +1224,7 @@ ACE_TMAIN (int argc_in,
     statistic_reporting_interval;
   configuration.streamConfiguration.debugScanner = IRC_CLIENT_DEF_LEX_TRACE;
   configuration.streamConfiguration.debugParser = IRC_CLIENT_DEF_YACC_TRACE;
-
+  ///////////////////////////////////////
   configuration.protocolConfiguration.loginOptions.nick =
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_NICK);
   //   userData.loginOptions.user.username = ;
@@ -1270,16 +1271,17 @@ ACE_TMAIN (int argc_in,
   Common_Tools::getCurrentUserName (configuration.protocolConfiguration.loginOptions.user.username,
                                     configuration.protocolConfiguration.loginOptions.user.realname);
 
-  std::string                server_hostname =
-      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SERVER_HOSTNAME);
-  unsigned short             server_port_number = IRC_CLIENT_DEF_SERVER_PORT;
-
   // step7: parse configuration file(s) (if any)
+  std::string                server_hostname =
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SERVER_HOSTNAME);
+  unsigned short             server_port_number = IRC_CLIENT_DEF_SERVER_PORT;
   if (!configuration_file.empty ())
     do_parseConfigurationFile (configuration_file,
                                configuration.protocolConfiguration.loginOptions,
                                server_hostname,
                                server_port_number);
+  ///////////////////////////////////////
+  configuration.logToFile = IRC_CLIENT_SESSION_DEF_LOG;
   configuration.useReactor = use_reactor;
 
   // step8: do work

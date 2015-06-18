@@ -64,7 +64,7 @@ void
 Net_Module_MessageHandler_T<ConfigurationType,
                             SessionMessageType,
                             MessageType>::initialize (SUBSCRIBERS_T* subscribers_in,
-                                                      ACE_Recursive_Thread_Mutex* lock_in)
+                                                      ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_MessageHandler_T::initialize"));
 

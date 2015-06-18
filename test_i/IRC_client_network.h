@@ -43,11 +43,6 @@
 #include "IRC_client_stream.h"
 #include "IRC_client_stream_common.h"
 
-//// forward declarations
-//struct IRC_Client_SessionData;
-//struct IRC_Client_Configuration;
-//class IRC_Client_Stream;
-
 /////////////////////////////////////////
 
 typedef Net_StreamTCPSocketBase_T<ACE_INET_Addr,
@@ -58,7 +53,7 @@ typedef Net_StreamTCPSocketBase_T<ACE_INET_Addr,
                                   IRC_Client_StreamSessionData_t,
                                   Stream_Statistic,
                                   IRC_Client_Stream,
-                                  Net_TCPSocketHandler> IRC_Client_TCPHandler_t;
+                                  Net_TCPSocketHandler_T<IRC_Client_SocketHandlerConfiguration> > IRC_Client_TCPHandler_t;
 typedef Net_StreamAsynchTCPSocketBase_T<ACE_INET_Addr,
                                         Net_SocketConfiguration,
                                         IRC_Client_Configuration,
@@ -67,26 +62,28 @@ typedef Net_StreamAsynchTCPSocketBase_T<ACE_INET_Addr,
                                         IRC_Client_StreamSessionData_t,
                                         Stream_Statistic,
                                         IRC_Client_Stream,
-                                        Net_AsynchTCPSocketHandler> IRC_Client_AsynchTCPHandler_t;
+                                        Net_AsynchTCPSocketHandler_T<IRC_Client_SocketHandlerConfiguration> > IRC_Client_AsynchTCPHandler_t;
 typedef Net_TCPConnectionBase_T<IRC_Client_Configuration,
                                 IRC_Client_SessionData,
                                 IRC_Client_StreamSessionData_t,
                                 IRC_Client_Stream,
-                                IRC_Client_TCPHandler_t> IRC_Client_TCPConnection_t;
+                                IRC_Client_TCPHandler_t,
+                                IRC_Client_SocketHandlerConfiguration> IRC_Client_TCPConnection_t;
 typedef Net_AsynchTCPConnectionBase_T<IRC_Client_Configuration,
                                       IRC_Client_SessionData,
                                       IRC_Client_StreamSessionData_t,
                                       IRC_Client_Stream,
-                                      IRC_Client_AsynchTCPHandler_t> IRC_Client_AsynchTCPConnection_t;
+                                      IRC_Client_AsynchTCPHandler_t,
+                                      IRC_Client_SocketHandlerConfiguration> IRC_Client_AsynchTCPConnection_t;
 
 /////////////////////////////////////////
 
-//typedef Net_Client_IConnector_T<ACE_INET_Addr,
-//                                Net_SocketHandlerConfiguration> IRC_Client_IClientConnector_t;
+typedef Net_Client_IConnector_T<ACE_INET_Addr,
+                                IRC_Client_SocketHandlerConfiguration> IRC_Client_IClientConnector_t;
 typedef Net_Client_Connector_T<ACE_INET_Addr,
                                Net_SocketConfiguration,
                                IRC_Client_Configuration,
-                               Net_SocketHandlerConfiguration,
+                               IRC_Client_SocketHandlerConfiguration,
                                IRC_Client_SessionData,
                                IRC_Client_StreamSessionData_t,
                                IRC_Client_Stream,
@@ -94,7 +91,7 @@ typedef Net_Client_Connector_T<ACE_INET_Addr,
 typedef Net_Client_AsynchConnector_T<ACE_INET_Addr,
                                      Net_SocketConfiguration,
                                      IRC_Client_Configuration,
-                                     Net_SocketHandlerConfiguration,
+                                     IRC_Client_SocketHandlerConfiguration,
                                      IRC_Client_SessionData,
                                      IRC_Client_StreamSessionData_t,
                                      IRC_Client_Stream,
@@ -116,6 +113,6 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  IRC_Client_Stream> IRC_Client_Connection_Manager_t;
 
 typedef ACE_Singleton<IRC_Client_Connection_Manager_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> IRC_CLIENT_CONNECTIONMANAGER_SINGLETON;
+                      ACE_SYNCH_MUTEX> IRC_CLIENT_CONNECTIONMANAGER_SINGLETON;
 
 #endif

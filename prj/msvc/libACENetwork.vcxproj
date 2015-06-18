@@ -107,134 +107,282 @@
     <ClCompile Include="..\..\src\net_asynch_netlinksockethandler.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_asynch_tcpsockethandler.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_asynch_udpsockethandler.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_common_tools.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_connection_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_connection_manager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_controller_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
-    <ClCompile Include="..\..\src\net_ipconnection.cpp" />
+    <ClCompile Include="..\..\src\net_ipconnection.cpp">
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
+    </ClCompile>
     <ClCompile Include="..\..\src\net_message.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
-    <ClCompile Include="..\..\src\net_messagehandler_base.cpp" />
+    <ClCompile Include="..\..\src\net_messagehandler_base.cpp">
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
+    </ClCompile>
     <ClCompile Include="..\..\src\net_message_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_module_headerparser.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
-    <ClCompile Include="..\..\src\net_module_messagehandler.cpp" />
+    <ClCompile Include="..\..\src\net_module_messagehandler.cpp">
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
+    </ClCompile>
     <ClCompile Include="..\..\src\net_module_protocolhandler.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_module_runtimestatistic.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_module_sockethandler.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_netlinksockethandler.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_protocol_layer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_sessionmessage.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_socketconnection_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_sockethandler_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_stream.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_stream_asynch_tcpsocket_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_stream_asynch_udpsocket_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_stream_tcpsocket_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_stream_udpsocket_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_tcpconnection.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
-    <ClCompile Include="..\..\src\net_tcpconnection_base.cpp" />
+    <ClCompile Include="..\..\src\net_tcpconnection_base.cpp">
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
+    </ClCompile>
     <ClCompile Include="..\..\src\net_tcpsockethandler.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_transportlayer_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_transportlayer_ip_cast.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_transportlayer_tcp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_transportlayer_udp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_udpconnection.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\net_udpsockethandler.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShowIncludes>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShowIncludes>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -296,6 +444,9 @@
     <ClInclude Include="..\..\src\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\src\net_asynch_netlinksockethandler.inl" />
+    <None Include="..\..\src\net_asynch_tcpsockethandler.inl" />
+    <None Include="..\..\src\net_asynch_udpsockethandler.inl" />
     <None Include="..\..\src\net_connection_base.inl" />
     <None Include="..\..\src\net_connection_manager.inl" />
     <None Include="..\..\src\net_messagehandler_base.inl" />
@@ -303,6 +454,7 @@
     <None Include="..\..\src\net_module_messagehandler.inl" />
     <None Include="..\..\src\net_module_runtimestatistic.inl" />
     <None Include="..\..\src\net_module_sockethandler.inl" />
+    <None Include="..\..\src\net_netlinksockethandler.inl" />
     <None Include="..\..\src\net_socketconnection_base.inl" />
     <None Include="..\..\src\net_sockethandler_base.inl" />
     <None Include="..\..\src\net_stream_asynch_tcpsocket_base.inl" />
@@ -310,6 +462,7 @@
     <None Include="..\..\src\net_stream_tcpsocket_base.inl" />
     <None Include="..\..\src\net_stream_udpsocket_base.inl" />
     <None Include="..\..\src\net_tcpconnection_base.inl" />
+    <None Include="..\..\src\net_tcpsockethandler.inl" />
     <None Include="..\..\src\net_udpconnection.inl" />
     <None Include="..\..\src\net_udpsockethandler.inl" />
   </ItemGroup>

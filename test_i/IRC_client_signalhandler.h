@@ -28,13 +28,13 @@
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
-#include "net_client_connector_common.h"
+#include "IRC_client_network.h"
 
 struct IRC_Client_SignalHandlerConfiguration
 {
 //  long                     actionTimerId;
-  Net_Client_IConnector_t* connector;
-  ACE_INET_Addr            peerAddress;
+  IRC_Client_IClientConnector_t* connector;
+  ACE_INET_Addr                  peerAddress;
 };
 
 class IRC_Client_SignalHandler

@@ -32,11 +32,29 @@
 #include "stream_common.h"
 #include "stream_imodule.h"
 #include "stream_session_data_base.h"
+#include "stream_messageallocatorheap_base.h"
 
-#include "net_configuration.h"
+//#include "net_configuration.h"
 #include "net_message.h"
+//#include "net_sessionmessage.h"
 
-typedef Stream_SessionDataBase_T<Net_UserData> Net_StreamSessionData_t;
+// forward declarations
+class Net_SessionMessage;
+
+// *NOTE*: I speculate that this is the main reason that C# was ever invented !
+struct Net_StreamUserData
+{
+  inline Net_StreamUserData ()
+   : userData (NULL)
+  {};
+
+  void* userData;
+};
+
+typedef Stream_MessageAllocatorHeapBase_T<Net_Message,
+                                          Net_SessionMessage> Net_StreamMessageAllocator_t;
+
+typedef Stream_SessionDataBase_T<Net_StreamUserData> Net_StreamSessionData_t;
 
 typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Common_TimePolicy_t,

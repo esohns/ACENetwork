@@ -21,6 +21,7 @@
 #ifndef IRC_CLIENT_CONFIGURATION_H
 #define IRC_CLIENT_CONFIGURATION_H
 
+#include "ace/INET_Addr.h"
 #include "ace/Time_Value.h"
 
 #include "common_defines.h"
@@ -29,10 +30,22 @@
 
 #include "net_configuration.h"
 #include "net_defines.h"
+#include "net_iconnectionmanager.h"
 
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
-//#include "IRC_client_statemachine_registration.h"
+
+// forward declarations
+struct IRC_Client_Configuration;
+class IRC_Client_IIRCControl;
+struct IRC_Client_SessionData;
+class IRC_Client_Stream;
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                 Net_SocketConfiguration,
+                                 IRC_Client_Configuration,
+                                 IRC_Client_SessionData,
+                                 Stream_Statistic,
+                                 IRC_Client_Stream> IRC_Client_IConnection_Manager_t;
 
 typedef Stream_Statistic IRC_Client_RuntimeStatistic_t;
 struct IRC_Client_SessionData
@@ -44,6 +57,23 @@ struct IRC_Client_SessionData
 
   IRC_Client_RuntimeStatistic_t currentStatistics;
   ACE_Time_Value                lastCollectionTimestamp;
+};
+
+struct IRC_Client_SocketHandlerConfiguration
+{
+  inline IRC_Client_SocketHandlerConfiguration ()
+   : bufferSize (IRC_CLIENT_BUFFER_SIZE)
+   , connectionManager (NULL)
+   , messageAllocator (NULL)
+   , socketConfiguration ()
+   , statisticCollectionInterval (0)
+  {};
+
+  int                               bufferSize; // pdu size (if fixed)
+  IRC_Client_IConnection_Manager_t* connectionManager;
+  Stream_IAllocator*                messageAllocator;
+  Net_SocketConfiguration           socketConfiguration;
+  unsigned int                      statisticCollectionInterval; // seconds [0: OFF]
 };
 
 struct IRC_Client_ProtocolConfiguration
@@ -95,15 +125,30 @@ struct IRC_Client_StreamConfiguration
   IRC_Client_ProtocolConfiguration*    protocolConfiguration;     // protocol configuration
 };
 
+struct IRC_Client_InputHandlerConfiguration
+{
+  inline IRC_Client_InputHandlerConfiguration ()
+   : controller (NULL)
+   , streamConfiguration (NULL)
+  {};
+
+  IRC_Client_IIRCControl* controller;
+  Stream_Configuration*   streamConfiguration;
+};
+
 struct IRC_Client_Configuration
 {
   inline IRC_Client_Configuration ()
    : socketConfiguration ()
+   //////////////////////////////////////
    , streamConfiguration ()
    //, streamSessionData ()
+   //////////////////////////////////////
    , protocolConfiguration ()
-   , useReactor (NET_EVENT_USE_REACTOR)
+   //////////////////////////////////////
    , groupID (COMMON_EVENT_DISPATCH_THREAD_GROUP_ID)
+   , logToFile (IRC_CLIENT_SESSION_DEF_LOG)
+   , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
   // **************************** socket data **********************************
@@ -114,8 +159,9 @@ struct IRC_Client_Configuration
   // *************************** protocol data *********************************
   IRC_Client_ProtocolConfiguration protocolConfiguration;
   // ***************************************************************************
-  bool                             useReactor;
   int                              groupID;
+  bool                             logToFile;
+  bool                             useReactor;
 };
 
 #endif

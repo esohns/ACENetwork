@@ -27,7 +27,22 @@
 #include "stream_common.h"
 #include "stream_iallocator.h"
 
+//#include "net_connection_manager_common.h"
 #include "net_defines.h"
+#include "net_iconnectionmanager.h"
+#include "net_stream_common.h"
+
+// forward declarations
+struct Net_Configuration;
+struct Net_SocketConfiguration;
+//struct Net_StreamUserData;
+class Net_Stream;
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                 Net_SocketConfiguration,
+                                 Net_Configuration,
+                                 Net_StreamUserData,
+                                 Stream_Statistic,
+                                 Net_Stream> Net_IInetConnectionManager_t;
 
 struct Net_SocketConfiguration
 {
@@ -58,13 +73,17 @@ struct Net_SocketHandlerConfiguration
 {
   inline Net_SocketHandlerConfiguration ()
    : bufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
+   , connectionManager (NULL)
    , messageAllocator (NULL)
    , socketConfiguration ()
+   , statisticCollectionInterval (0)
   {};
 
-  int                     bufferSize; // pdu size (if fixed)
-  Stream_IAllocator*      messageAllocator;
-  Net_SocketConfiguration socketConfiguration;
+  int                           bufferSize; // pdu size (if fixed)
+  Net_IInetConnectionManager_t* connectionManager;
+  Stream_IAllocator*            messageAllocator;
+  Net_SocketConfiguration       socketConfiguration;
+  unsigned int                  statisticCollectionInterval; // seconds [0: OFF]
 };
 
 struct Net_ProtocolConfiguration
@@ -82,16 +101,6 @@ struct Net_ProtocolConfiguration
   bool         printPongMessages;
 };
 
-// *NOTE*: I speculate that this is the main reason that C# was ever invented !
-struct Net_UserData
-{
-  inline Net_UserData ()
-   : userData (NULL)
-  {};
-
-  void* userData;
-};
-
 struct Net_StreamConfiguration
 {
   inline Net_StreamConfiguration ()
@@ -104,7 +113,7 @@ struct Net_StreamConfiguration
   Net_ProtocolConfiguration* protocolConfiguration; // protocol configuration
   unsigned int               sessionID;             // session ID
   Stream_Configuration       streamConfiguration;   // stream configuration
-  Net_UserData*              userData;              // user data
+  Net_StreamUserData*        userData;              // user data
 };
 
 struct Net_Configuration
@@ -120,7 +129,7 @@ struct Net_Configuration
   Net_SocketConfiguration   socketConfiguration;
   // **************************** stream data **********************************
   Net_StreamConfiguration   streamConfiguration;
-  Net_UserData              streamSessionData;
+  Net_StreamUserData        streamSessionData;
   // *************************** protocol data *********************************
   Net_ProtocolConfiguration protocolConfiguration;
 };

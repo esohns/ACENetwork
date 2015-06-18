@@ -22,7 +22,7 @@
 #define NET_SERVER_LISTENER_COMMON_H
 
 #include "ace/Singleton.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 #include "net_configuration.h"
 #include "net_stream_common.h"
@@ -34,24 +34,24 @@
 
 typedef Net_Server_AsynchListener_T<Net_Configuration,
                                     Net_SocketHandlerConfiguration,
-                                    Net_UserData,
+                                    Net_StreamUserData,
                                     Net_AsynchTCPConnection> Net_Server_AsynchListener_t;
 
 typedef Net_Server_Listener_T<Net_Configuration,
                               Net_SocketHandlerConfiguration,
-                              Net_UserData,
+                              Net_StreamUserData,
                               Net_TCPConnection> Net_Server_Listener_t;
 
 typedef ACE_Singleton<Net_Server_AsynchListener_t,
                       ACE_Recursive_Thread_Mutex> NET_SERVER_ASYNCHLISTENER_SINGLETON;
 NET_SERVER_SINGLETON_DECLARE (ACE_Singleton,
                               Net_Server_AsynchListener_t,
-                              ACE_Recursive_Thread_Mutex);
+                              ACE_SYNCH_RECURSIVE_MUTEX);
 
 typedef ACE_Singleton<Net_Server_Listener_t,
-                      ACE_Recursive_Thread_Mutex> NET_SERVER_LISTENER_SINGLETON;
+                      ACE_SYNCH_RECURSIVE_MUTEX> NET_SERVER_LISTENER_SINGLETON;
 NET_SERVER_SINGLETON_DECLARE (ACE_Singleton,
                               Net_Server_Listener_t,
-                              ACE_Recursive_Thread_Mutex);
+                              ACE_SYNCH_RECURSIVE_MUTEX);
 
 #endif
