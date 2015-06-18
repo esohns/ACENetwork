@@ -51,6 +51,7 @@ Net_ConnectionBase_T<AddressType,
                              this,
                              true)
  , statisticCollectHandlerID_ (-1)
+ , status_ (NET_CONNECTION_STATUS_OK)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
 
@@ -339,4 +340,25 @@ Net_ConnectionBase_T<AddressType,
   configuration_ = configuration_in;
 
   return true;
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename SessionDataType,
+          typename StatisticContainerType,
+          typename StreamType>
+Net_Connection_Status
+Net_ConnectionBase_T<AddressType,
+                     SocketConfigurationType,
+                     ConfigurationType,
+                     UserDataType,
+                     SessionDataType,
+                     StatisticContainerType,
+                     StreamType>::status () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::status"));
+
+  return status_;
 }

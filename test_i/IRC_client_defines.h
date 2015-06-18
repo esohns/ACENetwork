@@ -30,7 +30,8 @@
 #define IRC_CLIENT_IRC_FRAME_BOUNDARY_SIZE       2
 #define IRC_CLIENT_IRC_FRAME_MAXSIZE             512
 
-#define IRC_CLIENT_IRC_MAX_WELCOME_DELAY         3 // seconds
+#define IRC_CLIENT_IRC_MAX_NOTICE_DELAY          3  // seconds
+#define IRC_CLIENT_IRC_MAX_WELCOME_DELAY         30 // seconds
 
 // stream
 // *NOTE*: according to RFC1459, IRC messages SHALL not exceed 512 bytes.
@@ -112,5 +113,6 @@
 
 // client
 #define IRC_CLIENT_DEF_CONNECTION_TIMEOUT        2 // second(s)
+#define IRC_CLIENT_DEF_SESSION_LOG               "IRC_client_session"
 
 #endif

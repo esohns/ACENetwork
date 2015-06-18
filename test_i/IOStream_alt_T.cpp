@@ -49,7 +49,7 @@ ACE_IOStream_alt_T<STREAM>::ACE_IOStream_alt_T (STREAM &stream,
  , streambuf_ (NULL)
 {
   ACE_NEW_NORETURN (streambuf_,
-                    STREAMBUF_T ((STREAM*)this,
+                    STREAMBUF_T (this,
                                  streambuf_size));
   if (!streambuf_)
     ACE_DEBUG ((LM_CRITICAL,
@@ -65,7 +65,7 @@ ACE_IOStream_alt_T<STREAM>::ACE_IOStream_alt_T (u_int streambuf_size)
  , streambuf_ (NULL)
 {
   ACE_NEW_NORETURN (streambuf_,
-                    STREAMBUF_T ((STREAM*)this,
+                    STREAMBUF_T (this,
                                  streambuf_size));
   if (!streambuf_)
     ACE_DEBUG ((LM_CRITICAL,

@@ -37,15 +37,18 @@
 #include "IRC_client_iIRCControl.h"
 #include "IRC_client_message.h"
 #include "IRC_client_sessionmessage.h"
+#include "IRC_client_statemachine_registration.h"
 #include "IRC_client_stream_common.h"
 
 // forward declaration(s)
+class ACE_Time_Value;
 class Stream_IAllocator;
 
 class IRC_Client_Module_IRCHandler
  : public Stream_TaskBaseSynch_T<Common_TimePolicy_t,
                                  IRC_Client_SessionMessage,
                                  IRC_Client_Message>
+ , public IRC_Client_StateMachine_Registration
  , public IRC_Client_IIRCControl
  , public Common_IClone_T<Stream_Module_t>
 {
@@ -65,6 +68,9 @@ class IRC_Client_Module_IRCHandler
                                   bool&);               // return value: pass message downstream ?
   virtual void handleSessionMessage (IRC_Client_SessionMessage*&, // session message handle
                                      bool&);                      // return value: pass message downstream ?
+
+  // implement (part of) Common_IStateMachine_T
+  virtual bool wait (const ACE_Time_Value* = NULL);
 
   // implement IRC_Client_IIRCControl
   virtual void subscribe (IRC_Client_INotify_t*); // new subscriber
@@ -111,9 +117,13 @@ class IRC_Client_Module_IRCHandler
   typedef Stream_TaskBaseSynch_T<Common_TimePolicy_t,
                                  IRC_Client_SessionMessage,
                                  IRC_Client_Message> inherited;
+  typedef IRC_Client_StateMachine_Registration inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler (const IRC_Client_Module_IRCHandler&));
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler& operator= (const IRC_Client_Module_IRCHandler&));
+
+  // implement (part of) Common_IStateMachine_T
+  virtual void onChange (IRC_Client_RegistrationState); // new state
 
   // helper methods
   IRC_Client_Message* allocateMessage (unsigned int); // requested size
@@ -145,6 +155,7 @@ class IRC_Client_Module_IRCHandler
   ACE_SYNCH_MUTEX                       conditionLock_;
   ACE_Thread_Condition<ACE_SYNCH_MUTEX> condition_;
   bool                                  connectionIsAlive_;
+  bool                                  initialRegistration_;
   bool                                  receivedInitialNotice_;
 };
 

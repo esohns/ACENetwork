@@ -1073,6 +1073,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:       // 401
         case IRC_Client_IRC_Codes::ERR_NOMOTD:           // 422
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:    // 433
+        case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:    // 451
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:   // 461
         case IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
         case IRC_Client_IRC_Codes::ERR_BADCHANNAME:      // 479
@@ -1083,6 +1084,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           if ((message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOSUCHNICK)       ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE)    ||
+              (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOTREGISTERED)    ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP) ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_BADCHANNAME)      ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_CHANOPRIVSNEEDED) ||

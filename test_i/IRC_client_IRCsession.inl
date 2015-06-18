@@ -3,26 +3,77 @@
 #include "IRC_client_IRCsession.h"
 
 #include "ace/Assert.h"
+#include "ace/FILE_Addr.h"
+#include "ace/FILE_Connector.h"
 #include "ace/Log_Msg.h"
+#include "ace/OS.h"
+#include "ace/OS_Memory.h"
 
+#include "common_defines.h"
+#include "common_file_tools.h"
+//#include "common_time_common.h"
+#include "common_tools.h"
+
+#include "net_common.h"
 #include "net_macros.h"
 
 #include "IRC_common.h"
 
+#include "IRC_client_defines.h"
 #include "IRC_client_network.h"
 #include "IRC_client_tools.h"
 
 template <typename ConnectionType>
 IRC_Client_IRCSession_T<ConnectionType>::IRC_Client_IRCSession_T (IRC_Client_IConnection_Manager_t* interfaceHandle_in,
-                                                                  unsigned int statisticCollectionInterval_in)
+                                                                  unsigned int statisticCollectionInterval_in,
+                                                                  bool logToFile_in,
+                                                                  bool useReactor_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
+ , close_ (false)
  , controller_ (NULL)
+ , inputHandler_ (NULL)
  , output_ (ACE_STREAMBUF_SIZE)
  , state_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::IRC_Client_IRCSession_T"));
 
+  int result = -1;
+
+  ACE_NEW_NORETURN (inputHandler_,
+                    IRC_Client_InputHandler (useReactor_in));
+  if (!inputHandler_)
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", continuing\n")));
+
+  if (logToFile_in)
+  {
+    std::string filename = Common_File_Tools::getLogDirectory ();
+    filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    filename += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SESSION_LOG);
+    filename += COMMON_LOG_FILENAME_SUFFIX;
+    ACE_FILE_Addr address;
+    result = address.set (ACE_TEXT (filename.c_str ()));
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_FILE_Addr::set(\"%s\"): \"%m\", continuing\n"),
+                  ACE_TEXT (filename.c_str ())));
+    ACE_FILE_Connector connector;
+    result = connector.connect (output_,
+                                address,
+                                NULL,
+                                ACE_Addr::sap_any,
+                                O_CREAT | O_TEXT | O_TRUNC | O_WRONLY,
+                                ACE_DEFAULT_FILE_PERMS);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_FILE_Connector::connect(\"%s\"): \"%m\", continuing\n"),
+                  ACE_TEXT (filename.c_str ())));
+    else
+      close_ = true;
+  } // end IF
+  else
+    output_.set_handle (ACE_STDOUT);
 }
 
 template <typename ConnectionType>
@@ -30,6 +81,38 @@ IRC_Client_IRCSession_T<ConnectionType>::~IRC_Client_IRCSession_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::~IRC_Client_IRCSession_T"));
 
+  int result = -1;
+
+  if (inputHandler_)
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // *NOTE*: the input handler runs in a dedicated (detached) thread; there is
+    //         really nothing that can be done to stop it, as the thread id is
+    //         unknown. The thread will return gracefully (calls handle_close ()
+    //         and delete(s) itself) once ACE_STDIN is closed
+    //         (see ACE_Event_Handler.cpp:252, IRC_client_inputhandler.cpp:107)
+    //         --> nothing to be done here...
+#else
+    result = inputHandler_.handle_close ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to IRC_Client_InputHandler::handle_close(): \"%m\", continuing\n")));
+
+    delete inputHandler_;
+#endif
+  } // end IF
+
+  if (close_)
+  {
+    //result = file_.close ();
+    //if (result == -1)
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to ACE_FILE_Stream::close(): \"%m\", continuing\n")));
+    result = output_.close ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to IRC_Client_IOStream_t::close(): \"%m\", continuing\n")));
+  } // end IF
 }
 
 template <typename ConnectionType>
@@ -40,7 +123,7 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
 
   ACE_UNUSED_ARG (configuration_in);
 
-  // retrieve controller handle
+  // step1: retrieve controller handle
   const IRC_Client_Stream& stream_r = inherited::stream ();
   const typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T* module_p = NULL;
   for (typename inherited::CONNECTION_BASE_T::STREAM_T::ITERATOR_T iterator (stream_r);
@@ -50,21 +133,36 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
                         ACE_TEXT_ALWAYS_CHAR (IRC_HANDLER_MODULE_NAME)) == 0)
       break;
   if (!module_p)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("module \"%s\" not found, continuing\n"),
-                ACE_TEXT (IRC_HANDLER_MODULE_NAME)));
-  else
   {
-    controller_ =
-      dynamic_cast<IRC_Client_IIRCControl*> (const_cast<typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
-    if (!controller_)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<IRC_Client_IIRCControl*> failed, continuing\n"),
-                  ACE_TEXT (module_p->name ())));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("module \"%s\" not found, aborting\n"),
+                ACE_TEXT (IRC_HANDLER_MODULE_NAME)));
+
+    // close connection
+    inherited::close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
+
+    return;
+  } // end IF
+  controller_ =
+    dynamic_cast<IRC_Client_IIRCControl*> (const_cast<typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
+  if (!controller_)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: dynamic_cast<IRC_Client_IIRCControl*> failed, aborting\n"),
+                ACE_TEXT (module_p->name ())));
+
+    // close connection
+    inherited::close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
+
+    return;
   } // end ELSE
 
-  //   ACE_DEBUG((LM_DEBUG,
-  //              ACE_TEXT("connected...\n")));
+  // step2: set initial nickname
+  IRC_Client_Configuration* configuration_p =
+    &(inherited::CONNECTION_BASE_T::configuration_);
+  // sanity check(s)
+  ACE_ASSERT (configuration_p);
+  state_.nickname = configuration_p->protocolConfiguration.loginOptions.nick;
 }
 
 template <typename ConnectionType>
@@ -316,6 +414,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:       // 401
         case IRC_Client_IRC_Codes::ERR_NOMOTD:           // 422
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:    // 433
+        case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:    // 451
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:   // 461
         case IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
         case IRC_Client_IRC_Codes::ERR_BADCHANNAME:      // 479
@@ -326,6 +425,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
 
           if ((message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOSUCHNICK)       ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE)    ||
+              (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOTREGISTERED)    ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP) ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_BADCHANNAME)      ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_CHANOPRIVSNEEDED) ||
@@ -382,7 +482,12 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
 
           // reply from a successful join request ?
           if (message_in.prefix.origin == state_.nickname)
+          {
+            ACE_DEBUG ((LM_DEBUG,
+                        ACE_TEXT ("joined channel: \"%s\"...\n"),
+                        ACE_TEXT (message_in.params.front ().c_str ())));
             break;
+          } // end IF
 
           // someone joined a common channel...
           break;
@@ -395,7 +500,12 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
 
           // reply from a successful part request ?
           if (message_in.prefix.origin == state_.nickname)
+          {
+            ACE_DEBUG ((LM_DEBUG,
+                        ACE_TEXT ("left channel: \"%s\"...\n"),
+                        ACE_TEXT (message_in.params.front ().c_str ())));
             break;
+          } // end IF
 
           // someone left a common channel...
           break;
@@ -527,8 +637,18 @@ IRC_Client_IRCSession_T<ConnectionType>::end ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::end"));
 
-  //   ACE_DEBUG((LM_DEBUG,
-  //              ACE_TEXT("connection lost...\n")));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection %u closed/lost, shutting down...\n"),
+              inherited::id ()));
+
+  IRC_Client_Configuration* configuration_p =
+    &(inherited::CONNECTION_BASE_T::configuration_);
+  // sanity check(s)
+  ACE_ASSERT (configuration_p);
+
+  Common_Tools::finalizeEventDispatch (configuration_p->useReactor,
+                                       !configuration_p->useReactor,
+                                       -1); // *IMPORTANT NOTE*: don't (!) wait
 }
 
 template <typename ConnectionType>
@@ -603,9 +723,13 @@ IRC_Client_IRCSession_T<ConnectionType>::log (const std::string& messageText_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::log"));
 
+  int result = -1;
+
   output_ << messageText_in;
-//  const char* char_p = messageText_in.c_str ();
-//  output_ << char_p;
+  result = output_.sync ();
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_IOStream_t::sync(): \"%m\", continuing\n")));
 }
 
 template <typename ConnectionType>

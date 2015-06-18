@@ -29,7 +29,7 @@
 
 Net_TransportLayer_IP_Broadcast::Net_TransportLayer_IP_Broadcast (Net_ClientServerRole clientServerRole_in)
  : inherited (clientServerRole_in,
-              TRANSPORTLAYER_IP_BROADCAST)
+              NET_TRANSPORTLAYER_IP_BROADCAST)
 // , inherited2 ()
 // , myAddress ()
 {
@@ -58,7 +58,7 @@ Net_TransportLayer_IP_Broadcast::~Net_TransportLayer_IP_Broadcast ()
 
 Net_TransportLayer_IP_Multicast::Net_TransportLayer_IP_Multicast (Net_ClientServerRole clientServerRole_in)
  : inherited (clientServerRole_in,
-              TRANSPORTLAYER_IP_MULTICAST)
+              NET_TRANSPORTLAYER_IP_MULTICAST)
 // , inherited2 (ACE_SOCK_Dgram_Mcast::DEFOPTS)
 // , joined_ (false)
 // , address_ ()

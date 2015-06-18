@@ -23,12 +23,16 @@
 
 #include "ace/Time_Value.h"
 
+#include "common_defines.h"
+
 #include "stream_common.h"
 
 #include "net_configuration.h"
+#include "net_defines.h"
 
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
+//#include "IRC_client_statemachine_registration.h"
 
 typedef Stream_Statistic IRC_Client_RuntimeStatistic_t;
 struct IRC_Client_SessionData
@@ -60,10 +64,12 @@ struct IRC_Client_StreamModuleConfiguration
   inline IRC_Client_StreamModuleConfiguration ()
    : connection (NULL)
    , moduleConfiguration ()
+   //, registration (NULL)
   {};
 
-  IRC_Client_IConnection_t*  connection;
-  Stream_ModuleConfiguration moduleConfiguration;
+  IRC_Client_IConnection_t*   connection;
+  Stream_ModuleConfiguration  moduleConfiguration;
+  //IRC_Client_IRegistration_t* registration;
 };
 
 struct IRC_Client_StreamConfiguration
@@ -96,6 +102,8 @@ struct IRC_Client_Configuration
    , streamConfiguration ()
    //, streamSessionData ()
    , protocolConfiguration ()
+   , useReactor (NET_EVENT_USE_REACTOR)
+   , groupID (COMMON_EVENT_DISPATCH_THREAD_GROUP_ID)
   {};
 
   // **************************** socket data **********************************
@@ -106,6 +114,8 @@ struct IRC_Client_Configuration
   // *************************** protocol data *********************************
   IRC_Client_ProtocolConfiguration protocolConfiguration;
   // ***************************************************************************
+  bool                             useReactor;
+  int                              groupID;
 };
 
 #endif

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Erik Sohns   *
+ *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,32 +17,48 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "stdafx.h"
 
-//#include "ace/FILE_Stream.h"
-#include "FILE_Stream.h"
+#ifndef IRC_CLIENT_INPUTHANDLER_H
+#define IRC_CLIENT_INPUTHANDLER_H
 
-#if !defined (__ACE_INLINE__)
-//#include "ace/FILE_Stream.inl"
-#include "FILE_Stream.inl"
-#endif /* __ACE_INLINE__ */
+#include "ace/Event_Handler.h"
+#include "ace/Global_Macros.h"
 
-ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+#include "common_iinitialize.h"
 
-ACE_ALLOC_HOOK_DEFINE (ACE_FILE_Stream)
-
-void
-ACE_FILE_Stream::dump (void) const
+struct IRC_Client_InputHandlerConfiguration
 {
-#if defined (ACE_HAS_DUMP)
-  ACE_TRACE ("ACE_FILE_Stream::dump");
-#endif /* ACE_HAS_DUMP */
-}
 
-//int
-//ACE_FILE_Stream::close (void)
-//{
-//  return ACE_FILE::close ();
-//}
+};
 
-ACE_END_VERSIONED_NAMESPACE_DECL
+class IRC_Client_InputHandler
+ : public ACE_Event_Handler
+ , public Common_IInitialize_T<IRC_Client_InputHandlerConfiguration>
+{
+ public:
+  IRC_Client_InputHandler (bool = true); // use reactor ?
+  virtual ~IRC_Client_InputHandler ();
+
+  // implement Common_IInitialize_T
+  virtual bool initialize (const IRC_Client_InputHandlerConfiguration&); // configuration
+
+  // implement (part of) ACE_Event_Handler
+  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE); // handle
+
+ private:
+  typedef ACE_Event_Handler inherited;
+
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_InputHandler ());
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_InputHandler (const IRC_Client_InputHandler&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_InputHandler& operator= (const IRC_Client_InputHandler&));
+
+  // implement (part of) ACE_Event_Handler
+  virtual int handle_close (ACE_HANDLE,
+                            ACE_Reactor_Mask);
+
+  IRC_Client_InputHandlerConfiguration* configuration_;
+  bool                                  registered_;
+  bool                                  useReactor_;
+};
+
+#endif

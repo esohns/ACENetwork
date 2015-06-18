@@ -21,16 +21,23 @@
 #ifndef IRC_CLIENT_IRCSESSION_H
 #define IRC_CLIENT_IRCSESSION_H
 
+#include <string>
+
 #include "ace/Asynch_Connector.h"
 #include "ace/config-macros.h"
 #include "ace/Connector.h"
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "stream_common.h"
 
+#include "net_defines.h"
+
 #include "IRC_client_common.h"
+#include "IRC_client_inputhandler.h"
 #include "IRC_client_IRCmessage.h"
 #include "IRC_client_network.h"
+//#include "IRC_client_statemachine_registration.h"
 #include "IRC_client_stream_common.h"
 
 // forward declarations
@@ -48,8 +55,10 @@ class IRC_Client_IRCSession_T
 
  public:
   IRC_Client_IRCSession_T (IRC_Client_IConnection_Manager_t* = NULL, // connection manager handle
-                           unsigned int = 0);                        // statistics collecting interval (second(s))
+                           unsigned int = 0,                         // statistics collecting interval (second(s))
                                                                      // 0 --> DON'T collect statistics
+                           bool = false,                             // log to file ? : stdout
+                           bool = NET_EVENT_USE_REACTOR);            // use reactor ?
   virtual ~IRC_Client_IRCSession_T ();
 
   // implement IRC_Client_INotify_t
@@ -60,7 +69,6 @@ class IRC_Client_IRCSession_T
  private:
   typedef ConnectionType inherited;
 
-//  ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T ());
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T (const IRC_Client_IRCSession_T&));
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T& operator= (const IRC_Client_IRCSession_T&));
 
@@ -73,10 +81,11 @@ class IRC_Client_IRCSession_T
   void log (const IRC_Client_IRCMessage&);
   void log (const std::string&);
 
-  IRC_Client_IIRCControl* controller_;
-  IRC_Client_IOStream_t   output_;
-  //ACE_FILE_Stream         outputStream_;
-  IRC_Client_SessionState state_;
+  bool                     close_;
+  IRC_Client_IIRCControl*  controller_;
+  IRC_Client_InputHandler* inputHandler_;
+  IRC_Client_IOStream_t    output_;
+  IRC_Client_SessionState  state_;
 };
 
 // include template implementation

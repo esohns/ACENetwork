@@ -526,7 +526,7 @@ template <typename AddressType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
-void
+int
 Net_StreamAsynchTCPSocketBase_T<AddressType,
                                 SocketConfigurationType,
                                 ConfigurationType,
@@ -535,10 +535,11 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
                                 SessionDataType,
                                 StatisticContainerType,
                                 StreamType,
-                                SocketHandlerType>::close ()
+                                SocketHandlerType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::close"));
 
+  ACE_UNUSED_ARG (arg_in);
   int result = -1;
 
   // step1: shutdown operations
@@ -560,6 +561,8 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
                   handle));
 //    inherited::handle (ACE_INVALID_HANDLE);
   } // end IF
+
+  return result;
 }
 
 template <typename AddressType,

@@ -1505,6 +1505,7 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::RPL_INVITING:      // 341
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:    // 401
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE: // 433
+        case IRC_Client_IRC_Codes::ERR_NOTREGISTERED: // 451
         case IRC_Client_IRC_Codes::ERR_BADCHANNAME:   // 479
         case IRC_Client_IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
         {

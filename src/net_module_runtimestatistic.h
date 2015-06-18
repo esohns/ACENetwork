@@ -26,7 +26,7 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/Stream_Modules.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_icounter.h"
 #include "common_istatistic.h"
@@ -75,7 +75,7 @@ class Net_Module_Statistic_ReaderTask_T
                                             SessionMessageType,
                                             ProtocolMessageType,
                                             ProtocolCommandType,
-                                            StatisticContainerType> WRITER_TASK_TYPE;
+                                            StatisticContainerType> WRITER_TASK_T;
   typedef ProtocolMessageType Net_MessageType_t;
   typedef ProtocolCommandType Net_CommandType_t;
 
@@ -159,7 +159,7 @@ class Net_Module_Statistic_WriterTask_T
   bool                              printFinalReport_;
 
   // *GENERIC STATS*
-  mutable ACE_Thread_Mutex          lock_;
+  mutable ACE_SYNCH_MUTEX           lock_;
   unsigned int                      sessionID_;
 
   // *NOTE*: data messages == (myNumTotalMessages - myNumSessionMessages)

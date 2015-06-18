@@ -49,12 +49,12 @@ IRC_Client_SignalHandler::~IRC_Client_SignalHandler ()
 }
 
 bool
-IRC_Client_SignalHandler::initialize (const IRC_Client_SignalHandlerConfiguration_t& configuration_in)
+IRC_Client_SignalHandler::initialize (const IRC_Client_SignalHandlerConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::initialize"));
 
   configuration_ =
-      &const_cast<IRC_Client_SignalHandlerConfiguration_t&> (configuration_in);
+      &const_cast<IRC_Client_SignalHandlerConfiguration&> (configuration_in);
 
   return true;
 }

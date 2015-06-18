@@ -25,7 +25,9 @@
 #include <sstream>
 
 #include "ace/iosfwd.h"
+#include "ace/OS.h"
 
+//#include "common_time_common.h"
 #include "common_timer_manager.h"
 
 #include "stream_iallocator.h"
@@ -47,6 +49,7 @@ IRC_Client_Module_IRCHandler::IRC_Client_Module_IRCHandler ()
  , conditionLock_ ()
  , condition_ (conditionLock_)
  , connectionIsAlive_ (false)
+ , initialRegistration_ (true)
  , receivedInitialNotice_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::IRC_Client_Module_IRCHandler"));
@@ -82,11 +85,20 @@ IRC_Client_Module_IRCHandler::initialize (IRC_Client_INotify_t* subscriber_in,
     automaticPong_ = false;
     printPingPongDot_ = false;
     isInitialized_ = false;
+
     {
       ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
 
       connectionIsAlive_ = false;
     } // end lock scope
+
+    // synch access to state machine
+    {
+      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (inherited2::lock_);
+
+      inherited2::state_ = REGISTRATION_STATE_NICK;
+    } // end lock scope
+    initialRegistration_ = true;
     receivedInitialNotice_ = false;
 
     // synch access to subscribers
@@ -155,6 +167,18 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
         // *NOTE* these are the "regular" (== known) codes
         // [sent by ircd-hybrid-7.2.3 and others]...
         case IRC_Client_IRC_Codes::RPL_WELCOME:              //   1
+        {
+          if (initialRegistration_)
+          {
+            if (!inherited2::change (REGISTRATION_STATE_FINISHED))
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("failed to Common_IStateMachine_T::change(\"%s\"), continuing\n"),
+                          ACE_TEXT (inherited2::state2String (REGISTRATION_STATE_FINISHED).c_str ())));
+            initialRegistration_ = false;
+          } // end IF
+
+          // *WARNING*: falls through !
+        }
         case IRC_Client_IRC_Codes::RPL_YOURHOST:             //   2
         case IRC_Client_IRC_Codes::RPL_CREATED:              //   3
         case IRC_Client_IRC_Codes::RPL_MYINFO:               //   4
@@ -190,6 +214,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:           // 401
         case IRC_Client_IRC_Codes::ERR_NOMOTD:               // 422
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:        // 433
+        case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:        // 451
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:       // 461
         case IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP:     // 465
         case IRC_Client_IRC_Codes::ERR_BADCHANNAME:          // 479
@@ -466,6 +491,8 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::handleSessionMessage"));
 
+  int result = -1;
+
   // don't care (implies yes per default, if we're part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
@@ -484,7 +511,10 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
         connectionIsAlive_ = true;
 
         // signal any waiter(s)
-        condition_.broadcast ();
+        result = condition_.broadcast ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
       } // end lock scope
 
       // announce this information to any subscriber(s)
@@ -568,7 +598,8 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
 
         if (!subscribers_.empty ())
           ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT ("removing %u subscription(s)...\n"),
+                      ACE_TEXT ("%s: removing %u subscription(s)...\n"),
+                      ACE_TEXT (inherited::mod_->name ()),
                       subscribers_.size ()));
 
         // clean subscribers
@@ -582,16 +613,16 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
         connectionIsAlive_ = false;
 
         // signal any waiter(s)
-        condition_.broadcast ();
+        result = condition_.broadcast ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
       } // end lock scope
 
       break;
     }
     default:
-    {
-      // don't do anything...
       break;
-    }
   } // end SWITCH
 }
 
@@ -626,8 +657,10 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
       //         - connection to establish
       //         [- the initial NOTICEs to arrive]
       //         before proceeding...
-      ACE_Time_Value deadline = COMMON_TIME_POLICY () +
-                                ACE_Time_Value (IRC_CLIENT_IRC_MAX_WELCOME_DELAY, 0);
+      ACE_Time_Value timeout (IRC_CLIENT_IRC_MAX_NOTICE_DELAY, 0);
+      // *NOTE*: cannot use COMMON_TIME_NOW, as this is a high precision monotonous
+      //         clock... --> use standard getimeofday
+      ACE_Time_Value deadline = ACE_OS::gettimeofday () + timeout;
       result = condition_.wait (&deadline);
       if (result == -1)
       {
@@ -640,7 +673,8 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
       if (!connectionIsAlive_)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("not (yet ?) connected, aborting\n")));
+                    ACE_TEXT ("connection timeout (%#T), aborting\n"),
+                    &timeout));
         return false;
       } // end IF
 
@@ -768,6 +802,33 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
 //
 //   // step5b: send it upstream
 //   sendMessage(join_struct);
+
+  return true;
+}
+
+bool
+IRC_Client_Module_IRCHandler::wait (const ACE_Time_Value* timeout_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::wait"));
+
+  int result = -1;
+
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
+
+  result = condition_.wait (timeout_in);
+  if (result == -1)
+  {
+    int error = ACE_OS::last_error ();
+    if (error != ETIME)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Thread_Condition::wait(): \"%m\", continuing\n")));
+  } // end IF
+  if (initialRegistration_)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("registration timeout, aborting\n")));
+    return false;
+  } // end IF
 
   return true;
 }
@@ -1282,6 +1343,24 @@ IRC_Client_Module_IRCHandler::dump_state () const
 //   ACE_DEBUG((LM_DEBUG,
 //              ACE_TEXT(" ***** MODULE: \"%s\" state *****\\END\n"),
 //              ACE_TEXT_ALWAYS_CHAR(name())));
+}
+
+void
+IRC_Client_Module_IRCHandler::onChange (IRC_Client_RegistrationState newState_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::allocateMessage"));
+
+  int result = -1;
+
+  if (newState_in == REGISTRATION_STATE_FINISHED)
+  {
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
+
+    result = condition_.broadcast ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Thread_Condition::broadcast(): \"%m\", continuing\n")));
+  } // end IF
 }
 
 IRC_Client_Message*

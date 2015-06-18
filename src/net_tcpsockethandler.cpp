@@ -244,10 +244,18 @@ Net_TCPSocketHandler::handle_close (ACE_HANDLE handle_in,
                                             (mask_in |
                                              ACE_Event_Handler::DONT_CALL));
         if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@, %d): \"%m\", aborting\n"),
-                      this,
-                      mask_in));
+        {
+          int error = ACE_OS::last_error ();
+          if ((mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) &&
+              (error == ENOENT)) // <-- user abort during initialization
+                                 //     (prior to registration)
+            result = 0;
+          else
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@, %d): \"%m\", aborting\n"),
+                        this,
+                        mask_in));
+        } // end IF
       } // end IF
 
       break;

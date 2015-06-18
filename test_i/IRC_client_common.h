@@ -40,8 +40,9 @@
 #include "IOStream_alt_T.h"
 
 // forward declarations
-struct IRC_Client_Configuration;
 class IRC_Client_Stream;
+struct IRC_Client_Configuration;
+struct IRC_Client_StreamModuleConfiguration;
 
 struct IRC_Client_IRCLoginOptions
 {
@@ -224,14 +225,18 @@ typedef ACE_IOStream_alt_T<ACE_FILE_Stream> IRC_Client_IOStream_t;
 struct IRC_Client_ThreadData
 {
   inline IRC_Client_ThreadData ()
-   : groupID (-1)
+   : configuration (NULL)
+   , groupID (-1)
+   , moduleConfiguration (NULL)
    , useProactor (!NET_EVENT_USE_REACTOR)
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
-  int groupID;
-  bool useProactor;
-  bool useReactor;
+  IRC_Client_Configuration*             configuration;
+  int                                   groupID;
+  IRC_Client_StreamModuleConfiguration* moduleConfiguration;
+  bool                                  useProactor;
+  bool                                  useReactor;
 };
 
 typedef Net_IConnection_T<ACE_INET_Addr,

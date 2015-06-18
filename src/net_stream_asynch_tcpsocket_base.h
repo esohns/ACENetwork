@@ -75,7 +75,7 @@ class Net_StreamAsynchTCPSocketBase_T
                      AddressType&) const; // return value: remote SAP
   virtual unsigned int id () const;
   virtual const StreamType& stream () const;
-  virtual void close ();
+  virtual int close (u_long = 0); // reason
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;

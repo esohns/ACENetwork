@@ -24,6 +24,7 @@
 
 #include "stream_common.h"
 
+#include "net_common.h"
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -218,8 +219,13 @@ Net_StreamTCPSocketBase_T<AddressType,
   stream_.start ();
   if (!stream_.isRunning ())
   {
+    // *NOTE*: most likely, this happened because the stream failed to
+    //         initialize
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
+
+    inherited2::status_ = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+
     return -1;
   } // end IF
 
@@ -279,7 +285,10 @@ Net_StreamTCPSocketBase_T<AddressType,
                           SocketHandlerType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::close"));
-  // [*NOTE*: hereby we override the default behavior of a ACE_Svc_Handler,
+
+  int result = -1;
+
+  // [*NOTE*: override the default behavior of a ACE_Svc_Handler,
   // which would call handle_close() AGAIN]
 
   // *NOTE*: this method will be invoked
@@ -299,8 +308,9 @@ Net_StreamTCPSocketBase_T<AddressType,
     case NORMAL_CLOSE_OPERATION:
     {
       // check specifically for the first case...
-      if (ACE_OS::thr_equal (ACE_Thread::self (),
-                             inherited::last_thread ()))
+      result = ACE_OS::thr_equal (ACE_Thread::self (),
+                                  inherited::last_thread ());
+      if (result)
       {
 //       if (inherited::module ())
 //         ACE_DEBUG ((LM_DEBUG,
@@ -320,16 +330,22 @@ Net_StreamTCPSocketBase_T<AddressType,
     // (e.g. too many connections)
     // *NOTE*: this eventually calls handle_close() (see below)
     case CLOSE_DURING_NEW_CONNECTION:
+    case NET_CONNECTION_CLOSE_REASON_INITIALIZATION:
     {
+      //ACE_HANDLE handle =
+      //  ((arg_in == NET_CLOSE_REASON_INITIALIZATION) ? ACE_INVALID_HANDLE
+      //                                               : inherited::get_handle ());
       ACE_HANDLE handle = inherited::get_handle ();
 
       // step1: release any connection resources
-      int result = -1;
-      result = inherited::close (CLOSE_DURING_NEW_CONNECTION);
+      result =
+        handle_close (handle,
+                      ACE_Event_Handler::ALL_EVENTS_MASK);
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to SocketHandlerType::close(): \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to SocketHandlerType::handle_close(%d,%d): \"%m\", aborting\n"),
+                    handle, ACE_Event_Handler::ALL_EVENTS_MASK));
         return -1;
       } // end IF
 
@@ -350,7 +366,6 @@ Net_StreamTCPSocketBase_T<AddressType,
                         ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                         handle));
         } // end IF
-        //    inherited::handle (ACE_INVALID_HANDLE);
       } // end IF
 
       break;
@@ -763,17 +778,6 @@ Net_StreamTCPSocketBase_T<AddressType,
   // step4: deregister with the connection manager (if any)
   if (deregister)
     inherited2::deregister ();
-
-  // step5: release a reference (and let the reactor manage the lifecycle) ?
-  // *IMPORTANT NOTE*: may 'delete this'
-  //inherited2::decrease ();
-  // *IMPORTANT NOTE*: when the connection is closed asynchronously (i.e. user
-  //                   abort), the reactor may currently be reading/writing
-  //                   the socket. This operation will fail, and the reactor
-  //                   will invoke this method again (mask_in == EXCEPT_MASK)
-  //                   --> do not decrease the reference count in that case
-  //if (mask_in != ACE_Event_Handler::EXCEPT_MASK)
-  //  decrease ();
 
   return result;
 }

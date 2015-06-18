@@ -1453,9 +1453,8 @@ join_clicked_cb (GtkWidget* widget_in,
     channel_string.resize (IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH);
 
   // *TODO*: support channel keys/multi-join ?
-  string_list_t channels;
+  string_list_t channels, keys;
   channels.push_back (channel_string);
-  string_list_t keys;
   try
   {
     data_p->controller->join (channels, keys);

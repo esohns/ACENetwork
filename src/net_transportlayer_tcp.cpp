@@ -24,8 +24,8 @@
 #include "net_macros.h"
 
 Net_TransportLayer_TCP::Net_TransportLayer_TCP ()
- : inherited (ROLE_INVALID,
-              TRANSPORTLAYER_TCP)
+ : inherited (NET_ROLE_INVALID,
+              NET_TRANSPORTLAYER_TCP)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_TCP::Net_TransportLayer_TCP"));
 

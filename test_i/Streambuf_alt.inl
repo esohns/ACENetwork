@@ -87,12 +87,7 @@ ACE_Streambuf_alt_T<STREAM>::recv_n (char *buf,
                                      int flags,
                                      ACE_Time_Value *tv)
 {
-  this->timeout_ = 0;
-  errno = ESUCCESS;
-  ssize_t rval = peer_->recv_n (buf, len, flags, tv);
-  if (errno == ETIME)
-    this->timeout_ = 1;
-  return rval;
+  return recv (buf, len, flags, tv);
 }
 
 template <class STREAM>

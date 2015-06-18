@@ -28,8 +28,8 @@
 #include "net_macros.h"
 
 Net_TransportLayer_UDP::Net_TransportLayer_UDP ()
- : inherited (ROLE_INVALID,
-              TRANSPORTLAYER_UDP)
+ : inherited (NET_ROLE_INVALID,
+              NET_TRANSPORTLAYER_UDP)
  //, inherited2 ()
 //   address_ (),
 {

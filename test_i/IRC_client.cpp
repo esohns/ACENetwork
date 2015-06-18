@@ -342,9 +342,9 @@ do_initializeSignals (bool useReactor_in,
 }
 
 ACE_THR_FUNC_RETURN
-event_manager_termination_function (void* arg_in)
+connection_setup_function (void* arg_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::event_manager_termination_function"));
+  NETWORK_TRACE (ACE_TEXT ("::connection_setup_function"));
 
   IRC_Client_ThreadData* thread_data_p =
     static_cast<IRC_Client_ThreadData*> (arg_in);
@@ -352,10 +352,7 @@ event_manager_termination_function (void* arg_in)
   int result = -1;
   ACE_Time_Value delay (IRC_CLIENT_DEF_CONNECTION_TIMEOUT, 0);
 
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("waiting for connection...(%#T)\n"),
-              &delay));
-
+  // step1: wait for connection
   result = ACE_OS::sleep (delay);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
@@ -364,19 +361,192 @@ event_manager_termination_function (void* arg_in)
   Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
                                        thread_data_p->useProactor,
                                        -1);
-                                       //thread_data_p->groupID);
 
+  IRC_Client_IConnection_Manager_t* connection_manager_p =
+    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  if (connection_manager_p->numConnections () < 1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to connect (timeout: %#T), aborting\n"),
+                &delay));
+    return NULL;
+  } // end IF
+  thread_data_p->moduleConfiguration->connection =
+    connection_manager_p->operator[] (0);
+  if (!thread_data_p->moduleConfiguration->connection)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_IConnection_Manager_t::operator[0]: \"%m\", aborting\n")));
+
+    // stop event dispatch
+    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
+                                         thread_data_p->useProactor,
+                                         -1);
+
+    return NULL;
+  } // end IF
+
+  // step2: register connection with the server
+  // *NOTE*: this entails a little delay (waiting for the welcome notice...)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("waiting for connection...DONE\n")));
+              ACE_TEXT ("registering IRC connection...\n")));
+
+  bool result_2 = false;
+  const IRC_Client_Stream& stream_r =
+    thread_data_p->moduleConfiguration->connection->stream ();
+  const Stream_Module_t* module_p = NULL;
+  for (Stream_Iterator_t iterator (stream_r);
+       (iterator.next (module_p) != 0);
+       iterator.advance ())
+    if (ACE_OS::strcmp (module_p->name (),
+                        ACE_TEXT_ALWAYS_CHAR (IRC_HANDLER_MODULE_NAME)) == 0)
+      break;
+  if (!module_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("module \"%s\" not found, aborting\n"),
+                ACE_TEXT (IRC_HANDLER_MODULE_NAME)));
+
+    // clean up
+    thread_data_p->moduleConfiguration->connection->decrease ();
+    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
+                                         thread_data_p->useProactor,
+                                         -1);
+
+    return NULL;
+  } // end IF
+  IRC_Client_IIRCControl* IRCControl_p =
+    dynamic_cast<IRC_Client_IIRCControl*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  if (!IRCControl_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<IRC_Client_IIRCControl*>(0x%@), aborting\n"),
+                thread_data_p->moduleConfiguration->connection));
+
+    // clean up
+    thread_data_p->moduleConfiguration->connection->decrease ();
+    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
+                                         thread_data_p->useProactor,
+                                         -1);
+
+    return NULL;
+  } // end IF
+  try
+  {
+    result_2 =
+      IRCControl_p->registerConnection (thread_data_p->configuration->protocolConfiguration.loginOptions);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in IRC_Client_IIRCControl::registerConnection(), continuing\n")));
+  }
+  if (!result_2)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_IIRCControl::registerConnection(), aborting\n")));
+
+    // clean up
+    thread_data_p->moduleConfiguration->connection->decrease ();
+    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
+                                         thread_data_p->useProactor,
+                                         -1);
+
+    return NULL;
+  } // end IF
+
+  // step3: wait for registration to complete
+  // *NOTE*: this entails a little delay (waiting for connection registration...)
+  ACE_Time_Value timeout (IRC_CLIENT_IRC_MAX_WELCOME_DELAY, 0);
+  IRC_Client_IRegistration_t* registration_p =
+    dynamic_cast<IRC_Client_IRegistration_t*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  if (!registration_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<IRC_Client_IRegistration_t*>: \"%m\", aborting\n")));
+
+    // clean up
+    thread_data_p->moduleConfiguration->connection->decrease ();
+    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
+                                         thread_data_p->useProactor,
+                                         -1);
+
+    return NULL;
+  } // end ELSE
+  // *NOTE*: cannot use COMMON_TIME_NOW, as this is a high precision monotonous
+  //         clock... --> use standard getimeofday
+  ACE_Time_Value deadline = ACE_OS::gettimeofday () + timeout;
+  try
+  {
+    result_2 = registration_p->wait (&deadline);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in IRC_Client_IRegistration_t::wait(%#T), continuing\n"),
+                &timeout));
+  }
+  if (!result_2 ||
+      (registration_p->current () != REGISTRATION_STATE_FINISHED))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_IRegistration_t::wait(%#T), aborting\n"),
+                &timeout));
+
+    // clean up
+    thread_data_p->moduleConfiguration->connection->decrease ();
+    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
+                                         thread_data_p->useProactor,
+                                         -1);
+
+    return NULL;
+  } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("registering IRC connection...DONE\n")));
+
+  // step4: join a channel
+  std::string channel_string =
+    thread_data_p->configuration->protocolConfiguration.loginOptions.channel;
+  // sanity check(s): has '#' prefix ?
+  if (channel_string.find ('#', 0) != 0)
+    channel_string.insert (channel_string.begin (), '#');
+  // sanity check(s): larger than IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH characters ?
+  // *TODO*: support the CHANNELLEN=xxx "feature" of the server...
+  if (channel_string.size () > IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH)
+    channel_string.resize (IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH);
+  string_list_t channels, keys;
+  channels.push_back (channel_string);
+  try
+  {
+    IRCControl_p->join (channels, keys);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in IRC_Client_IIRCControl::join(\"%s\"), continuing\n"),
+                ACE_TEXT (channel_string.c_str ())));
+
+    // clean up
+    thread_data_p->moduleConfiguration->connection->decrease ();
+    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
+                                         thread_data_p->useProactor,
+                                         -1);
+  }
+
+  // clean up
+  thread_data_p->moduleConfiguration->connection->decrease ();
+  thread_data_p->moduleConfiguration->connection = NULL;
 
   return NULL;
 }
 
 void
 do_work (IRC_Client_Configuration& configuration_in,
-         bool useReactor_in,
          const std::string& serverHostname_in,
          unsigned short serverPortNumber_in,
+         const ACE_Sig_Set& signalSet_in,
+         const ACE_Sig_Set& ignoredSignalSet_in,
+         Common_SignalActions_t& previousSignalActions_inout,
          IRC_Client_SignalHandler& signalHandler_in,
          unsigned int numDispatchThreads_in)
 {
@@ -411,7 +581,7 @@ do_work (IRC_Client_Configuration& configuration_in,
     false;
 
   // step2: initialize event dispatch
-  if (!Common_Tools::initializeEventDispatch (useReactor_in,
+  if (!Common_Tools::initializeEventDispatch (configuration_in.useReactor,
                                               numDispatchThreads_in,
                                               configuration_in.streamConfiguration.streamConfiguration.serializeOutput))
   {
@@ -420,7 +590,7 @@ do_work (IRC_Client_Configuration& configuration_in,
     return;
   } // end IF
 
-  // step2: initialize client connector
+  // step3: initialize client connector
   Net_SocketHandlerConfiguration socket_handler_configuration;
   socket_handler_configuration.bufferSize = IRC_CLIENT_BUFFER_SIZE;
   socket_handler_configuration.messageAllocator =
@@ -430,7 +600,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   Net_Client_IConnector_t* connector_p = NULL;
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  if (useReactor_in)
+  if (configuration_in.useReactor)
     ACE_NEW_NORETURN (connector_p,
                       IRC_Client_SessionConnector_t (&socket_handler_configuration,
                                                      connection_manager_p,
@@ -448,7 +618,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step3: initialize signal handling
-  IRC_Client_SignalHandlerConfiguration_t signal_handler_configuration;
+  IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
   //  ACE_OS::memset (&signal_handler_configuration,
   //                  0,
   //                  sizeof (signal_handler_configuration));
@@ -479,6 +649,19 @@ do_work (IRC_Client_Configuration& configuration_in,
 
     return;
   } // end IF
+  if (!Common_Tools::initializeSignals (signalSet_in,
+                                        ignoredSignalSet_in,
+                                        &signalHandler_in,
+                                        previousSignalActions_inout))
+  {
+    ACE_DEBUG ((LM_ERROR,
+      ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
+
+    // clean up
+    delete connector_p;
+
+    return;
+  } // end IF
 
   // step4: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
@@ -486,14 +669,14 @@ do_work (IRC_Client_Configuration& configuration_in,
   connection_manager_p->set (configuration_in,
                              &session_data);
 
+  // event loop(s):
+  // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly shutdown)
+  // [- signal timer expiration to perform server queries] (see above)
+
   // step5a: initialize worker(s)
-  int group_id = -1;
-  // *NOTE*: this variable needs to stay on the working stack, it's passed to
-  //         the worker(s) (if any)
-  bool use_reactor = useReactor_in;
-  if (!Common_Tools::startEventDispatch (use_reactor,
+  if (!Common_Tools::startEventDispatch (configuration_in.useReactor,
                                          numDispatchThreads_in,
-                                         group_id))
+                                         configuration_in.groupID))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
@@ -523,9 +706,9 @@ do_work (IRC_Client_Configuration& configuration_in,
                 buffer));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         group_id);
+    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
+                                         !configuration_in.useReactor,
+                                         configuration_in.groupID);
     delete connector_p;
 
     return;
@@ -533,11 +716,13 @@ do_work (IRC_Client_Configuration& configuration_in,
 
   // *NOTE*: from this point, clean up any remote connections
 
-  // step6a: wait for connection
+  // step6a: wait for connection / setup
   IRC_Client_ThreadData thread_data;
-  thread_data.groupID = group_id;
-  thread_data.useProactor = !useReactor_in;
-  thread_data.useReactor = useReactor_in;
+  thread_data.configuration = &configuration_in;
+  thread_data.groupID = configuration_in.groupID;
+  thread_data.moduleConfiguration = &module_configuration;
+  thread_data.useProactor = !configuration_in.useReactor;
+  thread_data.useReactor = configuration_in.useReactor;
   ACE_thread_t thread_id = -1;
   ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
   //char thread_name[BUFSIZ];
@@ -551,9 +736,9 @@ do_work (IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         group_id);
+    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
+                                         !configuration_in.useReactor,
+                                         configuration_in.groupID);
     delete connector_p;
 
     return;
@@ -564,35 +749,35 @@ do_work (IRC_Client_Configuration& configuration_in,
   ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
   result =
-    thread_manager_p->spawn (::event_manager_termination_function, // function
-                             &thread_data,                         // argument
+    thread_manager_p->spawn (::connection_setup_function, // function
+                             &thread_data,                // argument
                              (THR_NEW_LWP      |
                               THR_JOINABLE     |
-                              THR_INHERIT_SCHED),                  // flags
-                             &thread_id,                           // thread id
-                             &thread_handle,                       // thread handle
-                             ACE_DEFAULT_THREAD_PRIORITY,          // priority
-                             group_id_2,                           // group id
-                             NULL,                                 // stack
-                             0,                                    // stack size
-                             //&thread_name);                        // name
-                             &thread_name_2);                      // name
+                              THR_INHERIT_SCHED),         // flags
+                             &thread_id,                  // thread id
+                             &thread_handle,              // thread handle
+                             ACE_DEFAULT_THREAD_PRIORITY, // priority
+                             group_id_2,                  // group id
+                             NULL,                        // stack
+                             0,                           // stack size
+                             //&thread_name);             // name
+                             &thread_name_2);             // name
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         group_id);
+    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
+                                         !configuration_in.useReactor,
+                                         configuration_in.groupID);
     delete connector_p;
 
     return;
   } // end IF
-  Common_Tools::dispatchEvents (useReactor_in,
-                                !useReactor_in,
-                                group_id);
+  Common_Tools::dispatchEvents (configuration_in.useReactor,
+                                !configuration_in.useReactor,
+                                configuration_in.groupID);
   if (connection_manager_p->numConnections () < 1)
   {
     // debug info
@@ -609,29 +794,48 @@ do_work (IRC_Client_Configuration& configuration_in,
                 buffer));
 
     // clean up
+    result = thread_manager_p->wait_grp (group_id_2);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", returning\n"),
+                  group_id_2));
     delete connector_p;
 
     return;
   } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connected...\n")));
 
   // step6b: dispatch events
-  if (!Common_Tools::startEventDispatch (use_reactor,
+  if (!Common_Tools::startEventDispatch (configuration_in.useReactor,
                                          numDispatchThreads_in,
-                                         group_id))
+                                         configuration_in.groupID))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
 
     // clean up
+    result = thread_manager_p->wait_grp (group_id_2);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", returning\n"),
+                  group_id_2));
+    connection_manager_p->abort ();
+    connection_manager_p->wait ();
     delete connector_p;
 
     return;
   } // end IF
-  Common_Tools::dispatchEvents (useReactor_in,
-                                !useReactor_in,
-                                group_id);
+  Common_Tools::dispatchEvents (configuration_in.useReactor,
+                                !configuration_in.useReactor,
+                                configuration_in.groupID);
 
   // step7: clean up
+  result = thread_manager_p->wait_grp (group_id_2);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", returning\n"),
+                group_id_2));
   connection_manager_p->abort ();
   connection_manager_p->wait ();
   delete connector_p;
@@ -961,7 +1165,7 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
   if (!Common_Tools::preInitializeSignals (signal_set,
-                                           NET_EVENT_USE_REACTOR,
+                                           use_reactor,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
@@ -1076,14 +1280,17 @@ ACE_TMAIN (int argc_in,
                                configuration.protocolConfiguration.loginOptions,
                                server_hostname,
                                server_port_number);
+  configuration.useReactor = use_reactor;
 
   // step8: do work
   ACE_High_Res_Timer timer;
-  timer.start();
+  timer.start ();
   do_work (configuration,
-           use_reactor,
            server_hostname,
            server_port_number,
+           signal_set,
+           ignored_signal_set,
+           previous_signal_actions,
            signal_handler,
            num_thread_pool_threads);
 

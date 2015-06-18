@@ -119,7 +119,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     sessionID_ = 0;
     // reset various counters...
     {
-      ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
       numInboundMessages_ = 0;
       numOutboundMessages_ = 0;
@@ -200,7 +200,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   ACE_ASSERT (message_inout);
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
     // update counters...
     numInboundMessages_++;
@@ -239,7 +239,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   ACE_ASSERT (isInitialized_);
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
     // update counters...
     // *NOTE*: currently, session messages travel only downstream...
@@ -342,7 +342,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
   // this should happen every second (roughly)...
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
     // remember this result (satisfies an asynchronous API)...
     lastMessagesPerSecondCount_ = messageCounter_;
@@ -378,7 +378,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   ACE_OS::memset (&data_out, 0, sizeof (StatisticContainerType));
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
     data_out.numDataMessages = (numInboundMessages_ + numOutboundMessages_);
     data_out.numDroppedMessages = 0;
@@ -404,7 +404,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::report"));
 
-  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
   ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("*** [session: %u] RUNTIME STATISTICS ***\n--> Stream Statistics <--\n messages/sec: %u\n messages total [in/out]): %u/%u (data: %.2f%%)\n bytes/sec: %u\n bytes total: %.0f\n--> Cache Statistics <--\n current cache usage [%u messages / %u byte(s) allocated]\n*** RUNTIME STATISTICS ***\\END\n"),
@@ -438,7 +438,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
   {
     // synchronize access to statistics data
-    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
     if ((numInboundMessages_ + numOutboundMessages_))
     {
@@ -580,8 +580,8 @@ Net_Module_Statistic_ReaderTask_T<TaskSynchType,
                 ACE_TEXT ("no sibling task: \"%m\", aborting\n")));
     return -1;
   } // end IF
-  WRITER_TASK_TYPE* sibling_p =
-    dynamic_cast<WRITER_TASK_TYPE*> (sibling_base_p);
+  WRITER_TASK_T* sibling_p =
+    dynamic_cast<WRITER_TASK_T*> (sibling_base_p);
   if (!sibling_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -597,7 +597,7 @@ Net_Module_Statistic_ReaderTask_T<TaskSynchType,
   } // end IF
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard (sibling_p->lock_);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (sibling_p->lock_);
 
     // update counters...
     sibling_p->numOutboundMessages_++;

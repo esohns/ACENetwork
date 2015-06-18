@@ -48,6 +48,7 @@ class Net_ConnectionBase_T
  public:
   // implement (part of) Net_IConnection_T
   virtual bool initialize (const ConfigurationType&); // handler configuration
+  virtual Net_Connection_Status status () const;
 
   // convenient types
   typedef StreamType STREAM_T;
@@ -73,6 +74,7 @@ class Net_ConnectionBase_T
   bool                   isRegistered_;
   ICONNECTION_MANAGER_T* manager_;
   SessionDataType*       sessionData_;
+  Net_Connection_Status  status_;
 
  private:
   typedef Common_ReferenceCounterBase inherited;

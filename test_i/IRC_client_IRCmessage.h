@@ -58,7 +58,7 @@ class IRC_Client_IRCMessage
       //         and replies/errors uniformly, start this beyond the
       //         range of (numeric) commands (== three-digit number)
       //         --> check RFC1459
-      //         --> see also: rpg_net_protocol_IRC_codes.h
+      //         --> see also: IRC_client_IRC_codes.h
       PASS = 1000,
       NICK,
       USER,

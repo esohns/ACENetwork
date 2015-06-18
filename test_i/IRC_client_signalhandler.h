@@ -30,7 +30,7 @@
 
 #include "net_client_connector_common.h"
 
-struct IRC_Client_SignalHandlerConfiguration_t
+struct IRC_Client_SignalHandlerConfiguration
 {
 //  long                     actionTimerId;
   Net_Client_IConnector_t* connector;
@@ -39,7 +39,7 @@ struct IRC_Client_SignalHandlerConfiguration_t
 
 class IRC_Client_SignalHandler
  : public Common_SignalHandler
- , public Common_IInitialize_T<IRC_Client_SignalHandlerConfiguration_t>
+ , public Common_IInitialize_T<IRC_Client_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
@@ -47,7 +47,7 @@ class IRC_Client_SignalHandler
   virtual ~IRC_Client_SignalHandler ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const IRC_Client_SignalHandlerConfiguration_t&); // configuration
+  virtual bool initialize (const IRC_Client_SignalHandlerConfiguration&); // configuration
 
   // implement Common_ISignal
   virtual bool handleSignal (int); // signal
@@ -59,8 +59,8 @@ class IRC_Client_SignalHandler
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler (const IRC_Client_SignalHandler&));
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler& operator= (const IRC_Client_SignalHandler&));
 
-  IRC_Client_SignalHandlerConfiguration_t* configuration_;
-  bool                                     useReactor_;
+  IRC_Client_SignalHandlerConfiguration* configuration_;
+  bool                                   useReactor_;
 };
 
 #endif

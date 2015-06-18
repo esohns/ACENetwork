@@ -21,6 +21,8 @@
 #ifndef NET_COMMON_H
 #define NET_COMMON_H
 
+#include "ace/Svc_Handler.h"
+
 #include "stream_messageallocatorheap_base.h"
 
 #include "net_message.h"
@@ -28,26 +30,47 @@
 
 enum Net_ClientServerRole
 {
-  ROLE_INVALID = -1,
-  ROLE_CLIENT = 0,
-  ROLE_SERVER,
+  NET_ROLE_INVALID = -1,
+  NET_ROLE_CLIENT = 0,
+  NET_ROLE_SERVER,
   ///////////////////////////////////////
-  ROLE_MAX
+  NET_ROLE_MAX
 };
 
 enum Net_TransportLayerType
 {
-  TRANSPORTLAYER_INVALID = -1,
-  TRANSPORTLAYER_IP_BROADCAST = 0,
-  TRANSPORTLAYER_IP_MULTICAST,
-  TRANSPORTLAYER_NETLINK,
-  TRANSPORTLAYER_TCP,
-  TRANSPORTLAYER_UDP,
+  NET_TRANSPORTLAYER_INVALID = -1,
+  NET_TRANSPORTLAYER_IP_BROADCAST = 0,
+  NET_TRANSPORTLAYER_IP_MULTICAST,
+  NET_TRANSPORTLAYER_NETLINK,
+  NET_TRANSPORTLAYER_TCP,
+  NET_TRANSPORTLAYER_UDP,
   ///////////////////////////////////////
-  TRANSPORTLAYER_MAX
+  NET_TRANSPORTLAYER_MAX
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<Net_Message,
                                           Net_SessionMessage> Net_StreamMessageAllocator_t;
+
+// *NOTE*: this extends ACE_Svc_Handler_Close (see Svc_Handler.h)
+enum Net_Connection_CloseReason
+{
+  NET_CONNECTION_CLOSE_REASON_INVALID = CLOSE_DURING_NEW_CONNECTION,
+  ///////////////////////////////////////
+  NET_CONNECTION_CLOSE_REASON_INITIALIZATION,
+  ///////////////////////////////////////
+  NET_CONNECTION_CLOSE_REASON_MAX
+};
+
+enum Net_Connection_Status
+{
+  NET_CONNECTION_STATUS_INVALID = -1,
+  ///////////////////////////////////////
+  NET_CONNECTION_STATUS_OK = 0,
+  ///////////////////////////////////////
+  NET_CONNECTION_STATUS_INITIALIZATION_FAILED,
+  ///////////////////////////////////////
+  NET_CONNECTION_STATUS_MAX
+};
 
 #endif

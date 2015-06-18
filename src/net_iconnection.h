@@ -48,9 +48,12 @@ class Net_IConnection_T
                      AddressType&) const = 0; // return value: remote SAP
   virtual unsigned int id () const = 0;
 
+  virtual Net_Connection_Status status () const = 0;
   virtual const StreamType& stream () const = 0;
 
-  virtual void close () = 0;
+  // *NOTE*: see ACE_Svc_Handler/ACE_Task_Base
+  //         (and net_common.h / ACE_Svc_Handler.h for reason codes)
+  virtual int close (u_long = 0) = 0; // reason
 };
 
 template <typename AddressType,

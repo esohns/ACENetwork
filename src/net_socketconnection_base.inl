@@ -456,8 +456,9 @@ Net_SocketConnectionBase_T<AddressType,
     case NORMAL_CLOSE_OPERATION:
     {
       // check specifically for the first case...
-      if (ACE_OS::thr_equal (ACE_Thread::self (),
-                             inherited::last_thread ()))
+      result = ACE_OS::thr_equal (ACE_Thread::self (),
+                                  inherited::last_thread ());
+      if (result)
       {
 //       if (inherited::module ())
 //         ACE_DEBUG ((LM_DEBUG,
@@ -466,7 +467,6 @@ Net_SocketConnectionBase_T<AddressType,
 //       else
 //         ACE_DEBUG ((LM_DEBUG,
 //                     ACE_TEXT ("worker thread (ID: %t) leaving...\n")));
-
         break;
       } // end IF
 
@@ -477,11 +477,19 @@ Net_SocketConnectionBase_T<AddressType,
     // (e.g. cannot connect, too many connections, ...)
     // *NOTE*: this (eventually) calls handle_close() (see below)
     case CLOSE_DURING_NEW_CONNECTION:
+    case NET_CONNECTION_CLOSE_REASON_INITIALIZATION:
     {
-      result = inherited::close (CLOSE_DURING_NEW_CONNECTION);
+      // step1: release resources
+      result = inherited::close (arg_in);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to HandlerType::close(CLOSE_DURING_NEW_CONNECTION): \"%m\", continuing\n")));
+                    ACE_TEXT ("failed to HandlerType::close(%u): \"%m\", continuing\n"),
+                    arg_in));
+
+      // step2: delete this ?
+      if ((arg_in == NORMAL_CLOSE_OPERATION) &&
+          (inherited::status_ == NET_CONNECTION_STATUS_INITIALIZATION_FAILED))
+        inherited::decrease ();
 
       break;
     } // end IF
