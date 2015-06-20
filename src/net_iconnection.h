@@ -74,4 +74,23 @@ class Net_ISocketConnection_T
   virtual ~Net_ISocketConnection_T () {};
 };
 
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename StateType>
+class Net_ISession_T
+ : virtual public Net_ISocketConnection_T<AddressType,
+                                          SocketConfigurationType,
+                                          ConfigurationType,
+                                          StatisticContainerType,
+                                          StreamType>
+{
+public:
+  virtual ~Net_ISession_T () {};
+
+  virtual const StateType& state () const = 0;
+};
+
 #endif

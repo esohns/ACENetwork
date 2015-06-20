@@ -9,6 +9,7 @@
 #define NOMINMAX
 
 // Windows Header Files
+#define WINVER 0x0602 // MS Windows 8.1
 #include <windows.h>
 #endif
 

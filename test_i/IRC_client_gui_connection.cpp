@@ -69,13 +69,12 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
   } // end IF
 
   // initialize cb data
-  CBData_.away = false;
   CBData_.connection = this;
   CBData_.connections = connections_in;
   CBData_.controller = controller_in;
   CBData_.GTKState = state_in;
   //   CBData_.nick.clear(); // cannot set this now...
-  CBData_.userModes.reset ();
+  CBData_.IRCSessionState.userModes.reset ();
 
   // create new GtkBuilder
   GtkBuilder* builder_p = gtk_builder_new ();
@@ -590,7 +589,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           // *NOTE*: this is the first message in any connection !
 
           // remember nickname
-          CBData_.nickname = message_in.params.front ();
+          CBData_.IRCSessionState.nickname = message_in.params.front ();
 
           gdk_threads_enter ();
 
@@ -714,7 +713,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           gdk_threads_enter ();
 
           // *WARNING*: needs the lock protection, otherwise there is a race...
-          CBData_.away = false;
+          CBData_.IRCSessionState.away = false;
 
           // retrieve togglebutton
           GtkToggleButton* togglebutton_p =
@@ -734,7 +733,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           gdk_threads_enter ();
 
           // *WARNING*: needs the lock protection, otherwise there is a race...
-          CBData_.away = true;
+          CBData_.IRCSessionState.away = true;
 
           // retrieve togglebutton
           GtkToggleButton* togglebutton_p =
@@ -928,7 +927,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           } // end IF
 
           // ignore own record
-          if (nick == CBData_.nickname)
+          if (nick == CBData_.IRCSessionState.nickname)
           {
             // clean up
             gdk_threads_leave ();
@@ -937,8 +936,8 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           } // end IF
 
           // step1: convert text
-          gchar* converted_nick_string = Common_UI_Tools::Locale2UTF8 (nick);
-          if (!converted_nick_string)
+          gchar* string_p = Common_UI_Tools::Locale2UTF8 (nick);
+          if (!string_p)
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to convert nickname: \"%s\", aborting\n"),
@@ -949,36 +948,36 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
             break;
           } // end IF
-          gchar* converted_name_string = Common_UI_Tools::Locale2UTF8(real_name);
-          if (!converted_name_string)
+          gchar* string_2 = Common_UI_Tools::Locale2UTF8 (real_name);
+          if (!string_2)
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to convert name: \"%s\", aborting\n"),
                         ACE_TEXT (real_name.c_str ())));
 
             // clean up
-            g_free (converted_nick_string);
+            g_free (string_p);
             gdk_threads_leave ();
 
             break;
           } // end IF
 
           // step2: append new (text) entry
-          GtkTreeIter iter;
-          gtk_list_store_append (liststore_p, &iter);
-          gtk_list_store_set (liststore_p, &iter,
-                              0, converted_nick_string, // column 0
+          GtkTreeIter iterator;
+          gtk_list_store_append (liststore_p, &iterator);
+          gtk_list_store_set (liststore_p, &iterator,
+                              0, string_p, // column 0
                               1, away,
                               2, is_IRCoperator,
                               3, is_operator,
                               4, is_voiced,
                               5, hop_count,
-                              6, converted_name_string,
+                              6, string_2,
                               -1);
 
           // clean up
-          g_free (converted_nick_string);
-          g_free (converted_name_string);
+          g_free (string_p);
+          g_free (string_2);
           gdk_threads_leave ();
 
           break;
@@ -1006,9 +1005,9 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
                                                                                           : current_position) - last_position));
 
             // check whether user is a channel operator
-            if (nick.find (CBData_.nickname) != std::string::npos)
+            if (nick.find (CBData_.IRCSessionState.nickname) != std::string::npos)
               is_operator = ((nick[0] == '@') &&
-                             (nick.size () == (CBData_.nickname.size () + 1)));
+                             (nick.size () == (CBData_.IRCSessionState.nickname.size () + 1)));
 
             list.push_back (nick);
 
@@ -1118,8 +1117,8 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRCMessage::NICK:
         {
           // remember changed nickname...
-          std::string old_nick = CBData_.nickname;
-          CBData_.nickname = message_in.params.front ();
+          std::string old_nick = CBData_.IRCSessionState.nickname;
+          CBData_.IRCSessionState.nickname = message_in.params.front ();
 
           // --> display (changed) nickname
           // step1: set server tab nickname label
@@ -1131,7 +1130,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           ACE_ASSERT (label_p);
           // --> see Pango Text Attribute Markup Language...
           std::string nickname_string = ACE_TEXT_ALWAYS_CHAR ("<b><i>nickname</i></b> ");
-          nickname_string += CBData_.nickname;
+          nickname_string += CBData_.IRCSessionState.nickname;
           gtk_label_set_markup (label_p,
                                 nickname_string.c_str ());
 
@@ -1155,7 +1154,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         {
           log (message_in);
 
-          if ((message_in.prefix.origin == CBData_.nickname) &&
+          if ((message_in.prefix.origin == CBData_.IRCSessionState.nickname) &&
               (command == IRC_Client_IRCMessage::QUIT))
             error (message_in); // --> show on statusbar as well...
 
@@ -1168,7 +1167,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           // - stranger entering the channel
 
           // reply from a successful join request ?
-          if (message_in.prefix.origin == CBData_.nickname)
+          if (message_in.prefix.origin == CBData_.IRCSessionState.nickname)
           {
             createMessageHandler (message_in.params.front ());
             break;
@@ -1198,10 +1197,9 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           // - someone left a common channel
 
           // reply from a successful part request ?
-          if (message_in.prefix.origin == CBData_.nickname)
+          if (message_in.prefix.origin == CBData_.IRCSessionState.nickname)
           {
             terminateMessageHandler (message_in.params.back ());
-
             break;
           } // end IF
 
@@ -1233,12 +1231,12 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
             message_in.params.begin ();
           param_iterator++;
 
-          if (message_in.params.front () == CBData_.nickname)
+          if (message_in.params.front () == CBData_.IRCSessionState.nickname)
           {
             // --> user mode
             // *WARNING*: needs the lock protection, otherwise there is a race...
             IRC_Client_Tools::merge (message_in.params.back (),
-                                     CBData_.userModes);
+                                     CBData_.IRCSessionState.userModes);
 
             // *WARNING*: needs the lock protection, otherwise there is a race...
             updateModeButtons ();
@@ -1330,7 +1328,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           // private message ?
           std::string target_id;
-          if (CBData_.nickname == message_in.params.front ())
+          if (CBData_.IRCSessionState.nickname == message_in.params.front ())
           {
             // --> send to private conversation handler
 
@@ -1342,8 +1340,8 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           } // end IF
 
           // channel/nick message ?
-          forward (((CBData_.nickname == message_in.params.front ()) ? message_in.prefix.origin
-                                                                     : message_in.params.front ()),
+          forward (((CBData_.IRCSessionState.nickname == message_in.params.front ()) ? message_in.prefix.origin
+                                                                                     : message_in.params.front ()),
                    message_text);
 
           break;
@@ -1436,9 +1434,9 @@ IRC_Client_GUI_Connection::getNickname () const
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::getNickname"));
 
   // sanity check(s)
-  ACE_ASSERT (!CBData_.nickname.empty ());
+  ACE_ASSERT (!CBData_.IRCSessionState.nickname.empty ());
 
-  return CBData_.nickname;
+  return CBData_.IRCSessionState.nickname;
 }
 
 std::string
@@ -1915,43 +1913,43 @@ IRC_Client_GUI_Connection::updateModeButtons ()
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_AWAY]);
+                                CBData_.IRCSessionState.userModes[USERMODE_AWAY]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_INVISIBLE]);
+                                CBData_.IRCSessionState.userModes[USERMODE_INVISIBLE]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_RECVNOTICES]);
+                                CBData_.IRCSessionState.userModes[USERMODE_RECVNOTICES]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_OPERATOR]);
+                                CBData_.IRCSessionState.userModes[USERMODE_OPERATOR]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_RESTRICTEDCONN]);
+                                CBData_.IRCSessionState.userModes[USERMODE_RESTRICTEDCONN]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_LOCALOPERATOR]);
+                                CBData_.IRCSessionState.userModes[USERMODE_LOCALOPERATOR]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                CBData_.userModes[USERMODE_RECVWALLOPS]);
+                                CBData_.IRCSessionState.userModes[USERMODE_RECVWALLOPS]);
 
   gdk_threads_leave ();
 }

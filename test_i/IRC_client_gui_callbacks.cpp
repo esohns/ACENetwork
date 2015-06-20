@@ -1596,7 +1596,7 @@ user_mode_toggled_cb (GtkToggleButton* widget_in,
   ACE_ASSERT (widget_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
-  ACE_ASSERT (!data_p->nickname.empty ());
+  ACE_ASSERT (!data_p->IRCSessionState.nickname.empty ());
 
   IRC_Client_UserMode mode = USERMODE_INVALID;
   // find out which button toggled...
@@ -1659,19 +1659,19 @@ user_mode_toggled_cb (GtkToggleButton* widget_in,
   // check if the state is inconsistent --> submit change request, else do nothing
   // i.e. state is off and widget is "on" (or vice-versa)
   // *NOTE*: avoid recursion
-  if (data_p->userModes.test (mode) == widget_in->active)
+  if (data_p->IRCSessionState.userModes.test (mode) == widget_in->active)
     return;
   // re-toggle button for now...
   // *NOTE*: will be auto-toggled according to the outcome of the change request
-  gtk_toggle_button_set_active (widget_in, data_p->userModes.test (mode));
+  gtk_toggle_button_set_active (widget_in, data_p->IRCSessionState.userModes.test (mode));
 
   string_list_t parameters;
   try
   {
-    data_p->controller->mode (data_p->nickname,                          // user mode
-                              IRC_Client_Tools::IRCUserMode2Char (mode), // corresponding mode char
-                              !data_p->userModes.test (mode),            // enable ?
-                              parameters);                               // parameters
+    data_p->controller->mode (data_p->IRCSessionState.nickname,               // user mode
+                              IRC_Client_Tools::IRCUserMode2Char (mode),      // corresponding mode char
+                              !data_p->IRCSessionState.userModes.test (mode), // enable ?
+                              parameters);                                    // parameters
   }
   catch (...)
   {
@@ -1741,11 +1741,11 @@ action_away_cb (GtkAction* action_in,
   // check if the state is inconsistent --> submit change request, else do nothing
   // i.e. state is off and widget is "on" or vice-versa
   // *NOTE*: avoid recursion
-  if (data_p->away == activating)
+  if (data_p->IRCSessionState.away == activating)
     return;
   // re-toggle button for now...
   // *NOTE*: will be auto-toggled according to the outcome of the change request
-  gtk_toggle_button_set_active (togglebutton_p, data_p->away);
+  gtk_toggle_button_set_active (togglebutton_p, data_p->IRCSessionState.away);
 
   // activating ? --> retrieve away message
   std::string away_message;

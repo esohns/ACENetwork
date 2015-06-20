@@ -35,16 +35,12 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="VS_ProjectPropertySheet_ACEd.props" />
-    <Import Project="VS_ProjectPropertySheet_png_gtk_gnome.props" />
-    <Import Project="VS_ProjectPropertySheet_glade.props" />
-    <Import Project="VS_ProjectPropertySheet_SDL.props" />
+    <Import Project="VS_ProjectPropertySheet_curses.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="VS_ProjectPropertySheet_ACE.props" />
-    <Import Project="VS_ProjectPropertySheet_png_gtk_gnome.props" />
-    <Import Project="VS_ProjectPropertySheet_glade.props" />
-    <Import Project="VS_ProjectPropertySheet_SDL.props" />
+    <Import Project="VS_ProjectPropertySheet_curses.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -62,7 +58,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>YY_NEVER_INTERACTIVE;DEBUG_DEBUGGER;BASEDIR="$(ProgramFiles.Replace('\', "\\"))\\$(SolutionName)";HAVE_CONFIG_H;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;D:\projects\yarp\modules\libACENetwork\3rd_party\msvc;$(ProjectDir)..\..\3rd_party;$(ProjectDir)..\..\3rd_party\bison;$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;$(ProjectDir)..\..\3rd_party;$(ProjectDir)..\..\3rd_party\bison;$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
@@ -130,6 +126,7 @@
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </ShowIncludes>
     </ClCompile>
+    <ClCompile Include="..\..\test_i\IRC_client_curses.cpp" />
     <ClCompile Include="..\..\test_i\IRC_client_inputhandler.cpp" />
     <ClCompile Include="..\..\test_i\IRC_client_IRCbisect.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -265,6 +262,7 @@
     <ClInclude Include="..\..\test_i\IRC_client_common.h" />
     <ClInclude Include="..\..\test_i\IRC_client_common_modules.h" />
     <ClInclude Include="..\..\test_i\IRC_client_configuration.h" />
+    <ClInclude Include="..\..\test_i\IRC_client_curses.h" />
     <ClInclude Include="..\..\test_i\IRC_client_defines.h" />
     <ClInclude Include="..\..\test_i\IRC_client_iIRCControl.h" />
     <ClInclude Include="..\..\test_i\IRC_client_inputhandler.h" />

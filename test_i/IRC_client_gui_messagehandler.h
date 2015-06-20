@@ -21,13 +21,14 @@
 #ifndef IRC_CLIENT_GUI_MESSAGEHANDLER_H
 #define IRC_CLIENT_GUI_MESSAGEHANDLER_H
 
-#include <deque>
 #include <string>
 
 #include "ace/Global_Macros.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 #include "gtk/gtk.h"
+
+#include "IRC_client_common.h"
 
 #include "IRC_client_gui_common.h"
 
@@ -103,14 +104,12 @@ class IRC_Client_GUI_MessageHandler
   void clearMembers ();
   void updateModeButtons ();
 
-  IRC_Client_GTK_HandlerCBData CBData_;
-
-  std::deque<std::string>      displayQueue_;
-  ACE_Thread_Mutex             lock_;
-
   std::string                  builderLabel_;
+  IRC_Client_GTK_HandlerCBData CBData_;
   guint                        eventSourceID_;
   bool                         isFirstMemberListMsg_;
+  IRC_Client_MessageQueue_t    messageQueue_;
+  ACE_SYNCH_MUTEX              messageQueueLock_;
   GtkNotebook*                 parent_;
   GtkTextView*                 view_;
 };

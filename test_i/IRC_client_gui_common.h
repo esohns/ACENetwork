@@ -28,7 +28,6 @@
 #include "common_ui_common.h"
 
 #include "IRC_client_common.h"
-//#include "IRC_client_configuration.h"
 #include "IRC_client_IRCmessage.h"
 
 // forward declaration(s)
@@ -61,23 +60,18 @@ struct IRC_Client_GTK_CBData
 struct IRC_Client_GTK_ConnectionCBData
 {
   inline IRC_Client_GTK_ConnectionCBData ()
-   : away (false)
+   : IRCSessionState ()
    , connection (NULL)
    , connections (NULL)
    , controller (NULL)
    , GTKState (NULL)
-   , nickname ()
-   , userModes ()
   {};
 
-  // *TODO*: couldn't it be done without this one ?
-  bool                       away;
+  IRC_Client_SessionState    IRCSessionState;
   IRC_Client_GUI_Connection* connection;
   connections_t*             connections;
   IRC_Client_IIRCControl*    controller;
   Common_UI_GTKState*        GTKState;
-  std::string                nickname;
-  IRC_Client_UserModes_t     userModes;
 };
 
 struct IRC_Client_GTK_HandlerCBData

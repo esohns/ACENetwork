@@ -170,11 +170,11 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
         {
           if (initialRegistration_)
           {
+            initialRegistration_ = false;
             if (!inherited2::change (REGISTRATION_STATE_FINISHED))
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to Common_IStateMachine_T::change(\"%s\"), continuing\n"),
                           ACE_TEXT (inherited2::state2String (REGISTRATION_STATE_FINISHED).c_str ())));
-            initialRegistration_ = false;
           } // end IF
 
           // *WARNING*: falls through !
@@ -212,6 +212,8 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
         case IRC_Client_IRC_Codes::RPL_MOTDSTART:            // 375
         case IRC_Client_IRC_Codes::RPL_ENDOFMOTD:            // 376
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:           // 401
+        case IRC_Client_IRC_Codes::ERR_NOTEXTTOSEND:         // 412
+        case IRC_Client_IRC_Codes::ERR_UNKNOWNCOMMAND:       // 421
         case IRC_Client_IRC_Codes::ERR_NOMOTD:               // 422
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:        // 433
         case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:        // 451

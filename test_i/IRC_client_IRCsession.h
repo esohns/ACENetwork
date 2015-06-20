@@ -31,20 +31,26 @@
 
 #include "stream_common.h"
 
+#include "net_iconnection.h"
+
 #include "IRC_client_common.h"
 #include "IRC_client_inputhandler.h"
 #include "IRC_client_IRCmessage.h"
 #include "IRC_client_network.h"
-//#include "IRC_client_statemachine_registration.h"
 #include "IRC_client_stream_common.h"
 
 // forward declarations
 class ACE_Message_Block;
-class IRC_Client_IIRCControl;
 
 template <typename ConnectionType>
 class IRC_Client_IRCSession_T
  : public ConnectionType
+ , virtual public Net_ISession_T<ACE_INET_Addr,
+                                 Net_SocketConfiguration,
+                                 IRC_Client_Configuration,
+                                 Stream_Statistic,
+                                 IRC_Client_Stream,
+                                 IRC_Client_SessionState>
  , public IRC_Client_INotify_t
 {
  friend class ACE_Connector<IRC_Client_IRCSession_T<ConnectionType>,
@@ -56,6 +62,9 @@ class IRC_Client_IRCSession_T
                            unsigned int = 0);                        // statistics collecting interval (second(s))
                                                                      // 0 --> DON'T collect statistics
   virtual ~IRC_Client_IRCSession_T ();
+
+  // implement Net_ISession_T
+  virtual const IRC_Client_SessionState& state () const;
 
   // implement IRC_Client_INotify_t
   virtual void start (const IRC_Client_StreamModuleConfiguration&);
@@ -75,11 +84,12 @@ class IRC_Client_IRCSession_T
 
   void error (const IRC_Client_IRCMessage&);
   void log (const IRC_Client_IRCMessage&);
-  void log (const std::string&);
+  void log (const std::string&, // text
+            bool = true);       // log to channel ? : server log
 
   bool                     close_;
-  IRC_Client_IIRCControl*  controller_;
   IRC_Client_InputHandler* inputHandler_;
+  bool                     logToFile_;
   IRC_Client_IOStream_t    output_;
   IRC_Client_SessionState  state_;
 };

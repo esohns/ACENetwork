@@ -1577,9 +1577,6 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
     }
   } // end SWITCH
 
-  // append newline
-  result += ACE_TEXT_ALWAYS_CHAR ("\n");
-
   return result;
 }
 

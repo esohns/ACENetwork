@@ -196,7 +196,8 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
     message_text.clear (); // all newline
 
   // send the message
-  ACE_ASSERT (configuration_.controller);
+  ACE_ASSERT (configuration_.IRCSessionState);
+  ACE_ASSERT (configuration_.IRCSessionState->controller);
   string_list_t receivers;
   ACE_ASSERT (state_);
   {
@@ -214,7 +215,7 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
   } // end lock scope
   try
   {
-    configuration_.controller->send (receivers, message_text);
+    configuration_.IRCSessionState->controller->send (receivers, message_text);
   }
   catch (...)
   {

@@ -115,6 +115,7 @@
 // client
 #define IRC_CLIENT_CONNECTION_DEF_TIMEOUT        2 // second(s)
 #define IRC_CLIENT_SESSION_LOG_FILENAME_PREFIX   "IRC_client_session"
+#define IRC_CLIENT_SESSION_DEF_CURSES            true // use (PD|N)curses ?
 #define IRC_CLIENT_SESSION_DEF_LOG               false // log to file ? : stdout
 
 #endif

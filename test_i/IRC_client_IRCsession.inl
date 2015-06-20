@@ -11,7 +11,6 @@
 
 #include "common_defines.h"
 #include "common_file_tools.h"
-//#include "common_time_common.h"
 #include "common_tools.h"
 
 #include "net_common.h"
@@ -19,6 +18,7 @@
 
 #include "IRC_common.h"
 
+#include "IRC_client_curses.h"
 #include "IRC_client_defines.h"
 #include "IRC_client_network.h"
 #include "IRC_client_tools.h"
@@ -29,8 +29,8 @@ IRC_Client_IRCSession_T<ConnectionType>::IRC_Client_IRCSession_T (IRC_Client_ICo
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
  , close_ (false)
- , controller_ (NULL)
  , inputHandler_ (NULL)
+ , logToFile_ (IRC_CLIENT_SESSION_DEF_LOG)
  , output_ (ACE_STREAMBUF_SIZE)
  , state_ ()
 {
@@ -105,9 +105,9 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
 
     return;
   } // end IF
-  controller_ =
+  state_.controller =
     dynamic_cast<IRC_Client_IIRCControl*> (const_cast<typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
-  if (!controller_)
+  if (!state_.controller)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<IRC_Client_IIRCControl*> failed, returning\n"),
@@ -135,7 +135,9 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
   state_.nickname = configuration_p->protocolConfiguration.loginOptions.nick;
 
   // step1: initialize output
-  if (configuration_p->logToFile)
+  state_.cursesState = configuration_p->cursesState;
+  logToFile_ = configuration_p->logToFile;
+  if (logToFile_)
   {
     std::string filename = Common_File_Tools::getLogDirectory ();
     filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -178,11 +180,12 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
     output_.set_handle (ACE_STDOUT);
 
   // step2: initialize input
-  if (!inputHandler_)
+  if (!configuration_p->cursesState &&
+      !inputHandler_)
   {
     ACE_NEW_NORETURN (inputHandler_,
                       IRC_Client_InputHandler (&state_,
-                      configuration_p->useReactor));
+                                               configuration_p->useReactor));
     if (!inputHandler_)
     {
       ACE_DEBUG ((LM_CRITICAL,
@@ -194,7 +197,7 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
       return;
     } // end IF
     IRC_Client_InputHandlerConfiguration input_handler_configuration;
-    input_handler_configuration.controller = controller_;
+    input_handler_configuration.IRCSessionState = &state_;
     input_handler_configuration.streamConfiguration =
       &configuration_p->streamConfiguration.streamConfiguration;
     if (!inputHandler_->initialize (input_handler_configuration))
@@ -208,6 +211,15 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
       return;
     } // end IF
   } // end IF
+}
+
+template <typename ConnectionType>
+const IRC_Client_SessionState&
+IRC_Client_IRCSession_T<ConnectionType>::state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::state"));
+
+  return state_;
 }
 
 template <typename ConnectionType>
@@ -523,16 +535,27 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           // there are two possibilities:
           // - reply from a successful join request
           // - stranger entering the channel
-          log (message_in);
 
           // reply from a successful join request ?
           if (message_in.prefix.origin == state_.nickname)
           {
-            state_.channel = message_in.params.front ();
+            std::string channel = message_in.params.front ();
+            if ((state_.channel.empty ()) &&
+                state_.cursesState)
+              if (!curses_join (channel,
+                                *state_.cursesState))
+                ACE_DEBUG ((LM_ERROR,
+                            ACE_TEXT ("failed to curses_join(\"%s\"), continuing\n"),
+                            ACE_TEXT (channel.c_str ())));
+
+            state_.channel = channel;
+
             break;
           } // end IF
 
           // someone joined a common channel...
+          log (message_in);
+
           break;
         }
         case IRC_Client_IRCMessage::PART:
@@ -540,16 +563,26 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           // there are two possibilities:
           // - reply from a (successful) part request
           // - someone left a common channel
-          log (message_in);
 
           // reply from a successful part request ?
           if (message_in.prefix.origin == state_.nickname)
           {
+            std::string channel = message_in.params.front ();
+            if ((!state_.channel.empty ()) &&
+                 state_.cursesState)
+              if (!curses_part (channel,
+                                *state_.cursesState))
+                ACE_DEBUG ((LM_ERROR,
+                            ACE_TEXT ("failed to curses_part(\"%s\"), continuing\n"),
+                            ACE_TEXT (channel.c_str ())));
+
             state_.channel.clear ();
             break;
           } // end IF
 
           // someone left a common channel...
+          log (message_in);
+
           break;
         }
         case IRC_Client_IRCMessage::MODE:
@@ -606,7 +639,6 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
             message_text += ACE_TEXT_ALWAYS_CHAR ("> ");
           } // end IF
           message_text += message_in.params.back ();
-          message_text += ACE_TEXT_ALWAYS_CHAR ("\n");
 
           // private message ?
           std::string target_id;
@@ -754,13 +786,25 @@ IRC_Client_IRCSession_T<ConnectionType>::error (const IRC_Client_IRCMessage& mes
 
 template <typename ConnectionType>
 void
-IRC_Client_IRCSession_T<ConnectionType>::log (const std::string& messageText_in)
+IRC_Client_IRCSession_T<ConnectionType>::log (const std::string& messageText_in,
+                                              bool logToChannel_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::log"));
 
   int result = -1;
 
-  output_ << messageText_in;
+  if (state_.cursesState)
+  {
+    curses_log (messageText_in,      // text
+                *state_.cursesState, // state
+                logToChannel_in,     // log to channel ? : server log
+                true);               // locked access
+
+    if (logToFile_)
+      output_ << messageText_in;
+  } // end IF
+  else
+    output_ << messageText_in;
   result = output_.sync ();
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
@@ -774,5 +818,6 @@ IRC_Client_IRCSession_T<ConnectionType>::log (const IRC_Client_IRCMessage& messa
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::log"));
 
   std::string message_text = IRC_Client_Tools::IRCMessage2String (message_in);
-  log (message_text);
+  log (message_text,
+       !message_in.prefix.user.empty ()); // log to channel ? : server log
 }

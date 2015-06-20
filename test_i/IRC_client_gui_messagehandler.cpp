@@ -35,11 +35,12 @@
 
 IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState* GTKState_in,
                                                               GtkTextView* view_in)
- : CBData_ ()
- , displayQueue_ ()
- , lock_ ()
+ : builderLabel_ ()
+ , CBData_ ()
  , eventSourceID_ (0)
  , isFirstMemberListMsg_ (true)
+ , messageQueue_ ()
+ , messageQueueLock_ ()
  , parent_ (NULL)
  , view_ (view_in)
 {
@@ -70,11 +71,12 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
                                                               const std::string& id_in,
                                                               const std::string& UIFileDirectory_in,
                                                               GtkNotebook* parent_in)
- : CBData_ ()
- , displayQueue_ ()
- , lock_ ()
+ : builderLabel_ ()
+ , CBData_ ()
  , eventSourceID_ (0)
  , isFirstMemberListMsg_ (true)
+ , messageQueue_ ()
+ , messageQueueLock_ ()
  , parent_ (parent_in)
  , view_ (NULL)
 {
@@ -538,9 +540,9 @@ IRC_Client_GUI_MessageHandler::queueForDisplay (const std::string& text_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::queueForDisplay"));
 
   // synch access
-  ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (messageQueueLock_);
 
-  displayQueue_.push_back (text_in);
+  messageQueue_.push_back (text_in);
 }
 
 void
@@ -555,41 +557,41 @@ IRC_Client_GUI_MessageHandler::update ()
 //              ACE_TEXT("printing: \"%s\"\n"),
 //              ACE_TEXT(displayQueue_.front().c_str())));
 
-  GtkTextIter iter;
+  GtkTextIter iterator;
   gtk_text_buffer_get_end_iter (gtk_text_view_get_buffer (view_),
-                                &iter);
+                                &iterator);
 
   {  // synch access
-    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (messageQueueLock_);
 
     // sanity check
-    if (displayQueue_.empty ())
+    if (messageQueue_.empty ())
       return; // nothing to do...
 
     // step1: convert text
-    gchar* converted_text =
-      Common_UI_Tools::Locale2UTF8 (displayQueue_.front ());
-    if (!converted_text)
+    gchar* string_p =
+      Common_UI_Tools::Locale2UTF8 (messageQueue_.front ());
+    if (!string_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to convert message text (was: \"%s\"), returning\n"),
-                  ACE_TEXT (displayQueue_.front ().c_str ())));
+                  ACE_TEXT (messageQueue_.front ().c_str ())));
       return;
     } // end IF
 
     // step2: display text
-    gtk_text_buffer_insert (gtk_text_view_get_buffer (view_), &iter,
-                            converted_text,
+    gtk_text_buffer_insert (gtk_text_view_get_buffer (view_), &iterator,
+                            string_p,
                             -1);
 //   gtk_text_buffer_insert_at_cursor(gtk_text_view_get_buffer (view_),
 //                                    message_text.c_str(),
 //                                    message_text.size());
 
     // clean up
-    g_free (converted_text);
+    g_free (string_p);
 
     // step3: pop stack
-    displayQueue_.pop_front ();
+    messageQueue_.pop_front ();
   } // end lock scope
 
 //   // get the new "end"...
@@ -597,7 +599,7 @@ IRC_Client_GUI_MessageHandler::update ()
 //                                &iter);
   // move the iterator to the beginning of line, so we don't scroll
   // in horizontal direction
-  gtk_text_iter_set_line_offset (&iter, 0);
+  gtk_text_iter_set_line_offset (&iterator, 0);
 
   // ...and place the mark at iter. The mark will stay there after we
   // insert some text at the end because it has right gravity
@@ -606,7 +608,7 @@ IRC_Client_GUI_MessageHandler::update ()
                                    ACE_TEXT_ALWAYS_CHAR ("scroll"));
   gtk_text_buffer_move_mark (gtk_text_view_get_buffer (view_),
                              mark,
-                             &iter);
+                             &iterator);
 
   // scroll the mark onscreen
   gtk_text_view_scroll_mark_onscreen (view_,

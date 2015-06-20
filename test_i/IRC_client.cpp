@@ -39,10 +39,14 @@
 #include "ace/Signal.h"
 #include "ace/Version.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN32)
+#include "curses.h"
+#else
+#include <ncurses.h>
+#endif
+
 #include "common_file_tools.h"
 #include "common_tools.h"
-
-#include "common_ui_gtk_manager.h"
 
 #include "stream_cachedallocatorheap.h"
 
@@ -56,6 +60,7 @@
 #include "IRC_common.h"
 
 #include "IRC_client_configuration.h"
+#include "IRC_client_curses.h"
 #include "IRC_client_defines.h"
 #include "IRC_client_messageallocator.h"
 #include "IRC_client_module_IRChandler.h"
@@ -101,6 +106,10 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT ("]")
             << std::endl;
+  std::cout << ACE_TEXT ("-n        : use (PD|n)curses library [")
+            << IRC_CLIENT_SESSION_DEF_CURSES
+            << ACE_TEXT ("]")
+            << std::endl;
   std::cout << ACE_TEXT ("-r        : use reactor [")
             << NET_EVENT_USE_REACTOR
             << ACE_TEXT ("]")
@@ -132,6 +141,7 @@ do_processArguments (int argc_in,
                      std::string& configurationFile_out,
                      bool& debugParser_out,
                      bool& logToFile_out,
+                     bool& useCursesLibrary_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
@@ -155,6 +165,7 @@ do_processArguments (int argc_in,
 
   debugParser_out                = false;
   logToFile_out                  = false;
+  useCursesLibrary_out           = IRC_CLIENT_SESSION_DEF_CURSES;
   useReactor_out                 = NET_EVENT_USE_REACTOR;
   statisticReportingInterval_out = IRC_CLIENT_DEF_STATSINTERVAL;
   traceInformation_out           = false;
@@ -163,7 +174,7 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("c:dlrs:tvx:"),
+                              ACE_TEXT ("c:dlnrs:tvx:"),
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -188,6 +199,11 @@ do_processArguments (int argc_in,
       case 'l':
       {
         logToFile_out = true;
+        break;
+      }
+      case 'n':
+      {
+        useCursesLibrary_out = true;
         break;
       }
       case 'r':
@@ -342,9 +358,9 @@ do_initializeSignals (bool useReactor_in,
 }
 
 ACE_THR_FUNC_RETURN
-connection_setup_function (void* arg_in)
+connection_setup_curses_function (void* arg_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::connection_setup_function"));
+  NETWORK_TRACE (ACE_TEXT ("::connection_setup_curses_function"));
 
   IRC_Client_ThreadData* thread_data_p =
     static_cast<IRC_Client_ThreadData*> (arg_in);
@@ -524,7 +540,7 @@ connection_setup_function (void* arg_in)
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in IRC_Client_IIRCControl::join(\"%s\"), continuing\n"),
+                ACE_TEXT ("caught exception in IRC_Client_IIRCControl::join(\"%s\"), aborting\n"),
                 ACE_TEXT (channel_string.c_str ())));
 
     // clean up
@@ -532,17 +548,58 @@ connection_setup_function (void* arg_in)
     Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
                                          thread_data_p->useProactor,
                                          -1);
+
+    return NULL;
   }
 
-  // clean up
-  thread_data_p->moduleConfiguration->connection->decrease ();
-  thread_data_p->moduleConfiguration->connection = NULL;
+  // step5: run curses event dispatch ?
+  if (thread_data_p->cursesState)
+  {
+    IRC_Client_ISession_t* session_p =
+      dynamic_cast<IRC_Client_ISession_t*> (thread_data_p->moduleConfiguration->connection);
+    if (!session_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to dynamic_cast<IRC_Client_ISession_t*>(0x%@), aborting\n"),
+                  thread_data_p->moduleConfiguration->connection));
+
+      // clean up
+      thread_data_p->moduleConfiguration->connection->decrease ();
+      Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
+                                           thread_data_p->useProactor,
+                                           -1);
+
+      return NULL;
+    } // end IF
+    const IRC_Client_SessionState& session_state_r = session_p->state ();
+    thread_data_p->cursesState->IRCSessionState =
+      &const_cast<IRC_Client_SessionState&> (session_state_r);
+
+    // step6: clean up
+    thread_data_p->moduleConfiguration->connection->decrease ();
+    thread_data_p->moduleConfiguration->connection = NULL;
+
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("running curses dispatch loop...\n")));
+
+    curses_main (*thread_data_p->cursesState);
+
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("running curses dispatch loop...DONE\n")));
+  } // end IF
+  else
+  {
+    // step6: clean up
+    thread_data_p->moduleConfiguration->connection->decrease ();
+    thread_data_p->moduleConfiguration->connection = NULL;
+  } // end ELSE
 
   return NULL;
 }
 
 void
 do_work (IRC_Client_Configuration& configuration_in,
+         bool useCursesLibrary_in,
          const std::string& serverHostname_in,
          unsigned short serverPortNumber_in,
          const ACE_Sig_Set& signalSet_in,
@@ -665,6 +722,10 @@ do_work (IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step4: initialize connection manager
+  IRC_Client_CursesState curses_state;
+  if (useCursesLibrary_in)
+    configuration_in.cursesState = &curses_state;
+
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   IRC_Client_SessionData session_data;
   connection_manager_p->set (configuration_in,
@@ -718,10 +779,13 @@ do_work (IRC_Client_Configuration& configuration_in,
   // *NOTE*: from this point, clean up any remote connections
 
   // step6a: wait for connection / setup
+
   IRC_Client_ThreadData thread_data;
   thread_data.configuration = &configuration_in;
   thread_data.groupID = configuration_in.groupID;
   thread_data.moduleConfiguration = &module_configuration;
+  if (useCursesLibrary_in)
+    thread_data.cursesState = &curses_state;
   thread_data.useProactor = !configuration_in.useReactor;
   thread_data.useReactor = configuration_in.useReactor;
   ACE_thread_t thread_id = -1;
@@ -750,19 +814,18 @@ do_work (IRC_Client_Configuration& configuration_in,
   ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
   result =
-    thread_manager_p->spawn (::connection_setup_function, // function
-                             &thread_data,                // argument
+    thread_manager_p->spawn (::connection_setup_curses_function, // function
+                             &thread_data,                       // argument
                              (THR_NEW_LWP      |
                               THR_JOINABLE     |
-                              THR_INHERIT_SCHED),         // flags
-                             &thread_id,                  // thread id
-                             &thread_handle,              // thread handle
-                             ACE_DEFAULT_THREAD_PRIORITY, // priority
-                             group_id_2,                  // group id
-                             NULL,                        // stack
-                             0,                           // stack size
-                             //&thread_name);             // name
-                             &thread_name_2);             // name
+                              THR_INHERIT_SCHED),                // flags
+                             &thread_id,                         // thread id
+                             &thread_handle,                     // thread handle
+                             ACE_DEFAULT_THREAD_PRIORITY,        // priority
+                             group_id_2,                         // group id
+                             NULL,                               // stack
+                             0,                                  // stack size
+                             &thread_name_2);                    // name
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1027,6 +1090,10 @@ do_printVersion (const std::string& programName_in)
 //             << ACE_VERSION
             << converter.str ()
             << std::endl;
+
+  std::cout << ACE_TEXT ("curses: ")
+            << curses_version ()
+            << std::endl;
 }
 
 int
@@ -1070,6 +1137,7 @@ ACE_TMAIN (int argc_in,
 
   bool debug_parser                         = false;
   bool log_to_file                          = false;
+  bool use_curses_library                   = IRC_CLIENT_SESSION_DEF_CURSES;
   bool use_reactor                          = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval = IRC_CLIENT_DEF_STATSINTERVAL;
   bool trace_information                    = false;
@@ -1080,6 +1148,7 @@ ACE_TMAIN (int argc_in,
                             configuration_file,
                             debug_parser,
                             log_to_file,
+                            use_curses_library,
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
@@ -1281,13 +1350,13 @@ ACE_TMAIN (int argc_in,
                                server_hostname,
                                server_port_number);
   ///////////////////////////////////////
-  configuration.logToFile = IRC_CLIENT_SESSION_DEF_LOG;
   configuration.useReactor = use_reactor;
 
   // step8: do work
   ACE_High_Res_Timer timer;
   timer.start ();
   do_work (configuration,
+           use_curses_library,
            server_hostname,
            server_port_number,
            signal_set,

@@ -22,6 +22,7 @@
 #define IRC_CLIENT_COMMON_H
 
 #include <bitset>
+#include <deque>
 #include <map>
 #include <set>
 #include <string>
@@ -33,16 +34,19 @@
 
 #include "stream_common.h"
 
+#include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnection.h"
 
 #include "FILE_Stream.h"
-//#include "IRC_client_configuration.h"
 #include "IOStream_alt_T.h"
+#include "IRC_client_defines.h"
 
 // forward declarations
+class IRC_Client_IIRCControl;
 class IRC_Client_Stream;
 struct IRC_Client_Configuration;
+struct IRC_Client_CursesState;
 struct IRC_Client_StreamModuleConfiguration;
 
 struct IRC_Client_IRCLoginOptions
@@ -208,21 +212,31 @@ struct IRC_Client_PhoneBook
 struct IRC_Client_SessionState
 {
   inline IRC_Client_SessionState ()
-   : channel ()
+   : away (false)
+   , channel ()
    , channelModes ()
+   , controller (NULL)
+   , cursesState (NULL)
    , isFirstMessage (false)
    , lock ()
    , nickname ()
    , userModes ()
   {};
 
+  // *TODO*: couldn't it be done without this one ?
+  bool                      away;
   std::string               channel;
   IRC_Client_ChannelModes_t channelModes;
+  IRC_Client_IIRCControl*   controller;
+  IRC_Client_CursesState*   cursesState;
   bool                      isFirstMessage;
   ACE_SYNCH_MUTEX           lock;
   std::string               nickname;
   IRC_Client_UserModes_t    userModes;
 };
+
+typedef std::deque<std::string> IRC_Client_MessageQueue_t;
+typedef IRC_Client_MessageQueue_t::const_reverse_iterator IRC_Client_MessageQueueIterator_t;
 
 //  ACE_IOStream<ACE_FILE_Stream> output_;
 typedef ACE_IOStream_alt_T<ACE_FILE_Stream> IRC_Client_IOStream_t;
@@ -231,6 +245,7 @@ struct IRC_Client_ThreadData
 {
   inline IRC_Client_ThreadData ()
    : configuration (NULL)
+   , cursesState (NULL)
    , groupID (-1)
    , moduleConfiguration (NULL)
    , useProactor (!NET_EVENT_USE_REACTOR)
@@ -238,6 +253,7 @@ struct IRC_Client_ThreadData
   {};
 
   IRC_Client_Configuration*             configuration;
+  IRC_Client_CursesState*               cursesState;
   int                                   groupID;
   IRC_Client_StreamModuleConfiguration* moduleConfiguration;
   bool                                  useProactor;
@@ -248,5 +264,11 @@ typedef Net_IConnection_T<ACE_INET_Addr,
                           IRC_Client_Configuration,
                           Stream_Statistic,
                           IRC_Client_Stream> IRC_Client_IConnection_t;
+typedef Net_ISession_T<ACE_INET_Addr,
+                       Net_SocketConfiguration,
+                       IRC_Client_Configuration,
+                       Stream_Statistic,
+                       IRC_Client_Stream,
+                       IRC_Client_SessionState> IRC_Client_ISession_t;
 
 #endif

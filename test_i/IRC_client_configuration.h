@@ -36,10 +36,11 @@
 #include "IRC_client_defines.h"
 
 // forward declarations
-struct IRC_Client_Configuration;
 class IRC_Client_IIRCControl;
-struct IRC_Client_SessionData;
 class IRC_Client_Stream;
+struct IRC_Client_Configuration;
+struct IRC_Client_CursesState;
+struct IRC_Client_SessionData;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_SocketConfiguration,
                                  IRC_Client_Configuration,
@@ -94,12 +95,10 @@ struct IRC_Client_StreamModuleConfiguration
   inline IRC_Client_StreamModuleConfiguration ()
    : connection (NULL)
    , moduleConfiguration ()
-   //, registration (NULL)
   {};
 
-  IRC_Client_IConnection_t*   connection;
-  Stream_ModuleConfiguration  moduleConfiguration;
-  //IRC_Client_IRegistration_t* registration;
+  IRC_Client_IConnection_t*  connection;
+  Stream_ModuleConfiguration moduleConfiguration;
 };
 
 struct IRC_Client_StreamConfiguration
@@ -128,12 +127,12 @@ struct IRC_Client_StreamConfiguration
 struct IRC_Client_InputHandlerConfiguration
 {
   inline IRC_Client_InputHandlerConfiguration ()
-   : controller (NULL)
+   : IRCSessionState (NULL)
    , streamConfiguration (NULL)
   {};
 
-  IRC_Client_IIRCControl* controller;
-  Stream_Configuration*   streamConfiguration;
+  IRC_Client_SessionState* IRCSessionState;
+  Stream_Configuration*    streamConfiguration;
 };
 
 struct IRC_Client_Configuration
@@ -146,6 +145,7 @@ struct IRC_Client_Configuration
    //////////////////////////////////////
    , protocolConfiguration ()
    //////////////////////////////////////
+   , cursesState (NULL)
    , groupID (COMMON_EVENT_DISPATCH_THREAD_GROUP_ID)
    , logToFile (IRC_CLIENT_SESSION_DEF_LOG)
    , useReactor (NET_EVENT_USE_REACTOR)
@@ -159,6 +159,7 @@ struct IRC_Client_Configuration
   // *************************** protocol data *********************************
   IRC_Client_ProtocolConfiguration protocolConfiguration;
   // ***************************************************************************
+  IRC_Client_CursesState*          cursesState;
   int                              groupID;
   bool                             logToFile;
   bool                             useReactor;
