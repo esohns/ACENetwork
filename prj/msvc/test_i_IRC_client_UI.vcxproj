@@ -35,12 +35,14 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="VS_ProjectPropertySheet_ACEd.props" />
+    <Import Project="VS_ProjectPropertySheet_curses.props" />
     <Import Project="VS_ProjectPropertySheet_png_gtk_gnome.props" />
     <Import Project="VS_ProjectPropertySheet_glade.props" />
     <Import Project="VS_ProjectPropertySheet_SDL.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="VS_ProjectPropertySheet_curses.props" />
     <Import Project="VS_ProjectPropertySheet_ACE.props" />
     <Import Project="VS_ProjectPropertySheet_png_gtk_gnome.props" />
     <Import Project="VS_ProjectPropertySheet_glade.props" />

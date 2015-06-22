@@ -21,21 +21,25 @@
 
 #include "IRC_client_signalhandler.h"
 
+#include "ace/Guard_T.h"
 #include "ace/Log_Msg.h"
 #include "ace/Proactor.h"
 #include "ace/Reactor.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_tools.h"
 
 #include "net_macros.h"
 
-#include "IRC_client_common.h"
-#include "IRC_client_network.h"
+//#include "IRC_client_common.h"
+#include "IRC_client_curses.h"
 
-IRC_Client_SignalHandler::IRC_Client_SignalHandler (bool useReactor_in)
+IRC_Client_SignalHandler::IRC_Client_SignalHandler (bool useReactor_in,
+                                                    bool useCursesLibrary_in)
  : inherited (this,          // event handler handle
               useReactor_in) // use reactor ?
  , configuration_ (NULL)
+ , useCursesLibrary_ (useCursesLibrary_in)
  , useReactor_ (useReactor_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::IRC_Client_SignalHandler"));
@@ -129,8 +133,21 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortOldestConnection ();
 
   // ...connect ?
-  if (connect_to_server && configuration_->connector)
+  if (connect_to_server)
   {
+    if (!configuration_)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("not configured: cannot connect, continuing\n")));
+      goto done_connect;
+    } // end IF
+    if (!configuration_->connector)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("no connector: cannot connect, continuing\n")));
+      goto done_connect;
+    } // end IF
+
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
     try
     {
@@ -164,12 +181,22 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortOldestConnection ();
     } // end IF
   } // end IF
+done_connect:
 
   // ...shutdown ?
   if (shutdown)
   {
-    // stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (true,         // stop reactor ?
+    // step1: notify curses dispatch ?
+    if (configuration_)
+      if (configuration_->cursesState)
+      {
+        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (configuration_->cursesState->lock);
+
+        configuration_->cursesState->finished = true;
+      } // end IF
+
+    // step2: stop event dispatch
+    Common_Tools::finalizeEventDispatch (useReactor_,  // stop reactor ?
                                          !useReactor_, // stop proactor ?
                                          -1);          // group ID (--> don't block !)
   } // end IF

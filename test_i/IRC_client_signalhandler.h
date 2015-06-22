@@ -28,12 +28,22 @@
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
+#include "IRC_client_defines.h"
 #include "IRC_client_network.h"
+
+// forward declarations
+struct IRC_Client_CursesState;
 
 struct IRC_Client_SignalHandlerConfiguration
 {
-//  long                     actionTimerId;
+  inline IRC_Client_SignalHandlerConfiguration ()
+   : connector (NULL)
+   , cursesState (NULL)
+   , peerAddress ()
+  {};
+
   IRC_Client_IClientConnector_t* connector;
+  IRC_Client_CursesState*        cursesState;
   ACE_INET_Addr                  peerAddress;
 };
 
@@ -43,7 +53,8 @@ class IRC_Client_SignalHandler
  , public Common_ISignal
 {
  public:
-  IRC_Client_SignalHandler (bool = true); // use reactor ?
+  IRC_Client_SignalHandler (bool = IRC_CLIENT_DEF_CLIENT_USES_REACTOR, // use reactor ?
+                            bool = IRC_CLIENT_SESSION_DEF_CURSES);     // use curses library ?
   virtual ~IRC_Client_SignalHandler ();
 
   // implement Common_IInitialize_T
@@ -60,6 +71,7 @@ class IRC_Client_SignalHandler
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler& operator= (const IRC_Client_SignalHandler&));
 
   IRC_Client_SignalHandlerConfiguration* configuration_;
+  bool                                   useCursesLibrary_;
   bool                                   useReactor_;
 };
 

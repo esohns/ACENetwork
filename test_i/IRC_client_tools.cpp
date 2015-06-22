@@ -1629,7 +1629,12 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
 
   // step1: setup configuration passed to processing stream
   IRC_Client_Configuration configuration;
-//  ACE_OS::memset (&configuration, 0, sizeof (configuration));
+  IRC_Client_SessionData* session_data_p = NULL;
+  IRC_Client_IConnection_Manager_t* connection_manager_p =
+      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  connection_manager_p->get (configuration,
+                             session_data_p);
 
   // ************ socket configuration data ************
   configuration.socketConfiguration.bufferSize =
@@ -1674,7 +1679,7 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
   // ************ protocol configuration data **************
   configuration.protocolConfiguration.loginOptions = loginOptions_in;
 
-  IRC_Client_SessionData* session_data_p = NULL;
+  session_data_p = NULL;
   ACE_NEW_NORETURN (session_data_p,
                     IRC_Client_SessionData ());
   if (!session_data_p)
@@ -1712,12 +1717,12 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
     configuration.socketConfiguration;
   // *TODO*: memory leak socket handler configuration here...
   IRC_Client_Connector_t connector (socket_handler_configuration_p,
-                                    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance (),
+                                    connection_manager_p,
                                     statisticReportingInterval_in);
 
   // *TODO*: memory leak final module/session data here ? ...
-  IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
-                                                            session_data_p);
+  connection_manager_p->set (configuration,
+                             session_data_p);
 
   // step3: (try to) connect to the server
   ACE_HANDLE handle =

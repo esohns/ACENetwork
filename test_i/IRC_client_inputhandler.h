@@ -49,6 +49,10 @@ class IRC_Client_InputHandler
 
   // implement (part of) ACE_Event_Handler
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE); // handle
+  // *WARNING*: do NOT call this manually !
+  // *TODO*: make this private
+  virtual int handle_close (ACE_HANDLE,
+                            ACE_Reactor_Mask);
 
  private:
   typedef ACE_Event_Handler inherited;
@@ -56,10 +60,6 @@ class IRC_Client_InputHandler
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_InputHandler ());
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_InputHandler (const IRC_Client_InputHandler&));
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_InputHandler& operator= (const IRC_Client_InputHandler&));
-
-  // implement (part of) ACE_Event_Handler
-  virtual int handle_close (ACE_HANDLE,
-                            ACE_Reactor_Mask);
 
   ACE_Message_Block* allocateMessage (unsigned int = IRC_CLIENT_BUFFER_SIZE); // size
 

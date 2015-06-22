@@ -183,6 +183,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
         case IRC_Client_IRC_Codes::RPL_CREATED:              //   3
         case IRC_Client_IRC_Codes::RPL_MYINFO:               //   4
         case IRC_Client_IRC_Codes::RPL_PROTOCTL:             //   5
+        case IRC_Client_IRC_Codes::RPL_SNOMASK:              //   8
         case IRC_Client_IRC_Codes::RPL_YOURID:               //  42
         case IRC_Client_IRC_Codes::RPL_STATSDLINE:           // 250
         case IRC_Client_IRC_Codes::RPL_LUSERCLIENT:          // 251
@@ -481,7 +482,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
       catch (...)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in IRC_Client_INotify::notify(), continuing\n")));
+                    ACE_TEXT ("caught exception in IRC_Client_INotify::notify(): \"%m\", continuing\n")));
       }
     } // end FOR
   } // end lock scope

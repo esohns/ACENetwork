@@ -139,11 +139,12 @@ enum IRC_Client_ChannelMode
   CHANNELMODE_SECRET,           // 's'
   CHANNELMODE_RESTRICTEDTOPIC,  // 't'
   CHANNELMODE_VOICE,            // 'v'
-  //
+  ///////////////////////////////////////
   CHANNELMODE_MAX,
   CHANNELMODE_INVALID
 };
-typedef std::bitset<11> IRC_Client_ChannelModes_t;
+// *NOTE*: --> CHANNELMODE_MAX
+typedef std::bitset<14> IRC_Client_ChannelModes_t;
 
 // see (RFC1459 section 4.2.3.2)
 //            i - marks a users as invisible
@@ -168,10 +169,11 @@ enum IRC_Client_UserMode
   USERMODE_RESTRICTEDCONN,     // 'r'
   USERMODE_RECVNOTICES,        // 's'
   USERMODE_RECVWALLOPS,        // 'w'
-  //
+  ///////////////////////////////////////
   USERMODE_MAX,
   USERMODE_INVALID
 };
+// *NOTE*: --> USERMODE_MAX
 typedef std::bitset<7> IRC_Client_UserModes_t;
 
 // phonebook
@@ -236,7 +238,8 @@ struct IRC_Client_SessionState
 };
 
 typedef std::deque<std::string> IRC_Client_MessageQueue_t;
-typedef IRC_Client_MessageQueue_t::const_reverse_iterator IRC_Client_MessageQueueIterator_t;
+typedef IRC_Client_MessageQueue_t::iterator IRC_Client_MessageQueueIterator_t;
+typedef IRC_Client_MessageQueue_t::reverse_iterator IRC_Client_MessageQueueReverseIterator_t;
 
 //  ACE_IOStream<ACE_FILE_Stream> output_;
 typedef ACE_IOStream_alt_T<ACE_FILE_Stream> IRC_Client_IOStream_t;

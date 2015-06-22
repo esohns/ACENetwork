@@ -32,6 +32,7 @@ IRC_Client_IRCSession_T<ConnectionType>::IRC_Client_IRCSession_T (IRC_Client_ICo
  , inputHandler_ (NULL)
  , logToFile_ (IRC_CLIENT_SESSION_DEF_LOG)
  , output_ (ACE_STREAMBUF_SIZE)
+ , shutdownOnEnd_ (true) // *TODO*: allow more sessions
  , state_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::IRC_Client_IRCSession_T"));
@@ -55,7 +56,8 @@ IRC_Client_IRCSession_T<ConnectionType>::~IRC_Client_IRCSession_T ()
     //         (see ACE_Event_Handler.cpp:252, IRC_client_inputhandler.cpp:107)
     //         --> nothing to be done here...
 #else
-    result = inputHandler_.handle_close ();
+    result = inputHandler_->handle_close (ACE_INVALID_HANDLE,
+                                          ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to IRC_Client_InputHandler::handle_close(): \"%m\", continuing\n")));
@@ -244,6 +246,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
         case IRC_Client_IRC_Codes::RPL_CREATED:          //   3
         case IRC_Client_IRC_Codes::RPL_MYINFO:           //   4
         case IRC_Client_IRC_Codes::RPL_PROTOCTL:         //   5
+        case IRC_Client_IRC_Codes::RPL_SNOMASK:          //   8
         case IRC_Client_IRC_Codes::RPL_YOURID:           //  42
         case IRC_Client_IRC_Codes::RPL_STATSDLINE:       // 250
         case IRC_Client_IRC_Codes::RPL_LUSERCLIENT:      // 251
@@ -322,7 +325,8 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
             message_string += (*iterator).substr (current_position + 1);
             message_string += ACE_TEXT_ALWAYS_CHAR ("\"\n");
 
-            log (message_string);
+            log (std::string (),
+                 message_string);
           } // end FOR
 
           break;
@@ -468,6 +472,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
         case IRC_Client_IRC_Codes::RPL_MOTDSTART:        // 375
         case IRC_Client_IRC_Codes::RPL_ENDOFMOTD:        // 376
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:       // 401
+        case IRC_Client_IRC_Codes::ERR_UNKNOWNCOMMAND:   // 421
         case IRC_Client_IRC_Codes::ERR_NOMOTD:           // 422
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:    // 433
         case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:    // 451
@@ -480,6 +485,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           log (message_in);
 
           if ((message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOSUCHNICK)       ||
+              (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_UNKNOWNCOMMAND)   ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE)    ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOTREGISTERED)    ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP) ||
@@ -641,7 +647,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           message_text += message_in.params.back ();
 
           // private message ?
-          std::string target_id;
+//          std::string target_id;
           if (state_.nickname == message_in.params.front ())
           {
             // --> send to private conversation handler
@@ -649,7 +655,8 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
             // part of an existing conversation ?
           } // end IF
 
-          log (message_text);
+          log (message_in.params.back (),
+               message_text);
 
           break;
         }
@@ -704,18 +711,21 @@ IRC_Client_IRCSession_T<ConnectionType>::end ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::end"));
 
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connection %u closed/lost, shutting down...\n"),
-              inherited::id ()));
+  int result = -1;
 
-  IRC_Client_Configuration* configuration_p =
-    &(inherited::CONNECTION_BASE_T::configuration_);
-  // sanity check(s)
-  ACE_ASSERT (configuration_p);
+  // --> raise a signal
+  if (shutdownOnEnd_)
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("connection %u closed/lost, shutting down\n"),
+                inherited::id ()));
 
-  Common_Tools::finalizeEventDispatch (configuration_p->useReactor,
-                                       !configuration_p->useReactor,
-                                       -1); // *IMPORTANT NOTE*: don't (!) wait
+    result = ACE_OS::raise (SIGINT);
+    if (result == -1)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("failed to ACE_OS::raise(%S): \"%m\", continuing\n"),
+                  SIGINT));
+  } // end IF
 }
 
 template <typename ConnectionType>
@@ -758,8 +768,13 @@ IRC_Client_IRCSession_T<ConnectionType>::open (ACE_HANDLE handle_in,
   // step0: intialize configuration object
   IRC_Client_Configuration* configuration_p = NULL;
   if (!inherited::manager_)
-    //configuration_p = reinterpret_cast<IRC_Client_Configuration*> (inherited::act ());
-  //else
+  {
+//    const IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p =
+//        reinterpret_cast<IRC_Client_Configuration*> (inherited::act ());
+//    ACE_ASSERT (socket_handler_configuration_p);
+//    configuration_p = socket_handler_configuration_p->configuration;
+  } // end IF
+  else
     configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
   // sanity check(s)
   ACE_ASSERT (configuration_p);
@@ -786,8 +801,8 @@ IRC_Client_IRCSession_T<ConnectionType>::error (const IRC_Client_IRCMessage& mes
 
 template <typename ConnectionType>
 void
-IRC_Client_IRCSession_T<ConnectionType>::log (const std::string& messageText_in,
-                                              bool logToChannel_in)
+IRC_Client_IRCSession_T<ConnectionType>::log (const std::string& channel_in,
+                                              const std::string& messageText_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::log"));
 
@@ -795,10 +810,10 @@ IRC_Client_IRCSession_T<ConnectionType>::log (const std::string& messageText_in,
 
   if (state_.cursesState)
   {
-    curses_log (messageText_in,      // text
-                *state_.cursesState, // state
-                logToChannel_in,     // log to channel ? : server log
-                true);               // locked access
+    curses_log (channel_in,            // channel
+                messageText_in,        // text
+                *(state_.cursesState), // state
+                true);                 // locked access
 
     if (logToFile_)
       output_ << messageText_in;
@@ -818,6 +833,7 @@ IRC_Client_IRCSession_T<ConnectionType>::log (const IRC_Client_IRCMessage& messa
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::log"));
 
   std::string message_text = IRC_Client_Tools::IRCMessage2String (message_in);
-  log (message_text,
-       !message_in.prefix.user.empty ()); // log to channel ? : server log
+  log (std::string (), // --> server log
+       message_text);
+
 }

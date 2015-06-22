@@ -101,11 +101,9 @@ class IRC_Client_GUI_Connection
   void error (const IRC_Client_IRCMessage&);
 
   IRC_Client_GUI_MessageHandler* getHandler (const std::string&); // id (channel/nick)
-  void updateModeButtons ();
 
   IRC_Client_GTK_ConnectionCBData CBData_;
   bool                            isFirstUsersMsg_;
-  std::string                     label_;
   std::string                     UIFileDirectory_;
 
   ACE_Thread_Mutex                lock_;

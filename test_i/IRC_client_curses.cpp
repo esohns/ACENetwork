@@ -23,16 +23,16 @@
 
 #include <string>
 
+#include "ace/Assert.h"
 #include "ace/Guard_T.h"
 #include "ace/Log_Msg.h"
 #include "ace/Reverse_Lock_T.h"
-
-#include "panel.h"
 
 #include "net_macros.h"
 
 #include "IRC_client_iIRCControl.h"
 #include "IRC_client_IRCmessage.h"
+#include "IRC_client_network.h"
 
 bool
 curses_join (const std::string& channel_in,
@@ -45,105 +45,85 @@ curses_join (const std::string& channel_in,
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_in.lock);
 
   int result = -1;
-  int max_y, max_x;
-  PANEL* panel_p = state_in.panels[0];
+  IRC_Client_CursesChannelsIterator_t iterator =
+      state_in.panels.find (std::string ());
+  ACE_ASSERT (iterator != state_in.panels.end ());
+  PANEL* panel_p = (*iterator).second;
   ACE_ASSERT (panel_p);
-  getmaxyx (panel_p->win, max_y, max_x);
-  WINDOW* window_p = newwin (max_y, max_x, 0, 0);
+  ACE_ASSERT (panel_p->win);
+  WINDOW* window_p = dupwin (panel_p->win);
   if (!window_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to newwin(%d,%d): \"%m\", aborting\n"),
-                max_y, max_x));
+                ACE_TEXT ("failed to dupwin(), aborting\n")));
     return false;
   } // end IF
-  result = idlok (window_p, TRUE);
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to idlok(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-  result = scrollok (window_p, TRUE);
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to scrollok(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-  result = leaveok (window_p, TRUE);
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to leaveok(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-  immedok (window_p, TRUE);
-  //result = werase (window_p);
-  //if (result == ERR)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to werase(): \"%m\", aborting\n")));
-  //  return false;
-  //} // end IF
-  result = box (window_p, 0, 0);
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to box(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-  result = wmove (window_p, 1, 1);
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to wmove(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
+//  result = idlok (window_p, TRUE);
+//  if (result == ERR)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to idlok(), aborting\n")));
+//    return false;
+//  } // end IF
+//  result = scrollok (window_p, TRUE);
+//  if (result == ERR)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to scrollok(), aborting\n")));
+//    return false;
+//  } // end IF
+//  immedok (window_p, TRUE);
   panel_p = new_panel (window_p);
   if (!panel_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to new_panel(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to new_panel(), aborting\n")));
+
+    // clean up
+    result = delwin (window_p);
+    if (result == ERR)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to delwin(), continuing\n")));
     return false;
   } // end IF
-  else
-    state_in.panels[1] = panel_p;
+  state_in.panels[channel_in] = panel_p;
+
+  // switch to channel, refresh
+  state_in.activePanel = state_in.panels.find (channel_in);
+  ACE_ASSERT (state_in.activePanel != state_in.panels.end ());
+  wbkgdset (window_p, COLOR_PAIR (0));
+  result = werase (window_p);
+  if (result == ERR)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to werase(), continuing\n")));
+  ACE_ASSERT (state_in.log);
+  result = wbkgd (state_in.log, COLOR_PAIR (0));
+  if (result == ERR)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to wbkgd(), continuing\n")));
   result = top_panel (panel_p);
   if (result == ERR)
-  {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to top_panel(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-  result = show_panel (panel_p);
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to show_panel(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
+                ACE_TEXT ("failed to top_panel(), continuing\n")));
   update_panels ();
   result = doupdate ();
   if (result == ERR)
-  {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to doupdate(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
+                ACE_TEXT ("failed to doupdate(), continuing\n")));
 
-  return true;
+  return (result == OK);
 }
 
 void
-curses_log (const std::string& text_in,
+curses_log (const std::string& channel_in,
+            const std::string& text_in,
             IRC_Client_CursesState& state_in,
-            bool logToChannel_in,
             bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_log"));
 
   int result = ERR;
+  WINDOW* window_p = NULL;
 
   if (lockedAccess_in)
   {
@@ -153,54 +133,63 @@ curses_log (const std::string& text_in,
                   ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
   } // end IF
 
-  PANEL* panel_p = (logToChannel_in ? state_in.panels[1]
-                                    : state_in.panels[0]);
-  WINDOW* window_p = (panel_p ? panel_p->win : NULL);
-  if (!window_p)
+  IRC_Client_CursesChannelsIterator_t iterator =
+      state_in.panels.find (channel_in);
+  if (iterator == state_in.panels.end ())
   {
     // not connected yet/not on a channel --> store
-    state_in.backLog.push_front (text_in);
+    IRC_Client_MessageQueue_t message_queue;
+    message_queue.push_front (text_in);
+    state_in.backLog.insert (std::make_pair (channel_in, message_queue));
     goto release;
   } // end IF
+  ACE_ASSERT ((*iterator).second);
+
+  window_p = (*iterator).second->win;
   ACE_ASSERT (window_p);
+//  result = wmove (window_p, window_p->_cury, 0);
+//  if (result == ERR)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to wmove(), continuing\n")));
+  if (window_p->_cury + 1 >= window_p->_maxy)
+  {
+    result = wmove (window_p,
+                    window_p->_maxy, 0); // retain sanity
+    if (result == ERR)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to wmove(), continuing\n")));
+    result = scroll (window_p);
+    if (result == ERR)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to scroll(), continuing\n")));
+  } // end IF
+  result = waddnstr (window_p, text_in.c_str (), -1);
+  if (result == ERR)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to waddnstr(), continuing\n")));
+  result = wmove (window_p,
+                  window_p->_cury + 1, 0); // next line, box
+  if (result == ERR)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to wmove(), continuing\n")));
 
-  result = wmove (window_p, getcury (window_p), 1); // box
+  // switch to channel, refresh
+  ACE_ASSERT (state_in.log);
+  result = wbkgd (state_in.log,
+                  (channel_in.empty () ? COLOR_PAIR (IRC_CLIENT_CURSES_COLOR_LOG)
+                                       : COLOR_PAIR (0)));
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to wmove(): \"%m\", continuing\n")));
-  result = waddstr (window_p, text_in.c_str ());
+                ACE_TEXT ("failed to wbkgd(), continuing\n")));
+  result = top_panel ((*iterator).second);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to waddstr(): \"%m\", continuing\n")));
-  result = wmove (window_p, getcury (window_p) + 1, 0); // next line
-  if (result == ERR)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to wmove(): \"%m\", continuing\n")));
-  result = top_panel (panel_p);
-  if (result == ERR)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to top_panel(): \"%m\", continuing\n")));
-  result = show_panel (panel_p);
-  if (result == ERR)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to show_panel(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to top_panel(), continuing\n")));
   update_panels ();
-
-  //result = wredrawln (state_in.status, getcury (state_in.status), 1);
-  //if (result == ERR)
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to wredrawln(): \"%m\", continuing\n")));
-  //result = wredrawln (state_in.input, getcury (state_in.input), 1);
-  //if (result == ERR)
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to wredrawln(): \"%m\", continuing\n")));
-
   result = doupdate ();
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to doupdate(): \"%m\", continuing\n")));
-
-  state_in.activePanel = (logToChannel_in ? 1 : 0);
+                ACE_TEXT ("failed to doupdate(), continuing\n")));
 
 release:
   if (lockedAccess_in)
@@ -212,7 +201,7 @@ release:
   } // end IF
 }
 
-void
+bool
 curses_main (IRC_Client_CursesState& state_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_main"));
@@ -224,13 +213,13 @@ curses_main (IRC_Client_CursesState& state_in)
   bool release = false;
   ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (state_in.lock,
                                                   ACE_Acquire_Method::ACE_REGULAR);
-  int color_pair_log = 1;
-  int color_pair_status = 2;
   WINDOW* stdscr_p = NULL;
   mmask_t mouse_mask = 0;
   WINDOW* window_p = NULL;
   PANEL* panel_p = NULL;
-  int terminal_y, terminal_x;
+  char* string_p = NULL;
+  int result_2 = ERR;
+  IRC_Client_CursesMessagesIterator_t iterator;
 
   // sanity checks
   ACE_ASSERT (state_in.IRCSessionState);
@@ -242,59 +231,52 @@ curses_main (IRC_Client_CursesState& state_in)
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", returning\n")));
-    return;
+                ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n")));
+    return (result == OK);
   } // end IF
-  else
-    release = true;
+  release = true;
 
-  use_env (FALSE);
+  use_env (TRUE);
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+  use_tioctl (TRUE);
+#endif
+//  nofilter ();
 
   // *NOTE*: if this fails, the program exits, which is not intended behavior
   // *TODO*: --> use newterm() instead
   //state_in.screen = initscr ();
-  FILE* std_out; FILE* std_in;
-  std_out = ACE_OS::fdopen (ACE_STDOUT, ACE_TEXT ("w"));
-  if (!std_out)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::fdopen(%d): \"%m\", returning\n"),
-                ACE_STDOUT));
-    goto release;
-  } // end IF
-  std_in = ACE_OS::fdopen (ACE_STDIN, ACE_TEXT ("r"));
-  if (!std_in)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::fdopen(%d): \"%m\", returning\n"),
-                ACE_STDIN));
-    goto close;
-  } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  // *NOTE*: for some (odd) reason, newterm does not work as advertised
-  //         (curscr, stdscr corrupt, return value works though)
-  stdscr_p = initscr ();
-  state_in.screen = SP;
-#else
-  state_in.screen = newterm (NULL, std_out, std_in); // use $TERM
-#endif
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+  state_in.screen = newterm (NULL, NULL, NULL); // use $TERM, STD_OUT, STD_IN
   if (!state_in.screen)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to newterm(0x%@,%d,%d): \"%m\", returning\n"),
-                NULL, ACE_STDOUT, ACE_STDIN));
+                ACE_TEXT ("failed to newterm(0x%@), aborting\n"),
+                NULL));
     goto close;
   } // end IF
-  ACE_ASSERT (stdscr_p);
-  char* string_p = longname ();
+#endif
+  // *NOTE*: for some (odd) reason, newterm does not work as advertised
+  //         (curscr, stdscr corrupt, return value works though)
+  stdscr_p = initscr ();
+  if (!stdscr_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initscr(), aborting\n")));
+    goto close;
+  } // end IF
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  state_in.screen = SP;
+#endif
+  ACE_ASSERT (state_in.screen && stdscr_p);
+  string_p = longname ();
   if (!string_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to longname(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to longname(), aborting\n")));
     goto close;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("initialized curses terminal \"%s\"\n"),
+              ACE_TEXT ("initialized curses terminal (\"%s\")\n"),
               ACE_TEXT (string_p)));
 
   if (has_colors ())
@@ -303,196 +285,192 @@ curses_main (IRC_Client_CursesState& state_in)
     if (result == ERR)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to start_color(): \"%m\", returning\n")));
+                  ACE_TEXT ("failed to start_color(), aborting\n")));
       goto close;
     } // end IF
 
-    result = init_pair (color_pair_log, COLOR_GREEN, COLOR_BLACK); // green-on-black
+    result = init_pair (IRC_CLIENT_CURSES_COLOR_LOG,
+                        COLOR_GREEN, COLOR_BLACK); // green-on-black
     if (result == ERR)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to init_pair(): \"%m\", returning\n")));
+                  ACE_TEXT ("failed to init_pair(), aborting\n")));
       goto close;
     } // end IF
-    result = init_pair (color_pair_status, COLOR_BLACK, COLOR_WHITE); // black-on-white
+    result = init_pair (IRC_CLIENT_CURSES_COLOR_STATUS,
+                        COLOR_BLACK, COLOR_WHITE); // black-on-white
     if (result == ERR)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to init_pair(): \"%m\", returning\n")));
+                  ACE_TEXT ("failed to init_pair(), aborting\n")));
       goto close;
     } // end IF
   } // end IF
 
-  //result = raw_output (TRUE);
-  //if (result == ERR)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to raw_output(TRUE): \"%m\", returning\n")));
-  //  goto close;
-  //} // end IF
-  result = curs_set (2); // show cursor
+  result = curs_set (IRC_CLIENT_CURSES_CURSOR_MODE); // cursor mode
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to curs_set(2): \"%m\", returning\n")));
+                ACE_TEXT ("failed to curs_set(%d), aborting\n"),
+                IRC_CLIENT_CURSES_CURSOR_MODE));
     goto close;
   } // end IF
   result = nonl ();
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nonl(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to nonl(), aborting\n")));
     goto close;
   } // end IF
 
   // step2: set up initial windows
-  result = scrollok (stdscr_p, TRUE);
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to scrollok(): \"%m\", returning\n")));
-    goto close;
-  } // end IF
-
-  // get maximum window dimensions
-  getmaxyx (stdscr_p, terminal_y, terminal_x);
-
-  window_p = newwin (terminal_y - 2, terminal_x, 0, 0);
+  window_p = newwin (LINES - 2, COLS,
+                     0, 0);
   if (!window_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to newwin(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
+                LINES - 2, COLS));
     goto close;
   } // end IF
-  result = idlok (window_p, TRUE);
+  state_in.log = window_p;
+  result = idlok (window_p, TRUE); // hw insert/delete line feature
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to idlok(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to idlok(), aborting\n")));
     goto clean;
   } // end IF
-  result = scrollok (window_p, TRUE);
+  immedok (window_p, TRUE); // immediate refresh
+  wbkgdset (window_p, COLOR_PAIR (IRC_CLIENT_CURSES_COLOR_LOG));
+  result = box (window_p, 0, 0);
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to scrollok(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to box(), aborting\n")));
     goto clean;
   } // end IF
-  result = leaveok (window_p, TRUE);
-  if (result == ERR)
+
+//#if defined (__GNUC__) && ((NCURSES_VERSION_MAJOR >= 5) && (NCURSES_VERSION_MINOR >= 9))
+////   *BUG*: linux (n)curses newwin() has a bug: _maxy, and _maxx are off by _begy, _begx
+//  window_p = newwin (LINES - 4 +1, COLS - 2 +1,
+//                     1, 1);
+  window_p = newwin (LINES - 4, COLS - 2,
+                     1, 1);
+//#endif
+  if (!window_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to leaveok(): \"%m\", aborting\n")));
-    goto clean;
-  } // end IF
-  immedok (window_p, TRUE);
-  result = wbkgd (window_p, COLOR_PAIR (color_pair_log));
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to wbkgd(): \"%m\", returning\n")));
-    goto clean;
-  } // end IF
-  result = wmove (window_p, 1, 0); // box
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to wmove(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
+                LINES - 4, COLS - 2));
     goto clean;
   } // end IF
   panel_p = new_panel (window_p);
   if (!panel_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to new_panel(): \"%m\", aborting\n")));
-    goto close;
-  } // end IF
-  else
-    state_in.panels[0] = panel_p;
-
-  // status window
-  state_in.status = newwin (1, terminal_x, terminal_y - 2, 0);
-  if (!state_in.status)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to newwin(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to new_panel(), aborting\n")));
     goto clean;
   } // end IF
-  immedok (state_in.status, TRUE);
-  //result = clearok (state_in.status, TRUE);
-  //if (result == ERR)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to clearok(): \"%m\", returning\n")));
-  //  goto clean;
-  //} // end IF
-  result = wbkgd (state_in.status, COLOR_PAIR (color_pair_status));
+  state_in.panels[std::string ()] = panel_p;
+  state_in.activePanel = state_in.panels.begin ();
+
+//  result = move_panel (panel_p, 1, 1);
+//  if (result == ERR)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to move_panel(), aborting\n")));
+//    goto clean;
+//  } // end IF
+  result = idlok (window_p, TRUE); // hw insert/delete line feature
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to wbkgd(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to idlok(), aborting\n")));
+    goto clean;
+  } // end IF
+  result = scrollok (window_p, TRUE); // scrolling feature
+  if (result == ERR)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to scrollok(), aborting\n")));
+    goto clean;
+  } // end IF
+  immedok (window_p, TRUE); // immediate refresh
+  wbkgdset (window_p, COLOR_PAIR (IRC_CLIENT_CURSES_COLOR_LOG));
+
+  // status window
+  state_in.status = newwin (1, COLS,
+                            stdscr_p->_maxy - 1, 0);
+  if (!state_in.status)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
+                1, COLS));
+    goto clean;
+  } // end IF
+  immedok (state_in.status, TRUE);
+  result = wbkgd (state_in.status, COLOR_PAIR (IRC_CLIENT_CURSES_COLOR_STATUS));
+  if (result == ERR)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to wbkgd(), aborting\n")));
     goto clean;
   } // end IF
 
-  state_in.input = newwin (1, terminal_x, terminal_y - 1, 0);
+  // input window
+  state_in.input = newwin (1, COLS,
+                           stdscr_p->_maxy, 0);
   if (!state_in.input)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to newwin(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
+                1, COLS));
     goto clean;
   } // end IF
   result = wmove (state_in.input, 0, 0); // move the cursor to the beginning
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to wmove(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to wmove(), aborting\n")));
     goto clean;
   } // end IF
   immedok (state_in.input, TRUE);
 
-  // step2a: draw box, move cursor position, refresh
-  result = box (window_p, 0, 0);
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to box(): \"%m\", returning\n")));
-    goto clean;
-  } // end IF
-  result = wmove (window_p, 1, 1);
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to wmove(): \"%m\", returning\n")));
-    goto clean;
-  } // end IF
-
-  // step3a: initialize input
+  // step2a: initialize input
   result = noecho (); // disable local echo
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to noecho(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to noecho(), aborting\n")));
     goto clean;
   } // end IF
   result = raw (); // disable line buffering, special character processing
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to raw(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to raw(), aborting\n")));
     goto clean;
   } // end IF
   result = keypad (state_in.input, TRUE); // enable function/arrow/... keys
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to keypad(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to keypad(), aborting\n")));
+    goto clean;
+  } // end IF
+  result = meta (state_in.input, TRUE); // 8-bit characters
+  if (result == ERR)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to meta(), aborting\n")));
     goto clean;
   } // end IF
   mouse_mask = mousemask (ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
   if (mouse_mask == 0)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to mousemask(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to mousemask(), aborting\n")));
     goto clean;
   } // end IF
 
@@ -504,12 +482,15 @@ curses_main (IRC_Client_CursesState& state_in)
       break; // done
 
     // step3bb: write backlog
-    for (IRC_Client_MessageQueueIterator_t iterator = state_in.backLog.rbegin ();
-         iterator != state_in.backLog.rend ();
-         iterator++)
-      curses_log (*iterator,
+    for (IRC_Client_CursesMessagesIterator_t iterator = state_in.backLog.begin ();
+         iterator != state_in.backLog.end ();
+         ++iterator)
+      for (IRC_Client_MessageQueueReverseIterator_t iterator_2 = (*iterator).second.rbegin ();
+           iterator_2 != (*iterator).second.rend ();
+           ++iterator_2)
+      curses_log ((*iterator).first,
+                  *iterator_2,
                   state_in,
-                  false,  // log to server log
                   false); // don't lock
     state_in.backLog.clear ();
 
@@ -521,43 +502,57 @@ curses_main (IRC_Client_CursesState& state_in)
     } // end lock scope
     switch (ch)
     {
-      case CTL_TAB:
+      case 27: // ESC
       {
-        PANEL* panel_p = state_in.panels[state_in.activePanel];
-        if (!panel_p)
-          break; // done
-        result = hide_panel (panel_p);
-        if (result == ERR)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to hide_panel(): \"%m\", continuing\n")));
-
+        // close connection --> closes session --> closes program
+        IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
+        break;
+      }
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      case CTL_TAB:
+#endif
+      case '\t':
+      {
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+//        if (1) // CTRL-TAB ?
+//          goto default_key;
+#endif
         state_in.activePanel++;
-        if (state_in.activePanel == (sizeof (state_in.panels) / sizeof (PANEL*)))
-          state_in.activePanel = 0;
+        if (state_in.activePanel == state_in.panels.end ())
+          state_in.activePanel = state_in.panels.find (std::string ());
+        ACE_ASSERT (state_in.activePanel != state_in.panels.end ());
 
-        panel_p = state_in.panels[state_in.activePanel];
-        result = top_panel (panel_p);
+        // (switch channel,) refresh
+        ACE_ASSERT (state_in.log);
+        result =
+            wbkgd (state_in.log,
+                   ((*state_in.activePanel).first.empty () ? COLOR_PAIR (IRC_CLIENT_CURSES_COLOR_LOG)
+                                                           : COLOR_PAIR (0)));
         if (result == ERR)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to top_panel(): \"%m\", continuing\n")));
-        result = show_panel (panel_p);
+                      ACE_TEXT ("failed to wbkgd(), continuing\n")));
+        result = top_panel ((*state_in.activePanel).second);
         if (result == ERR)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to show_panel(): \"%m\", continuing\n")));
+                      ACE_TEXT ("failed to top_panel(), continuing\n")));
         update_panels ();
         result = doupdate ();
         if (result == ERR)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to doupdate(): \"%m\", continuing\n")));
+                      ACE_TEXT ("failed to doupdate(), continuing\n")));
+
         break;
       }
       case '\r': // Apple
       case '\n': // Win32 / UNIX
       case KEY_ENTER:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       case PADENTER:
+#endif
       {
         // sanity check
-        if (message_text.empty ())
+        if (message_text.empty () ||
+            (*state_in.activePanel).first.empty ())
           break; // nothing to do
 
         // step1: send the message
@@ -587,25 +582,25 @@ curses_main (IRC_Client_CursesState& state_in)
           goto clean;
         }
 
-        // step2: echo to the channel window
-        curses_log (message_text,
+        // step2: echo to the local channel window
+        curses_log ((*state_in.activePanel).first,
+                    message_text,
                     state_in,
-                    true,
                     false);
 
         // step3: clear the input window
-        result = werase (state_in.input);
+        result = wmove (state_in.input, 0, 0); // reset the cursor
         if (result == ERR)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to werase(): \"%m\", continuing\n")));
-        result = wmove (state_in.input, 0, 0); // move the cursor to the beginning
+                      ACE_TEXT ("failed to wmove(), continuing\n")));
+        result = wclrtoeol (state_in.input);
         if (result == ERR)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to wmove(): \"%m\", continuing\n")));
-        //result = wrefresh (state_in.input);
-        //if (result == ERR)
-        //  ACE_DEBUG ((LM_ERROR,
-        //              ACE_TEXT ("failed to wrefresh(): \"%m\", continuing\n")));
+                      ACE_TEXT ("failed to wclrtoeol(), continuing\n")));
+//        result = wrefresh (state_in.input);
+//        if (result == ERR)
+//          ACE_DEBUG ((LM_ERROR,
+//                      ACE_TEXT ("failed to wrefresh(), continuing\n")));
 
         message_text.clear ();
 
@@ -613,7 +608,11 @@ curses_main (IRC_Client_CursesState& state_in)
       }
       default:
       {
-        wechochar (state_in.input, ch);
+default_key:
+        result = wechochar (state_in.input, ch);
+        if (result == ERR)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to wechochar(), continuing\n")));
 
         message_text += static_cast<char> (ch);
 
@@ -622,11 +621,15 @@ curses_main (IRC_Client_CursesState& state_in)
       case KEY_MOUSE:
       {
         MEVENT mouse_event;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         result = nc_getmouse (&mouse_event);
+#else
+        result = getmouse (&mouse_event);
+#endif
         if (result == ERR)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to nc_getmouse(): \"%m\", returning\n")));
+                      ACE_TEXT ("failed to getmouse(), returning\n")));
           break;
         } // end IF
         //mouse_mask = getmouse ();
@@ -634,97 +637,70 @@ curses_main (IRC_Client_CursesState& state_in)
       }
     } // end SWITCH
   } // end WHILE
- 
+
   // clean up
 clean:
-  window_p = NULL;
-  panel_p = state_in.panels[1];
-  if (panel_p)
+  for (IRC_Client_CursesChannelsIterator_t iterator = state_in.panels.begin ();
+       iterator != state_in.panels.end ();
+       iterator++)
   {
-    window_p = panel_p->win;
-    result = del_panel (panel_p);
-    if (result == ERR)
+    window_p = (*iterator).second->win;
+    result_2 = del_panel ((*iterator).second);
+    if (result_2 == ERR)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to del_panel(): \"%m\", continuing\n")));
-  } // end IF
-  if (window_p)
+                  ACE_TEXT ("failed to del_panel(), continuing\n")));
+    result_2 = delwin (window_p);
+    if (result_2 == ERR)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to delwin(), continuing\n")));
+  } // end FOR
+  if (state_in.log)
   {
-    result = delwin (window_p);
-    if (result == ERR)
+    result_2 = delwin (state_in.log);
+    if (result_2 == ERR)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to delwin(): \"%m\", continuing\n")));
-    window_p = NULL;
-  } // end IF
-  panel_p = state_in.panels[0];
-  if (panel_p)
-  {
-    window_p = panel_p->win;
-    result = del_panel (panel_p);
-    if (result == ERR)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to del_panel(): \"%m\", continuing\n")));
-  } // end IF
-  if (window_p)
-  {
-    result = delwin (window_p);
-    if (result == ERR)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to delwin(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to delwin(), continuing\n")));
   } // end IF
   if (state_in.status)
   {
-    result = delwin (state_in.status);
-    if (result == ERR)
+    result_2 = delwin (state_in.status);
+    if (result_2 == ERR)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to delwin(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to delwin(), continuing\n")));
   } // end IF
   if (state_in.input)
   {
-    result = delwin (state_in.input);
-    if (result == ERR)
+    result_2 = delwin (state_in.input);
+    if (result_2 == ERR)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to delwin(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to delwin(), continuing\n")));
   } // end IF
 
 close:
-  result = endwin ();
-  if (result == ERR)
+  result_2 = endwin ();
+  if (result_2 == ERR)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to endwin(): \"%m\", continuing\n")));
-  result = refresh (); // restore terminal
-  if (result == ERR)
+                ACE_TEXT ("failed to endwin(), continuing\n")));
+  result_2 = refresh (); // restore terminal
+  if (result_2 == ERR)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to refresh(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to refresh(), continuing\n")));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   delscreen (state_in.screen);
 #endif
-  if (std_out)
-  {
-    result = ACE_OS::fclose (std_out);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::flcose(%d): \"%m\", continuing\n"),
-                  ACE_STDOUT));
-  } // end IF
-  if (std_in)
-  {
-    result = ACE_OS::fclose (std_in);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::flcose(%d): \"%m\", continuing\n"),
-                  ACE_STDIN));
-  } // end IF
 
-release:
+//release:
   if (release)
   {
-    result = state_in.lock.release ();
-    if (result == -1)
+    result_2 = state_in.lock.release ();
+    if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
   } // end IF
+
+  return (result == OK);
 }
 
 bool
@@ -733,41 +709,42 @@ curses_part (const std::string& channel_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_part"));
 
-  ACE_UNUSED_ARG (channel_in);
-
   int result = ERR;
 
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_in.lock);
 
-  PANEL* panel_p = state_in.panels[1];
-  ACE_ASSERT (panel_p);
-  WINDOW* window_p = panel_p->win;
-  result = del_panel (state_in.panels[1]);
+  IRC_Client_CursesChannelsIterator_t iterator =
+      state_in.panels.find (channel_in);
+  ACE_ASSERT (iterator != state_in.panels.end ());
+  WINDOW* window_p = (*iterator).second->win;
+  result = del_panel ((*iterator).second);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to del_panel(): \"%m\", continuing\n")));
-  state_in.panels[1] = NULL;
+                ACE_TEXT ("failed to del_panel(), continuing\n")));
   result = delwin (window_p);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to delwin(): \"%m\", continuing\n")));
-  panel_p = state_in.panels[0];
-  ACE_ASSERT (panel_p);
-  result = top_panel (panel_p);
+                ACE_TEXT ("failed to delwin(), continuing\n")));
+  state_in.panels.erase (iterator);
+
+  // show server log, refresh
+  state_in.activePanel = state_in.panels.find (std::string ());
+  ACE_ASSERT (state_in.activePanel != state_in.panels.end ());
+  ACE_ASSERT (state_in.log);
+  result =
+      wbkgd (state_in.log, IRC_CLIENT_CURSES_COLOR_LOG);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to top_panel(): \"%m\", continuing\n")));
-  result = show_panel (panel_p);
+                ACE_TEXT ("failed to wbkgd(), continuing\n")));
+  result = top_panel ((*state_in.activePanel).second);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to show_panel(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to top_panel(), continuing\n")));
   update_panels ();
   result = doupdate ();
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to doupdate(): \"%m\", continuing\n")));
-
-  state_in.activePanel = 0;
+                ACE_TEXT ("failed to doupdate(), continuing\n")));
 
   return (result == OK);
 }

@@ -48,13 +48,13 @@ if %ERRORLEVEL% NEQ 0 (
  goto Failed
 )
 
-echo processing config.h...DONE
+echo processing %ConfigFile%...DONE
 timeout /T 2 /NOBREAK >NUL
 
 goto Clean_Up
 
 :Failed
-echo processing config.h...FAILED
+echo processing %ConfigFile%...FAILED
 
 :Clean_Up
 popd
@@ -68,3 +68,4 @@ exit /b %1
 
 :Error_Level
 call :Exit_Code %RC%
+

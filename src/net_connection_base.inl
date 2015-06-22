@@ -46,12 +46,12 @@ Net_ConnectionBase_T<AddressType,
  , isRegistered_ (false)
  , manager_ (interfaceHandle_in)
  , sessionData_ (NULL)
+ , status_ (NET_CONNECTION_STATUS_OK)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
  , statisticCollectHandler_ (ACTION_COLLECT,
                              this,
                              true)
  , statisticCollectHandlerID_ (-1)
- , status_ (NET_CONNECTION_STATUS_OK)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
 

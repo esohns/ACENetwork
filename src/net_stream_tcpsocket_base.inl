@@ -521,18 +521,34 @@ Net_StreamTCPSocketBase_T<AddressType,
   ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
+  ssize_t bytes_sent = 0;
 
-  // *IMPORTANT NOTE*: in a threaded environment, workers MAY be
-  // dispatching the reactor notification queue concurrently (most notably,
-  // ACE_TP_Reactor) --> enforce proper serialization
+  // *NOTE*: in a threaded environment, workers could be dispatching the reactor
+  //         notification queue concurrently (most notably, ACE_TP_Reactor)
+  //         --> enforce proper serialization here
+  // *IMPORTANT NOTE*: the ACE documentation (books) explicitly claims that
+  //                   measures are in place to prevent concurrent dispatch of
+  //                   the same handler for a specific handle by different
+  //                   threads (find reference). If this is indeed true, this
+  //                   check may be removed (make sure this holds for the
+  //                   reactor implementation, AND the specific dispatch
+  //                   mechanism of (piped) reactor notifications)
   if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
-    sendLock_.acquire ();
+  {
+    result = sendLock_.acquire ();
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n")));
+      return -1;
+    } // end IF
+  } // end IF
 
   if (currentWriteBuffer_ == NULL)
   {
     // send next data chunk from the stream...
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
-    // been notified to the reactor
+    //                   been notified to the reactor
     if (!inherited2::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
       result =
           stream_.get (currentWriteBuffer_,
@@ -543,21 +559,16 @@ Net_StreamTCPSocketBase_T<AddressType,
                            const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
     if (result == -1)
     {
-      // *IMPORTANT NOTE*: a number of issues can occur here:
-      // - connection has been closed in the meantime
-      // - queue has been deactivated
+      // *NOTE*: a number of issues can occur here:
+      //         - connection has been closed in the meantime
+      //         - queue has been deactivated
       int error = ACE_OS::last_error ();
       if ((error != EAGAIN) ||  // <-- connection has been closed
           (error != ESHUTDOWN)) // <-- queue has been deactivated
         ACE_DEBUG ((LM_ERROR,
                     (inherited2::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
                                                                                                                : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
-
-      // clean up
-      if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
-        sendLock_.release ();
-
-      return -1;
+      goto release;
     } // end IF
   } // end IF
   ACE_ASSERT (currentWriteBuffer_);
@@ -572,16 +583,13 @@ Net_StreamTCPSocketBase_T<AddressType,
 //       ACE_DEBUG ((LM_DEBUG,
 //                   ACE_TEXT ("[%u]: finished sending...\n"),
 //                   peer_.get_handle ()));
+    result = -1; // <-- deregister
 
-    // clean up
-    if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
-      sendLock_.release ();
-
-    return -1;
+    goto release;
   } // end IF
 
   // put some data into the socket...
-  ssize_t bytes_sent =
+  bytes_sent =
       inherited::peer_.send (currentWriteBuffer_->rd_ptr (), // buffer
                              currentWriteBuffer_->length (), // #bytes to send
                              0);                             // flags
@@ -589,9 +597,9 @@ Net_StreamTCPSocketBase_T<AddressType,
   {
     case -1:
     {
-      // *IMPORTANT NOTE*: a number of issues can occur here:
-      // - connection reset by peer
-      // - connection abort()ed locally
+      // *NOTE*: a number of issues can occur here:
+      //         - connection reset by peer
+      //         - connection abort()ed locally
       int error = ACE_OS::last_error ();
       if ((error != ECONNRESET)   &&
           (error != ECONNABORTED) &&
@@ -605,10 +613,8 @@ Net_StreamTCPSocketBase_T<AddressType,
       // clean up
       currentWriteBuffer_->release ();
       currentWriteBuffer_ = NULL;
-      if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
-        sendLock_.release ();
 
-      return -1;
+      break;
     }
     // *** GOOD CASES ***
     case 0:
@@ -620,10 +626,8 @@ Net_StreamTCPSocketBase_T<AddressType,
       // clean up
       currentWriteBuffer_->release ();
       currentWriteBuffer_ = NULL;
-      if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
-        sendLock_.release ();
 
-      return -1;
+      break;
     }
     default:
     {
@@ -645,33 +649,20 @@ Net_StreamTCPSocketBase_T<AddressType,
     }
   } // end SWITCH
 
-  // immediately reschedule sending ?
-//  if ((currentWriteBuffer_ == NULL) && inherited::msg_queue ()->is_empty ())
-//  {
-//    if (inherited::reactor ()->cancel_wakeup (this,
-//                                              ACE_Event_Handler::WRITE_MASK) == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_Reactor::cancel_wakeup(): \"%m\", continuing\n")));
-//  } // end IF
-//  else
+  // immediately reschedule handler ?
   if (currentWriteBuffer_)
-  {
-    // clean up
-    if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
-      sendLock_.release ();
+    result = 1; // <-- reschedule
 
-    return 1;
-  } // end IF
-    //if (inherited::reactor ()->schedule_wakeup (this,
-    //                                            ACE_Event_Handler::WRITE_MASK) == -1)
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to ACE_Reactor::schedule_wakeup(): \"%m\", continuing\n")));
-
-  // clean up
+release:
   if (inherited2::configuration_.streamConfiguration.streamConfiguration.serializeOutput)
-    sendLock_.release ();
+  {
+    int result_2 = sendLock_.release ();
+    if (result_2 == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
+  } // end IF
 
-  return 0;
+  return result;
 }
 
 template <typename AddressType,

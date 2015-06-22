@@ -42,7 +42,11 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
 #include "curses.h"
 #else
-#include <ncurses.h>
+#include "ncurses.h"
+// *NOTE*: the ncurses "timeout" macros conflicts with
+//         ACE_Synch_Options::timeout. Since not currently being used, it's safe
+//         to undefine...
+#undef timeout
 #endif
 
 #include "common_file_tools.h"
@@ -91,17 +95,17 @@ do_printUsage (const std::string& programName_in)
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
-  std::cout << ACE_TEXT ("-c [FILE]   : configuration file")
+  std::cout << ACE_TEXT ("-c [FILE] : configuration file")
             << ACE_TEXT (" [\"")
             << path
             << ACE_TEXT ("\"]")
             << std::endl;
-  std::cout << ACE_TEXT ("-d          : debug parser")
+  std::cout << ACE_TEXT ("-d        : debug parser")
             << ACE_TEXT (" [")
             << false
             << ACE_TEXT ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-l          : log to a file")
+  std::cout << ACE_TEXT ("-l        : log to a file")
             << ACE_TEXT (" [")
             << false
             << ACE_TEXT ("]")
@@ -119,17 +123,17 @@ do_printUsage (const std::string& programName_in)
             << IRC_CLIENT_DEF_STATSINTERVAL
             << ACE_TEXT ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-t          : trace information")
+  std::cout << ACE_TEXT ("-t        : trace information")
             << ACE_TEXT (" [")
             << false
             << ACE_TEXT ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-v          : print version information and exit")
+  std::cout << ACE_TEXT ("-v        : print version information and exit")
             << ACE_TEXT (" [")
             << false
             << ACE_TEXT ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-x [VALUE]  : #thread pool threads ([")
+  std::cout << ACE_TEXT ("-x [VALUE]: #thread pool threads ([")
             << IRC_CLIENT_DEF_NUM_TP_THREADS
             << ACE_TEXT ("]")
             << std::endl;
@@ -273,6 +277,7 @@ do_processArguments (int argc_in,
 
 void
 do_initializeSignals (bool useReactor_in,
+                      bool useCursesLibrary,
                       bool allowUserRuntimeStats_in,
                       ACE_Sig_Set& signals_out,
                       ACE_Sig_Set& ignoredSignals_out)
@@ -297,9 +302,9 @@ do_initializeSignals (bool useReactor_in,
     return;
   } // end IF
 
-  // *PORTABILITY*: on Windows most signals are not defined,
-  // and ACE_Sig_Set::fill_set() doesn't really work as specified
-  // --> add valid signals (see <signal.h>)...
+  // *PORTABILITY*: on Microsoft Windows (TM) most signals are not defined,
+  //                and ACE_Sig_Set::fill_set() doesn't really work as specified
+  //                --> add valid signals (see <signal.h>)...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   signals_out.sig_add (SIGINT);            // 2       /* interrupt */
   signals_out.sig_add (SIGILL);            // 4       /* illegal instruction - invalid function image */
@@ -354,6 +359,24 @@ do_initializeSignals (bool useReactor_in,
     if (proactor_impl_p->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
       signals_out.sig_del (COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
   } // end IF
+#endif
+
+  // *NOTE*: let (n)curses install it's own signal handler and process events in
+  //         (w)getch()
+  if (useCursesLibrary)
+  {
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+//    signals_out.sig_del (SIGINT);
+    signals_out.sig_del (SIGWINCH);
+#endif
+  } // end IF
+
+// *NOTE*: gdb sends some signals (when running in an IDE ?)
+//         --> remove signals (and let IDE handle them)
+#if defined (__GNUC__) && defined (DEBUG_DEBUGGER)
+//  signals_out.sig_del (SIGINT);
+  signals_out.sig_del (SIGCONT);
+  signals_out.sig_del (SIGHUP);
 #endif
 }
 
@@ -474,7 +497,7 @@ connection_setup_curses_function (void* arg_in)
 
   // step3: wait for registration to complete
   // *NOTE*: this entails a little delay (waiting for connection registration...)
-  ACE_Time_Value timeout (IRC_CLIENT_IRC_MAX_WELCOME_DELAY, 0);
+  delay.set (IRC_CLIENT_IRC_MAX_WELCOME_DELAY, 0);
   IRC_Client_IRegistration_t* registration_p =
     dynamic_cast<IRC_Client_IRegistration_t*> (const_cast<Stream_Module_t*> (module_p)->writer ());
   if (!registration_p)
@@ -492,7 +515,7 @@ connection_setup_curses_function (void* arg_in)
   } // end ELSE
   // *NOTE*: cannot use COMMON_TIME_NOW, as this is a high precision monotonous
   //         clock... --> use standard getimeofday
-  ACE_Time_Value deadline = ACE_OS::gettimeofday () + timeout;
+  ACE_Time_Value deadline = ACE_OS::gettimeofday () + delay;
   try
   {
     result_2 = registration_p->wait (&deadline);
@@ -501,14 +524,14 @@ connection_setup_curses_function (void* arg_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IRegistration_t::wait(%#T), continuing\n"),
-                &timeout));
+                &delay));
   }
   if (!result_2 ||
       (registration_p->current () != REGISTRATION_STATE_FINISHED))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_IRegistration_t::wait(%#T), aborting\n"),
-                &timeout));
+                &delay));
 
     // clean up
     thread_data_p->moduleConfiguration->connection->decrease ();
@@ -582,10 +605,20 @@ connection_setup_curses_function (void* arg_in)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("running curses dispatch loop...\n")));
 
-    curses_main (*thread_data_p->cursesState);
+    bool result_2 = curses_main (*thread_data_p->cursesState);
 
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("running curses dispatch loop...DONE\n")));
+    if (!result_2)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ::curses_main(), shutting down\n")));
+
+      Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
+                                           thread_data_p->useProactor,
+                                           -1);
+    } // end IF
+    else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("running curses dispatch loop...DONE\n")));
   } // end IF
   else
   {
@@ -676,12 +709,10 @@ do_work (IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step3: initialize signal handling
+  IRC_Client_CursesState curses_state;
   IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
-  //  ACE_OS::memset (&signal_handler_configuration,
-  //                  0,
-  //                  sizeof (signal_handler_configuration));
-//  signal_handler_configuration.actionTimerId = -1;
   signal_handler_configuration.connector = connector_p;
+  signal_handler_configuration.cursesState = &curses_state;
   result =
       signal_handler_configuration.peerAddress.set (serverPortNumber_in,
                                                     serverHostname_in.c_str (),
@@ -722,7 +753,6 @@ do_work (IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step4: initialize connection manager
-  IRC_Client_CursesState curses_state;
   if (useCursesLibrary_in)
     configuration_in.cursesState = &curses_state;
 
@@ -1212,7 +1242,8 @@ ACE_TMAIN (int argc_in,
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
   do_initializeSignals (use_reactor,
-                        false,
+                        use_curses_library,
+                        true,
                         signal_set,
                         ignored_signal_set);
   Common_SignalActions_t previous_signal_actions;

@@ -134,6 +134,7 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
       // *IMPORTANT NOTE*: a number of issues can occur here:
       // - STDIN closed (application shutdown)
       int error = ACE_OS::last_error ();
+      ACE_UNUSED_ARG (error);
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::read(%d): \"%m\", aborting\n"),
                   ACE_STDIN));

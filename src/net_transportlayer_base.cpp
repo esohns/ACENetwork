@@ -70,8 +70,8 @@ Net_InetTransportLayer_Base::finalize ()
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
- : clientServerRole_ (ROLE_INVALID)
- , transportLayer_ (TRANSPORTLAYER_NETLINK)
+ : clientServerRole_ (NET_ROLE_INVALID)
+ , transportLayer_ (NET_TRANSPORTLAYER_NETLINK)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base"));
 

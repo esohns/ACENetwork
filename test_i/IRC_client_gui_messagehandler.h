@@ -102,16 +102,14 @@ class IRC_Client_GUI_MessageHandler
 
   // helper methods
   void clearMembers ();
-  void updateModeButtons ();
 
-  std::string                  builderLabel_;
-  IRC_Client_GTK_HandlerCBData CBData_;
-  guint                        eventSourceID_;
-  bool                         isFirstMemberListMsg_;
-  IRC_Client_MessageQueue_t    messageQueue_;
-  ACE_SYNCH_MUTEX              messageQueueLock_;
-  GtkNotebook*                 parent_;
-  GtkTextView*                 view_;
+  IRC_Client_GTK_HandlerCBData  CBData_;
+  Common_UI_GTKEventSourceIds_t eventSourceIDs_;
+  bool                          isFirstMemberListMsg_;
+  IRC_Client_MessageQueue_t     messageQueue_;
+  ACE_SYNCH_MUTEX               messageQueueLock_;
+  GtkNotebook*                  parent_;
+  GtkTextView*                  view_;
 };
 
 #endif

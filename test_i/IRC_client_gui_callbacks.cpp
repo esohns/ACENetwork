@@ -60,116 +60,19 @@ is_entry_sensitive (GtkCellLayout*   layout_in,
                 NULL);
 }
 
+/////////////////////////////////////////
+
 gboolean
-update_display (gpointer userData_in)
+idle_finalize_UI_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::update_display"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
 
-  IRC_Client_GTK_CBData* data_p =
-    static_cast<IRC_Client_GTK_CBData*> (userData_in);
+  ACE_UNUSED_ARG (userData_in);
 
-  // sanity check(s)
-  ACE_ASSERT (data_p);
+  // leave GTK
+  gtk_main_quit ();
 
-  ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->GTKState.lock);
-  if (data_p->connections.empty ())
-    return TRUE; // G_SOURCE_CONTINUE
-
-  // step0: retrieve active connection
-  Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
-
-  GtkNotebook* notebook_p =
-    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
-  ACE_ASSERT (notebook_p);
-  gint tab_num = gtk_notebook_get_current_page (notebook_p);
-  ACE_ASSERT (tab_num >= 0);
-  GtkWidget* widget_p = gtk_notebook_get_nth_page (notebook_p,
-                                                   tab_num);
-  ACE_ASSERT (widget_p);
-  // *TODO*: the structure of the tab label is an implementation detail
-  // --> should be encapsulated by the connection somehow...
-  GtkHBox* hbox_p =
-    GTK_HBOX (gtk_notebook_get_tab_label (notebook_p,
-                                          widget_p));
-  ACE_ASSERT (hbox_p);
-  GList* list_p =
-    gtk_container_get_children (GTK_CONTAINER (hbox_p));
-  ACE_ASSERT (list_p);
-  GtkLabel* label_p =
-    GTK_LABEL (g_list_first (list_p)->data);
-  ACE_ASSERT (label_p);
-  std::string connection = gtk_label_get_text (label_p);
-
-  connections_iterator_t connections_iterator =
-    data_p->connections.find (connection);
-  ACE_ASSERT (connections_iterator != data_p->connections.end ());
-
-  //// step1: retrieve active channel
-  //Common_UI_GTKBuildersIterator_t iterator_2 =
-  //  data_p->GTKState.builders.find (connection);
-  //// sanity check(s)
-  //if (iterator_2 == data_p->GTKState.builders.end ())
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
-  //              ACE_TEXT (connection.c_str ())));
-  //  return FALSE; // G_SOURCE_REMOVE
-  //} // end IF
-
-  //notebook_p =
-  //  GTK_NOTEBOOK (gtk_builder_get_object ((*iterator_2).second.second,
-  //                                        ACE_TEXT_ALWAYS_CHAR ("server_tab_channel_tabs")));
-  //ACE_ASSERT (notebook_p);
-  //tab_num =
-  //  gtk_notebook_get_current_page (notebook_p);
-  //ACE_ASSERT (tab_num >= 0);
-  //widget_p =
-  //  gtk_notebook_get_nth_page (notebook_p,
-  //                             tab_num);
-  //ACE_ASSERT (widget_p);
-  //// *TODO*: the structure of the tab label is an implementation detail
-  //// --> should be encapsulated by the connection somehow...
-  //hbox_p =
-  //  GTK_HBOX (gtk_notebook_get_tab_label (notebook_p,
-  //                                        widget_p));
-  //ACE_ASSERT (hbox_p);
-  //list_p =
-  //  gtk_container_get_children (GTK_CONTAINER (hbox_p));
-  //ACE_ASSERT (list_p);
-  //label_p =
-  //  GTK_LABEL (g_list_first (list_p)->data);
-  //ACE_ASSERT (label_p);
-  //std::string channel = gtk_label_get_text (label_p);
-
-  ACE_ASSERT ((*connections_iterator).second);
-  IRC_Client_GUI_MessageHandler* message_handler_p =
-    (*connections_iterator).second->getActiveHandler (false);
-  if (!message_handler_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_GUI_Connection::getActiveHandler() (connection was: \"%s\"), returning\n"),
-                ACE_TEXT (connection.c_str ())));
-    return FALSE; // G_SOURCE_REMOVE
-  } // end IF
-
-  try
-  {
-    message_handler_p->update ();
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in IRC_Client_GUI_MessageHandler::update() (connection was: \"%s\"), returning\n"),
-                ACE_TEXT (connection.c_str ())));
-    return FALSE; // G_SOURCE_REMOVE
-  }
-
-  // --> reschedule
-  return TRUE; // G_SOURCE_CONTINUE
+  return FALSE; // G_SOURCE_REMOVE
 }
 
 gboolean
@@ -360,12 +263,12 @@ idle_initialize_UI_cb (gpointer userData_in)
   //              ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
   //  return FALSE; // G_SOURCE_REMOVE
   //} // end IF
-  event_source_id = g_idle_add (update_display,
+  event_source_id = g_idle_add (idle_update_display_cb,
                                 userData_in);
   if (!event_source_id)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to g_idle_add(idle_update_display_cb): \"%m\", aborting\n")));
     return FALSE; // G_SOURCE_REMOVE
   } // end IF
   data_p->GTKState.eventSourceIds.push_back (event_source_id);
@@ -374,17 +277,306 @@ idle_initialize_UI_cb (gpointer userData_in)
 }
 
 gboolean
-idle_finalize_UI_cb (gpointer userData_in)
+idle_remove_connection_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_remove_connection_cb"));
 
-  ACE_UNUSED_ARG (userData_in);
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
-  // leave GTK
-  gtk_main_quit ();
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+
+  delete data_p->connection;
 
   return FALSE; // G_SOURCE_REMOVE
 }
+
+gboolean
+idle_update_channel_modes_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_initialize_UI_cb"));
+
+  IRC_Client_GTK_HandlerCBData* data_p =
+    static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->GTKState);
+
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+
+  Common_UI_GTKBuildersIterator_t iterator =
+    data_p->GTKState->builders.find (data_p->builderLabel);
+  // sanity check(s)
+  ACE_ASSERT (iterator != data_p->GTKState->builders.end ());
+
+  // display (changed) channel modes
+  GtkToggleButton* togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_KEY)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->channelModes[CHANNELMODE_PASSWORD]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_VOICE)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->channelModes[CHANNELMODE_VOICE]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BAN)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->channelModes[CHANNELMODE_BAN]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_USERLIMIT)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->channelModes[CHANNELMODE_USERLIMIT]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_MODERATED)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->channelModes[CHANNELMODE_MODERATED]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BLOCKFOREIGN)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->channelModes[CHANNELMODE_BLOCKFOREIGNMSGS]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_RESTRICTOPIC)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->channelModes[CHANNELMODE_RESTRICTEDTOPIC]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_INVITEONLY)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->channelModes[CHANNELMODE_INVITEONLY]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_SECRET)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->channelModes[CHANNELMODE_SECRET]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_PRIVATE)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->channelModes[CHANNELMODE_PRIVATE]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_OPERATOR)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->channelModes[CHANNELMODE_OPERATOR]);
+
+  // enable channel modes ?
+
+  // retrieve channel tab mode hbox handle
+  GtkHBox* hbox_p =
+    GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
+                                      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_HBOX_CHANNELMODE)));
+  ACE_ASSERT (hbox_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (hbox_p),
+                            data_p->channelModes.test (CHANNELMODE_OPERATOR));
+
+  return FALSE; // G_SOURCE_REMOVE
+}
+
+gboolean
+idle_update_display_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_update_display_cb"));
+
+  IRC_Client_GTK_CBData* data_p =
+    static_cast<IRC_Client_GTK_CBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+  if (data_p->connections.empty ())
+    return TRUE; // G_SOURCE_CONTINUE
+
+  // step0: retrieve active connection
+  Common_UI_GTKBuildersIterator_t iterator =
+    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+
+  GtkNotebook* notebook_p =
+    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
+  ACE_ASSERT (notebook_p);
+  gint tab_num = gtk_notebook_get_current_page (notebook_p);
+  ACE_ASSERT (tab_num >= 0);
+  GtkWidget* widget_p = gtk_notebook_get_nth_page (notebook_p,
+                                                   tab_num);
+  ACE_ASSERT (widget_p);
+  // *TODO*: the structure of the tab label is an implementation detail
+  // --> should be encapsulated by the connection somehow...
+  GtkHBox* hbox_p =
+    GTK_HBOX (gtk_notebook_get_tab_label (notebook_p,
+    widget_p));
+  ACE_ASSERT (hbox_p);
+  GList* list_p =
+    gtk_container_get_children (GTK_CONTAINER (hbox_p));
+  ACE_ASSERT (list_p);
+  GtkLabel* label_p =
+    GTK_LABEL (g_list_first (list_p)->data);
+  ACE_ASSERT (label_p);
+  std::string connection = gtk_label_get_text (label_p);
+
+  connections_iterator_t connections_iterator =
+    data_p->connections.find (connection);
+  ACE_ASSERT (connections_iterator != data_p->connections.end ());
+
+  //// step1: retrieve active channel
+  //Common_UI_GTKBuildersIterator_t iterator_2 =
+  //  data_p->GTKState.builders.find (connection);
+  //// sanity check(s)
+  //if (iterator_2 == data_p->GTKState.builders.end ())
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
+  //              ACE_TEXT (connection.c_str ())));
+  //  return FALSE; // G_SOURCE_REMOVE
+  //} // end IF
+
+  //notebook_p =
+  //  GTK_NOTEBOOK (gtk_builder_get_object ((*iterator_2).second.second,
+  //                                        ACE_TEXT_ALWAYS_CHAR ("server_tab_channel_tabs")));
+  //ACE_ASSERT (notebook_p);
+  //tab_num =
+  //  gtk_notebook_get_current_page (notebook_p);
+  //ACE_ASSERT (tab_num >= 0);
+  //widget_p =
+  //  gtk_notebook_get_nth_page (notebook_p,
+  //                             tab_num);
+  //ACE_ASSERT (widget_p);
+  //// *TODO*: the structure of the tab label is an implementation detail
+  //// --> should be encapsulated by the connection somehow...
+  //hbox_p =
+  //  GTK_HBOX (gtk_notebook_get_tab_label (notebook_p,
+  //                                        widget_p));
+  //ACE_ASSERT (hbox_p);
+  //list_p =
+  //  gtk_container_get_children (GTK_CONTAINER (hbox_p));
+  //ACE_ASSERT (list_p);
+  //label_p =
+  //  GTK_LABEL (g_list_first (list_p)->data);
+  //ACE_ASSERT (label_p);
+  //std::string channel = gtk_label_get_text (label_p);
+
+  ACE_ASSERT ((*connections_iterator).second);
+  IRC_Client_GUI_MessageHandler* message_handler_p =
+    (*connections_iterator).second->getActiveHandler (false);
+  if (!message_handler_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+      ACE_TEXT ("failed to IRC_Client_GUI_Connection::getActiveHandler() (connection was: \"%s\"), returning\n"),
+      ACE_TEXT (connection.c_str ())));
+    return FALSE; // G_SOURCE_REMOVE
+  } // end IF
+
+  try
+  {
+    message_handler_p->update ();
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in IRC_Client_GUI_MessageHandler::update() (connection was: \"%s\"), returning\n"),
+                ACE_TEXT (connection.c_str ())));
+    return FALSE; // G_SOURCE_REMOVE
+  }
+
+  // --> reschedule
+  return TRUE; // G_SOURCE_CONTINUE
+}
+
+gboolean
+idle_update_user_modes_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_update_user_modes_cb"));
+
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->GTKState);
+
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  
+  Common_UI_GTKBuildersIterator_t iterator =
+    data_p->GTKState->builders.find (data_p->label);
+  // sanity check(s)
+  if (iterator == data_p->GTKState->builders.end ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("connection (was: \"%s\") builder not found, aborting\n"),
+                ACE_TEXT (data_p->label.c_str ())));
+    return FALSE; // G_SOURCE_REMOVE
+  } // end IF
+  
+  // display (changed) user modes
+  GtkToggleButton* togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->IRCSessionState.userModes[USERMODE_AWAY]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->IRCSessionState.userModes[USERMODE_INVISIBLE]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->IRCSessionState.userModes[USERMODE_RECVNOTICES]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->IRCSessionState.userModes[USERMODE_OPERATOR]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->IRCSessionState.userModes[USERMODE_RESTRICTEDCONN]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->IRCSessionState.userModes[USERMODE_LOCALOPERATOR]);
+  togglebutton_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
+  ACE_ASSERT (togglebutton_p);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                data_p->IRCSessionState.userModes[USERMODE_RECVWALLOPS]);
+
+  return FALSE; // G_SOURCE_REMOVE
+}
+
+/////////////////////////////////////////
 
 void
 button_about_clicked_cb (GtkWidget* widget_in,
@@ -749,7 +941,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   // step7: remember this connection
   // synch access
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->GTKState.lock);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
 
     // *TODO*: who deletes the module ? (the stream won't do it !)
     data_p->connections.insert (std::make_pair (entry_name, connection_2));
@@ -858,7 +1050,7 @@ button_send_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (label_p);
   std::string connection = gtk_label_get_text (label_p);
 
-  ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->GTKState.lock);
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
 
   connections_iterator_t connections_iterator =
     data_p->connections.find (connection);
@@ -921,7 +1113,6 @@ button_send_clicked_cb (GtkWidget* widget_in,
 
   // step4: echo data locally...
   message_string.insert (0, ACE_TEXT ("<me> "));
-  message_string += ACE_TEXT_ALWAYS_CHAR ("\n");
   IRC_Client_GUI_MessageHandler* message_handler_p =
     (*connections_iterator).second->getActiveHandler (false);
   ACE_ASSERT (message_handler_p);
@@ -959,7 +1150,7 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 
   //// step1: remove event sources
   //{
-  //  ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->GTKState.lock);
+  //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
 
   //  for (Common_UI_GTKEventSourceIdsIterator_t iterator = data_p->GTKState.eventSourceIds.begin ();
   //       iterator != data_p->GTKState.eventSourceIds.end ();
@@ -996,6 +1187,9 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
 
+  // ward further clicks
+  gtk_widget_set_sensitive (widget_in, FALSE);
+
   try
   {
     data_p->controller->quit (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_LEAVE_REASON));
@@ -1007,6 +1201,7 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
   }
 
   // *NOTE*: the server should close the connection after this...
+  //         --> the connection notebook page cleans itself in the dtor !
 }
 
 gboolean
@@ -1601,7 +1796,6 @@ user_mode_toggled_cb (GtkToggleButton* widget_in,
   IRC_Client_UserMode mode = USERMODE_INVALID;
   // find out which button toggled...
   const gchar* name_p = gtk_buildable_get_name (GTK_BUILDABLE (widget_in));
-  //const gchar* name_p = gtk_widget_get_name (GTK_WIDGET (widget_in));
   result = ACE_OS::strcmp (name_p,
                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR));
   if (result == 0)
@@ -1838,93 +2032,114 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   bool                   need_parameter = false;
   std::string            entry_label;
   // find out which button toggled...
-  const gchar* name_p = gtk_widget_get_name (GTK_WIDGET (toggleButton_in));
+  const gchar* name_p = gtk_buildable_get_name (GTK_BUILDABLE (toggleButton_in));
   result = ACE_OS::strcmp (name_p,
-                           ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_KEY));
+                           ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_ANONYMOUS));
   if (result == 0)
-  {
-    mode = CHANNELMODE_PASSWORD;
-    need_parameter = true;
-    entry_label = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_MODE_PASSWORD);
-  } // end IF
+    mode = CHANNELMODE_ANONYMOUS;
   else
   {
     result = ACE_OS::strcmp (name_p,
-                             ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_VOICE));
+                             ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BAN));
     if (result == 0)
     {
-      mode = CHANNELMODE_VOICE;
+      mode = CHANNELMODE_BAN;
       need_parameter = true;
-      entry_label = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_MODE_VOICE);
+      entry_label = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_MODE_BAN);
     } // end IF
     else
     {
       result = ACE_OS::strcmp (name_p,
-                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BAN));
+                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_INVITEONLY));
       if (result == 0)
-      {
-        mode = CHANNELMODE_BAN;
-        need_parameter = true;
-        entry_label = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_MODE_BAN);
-      } // end IF
+        mode = CHANNELMODE_INVITEONLY;
       else
       {
         result = ACE_OS::strcmp (name_p,
-                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_USERLIMIT));
+                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_KEY));
         if (result == 0)
         {
-          mode = CHANNELMODE_USERLIMIT;
+          mode = CHANNELMODE_PASSWORD;
           need_parameter = true;
-          entry_label = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_MODE_USERLIMIT);
-        }
+          entry_label = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_MODE_PASSWORD);
+        } // end IF
         else
         {
           result = ACE_OS::strcmp (name_p,
-                                   ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_MODERATED));
+                                   ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_USERLIMIT));
           if (result == 0)
-            mode = CHANNELMODE_MODERATED;
+          {
+            mode = CHANNELMODE_USERLIMIT;
+            need_parameter = true;
+            entry_label = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_MODE_USERLIMIT);
+          }
           else
           {
             result = ACE_OS::strcmp (name_p,
-                                     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BLOCKFOREIGN));
+                                     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_MODERATED));
             if (result == 0)
-              mode = CHANNELMODE_BLOCKFOREIGNMSGS;
+              mode = CHANNELMODE_MODERATED;
             else
             {
               result = ACE_OS::strcmp (name_p,
-                                       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_RESTRICTOPIC));
+                                       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BLOCKFOREIGN));
               if (result == 0)
-                mode = CHANNELMODE_RESTRICTEDTOPIC;
+                mode = CHANNELMODE_BLOCKFOREIGNMSGS;
               else
               {
                 result = ACE_OS::strcmp (name_p,
-                                         ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_INVITEONLY));
+                                         ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_OPERATOR));
                 if (result == 0)
-                  mode = CHANNELMODE_INVITEONLY;
+                  mode = CHANNELMODE_OPERATOR;
                 else
                 {
                   result = ACE_OS::strcmp (name_p,
-                                           ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_SECRET));
+                                           ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_PRIVATE));
                   if (result == 0)
-                    mode = CHANNELMODE_SECRET;
+                    mode = CHANNELMODE_PRIVATE;
                   else
                   {
                     result = ACE_OS::strcmp (name_p,
-                                             ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_PRIVATE));
+                                             ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_QUIET));
                     if (result == 0)
-                      mode = CHANNELMODE_PRIVATE;
+                      mode = CHANNELMODE_QUIET;
                     else
                     {
                       result = ACE_OS::strcmp (name_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_OPERATOR));
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_REOP));
                       if (result == 0)
-                        mode = CHANNELMODE_OPERATOR;
+                        mode = CHANNELMODE_REOP;
                       else
                       {
-                        ACE_DEBUG ((LM_ERROR,
-                                    ACE_TEXT ("unknown/invalid channel mode toggled (was: %@), returning\n"),
-                                    toggleButton_in));
-                        return;
+                        result = ACE_OS::strcmp (name_p,
+                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_SECRET));
+                        if (result == 0)
+                          mode = CHANNELMODE_SECRET;
+                        else
+                        {
+                          result = ACE_OS::strcmp (name_p,
+                                                   ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_RESTRICTOPIC));
+                          if (result == 0)
+                            mode = CHANNELMODE_RESTRICTEDTOPIC;
+                          else
+                          {
+                            result = ACE_OS::strcmp (name_p,
+                                                     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_VOICE));
+                            if (result == 0)
+                            {
+                              mode = CHANNELMODE_VOICE;
+                              need_parameter = true;
+                              entry_label = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_MODE_VOICE);
+                            } // end IF
+                            else
+                            {
+                              ACE_DEBUG ((LM_ERROR,
+                                          ACE_TEXT ("unknown/invalid channel mode toggled (was: %@), returning\n"),
+                                          toggleButton_in));
+                              return;
+                            } // end ELSE
+                          } // end ELSE
+                        } // end ELSE
                       } // end ELSE
                     } // end ELSE
                   } // end ELSE
@@ -1939,7 +2154,7 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
 
   // check if the state is inconsistent --> submit change request, else do nothing
   // i.e. state is off and widget is "on" or vice-versa
-  // *NOTE*: avoid recursion
+  // *NOTE*: avoid recursion here !
   if (data_p->channelModes.test (mode) == toggleButton_in->active)
     return;
   // re-toggle button for now...
@@ -1991,7 +2206,8 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (dialog_p);
     gtk_window_set_title (GTK_WINDOW (dialog_p),
                           entry_label.c_str ());
-    if (gtk_dialog_run (dialog_p))
+    gint response_id = gtk_dialog_run (dialog_p);
+    if (response_id)
     {
 //       ACE_DEBUG((LM_DEBUG,
 //                  ACE_TEXT("channel mode cancelled...\n")));
@@ -1999,12 +2215,11 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
       // clean up
       gtk_entry_buffer_delete_text (gtk_entry_get_buffer (entry_p),
                                     0, -1);
-
-      //gtk_widget_hide (GTK_WIDGET (dialog_p));
+      gtk_widget_hide (GTK_WIDGET (dialog_p));
 
       return;
     } // end IF
-    //gtk_widget_hide (GTK_WIDGET (dialog_p));
+    gtk_widget_hide (GTK_WIDGET (dialog_p));
 
     value = gtk_entry_get_text (entry_p);
     // clean up

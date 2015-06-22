@@ -132,6 +132,7 @@ class Net_StreamAsynchUDPSocketBase_T
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // partial specialization (for Netlink)
 template <typename AddressType,
+          typename HandlerConfigurationType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename ModuleConfigurationType,
@@ -148,8 +149,8 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
                                       StatisticContainerType,
                                       StreamType,
                                       ACE_SOCK_NETLINK,
-                                      Net_AsynchNetlinkSocketHandler>
- : public Net_AsynchNetlinkSocketHandler
+                                      Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType> >
+ : public Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>
  , public ACE_SOCK_NETLINK
  , public ACE_Event_Handler
  , public Net_ConnectionBase_T<AddressType,
@@ -209,7 +210,7 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
   StreamType         stream_;
 
  private:
-  typedef Net_AsynchNetlinkSocketHandler inherited;
+  typedef Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>  inherited;
   typedef ACE_SOCK_NETLINK inherited2;
   typedef ACE_Event_Handler inherited3;
   typedef Net_ConnectionBase_T<AddressType,

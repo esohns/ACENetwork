@@ -84,13 +84,14 @@ class IRC_Client_IRCSession_T
 
   void error (const IRC_Client_IRCMessage&);
   void log (const IRC_Client_IRCMessage&);
-  void log (const std::string&, // text
-            bool = true);       // log to channel ? : server log
+  void log (const std::string&,  // channel (empty ? server log : channel)
+            const std::string&); // text
 
   bool                     close_;
   IRC_Client_InputHandler* inputHandler_;
   bool                     logToFile_;
   IRC_Client_IOStream_t    output_;
+  bool                     shutdownOnEnd_;
   IRC_Client_SessionState  state_;
 };
 

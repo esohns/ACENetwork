@@ -140,6 +140,7 @@ class Net_StreamUDPSocketBase_T
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // partial specialization (for Netlink)
 template <typename AddressType,
+          typename HandlerConfigurationType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename ModuleConfigurationType,
@@ -155,9 +156,8 @@ class Net_StreamUDPSocketBase_T<AddressType,
                                 SessionDataType,
                                 StatisticContainerType,
                                 StreamType,
-                                Net_NetlinkSocketHandler>
- : /*public SocketType
- ,*/ public Net_NetlinkSocketHandler
+                                Net_NetlinkSocketHandler_T<HandlerConfigurationType> >
+ : public Net_NetlinkSocketHandler_T<HandlerConfigurationType>
  , public Net_ConnectionBase_T<AddressType,
                                SocketConfigurationType,
                                ConfigurationType,
@@ -224,15 +224,14 @@ class Net_StreamUDPSocketBase_T<AddressType,
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
 
  private:
-//  typedef SocketType inherited;
-  typedef Net_NetlinkSocketHandler inherited2;
+  typedef Net_NetlinkSocketHandler_T<HandlerConfigurationType> inherited;
   typedef Net_ConnectionBase_T<AddressType,
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
                                SessionDataType,
                                StatisticContainerType,
-                               StreamType> inherited3;
+                               StreamType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T ());
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&));

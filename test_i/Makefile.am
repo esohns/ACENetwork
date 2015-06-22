@@ -3,6 +3,7 @@ ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = \
   -I/usr/include/c++/3.4.6/backward \
   -I$(top_srcdir)/../../modules/ATCD/ACE \
+  $(PKGCURSES_CFLAGS) \
   $(PKGSDL_CFLAGS) \
   $(PKGGTK_CFLAGS)
 if VALGRIND_SUPPORT
@@ -35,8 +36,12 @@ IRC_client_SOURCES = \
   IRC_client_common.h \
   IRC_client_common_modules.h \
   IRC_client_configuration.h \
+  IRC_client_curses.cpp \
+  IRC_client_curses.h \
   IRC_client_defines.h \
   IRC_client_iIRCControl.h \
+  IRC_client_inputhandler.cpp \
+  IRC_client_inputhandler.h \
   IRC_client_IRC_codes.h \
   IRC_client_IRCbisect.cpp \
   IRC_client_IRCbisect.h \
@@ -50,6 +55,7 @@ IRC_client_SOURCES = \
   IRC_client_IRCscanner.h \
   IRC_client_IRCsession.cpp \
   IRC_client_IRCsession.h \
+  IRC_client_IRCsession.inl \
   IRC_client_message.cpp \
   IRC_client_message.h \
   IRC_client_messageallocator.cpp \
@@ -67,6 +73,8 @@ IRC_client_SOURCES = \
   IRC_client_sessionmessage.h \
   IRC_client_signalhandler.cpp \
   IRC_client_signalhandler.h \
+  IRC_client_statemachine_registration.cpp \
+  IRC_client_statemachine_registration.h \
   IRC_client_stream.cpp \
   IRC_client_stream.h \
   IRC_client_stream_common.h \
@@ -89,6 +97,7 @@ IRC_client_CPPFLAGS = \
   -I$(builddir)/../..
 IRC_client_LDFLAGS = \
   -L$(abs_top_srcdir)/modules/ATCD/ACE/build/linux/lib \
+  $(PKGCURSES_LDFLAGS) \
   $(PKGSDL_LDFLAGS) \
   $(PKGGTK_LDFLAGS) \
   -L$(abs_builddir)/../modules/libCommon/src/.libs \
@@ -97,6 +106,7 @@ IRC_client_LDFLAGS = \
   -L$(abs_builddir)/../src/.libs
 IRC_client_LDADD = \
   -lACE \
+  $(PKGCURSES_LIBS) \
   $(PKGSDL_LIBS) \
   $(PKGGTK_LIBS) \
   -lCommon \
@@ -148,6 +158,8 @@ IRC_client_gui_SOURCES = \
   IRC_client_sessionmessage.h \
   IRC_client_signalhandler.cpp \
   IRC_client_signalhandler.h \
+  IRC_client_statemachine_registration.cpp \
+  IRC_client_statemachine_registration.h \
   IRC_client_stream.cpp \
   IRC_client_stream.h \
   IRC_client_stream_common.h \

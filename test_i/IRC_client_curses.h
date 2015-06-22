@@ -21,14 +21,17 @@
 #ifndef IRC_CLIENT_CURSES_H
 #define IRC_CLIENT_CURSES_H
 
+#include <map>
 #include <string>
-
-#include "ace/OS.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
 #include "curses.h"
 #else
-#include <ncurses.h>
+#include "ncurses.h"
+// *NOTE*: the ncurses "timeout" macros conflicts with
+//         ACE_Synch_Options::timeout. Since not currently used, it's safe to
+//         undefine
+#undef timeout
 #endif
 #include "panel.h"
 
@@ -37,12 +40,19 @@
 // forward declarations
 struct IRC_Client_SessionState;
 
+typedef std::map<std::string, PANEL*> IRC_Client_CursesChannels_t;
+typedef IRC_Client_CursesChannels_t::iterator IRC_Client_CursesChannelsIterator_t;
+
+typedef std::map<std::string, IRC_Client_MessageQueue_t> IRC_Client_CursesMessages_t;
+typedef IRC_Client_CursesMessages_t::iterator IRC_Client_CursesMessagesIterator_t;
+
 struct IRC_Client_CursesState
 {
   inline IRC_Client_CursesState ()
-   : activePanel (0)
-   , panels ()
+   : activePanel ()
    , input (NULL)
+   , log (NULL)
+   , panels ()
    , screen (NULL)
    , status (NULL)
    , finished (false)
@@ -51,34 +61,35 @@ struct IRC_Client_CursesState
    , backLog ()
    , IRCSessionState (NULL)
   {
-    ACE_OS::memset (panels, 0, sizeof (panels));
+    activePanel = panels.begin ();
   };
 
   // curses
-  int                       activePanel;
-  WINDOW*                   input;
-  PANEL*                    panels[2]; // 0: log, 1: channel
-  SCREEN*                   screen;
-  WINDOW*                   status;
+  IRC_Client_CursesChannelsIterator_t activePanel;
+  WINDOW*                             input;
+  WINDOW*                             log;
+  IRC_Client_CursesChannels_t         panels;
+  SCREEN*                             screen;
+  WINDOW*                             status;
 
   // dispatch loop
-  bool                      finished;
-  ACE_SYNCH_MUTEX           lock;
+  bool                                finished;
+  ACE_SYNCH_MUTEX                     lock;
 
   ///////////////////////////////////////
 
   // session
-  IRC_Client_MessageQueue_t backLog;
-  IRC_Client_SessionState*  IRCSessionState;
+  IRC_Client_CursesMessages_t         backLog;
+  IRC_Client_SessionState*            IRCSessionState;
 };
 
 bool curses_join (const std::string&,       // channel
                   IRC_Client_CursesState&); // state
-void curses_log (const std::string&,      // text
+void curses_log (const std::string&,      // channel (empty ? server log : channel)
+                 const std::string&,      // text
                  IRC_Client_CursesState&, // state
-                 bool = true,             // channel ? : server log
                  bool = true);            // lock ?
-void curses_main (IRC_Client_CursesState&); // state
+bool curses_main (IRC_Client_CursesState&); // state
 bool curses_part (const std::string&,       // channel
                   IRC_Client_CursesState&); // state
 

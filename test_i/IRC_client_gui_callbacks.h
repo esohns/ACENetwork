@@ -32,12 +32,20 @@ void is_entry_sensitive (GtkCellLayout*,
                          GtkTreeModel*,
                          GtkTreeIter*,
                          gpointer);
-gboolean update_display (gpointer);
 
 //------------------------------------------------------------------------------
-G_MODULE_EXPORT gboolean idle_initialize_UI_cb (gpointer);
-G_MODULE_EXPORT gboolean idle_finalize_UI_cb (gpointer);
 
+// idle routines
+gboolean idle_finalize_UI_cb (gpointer);
+gboolean idle_initialize_UI_cb (gpointer);
+gboolean idle_remove_connection_cb (gpointer);
+gboolean idle_update_channel_modes_cb (gpointer);
+gboolean idle_update_display_cb (gpointer);
+gboolean idle_update_user_modes_cb (gpointer);
+
+//------------------------------------------------------------------------------
+
+// callbacks
 // main
 G_MODULE_EXPORT void button_about_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void button_connect_clicked_cb (GtkWidget*, gpointer);

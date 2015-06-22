@@ -60,24 +60,27 @@ struct IRC_Client_GTK_CBData
 struct IRC_Client_GTK_ConnectionCBData
 {
   inline IRC_Client_GTK_ConnectionCBData ()
-   : IRCSessionState ()
-   , connection (NULL)
+   : connection (NULL)
    , connections (NULL)
    , controller (NULL)
    , GTKState (NULL)
+   , IRCSessionState ()
+   , label ()
   {};
 
-  IRC_Client_SessionState    IRCSessionState;
   IRC_Client_GUI_Connection* connection;
   connections_t*             connections;
   IRC_Client_IIRCControl*    controller;
   Common_UI_GTKState*        GTKState;
+  IRC_Client_SessionState    IRCSessionState;
+  std::string                label;
 };
 
 struct IRC_Client_GTK_HandlerCBData
 {
   inline IRC_Client_GTK_HandlerCBData ()
-   : channelModes ()
+   : builderLabel ()
+   , channelModes ()
    , connection (NULL)
    , controller (NULL)
    , GTKState (NULL)
@@ -85,6 +88,7 @@ struct IRC_Client_GTK_HandlerCBData
    , parameters ()
   {};
 
+  std::string                builderLabel;
   IRC_Client_ChannelModes_t  channelModes;
   IRC_Client_GUI_Connection* connection;
   IRC_Client_IIRCControl*    controller;

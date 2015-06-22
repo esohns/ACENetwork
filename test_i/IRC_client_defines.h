@@ -110,6 +110,9 @@
 #define IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH    200
 
 // UI/output
+#define IRC_CLIENT_CURSES_COLOR_LOG              1
+#define IRC_CLIENT_CURSES_COLOR_STATUS           2
+#define IRC_CLIENT_CURSES_CURSOR_MODE            2 // highlighted
 #define IRC_CLIENT_DEF_PRINT_PINGDOT             false
 
 // client

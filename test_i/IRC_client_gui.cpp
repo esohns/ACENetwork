@@ -418,8 +418,6 @@ do_work (bool useThreadPool_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
-  int result = -1;
-
   // sanity check(s)
   ACE_ASSERT (userData_in.configuration);
 
@@ -439,11 +437,16 @@ do_work (bool useThreadPool_in,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
     return;
   } // end IF
-  IRCHandler_impl_p->initialize (NULL,
-                                 userData_in.configuration->streamConfiguration.streamConfiguration.messageAllocator,
-                                 userData_in.configuration->streamConfiguration.streamConfiguration.bufferSize,
-                                 userData_in.configuration->protocolConfiguration.automaticPong,
-                                 userData_in.configuration->protocolConfiguration.printPingDot);
+  if (!IRCHandler_impl_p->initialize (NULL,
+                                      userData_in.configuration->streamConfiguration.streamConfiguration.messageAllocator,
+                                      userData_in.configuration->streamConfiguration.streamConfiguration.bufferSize,
+                                      userData_in.configuration->protocolConfiguration.automaticPong,
+                                      userData_in.configuration->protocolConfiguration.printPingDot))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::initialize(), returning\n")));
+    return;
+  } // end IF
   userData_in.configuration->streamConfiguration.streamConfiguration.module =
     &IRC_handler;
   userData_in.configuration->streamConfiguration.streamConfiguration.deleteModule =
@@ -460,10 +463,13 @@ do_work (bool useThreadPool_in,
   } // end IF
 
   // step3a: initialize connection manager
-  IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (std::numeric_limits<unsigned int>::max ());
+  IRC_Client_Connection_Manager_t* connection_manager_p =
+      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   IRC_Client_SessionData session_data;
-  IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->set (*userData_in.configuration,
-                                                            &session_data);
+  connection_manager_p->set (*userData_in.configuration,
+                             &session_data);
 
   // step3b: initialize timer manager
   Common_Timer_Manager_t* timer_manager_p =
@@ -474,9 +480,17 @@ do_work (bool useThreadPool_in,
   timer_manager_p->start ();
 
   // step4: initialize signal handling
-//  Net_Client_SignalHandlerConfiguration_t signal_handler_configuration;
-//  userData_in.signalHandlerConfiguration = &signal_handler_configuration;
-//  signalHandler_in.initialize (signal_handler_configuration);
+  IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
+  if (!signalHandler_in.initialize (signal_handler_configuration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_SignalHandler::initialize(): \"%m\", returning\n")));
+
+    // clean up
+    timer_manager_p->stop ();
+
+    return;
+  } // end IF
   if (!Common_Tools::initializeSignals (signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,

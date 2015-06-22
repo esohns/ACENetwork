@@ -179,6 +179,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">q</property>
                             <property name="relief">none</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
@@ -194,6 +195,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">r</property>
                             <property name="relief">none</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
@@ -495,8 +497,8 @@
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_accept</property>
+                <property name="use_action_appearance">True</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
               </object>
@@ -511,8 +513,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_cancel</property>
+                <property name="use_action_appearance">True</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
               </object>
@@ -551,24 +553,26 @@
   <object class="GtkMenu" id="menu_page_channel">
     <property name="take_focus">False</property>
     <child>
-      <object class="GtkMenuItem" id="menuitem_info">
+      <object class="GtkImageMenuItem" id="menuitem_info">
         <property name="visible">True</property>
-        <property name="use_action_appearance">True</property>
         <property name="related_action">action_info</property>
+        <property name="use_action_appearance">True</property>
+        <property name="use_stock">True</property>
       </object>
     </child>
     <child>
-      <object class="GtkMenuItem" id="menuitem_msg">
+      <object class="GtkImageMenuItem" id="menuitem_msg">
         <property name="visible">True</property>
-        <property name="use_action_appearance">True</property>
         <property name="related_action">action_msg</property>
+        <property name="use_action_appearance">True</property>
+        <property name="use_stock">True</property>
       </object>
     </child>
     <child>
       <object class="GtkMenuItem" id="menuitem_invite">
         <property name="visible">True</property>
-        <property name="use_action_appearance">True</property>
         <property name="related_action">action_invite</property>
+        <property name="use_action_appearance">True</property>
       </object>
     </child>
     <child>
@@ -579,15 +583,16 @@
     <child>
       <object class="GtkMenuItem" id="menuitem_kick">
         <property name="visible">True</property>
-        <property name="use_action_appearance">True</property>
         <property name="related_action">action_kick</property>
+        <property name="use_action_appearance">True</property>
       </object>
     </child>
     <child>
-      <object class="GtkMenuItem" id="menuitem_ban">
+      <object class="GtkImageMenuItem" id="menuitem_ban">
         <property name="visible">True</property>
-        <property name="use_action_appearance">True</property>
         <property name="related_action">action_ban</property>
+        <property name="use_action_appearance">True</property>
+        <property name="use_stock">True</property>
       </object>
     </child>
   </object>
