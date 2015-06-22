@@ -2,12 +2,6 @@
 <interface>
   <requires lib="gtk+" version="2.24"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkAction" id="action_away">
-    <property name="label">Away</property>
-    <property name="short_label">Away</property>
-    <property name="is_important">True</property>
-    <signal name="activate" handler="action_away_cb"/>
-  </object>
   <object class="GtkAction" id="action_cancel">
     <property name="label">Cancel</property>
     <property name="short_label">Cancel</property>
@@ -51,8 +45,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_cancel</property>
+                <property name="use_action_appearance">True</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
               </object>
@@ -70,8 +64,8 @@
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_accept</property>
+                <property name="use_action_appearance">True</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
               </object>
@@ -228,7 +222,6 @@
                         <child>
                           <object class="GtkComboBox" id="combobox_page_connection_users">
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="model">liststore_page_connection_users</property>
                             <property name="has_frame">False</property>
@@ -242,6 +235,8 @@
                             </child>
                           </object>
                           <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
                             <property name="position">3</property>
                           </packing>
                         </child>
@@ -257,6 +252,8 @@
                             <signal name="clicked" handler="refresh_users_clicked_cb"/>
                           </object>
                           <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
                             <property name="position">4</property>
                           </packing>
                         </child>
@@ -334,8 +331,8 @@
                         <child>
                           <object class="GtkComboBox" id="combobox_page_connection_channels">
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
+                            <property name="model">liststore_page_connection_channels</property>
                             <property name="has_frame">False</property>
                             <property name="focus_on_click">False</property>
                             <signal name="changed" handler="channelbox_changed_cb"/>
@@ -347,6 +344,8 @@
                             </child>
                           </object>
                           <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
                             <property name="position">3</property>
                           </packing>
                         </child>
@@ -362,6 +361,8 @@
                             <signal name="clicked" handler="refresh_channels_clicked_cb"/>
                           </object>
                           <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
                             <property name="position">4</property>
                           </packing>
                         </child>
@@ -404,7 +405,6 @@
                       <object class="GtkToggleButton" id="togglebutton_away">
                         <property name="label" translatable="yes">_away</property>
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">a</property>
@@ -434,13 +434,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_localoperator">
-                        <property name="label" translatable="yes">_local</property>
+                      <object class="GtkToggleButton" id="togglebutton_operator">
+                        <property name="label" translatable="yes">_operator</property>
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">local operator (O)</property>
+                        <property name="tooltip_text" translatable="yes">o</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -451,12 +450,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_notices">
-                        <property name="label" translatable="yes">notice_s</property>
+                      <object class="GtkToggleButton" id="togglebutton_localoperator">
+                        <property name="label" translatable="yes">_local</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">receive server notices (s)</property>
+                        <property name="tooltip_text" translatable="yes">local operator (O)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -467,13 +466,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_operator">
-                        <property name="label" translatable="yes">_operator</property>
+                      <object class="GtkToggleButton" id="togglebutton_restricted">
+                        <property name="label" translatable="yes">_restricted</property>
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">o</property>
+                        <property name="tooltip_text" translatable="yes">restricted user connection (r)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -484,12 +482,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_restricted">
-                        <property name="label" translatable="yes">_restricted</property>
+                      <object class="GtkToggleButton" id="togglebutton_notices">
+                        <property name="label" translatable="yes">notice_s</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">restricted user connection (r)</property>
+                        <property name="tooltip_text" translatable="yes">receive server notices (s)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -575,6 +573,7 @@
           <object class="GtkNotebook" id="notebook_page_connection_channels">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="tab_pos">bottom</property>
             <property name="show_border">False</property>
             <property name="scrollable">True</property>
             <property name="tab_border">0</property>
@@ -605,16 +604,19 @@
                   </object>
                 </child>
               </object>
+              <packing>
+                <property name="tab_fill">False</property>
+                <property name="reorderable">True</property>
+              </packing>
             </child>
             <child type="tab">
               <object class="GtkLabel" id="label_notebook_page_connection_channels">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">&lt;i&gt;server log&lt;/i&gt;</property>
-                <property name="use_markup">True</property>
-                <property name="single_line_mode">True</property>
+                <property name="label" translatable="yes">server log</property>
               </object>
               <packing>
                 <property name="tab_fill">False</property>
+                <property name="reorderable">True</property>
               </packing>
             </child>
           </object>

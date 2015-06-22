@@ -113,6 +113,7 @@
 #define IRC_CLIENT_CURSES_COLOR_LOG              1
 #define IRC_CLIENT_CURSES_COLOR_STATUS           2
 #define IRC_CLIENT_CURSES_CURSOR_MODE            2 // highlighted
+#define IRC_CLIENT_DEF_ENCODING                  CHARACTERENCODING_UTF8
 #define IRC_CLIENT_DEF_PRINT_PINGDOT             false
 
 // client

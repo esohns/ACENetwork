@@ -54,47 +54,54 @@ struct IRC_Client_GTK_CBData
   Common_UI_GTKState        GTKState;
   IRC_Client_PhoneBook      phoneBook;
   std::string               UIFileDirectory;
-
 };
 
 struct IRC_Client_GTK_ConnectionCBData
 {
   inline IRC_Client_GTK_ConnectionCBData ()
-   : connection (NULL)
+   : acknowledgements (0)
+   , connection (NULL)
    , connections (NULL)
    , controller (NULL)
    , GTKState (NULL)
    , IRCSessionState ()
    , label ()
+   , pending (false)
   {};
 
+  unsigned int               acknowledgements;
   IRC_Client_GUI_Connection* connection;
   connections_t*             connections;
   IRC_Client_IIRCControl*    controller;
   Common_UI_GTKState*        GTKState;
   IRC_Client_SessionState    IRCSessionState;
   std::string                label;
+  bool                       pending;
 };
 
 struct IRC_Client_GTK_HandlerCBData
 {
   inline IRC_Client_GTK_HandlerCBData ()
-   : builderLabel ()
+   : acknowledgements (0)
+   , builderLabel ()
    , channelModes ()
    , connection (NULL)
    , controller (NULL)
    , GTKState (NULL)
    , id ()
    , parameters ()
+   , pending (false)
   {};
 
-  std::string                builderLabel;
-  IRC_Client_ChannelModes_t  channelModes;
-  IRC_Client_GUI_Connection* connection;
-  IRC_Client_IIRCControl*    controller;
-  Common_UI_GTKState*        GTKState;
-  std::string                id;
-  string_list_t              parameters;
+  unsigned int                      acknowledgements;
+  std::string                       builderLabel;
+  IRC_Client_ChannelModes_t         channelModes;
+  IRC_Client_GUI_Connection*        connection;
+  IRC_Client_IIRCControl*           controller;
+  Common_UI_GTKState*               GTKState;
+  std::string                       id;
+  string_list_t                     parameters;
+  bool                              pending;
 };
 
 #endif

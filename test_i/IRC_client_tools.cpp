@@ -245,50 +245,74 @@ IRC_Client_Tools::IRCCommandString2Type (const std::string& commandString_in)
   } // end ELSE
 }
 
-void
+unsigned int
 IRC_Client_Tools::merge (const std::string& modes_in,
                          IRC_Client_UserModes_t& modes_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::merge"));
 
-  IRC_Client_UserMode user_mode = USERMODE_INVALID;
+  unsigned int result = 0;
+  IRC_Client_UserMode mode = USERMODE_INVALID;
 
   // *NOTE* format is {[+|-]|i|w|s|o}
   bool assign = (modes_in[0] == '+');
+  bool toggled;
   std::string::const_iterator iterator = modes_in.begin ();
   for (iterator++;
        iterator != modes_in.end ();
        iterator++)
   {
-    user_mode = IRC_Client_Tools::IRCUserModeChar2UserMode (*iterator);
-    if (user_mode >= USERMODE_MAX)
+    mode = IRC_Client_Tools::IRCUserModeChar2UserMode (*iterator);
+    if (mode >= USERMODE_MAX)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("unknown/invalid user mode (was: \"%c\"), continuing\n"),
+                  ACE_TEXT (*iterator)));
       continue; // unknown user mode...
+    } // end IF
 
-    modes_inout.set (user_mode, assign);
+    toggled = (( modes_inout.test (mode) && !assign) ||
+               (!modes_inout.test (mode) &&  assign));
+    modes_inout.set (mode, assign);
+    if (toggled) ++result;
   } // end FOR
+
+  return result;
 }
 
-void
+unsigned int
 IRC_Client_Tools::merge (const std::string& modes_in,
                          IRC_Client_ChannelModes_t& modes_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::merge"));
 
-  IRC_Client_ChannelMode channel_mode = CHANNELMODE_INVALID;
+  unsigned int result = 0;
+  IRC_Client_ChannelMode mode = CHANNELMODE_INVALID;
 
   // *NOTE* format is {[+|-]|o|p|s|i|t|n|m|l|b|v|k}
   bool assign = (modes_in[0] == '+');
+  bool toggled;
   std::string::const_iterator iterator = modes_in.begin ();
   for (iterator++;
        iterator != modes_in.end ();
        iterator++)
   {
-    channel_mode = IRC_Client_Tools::IRCChannelModeChar2ChannelMode (*iterator);
-    if (channel_mode >= CHANNELMODE_MAX)
+    mode = IRC_Client_Tools::IRCChannelModeChar2ChannelMode (*iterator);
+    if (mode >= CHANNELMODE_MAX)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("unknown/invalid channel mode (was: \"%c\"), continuing\n"),
+                  ACE_TEXT (*iterator)));
       continue; // unknown channel mode...
+    } // end IF
 
-    modes_inout.set (channel_mode, assign);
+    toggled = (( modes_inout.test (mode) && !assign) ||
+               (!modes_inout.test (mode) &&  assign));
+    modes_inout.set (mode, assign);
+    if (toggled) ++result;
   } // end FOR
+
+  return result;
 }
 
 char
@@ -1521,6 +1545,7 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
         }
         case IRC_Client_IRC_Codes::RPL_MYINFO:        //   4
         case IRC_Client_IRC_Codes::RPL_PROTOCTL:      //   5
+        case IRC_Client_IRC_Codes::RPL_SNOMASK:       //   8
         case IRC_Client_IRC_Codes::RPL_YOURID:        //  42
         case IRC_Client_IRC_Codes::RPL_STATSDLINE:    // 250
         case IRC_Client_IRC_Codes::RPL_LUSEROP:       // 252

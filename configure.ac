@@ -24,10 +24,13 @@ m4_ifset([M4_LIBACENETWORK_VERSION_DEVEL],
 # (meta-)package name
 m4_define([M4_PACKAGE_NAME], [libACENetwork])
 
+# maintainer email address
+m4_define([M4_MAINTAINER_EMAIL_ADDRESS], [eriksohns@123mail.org])
+
 AC_PREREQ([2.69])
 AC_INIT([M4_PACKAGE_NAME],
         [M4_LIBACENETWORK_VERSION],
-        [eriksohns@123mail.org],
+        [M4_MAINTAINER_EMAIL_ADDRESS],
         [M4_PACKAGE_NAME],
         [http://www.github.com/esohns/libACENetwork])
 AC_CONFIG_AUX_DIR([aux_config])
@@ -38,7 +41,8 @@ dnl                    modules/libCommon
 dnl                    modules/libACEStream])
 AC_CONFIG_SUBDIRS([modules/libCommon
                    modules/libACEStream])
-
+AM_PO_SUBDIRS
+                   
 LIBACENETWORK_VERSION_API=M4_LIBACENETWORK_VERSION_API
 AC_SUBST([LIBACENETWORK_VERSION_API])
 
@@ -66,13 +70,24 @@ AC_PROG_CXX
 #AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 #AC_PROG_YACC
+AM_GNU_GETTEXT([external])
 AM_PROG_AR
 LT_INIT
 
-# init other tools
+# initialize other tools
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 # build time sanity check...
 AM_SANITY_CHECK
+AM_XGETTEXT_OPTION([--language=C++])
+AM_XGETTEXT_OPTION([--extract-all])
+AM_XGETTEXT_OPTION([--trigraphs])
+AM_XGETTEXT_OPTION([--debug])
+#
+AM_XGETTEXT_OPTION([--indent])
+AM_XGETTEXT_OPTION([--foreign-user])
+AM_XGETTEXT_OPTION([--package-name=M4_PACKAGE_NAME])
+AM_XGETTEXT_OPTION([--package-version=M4_LIBACENETWORK_VERSION])
+AM_XGETTEXT_OPTION([--msgid-bugs-address=M4_MAINTAINER_EMAIL_ADDRESS])
 LT_INIT
 
 # prefix config.h
@@ -203,6 +218,7 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_CONFIG_FILES([Makefile
                  m4/Makefile
+                 po/Makefile.in
                  modules/Makefile
                  scripts/Makefile
                  src/Makefile

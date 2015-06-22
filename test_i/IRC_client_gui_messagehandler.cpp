@@ -125,19 +125,19 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   } // end IF
 
   // load widget tree
-  GError* error = NULL;
+  GError* error_p = NULL;
   gtk_builder_add_from_file (builder_p,
                              ui_definition_filename.c_str (),
-                             &error);
-  if (error)
+                             &error_p);
+  if (error_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to gtk_builder_add_from_file(\"%s\"): \"%s\", returning\n"),
                 ACE_TEXT (ui_definition_filename.c_str ()),
-                ACE_TEXT (error->message)));
+                ACE_TEXT (error_p->message)));
 
     // clean up
-    g_error_free (error);
+    g_error_free (error_p);
     g_object_unref (G_OBJECT (builder_p));
 
     return;
@@ -148,23 +148,23 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
       GTK_TEXT_VIEW (gtk_builder_get_object (builder_p,
                                              ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TEXTVIEW_CHANNEL)));
   ACE_ASSERT (view_);
-  GtkTextIter iter;
+  GtkTextIter text_iter;
   gtk_text_buffer_get_end_iter (gtk_text_view_get_buffer (view_),
-                                &iter);
+                                &text_iter);
   gtk_text_buffer_create_mark (gtk_text_view_get_buffer (view_),
                                ACE_TEXT_ALWAYS_CHAR ("scroll"),
-                               &iter,
+                               &text_iter,
                                TRUE);
 
   // enable multi-selection in treeview
-  GtkTreeView* treeview_p =
+  GtkTreeView* tree_view_p =
     GTK_TREE_VIEW (gtk_builder_get_object (builder_p,
                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TREEVIEW_CHANNEL)));
-  ACE_ASSERT (treeview_p);
-  GtkTreeSelection* treeselection_p =
-    gtk_tree_view_get_selection (treeview_p);
-  ACE_ASSERT (treeselection_p);
-  gtk_tree_selection_set_mode (treeselection_p,
+  ACE_ASSERT (tree_view_p);
+  GtkTreeSelection* tree_selection_p =
+    gtk_tree_view_get_selection (tree_view_p);
+  ACE_ASSERT (tree_selection_p);
+  gtk_tree_selection_set_mode (tree_selection_p,
                                GTK_SELECTION_MULTIPLE);
 
   // add the invite_channel_members_menu to the "Invite" menu item
@@ -172,11 +172,11 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
     GTK_MENU (gtk_builder_get_object (builder_p,
                                       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_MENU_CHANNEL_INVITE)));
   ACE_ASSERT (menu_p);
-  GtkMenuItem* menuitem_p =
+  GtkMenuItem* menu_item_p =
     GTK_MENU_ITEM (gtk_builder_get_object (builder_p,
                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_MENUITEM_INVITE)));
-  ACE_ASSERT (menuitem_p);
-  gtk_menu_item_set_submenu (menuitem_p, GTK_WIDGET (menu_p));
+  ACE_ASSERT (menu_item_p);
+  gtk_menu_item_set_submenu (menu_item_p, GTK_WIDGET (menu_p));
 
   // connect signal(s)
   GtkButton* button_p =
@@ -190,119 +190,146 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   ACE_ASSERT (result);
 
   // togglebuttons
-  GtkToggleButton* togglebutton_p =
+  GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_KEY)));
-  ACE_ASSERT (togglebutton_p);
-  result = g_signal_connect (togglebutton_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_ANONYMOUS)));
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
                              &CBData_);
   ACE_ASSERT (result);
-  togglebutton_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_VOICE)));
-  ACE_ASSERT (togglebutton_p);
-  result = g_signal_connect (togglebutton_p,
-                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                             G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
-  ACE_ASSERT (result);
-  togglebutton_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BAN)));
-  ACE_ASSERT (togglebutton_p);
-  result = g_signal_connect (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
                              &CBData_);
   ACE_ASSERT (result);
-  togglebutton_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_USERLIMIT)));
-  ACE_ASSERT (togglebutton_p);
-  result = g_signal_connect (togglebutton_p,
-                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                             G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
-  ACE_ASSERT (result);
-  togglebutton_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_MODERATED)));
-  ACE_ASSERT (togglebutton_p);
-  result = g_signal_connect (togglebutton_p,
-                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                             G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
-  ACE_ASSERT (result);
-  togglebutton_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BLOCKFOREIGN)));
-  ACE_ASSERT (togglebutton_p);
-  result = g_signal_connect (togglebutton_p,
-                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                             G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
-  ACE_ASSERT (result);
-  togglebutton_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_RESTRICTOPIC)));
-  ACE_ASSERT (togglebutton_p);
-  result = g_signal_connect (togglebutton_p,
-                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                             G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
-  ACE_ASSERT (result);
-  togglebutton_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_INVITEONLY)));
-  ACE_ASSERT (togglebutton_p);
-  result = g_signal_connect (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
                              &CBData_);
   ACE_ASSERT (result);
-  togglebutton_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_SECRET)));
-  ACE_ASSERT (togglebutton_p);
-  result = g_signal_connect (togglebutton_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_KEY)));
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
                              &CBData_);
   ACE_ASSERT (result);
-  togglebutton_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_PRIVATE)));
-  ACE_ASSERT (togglebutton_p);
-  result = g_signal_connect (togglebutton_p,
+                                              ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_USERLIMIT)));
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
                              &CBData_);
   ACE_ASSERT (result);
-  togglebutton_p =
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_MODERATED)));
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
+                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                             G_CALLBACK (channel_mode_toggled_cb),
+                             &CBData_);
+  ACE_ASSERT (result);
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BLOCKFOREIGN)));
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
+                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                             G_CALLBACK (channel_mode_toggled_cb),
+                             &CBData_);
+  ACE_ASSERT (result);
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_OPERATOR)));
-  ACE_ASSERT (togglebutton_p);
-  result = g_signal_connect (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
+                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                             G_CALLBACK (channel_mode_toggled_cb),
+                             &CBData_);
+  ACE_ASSERT (result);
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_PRIVATE)));
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
+                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                             G_CALLBACK (channel_mode_toggled_cb),
+                             &CBData_);
+  ACE_ASSERT (result);
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_QUIET)));
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
+                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                             G_CALLBACK (channel_mode_toggled_cb),
+                             &CBData_);
+  ACE_ASSERT (result);
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_REOP)));
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
+                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                             G_CALLBACK (channel_mode_toggled_cb),
+                             &CBData_);
+  ACE_ASSERT (result);
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_SECRET)));
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
+                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                             G_CALLBACK (channel_mode_toggled_cb),
+                             &CBData_);
+  ACE_ASSERT (result);
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_RESTRICTOPIC)));
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
+                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                             G_CALLBACK (channel_mode_toggled_cb),
+                             &CBData_);
+  ACE_ASSERT (result);
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_VOICE)));
+  ACE_ASSERT (toggle_button_p);
+  result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
                              &CBData_);
   ACE_ASSERT (result);
 
   // topic label
-  GtkEventBox* eventbox_p =
+  GtkEventBox* event_box_p =
     GTK_EVENT_BOX (gtk_builder_get_object (builder_p,
                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_EVENTBOX_TOPIC)));
-  ACE_ASSERT (eventbox_p);
-  result = g_signal_connect (eventbox_p,
+  ACE_ASSERT (event_box_p);
+  result = g_signal_connect (event_box_p,
                              ACE_TEXT_ALWAYS_CHAR ("button-press-event"),
                              G_CALLBACK (topic_clicked_cb),
                              &CBData_);
   ACE_ASSERT (result);
 
   // context menu in treeview
-  result = g_signal_connect (treeview_p,
+  result = g_signal_connect (tree_view_p,
                              ACE_TEXT_ALWAYS_CHAR ("button-press-event"),
                              G_CALLBACK (members_clicked_cb),
                              &CBData_);
@@ -377,9 +404,9 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   if (!IRC_Client_Tools::isValidIRCChannelName (CBData_.id))
   {
     // --> private conversation window, modify label accordingly
-    page_tab_label_string = ACE_TEXT_ALWAYS_CHAR ("[");
+    page_tab_label_string = ACE_TEXT_ALWAYS_CHAR ("<b>");
     page_tab_label_string += CBData_.id;
-    page_tab_label_string += ACE_TEXT_ALWAYS_CHAR ("]");
+    page_tab_label_string += ACE_TEXT_ALWAYS_CHAR ("</b>");
 
     // hide channel mode tab frame
     GtkFrame* frame_p =
@@ -388,18 +415,18 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
     ACE_ASSERT (frame_p);
     gtk_widget_hide (GTK_WIDGET (frame_p));
     // hide channel tab treeview
-    treeview_p =
+    tree_view_p =
       GTK_TREE_VIEW (gtk_builder_get_object (builder_p,
                                              ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TREEVIEW_CHANNEL)));
-    ACE_ASSERT (treeview_p);
-    gtk_widget_hide (GTK_WIDGET (treeview_p));
+    ACE_ASSERT (tree_view_p);
+    gtk_widget_hide (GTK_WIDGET (tree_view_p));
 
     // erase "topic" label
-    label_p =
+    GtkLabel* label_2 =
       GTK_LABEL (gtk_builder_get_object (builder_p,
                                          ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LABEL_TOPIC)));
-    ACE_ASSERT (label_p);
-    gtk_label_set_text (label_p, NULL);
+    ACE_ASSERT (label_2);
+    gtk_label_set_text (label_2, NULL);
   } // end IF
   else
     page_tab_label_string = CBData_.id;
@@ -572,10 +599,12 @@ IRC_Client_GUI_MessageHandler::update ()
 //              ACE_TEXT("printing: \"%s\"\n"),
 //              ACE_TEXT(displayQueue_.front().c_str())));
 
-  GtkTextIter iterator;
+  GtkTextIter text_iterator;
   gtk_text_buffer_get_end_iter (gtk_text_view_get_buffer (view_),
-                                &iterator);
+                                &text_iterator);
 
+  //gchar* string_p = NULL;
+  std::string message_text;
   {  // synch access
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (messageQueueLock_);
 
@@ -583,53 +612,52 @@ IRC_Client_GUI_MessageHandler::update ()
     if (messageQueue_.empty ())
       return; // nothing to do...
 
-    // step1: convert text
-    gchar* string_p =
-      Common_UI_Tools::Locale2UTF8 (messageQueue_.back () + '\n');
-    if (!string_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to convert message text (was: \"%s\"), returning\n"),
-                  ACE_TEXT (messageQueue_.back ().c_str ())));
+    message_text = messageQueue_.back () + '\n';
+    //// step1: convert text (GTK uses UTF-8 to represent strings)
+    //string_p =
+    //  Common_UI_Tools::Locale2UTF8 (messageQueue_.back () + '\n');
+    //if (!string_p)
+    //{
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"), returning\n"),
+    //              ACE_TEXT (messageQueue_.back ().c_str ())));
 
-      // clean up
-      messageQueue_.pop_back ();
+    //  // clean up
+    //  messageQueue_.pop_back ();
 
-      return;
-    } // end IF
+    //  return;
+    //} // end IF
     messageQueue_.pop_back ();
-
-    // step2: display text
-    gtk_text_buffer_insert (gtk_text_view_get_buffer (view_), &iterator,
-                            string_p,
-                            -1);
-//   gtk_text_buffer_insert_at_cursor(gtk_text_view_get_buffer (view_),
-//                                    message_text.c_str(),
-//                                    message_text.size());
-
-    // clean up
-    g_free (string_p);
   } // end lock scope
+  // step2: display text
+  //gtk_text_buffer_insert (gtk_text_view_get_buffer (view_), &text_iterator,
+  //                        string_p, -1);
+  gtk_text_buffer_insert (gtk_text_view_get_buffer (view_), &text_iterator,
+                          message_text.c_str (), -1);
+
+  //// clean up
+  //g_free (string_p);
 
 //   // get the new "end"...
 //   gtk_text_buffer_get_end_iter(myTargetBuffer,
 //                                &iter);
   // move the iterator to the beginning of line, so we don't scroll
   // in horizontal direction
-  gtk_text_iter_set_line_offset (&iterator, 0);
+  gtk_text_iter_set_line_offset (&text_iterator, 0);
 
   // ...and place the mark at iter. The mark will stay there after we
   // insert some text at the end because it has right gravity
-  GtkTextMark* mark = NULL;
-  mark = gtk_text_buffer_get_mark (gtk_text_view_get_buffer (view_),
-                                   ACE_TEXT_ALWAYS_CHAR ("scroll"));
+  GtkTextMark* mark_p =
+    gtk_text_buffer_get_mark (gtk_text_view_get_buffer (view_),
+                              ACE_TEXT_ALWAYS_CHAR ("scroll"));
+  ACE_ASSERT (mark_p);
   gtk_text_buffer_move_mark (gtk_text_view_get_buffer (view_),
-                             mark,
-                             &iterator);
+                             mark_p,
+                             &text_iterator);
 
   // scroll the mark onscreen
   gtk_text_view_scroll_mark_onscreen (view_,
-                                      mark);
+                                      mark_p);
 
   // redraw view area...
 //   // sanity check(s)
@@ -741,8 +769,9 @@ IRC_Client_GUI_MessageHandler::setModes (const std::string& modes_in,
   // sanity check(s)
   ACE_ASSERT (CBData_.GTKState);
 
-  IRC_Client_Tools::merge (modes_in,
-                           CBData_.channelModes);
+  CBData_.acknowledgements +=
+    IRC_Client_Tools::merge (modes_in,
+                             CBData_.channelModes);
 
   guint event_source_id = g_idle_add (idle_update_channel_modes_cb,
                                       &CBData_);
@@ -1036,91 +1065,3 @@ IRC_Client_GUI_MessageHandler::endMembers ()
 
   gdk_threads_leave ();
 }
-
-//void
-//IRC_Client_GUI_MessageHandler::updateModeButtons ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::updateModeButtons"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (CBData_.GTKState);
-//
-//  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
-//
-//  Common_UI_GTKBuildersIterator_t iterator =
-//    CBData_.GTKState->builders.find (CBData_.builderLabel);
-//  // sanity check(s)
-//  ACE_ASSERT (iterator != CBData_.GTKState->builders.end ());
-//
-//  gdk_threads_enter ();
-//
-//  // display (changed) channel modes
-//  GtkToggleButton* togglebutton_p =
-//    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_KEY)));
-//  ACE_ASSERT (togglebutton_p);
-//  gtk_toggle_button_set_active (togglebutton_p,
-//                                CBData_.channelModes[CHANNELMODE_PASSWORD]);
-//  togglebutton_p =
-//    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_VOICE)));
-//  ACE_ASSERT (togglebutton_p);
-//  gtk_toggle_button_set_active (togglebutton_p,
-//                                CBData_.channelModes[CHANNELMODE_VOICE]);
-//  togglebutton_p =
-//    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BAN)));
-//  ACE_ASSERT (togglebutton_p);
-//  gtk_toggle_button_set_active (togglebutton_p,
-//                                CBData_.channelModes[CHANNELMODE_BAN]);
-//  togglebutton_p =
-//    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_USERLIMIT)));
-//  ACE_ASSERT (togglebutton_p);
-//  gtk_toggle_button_set_active (togglebutton_p,
-//                                CBData_.channelModes[CHANNELMODE_USERLIMIT]);
-//  togglebutton_p =
-//    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_MODERATED)));
-//  ACE_ASSERT (togglebutton_p);
-//  gtk_toggle_button_set_active (togglebutton_p,
-//                                CBData_.channelModes[CHANNELMODE_MODERATED]);
-//  togglebutton_p =
-//    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BLOCKFOREIGN)));
-//  ACE_ASSERT (togglebutton_p);
-//  gtk_toggle_button_set_active (togglebutton_p,
-//                                CBData_.channelModes[CHANNELMODE_BLOCKFOREIGNMSGS]);
-//  togglebutton_p =
-//    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_RESTRICTOPIC)));
-//  ACE_ASSERT (togglebutton_p);
-//  gtk_toggle_button_set_active (togglebutton_p,
-//                                CBData_.channelModes[CHANNELMODE_RESTRICTEDTOPIC]);
-//  togglebutton_p =
-//    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_INVITEONLY)));
-//  ACE_ASSERT (togglebutton_p);
-//  gtk_toggle_button_set_active (togglebutton_p,
-//                                CBData_.channelModes[CHANNELMODE_INVITEONLY]);
-//  togglebutton_p =
-//    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_SECRET)));
-//  ACE_ASSERT (togglebutton_p);
-//  gtk_toggle_button_set_active (togglebutton_p,
-//                                CBData_.channelModes[CHANNELMODE_SECRET]);
-//  togglebutton_p =
-//    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_PRIVATE)));
-//  ACE_ASSERT (togglebutton_p);
-//  gtk_toggle_button_set_active (togglebutton_p,
-//                                CBData_.channelModes[CHANNELMODE_PRIVATE]);
-//  togglebutton_p =
-//    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_OPERATOR)));
-//  ACE_ASSERT (togglebutton_p);
-//  gtk_toggle_button_set_active (togglebutton_p,
-//                                CBData_.channelModes[CHANNELMODE_OPERATOR]);
-//
-//  gdk_threads_leave ();
-//}

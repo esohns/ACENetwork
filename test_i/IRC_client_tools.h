@@ -28,8 +28,6 @@
 
 #include "common_time_common.h"
 
-//#include "stream_common.h"
-
 #include "IRC_client_common.h"
 #include "IRC_client_IRCmessage.h"
 
@@ -56,10 +54,10 @@ class IRC_Client_Tools
   static std::string IRCMessage2String (const IRC_Client_IRCMessage&);
 
   static IRC_Client_CommandType_t IRCCommandString2Type (const std::string&);
-  static void merge (const std::string&,       // mode string (e.g. "+i")
-                     IRC_Client_UserModes_t&); // input/return value: (merged) user modes
-  static void merge (const std::string&,          // mode string (e.g. "+i")
-                     IRC_Client_ChannelModes_t&); // input/return value: (merged) channel modes
+  static unsigned int merge (const std::string&,       // mode string (e.g. "+i")
+                             IRC_Client_UserModes_t&); // input/return value: (merged) user modes
+  static unsigned int merge (const std::string&,          // mode string (e.g. "+i")
+                             IRC_Client_ChannelModes_t&); // input/return value: (merged) channel modes
   static char IRCChannelMode2Char (const IRC_Client_ChannelMode&);
   static char IRCUserMode2Char (const IRC_Client_UserMode&);
 

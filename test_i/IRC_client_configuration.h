@@ -146,6 +146,7 @@ struct IRC_Client_Configuration
    , protocolConfiguration ()
    //////////////////////////////////////
    , cursesState (NULL)
+   , encoding (IRC_CLIENT_DEF_ENCODING)
    , groupID (COMMON_EVENT_DISPATCH_THREAD_GROUP_ID)
    , logToFile (IRC_CLIENT_SESSION_DEF_LOG)
    , useReactor (NET_EVENT_USE_REACTOR)
@@ -160,6 +161,10 @@ struct IRC_Client_Configuration
   IRC_Client_ProtocolConfiguration protocolConfiguration;
   // ***************************************************************************
   IRC_Client_CursesState*          cursesState;
+  // *NOTE*: see also https://en.wikipedia.org/wiki/Internet_Relay_Chat#Character_encoding
+  // *TODO*: implement support for 7-bit ASCII (as it is the most compatible
+  //         encoding)
+  IRC_Client_CharacterEncoding     encoding;
   int                              groupID;
   bool                             logToFile;
   bool                             useReactor;

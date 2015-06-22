@@ -274,4 +274,16 @@ typedef Net_ISession_T<ACE_INET_Addr,
                        IRC_Client_Stream,
                        IRC_Client_SessionState> IRC_Client_ISession_t;
 
+
+enum IRC_Client_CharacterEncoding
+{
+  CHARACTERENCODING_ASCII = 0,
+  CHARACTERENCODING_LOCALE, // *NOTE*: may lead to problems if clients do not
+                            //         share the same configuration
+  CHARACTERENCODING_UTF8,
+  ///////////////////////////////////////
+  CHARACTERENCODING_MAX,
+  CHARACTERENCODING_INVALID
+};
+
 #endif
