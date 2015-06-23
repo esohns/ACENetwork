@@ -54,3 +54,4 @@ ipch/
 /prj/msvc/*.opensdf
 *.vcxproj.user
 
+/prj/msvc/Release_obj

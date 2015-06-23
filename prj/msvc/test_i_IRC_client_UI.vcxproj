@@ -5,9 +5,17 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -29,6 +37,12 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -42,8 +56,8 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="VS_ProjectPropertySheet_curses.props" />
     <Import Project="VS_ProjectPropertySheet_ACE.props" />
+    <Import Project="VS_ProjectPropertySheet_curses.props" />
     <Import Project="VS_ProjectPropertySheet_png_gtk_gnome.props" />
     <Import Project="VS_ProjectPropertySheet_glade.props" />
     <Import Project="VS_ProjectPropertySheet_SDL.props" />
@@ -71,7 +85,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
+    <PostBuildEvent>
+      <Command>$(ProjectDir)..\..\test_i\scripts\make_installer.bat $(Configuration)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -91,8 +110,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
       <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -225,12 +246,19 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\test_i\IRC_client.ini" />
-    <None Include="..\..\test_i\IRC_client_channel.glade" />
-    <None Include="..\..\test_i\IRC_client_connection.glade" />
+    <None Include="..\..\test_i\etc\IRC_client_channel.glade" />
+    <None Include="..\..\test_i\etc\IRC_client_connection.glade" />
+    <None Include="..\..\test_i\etc\IRC_client_main.glade" />
     <None Include="..\..\test_i\IRC_client_IRCsession.inl" />
-    <None Include="..\..\test_i\IRC_client_main.glade" />
-    <None Include="..\..\test_i\servers.ini" />
+    <None Include="..\..\test_i\scripts\IRCbisect.l" />
+    <None Include="..\..\test_i\scripts\IRCclient.nsi" />
+    <None Include="..\..\test_i\scripts\IRCparser.y" />
+    <None Include="..\..\test_i\scripts\IRCscanner.l" />
+    <None Include="..\..\test_i\scripts\IRC_client.ini" />
+    <None Include="..\..\test_i\scripts\make_installer.bat" />
+    <None Include="..\..\test_i\scripts\parser.bat" />
+    <None Include="..\..\test_i\scripts\scanner.bat" />
+    <None Include="..\..\test_i\scripts\servers.ini" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test_i\IRC_client_common.h" />

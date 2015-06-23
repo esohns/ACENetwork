@@ -21,10 +21,14 @@
 #ifndef IRC_CLIENT_GUI_DEFINES_H
 #define IRC_CLIENT_GUI_DEFINES_H
 
+// scripts
+#define IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY "scripts"
+
 // phonebook
 #define IRC_CLIENT_GUI_DEF_FILE_SERVERS "servers.ini"
 
 // UI definitions
+#define IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY  "etc"
 // files
 #define IRC_CLIENT_GUI_GTK_UI_CHANNEL_FILE    "IRC_client_channel.glade"
 #define IRC_CLIENT_GUI_GTK_UI_CONNECTION_FILE "IRC_client_connection.glade"

@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include <iostream>
+#include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
@@ -77,13 +77,12 @@ do_printUsage (const std::string& programName_in)
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_TEXT ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
+  configuration_path += ACE_TEXT ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
+  configuration_path += ACE_TEXT ("test_i");
 #endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT ("usage: ")
@@ -93,7 +92,9 @@ do_printUsage (const std::string& programName_in)
   std::cout << ACE_TEXT ("currently available options:") << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
+  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT (IRC_CLIENT_CNF_DEF_INI_FILE);
   std::cout << ACE_TEXT ("-c [FILE] : configuration file")
             << ACE_TEXT (" [\"")
             << path
@@ -114,6 +115,8 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   path = configuration_path;
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_SERVERS);
   std::cout << ACE_TEXT ("-p [FILE] : servers configuration file")
@@ -137,6 +140,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   std::cout << ACE_TEXT ("-u [DIR]  : UI file directory")
             << ACE_TEXT (" [\"")
             << path
@@ -173,7 +177,6 @@ do_processArguments (int argc_in,
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -184,6 +187,9 @@ do_processArguments (int argc_in,
 
   // initialize results
   configurationFile_out          = configuration_path;
+  configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configurationFile_out         +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
@@ -197,6 +203,9 @@ do_processArguments (int argc_in,
   phonebookFile_out              = configuration_path;
   phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebookFile_out             +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
+  phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  phonebookFile_out             +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_SERVERS);
 
   useReactor_out                 = NET_EVENT_USE_REACTOR;
@@ -206,6 +215,9 @@ do_processArguments (int argc_in,
   traceInformation_out           = false;
 
   UIFileDirectory_out            = configuration_path;
+  UIFileDirectory_out           += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UIFileDirectory_out           +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
 
   printVersionAndExit_out        = false;
   numThreadPoolThreads_out       = IRC_CLIENT_DEF_NUM_TP_THREADS;
@@ -1200,7 +1212,6 @@ ACE_TMAIN (int argc_in,
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1210,8 +1221,12 @@ ACE_TMAIN (int argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   std::string configuration_file       = configuration_path;
-  configuration_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_file += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
+  configuration_file                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_file                  +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
+  configuration_file                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_file                  +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
 
   bool debug                           =
     (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE);
@@ -1219,6 +1234,9 @@ ACE_TMAIN (int argc_in,
   bool log_to_file                     = false;
 
   std::string phonebook_file           = configuration_path;
+  phonebook_file                      += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  phonebook_file                      +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
   phonebook_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebook_file += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_SERVERS);
 
@@ -1229,7 +1247,9 @@ ACE_TMAIN (int argc_in,
   bool trace_information               = false;
 
   std::string UIFile_directory         = configuration_path;
-  UIFile_directory += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UIFile_directory                    += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UIFile_directory                    +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
 
   bool print_version_and_exit          = false;
   unsigned int num_thread_pool_threads = IRC_CLIENT_DEF_NUM_TP_THREADS;
