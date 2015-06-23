@@ -23,7 +23,7 @@
 *.lib
 
 # Executables
-*.exe
+#*.exe
 *.out
 *.app
 
@@ -48,10 +48,10 @@ m4/ltoptions.m4
 Debug/
 Release/
 Debug_obj/
+Release_obj/
 ipch/
 *.sdf
 *.suo
-/prj/msvc/*.opensdf
+*.opensdf
 *.vcxproj.user
 
-/prj/msvc/Release_obj
