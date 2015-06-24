@@ -1008,7 +1008,7 @@ do_parseConfigurationFile (const std::string& configFilename_in,
     if (val_name == ACE_TEXT_ALWAYS_CHAR ("password"))
       loginOptions_out.password = ACE_TEXT_ALWAYS_CHAR (val_value.c_str ());
     else if (val_name == ACE_TEXT_ALWAYS_CHAR ("nick"))
-      loginOptions_out.nick = ACE_TEXT_ALWAYS_CHAR (val_value.c_str());
+      loginOptions_out.nickname = ACE_TEXT_ALWAYS_CHAR (val_value.c_str ());
     else if (val_name == ACE_TEXT_ALWAYS_CHAR ("user"))
       loginOptions_out.user.username = ACE_TEXT_ALWAYS_CHAR (val_value.c_str ());
     else if (val_name == ACE_TEXT_ALWAYS_CHAR ("realname"))
@@ -1325,7 +1325,7 @@ ACE_TMAIN (int argc_in,
   configuration.streamConfiguration.debugScanner = IRC_CLIENT_DEF_LEX_TRACE;
   configuration.streamConfiguration.debugParser = IRC_CLIENT_DEF_YACC_TRACE;
   ///////////////////////////////////////
-  configuration.protocolConfiguration.loginOptions.nick =
+  configuration.protocolConfiguration.loginOptions.nickname =
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_NICK);
   //   userData.loginOptions.user.username = ;
   std::string hostname;

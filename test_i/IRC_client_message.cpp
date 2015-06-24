@@ -74,21 +74,22 @@ IRC_Client_Message::getCommand () const
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Message::getCommand"));
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::getData ());
+  const IRC_Client_IRCMessage* data_p = inherited::getData ();
 
-  switch (inherited::getData ()->command.discriminator)
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+
+  switch (data_p->command.discriminator)
   {
     case IRC_Client_IRCMessage::Command::STRING:
-      return IRC_Client_Tools::IRCCommandString2Type (*inherited::getData ()->command.string);
+      return IRC_Client_Tools::IRCCommandString2Type (*data_p->command.string);
     case IRC_Client_IRCMessage::Command::NUMERIC:
-      return static_cast<IRC_Client_CommandType_t> (inherited::getData ()->command.numeric);
+      return static_cast<IRC_Client_CommandType_t> (data_p->command.numeric);
     default:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid command type (was: %d), aborting\n"),
-                  inherited::getData ()->command.discriminator));
-
+                  data_p->command.discriminator));
       break;
     }
   } // end SWITCH
@@ -135,63 +136,66 @@ IRC_Client_Message::crunch ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Message::crunch"));
 
+  int result = -1;
+
   // sanity check
-  // *WARNING*: this is NOT enough, it's a race.
-  // Anyway, there may be trailing messages and/or pieces referencing the same
-  // buffer...
-  // --> in fact, that should be the norm
+  // *WARNING*: this check is NOT enough, it's a race. Anyway, there may be
+  //            trailing messages and/or pieces referencing the same buffer...
+  //            --> in fact, that should be the norm
 //   ACE_ASSERT(reference_count() == 1);
   // ... assuming stream processing is indeed single-threaded, then the
-  // reference count at this stage SHOULD be 2: us, and the next,
-  // trailing "message head". (Of course, it COULD be just "us"...)
-  if (reference_count() <= 2)
+  // reference count at this stage should be just 2: "this", and the next,
+  // trailing "message head" (of course, it could be just "this").
+  result = reference_count ();
+  if (result <= 2)
   {  // step1: align rd_ptr() with base()
-    if (inherited::crunch())
+    result = inherited::crunch ();
+    if (result == -1)
     {
-      ACE_DEBUG((LM_ERROR,
-                ACE_TEXT("failed to ACE_Message_Block::crunch(): \"%m\", aborting\n")));
-
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Message_Block::crunch(): \"%m\", returning\n")));
       return;
     } // end IF
   } // end IF
 
-  // step2: copy the data
-  ACE_Message_Block* source = NULL;
-  size_t amount = 0;
-  for (source = cont();
-       source != NULL;
-       source = source->cont())
+  // step2: copy (part of) the data
+  ACE_Message_Block* message_block_p = NULL;
+  size_t amount, space, length = 0;
+  for (message_block_p = cont ();
+       message_block_p;
+       message_block_p = message_block_p->cont ())
   {
-    amount = (space() < source->length() ? space()
-                                         : source->length());
-    if (copy(source->rd_ptr(), amount))
+    space = inherited::space ();
+    length = message_block_p->length ();
+    amount = (space < length ? space : length);
+    result = inherited::copy (message_block_p->rd_ptr (), amount);
+    if (result == -1)
     {
-      ACE_DEBUG((LM_ERROR,
-                 ACE_TEXT("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
-
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", returning\n")));
       return;
     } // end IF
 
     // adjust read pointer accordingly
-    source->rd_ptr(amount);
+    message_block_p->rd_ptr (amount);
   } // end FOR
 
-  // step3: release any thus obsoleted continuations
-  source = cont();
-  ACE_Message_Block* prev = this;
-  ACE_Message_Block* obsolete = NULL;
+  // step3: release any thusly obsoleted continuations
+  message_block_p = cont ();
+  ACE_Message_Block* previous_p = this;
+  ACE_Message_Block* obsolete_p = NULL;
   do
   {
     // finished ?
-    if (source == NULL)
+    if (!message_block_p)
       break;
 
-    if (source->length() == 0)
+    if (message_block_p->length () == 0)
     {
-      obsolete = source;
-      source = source->cont();
-      prev->cont(source);
-      obsolete->release();
+      obsolete_p = message_block_p;
+      message_block_p = message_block_p->cont ();
+      previous_p->cont (message_block_p);
+      obsolete_p->release ();
     } // end IF
   } while (true);
 }

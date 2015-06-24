@@ -134,7 +134,8 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
     configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
   // sanity check(s)
   ACE_ASSERT (configuration_p);
-  state_.nickname = configuration_p->protocolConfiguration.loginOptions.nick;
+  state_.nickname =
+    configuration_p->protocolConfiguration.loginOptions.nickname;
 
   // step1: initialize output
   state_.cursesState = configuration_p->cursesState;

@@ -1443,8 +1443,9 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRCMessage::QUIT:
         {
           result = message_in.prefix.origin;
-          result += ACE_TEXT_ALWAYS_CHAR (" has QUIT IRC (reason: \"%s\")");
+          result += ACE_TEXT_ALWAYS_CHAR (" has QUIT IRC (reason: \"");
           result += message_in.params.back ();
+          result += ACE_TEXT_ALWAYS_CHAR ("\")");
           break;
         }
         case IRC_Client_IRCMessage::JOIN:
@@ -1516,21 +1517,21 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
     {
       switch (message_in.command.numeric)
       {
-        case IRC_Client_IRC_Codes::RPL_WELCOME:       //   1
-        case IRC_Client_IRC_Codes::RPL_YOURHOST:      //   2
-        case IRC_Client_IRC_Codes::RPL_CREATED:       //   3
-        case IRC_Client_IRC_Codes::RPL_LUSERCLIENT:   // 251
-        case IRC_Client_IRC_Codes::RPL_LUSERME:       // 255
-        case IRC_Client_IRC_Codes::RPL_TRYAGAIN:      // 263
-        case IRC_Client_IRC_Codes::RPL_LOCALUSERS:    // 265
-        case IRC_Client_IRC_Codes::RPL_GLOBALUSERS:   // 266
-        case IRC_Client_IRC_Codes::RPL_UNAWAY:        // 305
-        case IRC_Client_IRC_Codes::RPL_NOWAWAY:       // 306
-        case IRC_Client_IRC_Codes::RPL_ENDOFBANLIST:  // 368
-        case IRC_Client_IRC_Codes::RPL_MOTD:          // 372
-        case IRC_Client_IRC_Codes::RPL_MOTDSTART:     // 375
-        case IRC_Client_IRC_Codes::RPL_ENDOFMOTD:     // 376
-        case IRC_Client_IRC_Codes::ERR_NOMOTD:        // 422
+        case IRC_Client_IRC_Codes::RPL_WELCOME:          //   1
+        case IRC_Client_IRC_Codes::RPL_YOURHOST:         //   2
+        case IRC_Client_IRC_Codes::RPL_CREATED:          //   3
+        case IRC_Client_IRC_Codes::RPL_LUSERCLIENT:      // 251
+        case IRC_Client_IRC_Codes::RPL_LUSERME:          // 255
+        case IRC_Client_IRC_Codes::RPL_TRYAGAIN:         // 263
+        case IRC_Client_IRC_Codes::RPL_LOCALUSERS:       // 265
+        case IRC_Client_IRC_Codes::RPL_GLOBALUSERS:      // 266
+        case IRC_Client_IRC_Codes::RPL_UNAWAY:           // 305
+        case IRC_Client_IRC_Codes::RPL_NOWAWAY:          // 306
+        case IRC_Client_IRC_Codes::RPL_ENDOFBANLIST:     // 368
+        case IRC_Client_IRC_Codes::RPL_MOTD:             // 372
+        case IRC_Client_IRC_Codes::RPL_MOTDSTART:        // 375
+        case IRC_Client_IRC_Codes::RPL_ENDOFMOTD:        // 376
+        case IRC_Client_IRC_Codes::ERR_NOMOTD:           // 422
         case IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
         case IRC_Client_IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         {
@@ -1538,28 +1539,29 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
                                                 -1);
           break;
         }
-        case IRC_Client_IRC_Codes::RPL_BANLIST:       // 367
+        case IRC_Client_IRC_Codes::RPL_BANLIST:          // 367
         {
           result = IRC_Client_Tools::stringify (message_in.params);
           break;
         }
-        case IRC_Client_IRC_Codes::RPL_MYINFO:        //   4
-        case IRC_Client_IRC_Codes::RPL_PROTOCTL:      //   5
-        case IRC_Client_IRC_Codes::RPL_SNOMASK:       //   8
-        case IRC_Client_IRC_Codes::RPL_YOURID:        //  42
-        case IRC_Client_IRC_Codes::RPL_STATSDLINE:    // 250
-        case IRC_Client_IRC_Codes::RPL_LUSEROP:       // 252
-        case IRC_Client_IRC_Codes::RPL_LUSERUNKNOWN:  // 253
-        case IRC_Client_IRC_Codes::RPL_LUSERCHANNELS: // 254
-        case IRC_Client_IRC_Codes::RPL_USERHOST:      // 302
-        case IRC_Client_IRC_Codes::RPL_LISTSTART:     // 321
-        case IRC_Client_IRC_Codes::RPL_LIST:          // 322
-        case IRC_Client_IRC_Codes::RPL_LISTEND:       // 323
-        case IRC_Client_IRC_Codes::RPL_INVITING:      // 341
-        case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:    // 401
-        case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE: // 433
-        case IRC_Client_IRC_Codes::ERR_NOTREGISTERED: // 451
-        case IRC_Client_IRC_Codes::ERR_BADCHANNAME:   // 479
+        case IRC_Client_IRC_Codes::RPL_MYINFO:           //   4
+        case IRC_Client_IRC_Codes::RPL_PROTOCTL:         //   5
+        case IRC_Client_IRC_Codes::RPL_SNOMASK:          //   8
+        case IRC_Client_IRC_Codes::RPL_YOURID:           //  42
+        case IRC_Client_IRC_Codes::RPL_STATSDLINE:       // 250
+        case IRC_Client_IRC_Codes::RPL_LUSEROP:          // 252
+        case IRC_Client_IRC_Codes::RPL_LUSERUNKNOWN:     // 253
+        case IRC_Client_IRC_Codes::RPL_LUSERCHANNELS:    // 254
+        case IRC_Client_IRC_Codes::RPL_USERHOST:         // 302
+        case IRC_Client_IRC_Codes::RPL_LISTSTART:        // 321
+        case IRC_Client_IRC_Codes::RPL_LIST:             // 322
+        case IRC_Client_IRC_Codes::RPL_LISTEND:          // 323
+        case IRC_Client_IRC_Codes::RPL_INVITING:         // 341
+        case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:       // 401
+        case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:    // 433
+        case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:    // 451
+        case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:   // 461
+        case IRC_Client_IRC_Codes::ERR_BADCHANNAME:      // 479
         case IRC_Client_IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
         {
           result = IRC_Client_Tools::stringify (message_in.params,

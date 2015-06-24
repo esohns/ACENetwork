@@ -2,13 +2,13 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
+  <object class="GtkTextTagTable" id="texttagtable_page_channel"/>
   <object class="GtkListStore" id="liststore_page_channel">
     <columns>
-      <!-- column-name text -->
+      <!-- column-name nickname -->
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkTextTagTable" id="texttagtable_page_channel"/>
   <object class="GtkWindow" id="window_page_channel">
     <child>
       <object class="GtkVBox" id="vbox_page_channel">
@@ -496,8 +496,8 @@
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
-                <property name="related_action">action_accept</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_accept</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
               </object>
@@ -512,8 +512,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="related_action">action_cancel</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_cancel</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
               </object>
@@ -554,8 +554,8 @@
     <child>
       <object class="GtkImageMenuItem" id="menuitem_info">
         <property name="visible">True</property>
-        <property name="related_action">action_info</property>
         <property name="use_action_appearance">True</property>
+        <property name="related_action">action_info</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
       </object>
@@ -563,8 +563,8 @@
     <child>
       <object class="GtkImageMenuItem" id="menuitem_msg">
         <property name="visible">True</property>
-        <property name="related_action">action_msg</property>
         <property name="use_action_appearance">True</property>
+        <property name="related_action">action_msg</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
       </object>
@@ -572,8 +572,8 @@
     <child>
       <object class="GtkMenuItem" id="menuitem_invite">
         <property name="visible">True</property>
-        <property name="related_action">action_invite</property>
         <property name="use_action_appearance">True</property>
+        <property name="related_action">action_invite</property>
       </object>
     </child>
     <child>
@@ -584,15 +584,15 @@
     <child>
       <object class="GtkMenuItem" id="menuitem_kick">
         <property name="visible">True</property>
-        <property name="related_action">action_kick</property>
         <property name="use_action_appearance">True</property>
+        <property name="related_action">action_kick</property>
       </object>
     </child>
     <child>
       <object class="GtkImageMenuItem" id="menuitem_ban">
         <property name="visible">True</property>
-        <property name="related_action">action_ban</property>
         <property name="use_action_appearance">True</property>
+        <property name="related_action">action_ban</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
       </object>

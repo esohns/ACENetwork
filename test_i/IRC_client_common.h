@@ -53,13 +53,13 @@ struct IRC_Client_IRCLoginOptions
 {
   inline IRC_Client_IRCLoginOptions ()
    : password ()
-   , nick ()
+   , nickname ()
    , user ()
    , channel ()
   {};
 
   std::string password;
-  std::string nick;
+  std::string nickname;
   struct User
   {
     inline User ()

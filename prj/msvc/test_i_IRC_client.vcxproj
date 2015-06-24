@@ -262,11 +262,7 @@
     <None Include="..\..\test_i\FILE_Stream.inl" />
     <None Include="..\..\test_i\IOStream_alt_T.inl" />
     <None Include="..\..\test_i\IRC_client.ini" />
-    <None Include="..\..\test_i\IRC_client_channel.glade" />
-    <None Include="..\..\test_i\IRC_client_connection.glade" />
     <None Include="..\..\test_i\IRC_client_IRCsession.inl" />
-    <None Include="..\..\test_i\IRC_client_main.glade" />
-    <None Include="..\..\test_i\servers.ini" />
     <None Include="..\..\test_i\Streambuf_alt.inl" />
   </ItemGroup>
   <ItemGroup>

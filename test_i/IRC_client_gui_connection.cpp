@@ -23,6 +23,8 @@
 
 #include <sstream>
 
+#include "ace/ACE.h"
+
 #include "common_file_tools.h"
 
 #include "common_ui_common.h"
@@ -39,7 +41,7 @@
 
 IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_in,
                                                       IRC_Client_IIRCControl* controller_in,
-                                                      connections_t* connections_in,
+                                                      IRC_Client_GUI_Connections_t* connections_in,
                                                       const std::string& label_in,
                                                       const std::string& UIFileDirectory_in,
                                                       GtkNotebook* parent_in)
@@ -53,8 +55,6 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
  , parent_ (parent_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::IRC_Client_GUI_Connection"));
-
-  CBData_.label = label_in;
 
   // sanity check(s)
   ACE_ASSERT (state_in);
@@ -76,6 +76,20 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
   CBData_.GTKState = state_in;
   //   CBData_.nick.clear(); // cannot set this now...
   CBData_.IRCSessionState.userModes.reset ();
+  CBData_.label = label_in;
+  ACE_TCHAR timestamp[27]; // ISO-8601 format
+  ACE_OS::memset (&timestamp, 0, sizeof (timestamp));
+  ACE_TCHAR* result_p = ACE::timestamp (COMMON_TIME_NOW,
+                                        timestamp,
+                                        sizeof (timestamp),
+                                        false);
+  if (result_p == NULL)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE::timestamp(): \"%m\", returning\n")));
+    return;
+  } // end IF
+  CBData_.timestamp = ACE_TEXT_ALWAYS_CHAR (timestamp);
 
   // create new GtkBuilder
   GtkBuilder* builder_p = gtk_builder_new ();
@@ -83,20 +97,6 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-    return;
-  } // end IF
-  Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.label);
-  // sanity check(s)
-  if (iterator != CBData_.GTKState->builders.end ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection \"%s\" exists, returning\n"),
-                ACE_TEXT (CBData_.label.c_str ())));
-
-    // clean up
-    g_object_unref (G_OBJECT (builder_p));
-
     return;
   } // end IF
   std::string ui_definition_filename = UIFileDirectory_;
@@ -115,27 +115,27 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
   } // end IF
 
   // load widget tree
-  GError* error = NULL;
+  GError* error_p = NULL;
   gtk_builder_add_from_file (builder_p,
                              ui_definition_filename.c_str (),
-                             &error);
-  if (error)
+                             &error_p);
+  if (error_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to gtk_builder_add_from_file(\"%s\"): \"%s\", aborting\n"),
                 ACE_TEXT (ui_definition_filename.c_str ()),
-                ACE_TEXT (error->message)));
+                ACE_TEXT (error_p->message)));
 
     // clean up
-    g_error_free (error);
+    g_error_free (error_p);
     g_object_unref (G_OBJECT (builder_p));
 
     return;
   } // end IF
 
   // generate context ID
-  iterator =
-      CBData_.GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  Common_UI_GTKBuildersConstIterator_t iterator =
+    CBData_.GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != CBData_.GTKState->builders.end ());
 
@@ -174,7 +174,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
   ACE_ASSERT (entry_p);
   result_2 = g_signal_connect (entry_p,
                                ACE_TEXT_ALWAYS_CHAR ("focus-in-event"),
-                               G_CALLBACK (nick_entry_kb_focused_cb),
+                               G_CALLBACK (nickname_entry_kb_focused_cb),
                                &CBData_);
   ACE_ASSERT (result_2);
   button_p =
@@ -182,128 +182,272 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
                                         ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_BUTTON_NICK_ACCEPT)));
   ACE_ASSERT (button_p);
   result_2 = g_signal_connect (button_p,
-                             ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                             G_CALLBACK (change_clicked_cb),
-                             &CBData_);
+                               ACE_TEXT_ALWAYS_CHAR ("clicked"),
+                               G_CALLBACK (nickname_clicked_cb),
+                               &CBData_);
   ACE_ASSERT (result_2);
   GtkComboBox* combobox_p =
     GTK_COMBO_BOX (gtk_builder_get_object (builder_p,
                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_COMBOBOX_USERS)));
   ACE_ASSERT (combobox_p);
   result_2 = g_signal_connect (combobox_p,
-                             ACE_TEXT_ALWAYS_CHAR ("changed"),
-                             G_CALLBACK (usersbox_changed_cb),
-                             &CBData_);
+                               ACE_TEXT_ALWAYS_CHAR ("changed"),
+                               G_CALLBACK (usersbox_changed_cb),
+                               &CBData_);
   ACE_ASSERT (result_2);
   button_p =
     GTK_BUTTON (gtk_builder_get_object (builder_p,
                                         ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_BUTTON_USERS_REFRESH)));
   ACE_ASSERT (button_p);
   result_2 = g_signal_connect (button_p,
-                             ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                             G_CALLBACK (refresh_users_clicked_cb),
-                             &CBData_);
+                               ACE_TEXT_ALWAYS_CHAR ("clicked"),
+                               G_CALLBACK (refresh_users_clicked_cb),
+                               &CBData_);
   ACE_ASSERT (result_2);
   entry_p =
     GTK_ENTRY (gtk_builder_get_object (builder_p,
                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_ENTRY_CONNECTION_CHANNEL)));
   ACE_ASSERT (entry_p);
   result_2 = g_signal_connect (entry_p,
-                             ACE_TEXT_ALWAYS_CHAR ("focus-in-event"),
-                             G_CALLBACK (channel_entry_kb_focused_cb),
-                             &CBData_);
+                               ACE_TEXT_ALWAYS_CHAR ("focus-in-event"),
+                               G_CALLBACK (channel_entry_kb_focused_cb),
+                               &CBData_);
   ACE_ASSERT (result_2);
   button_p =
     GTK_BUTTON (gtk_builder_get_object (builder_p,
                                         ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_BUTTON_JOIN)));
   ACE_ASSERT (button_p);
   result_2 = g_signal_connect (button_p,
-                             ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                             G_CALLBACK (join_clicked_cb),
-                             &CBData_);
+                               ACE_TEXT_ALWAYS_CHAR ("clicked"),
+                               G_CALLBACK (join_clicked_cb),
+                               &CBData_);
   ACE_ASSERT (result_2);
   combobox_p =
     GTK_COMBO_BOX (gtk_builder_get_object (builder_p,
                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_COMBOBOX_CHANNELS)));
   ACE_ASSERT (combobox_p);
   result_2 = g_signal_connect (combobox_p,
-                             ACE_TEXT_ALWAYS_CHAR ("changed"),
-                             G_CALLBACK (channelbox_changed_cb),
-                             &CBData_);
+                               ACE_TEXT_ALWAYS_CHAR ("changed"),
+                               G_CALLBACK (channelbox_changed_cb),
+                               &CBData_);
   ACE_ASSERT (result_2);
   button_p =
     GTK_BUTTON (gtk_builder_get_object (builder_p,
                                         ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_BUTTON_CHANNELS_REFRESH)));
   ACE_ASSERT (button_p);
   result_2 = g_signal_connect (button_p,
-                             ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                             G_CALLBACK (refresh_channels_clicked_cb),
-                             &CBData_);
+                               ACE_TEXT_ALWAYS_CHAR ("clicked"),
+                               G_CALLBACK (refresh_channels_clicked_cb),
+                               &CBData_);
   ACE_ASSERT (result_2);
 
   // togglebuttons
-  GtkToggleButton* togglebutton_p =
+  GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
-  ACE_ASSERT (togglebutton_p);
-  result_2 = g_signal_connect (togglebutton_p,
-                               ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                               G_CALLBACK (user_mode_toggled_cb),
-                               &CBData_);
-  ACE_ASSERT (result_2);
-  togglebutton_p =
+  ACE_ASSERT (toggle_button_p);
+  //PangoAttribute* pango_attribute_p = pango_attr_scale_new (PANGO_SCALE_SMALL);
+  //if (!pango_attribute_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to pango_attr_scale_new(%f): \"%m\", aborting\n"),
+  //              PANGO_SCALE_SMALL));
+
+  //  // clean up
+  //  g_object_unref (G_OBJECT (builder_p));
+
+  //  return;
+  //} // end IF
+  //PangoAttrList* pango_attr_list_p = NULL;
+  //// *TODO*: find a better way to do this...
+  //const char* markup_p = ACE_TEXT_ALWAYS_CHAR ("<span size=\"smaller\"></span>");
+  //if (!pango_parse_markup (markup_p, -1,
+  //                         0,
+  //                         &pango_attr_list_p,
+  //                         NULL,
+  //                         NULL,
+  //                         &error_p))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to pango_parse_markup(\"%s\"): \"%s\", aborting\n"),
+  //              ACE_TEXT (markup_p),
+  //              ACE_TEXT (error_p->message)));
+
+  //  // clean up
+  //  g_error_free (error_p);
+  //  g_object_unref (G_OBJECT (builder_p));
+
+  //  return;
+  //} // end IF
+  //GtkLabel* label_p = GTK_LABEL (gtk_bin_get_child (GTK_BIN (toggle_button_p)));
+  //ACE_ASSERT (label_p);
+  //PangoAttrList* pango_attr_list_2 = NULL;
+  //char* text_p = NULL;
+  //gunichar accel_char;
+  //if (!pango_parse_markup (gtk_label_get_text (label_p), -1,
+  //                         '_',
+  //                         &pango_attr_list_2,
+  //                         &text_p,
+  //                         &accel_char,
+  //                         &error_p))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to pango_parse_markup(\"%s\"): \"%s\", aborting\n"),
+  //              ACE_TEXT (gtk_label_get_text (label_p)),
+  //              ACE_TEXT (error_p->message)));
+
+  //  // clean up
+  //  //pango_attr_list_unref (pango_attr_list_p);
+  //  g_error_free (error_p);
+  //  g_object_unref (G_OBJECT (builder_p));
+
+  //  return;
+  //} // end IF
+  //PangoAttribute* pango_attribute_2 = pango_attribute_copy (pango_attribute_p);
+  //if (!pango_attribute_2)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to pango_attribute_copy(0x%@), aborting\n"),
+  //              pango_attribute_p));
+
+  //  // clean up
+  //  pango_attr_list_unref (pango_attr_list_2);
+  //  g_object_unref (G_OBJECT (builder_p));
+
+  //  return;
+  //} // end IF
+  //pango_attr_list_change (pango_attr_list_2,
+  //                        pango_attribute_2);
+  //pango_attribute_destroy (pango_attribute_p);
+  //PangoAttrIterator* iterator_p =
+  //  pango_attr_list_get_iterator (pango_attr_list_p);
+  //if (!iterator_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to pango_attr_list_get_iterator(0x%@): \"%m\", aborting\n"),
+  //              pango_attr_list_p));
+
+  //  // clean up
+  //  pango_attr_list_unref (pango_attr_list_p);
+  //  g_error_free (error_p);
+  //  g_object_unref (G_OBJECT (builder_p));
+
+  //  return;
+  //} // end IF
+  //GSList* list_p = NULL;
+  //do
+  //{
+  //  list_p = pango_attr_iterator_get_attrs (iterator_p);
+  //  for (PangoAttribute* pango_attribute_p = NULL;
+  //       (list_p = g_slist_next (list_p)) != NULL;
+  //       pango_attribute_p = static_cast<PangoAttribute*> (list_p->data))
+  //  {
+  //    pango_attr_list_change (pango_attr_list_2,
+  //                            pango_attribute_p);
+  //    pango_attribute_destroy (pango_attribute_p);
+  //  } // end FOR
+  //  g_slist_free (list_p);
+
+  //  if (!pango_attr_iterator_next (iterator_p))
+  //    break; // done
+  //} while (true); // end WHILE
+  //pango_attr_list_unref (pango_attr_list_p);
+  //pango_attr_iterator_destroy (iterator_p);
+  //gtk_label_set_attributes (label_p,
+  //                          pango_attr_list_2);
+  //result_2 = g_signal_connect (toggle_button_p,
+  //                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
+  //                             G_CALLBACK (user_mode_toggled_cb),
+  //                             &CBData_);
+  //ACE_ASSERT (result_2);
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)));
-  ACE_ASSERT (togglebutton_p);
-  result_2 = g_signal_connect (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  //label_p = GTK_LABEL (gtk_bin_get_child (GTK_BIN (toggle_button_p)));
+  //ACE_ASSERT (label_p);
+  //if (!pango_parse_markup (gtk_label_get_text (label_p), -1,
+  //                         '_',
+  //                         &pango_attr_list_2,
+  //                         &text_p,
+  //                         &accel_char,
+  //                         &error_p))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to pango_parse_markup(\"%s\"): \"%s\", aborting\n"),
+  //              ACE_TEXT (gtk_label_get_text (label_p)),
+  //              ACE_TEXT (error_p->message)));
+
+  //  // clean up
+  //  g_error_free (error_p);
+  //  g_object_unref (G_OBJECT (builder_p));
+
+  //  return;
+  //} // end IF
+  //pango_attribute_2 = pango_attribute_copy (pango_attribute_p);
+  //if (!pango_attribute_2)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to pango_attribute_copy(0x%@), aborting\n"),
+  //              pango_attribute_p));
+
+  //  // clean up
+  //  pango_attr_list_unref (pango_attr_list_2);
+  //  g_object_unref (G_OBJECT (builder_p));
+
+  //  return;
+  //} // end IF
+  //pango_attr_list_change (pango_attr_list_2,
+  //                        pango_attribute_2);
+  result_2 = g_signal_connect (toggle_button_p,
                                ACE_TEXT_ALWAYS_CHAR ("toggled"),
                                G_CALLBACK (user_mode_toggled_cb),
                                &CBData_);
   ACE_ASSERT (result_2);
-  togglebutton_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
-  ACE_ASSERT (togglebutton_p);
-  result_2 = g_signal_connect (togglebutton_p,
-                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                             G_CALLBACK (user_mode_toggled_cb),
-                             &CBData_);
-  ACE_ASSERT (result_2);
-  togglebutton_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
-  ACE_ASSERT (togglebutton_p);
-  result_2 = g_signal_connect (togglebutton_p,
-                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                             G_CALLBACK (user_mode_toggled_cb),
-                             &CBData_);
-  ACE_ASSERT (result_2);
-  togglebutton_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
-  ACE_ASSERT (togglebutton_p);
-  result_2 = g_signal_connect (togglebutton_p,
-                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                             G_CALLBACK (user_mode_toggled_cb),
-                             &CBData_);
-  ACE_ASSERT (result_2);
-  togglebutton_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
-  ACE_ASSERT (togglebutton_p);
-  result_2 = g_signal_connect (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  result_2 = g_signal_connect (toggle_button_p,
                                ACE_TEXT_ALWAYS_CHAR ("toggled"),
                                G_CALLBACK (user_mode_toggled_cb),
                                &CBData_);
   ACE_ASSERT (result_2);
-  togglebutton_p =
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
+  ACE_ASSERT (toggle_button_p);
+  result_2 = g_signal_connect (toggle_button_p,
+                               ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                               G_CALLBACK (user_mode_toggled_cb),
+                               &CBData_);
+  ACE_ASSERT (result_2);
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
+  ACE_ASSERT (toggle_button_p);
+  result_2 = g_signal_connect (toggle_button_p,
+                               ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                               G_CALLBACK (user_mode_toggled_cb),
+                               &CBData_);
+  ACE_ASSERT (result_2);
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
+                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
+  ACE_ASSERT (toggle_button_p);
+  result_2 = g_signal_connect (toggle_button_p,
+                               ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                               G_CALLBACK (user_mode_toggled_cb),
+                               &CBData_);
+  ACE_ASSERT (result_2);
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
-  ACE_ASSERT (togglebutton_p);
-  result_2 = g_signal_connect (togglebutton_p,
-                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                             G_CALLBACK (user_mode_toggled_cb),
-                             &CBData_);
+  ACE_ASSERT (toggle_button_p);
+  result_2 = g_signal_connect (toggle_button_p,
+                               ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                               G_CALLBACK (user_mode_toggled_cb),
+                               &CBData_);
   ACE_ASSERT (result_2);
 
   //// actions
@@ -323,9 +467,9 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
                                           ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
   ACE_ASSERT (notebook_p);
   result_2 = g_signal_connect (notebook_p,
-                             ACE_TEXT_ALWAYS_CHAR ("switch-page"),
-                             G_CALLBACK (switch_channel_cb),
-                             &CBData_);
+                               ACE_TEXT_ALWAYS_CHAR ("switch-page"),
+                               G_CALLBACK (switch_channel_cb),
+                               &CBData_);
   ACE_ASSERT (result_2);
 
   // retrieve server log tab child
@@ -479,8 +623,8 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
   {
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
-    CBData_.GTKState->builders[CBData_.label] =
-        std::make_pair (ui_definition_filename, builder_p);
+    CBData_.GTKState->builders[CBData_.timestamp] =
+      std::make_pair (ui_definition_filename, builder_p);
   } // end lock scope
 
   isInitialized_ = true;
@@ -492,6 +636,7 @@ IRC_Client_GUI_Connection::~IRC_Client_GUI_Connection ()
 
   // sanity check(s)
   ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_.connections);
 
   // clean up message handlers
   for (MESSAGE_HANDLERSITERATOR_T iterator = messageHandlers_.begin ();
@@ -502,14 +647,14 @@ IRC_Client_GUI_Connection::~IRC_Client_GUI_Connection ()
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   // remove this from the connection list
-  connections_iterator_t iterator =
-    CBData_.connections->find (CBData_.label);
+  IRC_Client_GUI_ConnectionsConstIterator_t iterator =
+    CBData_.connections->find (CBData_.timestamp);
   if (iterator != CBData_.connections->end ())
     CBData_.connections->erase (iterator);
 
   // remove server page from parent notebook
   Common_UI_GTKBuildersIterator_t iterator_2 =
-      CBData_.GTKState->builders.find (CBData_.label);
+    CBData_.GTKState->builders.find (CBData_.timestamp);
   // sanity check(s)
   if (iterator_2 == CBData_.GTKState->builders.end ())
   {
@@ -557,7 +702,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
-      CBData_.GTKState->builders.find (CBData_.label);
+      CBData_.GTKState->builders.find (CBData_.timestamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {
@@ -706,11 +851,11 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           CBData_.IRCSessionState.away = false;
 
           // retrieve togglebutton
-          GtkToggleButton* togglebutton_p =
+          GtkToggleButton* toggle_button_p =
             GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
-          ACE_ASSERT (togglebutton_p);
-          gtk_toggle_button_set_active (togglebutton_p, FALSE);
+          ACE_ASSERT (toggle_button_p);
+          gtk_toggle_button_set_active (toggle_button_p, FALSE);
 
           gdk_threads_leave ();
 
@@ -726,11 +871,11 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           CBData_.IRCSessionState.away = true;
 
           // retrieve togglebutton
-          GtkToggleButton* togglebutton_p =
+          GtkToggleButton* toggle_button_p =
             GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
-          ACE_ASSERT (togglebutton_p);
-          gtk_toggle_button_set_active (togglebutton_p, TRUE);
+          ACE_ASSERT (toggle_button_p);
+          gtk_toggle_button_set_active (toggle_button_p, TRUE);
 
           gdk_threads_leave ();
 
@@ -796,10 +941,10 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           gdk_threads_enter ();
 
           // retrieve server tab channels store
-          GtkListStore* liststore_p =
+          GtkListStore* list_store_p =
             GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                                     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LISTSTORE_CHANNELS)));
-          ACE_ASSERT (liststore_p);
+          ACE_ASSERT (list_store_p);
 
           // convert <# visible>
           IRC_Client_ParametersIterator_t param_iterator = message_in.params.begin ();
@@ -812,31 +957,31 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           param_iterator--;
 
           // convert text
-          gchar* converted_text =
-            Common_UI_Tools::Locale2UTF8 (*param_iterator);
-          if (!converted_text)
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to convert message text (was: \"%s\"), aborting\n"),
-                        ACE_TEXT ((*param_iterator).c_str ())));
+          const gchar* string_p = (*param_iterator).c_str ();
+          //  Common_UI_Tools::Locale2UTF8 (*param_iterator);
+          //if (!converted_text)
+          //{
+          //  ACE_DEBUG ((LM_ERROR,
+          //              ACE_TEXT ("failed to convert message text (was: \"%s\"), aborting\n"),
+          //              ACE_TEXT ((*param_iterator).c_str ())));
 
-            // clean up
-            gdk_threads_leave ();
+          //  // clean up
+          //  gdk_threads_leave ();
 
-            break;
-          } // end IF
+          //  break;
+          //} // end IF
 
-          GtkTreeIter list_iterator;
-          gtk_list_store_append (liststore_p,
-                                 &list_iterator);
-          gtk_list_store_set (liststore_p, &list_iterator,
-                              0, converted_text,                     // channel name
+          GtkTreeIter tree_iter;
+          gtk_list_store_append (list_store_p,
+                                 &tree_iter);
+          gtk_list_store_set (list_store_p, &tree_iter,
+                              0, string_p,                           // channel name
                               1, num_members,                        // # visible members
                               2, message_in.params.back ().c_str (), // topic
                               -1);
 
           // clean up
-          g_free (converted_text);
+          //g_free (string_p);
           gdk_threads_leave ();
 
           break;
@@ -868,7 +1013,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
             message_in.params.begin ();
           ACE_ASSERT (message_in.params.size () >= 8);
           std::advance (iterator_2, 5); // nick position
-          std::string nick = *iterator_2;
+          std::string nickname = *iterator_2;
           iterator_2++;
           bool away = ((*iterator_2).find (ACE_TEXT_ALWAYS_CHAR ("G"), 0) == 0);
           bool is_IRCoperator =
@@ -890,7 +1035,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           // retrieve server tab users store
           Common_UI_GTKBuildersIterator_t iterator_3 =
-            CBData_.GTKState->builders.find (CBData_.label);
+            CBData_.GTKState->builders.find (CBData_.timestamp);
           // sanity check(s)
           if (iterator_3 == CBData_.GTKState->builders.end ())
           {
@@ -904,20 +1049,20 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
             break;
           } // end IF
 
-          GtkListStore* liststore_p =
+          GtkListStore* list_store_p =
             GTK_LIST_STORE (gtk_builder_get_object ((*iterator_3).second.second,
                                                     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LISTSTORE_USERS)));
-          ACE_ASSERT (liststore_p);
+          ACE_ASSERT (list_store_p);
 
           if (isFirstUsersMsg_)
           {
-            gtk_list_store_clear (liststore_p);
+            gtk_list_store_clear (list_store_p);
 
             isFirstUsersMsg_ = false;
           } // end IF
 
           // ignore own record
-          if (nick == CBData_.IRCSessionState.nickname)
+          if (nickname == CBData_.IRCSessionState.nickname)
           {
             // clean up
             gdk_threads_leave ();
@@ -926,36 +1071,38 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           } // end IF
 
           // step1: convert text
-          gchar* string_p = Common_UI_Tools::Locale2UTF8 (nick);
-          if (!string_p)
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to convert nickname: \"%s\", aborting\n"),
-                        ACE_TEXT (nick.c_str ())));
+          const gchar* string_p = nickname.c_str ();
+          //gchar* string_p = Common_UI_Tools::Locale2UTF8 (nick);
+          //if (!string_p)
+          //{
+          //  ACE_DEBUG ((LM_ERROR,
+          //              ACE_TEXT ("failed to convert nickname: \"%s\", aborting\n"),
+          //              ACE_TEXT (nick.c_str ())));
 
-            // clean up
-            gdk_threads_leave ();
+          //  // clean up
+          //  gdk_threads_leave ();
 
-            break;
-          } // end IF
-          gchar* string_2 = Common_UI_Tools::Locale2UTF8 (real_name);
-          if (!string_2)
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to convert name: \"%s\", aborting\n"),
-                        ACE_TEXT (real_name.c_str ())));
+          //  break;
+          //} // end IF
+          const gchar* string_2 = real_name.c_str ();
+          //gchar* string_2 = Common_UI_Tools::Locale2UTF8 (real_name);
+          //if (!string_2)
+          //{
+          //  ACE_DEBUG ((LM_ERROR,
+          //              ACE_TEXT ("failed to convert name: \"%s\", aborting\n"),
+          //              ACE_TEXT (real_name.c_str ())));
 
-            // clean up
-            g_free (string_p);
-            gdk_threads_leave ();
+          //  // clean up
+          //  g_free (string_p);
+          //  gdk_threads_leave ();
 
-            break;
-          } // end IF
+          //  break;
+          //} // end IF
 
           // step2: append new (text) entry
           GtkTreeIter tree_iter;
-          gtk_list_store_append (liststore_p, &tree_iter);
-          gtk_list_store_set (liststore_p, &tree_iter,
+          gtk_list_store_append (list_store_p, &tree_iter);
+          gtk_list_store_set (list_store_p, &tree_iter,
                               0, string_p, // column 0
                               1, away,
                               2, is_IRCoperator,
@@ -966,8 +1113,8 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
                               -1);
 
           // clean up
-          g_free (string_p);
-          g_free (string_2);
+          //g_free (string_p);
+          //g_free (string_2);
           gdk_threads_leave ();
 
           break;
@@ -976,34 +1123,35 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         {
           // bisect (WS-separated) nicknames from the final parameter string
 
+          // *NOTE*: UnrealIRCd 3.2.10.4 has trailing whitespace...
+          std::string& back =
+            const_cast<IRC_Client_IRCMessage&> (message_in).params.back ();
+
           //ACE_DEBUG ((LM_DEBUG,
           //            ACE_TEXT ("bisecting nicknames: \"%s\"...\n"),
-          //            ACE_TEXT (message_in.params.back ().c_str ())));
+          //            ACE_TEXT (back.c_str ())));
 
-          std::string::size_type current_position = 0;
-          std::string::size_type last_position = 0;
-          std::string nick;
+          // step1: trim trailing WS
+          size_t position = back.find_last_of (' ', std::string::npos);
+          if (position != std::string::npos)
+            back.erase (position, std::string::npos);
+
+          std::istringstream converter (back);
+          std::string nickname;
           string_list_t list;
           bool is_operator = false;
-          do
+          while (!converter.eof ())
           {
-            current_position =
-              message_in.params.back ().find (' ', last_position);
-            nick =
-              message_in.params.back ().substr (last_position,
-                                                (((current_position == std::string::npos) ? message_in.params.back ().size ()
-                                                                                          : current_position) - last_position));
+            converter >> nickname;
 
             // check whether user is a channel operator
-            if (nick.find (CBData_.IRCSessionState.nickname) != std::string::npos)
-              is_operator = ((nick[0] == '@') &&
-                             (nick.size () == (CBData_.IRCSessionState.nickname.size () + 1)));
+            if (nickname.find (CBData_.IRCSessionState.nickname) != std::string::npos)
+              is_operator = ((nickname[0] == '@') &&
+                             (nickname.size () == (CBData_.IRCSessionState.nickname.size () + 1)));
 
-            list.push_back (nick);
+            list.push_back (nickname);
 
-            // advance
-            last_position = current_position + 1;
-          } while (current_position != std::string::npos);
+          } // end WHILE
 
           // retrieve channel name
           IRC_Client_ParametersIterator_t param_iterator =
@@ -1024,6 +1172,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           (*handler_iterator).second->members (list);
 
+          // user is operator ? --> set channel mode accordingly
           if (is_operator)
           {
             // *NOTE*: ops always have a voice...
@@ -1431,15 +1580,12 @@ IRC_Client_GUI_Connection::end ()
   CBData_.GTKState->eventSourceIds.push_back (event_source_id);
 }
 
-IRC_Client_IIRCControl*
-IRC_Client_GUI_Connection::getController ()
+const IRC_Client_GTK_ConnectionCBData&
+IRC_Client_GUI_Connection::get () const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::getController"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::get"));
 
-  // sanity check(s)
-  ACE_ASSERT (CBData_.controller);
-
-  return CBData_.controller;
+  return CBData_;
 }
 
 IRC_Client_GUI_MessageHandler*
@@ -1457,25 +1603,6 @@ IRC_Client_GUI_Connection::getHandler (const std::string& id_in)
 }
 
 std::string
-IRC_Client_GUI_Connection::getNickname () const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::getNickname"));
-
-  // sanity check(s)
-  ACE_ASSERT (!CBData_.IRCSessionState.nickname.empty ());
-
-  return CBData_.IRCSessionState.nickname;
-}
-
-std::string
-IRC_Client_GUI_Connection::getLabel () const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::getLabel"));
-
-  return CBData_.label;
-}
-
-std::string
 IRC_Client_GUI_Connection::getActiveID ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::getActiveID"));
@@ -1489,7 +1616,7 @@ IRC_Client_GUI_Connection::getActiveID ()
   //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
-      CBData_.GTKState->builders.find (CBData_.label);
+      CBData_.GTKState->builders.find (CBData_.timestamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {
@@ -1559,7 +1686,7 @@ IRC_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in)
     CBData_.GTKState->lock.acquire ();
 
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.label);
+    CBData_.GTKState->builders.find (CBData_.timestamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {
@@ -1691,7 +1818,7 @@ IRC_Client_GUI_Connection::error (const IRC_Client_IRCMessage& message_in)
   if (iterator == CBData_.GTKState->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
+                ACE_TEXT ("connection (was: \"%s\") main builder not found, returning\n"),
                 ACE_TEXT (CBData_.label.c_str ())));
     return;
   } // end IF
@@ -1722,7 +1849,7 @@ IRC_Client_GUI_Connection::exists (const std::string& id_in)
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
-      CBData_.GTKState->builders.find (CBData_.label);
+      CBData_.GTKState->builders.find (CBData_.timestamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {
@@ -1751,9 +1878,9 @@ IRC_Client_GUI_Connection::exists (const std::string& id_in)
        page_num < num_pages;
        page_num++)
   {
-    // *NOTE*: channel id's are unique, but notebook page numbers
-    // change as channels are joined/parted and private conversations "come and
-    // go", (for lack of a better metaphor)...
+    // *NOTE*: channel ids are unique, but notebook page numbers may change as
+    //         channels/private conversations are joined/parted and/or tabs
+    //         are rearranged
     widget_p = gtk_notebook_get_nth_page (notebook_p,
                                           page_num);
     ACE_ASSERT (widget_p);
@@ -1787,11 +1914,12 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in)
 
   // sanity check(s)
   ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_.connections);
 
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.label);
+    CBData_.GTKState->builders.find (CBData_.timestamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {
@@ -1861,7 +1989,7 @@ IRC_Client_GUI_Connection::terminateMessageHandler (const std::string& id_in)
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
-      CBData_.GTKState->builders.find (CBData_.label);
+    CBData_.GTKState->builders.find (CBData_.timestamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {

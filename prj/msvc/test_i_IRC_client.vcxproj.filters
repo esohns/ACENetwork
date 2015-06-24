@@ -89,19 +89,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\test_i\servers.ini">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\..\test_i\IRC_client.ini">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\test_i\IRC_client_channel.glade">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\test_i\IRC_client_connection.glade">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\test_i\IRC_client_main.glade">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\test_i\FILE_Stream.inl">

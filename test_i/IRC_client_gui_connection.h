@@ -28,6 +28,8 @@
 
 #include "gtk/gtk.h"
 
+#include "common_iget.h"
+
 #include "stream_common.h"
 
 #include "IRC_client_gui_common.h"
@@ -45,6 +47,7 @@ class IRC_Client_GUI_MessageHandler;
 */
 class IRC_Client_GUI_Connection
  : public IRC_Client_INotify_t
+ , public Common_IGet_T<IRC_Client_GTK_ConnectionCBData>
 {
   friend class IRC_Client_GUI_MessageHandler;
 
@@ -52,13 +55,13 @@ class IRC_Client_GUI_Connection
   // *WARNING*: make sure the ctor/dtor calls are made either:
   // - by the main thread (servicing the gtk_main event loop)
   // - protected by gdk_threads_enter/gdk_threads_leave
-  IRC_Client_GUI_Connection (Common_UI_GTKState*,     // GTK state handle
-                             IRC_Client_IIRCControl*, // controller handle
-                             connections_t*,          // connections handle
+  IRC_Client_GUI_Connection (Common_UI_GTKState*,           // GTK state handle
+                             IRC_Client_IIRCControl*,       // controller handle
+                             IRC_Client_GUI_Connections_t*, // connections handle
                              //const std::string&,            // (starting) nickname
-                             const std::string&,      // (server tab) label
-                             const std::string&,      // UI (glade) file directory
-                             GtkNotebook*);           // parent widget
+                             const std::string&,            // (server tab) label
+                             const std::string&,            // UI (glade) file directory
+                             GtkNotebook*);                 // parent widget
   virtual~IRC_Client_GUI_Connection ();
 
   // implement IRC_Client_INotify_t
@@ -66,11 +69,12 @@ class IRC_Client_GUI_Connection
   virtual void notify (const IRC_Client_IRCMessage&);
   virtual void end ();
 
+  // implement Common_IGet_T
+  virtual const IRC_Client_GTK_ConnectionCBData& get () const;
+
   // *NOTE*: a return value of -1 indicates non-existence
   guint exists (const std::string&); // channel/nick
   void channels (string_list_t&); // return value: list of active channels
-  IRC_Client_IIRCControl* getController ();
-  std::string getNickname () const;
 
   // *WARNING*: callers may need protection from:
   //            - the thread(s) servicing the UI (GTK) event loop
@@ -79,8 +83,6 @@ class IRC_Client_GUI_Connection
   IRC_Client_GUI_MessageHandler* getActiveHandler (bool = true); // locked access ?
   void createMessageHandler (const std::string&); // channel/nick
   void terminateMessageHandler (const std::string&); // channel/nick
-
-  std::string getLabel () const;
 
   bool isInitialized_;
 

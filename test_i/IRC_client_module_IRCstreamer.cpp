@@ -47,6 +47,8 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCStreamer::handleDataMessage"));
 
+  int result = -1;
+
   // don't care (implies yes per default, if we're part of a stream)
   // *NOTE*: as this is an "upstream" module, the "wording" is wrong
   // --> the logic remains the same, though
@@ -71,19 +73,22 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
   //                   NUL or CR or LF>
 
   // prefix
-  if (!message_inout->getData ()->prefix.origin.empty ())
+  const IRC_Client_IRCMessage* data_p = message_inout->getData ();
+  ACE_ASSERT (data_p);
+  if (!data_p->prefix.origin.empty ())
   {
     // prefix the prefix
     *message_inout->wr_ptr () = ':';
     message_inout->wr_ptr (1);
 
-    if (message_inout->copy (message_inout->getData ()->prefix.origin.c_str (),
-                             message_inout->getData ()->prefix.origin.size ()) == -1)
+    result = message_inout->copy (data_p->prefix.origin.c_str (),
+                                  data_p->prefix.origin.size ());
+    if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
-                  message_inout->getData ()->prefix.origin.c_str (),
-                  message_inout->getData ()->prefix.origin.size ()));
+                  ACE_TEXT (data_p->prefix.origin.c_str ()),
+                  data_p->prefix.origin.size ()));
 
       // clean up
       passMessageDownstream_out = false;
@@ -94,7 +99,7 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
     } // end IF
 
     // append user
-    if (!message_inout->getData ()->prefix.user.empty ())
+    if (!data_p->prefix.user.empty ())
     {
       // sanity check
       if (message_inout->space () < 1)
@@ -116,13 +121,14 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
       *message_inout->wr_ptr () = '!';
       message_inout->wr_ptr (1);
 
-      if (message_inout->copy (message_inout->getData ()->prefix.user.c_str (),
-                               message_inout->getData ()->prefix.user.size ()) == -1)
+      result = message_inout->copy (data_p->prefix.user.c_str (),
+                                    data_p->prefix.user.size ());
+      if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
-                    ACE_TEXT (message_inout->getData ()->prefix.user.c_str ()),
-                    message_inout->getData ()->prefix.user.size ()));
+                    ACE_TEXT (data_p->prefix.user.c_str ()),
+                    data_p->prefix.user.size ()));
 
         // clean up
         passMessageDownstream_out = false;
@@ -134,7 +140,7 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
     } // end IF
 
     // append host
-    if (!message_inout->getData ()->prefix.host.empty ())
+    if (!data_p->prefix.host.empty ())
     {
       // sanity check
       if (message_inout->space () < 1)
@@ -156,8 +162,9 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
       *message_inout->wr_ptr () = '@';
       message_inout->wr_ptr (1);
 
-      if (message_inout->copy (message_inout->getData ()->prefix.host.c_str (),
-                               message_inout->getData ()->prefix.host.size ()) == -1)
+      result = message_inout->copy (data_p->prefix.host.c_str (),
+                                    data_p->prefix.host.size ());
+      if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
@@ -195,7 +202,7 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
   } // end IF
 
   // command
-  switch (message_inout->getData ()->command.discriminator)
+  switch (data_p->command.discriminator)
   {
     case IRC_Client_IRCMessage::Command::NUMERIC:
     {
@@ -216,10 +223,11 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
         return;
       } // end IF
       // convert number into the equivalent 3-letter string
-      if (ACE_OS::snprintf (message_inout->wr_ptr (),      // target
-                            4,                            // max length
-                            ACE_TEXT_ALWAYS_CHAR ("%.3u"), // format string
-                            message_inout->getData ()->command.numeric) != 3)
+      result = ACE_OS::snprintf (message_inout->wr_ptr (),      // target
+                                 4,                             // max length
+                                 ACE_TEXT_ALWAYS_CHAR ("%.3u"), // format string
+                                 data_p->command.numeric);
+      if (result != 3)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::snprintf: \"%m\", aborting\n")));
@@ -239,13 +247,14 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
     }
     case IRC_Client_IRCMessage::Command::STRING:
     {
-      if (message_inout->copy (message_inout->getData ()->command.string->c_str (),
-                               message_inout->getData ()->command.string->size ()) == -1)
+      result = message_inout->copy (data_p->command.string->c_str (),
+                                    data_p->command.string->size ());
+      if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
-                    ACE_TEXT (message_inout->getData ()->command.string->c_str ()),
-                    message_inout->getData ()->command.string->size ()));
+                    ACE_TEXT (data_p->command.string->c_str ()),
+                    data_p->command.string->size ()));
 
         // clean up
         passMessageDownstream_out = false;
@@ -260,9 +269,9 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("[%u]: invalid command type (was: %u), aborting\n"),
+                  ACE_TEXT ("[%u]: invalid command type (was: %d), aborting\n"),
                   message_inout->getID (),
-                  message_inout->getData ()->command.discriminator));
+                  data_p->command.discriminator));
 
       // clean up
       passMessageDownstream_out = false;
@@ -274,7 +283,7 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
   } // end SWITCH
 
   // parameter(s)
-  if (!message_inout->getData ()->params.empty ())
+  if (!data_p->params.empty ())
   {
     // sanity check
     if (message_inout->space () < 1)
@@ -297,23 +306,24 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
     message_inout->wr_ptr (1);
   } // end IF
   unsigned long forward_i = 0;
-  unsigned long reverse_i = message_inout->getData ()->params.size ();
+  unsigned long reverse_i = data_p->params.size ();
   char param_separator = ' ';
-  list_items_ranges_iterator_t range_iterator = message_inout->getData ()->list_param_ranges.begin ();
-  for (IRC_Client_ParametersIterator_t iterator = message_inout->getData ()->params.begin ();
-       iterator != message_inout->getData ()->params.end ();
+  list_items_ranges_iterator_t range_iterator =
+    data_p->list_param_ranges.begin ();
+  for (IRC_Client_ParametersIterator_t iterator = data_p->params.begin ();
+       iterator != data_p->params.end ();
        iterator++, forward_i++, reverse_i--)
   {
     // (re-)set to default
     param_separator = ' ';
 
     // advance range iterator ?
-    if ((range_iterator != message_inout->getData ()->list_param_ranges.end ()) &&
+    if ((range_iterator != data_p->list_param_ranges.end ()) &&
         (forward_i > (*range_iterator).second))
       range_iterator++;
 
     // param part of a list ?
-    if ((range_iterator != message_inout->getData ()->list_param_ranges.end ()) &&
+    if ((range_iterator != data_p->list_param_ranges.end ()) &&
         (forward_i >= (*range_iterator).first) &&
         (forward_i <= (*range_iterator).second))
       param_separator = ',';
@@ -352,8 +362,9 @@ IRC_Client_Module_IRCStreamer::handleDataMessage (IRC_Client_Message*& message_i
     } // end IF
 
     // append param string
-    if (message_inout->copy ((*iterator).c_str (),
-                             (*iterator).size ()) == -1)
+    result = message_inout->copy ((*iterator).c_str (),
+                                  (*iterator).size ());
+    if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),

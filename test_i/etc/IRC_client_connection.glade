@@ -14,8 +14,6 @@
     <property name="window_position">center</property>
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">normal</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="skip_pager_hint">True</property>
     <property name="deletable">False</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="vbox_dialog_page_connection_entry">
@@ -45,8 +43,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="related_action">action_cancel</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_cancel</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
               </object>
@@ -64,8 +62,8 @@
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
-                <property name="related_action">action_accept</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_accept</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
               </object>
@@ -612,7 +610,8 @@
             <child type="tab">
               <object class="GtkLabel" id="label_notebook_page_connection_channels">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">server log</property>
+                <property name="label" translatable="yes">&lt;i&gt;server log&lt;/i&gt;</property>
+                <property name="use_markup">True</property>
               </object>
               <packing>
                 <property name="tab_fill">False</property>

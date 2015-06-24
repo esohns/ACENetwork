@@ -21,18 +21,21 @@
 #ifndef IRC_CLIENT_GUI_DEFINES_H
 #define IRC_CLIENT_GUI_DEFINES_H
 
-// scripts
-#define IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY "scripts"
+//// scripts
+//#define IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY "scripts"
 
 // phonebook
-#define IRC_CLIENT_GUI_DEF_FILE_SERVERS "servers.ini"
+#define IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK "IRC_client_phonebook.ini"
 
-// UI definitions
+// UI glade/GTKBuilder definitions
 #define IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY  "etc"
 // files
 #define IRC_CLIENT_GUI_GTK_UI_CHANNEL_FILE    "IRC_client_channel.glade"
 #define IRC_CLIENT_GUI_GTK_UI_CONNECTION_FILE "IRC_client_connection.glade"
 #define IRC_CLIENT_GUI_GTK_UI_MAIN_FILE       "IRC_client_main.glade"
+
+// UI GTK .rc files
+#define IRC_CLIENT_GUI_GTK_UI_RC_FILE "IRC_client.rc"
 
 // widget names
 #define IRC_CLIENT_GUI_GTK_ACTION_AWAY                           "action_away"
@@ -54,10 +57,11 @@
 #define IRC_CLIENT_GUI_GTK_COMBOBOX_CHANNELS                     "combobox_page_connection_channels"
 #define IRC_CLIENT_GUI_GTK_COMBOBOX_SERVERS                      "combobox_servers"
 #define IRC_CLIENT_GUI_GTK_COMBOBOX_USERS                        "combobox_page_connection_users"
-#define IRC_CLIENT_GUI_GTK_DIALOG_ABOUT                          "dialog_about"
-#define IRC_CLIENT_GUI_GTK_DIALOG_ENTRY_CHANNEL                  "dialog_page_channel_entry"
-#define IRC_CLIENT_GUI_GTK_DIALOG_ENTRY_CONNECTION               "dialog_page_connection_entry"
-#define IRC_CLIENT_GUI_GTK_DIALOG_ENTRY_MAIN                     "dialog_entry_main"
+#define IRC_CLIENT_GUI_GTK_DIALOG_CHANNEL_ENTRY                  "dialog_page_channel_entry"
+#define IRC_CLIENT_GUI_GTK_DIALOG_CONNECTION_ENTRY               "dialog_page_connection_entry"
+#define IRC_CLIENT_GUI_GTK_DIALOG_MAIN_ABOUT                     "dialog_main_about"
+#define IRC_CLIENT_GUI_GTK_DIALOG_MAIN_ENTRY                     "dialog_main_entry"
+#define IRC_CLIENT_GUI_GTK_DIALOG_MAIN_MESSAGE                   "dialog_main_message"
 #define IRC_CLIENT_GUI_GTK_ENTRY_CHANNEL                         "entry_dialog_page_channel_entry"
 #define IRC_CLIENT_GUI_GTK_ENTRY_CONNECTION                      "entry_dialog_page_connection_entry"
 #define IRC_CLIENT_GUI_GTK_ENTRY_CONNECTION_CHANNEL              "entry_page_connection_channels"
@@ -133,6 +137,9 @@
 #define IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_MODE_USERLIMIT "set the channel user limit..."
 #define IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_NICK           "please provide a nickname..."
 #define IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_TOPIC          "set the channel topic..."
+
+// message dialog text
+#define IRC_CLIENT_GUI_MESSAGEDIALOG_TEXT_NICKNAMETAKEN  "the nickname you supplied is in use, please try again"
 
 //#define IRC_CLIENT_GUI_DEF_SERVER_LABEL_TEXT           "no server"
 //#define IRC_CLIENT_GUI_DEF_CHANNEL_LABEL_TEXT          "no channel"

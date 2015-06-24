@@ -82,9 +82,11 @@ IRC_Client_Module_IRCParser::initialize (Stream_IAllocator* allocator_in,
 
 void
 IRC_Client_Module_IRCParser::handleDataMessage (IRC_Client_Message*& message_inout,
-                                                      bool& passMessageDownstream_out)
+                                                bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCParser::handleDataMessage"));
+
+  int result = -1;
 
 // according to RFC1459:
 //  <message>  ::= [':' <prefix> <SPACE> ] <command> <params> <crlf>
@@ -118,13 +120,14 @@ IRC_Client_Module_IRCParser::handleDataMessage (IRC_Client_Message*& message_ino
     } // end IF
 
     // step2: copy available data
-    for (ACE_Message_Block* source = message_inout;
-         source;
-         source = source->cont ())
+    for (ACE_Message_Block* message_block_p = message_inout;
+         message_block_p;
+         message_block_p = message_block_p->cont ())
     {
-      ACE_ASSERT (source->length () <= message_p->space ());
-      if (message_p->copy (source->rd_ptr (),
-                           source->length ()))
+      ACE_ASSERT (message_block_p->length () <= message_p->space ());
+      result = message_p->copy (message_block_p->rd_ptr (),
+                                message_block_p->length ());
+      if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", returning\n")));

@@ -53,11 +53,12 @@ G_MODULE_EXPORT void button_send_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void button_quit_clicked_cb (GtkWidget*, GdkEvent*, gpointer);
 G_MODULE_EXPORT void entry_send_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gboolean entry_send_kb_focused_cb (GtkWidget*, GdkEventFocus*, gpointer);
+G_MODULE_EXPORT void switch_connection_cb (GtkWidget*, gpointer);
 
 // IRC_Client_GUI_Connection
 G_MODULE_EXPORT void button_disconnect_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gboolean nick_entry_kb_focused_cb (GtkWidget*, GdkEventFocus*, gpointer);
-G_MODULE_EXPORT void change_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT gboolean nickname_entry_kb_focused_cb (GtkWidget*, GdkEventFocus*, gpointer);
+G_MODULE_EXPORT void nickname_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void usersbox_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void refresh_users_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gboolean channel_entry_kb_focused_cb (GtkWidget*, GdkEventFocus*, gpointer);

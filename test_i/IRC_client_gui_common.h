@@ -36,24 +36,27 @@ struct IRC_Client_Configuration;
 class IRC_Client_IIRCControl;
 class IRC_Client_GUI_Connection;
 
-typedef std::map<std::string, IRC_Client_GUI_Connection*> connections_t;
-typedef connections_t::iterator connections_iterator_t;
+typedef std::map<std::string, IRC_Client_GUI_Connection*> IRC_Client_GUI_Connections_t;
+typedef IRC_Client_GUI_Connections_t::iterator IRC_Client_GUI_ConnectionsIterator_t;
+typedef IRC_Client_GUI_Connections_t::const_iterator IRC_Client_GUI_ConnectionsConstIterator_t;
 
 struct IRC_Client_GTK_CBData
 {
   inline IRC_Client_GTK_CBData ()
-    : configuration (NULL)
-    , connections ()
-    , GTKState ()
-    , phoneBook ()
-    , UIFileDirectory ()
+   : configuration (NULL)
+   , connections ()
+   , GTKState ()
+   , phoneBook ()
+   , UIFileDirectory ()
+   //, timestamp ()
   {};
 
-  IRC_Client_Configuration* configuration;
-  connections_t             connections;
-  Common_UI_GTKState        GTKState;
-  IRC_Client_PhoneBook      phoneBook;
-  std::string               UIFileDirectory;
+  IRC_Client_Configuration*    configuration;
+  IRC_Client_GUI_Connections_t connections;
+  Common_UI_GTKState           GTKState;
+  IRC_Client_PhoneBook         phoneBook;
+  //std::string                  timestamp;
+  std::string                  UIFileDirectory;
 };
 
 struct IRC_Client_GTK_ConnectionCBData
@@ -67,16 +70,18 @@ struct IRC_Client_GTK_ConnectionCBData
    , IRCSessionState ()
    , label ()
    , pending (false)
+   , timestamp ()
   {};
 
-  unsigned int               acknowledgements;
-  IRC_Client_GUI_Connection* connection;
-  connections_t*             connections;
-  IRC_Client_IIRCControl*    controller;
-  Common_UI_GTKState*        GTKState;
-  IRC_Client_SessionState    IRCSessionState;
-  std::string                label;
-  bool                       pending;
+  unsigned int                  acknowledgements;
+  IRC_Client_GUI_Connection*    connection;
+  IRC_Client_GUI_Connections_t* connections;
+  IRC_Client_IIRCControl*       controller;
+  Common_UI_GTKState*           GTKState;
+  IRC_Client_SessionState       IRCSessionState;
+  std::string                   label;
+  bool                          pending;
+  std::string                   timestamp;
 };
 
 struct IRC_Client_GTK_HandlerCBData

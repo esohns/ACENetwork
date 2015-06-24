@@ -141,6 +141,7 @@
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </ShowIncludes>
     </ClCompile>
+    <ClCompile Include="..\..\test_i\IRC_client_gui_tools.cpp" />
     <ClCompile Include="..\..\test_i\IRC_client_IRCbisect.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -246,19 +247,19 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\test_i\etc\IRC_client.ini" />
     <None Include="..\..\test_i\etc\IRC_client_channel.glade" />
     <None Include="..\..\test_i\etc\IRC_client_connection.glade" />
     <None Include="..\..\test_i\etc\IRC_client_main.glade" />
+    <None Include="..\..\test_i\etc\IRC_client_phonebook.ini" />
     <None Include="..\..\test_i\IRC_client_IRCsession.inl" />
     <None Include="..\..\test_i\scripts\IRCbisect.l" />
     <None Include="..\..\test_i\scripts\IRCclient.nsi" />
     <None Include="..\..\test_i\scripts\IRCparser.y" />
     <None Include="..\..\test_i\scripts\IRCscanner.l" />
-    <None Include="..\..\test_i\scripts\IRC_client.ini" />
     <None Include="..\..\test_i\scripts\make_installer.bat" />
     <None Include="..\..\test_i\scripts\parser.bat" />
     <None Include="..\..\test_i\scripts\scanner.bat" />
-    <None Include="..\..\test_i\scripts\servers.ini" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test_i\IRC_client_common.h" />
@@ -270,6 +271,7 @@
     <ClInclude Include="..\..\test_i\IRC_client_gui_connection.h" />
     <ClInclude Include="..\..\test_i\IRC_client_gui_defines.h" />
     <ClInclude Include="..\..\test_i\IRC_client_gui_messagehandler.h" />
+    <ClInclude Include="..\..\test_i\IRC_client_gui_tools.h" />
     <ClInclude Include="..\..\test_i\IRC_client_iIRCControl.h" />
     <ClInclude Include="..\..\test_i\IRC_client_IRCbisect.h" />
     <ClInclude Include="..\..\test_i\IRC_client_IRCmessage.h" />
@@ -293,6 +295,7 @@
     <ClInclude Include="..\..\test_i\IRC_client_tools.h" />
     <ClInclude Include="..\..\test_i\IRC_common.h" />
     <ClInclude Include="..\..\test_i\stdafx.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\libACEStream\prj\msvc\libACEStream.vcxproj">

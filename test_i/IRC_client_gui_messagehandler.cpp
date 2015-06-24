@@ -99,7 +99,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   CBData_.connection = connection_in;
   CBData_.id = id_in;
   CBData_.controller = controller_in;
-  CBData_.channelModes = 0;
+  //CBData_.channelModes = 0;
 
   // create new GtkBuilder
   GtkBuilder* builder_p = gtk_builder_new ();
@@ -475,7 +475,11 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
     gtk_notebook_set_current_page (parent_,
                                    page_num);
 
-  CBData_.builderLabel = connection_in->getLabel ();
+  // *TODO*: there must be a better way to do this
+  //         (see: IRC_client_gui_callbacks.cpp:2236, 2347, ...)
+  const IRC_Client_GTK_ConnectionCBData& connection_data_r =
+    connection_in->get ();
+  CBData_.builderLabel = connection_data_r.timestamp;
   CBData_.builderLabel += ACE_TEXT_ALWAYS_CHAR ("::");
   CBData_.builderLabel += page_tab_label_string;
   // synch access
@@ -824,16 +828,18 @@ IRC_Client_GUI_MessageHandler::updateNick (const std::string& oldNick_in)
   // sanity check(s)
   ACE_ASSERT (CBData_.connection);
 
-  std::string new_nick = CBData_.connection->getNickname ();
+  const IRC_Client_GTK_ConnectionCBData& connection_data_r =
+    CBData_.connection->get ();
+  std::string new_nickname = connection_data_r.IRCSessionState.nickname;
   if (CBData_.channelModes.test (CHANNELMODE_OPERATOR))
-    new_nick.insert (new_nick.begin (), '@');
+    new_nickname.insert (new_nickname.begin (), '@');
 
   remove (oldNick_in);
-  add (new_nick);
+  add (new_nickname);
 }
 
 void
-IRC_Client_GUI_MessageHandler::add (const std::string& nick_in)
+IRC_Client_GUI_MessageHandler::add (const std::string& nickname_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::add"));
 
@@ -855,28 +861,30 @@ IRC_Client_GUI_MessageHandler::add (const std::string& nick_in)
                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LISTSTORE_CHANNEL)));
   ACE_ASSERT (list_store_p);
 
-  // step1: convert text
-  GtkTreeIter iter;
-  gchar* converted_nick_string = Common_UI_Tools::Locale2UTF8 (nick_in);
-  if (!converted_nick_string)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to convert nickname: \"%s\", returning\n")));
+  //// step1: convert text
+  const gchar* string_p = nickname_in.c_str ();
+  //gchar* string_p = Common_UI_Tools::Locale2UTF8 (nickname_in);
+  //if (!string_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
+  //              ACE_TEXT (nickname_in.c_str ())));
 
-    // clean up
-    gdk_threads_leave ();
+  //  // clean up
+  //  gdk_threads_leave ();
 
-    return;
-  } // end IF
+  //  return;
+  //} // end IF
 
   // step2: append new (text) entry
-  gtk_list_store_append (list_store_p, &iter);
-  gtk_list_store_set (list_store_p, &iter,
-                      0, converted_nick_string, // column 0
+  GtkTreeIter tree_iter;
+  gtk_list_store_append (list_store_p, &tree_iter);
+  gtk_list_store_set (list_store_p, &tree_iter,
+                      0, string_p, // column 0
                       -1);
 
   // clean up
-  g_free (converted_nick_string);
+  //g_free (string_p);
   gdk_threads_leave ();
 }
 
@@ -1000,38 +1008,40 @@ IRC_Client_GUI_MessageHandler::members (const string_list_t& list_in)
   gdk_threads_enter ();
 
   // retrieve channel liststore handle
-  GtkListStore* liststore_p =
-      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LISTSTORE_CHANNEL)));
-  ACE_ASSERT (liststore_p);
+  GtkListStore* list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LISTSTORE_CHANNEL)));
+  ACE_ASSERT (list_store_p);
 
-  GtkTreeIter iter;
-  gchar* converted_nick_string = NULL;
+  GtkTreeIter tree_iter;
+  const gchar* string_p = NULL;
   for (string_list_const_iterator_t iterator = list_in.begin ();
        iterator != list_in.end ();
        iterator++)
   {
     // step1: convert text
-    converted_nick_string = Common_UI_Tools::Locale2UTF8 (*iterator);
-    if (!converted_nick_string)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to convert nickname: \"%s\", returning\n")));
+    string_p = (*iterator).c_str ();
+    //string_p = Common_UI_Tools::Locale2UTF8 (*iterator);
+    //if (!string_p)
+    //{
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
+    //              ACE_TEXT ((*iterator).c_str ())));
 
-      // clean up
-      gdk_threads_leave ();
+    //  // clean up
+    //  gdk_threads_leave ();
 
-      return;
-    } // end IF
+    //  return;
+    //} // end IF
 
     // step2: append new (text) entry
-    gtk_list_store_append (liststore_p, &iter);
-    gtk_list_store_set (liststore_p, &iter,
-                        0, converted_nick_string, // column 0
+    gtk_list_store_append (list_store_p, &tree_iter);
+    gtk_list_store_set (list_store_p, &tree_iter,
+                        0, string_p, // column 0
                         -1);
 
     // clean up
-    g_free (converted_nick_string);
+    //g_free (string_p);
   } // end FOR
 
   gdk_threads_leave ();
@@ -1057,11 +1067,11 @@ IRC_Client_GUI_MessageHandler::endMembers ()
   gdk_threads_enter ();
 
   // retrieve treeview handle
-  GtkTreeView* treeview_p =
+  GtkTreeView* tree_view_p =
       GTK_TREE_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TREEVIEW_CHANNEL)));
-  ACE_ASSERT (treeview_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (treeview_p), TRUE);
+  ACE_ASSERT (tree_view_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (tree_view_p), TRUE);
 
   gdk_threads_leave ();
 }

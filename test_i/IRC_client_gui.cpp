@@ -92,7 +92,7 @@ do_printUsage (const std::string& programName_in)
   std::cout << ACE_TEXT ("currently available options:") << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
+  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT (IRC_CLIENT_CNF_DEF_INI_FILE);
   std::cout << ACE_TEXT ("-c [FILE] : configuration file")
@@ -105,6 +105,16 @@ do_printUsage (const std::string& programName_in)
             << (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE)
             << ACE_TEXT ("]")
             << std::endl;
+  path = configuration_path;
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
+  std::cout << ACE_TEXT ("-g [FILE] : GTK rc file")
+            << ACE_TEXT (" [\"")
+            << path
+            << ACE_TEXT ("\"]")
+            << std::endl;
   std::cout << ACE_TEXT ("-h        : use thread-pool [")
             << NET_EVENT_USE_THREAD_POOL
             << ACE_TEXT ("]")
@@ -116,10 +126,10 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
+  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_SERVERS);
-  std::cout << ACE_TEXT ("-p [FILE] : servers configuration file")
+  path += ACE_TEXT (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
+  std::cout << ACE_TEXT ("-p [FILE] : phonebook file")
             << ACE_TEXT (" [\"")
             << path
             << ACE_TEXT ("\"]")
@@ -162,13 +172,14 @@ do_processArguments (int argc_in,
                      ACE_TCHAR* argv_in[], // cannot be const...
                      std::string& configurationFile_out,
                      bool& debug_out,
+                     std::string& UIRCFile_out,
                      bool& useThreadpool_out,
                      bool& logToFile_out,
                      std::string& phonebookFile_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
-                     std::string& UIFileDirectory_out,
+                     std::string& UIDefinitionFileDirectory_out,
                      bool& printVersionAndExit_out,
                      unsigned int& numThreadPoolThreads_out)
 {
@@ -189,13 +200,22 @@ do_processArguments (int argc_in,
   configurationFile_out          = configuration_path;
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
 
   debug_out                      =
     (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE);
+
+  UIRCFile_out                   = configuration_path;
+  UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UIRCFile_out                  +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UIRCFile_out                  +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
+
   useThreadpool_out              = NET_EVENT_USE_THREAD_POOL;
 
   logToFile_out                  = false;
@@ -203,10 +223,10 @@ do_processArguments (int argc_in,
   phonebookFile_out              = configuration_path;
   phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebookFile_out             +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebookFile_out             +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_SERVERS);
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
   useReactor_out                 = NET_EVENT_USE_REACTOR;
 
@@ -214,9 +234,9 @@ do_processArguments (int argc_in,
 
   traceInformation_out           = false;
 
-  UIFileDirectory_out            = configuration_path;
-  UIFileDirectory_out           += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIFileDirectory_out           +=
+  UIDefinitionFileDirectory_out  = configuration_path;
+  UIDefinitionFileDirectory_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UIDefinitionFileDirectory_out +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
 
   printVersionAndExit_out        = false;
@@ -224,7 +244,7 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("c:dhlp:rs:tu:vx:"),
+                              ACE_TEXT ("c:dg:hlp:rs:tu:vx:"),
                               1, // skip command name
                               1, // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -244,6 +264,11 @@ do_processArguments (int argc_in,
       case 'd':
       {
         debug_out = true;
+        break;
+      }
+      case 'g':
+      {
+        UIRCFile_out = argumentParser.opt_arg ();
         break;
       }
       case 'h':
@@ -281,7 +306,7 @@ do_processArguments (int argc_in,
       }
       case 'u':
       {
-        UIFileDirectory_out = argumentParser.opt_arg ();
+        UIDefinitionFileDirectory_out = argumentParser.opt_arg ();
         break;
       }
       case 'v':
@@ -1029,7 +1054,7 @@ do_parseConfigurationFile (const std::string& configFilename_in,
     if (val_name == ACE_TEXT_ALWAYS_CHAR ("password"))
       loginOptions_out.password = ACE_TEXT_ALWAYS_CHAR (val_string_value.c_str ());
     else if (val_name == ACE_TEXT_ALWAYS_CHAR ("nick"))
-      loginOptions_out.nick = ACE_TEXT_ALWAYS_CHAR (val_string_value.c_str ());
+      loginOptions_out.nickname = ACE_TEXT_ALWAYS_CHAR (val_string_value.c_str ());
     else if (val_name == ACE_TEXT_ALWAYS_CHAR ("user"))
       loginOptions_out.user.username = ACE_TEXT_ALWAYS_CHAR (val_string_value.c_str ());
     else if (val_name == ACE_TEXT_ALWAYS_CHAR ("realname"))
@@ -1220,50 +1245,60 @@ ACE_TMAIN (int argc_in,
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
 #endif // #ifdef DEBUG_DEBUGGER
 
-  std::string configuration_file       = configuration_path;
-  configuration_file                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_file                  +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
-  configuration_file                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_file                  +=
+  std::string configuration_file         = configuration_path;
+  configuration_file                    += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_file                    +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  configuration_file                    += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_file                    +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
 
-  bool debug                           =
+  bool debug                             =
     (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE);
-  bool use_thread_pool                 = NET_EVENT_USE_THREAD_POOL;
-  bool log_to_file                     = false;
 
-  std::string phonebook_file           = configuration_path;
-  phonebook_file                      += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  phonebook_file                      +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_SCRIPTS_DIRECTORY);
+  std::string UIRC_file                  = configuration_path;
+  UIRC_file                             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UIRC_file                             +=
+    ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  UIRC_file                             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UIRC_file                             +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
+
+  bool use_thread_pool                   = NET_EVENT_USE_THREAD_POOL;
+  bool log_to_file                       = false;
+
+  std::string phonebook_file             = configuration_path;
+  phonebook_file                        += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  phonebook_file                        +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   phonebook_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  phonebook_file += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_SERVERS);
+  phonebook_file += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
-  bool use_reactor                     = NET_EVENT_USE_REACTOR;
+  bool use_reactor                       = NET_EVENT_USE_REACTOR;
 
-  unsigned int reporting_interval      = IRC_CLIENT_DEF_STATSINTERVAL;
+  unsigned int reporting_interval        = IRC_CLIENT_DEF_STATSINTERVAL;
 
-  bool trace_information               = false;
+  bool trace_information                 = false;
 
-  std::string UIFile_directory         = configuration_path;
-  UIFile_directory                    += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIFile_directory                    +=
+  std::string UIDefinitionFile_directory = configuration_path;
+  UIDefinitionFile_directory            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UIDefinitionFile_directory            +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
 
-  bool print_version_and_exit          = false;
-  unsigned int num_thread_pool_threads = IRC_CLIENT_DEF_NUM_TP_THREADS;
+  bool print_version_and_exit            = false;
+  unsigned int num_thread_pool_threads   = IRC_CLIENT_DEF_NUM_TP_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
                             configuration_file,
                             debug,
+                            UIRC_file,
                             use_thread_pool,
                             log_to_file,
                             phonebook_file,
                             use_reactor,
                             reporting_interval,
                             trace_information,
-                            UIFile_directory,
+                            UIDefinitionFile_directory,
                             print_version_and_exit,
                             num_thread_pool_threads))
   {
@@ -1282,9 +1317,10 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // assemble FQ filename (Glade-UI XML)
-  std::string ui_definition_filename = UIFile_directory;
+  std::string ui_definition_filename = UIDefinitionFile_directory;
   ui_definition_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  ui_definition_filename += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_MAIN_FILE);
+  ui_definition_filename +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_MAIN_FILE);
 
   // step2b: validate argument(s)
   if (!Common_File_Tools::isReadable (configuration_file)    ||
@@ -1418,10 +1454,10 @@ ACE_TMAIN (int argc_in,
 
   IRC_Client_GTK_CBData user_data;
   user_data.configuration = &configuration;
-  user_data.UIFileDirectory = UIFile_directory;
+  user_data.UIFileDirectory = UIDefinitionFile_directory;
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
-  user_data.configuration->protocolConfiguration.loginOptions.nick =
+  user_data.configuration->protocolConfiguration.loginOptions.nickname =
       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_NICK);
 //   userData.loginOptions.user.username = ;
   std::string hostname;
@@ -1466,6 +1502,8 @@ ACE_TMAIN (int argc_in,
   // populate user/realname
   Common_Tools::getCurrentUserName (configuration.protocolConfiguration.loginOptions.user.username,
                                     configuration.protocolConfiguration.loginOptions.user.realname);
+
+  user_data.GTKState.RCFiles.push_back (UIRC_file);
 
   // step7: parse configuration file(s) (if any)
   if (!phonebook_file.empty ())

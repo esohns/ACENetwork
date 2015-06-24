@@ -743,7 +743,7 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
     return false;
   } // end IF
 
-  message_p->params.push_back (loginOptions_in.nick);
+  message_p->params.push_back (loginOptions_in.nickname);
 
   // step4b: send it upstream
   sendMessage (message_p);

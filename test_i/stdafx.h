@@ -22,6 +22,7 @@
 #include "ace/streams.h"
 //#include "ace/Log_Msg.h"
 //#include "ace/OS.h"
+#include "ace/Synch.h"
 
 // Local Header Files
 #include "net_macros.h"
