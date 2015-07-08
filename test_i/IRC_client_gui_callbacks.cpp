@@ -46,6 +46,325 @@
 extern "C"
 {
 #endif /* __cplusplus */
+ACE_THR_FUNC_RETURN
+connection_setup_function (void* arg_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::connection_setup_function"));
+
+  ACE_THR_FUNC_RETURN result;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = -1;
+#else
+  result = arg_in;
+#endif
+
+  IRC_Client_ConnectionThreadData* data_p =
+    static_cast<IRC_Client_ConnectionThreadData*> (arg_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->CBData);
+  ACE_ASSERT (data_p->configuration);
+
+  guint context_id = 0;
+  GtkProgressBar* progress_bar_p = NULL;
+  GtkStatusbar* statusbar_p = NULL;
+  gchar* string_p = NULL;
+  {
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+
+    // step1: create new connection handler
+    Common_UI_GTKBuildersIterator_t iterator =
+      data_p->CBData->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    // sanity check(s)
+    ACE_ASSERT (iterator != data_p->CBData->GTKState.builders.end ());
+
+    // retrieve progress bar handle
+    gdk_threads_enter ();
+    progress_bar_p =
+      GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_PROGRESSBAR)));
+    ACE_ASSERT (progress_bar_p);
+
+    // generate context ID
+    statusbar_p =
+      GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_STATUSBAR)));
+    ACE_ASSERT (statusbar_p);
+    //string_p =
+    //  Common_UI_Tools::Locale2UTF8 ((*data_p->phonebookIterator).second.hostName);
+    //if (!string_p)
+    //{
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
+    //              ACE_TEXT ((*data_p->phonebookIterator).second.hostName.c_str ())));
+
+    //  // clean up
+    //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    //  data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
+    //  delete data_p;
+
+    //  return result;
+    //} // end IF
+    context_id =
+      gtk_statusbar_get_context_id (statusbar_p,
+                                    (*data_p->phonebookIterator).second.hostName.c_str ());
+                                    //string_p);
+    gdk_threads_leave ();
+    //g_free (string_p);
+  } // end lock scope
+
+  // *NOTE*: this schedules addition of a new server page
+  //         --> make sure to remove it again, if things go wrong
+  IRC_Client_GUI_Connection* connection_p = NULL;
+  gdk_threads_enter ();
+  ACE_NEW_NORETURN (connection_p,
+                    IRC_Client_GUI_Connection (&data_p->CBData->GTKState,
+                                               &data_p->CBData->connections,
+                                               context_id,
+                                               (*data_p->phonebookIterator).second.hostName,
+                                               data_p->CBData->UIFileDirectory));
+  if (!connection_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+
+    // clean up
+    gdk_threads_leave ();
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
+    delete data_p;
+
+    return result;
+  } // end IF
+  gdk_threads_leave ();
+  data_p->configuration->streamConfiguration.streamModuleConfiguration.subscriber =
+    connection_p;
+
+  // step2: connect to the server
+  std::stringstream converter;
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  for (IRC_Client_PortRangesIterator_t port_range_iter = (*data_p->phonebookIterator).second.listeningPorts.begin ();
+       port_range_iter != (*data_p->phonebookIterator).second.listeningPorts.end ();
+       port_range_iter++)
+  {
+    // *TODO*: update progress bar units
+
+    // port range ?
+    if ((*port_range_iter).first < (*port_range_iter).second)
+    {
+      for (unsigned short current_port = (*port_range_iter).first;
+           current_port <= (*port_range_iter).second;
+           current_port++)
+      {
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << ACE_TEXT_ALWAYS_CHAR ("trying port ");
+        converter << current_port;
+        converter << ACE_TEXT_ALWAYS_CHAR ("...");
+        string_p = Common_UI_Tools::Locale2UTF8 (converter.str ());
+        if (!string_p)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
+                      ACE_TEXT (converter.str ().c_str ())));
+
+          // clean up
+          ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+          data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
+          goto remove_page;
+        } // end IF
+        gdk_threads_enter ();
+        gtk_progress_bar_set_text (progress_bar_p,
+                                   string_p);
+        gdk_threads_leave ();
+        g_free (string_p);
+
+        handle =
+          IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
+                                     data_p->loginOptions,                                                                      // login options
+                                     data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
+                                     data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
+                                     data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
+                                     (*data_p->phonebookIterator).second.hostName,                                              // server hostname
+                                     current_port,                                                                              // server listening port
+                                     data_p->configuration->streamConfiguration.streamConfiguration.cloneModule,                // clone final module ?
+                                     data_p->configuration->streamConfiguration.streamConfiguration.deleteModule,               // delete final module ?
+                                     data_p->configuration->streamConfiguration.streamConfiguration.module,                     // final module handle
+                                     &data_p->configuration->streamConfiguration.streamModuleConfiguration);                    // module configuration
+
+        if (handle != ACE_INVALID_HANDLE)
+          break;
+      } // end FOR
+    } // end IF
+    else
+      handle =
+        IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
+                                   data_p->loginOptions,                                                                      // login options
+                                   data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
+                                   data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
+                                   data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
+                                   (*data_p->phonebookIterator).second.hostName,                                              // server hostname
+                                   (*port_range_iter).first,                                                                  // server listening port
+                                   data_p->configuration->streamConfiguration.streamConfiguration.cloneModule,                // clone final module ?
+                                   data_p->configuration->streamConfiguration.streamConfiguration.deleteModule,               // delete final module ?
+                                   data_p->configuration->streamConfiguration.streamConfiguration.module,                     // final module handle
+                                   &data_p->configuration->streamConfiguration.streamModuleConfiguration);                    // module configuration
+    if (handle != ACE_INVALID_HANDLE)
+      break;
+
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to connect to server \"%s\", retrying\n"),
+                ACE_TEXT ((*data_p->phonebookIterator).second.hostName.c_str ())));
+  } // end FOR
+  if (handle == ACE_INVALID_HANDLE)
+  {
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter << ACE_TEXT_ALWAYS_CHAR ("failed to connect to server \"");
+    converter << (*data_p->phonebookIterator).second.hostName;
+    converter << ACE_TEXT_ALWAYS_CHAR ("\"");
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s, returning\n"),
+                ACE_TEXT (converter.str ().c_str ())));
+
+    // clean up
+    string_p = Common_UI_Tools::Locale2UTF8 (converter.str ());
+    if (!string_p)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", continuing\n"),
+                  ACE_TEXT (converter.str ().c_str ())));
+    gdk_threads_enter ();
+    gtk_statusbar_push (statusbar_p,
+                        data_p->CBData->contextID,
+                        string_p);
+    gdk_threads_leave ();
+    g_free (string_p);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
+    goto remove_page;
+  } // end IF
+
+  IRC_Client_Connection_Manager_t::CONNECTION_T* connection_2 =
+    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->get (handle);
+  if (!connection_2)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_Connection_Manager_t::get(%u), returning\n"),
+                handle));
+
+    // clean up
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
+    goto remove_page;
+  } // end IF
+  const IRC_Client_Stream& stream = connection_2->stream ();
+  const Stream_Module_t* module_p = NULL;
+  const Stream_Module_t* current_p = NULL;
+  for (Stream_Iterator_t iterator_2 (stream);
+       iterator_2.next (current_p) != 0;
+       iterator_2.advance ())
+    if (current_p != const_cast<IRC_Client_Stream&> (stream).tail ())
+      module_p = current_p;
+  ACE_ASSERT (module_p);
+  IRC_Client_IIRCControl* IRCControl_p =
+    dynamic_cast<IRC_Client_IIRCControl*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  if (!IRCControl_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("dynamic_cast<IRC_Client_IIRCControl> failed, returning\n")));
+
+    // clean up
+    connection_2->close ();
+    connection_2->decrease ();
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
+    goto remove_page;
+  } // end IF
+
+  // step3: initialize new connection handler
+  connection_p->initialize (IRCControl_p);
+
+  //   ACE_DEBUG((LM_DEBUG,
+  //              ACE_TEXT("registering...\n")));
+
+  // step4: register connection with the server
+  bool result_2 = false;
+  try
+  {
+    // *NOTE*: this entails a little delay (waiting for the welcome notice...)
+    result_2 =
+      IRCControl_p->registerConnection (data_p->loginOptions);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in IRC_Client_IIRCControl::registerConnection(), continuing\n")));
+  }
+  if (!result_2)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_IIRCControl::registerConnection(), returning\n")));
+
+    // clean up
+    connection_2->close ();
+    connection_2->decrease ();
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
+    goto remove_page;
+  } // end IF
+  //   ACE_DEBUG((LM_DEBUG,
+  //              ACE_TEXT("registering...DONE\n")));
+
+  connection_2->decrease ();
+
+  // synch access
+  {
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+
+    // step5a: remember this connection
+    const IRC_Client_GTK_ConnectionCBData& connection_data_r =
+      connection_p->get ();
+    // *TODO*: who deletes the module ? (the stream won't do it !)
+    data_p->CBData->connections.insert (std::make_pair (connection_data_r.timestamp, connection_p));
+
+    // step5b: stop progress updates
+    data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
+  } // end lock scope
+
+  // clean up
+  delete data_p;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = 0;
+#else
+  result = NULL;
+#endif
+  return result;
+
+remove_page:
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+
+    const IRC_Client_GTK_ConnectionCBData& connection_cb_data_r =
+      connection_p->get ();
+    guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+                                             idle_remove_connection_cb,
+                                             &const_cast<IRC_Client_GTK_ConnectionCBData&> (connection_cb_data_r),
+                                             NULL);
+    if (!event_source_id)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add_full(idle_remove_connection_cb): \"%m\", continuing\n")));
+    else
+      data_p->CBData->GTKState.eventSourceIds.insert (event_source_id);
+  } // end lock scope
+
+  // clean up
+  delete data_p;
+
+  return result;
+}
+
 void
 is_entry_sensitive (GtkCellLayout*   layout_in,
                     GtkCellRenderer* renderer_in,
@@ -63,6 +382,124 @@ is_entry_sensitive (GtkCellLayout*   layout_in,
 }
 
 /////////////////////////////////////////
+
+gboolean
+idle_add_connection_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_add_connection_cb"));
+
+  IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->GTKState);
+
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+
+  Common_UI_GTKBuildersIterator_t iterator =
+    data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != data_p->GTKState->builders.end ());
+
+  Common_UI_GTKBuildersIterator_t iterator_2 =
+    data_p->GTKState->builders.find (data_p->timestamp);
+  // sanity check(s)
+  if (iterator_2 == data_p->GTKState->builders.end ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("connection (was: \"%s\") builder not found, aborting\n"),
+                ACE_TEXT (data_p->label.c_str ())));
+    return FALSE; // G_SOURCE_REMOVE
+  } // end IF
+
+  // add the new server page to the (parent) notebook
+  // retrieve (dummy) parent window
+  GtkWindow* window_p =
+    GTK_WINDOW (gtk_builder_get_object ((*iterator_2).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_WINDOW_TAB_CONNECTION)));
+  ACE_ASSERT (window_p);
+  // retrieve server tab label
+  GtkHBox* hbox_p =
+    GTK_HBOX (gtk_builder_get_object ((*iterator_2).second.second,
+                                      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_HBOX_CONNECTION_TAB)));
+  ACE_ASSERT (hbox_p);
+  g_object_ref (hbox_p);
+  gtk_container_remove (GTK_CONTAINER (window_p),
+                        GTK_WIDGET (hbox_p));
+  // set tab label
+  GtkLabel* label_p =
+    GTK_LABEL (gtk_builder_get_object ((*iterator_2).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LABEL_CONNECTION_TAB)));
+  ACE_ASSERT (label_p);
+  gchar* string_p = Common_UI_Tools::Locale2UTF8 (data_p->label);
+  if (!string_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (data_p->label.c_str ())));
+
+    // clean up
+    g_object_unref (hbox_p);
+
+    return FALSE; // G_SOURCE_REMOVE
+  } // end IF
+  gtk_label_set_text (label_p, string_p);
+  g_free (string_p);
+  // disable close button (until connection is fully established)
+  GtkButton* button_p =
+    GTK_BUTTON (gtk_builder_get_object ((*iterator_2).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_BUTTON_DISCONNECT)));
+  ACE_ASSERT (button_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (button_p), FALSE);
+
+  // retrieve (dummy) parent window
+  window_p =
+    GTK_WINDOW (gtk_builder_get_object ((*iterator_2).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_WINDOW_CONNECTION)));
+  ACE_ASSERT (window_p);
+  // retrieve server tab
+  GtkVBox* vbox_p =
+    GTK_VBOX (gtk_builder_get_object ((*iterator_2).second.second,
+                                      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_VBOX_CONNECTION)));
+  ACE_ASSERT (vbox_p);
+  g_object_ref (vbox_p);
+  gtk_container_remove (GTK_CONTAINER (window_p),
+                        GTK_WIDGET (vbox_p));
+
+  GtkNotebook* notebook_p =
+    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
+  ACE_ASSERT (notebook_p);
+  gint page_number = gtk_notebook_append_page (notebook_p,
+                                               GTK_WIDGET (vbox_p),
+                                               GTK_WIDGET (hbox_p));
+  if (page_number == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to gtk_notebook_append_page(%@), aborting\n"),
+                notebook_p));
+
+    // clean up
+    g_object_unref (hbox_p);
+    g_object_unref (vbox_p);
+
+    return FALSE; // G_SOURCE_REMOVE
+  } // end IF
+  g_object_unref (hbox_p);
+
+  // allow reordering
+  gtk_notebook_set_tab_reorderable (notebook_p,
+                                    GTK_WIDGET (vbox_p),
+                                    TRUE);
+  g_object_unref (vbox_p);
+
+  // activate new page
+  gtk_notebook_set_current_page (notebook_p,
+                                 page_number);
+
+  return FALSE; // G_SOURCE_REMOVE
+}
 
 gboolean
 idle_finalize_UI_cb (gpointer userData_in)
@@ -245,6 +682,14 @@ idle_initialize_UI_cb (gpointer userData_in)
                              window_p);
   ACE_ASSERT (result);
 
+  GtkStatusbar* statusbar_p = 
+    GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_STATUSBAR)));
+  ACE_ASSERT (statusbar_p);
+  data_p->contextID =
+    gtk_statusbar_get_context_id (statusbar_p,
+                                  ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_STATUSBAR_CONTEXT_DESCRIPTION));
+
   //// use correct screen
   //if (parentWidget_in)
   //  gtk_window_set_screen (window,
@@ -265,15 +710,17 @@ idle_initialize_UI_cb (gpointer userData_in)
   //              ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
   //  return FALSE; // G_SOURCE_REMOVE
   //} // end IF
-  event_source_id = g_idle_add (idle_update_display_cb,
-                                userData_in);
+  event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE,
+                                     idle_update_display_cb,
+                                     userData_in,
+                                     NULL);
   if (!event_source_id)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_update_display_cb): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to g_idle_add_full(idle_update_display_cb): \"%m\", aborting\n")));
     return FALSE; // G_SOURCE_REMOVE
   } // end IF
-  data_p->GTKState.eventSourceIds.push_back (event_source_id);
+  data_p->GTKState.eventSourceIds.insert (event_source_id);
 
   return FALSE; // G_SOURCE_REMOVE
 }
@@ -295,14 +742,42 @@ idle_remove_connection_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->GTKState->builders.end ());
 
-  GtkWindow* window_p =
-    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_WINDOW_MAIN)));
-  ACE_ASSERT (window_p);
+  Common_UI_GTKBuildersIterator_t iterator_2 =
+    data_p->GTKState->builders.find (data_p->timestamp);
+  // sanity check(s)
+  if (iterator_2 == data_p->GTKState->builders.end ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("connection (was: \"%s\") builder not found, aborting\n"),
+                ACE_TEXT (data_p->label.c_str ())));
+    return FALSE; // G_SOURCE_REMOVE
+  } // end IF
+
+  // remove server page from parent notebook
+  GtkNotebook* notebook_p =
+    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
+  ACE_ASSERT (notebook_p);
+  GtkVBox* vbox_p =
+    GTK_VBOX (gtk_builder_get_object ((*iterator_2).second.second,
+                                      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_VBOX_CONNECTION)));
+  ACE_ASSERT (vbox_p);
+  guint page_number = gtk_notebook_page_num (notebook_p,
+                                             GTK_WIDGET (vbox_p));
+  // flip away from "this" page ?
+  if (gtk_notebook_get_current_page (notebook_p) ==
+      static_cast<gint> (page_number))
+    gtk_notebook_prev_page (notebook_p);
+  gtk_notebook_remove_page (notebook_p,
+                            page_number);
 
   delete data_p->connection;
 
   // if necessary, shrink main window
+  GtkWindow* window_p =
+    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_WINDOW_MAIN)));
+  ACE_ASSERT (window_p);
   gtk_window_resize (window_p, 1, 1);
 
   return FALSE; // G_SOURCE_REMOVE
@@ -426,12 +901,8 @@ idle_update_display_cb (gpointer userData_in)
   // step0: retrieve active connection
   IRC_Client_GUI_Connection* connection_p =
     IRC_Client_UI_Tools::current (*data_p);
-  if (!connection_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_GUI_Tools::current(), aborting\n")));
-    return FALSE; // G_SOURCE_REMOVE
-  } // end IF
+  if (!connection_p) // *NOTE*: most probable cause: no server page/corresponding connection (yet)
+    return TRUE; // G_SOURCE_CONTINUE
 
   // step1: retrieve active channel
   //ACE_ASSERT ((*connections_iterator).second);
@@ -455,6 +926,90 @@ idle_update_display_cb (gpointer userData_in)
                 ACE_TEXT ("caught exception in IRC_Client_GUI_MessageHandler::update(), aborting\n")));
     return FALSE; // G_SOURCE_REMOVE
   }
+
+  // --> reschedule
+  return TRUE; // G_SOURCE_CONTINUE
+}
+
+gboolean
+idle_update_progress_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_cb"));
+
+  IRC_Client_GTK_ProgressData* data_p =
+    static_cast<IRC_Client_GTK_ProgressData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->GTKState);
+
+  int result = -1;
+  Common_UI_GTKBuildersIterator_t iterator =
+    data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != data_p->GTKState->builders.end ());
+
+  GtkProgressBar* progress_bar_p =
+    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_PROGRESSBAR)));
+  ACE_ASSERT (progress_bar_p);
+
+  if (data_p->pendingActions.empty ())
+  {
+    //if (data_p->cursorType != GDK_LAST_CURSOR)
+    //{
+    //  GdkCursor* cursor_p = gdk_cursor_new (data_p->cursorType);
+    //  if (!cursor_p)
+    //  {
+    //    ACE_DEBUG ((LM_ERROR,
+    //                ACE_TEXT ("failed to gdk_cursor_new(%d): \"%m\", continuing\n"),
+    //                data_p->cursorType));
+    //    return FALSE; // G_SOURCE_REMOVE
+    //  } // end IF
+    //  GtkWindow* window_p =
+    //    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+    //                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_WINDOW_MAIN)));
+    //  ACE_ASSERT (window_p);
+    //  GdkWindow* window_2 = gtk_widget_get_window (GTK_WIDGET (window_p));
+    //  ACE_ASSERT (window_2);
+    //  gdk_window_set_cursor (window_2, cursor_p);
+    //  data_p->cursorType = GDK_LAST_CURSOR;
+    //} // end IF
+    gtk_widget_hide (GTK_WIDGET (progress_bar_p));
+    return FALSE; // G_SOURCE_REMOVE
+  } // end IF
+
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+
+    ACE_THR_FUNC_RETURN exit_status;
+    ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
+    ACE_ASSERT (thread_manager_p);
+    for (IRC_Client_GUI_CompletedActionsIterator_t iterator = data_p->completedActions.begin ();
+          iterator != data_p->completedActions.end ();
+          ++iterator)
+    {
+      result = thread_manager_p->join (*iterator, &exit_status);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Thread_Manager::join(%d): \"%m\", continuing\n"),
+                    *iterator));
+      else if (exit_status)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("thread %d has joined (status was: %d)...\n"),
+                    *iterator,
+                    exit_status));
+
+      IRC_Client_GUI_PendingActionsIterator_t iterator_2 =
+        data_p->pendingActions.find (*iterator);
+      ACE_ASSERT (iterator_2 != data_p->pendingActions.end ());
+      data_p->GTKState->eventSourceIds.erase ((*iterator_2).second);
+      data_p->pendingActions.erase (iterator_2);
+    } // end FOR
+    data_p->completedActions.clear ();
+  } // end lock scope
+
+  gtk_progress_bar_pulse (progress_bar_p);
 
   // --> reschedule
   return TRUE; // G_SOURCE_CONTINUE
@@ -579,6 +1134,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
+  int result = -1;
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
@@ -586,26 +1142,26 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 
   // step1: retrieve active phonebook entry
   // retrieve serverlist handle
-  GtkComboBox* combobox_p =
+  GtkComboBox* combo_box_p =
     GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_COMBOBOX_SERVERS)));
-  ACE_ASSERT (combobox_p);
+  ACE_ASSERT (combo_box_p);
   GtkTreeIter tree_iter;
   //   GValue active_value;
   gchar* value_p = NULL;
   std::string server_name_string;
-  if (!gtk_combo_box_get_active_iter (combobox_p,
+  if (!gtk_combo_box_get_active_iter (combo_box_p,
                                       &tree_iter))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to gtk_combo_box_get_active_iter(%@), returning\n"),
-                combobox_p));
+                combo_box_p));
     return;
   } // end IF
   //   gtk_tree_model_get_value(gtk_combo_box_get_model(serverlist),
   //                            &active_iter,
   //                            0, &active_value);
-  gtk_tree_model_get (gtk_combo_box_get_model (combobox_p),
+  gtk_tree_model_get (gtk_combo_box_get_model (combo_box_p),
                       &tree_iter,
                       0, &value_p,
                       -1);
@@ -729,175 +1285,138 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   gtk_entry_buffer_delete_text (gtk_entry_get_buffer (entry_p),
                                 0, -1);
 
-  // step4: connect to the server
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  for (IRC_Client_PortRangesIterator_t port_range_iter = (*phonebook_iterator).second.listeningPorts.begin ();
-       port_range_iter != (*phonebook_iterator).second.listeningPorts.end ();
-       port_range_iter++)
+  // start connection thread
+  IRC_Client_ConnectionThreadData* connection_thread_data_p = NULL;
+  ACE_NEW_NORETURN (connection_thread_data_p,
+                    IRC_Client_ConnectionThreadData ());
+  if (!connection_thread_data_p)
   {
-    // port range ?
-    if ((*port_range_iter).first < (*port_range_iter).second)
-    {
-      for (unsigned short current_port = (*port_range_iter).first;
-           current_port <= (*port_range_iter).second;
-           current_port++)
-      {
-        handle =
-          IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
-                                     login_options,                                                                             // login options
-                                     data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
-                                     data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
-                                     data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
-                                     (*phonebook_iterator).second.hostName,                                                     // server hostname
-                                     current_port,                                                                              // server listening port
-                                     data_p->configuration->streamConfiguration.streamConfiguration.deleteModule,               // delete final module ?
-                                     data_p->configuration->streamConfiguration.streamConfiguration.module,                     // final module handle
-                                     &data_p->configuration->streamConfiguration.streamModuleConfiguration);                    // module configuration
-
-        if (handle != ACE_INVALID_HANDLE)
-          break;
-      } // end FOR
-    } // end IF
-    else
-      handle =
-        IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
-                                   login_options,                                                                             // login options
-                                   data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
-                                   data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
-                                   data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
-                                   (*phonebook_iterator).second.hostName,                                                     // server hostname
-                                   (*port_range_iter).first,                                                                  // server listening port
-                                   data_p->configuration->streamConfiguration.streamConfiguration.deleteModule,               // delete final module ?
-                                   data_p->configuration->streamConfiguration.streamConfiguration.module,                     // final module handle
-                                   &data_p->configuration->streamConfiguration.streamModuleConfiguration);                    // module configuration
-    if (handle != ACE_INVALID_HANDLE)
-      break;
-
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to connect to server(\"%s\"), retrying\n"),
-                ACE_TEXT ((*phonebook_iterator).second.hostName.c_str ())));
-  } // end FOR
-  if (handle == ACE_INVALID_HANDLE)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to server(\"%s\"), returning\n"),
-                ACE_TEXT ((*phonebook_iterator).second.hostName.c_str ())));
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
     return;
   } // end IF
-
-  IRC_Client_Connection_Manager_t::CONNECTION_T* connection_p =
-      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->get (handle);
-  if (!connection_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Connection_Manager_t::get(%u), returning\n"),
-                handle));
-    return;
-  } // end IF
-  const IRC_Client_Stream& stream = connection_p->stream ();
-  Stream_Iterator_t iterator_2 (stream);
-  const Stream_Module_t* module_p = NULL;
-  for (const Stream_Module_t* current_p = NULL;
-       iterator_2.next (current_p) != 0;
-       iterator_2.advance ())
-    if (current_p != const_cast<IRC_Client_Stream&> (stream).tail ())
-      module_p = current_p;
-  ACE_ASSERT (module_p);
-  IRC_Client_IIRCControl* IRCControl_p =
-      dynamic_cast<IRC_Client_IIRCControl*> (const_cast<Stream_Module_t*> (module_p)->writer ());
-  if (!IRCControl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_Client_IIRCControl> failed, returning\n")));
-
-    // clean up
-    connection_p->close ();
-    connection_p->decrease ();
-
-    return;
-  } // end IF
-
-  // step4: create/initialize new connection handler
-
-  // retrieve server tabs handle
-  GtkNotebook* notebook_p =
-    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
-  ACE_ASSERT (notebook_p);
-
-  IRC_Client_GUI_Connection* connection_2 = NULL;
-  ACE_NEW_NORETURN (connection_2,
-                    IRC_Client_GUI_Connection (&data_p->GTKState,
-                                               IRCControl_p,
-                                               &data_p->connections,
-                                               server_name_string,
-                                               data_p->UIFileDirectory,
-                                               notebook_p));
-  if (!connection_2)
+  connection_thread_data_p->CBData = data_p;
+  connection_thread_data_p->configuration = data_p->configuration;
+  connection_thread_data_p->phonebookIterator = phonebook_iterator;
+  connection_thread_data_p->loginOptions = login_options;
+  ACE_thread_t thread_id = -1;
+  ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
+  //char thread_name[BUFSIZ];
+  //ACE_OS::memset (thread_name, 0, sizeof (thread_name));
+  char* thread_name_p = NULL;
+  ACE_NEW_NORETURN (thread_name_p,
+                    char[BUFSIZ]);
+  if (!thread_name_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
 
     // clean up
-    connection_p->close ();
-    connection_p->decrease ();
+    delete connection_thread_data_p;
 
     return;
   } // end IF
-  if (!connection_2->isInitialized_)
+  ACE_OS::memset (thread_name_p, 0, sizeof (thread_name_p));
+  const char* thread_name_2 = thread_name_p;
+  ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
+  ACE_ASSERT (thread_manager_p);
+  result =
+    thread_manager_p->spawn (::connection_setup_function,               // function
+                             connection_thread_data_p,                  // argument
+                             (THR_NEW_LWP      |
+                              THR_JOINABLE     |
+                              THR_INHERIT_SCHED),                       // flags
+                             &thread_id,                                // thread id
+                             &thread_handle,                            // thread handle
+                             ACE_DEFAULT_THREAD_PRIORITY,               // priority
+                             COMMON_EVENT_DISPATCH_THREAD_GROUP_ID + 2, // group id
+                             NULL,                                      // stack
+                             0,                                         // stack size
+                             &thread_name_2);                           // name
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connection, returning\n")));
+                ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
 
     // clean up
-    delete connection_2;
-    connection_p->close ();
-    connection_p->decrease ();
+    delete thread_name_p;
+    delete connection_thread_data_p;
 
     return;
   } // end IF
 
-  //   ACE_DEBUG((LM_DEBUG,
-  //              ACE_TEXT("registering...\n")));
+  // setup progress updates
+  //if (data_p->progressData.cursorType == GDK_LAST_CURSOR)
+  //{
+  //  GtkWindow* window_p =
+  //    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+  //                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_WINDOW_MAIN)));
+  //  ACE_ASSERT (window_p);
+  //  GdkWindow* window_2 = gtk_widget_get_window (GTK_WIDGET (window_p));
+  //  ACE_ASSERT (window_2);
+  //  GdkCursor* cursor_p = gdk_window_get_cursor (window_2);
+  //  data_p->progressData.cursorType = gdk_cursor_get_cursor_type (cursor_p);
+  //  cursor_p = gdk_cursor_new (IRC_CLIENT_GUI_GTK_CURSOR_BUSY);
+  //  if (!cursor_p)
+  //  {
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("failed to gdk_cursor_new(): \"%m\", returning\n")));
 
-  // step6: register connection with the server
-  bool result = false;
-  try
-  {
-    // *NOTE*: this entails a little delay (waiting for the welcome notice...)
-    result = IRCControl_p->registerConnection (login_options);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in IRC_Client_IIRCControl::registerConnection(), continuing\n")));
-  }
-  if (!result)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_IIRCControl::registerConnection(), returning\n")));
+  //    // clean up
+  //    delete thread_name_p;
+  //    delete connection_thread_data_p;
+  //    ACE_THR_FUNC_RETURN exit_status;
+  //    result = thread_manager_p->join (thread_id, &exit_status);
+  //    if (result == -1)
+  //      ACE_DEBUG ((LM_ERROR,
+  //                  ACE_TEXT ("failed to ACE_Thread_Manager::join(%d): \"%m\", continuing\n"),
+  //                  thread_id));
+  //    data_p->progressData.cursorType = GDK_LAST_CURSOR;
 
-    // clean up
-    delete connection_2;
-    connection_p->close ();
-    connection_p->decrease ();
-
-    return;
-  } // end IF
-  //   ACE_DEBUG((LM_DEBUG,
-  //              ACE_TEXT("registering...DONE\n")));
-
-  connection_p->decrease ();
-
-  // step7: remember this connection
-  // synch access
-  {
+  //    return;
+  //  } // end IF
+  //  gdk_window_set_cursor (window_2, cursor_p);
+  //} // end IF
+  GtkProgressBar* progress_bar_p =
+    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_PROGRESSBAR)));
+  ACE_ASSERT (progress_bar_p);
+  gint width, height;
+  gtk_widget_get_size_request (GTK_WIDGET (progress_bar_p), &width, &height);
+  gtk_progress_bar_set_pulse_step (progress_bar_p,
+                                   1.0 / static_cast<double> (width));
+  gtk_widget_show (GTK_WIDGET (progress_bar_p));
+  { // synch access
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
 
-    const IRC_Client_GTK_ConnectionCBData& connection_data_r =
-      connection_2->get ();
-    // *TODO*: who deletes the module ? (the stream won't do it !)
-    data_p->connections.insert (std::make_pair (connection_data_r.timestamp, connection_2));
+    guint event_source_id =
+      //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+      //                 idle_update_progress_cb,
+      //                 &data_p->progressData,
+      //                 NULL);
+      g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                        // _LOW doesn't work (on Win32)
+                          IRC_CLIENT_GUI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
+                          idle_update_progress_cb,
+                          &data_p->progressData,
+                          NULL);
+    if (!event_source_id)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add_full(idle_update_progress_cb): \"%m\", returning\n")));
+
+      // clean up
+      gtk_widget_hide (GTK_WIDGET (progress_bar_p));
+      ACE_THR_FUNC_RETURN exit_status;
+      result = thread_manager_p->join (thread_id, &exit_status);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Thread_Manager::join(%d): \"%m\", continuing\n"),
+                    thread_id));
+
+      return;
+    } // end IF
+    data_p->progressData.pendingActions[thread_id] = event_source_id;
+    data_p->GTKState.eventSourceIds.insert (event_source_id);
   } // end lock scope
 }
 

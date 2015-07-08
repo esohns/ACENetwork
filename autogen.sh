@@ -57,12 +57,12 @@ if ! test -x $AUTOPOINT; then
 fi
 echo $($(basename $AUTOPOINT) --version | head -1) found
 
-autoreconf$AC_POSTFIX --force --install --symlink --warnings=all
+autoreconf$AC_POSTFIX --install --symlink --warnings=all
 #autoconf$AC_POSTFIX
 #autoheader$AC_POSTFIX
 #aclocal$AM_POSTFIX
 #automake$AM_POSTFIX --add-missing --force-missing --all
-##gettextize
+gettextize --force --symlink
 #autopoint
 #if test ! -e po/Makevars
 #then cp po/Makevars.template po/Makevars

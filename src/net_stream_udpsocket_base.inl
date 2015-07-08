@@ -81,6 +81,8 @@ Net_StreamUDPSocketBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::~Net_StreamUDPSocketBase_T"));
 
+  int result = -1;
+
   // clean up
   if (inherited3::configuration_.streamConfiguration.streamConfiguration.module)
   {
@@ -88,7 +90,7 @@ Net_StreamUDPSocketBase_T<AddressType,
       stream_.find (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ());
     if (module_p)
     {
-      int result =
+      result =
         stream_.remove (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name (),
                         ACE_Module_Base::M_DELETE_NONE);
       if (result == -1)
@@ -98,7 +100,6 @@ Net_StreamUDPSocketBase_T<AddressType,
     } // end IF
     if (inherited3::configuration_.streamConfiguration.streamConfiguration.deleteModule)
       delete inherited3::configuration_.streamConfiguration.streamConfiguration.module;
-    inherited3::configuration_.streamConfiguration.streamConfiguration.module = NULL;
   } // end IF
 
   if (currentWriteBuffer_)
@@ -166,38 +167,45 @@ Net_StreamUDPSocketBase_T<AddressType,
     inherited3::configuration_.streamConfiguration.streamConfiguration.notificationStrategy =
         &this->notificationStrategy_;
   } // end IF
-  // step2b: initialize final module (if any)
+  // step2b: clone/initialize final module (if any)
   if (inherited3::configuration_.streamConfiguration.streamConfiguration.module)
   {
-    Stream_IModule_t* imodule_p =
-      dynamic_cast<Stream_IModule_t*> (inherited3::configuration_.streamConfiguration.streamConfiguration.module);
-    if (!imodule_p)
+    // step2ba: clone final module ?
+    if (inherited3::configuration_.streamConfiguration.streamConfiguration.module)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-                  ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
-      return -1;
+      Stream_IModule_t* imodule_p =
+        dynamic_cast<Stream_IModule_t*> (inherited3::configuration_.streamConfiguration.streamConfiguration.module);
+      if (!imodule_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
+                    ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+        return -1;
+      } // end IF
+      Stream_Module_t* clone_p = NULL;
+      try
+      {
+        clone_p = imodule_p->clone ();
+      }
+      catch (...)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), continuing\n"),
+                    ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+      }
+      if (!clone_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
+                    ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+        return -1;
+      }
+      inherited3::configuration_.streamConfiguration.streamConfiguration.module =
+        clone_p;
+      inherited3::configuration_.streamConfiguration.streamConfiguration.deleteModule =
+        true;
     } // end IF
-    Stream_Module_t* clone_p = NULL;
-    try
-    {
-      clone_p = imodule_p->clone ();
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), continuing\n"),
-                  ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
-    }
-    if (!clone_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
-      return -1;
-    }
-    inherited3::configuration_.streamConfiguration.streamConfiguration.module = clone_p;
-    inherited3::configuration_.streamConfiguration.streamConfiguration.deleteModule = true;
+    // *TODO*: step2bb: initialize final module
   } // end IF
   // step2c: initialize stream
   // *TODO*: this clearly is a design glitch
@@ -1168,9 +1176,9 @@ Net_StreamUDPSocketBase_T<AddressType,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
                     ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
     } // end IF
-    if (inherited2::configuration_.streamConfiguration.deleteModule)
+    if (inherited2::configuration_.streamConfiguration.cloneModule ||
+        inherited2::configuration_.streamConfiguration.deleteModule)
       delete inherited2::configuration_.streamConfiguration.module;
-    inherited2::configuration_.streamConfiguration.module = NULL;
   } // end IF
 
   if (currentWriteBuffer_)
@@ -1241,39 +1249,44 @@ Net_StreamUDPSocketBase_T<AddressType,
         &inherited::notificationStrategy_;
 #endif
   } // end IF
-  // step2b: initialize final module (if any)
+  // step2b: clone/initialize final module (if any)
   if (inherited2::configuration_.streamConfiguration.module)
   {
-    Stream_IModule_t* imodule_p =
-      dynamic_cast<Stream_IModule_t*> (inherited2::configuration_.streamConfiguration.module);
-    if (!imodule_p)
+    // step2ba: clone final module ?
+    if (inherited2::configuration_.streamConfiguration.module)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-      return -1;
+      Stream_IModule_t* imodule_p =
+        dynamic_cast<Stream_IModule_t*> (inherited2::configuration_.streamConfiguration.module);
+      if (!imodule_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
+                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
+        return -1;
+      } // end IF
+      Stream_Module_t* clone_p = NULL;
+      try
+      {
+        clone_p = imodule_p->clone ();
+      }
+      catch (...)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
+                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
+        return -1;
+      }
+      if (!clone_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
+                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
+        return -1;
+      }
+      inherited2::configuration_.streamConfiguration.module = clone_p;
+      inherited2::configuration_.streamConfiguration.deleteModule = true;
     } // end IF
-    Stream_Module_t* clone_p = NULL;
-    try
-    {
-      clone_p = imodule_p->clone ();
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-      return -1;
-    }
-    if (!clone_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-      return -1;
-    }
-    inherited2::configuration_.streamConfiguration.module = clone_p;
-    inherited2::configuration_.streamConfiguration.deleteModule = true;
+    // *TODO*: step2bb: initialize final module
   } // end IF
   // step2c: initialize stream
   unsigned int session_id = 0;

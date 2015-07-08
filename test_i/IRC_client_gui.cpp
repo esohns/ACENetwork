@@ -486,6 +486,8 @@ do_work (bool useThreadPool_in,
   } // end IF
   userData_in.configuration->streamConfiguration.streamConfiguration.module =
     &IRC_handler;
+  userData_in.configuration->streamConfiguration.streamConfiguration.cloneModule =
+    true;
   userData_in.configuration->streamConfiguration.streamConfiguration.deleteModule =
     false;
 
@@ -1513,6 +1515,7 @@ ACE_TMAIN (int argc_in,
     do_parseConfigurationFile (configuration_file,
                                configuration.protocolConfiguration.loginOptions,
                                user_data.phoneBook);
+  user_data.progressData.GTKState = &user_data.GTKState;
 
   // step8: initialize GTK UI
   Common_UI_GtkBuilderDefinition ui_definition (argc_in,

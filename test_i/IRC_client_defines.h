@@ -109,6 +109,11 @@
 #define IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH       9
 #define IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH    200
 
+// UI/input
+#define IRC_CLIENT_INPUT_THREAD_NAME             "input"
+// *TODO*: make sure this is unique
+#define IRC_CLIENT_INPUT_THREAD_GROUP_ID         COMMON_EVENT_DISPATCH_THREAD_GROUP_ID + 1
+
 // UI/output
 #define IRC_CLIENT_CURSES_COLOR_LOG              1
 #define IRC_CLIENT_CURSES_COLOR_STATUS           2

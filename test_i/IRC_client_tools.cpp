@@ -1646,6 +1646,7 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                            unsigned int statisticReportingInterval_in,
                            const std::string& serverHostname_in,
                            unsigned short serverPortNumber_in,
+                           bool cloneModule_in,
                            bool deleteModule_in,
                            const Stream_Module_t* finalModule_inout,
                            const IRC_Client_StreamModuleConfiguration* moduleConfiguration_in)
@@ -1677,18 +1678,25 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
 
     // clean up
-    delete finalModule_inout;
-    finalModule_inout = NULL;
+    if (deleteModule_in)
+      delete finalModule_inout;
 
     return ACE_INVALID_HANDLE;
   } // end IF
   // ************ stream configuration data ****************
-  configuration.streamConfiguration.streamConfiguration.messageAllocator =
-    messageAllocator_in;
+  configuration.streamConfiguration.crunchMessageBuffers =
+    IRC_CLIENT_DEF_CRUNCH_MESSAGES;
+  configuration.streamConfiguration.debugScanner = debugScanner_in;
+  configuration.streamConfiguration.debugParser = debugParser_in;
+
   configuration.streamConfiguration.streamConfiguration.bufferSize =
     IRC_CLIENT_BUFFER_SIZE;
+  configuration.streamConfiguration.streamConfiguration.messageAllocator =
+    messageAllocator_in;
   if (finalModule_inout)
   {
+    configuration.streamConfiguration.streamConfiguration.cloneModule =
+      cloneModule_in;
     configuration.streamConfiguration.streamConfiguration.deleteModule =
       deleteModule_in;
     configuration.streamConfiguration.streamConfiguration.module =
@@ -1698,10 +1706,8 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
   } // end IF
   configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
-  configuration.streamConfiguration.crunchMessageBuffers =
-    IRC_CLIENT_DEF_CRUNCH_MESSAGES;
-  configuration.streamConfiguration.debugScanner = debugScanner_in;
-  configuration.streamConfiguration.debugParser = debugParser_in;
+  configuration.streamConfiguration.streamModuleConfiguration =
+    *moduleConfiguration_in;
 
   // ************ protocol configuration data **************
   configuration.protocolConfiguration.loginOptions = loginOptions_in;
@@ -1715,8 +1721,8 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                 ACE_TEXT ("failed to allocator memory: \"%m\", aborting\n")));
 
     // clean up
-    delete finalModule_inout;
-    finalModule_inout = NULL;
+    if (deleteModule_in)
+      delete finalModule_inout;
 
     return ACE_INVALID_HANDLE;
   } // end IF
@@ -1732,8 +1738,8 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
     // clean up
-    delete finalModule_inout;
-    finalModule_inout = NULL;
+    if (deleteModule_in)
+      delete finalModule_inout;
     delete session_data_p;
 
     return ACE_INVALID_HANDLE;
@@ -1747,13 +1753,13 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                                     connection_manager_p,
                                     statisticReportingInterval_in);
 
-  // *TODO*: memory leak final module/session data here ? ...
+  connection_manager_p->lock ();
   connection_manager_p->set (configuration,
                              session_data_p);
 
   // step3: (try to) connect to the server
   ACE_HANDLE handle =
-      connector.connect (configuration.socketConfiguration.peerAddress);
+    connector.connect (configuration.socketConfiguration.peerAddress);
   if (handle == ACE_INVALID_HANDLE)
   {
     // debug info
@@ -1763,13 +1769,20 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
       configuration.socketConfiguration.peerAddress.addr_to_string (buffer,
                                                                     sizeof (buffer));
     if (result == -1)
-      ACE_DEBUG((LM_ERROR,
-                 ACE_TEXT("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));
+
+    // clean up
+    if (deleteModule_in)
+      delete finalModule_inout;
+    connection_manager_p->unlock ();
+
     return ACE_INVALID_HANDLE;
   } // end IF
+  connection_manager_p->unlock ();
 
   // *NOTE*: handlers automagically register with the connection manager and
   //         will also de-register and self-destruct on disconnects !

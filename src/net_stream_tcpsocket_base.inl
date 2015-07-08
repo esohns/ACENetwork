@@ -96,7 +96,6 @@ Net_StreamTCPSocketBase_T<AddressType,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
                     ACE_TEXT (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ())));
     } // end IF
-
     if (inherited2::configuration_.streamConfiguration.streamConfiguration.deleteModule)
       delete inherited2::configuration_.streamConfiguration.streamConfiguration.module;
   } // end IF
@@ -163,40 +162,45 @@ Net_StreamTCPSocketBase_T<AddressType,
   // step1b: initialize final module (if any)
   if (inherited2::configuration_.streamConfiguration.streamConfiguration.module)
   {
-    IMODULE_T* imodule_p = NULL;
-    // need a downcast...
-    imodule_p =
-      dynamic_cast<IMODULE_T*> (inherited2::configuration_.streamConfiguration.streamConfiguration.module);
-    if (!imodule_p)
+    // step1ba: clone final module ?
+    if (inherited2::configuration_.streamConfiguration.streamConfiguration.cloneModule)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T*> failed, aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ())));
-      return -1;
+      IMODULE_T* imodule_p = NULL;
+      // need a downcast...
+      imodule_p =
+        dynamic_cast<IMODULE_T*> (inherited2::configuration_.streamConfiguration.streamConfiguration.module);
+      if (!imodule_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T*> failed, aborting\n"),
+                    ACE_TEXT (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+        return -1;
+      } // end IF
+      Stream_Module_t* clone_p = NULL;
+      try
+      {
+        clone_p = imodule_p->clone ();
+      }
+      catch (...)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), aborting\n"),
+                    ACE_TEXT (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+        return -1;
+      }
+      if (!clone_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
+                    ACE_TEXT (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+        return -1;
+      } // end IF
+      inherited2::configuration_.streamConfiguration.streamConfiguration.deleteModule =
+        true;
+      inherited2::configuration_.streamConfiguration.streamConfiguration.module =
+        clone_p;
     } // end IF
-    Stream_Module_t* clone_p = NULL;
-    try
-    {
-      clone_p = imodule_p->clone ();
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ())));
-      return -1;
-    }
-    if (!clone_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
-                  ACE_TEXT (inherited2::configuration_.streamConfiguration.streamConfiguration.module->name ())));
-      return -1;
-    } // end IF
-    inherited2::configuration_.streamConfiguration.streamConfiguration.deleteModule =
-      true;
-    inherited2::configuration_.streamConfiguration.streamConfiguration.module =
-      clone_p;
+    // *TODO*: step1bb: initialize final module
   } // end IF
   // step1c: initialize stream
   // *TODO*: this clearly is a design glitch
@@ -363,7 +367,7 @@ Net_StreamTCPSocketBase_T<AddressType,
           //         exception, so this looks like a resource leak...
           if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                        ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
                         handle));
         } // end IF
       } // end IF
@@ -1114,8 +1118,8 @@ Net_StreamTCPSocketBase_T<AddressType,
       //         exception, so this looks like a resource leak...
       if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
         ACE_DEBUG ((LM_ERROR,
-        ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-        handle));
+                    ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
+                    handle));
     } // end IF
     //    inherited::handle (ACE_INVALID_HANDLE);
   } // end IF

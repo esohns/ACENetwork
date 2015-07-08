@@ -129,6 +129,8 @@ IRC_client_gui_SOURCES = \
   IRC_client_gui_defines.h \
   IRC_client_gui_messagehandler.cpp \
   IRC_client_gui_messagehandler.h \
+  IRC_client_gui_tools.cpp \
+  IRC_client_gui_tools.h \
   IRC_client_iIRCControl.h \
   IRC_client_IRC_codes.h \
   IRC_client_IRCbisect.cpp \
@@ -194,13 +196,6 @@ IRC_client_gui_LDADD = \
   -lACEStream \
   -lACENetwork
 
-configdir = $(datadir)/@PACKAGE_NAME@/config
-config_DATA = \
-  IRC_client_channel.glade \
-  IRC_client_connection.glade \
-  IRC_client_main.glade \
-  IRC_client.ini \
-  servers.ini
-
-EXTRA_DIST = \
-  $(config_DATA)
+SUBDIRS = \
+  . \
+  etc

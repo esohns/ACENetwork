@@ -55,12 +55,14 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   CBData_.controller = NULL;
 
   // setup auto-scrolling
-  GtkTextIter iterator;
-  gtk_text_buffer_get_end_iter (gtk_text_view_get_buffer (view_),
-                                &iterator);
-  gtk_text_buffer_create_mark (gtk_text_view_get_buffer (view_),
+  GtkTextIter text_iter;
+  GtkTextBuffer* buffer_p = gtk_text_view_get_buffer (view_);
+  ACE_ASSERT (buffer_p);
+  gtk_text_buffer_get_end_iter (buffer_p,
+                                &text_iter);
+  gtk_text_buffer_create_mark (buffer_p,
                                ACE_TEXT_ALWAYS_CHAR ("scroll"),
-                               &iterator,
+                               &text_iter,
                                TRUE);
 }
 
@@ -149,9 +151,11 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
                                              ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TEXTVIEW_CHANNEL)));
   ACE_ASSERT (view_);
   GtkTextIter text_iter;
-  gtk_text_buffer_get_end_iter (gtk_text_view_get_buffer (view_),
+  GtkTextBuffer* buffer_p = gtk_text_view_get_buffer (view_);
+  ACE_ASSERT (buffer_p);
+  gtk_text_buffer_get_end_iter (buffer_p,
                                 &text_iter);
-  gtk_text_buffer_create_mark (gtk_text_view_get_buffer (view_),
+  gtk_text_buffer_create_mark (buffer_p,
                                ACE_TEXT_ALWAYS_CHAR ("scroll"),
                                &text_iter,
                                TRUE);
@@ -446,10 +450,10 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   g_object_ref (vbox_p);
   gtk_container_remove (GTK_CONTAINER (window_p),
                         GTK_WIDGET (vbox_p));
-  gint page_num = gtk_notebook_append_page (parent_,
-                                            GTK_WIDGET (vbox_p),
-                                            GTK_WIDGET (hbox_p));
-  if (page_num == -1)
+  gint page_number = gtk_notebook_append_page (parent_,
+                                               GTK_WIDGET (vbox_p),
+                                               GTK_WIDGET (hbox_p));
+  if (page_number == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to gtk_notebook_append_page(%@), returning\n"),
@@ -473,7 +477,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   // activate new page (iff it's a channel tab !)
   if (IRC_Client_Tools::isValidIRCChannelName (CBData_.id))
     gtk_notebook_set_current_page (parent_,
-                                   page_num);
+                                   page_number);
 
   // *TODO*: there must be a better way to do this
   //         (see: IRC_client_gui_callbacks.cpp:2236, 2347, ...)
@@ -788,7 +792,7 @@ IRC_Client_GUI_MessageHandler::setModes (const std::string& modes_in,
 
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
-  CBData_.GTKState->eventSourceIds.push_back (event_source_id);
+  CBData_.GTKState->eventSourceIds.insert (event_source_id);
 }
 
 void

@@ -1,0 +1,1134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="95">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>../../../src/net_asynch_netlinksockethandler.h</itemPath>
+      <itemPath>../../../src/net_asynch_netlinksockethandler.inl</itemPath>
+      <itemPath>../../../src/net_asynch_tcpsockethandler.h</itemPath>
+      <itemPath>../../../src/net_asynch_tcpsockethandler.inl</itemPath>
+      <itemPath>../../../src/net_asynch_udpsockethandler.h</itemPath>
+      <itemPath>../../../src/net_asynch_udpsockethandler.inl</itemPath>
+      <itemPath>../../../src/net_common.h</itemPath>
+      <itemPath>../../../src/net_common_modules.h</itemPath>
+      <itemPath>../../../src/net_common_tools.h</itemPath>
+      <itemPath>../../../src/net_configuration.h</itemPath>
+      <itemPath>../../../src/net_connection_base.h</itemPath>
+      <itemPath>../../../src/net_connection_base.inl</itemPath>
+      <itemPath>../../../src/net_connection_common.h</itemPath>
+      <itemPath>../../../src/net_connection_manager.h</itemPath>
+      <itemPath>../../../src/net_connection_manager.inl</itemPath>
+      <itemPath>../../../src/net_connection_manager_common.h</itemPath>
+      <itemPath>../../../src/net_controller_base.h</itemPath>
+      <itemPath>../../../src/net_defines.h</itemPath>
+      <itemPath>../../../src/net_exports.h</itemPath>
+      <itemPath>../../../src/net_iconnection.h</itemPath>
+      <itemPath>../../../src/net_iconnectionmanager.h</itemPath>
+      <itemPath>../../../src/net_ipconnection.h</itemPath>
+      <itemPath>../../../src/net_itransportlayer.h</itemPath>
+      <itemPath>../../../src/net_macros.h</itemPath>
+      <itemPath>../../../src/net_message.h</itemPath>
+      <itemPath>../../../src/net_message_base.h</itemPath>
+      <itemPath>../../../src/net_message_base.inl</itemPath>
+      <itemPath>../../../src/net_messagehandler_base.h</itemPath>
+      <itemPath>../../../src/net_messagehandler_base.inl</itemPath>
+      <itemPath>../../../src/net_module_headerparser.h</itemPath>
+      <itemPath>../../../src/net_module_messagehandler.h</itemPath>
+      <itemPath>../../../src/net_module_messagehandler.inl</itemPath>
+      <itemPath>../../../src/net_module_protocolhandler.h</itemPath>
+      <itemPath>../../../src/net_module_runtimestatistic.h</itemPath>
+      <itemPath>../../../src/net_module_runtimestatistic.inl</itemPath>
+      <itemPath>../../../src/net_module_sockethandler.h</itemPath>
+      <itemPath>../../../src/net_module_sockethandler.inl</itemPath>
+      <itemPath>../../../src/net_netlinkconnection.h</itemPath>
+      <itemPath>../../../src/net_netlinkconnection.inl</itemPath>
+      <itemPath>../../../src/net_netlinksockethandler.h</itemPath>
+      <itemPath>../../../src/net_netlinksockethandler.inl</itemPath>
+      <itemPath>../../../src/net_packet_headers.h</itemPath>
+      <itemPath>../../../src/net_protocol_layer.h</itemPath>
+      <itemPath>../../../src/net_remote_comm.h</itemPath>
+      <itemPath>../../../src/net_sessionmessage.h</itemPath>
+      <itemPath>../../../src/net_socket_common.h</itemPath>
+      <itemPath>../../../src/net_socketconnection_base.h</itemPath>
+      <itemPath>../../../src/net_socketconnection_base.inl</itemPath>
+      <itemPath>../../../src/net_sockethandler_base.h</itemPath>
+      <itemPath>../../../src/net_sockethandler_base.inl</itemPath>
+      <itemPath>../../../src/net_stream.h</itemPath>
+      <itemPath>../../../src/net_stream_asynch_tcpsocket_base.h</itemPath>
+      <itemPath>../../../src/net_stream_asynch_tcpsocket_base.inl</itemPath>
+      <itemPath>../../../src/net_stream_asynch_udpsocket_base.h</itemPath>
+      <itemPath>../../../src/net_stream_asynch_udpsocket_base.inl</itemPath>
+      <itemPath>../../../src/net_stream_common.h</itemPath>
+      <itemPath>../../../src/net_stream_tcpsocket_base.h</itemPath>
+      <itemPath>../../../src/net_stream_tcpsocket_base.inl</itemPath>
+      <itemPath>../../../src/net_stream_udpsocket_base.h</itemPath>
+      <itemPath>../../../src/net_stream_udpsocket_base.inl</itemPath>
+      <itemPath>../../../src/net_tcpconnection.h</itemPath>
+      <itemPath>../../../src/net_tcpconnection_base.h</itemPath>
+      <itemPath>../../../src/net_tcpconnection_base.inl</itemPath>
+      <itemPath>../../../src/net_tcpsockethandler.h</itemPath>
+      <itemPath>../../../src/net_tcpsockethandler.inl</itemPath>
+      <itemPath>../../../src/net_transportlayer_base.h</itemPath>
+      <itemPath>../../../src/net_transportlayer_ip_cast.h</itemPath>
+      <itemPath>../../../src/net_transportlayer_netlink.h</itemPath>
+      <itemPath>../../../src/net_transportlayer_tcp.h</itemPath>
+      <itemPath>../../../src/net_transportlayer_udp.h</itemPath>
+      <itemPath>../../../src/net_udpconnection.h</itemPath>
+      <itemPath>../../../src/net_udpconnection.inl</itemPath>
+      <itemPath>../../../src/net_udpsockethandler.h</itemPath>
+      <itemPath>../../../src/net_udpsockethandler.inl</itemPath>
+      <itemPath>../../../src/stdafx.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+      <logicalFolder name="f1" displayName="3rd_party" projectFiles="true">
+        <logicalFolder name="f1" displayName="ACE_wrappers" projectFiles="true">
+        </logicalFolder>
+      </logicalFolder>
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>../../../src/net_asynch_netlinksockethandler.cpp</itemPath>
+      <itemPath>../../../src/net_asynch_tcpsockethandler.cpp</itemPath>
+      <itemPath>../../../src/net_asynch_udpsockethandler.cpp</itemPath>
+      <itemPath>../../../src/net_common_tools.cpp</itemPath>
+      <itemPath>../../../src/net_connection_base.cpp</itemPath>
+      <itemPath>../../../src/net_connection_manager.cpp</itemPath>
+      <itemPath>../../../src/net_controller_base.cpp</itemPath>
+      <itemPath>../../../src/net_ipconnection.cpp</itemPath>
+      <itemPath>../../../src/net_message.cpp</itemPath>
+      <itemPath>../../../src/net_message_base.cpp</itemPath>
+      <itemPath>../../../src/net_messagehandler_base.cpp</itemPath>
+      <itemPath>../../../src/net_module_headerparser.cpp</itemPath>
+      <itemPath>../../../src/net_module_messagehandler.cpp</itemPath>
+      <itemPath>../../../src/net_module_protocolhandler.cpp</itemPath>
+      <itemPath>../../../src/net_module_runtimestatistic.cpp</itemPath>
+      <itemPath>../../../src/net_module_sockethandler.cpp</itemPath>
+      <itemPath>../../../src/net_netlinkconnection.cpp</itemPath>
+      <itemPath>../../../src/net_netlinksockethandler.cpp</itemPath>
+      <itemPath>../../../src/net_protocol_layer.cpp</itemPath>
+      <itemPath>../../../src/net_sessionmessage.cpp</itemPath>
+      <itemPath>../../../src/net_socketconnection_base.cpp</itemPath>
+      <itemPath>../../../src/net_sockethandler_base.cpp</itemPath>
+      <itemPath>../../../src/net_stream.cpp</itemPath>
+      <itemPath>../../../src/net_stream_asynch_tcpsocket_base.cpp</itemPath>
+      <itemPath>../../../src/net_stream_asynch_udpsocket_base.cpp</itemPath>
+      <itemPath>../../../src/net_stream_tcpsocket_base.cpp</itemPath>
+      <itemPath>../../../src/net_stream_udpsocket_base.cpp</itemPath>
+      <itemPath>../../../src/net_tcpconnection.cpp</itemPath>
+      <itemPath>../../../src/net_tcpconnection_base.cpp</itemPath>
+      <itemPath>../../../src/net_tcpsockethandler.cpp</itemPath>
+      <itemPath>../../../src/net_transportlayer_base.cpp</itemPath>
+      <itemPath>../../../src/net_transportlayer_ip_cast.cpp</itemPath>
+      <itemPath>../../../src/net_transportlayer_netlink.cpp</itemPath>
+      <itemPath>../../../src/net_transportlayer_tcp.cpp</itemPath>
+      <itemPath>../../../src/net_transportlayer_udp.cpp</itemPath>
+      <itemPath>../../../src/net_udpconnection.cpp</itemPath>
+      <itemPath>../../../src/net_udpsockethandler.cpp</itemPath>
+      <itemPath>../../../src/stdafx.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>../../../src</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="2">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <incDir>
+            <pElem>../../../../ATCD/ACE</pElem>
+          </incDir>
+        </ccTool>
+        <requiredProjects>
+          <makeArtifact PL="../../../../libACEStream/prj/solstudio/libACEStream"
+                        CT="2"
+                        CN="Debug"
+                        AC="true"
+                        BL="true"
+                        WD="../../../../libACEStream/prj/solstudio/libACEStream"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibACEStream.${CND_DLIB_EXT}">
+          </makeArtifact>
+          <makeArtifact PL="../../../../libCommon/prj/solstudio/libCommon"
+                        CT="2"
+                        CN="Debug"
+                        AC="true"
+                        BL="true"
+                        WD="../../../../libCommon/prj/solstudio/libCommon"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibCommon.${CND_DLIB_EXT}">
+          </makeArtifact>
+        </requiredProjects>
+      </compileType>
+      <item path="../../../src/net_asynch_netlinksockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_netlinksockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_netlinksockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_tcpsockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_tcpsockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_tcpsockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_udpsockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_udpsockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_udpsockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_common_modules.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_common_tools.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_common_tools.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_configuration.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_manager.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_manager.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_manager.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_manager_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_controller_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_controller_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_defines.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_exports.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_iconnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_iconnectionmanager.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_ipconnection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_ipconnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_itransportlayer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_macros.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_message.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_message.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_message_base.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_message_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_message_base.inl" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_messagehandler_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_messagehandler_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_messagehandler_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_headerparser.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_headerparser.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_messagehandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_messagehandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_messagehandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_protocolhandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_protocolhandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_runtimestatistic.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_runtimestatistic.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_runtimestatistic.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_sockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_sockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_sockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinkconnection.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinkconnection.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinkconnection.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinksockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinksockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinksockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_packet_headers.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_protocol_layer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_protocol_layer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_remote_comm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_sessionmessage.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_sessionmessage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_socket_common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_socketconnection_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_socketconnection_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_socketconnection_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_sockethandler_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_sockethandler_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_sockethandler_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_stream.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_tcpsocket_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_tcpsocket_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_tcpsocket_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_udpsocket_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_udpsocket_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_udpsocket_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_tcpsocket_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_tcpsocket_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_tcpsocket_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_udpsocket_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_udpsocket_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_udpsocket_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpconnection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpconnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpconnection_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpconnection_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpconnection_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpsockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpsockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpsockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_ip_cast.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_ip_cast.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_netlink.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_netlink.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_tcp.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_tcp.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_udp.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_udp.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_udpconnection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_udpconnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_udpconnection.inl" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_udpsockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_udpsockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_udpsockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/stdafx.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="2">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+      </compileType>
+      <item path="../../../src/net_asynch_netlinksockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_netlinksockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_netlinksockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_tcpsockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_tcpsockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_tcpsockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_udpsockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_udpsockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_asynch_udpsockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_common_modules.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_common_tools.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_common_tools.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_configuration.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_manager.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_manager.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_manager.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_connection_manager_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_controller_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_controller_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_defines.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_exports.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_iconnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_iconnectionmanager.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_ipconnection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_ipconnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_itransportlayer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_macros.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_message.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_message.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_message_base.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_message_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_message_base.inl" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_messagehandler_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_messagehandler_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_messagehandler_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_headerparser.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_headerparser.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_messagehandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_messagehandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_messagehandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_protocolhandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_protocolhandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_runtimestatistic.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_runtimestatistic.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_runtimestatistic.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_sockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_sockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_module_sockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinkconnection.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinkconnection.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinkconnection.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinksockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinksockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_netlinksockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_packet_headers.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_protocol_layer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_protocol_layer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_remote_comm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_sessionmessage.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_sessionmessage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_socket_common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_socketconnection_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_socketconnection_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_socketconnection_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_sockethandler_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_sockethandler_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_sockethandler_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_stream.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_tcpsocket_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_tcpsocket_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_tcpsocket_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_udpsocket_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_udpsocket_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_asynch_udpsocket_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_tcpsocket_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_tcpsocket_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_tcpsocket_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_udpsocket_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_udpsocket_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_stream_udpsocket_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpconnection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpconnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpconnection_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpconnection_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpconnection_base.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpsockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpsockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_tcpsockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_base.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_base.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_ip_cast.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_ip_cast.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_netlink.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_netlink.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_tcp.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_tcp.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_udp.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_transportlayer_udp.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_udpconnection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/net_udpconnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_udpconnection.inl" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../src/net_udpsockethandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_udpsockethandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/net_udpsockethandler.inl"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../src/stdafx.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../src/stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

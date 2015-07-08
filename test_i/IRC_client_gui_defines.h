@@ -27,17 +27,17 @@
 // phonebook
 #define IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK "IRC_client_phonebook.ini"
 
-// UI glade/GTKBuilder definitions
+// glade/GTKBuilder definitions
 #define IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY  "etc"
 // files
 #define IRC_CLIENT_GUI_GTK_UI_CHANNEL_FILE    "IRC_client_channel.glade"
 #define IRC_CLIENT_GUI_GTK_UI_CONNECTION_FILE "IRC_client_connection.glade"
 #define IRC_CLIENT_GUI_GTK_UI_MAIN_FILE       "IRC_client_main.glade"
 
-// UI GTK .rc files
+// GTK .rc files
 #define IRC_CLIENT_GUI_GTK_UI_RC_FILE "IRC_client.rc"
 
-// widget names
+// GTK widget names
 #define IRC_CLIENT_GUI_GTK_ACTION_AWAY                           "action_away"
 #define IRC_CLIENT_GUI_GTK_ACTION_BAN                            "action_ban"
 #define IRC_CLIENT_GUI_GTK_ACTION_INFO                           "action_info"
@@ -90,6 +90,7 @@
 #define IRC_CLIENT_GUI_GTK_MENUITEM_KICK                         "menuitem_kick"
 #define IRC_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS                     "notebook_page_connection_channels"
 #define IRC_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS                  "notebook_connections"
+#define IRC_CLIENT_GUI_GTK_PROGRESSBAR                           "progressbar"
 #define IRC_CLIENT_GUI_GTK_SCROLLEDWINDOW_CONNECTION             "scrolledwindow_page_connection_channels"
 #define IRC_CLIENT_GUI_GTK_STATUSBAR                             "statusbar"
 #define IRC_CLIENT_GUI_GTK_TEXTVIEW_CHANNEL                      "textview_page_channel"
@@ -126,8 +127,15 @@
 #define IRC_CLIENT_GUI_GTK_WINDOW_TAB_CHANNEL                    "window_tab_channel"
 #define IRC_CLIENT_GUI_GTK_WINDOW_TAB_CONNECTION                 "window_tab_connection"
 
-#define IRC_CLIENT_GUI_GTK_STATUSBAR_CONTEXT_DESCRIPTION "IRC client GUI"
-#define IRC_CLIENT_GUI_GTK_LABEL_DEF_TOPIC_TEXT          "no topic"
+// GTK cursor
+// *TODO*: use GDK_BLANK_CURSOR instead ?
+#define IRC_CLIENT_GUI_GTK_CURSOR_BUSY GDK_WATCH
+
+// GTK progress/status-bar
+#define IRC_CLIENT_GUI_GTK_PROGRESSBAR_UPDATE_INTERVAL   27 // ms (?)
+#define IRC_CLIENT_GUI_GTK_STATUSBAR_CONTEXT_DESCRIPTION "IRC client::main"
+
+#define IRC_CLIENT_GUI_GTK_LABEL_DEF_TOPIC_TEXT "no topic"
 
 // dialog titles
 #define IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_AWAY           "please provide an away message..."

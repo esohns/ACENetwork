@@ -70,6 +70,7 @@ class IRC_Client_Tools
                              unsigned int,                                        // statistics reporting interval (0: OFF)
                              const std::string&,                                  // hostname
                              unsigned short,                                      // port
+                             bool = true,                                         // delete module
                              bool = false,                                        // delete module
                              const Stream_Module_t* = NULL,                       // final module
                              const IRC_Client_StreamModuleConfiguration* = NULL); // module configuration

@@ -1,0 +1,768 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="95">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>../../../test_i/FILE_Stream.h</itemPath>
+      <itemPath>../../../test_i/FILE_Stream.inl</itemPath>
+      <itemPath>../../../test_i/IOStream_alt_T.h</itemPath>
+      <itemPath>../../../test_i/IOStream_alt_T.inl</itemPath>
+      <itemPath>../../../test_i/IOStream_alt_macros.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_IRC_codes.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_IRCbisect.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_IRCmessage.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_IRCparser.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_IRCparser_driver.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_IRCscanner.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_common.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_common_modules.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_configuration.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_defines.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_gui_callbacks.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_gui_common.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_gui_connection.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_gui_defines.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_gui_messagehandler.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_gui_tools.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_iIRCControl.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_inputhandler.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_message.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_messageallocator.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_module_IRChandler.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_module_IRCparser.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_module_IRCsplitter.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_module_IRCstreamer.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_network.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_session_common.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_sessionmessage.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_signalhandler.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_statemachine_registration.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_stream.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_stream_common.h</itemPath>
+      <itemPath>../../../test_i/IRC_client_tools.h</itemPath>
+      <itemPath>../../../test_i/IRC_common.h</itemPath>
+      <itemPath>../../../test_i/Streambuf_alt.h</itemPath>
+      <itemPath>../../../test_i/Streambuf_alt.inl</itemPath>
+      <itemPath>../../../test_i/stdafx.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+      <itemPath>../../../test_i/etc/IRC_client.ini</itemPath>
+      <itemPath>../../../test_i/etc/IRC_client_channel.glade</itemPath>
+      <itemPath>../../../test_i/etc/IRC_client_connection.glade</itemPath>
+      <itemPath>../../../test_i/etc/IRC_client_main.glade</itemPath>
+      <itemPath>../../../test_i/etc/IRC_client_phonebook.ini</itemPath>
+      <itemPath>../../../test_i/etc/IRCclient.rc</itemPath>
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>../../../test_i/FILE_Stream.cpp</itemPath>
+      <itemPath>../../../test_i/IOStream_alt_T.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_IRCbisect.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_IRCmessage.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_IRCparser.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_IRCparser_driver.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_IRCscanner.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_gui.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_gui_callbacks.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_gui_connection.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_gui_messagehandler.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_gui_tools.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_inputhandler.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_message.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_messageallocator.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_module_IRChandler.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_module_IRCparser.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_module_IRCsplitter.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_module_IRCstreamer.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_sessionmessage.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_signalhandler.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_statemachine_registration.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_stream.cpp</itemPath>
+      <itemPath>../../../test_i/IRC_client_tools.cpp</itemPath>
+      <itemPath>../../../test_i/Streambuf_alt.cpp</itemPath>
+      <itemPath>../../../test_i/stdafx.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+      </compileType>
+      <item path="../../../test_i/FILE_Stream.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../test_i/FILE_Stream.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/FILE_Stream.inl" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/IOStream_alt_T.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../test_i/IOStream_alt_T.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/IOStream_alt_T.inl" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/IOStream_alt_macros.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRC_codes.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCbisect.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCbisect.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCmessage.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCmessage.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCparser.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCparser.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCparser_driver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCparser_driver.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCscanner.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCscanner.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_common_modules.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_configuration.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_defines.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_callbacks.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_callbacks.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_connection.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_connection.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_defines.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_messagehandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_messagehandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_tools.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_tools.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_iIRCControl.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_inputhandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_inputhandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_message.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_message.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_messageallocator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_messageallocator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRChandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRChandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCparser.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCparser.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCsplitter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCsplitter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCstreamer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCstreamer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_network.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_session_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_sessionmessage.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_sessionmessage.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_signalhandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_signalhandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_statemachine_registration.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_statemachine_registration.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_stream.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_stream.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_stream_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_tools.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_tools.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/Streambuf_alt.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../test_i/Streambuf_alt.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/Streambuf_alt.inl" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRC_client.ini" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRC_client_channel.glade"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRC_client_connection.glade"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRC_client_main.glade"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRC_client_phonebook.ini"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRCclient.rc" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/stdafx.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../test_i/stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+      </compileType>
+      <item path="../../../test_i/FILE_Stream.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../test_i/FILE_Stream.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/FILE_Stream.inl" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/IOStream_alt_T.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../test_i/IOStream_alt_T.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/IOStream_alt_T.inl" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/IOStream_alt_macros.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRC_codes.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCbisect.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCbisect.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCmessage.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCmessage.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCparser.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCparser.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCparser_driver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCparser_driver.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCscanner.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_IRCscanner.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_common_modules.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_configuration.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_defines.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_callbacks.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_callbacks.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_connection.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_connection.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_defines.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_messagehandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_messagehandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_tools.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_gui_tools.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_iIRCControl.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_inputhandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_inputhandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_message.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_message.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_messageallocator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_messageallocator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRChandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRChandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCparser.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCparser.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCsplitter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCsplitter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCstreamer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_module_IRCstreamer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_network.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_session_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_sessionmessage.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_sessionmessage.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_signalhandler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_signalhandler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_statemachine_registration.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_statemachine_registration.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_stream.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_stream.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_stream_common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_tools.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_client_tools.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/IRC_common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/Streambuf_alt.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../test_i/Streambuf_alt.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/Streambuf_alt.inl" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRC_client.ini" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRC_client_channel.glade"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRC_client_connection.glade"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRC_client_main.glade"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRC_client_phonebook.ini"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../test_i/etc/IRCclient.rc" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../test_i/stdafx.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../test_i/stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

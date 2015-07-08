@@ -27,7 +27,6 @@
 #include "ace/iosfwd.h"
 #include "ace/OS.h"
 
-//#include "common_time_common.h"
 #include "common_timer_manager.h"
 
 #include "stream_iallocator.h"
@@ -524,17 +523,17 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       IRC_Client_Module_IRCHandler_Module* module_p =
         dynamic_cast<IRC_Client_Module_IRCHandler_Module*> (inherited::module ());
       ACE_ASSERT (module_p);
-      const IRC_Client_StreamModuleConfiguration& module_configuration =
+      const IRC_Client_StreamModuleConfiguration& module_configuration_r =
           module_p->get ();
-      IRC_Client_INotify_t* subscriber_p =
-        dynamic_cast<IRC_Client_INotify_t*> (module_configuration.connection);
+      //IRC_Client_INotify_t* subscriber_p =
+      //  dynamic_cast<IRC_Client_INotify_t*> (module_configuration_r.connection);
 
       {
         ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
         // initial subscriber ?
-        if (subscriber_p)
-          subscribers_.push_back (subscriber_p);
+        if (module_configuration_r.subscriber)
+          subscribers_.push_back (module_configuration_r.subscriber);
 
 //         ACE_DEBUG ((LM_DEBUG,
 //                     ACE_TEXT ("session starting, notifying %u subscriber(s)...\n"),
@@ -554,7 +553,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
         {
           try
           {
-            (*iterator++)->start (module_configuration);
+            (*iterator++)->start (module_configuration_r);
           }
           catch (...)
           {
@@ -595,7 +594,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
           catch (...)
           {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("caught exception in IRC_Client_INotify::end(), continuing\n")));
+                        ACE_TEXT ("caught exception in IRC_Client_INotify_t::end(), continuing\n")));
           }
         } // end FOR
 
@@ -1471,16 +1470,17 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Client_IRCMessage*& command_in)
   command_in = NULL;
 
   // step3: send it upstream
-  // *NOTE*: while there is NO way to prevent async close of the CONNECTION,
-  // this does protect against async closure of the STREAM WHILE we propagate
-  // our message...
-  // --> grab our lock and check connectionIsAlive_
+
+  // *NOTE*: there is NO way to prevent asynchronous closure of the connection;
+  //         this protect against closure of the stream while the message is
+  //         propagated... (see line 614)
+  //         --> grab lock and check connectionIsAlive_
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
   // sanity check
   if (!connectionIsAlive_)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("no connection - cannot send message, returning\n")));
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("connection has been closed/lost - cannot send message, returning\n")));
 
     // clean up
     message_p->release ();

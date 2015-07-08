@@ -125,9 +125,7 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
   IRC_Client_Configuration* configuration_p = NULL;
   if (!inherited::manager_)
   {
-    ACE_ASSERT (configuration_in.connection);
-    const IRC_Client_Configuration& configuration_r =
-      configuration_in.connection->get ();
+    const IRC_Client_Configuration& configuration_r = inherited::get ();
     configuration_p = &const_cast<IRC_Client_Configuration&> (configuration_r);
   } // end IF
   else
@@ -751,7 +749,7 @@ IRC_Client_IRCSession_T<ConnectionType>::open (void* arg_in)
     configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
   // sanity check(s)
   ACE_ASSERT (configuration_p);
-  configuration_p->streamConfiguration.streamModuleConfiguration.connection =
+  configuration_p->streamConfiguration.streamModuleConfiguration.subscriber =
     this;
 
   // step1: initialize/start stream, tweak socket, register reading data with
@@ -779,7 +777,7 @@ IRC_Client_IRCSession_T<ConnectionType>::open (ACE_HANDLE handle_in,
     configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
   // sanity check(s)
   ACE_ASSERT (configuration_p);
-  configuration_p->streamConfiguration.streamModuleConfiguration.connection =
+  configuration_p->streamConfiguration.streamModuleConfiguration.subscriber =
     this;
 
   // step1: initialize/start stream, tweak socket, register reading data with

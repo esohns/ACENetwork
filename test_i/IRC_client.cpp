@@ -385,8 +385,8 @@ connection_setup_curses_function (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::connection_setup_curses_function"));
 
-  IRC_Client_ThreadData* thread_data_p =
-    static_cast<IRC_Client_ThreadData*> (arg_in);
+  IRC_Client_InputThreadData* thread_data_p =
+    static_cast<IRC_Client_InputThreadData*> (arg_in);
   ACE_ASSERT (thread_data_p);
   int result = -1;
   ACE_Time_Value delay (IRC_CLIENT_CONNECTION_DEF_TIMEOUT, 0);
@@ -411,9 +411,9 @@ connection_setup_curses_function (void* arg_in)
                 &delay));
     return NULL;
   } // end IF
-  thread_data_p->moduleConfiguration->connection =
+  IRC_Client_IConnection_t* connection_p =
     connection_manager_p->operator[] (0);
-  if (!thread_data_p->moduleConfiguration->connection)
+  if (!connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_IConnection_Manager_t::operator[0]: \"%m\", aborting\n")));
@@ -432,8 +432,7 @@ connection_setup_curses_function (void* arg_in)
               ACE_TEXT ("registering IRC connection...\n")));
 
   bool result_2 = false;
-  const IRC_Client_Stream& stream_r =
-    thread_data_p->moduleConfiguration->connection->stream ();
+  const IRC_Client_Stream& stream_r = connection_p->stream ();
   const Stream_Module_t* module_p = NULL;
   for (Stream_Iterator_t iterator (stream_r);
        (iterator.next (module_p) != 0);
@@ -448,7 +447,7 @@ connection_setup_curses_function (void* arg_in)
                 ACE_TEXT (IRC_HANDLER_MODULE_NAME)));
 
     // clean up
-    thread_data_p->moduleConfiguration->connection->decrease ();
+    connection_p->decrease ();
     Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
                                          thread_data_p->useProactor,
                                          -1);
@@ -461,10 +460,10 @@ connection_setup_curses_function (void* arg_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<IRC_Client_IIRCControl*>(0x%@), aborting\n"),
-                thread_data_p->moduleConfiguration->connection));
+                connection_p));
 
     // clean up
-    thread_data_p->moduleConfiguration->connection->decrease ();
+    connection_p->decrease ();
     Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
                                          thread_data_p->useProactor,
                                          -1);
@@ -487,7 +486,7 @@ connection_setup_curses_function (void* arg_in)
                 ACE_TEXT ("failed to IRC_Client_IIRCControl::registerConnection(), aborting\n")));
 
     // clean up
-    thread_data_p->moduleConfiguration->connection->decrease ();
+    connection_p->decrease ();
     Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
                                          thread_data_p->useProactor,
                                          -1);
@@ -506,7 +505,7 @@ connection_setup_curses_function (void* arg_in)
                 ACE_TEXT ("failed to dynamic_cast<IRC_Client_IRegistration_t*>: \"%m\", aborting\n")));
 
     // clean up
-    thread_data_p->moduleConfiguration->connection->decrease ();
+    connection_p->decrease ();
     Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
                                          thread_data_p->useProactor,
                                          -1);
@@ -534,7 +533,7 @@ connection_setup_curses_function (void* arg_in)
                 &delay));
 
     // clean up
-    thread_data_p->moduleConfiguration->connection->decrease ();
+    connection_p->decrease ();
     Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
                                          thread_data_p->useProactor,
                                          -1);
@@ -567,7 +566,7 @@ connection_setup_curses_function (void* arg_in)
                 ACE_TEXT (channel_string.c_str ())));
 
     // clean up
-    thread_data_p->moduleConfiguration->connection->decrease ();
+    connection_p->decrease ();
     Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
                                          thread_data_p->useProactor,
                                          -1);
@@ -579,15 +578,15 @@ connection_setup_curses_function (void* arg_in)
   if (thread_data_p->cursesState)
   {
     IRC_Client_ISession_t* session_p =
-      dynamic_cast<IRC_Client_ISession_t*> (thread_data_p->moduleConfiguration->connection);
+      dynamic_cast<IRC_Client_ISession_t*> (connection_p);
     if (!session_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to dynamic_cast<IRC_Client_ISession_t*>(0x%@), aborting\n"),
-                  thread_data_p->moduleConfiguration->connection));
+                  connection_p));
 
       // clean up
-      thread_data_p->moduleConfiguration->connection->decrease ();
+      connection_p->decrease ();
       Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
                                            thread_data_p->useProactor,
                                            -1);
@@ -599,8 +598,7 @@ connection_setup_curses_function (void* arg_in)
       &const_cast<IRC_Client_SessionState&> (session_state_r);
 
     // step6: clean up
-    thread_data_p->moduleConfiguration->connection->decrease ();
-    thread_data_p->moduleConfiguration->connection = NULL;
+    connection_p->decrease ();
 
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("running curses dispatch loop...\n")));
@@ -623,8 +621,7 @@ connection_setup_curses_function (void* arg_in)
   else
   {
     // step6: clean up
-    thread_data_p->moduleConfiguration->connection->decrease ();
-    thread_data_p->moduleConfiguration->connection = NULL;
+    connection_p->decrease ();
   } // end ELSE
 
   return NULL;
@@ -668,6 +665,8 @@ do_work (IRC_Client_Configuration& configuration_in,
                                  configuration_in.protocolConfiguration.printPingDot);
   configuration_in.streamConfiguration.streamConfiguration.module =
     &IRC_handler;
+  configuration_in.streamConfiguration.streamConfiguration.cloneModule =
+    true;
   configuration_in.streamConfiguration.streamConfiguration.deleteModule =
     false;
 
@@ -810,14 +809,14 @@ do_work (IRC_Client_Configuration& configuration_in,
 
   // step6a: wait for connection / setup
 
-  IRC_Client_ThreadData thread_data;
-  thread_data.configuration = &configuration_in;
-  thread_data.groupID = configuration_in.groupID;
-  thread_data.moduleConfiguration = &module_configuration;
+  IRC_Client_InputThreadData input_thread_data;
+  input_thread_data.configuration = &configuration_in;
+  input_thread_data.groupID = configuration_in.groupID;
+  input_thread_data.moduleConfiguration = &module_configuration;
   if (useCursesLibrary_in)
-    thread_data.cursesState = &curses_state;
-  thread_data.useProactor = !configuration_in.useReactor;
-  thread_data.useReactor = configuration_in.useReactor;
+    input_thread_data.cursesState = &curses_state;
+  input_thread_data.useProactor = !configuration_in.useReactor;
+  input_thread_data.useReactor = configuration_in.useReactor;
   ACE_thread_t thread_id = -1;
   ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
   //char thread_name[BUFSIZ];
@@ -827,7 +826,7 @@ do_work (IRC_Client_Configuration& configuration_in,
                     char[BUFSIZ]);
   if (!thread_name_p)
   {
-    ACE_DEBUG ((LM_ERROR,
+    ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
 
     // clean up
@@ -845,7 +844,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   ACE_ASSERT (thread_manager_p);
   result =
     thread_manager_p->spawn (::connection_setup_curses_function, // function
-                             &thread_data,                       // argument
+                             &input_thread_data,                 // argument
                              (THR_NEW_LWP      |
                               THR_JOINABLE     |
                               THR_INHERIT_SCHED),                // flags

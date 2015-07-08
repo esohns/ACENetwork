@@ -244,9 +244,9 @@ typedef IRC_Client_MessageQueue_t::reverse_iterator IRC_Client_MessageQueueRever
 //  ACE_IOStream<ACE_FILE_Stream> output_;
 typedef ACE_IOStream_alt_T<ACE_FILE_Stream> IRC_Client_IOStream_t;
 
-struct IRC_Client_ThreadData
+struct IRC_Client_InputThreadData
 {
-  inline IRC_Client_ThreadData ()
+  inline IRC_Client_InputThreadData ()
    : configuration (NULL)
    , cursesState (NULL)
    , groupID (-1)

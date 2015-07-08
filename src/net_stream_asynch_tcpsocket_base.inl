@@ -124,45 +124,51 @@ Net_StreamAsynchTCPSocketBase_T<AddressType,
   // step2: initialize/start stream
   // step2a: connect stream head message queue with a notification pipe/queue ?
   if (!inherited3::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
-  {
     inherited3::configuration_.streamConfiguration.streamConfiguration.notificationStrategy =
       this;
-  } // end IF
-  // step2b: initialize final module (if any)
+
   if (inherited3::configuration_.streamConfiguration.streamConfiguration.module)
   {
-    IMODULE_T* imodule_p = NULL;
-    // need a downcast...
-    imodule_p =
-      dynamic_cast<IMODULE_T*> (inherited3::configuration_.streamConfiguration.streamConfiguration.module);
-    if (!imodule_p)
+    // step2b: clone final module (if any) ?
+    if (inherited3::configuration_.streamConfiguration.streamConfiguration.cloneModule)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
-                  ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
-      goto close;
+      IMODULE_T* imodule_p = NULL;
+      // need a downcast...
+      imodule_p =
+        dynamic_cast<IMODULE_T*> (inherited3::configuration_.streamConfiguration.streamConfiguration.module);
+      if (!imodule_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
+                    ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+        goto close;
+      } // end IF
+      Stream_Module_t* clone_p = NULL;
+      try
+      {
+        clone_p = imodule_p->clone ();
+      }
+      catch (...)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), aborting\n"),
+                    ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+        goto close;
+      }
+      if (!clone_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
+                    ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+        goto close;
+      }
+      inherited3::configuration_.streamConfiguration.streamConfiguration.module =
+        clone_p;
+      inherited3::configuration_.streamConfiguration.streamConfiguration.deleteModule =
+        true;
     } // end IF
-    Stream_Module_t* clone_p = NULL;
-    try
-    {
-      clone_p = imodule_p->clone ();
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), aborting\n"),
-                  ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
-      goto close;
-    }
-    if (!clone_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
-                  ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
-      goto close;
-    }
-    inherited3::configuration_.streamConfiguration.streamConfiguration.module = clone_p;
-    inherited3::configuration_.streamConfiguration.streamConfiguration.deleteModule = true;
+
+    // *TODO*: step2b: initialize final module (if any)
   } // end IF
 
   // *TODO*: this clearly is a design glitch

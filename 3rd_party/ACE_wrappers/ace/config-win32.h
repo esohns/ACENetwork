@@ -1,6 +1,13 @@
 // *NOTE*: uncomment the line corresponding to your platform !
 #include "ace/config-win32.h"
 
+// *NOTE*: this settings corresponds with the UNICODE preprocessor symbol (MSVC
+//         builds):
+// *TODO*: check how this correlates with the standard multi-byte compiler
+//         setting; in places, this seems to be inconsistent throughout both
+//         frameworks
+//#define ACE_USES_WCHAR 1
+
 // *NOTE*: needed for ACE_IOStream
 #define ACE_HAS_STANDARD_CPP_LIBRARY 1
 

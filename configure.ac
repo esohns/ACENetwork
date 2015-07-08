@@ -42,7 +42,7 @@ dnl                    modules/libACEStream])
 AC_CONFIG_SUBDIRS([modules/libCommon
                    modules/libACEStream])
 AM_PO_SUBDIRS
-                   
+
 LIBACENETWORK_VERSION_API=M4_LIBACENETWORK_VERSION_API
 AC_SUBST([LIBACENETWORK_VERSION_API])
 
@@ -71,6 +71,7 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 #AC_PROG_YACC
 AM_GNU_GETTEXT([external])
+AM_GNU_GETTEXT_VERSION([0.19.4])
 AM_PROG_AR
 LT_INIT
 
@@ -224,6 +225,7 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/client_server/Makefile
                  test_i/Makefile
+                 test_i/etc/Makefile
                  test_u/Makefile])
 
 AC_OUTPUT

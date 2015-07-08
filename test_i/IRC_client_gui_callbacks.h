@@ -21,12 +21,15 @@
 #ifndef IRC_CLIENT_GUI_CALLBACKS_H
 #define IRC_CLIENT_GUI_CALLBACKS_H
 
+#include "ace/config-macros.h"
+
 #include "gtk/gtk.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif /* __cplusplus */
+ACE_THR_FUNC_RETURN connection_setup_function (void*);
 void is_entry_sensitive (GtkCellLayout*,
                          GtkCellRenderer*,
                          GtkTreeModel*,
@@ -36,11 +39,13 @@ void is_entry_sensitive (GtkCellLayout*,
 //------------------------------------------------------------------------------
 
 // idle routines
+gboolean idle_add_connection_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
 gboolean idle_remove_connection_cb (gpointer);
 gboolean idle_update_channel_modes_cb (gpointer);
 gboolean idle_update_display_cb (gpointer);
+gboolean idle_update_progress_cb (gpointer);
 gboolean idle_update_user_modes_cb (gpointer);
 
 //------------------------------------------------------------------------------

@@ -25,6 +25,7 @@
 #include "ace/Time_Value.h"
 
 #include "common_defines.h"
+#include "common_inotify.h"
 
 #include "stream_common.h"
 
@@ -34,19 +35,24 @@
 
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
+//#include "IRC_client_stream_common.h"
 
 // forward declarations
-class IRC_Client_IIRCControl;
-class IRC_Client_Stream;
 struct IRC_Client_Configuration;
 struct IRC_Client_CursesState;
+class IRC_Client_IIRCControl;
+class IRC_Client_IRCMessage;
 struct IRC_Client_SessionData;
+class IRC_Client_Stream;
+struct IRC_Client_StreamModuleConfiguration;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_SocketConfiguration,
                                  IRC_Client_Configuration,
                                  IRC_Client_SessionData,
                                  Stream_Statistic,
                                  IRC_Client_Stream> IRC_Client_IConnection_Manager_t;
+typedef Common_INotify_T<IRC_Client_StreamModuleConfiguration,
+                         IRC_Client_IRCMessage> IRC_Client_INotify_t;
 
 typedef Stream_Statistic IRC_Client_RuntimeStatistic_t;
 struct IRC_Client_SessionData
@@ -93,11 +99,13 @@ struct IRC_Client_ProtocolConfiguration
 struct IRC_Client_StreamModuleConfiguration
 {
   inline IRC_Client_StreamModuleConfiguration ()
-   : connection (NULL)
+   : //connection (NULL),
+     subscriber (NULL)
    , moduleConfiguration ()
   {};
 
-  IRC_Client_IConnection_t*  connection;
+  //IRC_Client_IConnection_t*  connection;
+  IRC_Client_INotify_t*      subscriber; // (initial) subscriber
   Stream_ModuleConfiguration moduleConfiguration;
 };
 
@@ -152,12 +160,12 @@ struct IRC_Client_Configuration
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
-  // **************************** socket data **********************************
+  // ****************************** socket *************************************
   Net_SocketConfiguration          socketConfiguration;
-  // **************************** stream data **********************************
+  // ****************************** stream *************************************
   IRC_Client_StreamConfiguration   streamConfiguration;
   //IRC_Client_SessionData*          streamSessionData;
-  // *************************** protocol data *********************************
+  // ***************************** protocol ************************************
   IRC_Client_ProtocolConfiguration protocolConfiguration;
   // ***************************************************************************
   IRC_Client_CursesState*          cursesState;

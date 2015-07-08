@@ -44,9 +44,6 @@ IRC_Client_Stream::IRC_Client_Stream ()
   inherited::availableModules_.push_front (&IRCMarshal_);
   inherited::availableModules_.push_front (&IRCParser_);
   inherited::availableModules_.push_front (&runtimeStatistic_);
-  //inherited::availableModules_.insert_tail (&IRCMarshal_);
-  //inherited::availableModules_.insert_tail (&IRCParser_);
-  //inherited::availableModules_.insert_tail (&runtimeStatistic_);
 
   // *TODO*: fix ACE bug: modules should initialize their "next" member to NULL
   //inherited::MODULE_T* module_p = NULL;
@@ -81,7 +78,6 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   // - initialize modules
   // - push them onto the stream (tail-first) !
 
-  //  ACE_OS::memset (&inherited::state_, 0, sizeof (inherited::state_));
   inherited::state_.sessionID = configuration_in.sessionID;
 
   int result = -1;

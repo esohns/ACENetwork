@@ -88,6 +88,9 @@ class IRC_Client_Stream
   IRC_Client_Module_IRCMarshal_Module       IRCMarshal_;
   IRC_Client_Module_IRCParser_Module        IRCParser_;
   IRC_Client_Module_RuntimeStatistic_Module runtimeStatistic_;
+  // *NOTE*: the final module needs to be supplied to the stream from outside,
+  //         otherwise data might be lost if event dispatch runs in (a) separate
+  //         thread(s)
   //   IRC_Client_Module_IRCHandler_Module IRCHandler_;
 };
 

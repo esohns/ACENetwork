@@ -52,17 +52,14 @@ class IRC_Client_GUI_Connection
   friend class IRC_Client_GUI_MessageHandler;
 
  public:
-  // *WARNING*: make sure the ctor/dtor calls are made either:
-  // - by the main thread (servicing the gtk_main event loop)
-  // - protected by gdk_threads_enter/gdk_threads_leave
   IRC_Client_GUI_Connection (Common_UI_GTKState*,           // GTK state handle
-                             IRC_Client_IIRCControl*,       // controller handle
                              IRC_Client_GUI_Connections_t*, // connections handle
-                             //const std::string&,            // (starting) nickname
+                             guint,                         // (statusbar) context ID
                              const std::string&,            // (server tab) label
-                             const std::string&,            // UI (glade) file directory
-                             GtkNotebook*);                 // parent widget
-  virtual~IRC_Client_GUI_Connection ();
+                             const std::string&);           // UI (glade) file directory
+  virtual ~IRC_Client_GUI_Connection ();
+
+  void initialize (IRC_Client_IIRCControl*); // controller handle
 
   // implement IRC_Client_INotify_t
   virtual void start (const IRC_Client_StreamModuleConfiguration&);
@@ -105,14 +102,12 @@ class IRC_Client_GUI_Connection
   IRC_Client_GUI_MessageHandler* getHandler (const std::string&); // id (channel/nick)
 
   IRC_Client_GTK_ConnectionCBData CBData_;
+  guint                           contextID_;
   bool                            isFirstUsersMsg_;
   std::string                     UIFileDirectory_;
 
   ACE_Thread_Mutex                lock_;
   MESSAGE_HANDLERS_T              messageHandlers_;
-
-  guint                           contextID_;
-  GtkNotebook*                    parent_;
 };
 
 #endif

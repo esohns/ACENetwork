@@ -195,30 +195,34 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   //  g_object_unref (buffer_p);
 
   // step5: initialize updates
-  // schedule asynchronous updates of the log view
-  guint event_source_id = g_timeout_add_seconds (1,
-                                                 idle_update_log_display_cb,
-                                                 userData_in);
-  if (event_source_id > 0)
-    data_p->GTKState.eventSourceIds.push_back (event_source_id);
-  else
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_timeout_add_seconds(): \"%m\", aborting\n")));
-    return FALSE; // G_SOURCE_REMOVE
-  } // end ELSE
-  // schedule asynchronous updates of the info view
-  event_source_id = g_timeout_add (NET_UI_GTKEVENT_RESOLUTION,
-                                   idle_update_info_display_cb,
-                                   userData_in);
-  if (event_source_id > 0)
-    data_p->GTKState.eventSourceIds.push_back (event_source_id);
-  else
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
-    return FALSE; // G_SOURCE_REMOVE
-  } // end ELSE
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+
+    // schedule asynchronous updates of the log view
+    guint event_source_id = g_timeout_add_seconds (1,
+                                                   idle_update_log_display_cb,
+                                                   userData_in);
+    if (event_source_id > 0)
+      data_p->GTKState.eventSourceIds.insert (event_source_id);
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add_seconds(): \"%m\", aborting\n")));
+      return FALSE; // G_SOURCE_REMOVE
+    } // end ELSE
+    // schedule asynchronous updates of the info view
+    event_source_id = g_timeout_add (NET_UI_GTKEVENT_RESOLUTION,
+                                     idle_update_info_display_cb,
+                                     userData_in);
+    if (event_source_id > 0)
+      data_p->GTKState.eventSourceIds.insert (event_source_id);
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
+      return FALSE; // G_SOURCE_REMOVE
+    } // end ELSE
+  } // end lock scope
 
   // step6: disable some functions ?
   GtkButton* button_p =
@@ -490,30 +494,34 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   gtk_rc_style_unref (rc_style_p);
 
   // step4: initialize updates
-  // schedule asynchronous updates of the log view
-  guint event_source_id = g_timeout_add_seconds (1,
-                                                 idle_update_log_display_cb,
-                                                 userData_in);
-  if (event_source_id > 0)
-    data_p->GTKState.eventSourceIds.push_back (event_source_id);
-  else
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_timeout_add_seconds(): \"%m\", aborting\n")));
-    return FALSE; // G_SOURCE_REMOVE
-  } // end ELSE
-  // schedule asynchronous updates of the info view
-  event_source_id = g_timeout_add (NET_UI_GTKEVENT_RESOLUTION,
-                                   idle_update_info_display_cb,
-                                   userData_in);
-  if (event_source_id > 0)
-    data_p->GTKState.eventSourceIds.push_back (event_source_id);
-  else
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
-    return FALSE; // G_SOURCE_REMOVE
-  } // end ELSE
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+
+    // schedule asynchronous updates of the log view
+    guint event_source_id = g_timeout_add_seconds (1,
+                                                   idle_update_log_display_cb,
+                                                   userData_in);
+    if (event_source_id > 0)
+      data_p->GTKState.eventSourceIds.insert (event_source_id);
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add_seconds(): \"%m\", aborting\n")));
+      return FALSE; // G_SOURCE_REMOVE
+    } // end ELSE
+    // schedule asynchronous updates of the info view
+    event_source_id = g_timeout_add (NET_UI_GTKEVENT_RESOLUTION,
+                                     idle_update_info_display_cb,
+                                     userData_in);
+    if (event_source_id > 0)
+      data_p->GTKState.eventSourceIds.insert (event_source_id);
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
+      return FALSE; // G_SOURCE_REMOVE
+    } // end ELSE
+  } // end lock scope
 
   // step5: disable some functions ?
   GtkButton* button_p =

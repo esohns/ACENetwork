@@ -88,14 +88,15 @@ IRC_Client_UI_Tools::current (const IRC_Client_GTK_CBData& CBData_in)
     GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
                                           ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
   ACE_ASSERT (notebook_p);
-  gint tab_num = gtk_notebook_get_current_page (notebook_p);
-  ACE_ASSERT (tab_num >= 0);
+  gint tab_number = gtk_notebook_get_current_page (notebook_p);
+  if (tab_number == -1)
+    return NULL; // no connection page (yet ?)
   GtkWidget* widget_p = gtk_notebook_get_nth_page (notebook_p,
-                                                   tab_num);
+                                                   tab_number);
   ACE_ASSERT (widget_p);
 
-  // step2: find connection whose main window corresponds with the
-  //        currently active notebook page
+  // step2: find connection whose main window corresponds with the currently
+  //        active notebook page
   for (IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 = CBData_in.connections.begin ();
        iterator_2 != CBData_in.connections.end ();
        ++iterator_2)
@@ -122,9 +123,11 @@ IRC_Client_UI_Tools::current (const IRC_Client_GTK_CBData& CBData_in)
       break;
     } // end IF
   } // end FOR
-  if (!result_p)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("could not find active connection --> check implementation !, aborting\n")));
+
+  // *NOTE*: there is a delay between connection establishment and registration.
+  //         In this state, a server page is already added, even though
+  //         CBData_in.connections has not been updated (yet)
+  //         --> no connection will be found here
 
   return result_p;
 }
