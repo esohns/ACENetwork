@@ -579,7 +579,6 @@ IRC_Client_GUI_Connection::start (const IRC_Client_StreamModuleConfiguration& co
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::start"));
 
   ACE_UNUSED_ARG (configuration_in);
-
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
@@ -1127,6 +1126,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:       // 401
         case IRC_Client_IRC_Codes::ERR_UNKNOWNCOMMAND:   // 421
         case IRC_Client_IRC_Codes::ERR_NOMOTD:           // 422
+        case IRC_Client_IRC_Codes::ERR_ERRONEUSNICKNAME: // 432
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:    // 433
         case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:    // 451
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:   // 461
@@ -1139,6 +1139,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           if ((message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOSUCHNICK)       ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_UNKNOWNCOMMAND)   ||
+              (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_ERRONEUSNICKNAME) ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE)    ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOTREGISTERED)    ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP) ||

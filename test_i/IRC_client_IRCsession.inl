@@ -473,6 +473,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:       // 401
         case IRC_Client_IRC_Codes::ERR_UNKNOWNCOMMAND:   // 421
         case IRC_Client_IRC_Codes::ERR_NOMOTD:           // 422
+        case IRC_Client_IRC_Codes::ERR_ERRONEUSNICKNAME: // 432
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:    // 433
         case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:    // 451
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:   // 461
@@ -485,6 +486,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
 
           if ((message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOSUCHNICK)       ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_UNKNOWNCOMMAND)   ||
+              (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_ERRONEUSNICKNAME) ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE)    ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOTREGISTERED)    ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP) ||

@@ -215,6 +215,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
         case IRC_Client_IRC_Codes::ERR_NOTEXTTOSEND:         // 412
         case IRC_Client_IRC_Codes::ERR_UNKNOWNCOMMAND:       // 421
         case IRC_Client_IRC_Codes::ERR_NOMOTD:               // 422
+        case IRC_Client_IRC_Codes::ERR_ERRONEUSNICKNAME:     // 432
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:        // 433
         case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:        // 451
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:       // 461

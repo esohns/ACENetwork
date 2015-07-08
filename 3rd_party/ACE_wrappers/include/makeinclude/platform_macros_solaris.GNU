@@ -1,5 +1,3 @@
-include $(ACE_ROOT)/include/makeinclude/platform_sunos5_sunc++.GNU
-
 CFLAGS+=-features=zla
 
 INSTALL_PREFIX=/usr/local
@@ -8,7 +6,7 @@ INSTALL_PREFIX=/usr/local
 debug=1
 #dmalloc=0
 #fast=0
-inline=1
+#inline=1
 #minimum_corba=0
 #mtrace=0
 optimize=0
@@ -42,4 +40,14 @@ versioned_so=1
 #winregistry=1
 #winnt=1
 link_groups=1
+
+# *NOTE*: enable native ACE_Atomic_Op<ACE_Thread_Mutex, long>
+#atomic_ops_sparc=1
+#buildbits=64
+
+include $(ACE_ROOT)/include/makeinclude/platform_sunos5_sunc++.GNU
+
+#CFLAGS=$(filter-out -xarch=generic64, $(CFLAGS)) 
+#CFLAGS+=-xarch=v8plus
+#CFLAGS+=-xarch=v9
 

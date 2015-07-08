@@ -1,4 +1,3 @@
-// *NOTE*: uncomment the line corresponding to your platform !
 #include "ace/config-sunos5.11.h"
 
 // *NOTE*: don't use the regular pipe-based mechanism,
@@ -16,5 +15,6 @@
 #undef __FD_SETSIZE
 #define __FD_SETSIZE 65536
 #include <sys/select.h>
-//#include <linux/posix_types.h>
+
+#define _POSIX_PTHREAD_SEMANTICS
 
