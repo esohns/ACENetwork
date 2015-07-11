@@ -27,6 +27,8 @@
 
 #include "ace/OS.h"
 
+#include "gtk/gtk.h"
+
 #include "common_ui_common.h"
 
 #include "IRC_client_common.h"
@@ -37,6 +39,7 @@ class ACE_Thread_Mutex;
 struct IRC_Client_Configuration;
 class IRC_Client_IIRCControl;
 class IRC_Client_GUI_Connection;
+class IRC_Client_GUI_MessageHandler;
 
 typedef std::map<std::string, IRC_Client_GUI_Connection*> IRC_Client_GUI_Connections_t;
 typedef IRC_Client_GUI_Connections_t::iterator IRC_Client_GUI_ConnectionsIterator_t;
@@ -102,9 +105,9 @@ struct IRC_Client_GTK_ConnectionCBData
 {
   inline IRC_Client_GTK_ConnectionCBData ()
    : acknowledgements (0)
-   , connection (NULL)
    , connections (NULL)
    , controller (NULL)
+   , eventSourceID (0)
    , GTKState (NULL)
    , IRCSessionState ()
    , label ()
@@ -113,9 +116,9 @@ struct IRC_Client_GTK_ConnectionCBData
   {};
 
   unsigned int                  acknowledgements;
-  IRC_Client_GUI_Connection*    connection;
   IRC_Client_GUI_Connections_t* connections;
   IRC_Client_IIRCControl*       controller;
+  guint                         eventSourceID;
   Common_UI_GTKState*           GTKState;
   IRC_Client_SessionState       IRCSessionState;
   std::string                   label;
@@ -131,21 +134,27 @@ struct IRC_Client_GTK_HandlerCBData
    , channelModes ()
    , connection (NULL)
    , controller (NULL)
+   , eventSourceID (0)
    , GTKState (NULL)
+   , handler (NULL)
    , id ()
    , parameters ()
    , pending (false)
+   , timestamp ()
   {};
 
-  unsigned int                      acknowledgements;
-  std::string                       builderLabel;
-  IRC_Client_ChannelModes_t         channelModes;
-  IRC_Client_GUI_Connection*        connection;
-  IRC_Client_IIRCControl*           controller;
-  Common_UI_GTKState*               GTKState;
-  std::string                       id;
-  string_list_t                     parameters;
-  bool                              pending;
+  unsigned int                   acknowledgements;
+  std::string                    builderLabel;
+  IRC_Client_ChannelModes_t      channelModes;
+  IRC_Client_GUI_Connection*     connection;
+  IRC_Client_IIRCControl*        controller;
+  guint                          eventSourceID;
+  Common_UI_GTKState*            GTKState;
+  IRC_Client_GUI_MessageHandler* handler;
+  std::string                    id;
+  string_list_t                  parameters;
+  bool                           pending;
+  std::string                    timestamp;
 };
 
 #endif

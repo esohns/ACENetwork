@@ -6,14 +6,14 @@ if test ! -x "$MAKE" ; then MAKE=`which make 2>/dev/null` ; fi
 HAVE_GNU_MAKE=`$MAKE --version|grep -c "Free Software Foundation"`
 
 if test "$HAVE_GNU_MAKE" != "1"; then 
-echo Only non-GNU make found: $MAKE
+echo only non-GNU make found: $MAKE
 else
 echo `$MAKE --version | head -1` found
 fi
 
 AUTORECONF=`which autoreconf 2>/dev/null`
-if $AUTORECONF2.50 >/dev/null 2>&1
-then AC_POSTFIX=2.50
+if $AUTORECONF2.58 >/dev/null 2>&1
+then AC_POSTFIX=2.58
 elif $AUTORECONF --version >/dev/null 2>&1
 then AC_POSTFIX=""
 else
@@ -33,22 +33,19 @@ echo `autoreconf$AC_POSTFIX --version | head -1` found
 #fi
 #echo `autoconf$AC_POSTFIX --version | head -1` found
 
-#AUTOMAKE=`which automake`
-#if $AUTOMAKE-1.9 >/dev/null 2>&1
-#then AM_POSTFIX=-1.9
-#elif which automake-1.8 >/dev/null 2>&1
-#then AM_POSTFIX=-1.8
-#elif which automake-1.7 >/dev/null 2>&1
-#then AM_POSTFIX=-1.7
-#elif which automake-1.6 >/dev/null 2>&1
-#then AM_POSTFIX=-1.6
-#elif $$AUTOMAKE >/dev/null 2>&1
-#then AM_POSTFIX=""
-#else
-#  echo 'you need automake (1.8.3+ recommended) to generate the Makefile'
-#  exit 1
-#fi
-#echo `automake$AM_POSTFIX --version | head -1` found
+AUTOMAKE=`which automake`
+if ! test -x $AUTOMAKE; then
+  echo 'you need automake (1.14+ recommended) to generate the Makefile'
+  exit 1
+fi
+echo `automake --version | head -1` found
+
+LIBTOOL=`which libtoolize`
+if ! test -x $LIBTOOL; then
+  echo 'you need libtool (2.4.2+ recommended) to generate the Makefile'
+  exit 1
+fi
+echo $($(basename $LIBTOOL) --version | head -1) found
 
 AUTOPOINT=`which autopoint`
 if ! test -x $AUTOPOINT; then
@@ -57,7 +54,14 @@ if ! test -x $AUTOPOINT; then
 fi
 echo $($(basename $AUTOPOINT) --version | head -1) found
 
-autoreconf$AC_POSTFIX --install --symlink --warnings=all
+PKGCONFIG=`which pkg-config`
+if ! test -x $PKGCONFIG; then
+  echo 'you need pkg-config (0.28+ recommended) to generate the Makefile'
+  exit 1
+fi
+echo $(basename $PKGCONFIG) $($(basename $PKGCONFIG) --version | head -1) found
+
+autoreconf$AC_POSTFIX --force --install --symlink --warnings=all
 #autoconf$AC_POSTFIX
 #autoheader$AC_POSTFIX
 #aclocal$AM_POSTFIX
@@ -70,4 +74,5 @@ gettextize --force --symlink
 #if test ! -e po/LINGUAS
 #then touch po/LINGUAS
 #fi
-##libtoolize --force --copy
+libtoolize --force --install
+

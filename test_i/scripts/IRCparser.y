@@ -63,6 +63,15 @@ typedef void* yyscan_t;
 #endif
 #include <string>
 
+// *WORKAROUND*
+using namespace std;
+// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
+//                   a problem in conjunction with the standard include headers
+//                   when ACE_USES_OLD_IOSTREAMS is defined
+//                   --> include the necessary headers manually (see above), and
+//                       prevent ace/iosfwd.h from causing any harm
+#define ACE_IOSFWD_H
+
 #include "ace/Log_Msg.h"
 
 #include "net_macros.h"

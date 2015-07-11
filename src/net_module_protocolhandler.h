@@ -21,14 +21,14 @@
 #ifndef NET_MODULE_PROTOCOLHANDLER_H
 #define NET_MODULE_PROTOCOLHANDLER_H
 
-#include "ace/Time_Value.h"
-#include "ace/Reactor.h"
+#include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common.h"
 #include "common_itimer.h"
+#include "common_time_common.h"
 #include "common_timerhandler.h"
 
+#include "stream_common.h"
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 

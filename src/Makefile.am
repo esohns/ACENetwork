@@ -6,8 +6,9 @@ DEFS += \
   -DNET_BUILD_DLL=1 \
   -DMETA_PACKAGE=\"@PACKAGE_NAME@\"
 
+#  -I/usr/include/c++/3.4.6/backward
+#  -I$(top_srcdir)/3rd_party/c++
 AM_CPPFLAGS = \
-  -I/usr/include/c++/3.4.6/backward \
   -I$(top_srcdir)/../ATCD/ACE
 
 noinst_HEADERS = \

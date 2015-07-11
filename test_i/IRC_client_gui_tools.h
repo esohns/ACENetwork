@@ -23,28 +23,33 @@
 
 #include <string>
 
-#include "gtk/gtk.h"
-
 #include "ace/Global_Macros.h"
 
+#include "common_ui_common.h"
+
 #include "IRC_client_gui_common.h"
+
+// forward declarations
+class IRC_Client_GUI_Connection;
 
 class IRC_Client_UI_Tools
 {
  public:
   // *WARNING*: these members must be called with
   //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
-  static IRC_Client_GUI_Connection* current (const IRC_Client_GTK_CBData&); // GTK callback state
-  static bool current (const std::string&,           // (connection-) timestamp
-                       const IRC_Client_GTK_CBData&, // GTK callback state
-                       std::string&,                 // return value: nickname
-                       std::string&);                // return value: channel
+  static bool current (const std::string&,                  // (connection-) timestamp
+                       const IRC_Client_GUI_Connections_t&, // connections
+                       std::string&,                        // return value: nickname
+                       std::string&);                       // return value: channel
+  // *WARNING*: this requires gdk_threads_enter()/leave() protection !
+  static IRC_Client_GUI_Connection* current (const Common_UI_GTKState&,            // GTK state
+                                             const IRC_Client_GUI_Connections_t&); // connections
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_UI_Tools ());
-  ACE_UNIMPLEMENTED_FUNC (~IRC_Client_UI_Tools ());
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_UI_Tools (const IRC_Client_UI_Tools&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_UI_Tools& operator= (const IRC_Client_UI_Tools&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_UI_Tools ())
+  ACE_UNIMPLEMENTED_FUNC (~IRC_Client_UI_Tools ())
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_UI_Tools (const IRC_Client_UI_Tools&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_UI_Tools& operator= (const IRC_Client_UI_Tools&))
 };
 
 #endif

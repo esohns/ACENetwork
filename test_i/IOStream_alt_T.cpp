@@ -22,6 +22,16 @@
 #ifndef ACE_IOSTREAM_ALT_T_CPP
 #define ACE_IOSTREAM_ALT_T_CPP
 
+//// *WORKAROUND*
+//#include <streambuf>
+//using namespace std;
+//// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
+////                   a problem in conjunction with the standard include headers
+////                   when ACE_USES_OLD_IOSTREAMS is defined
+////                   --> include the necessary headers manually (see above), and
+////                       prevent ace/iosfwd.h from causing any harm
+//#define ACE_IOSFWD_H
+
 #include "IOStream_alt_T.h"
 
 #include "ace/Log_Msg.h"

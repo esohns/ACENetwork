@@ -357,15 +357,18 @@ Net_StreamTCPSocketBase_T<AddressType,
       // *IMPORTANT NOTE*: this wakes up any reactor threads that may still be
       //                   using the handle. Makes sure this connection is
       //                   delete(d) ASAP
-      if (handle != ACE_INVALID_HANDLE)
+      if (arg_in != CLOSE_DURING_NEW_CONNECTION) // <-- failed to connect ?
       {
+        ACE_ASSERT (handle != ACE_INVALID_HANDLE);
         result = ACE_OS::closesocket (handle);
         if (result == -1)
         {
           int error = ACE_OS::last_error ();
-          // *TODO*: on Win32, ACE_OS::close (--> ::CloseHandle) throws an
-          //         exception, so this looks like a resource leak...
-          if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
+          ACE_UNUSED_ARG (error);
+//          // *TODO*: on Win32, ACE_OS::close (--> ::CloseHandle) throws an
+//          //         exception, so this looks like a resource leak...
+//          if ((error != ENOTSOCK) && // Win32 (failed to connect: timed out)
+//              (error != EBADF))      // Linux (failed to connect: timed out)
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
                         handle));

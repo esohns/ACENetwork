@@ -19,13 +19,13 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include <iostream>
+#include <iostream>
 #include <limits>
 #include <list>
 #include <sstream>
 #include <string>
 
-#include "ace/streams.h"
+//#include "ace/streams.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

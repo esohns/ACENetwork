@@ -21,9 +21,9 @@
 
 #include "net_module_protocolhandler.h"
 
-//#include <iostream>
+#include <iostream>
 
-#include "ace/streams.h"
+//#include "ace/streams.h"
 
 //#include "common.h"
 #include "common_timer_manager_common.h"

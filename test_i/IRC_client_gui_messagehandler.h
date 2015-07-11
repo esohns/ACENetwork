@@ -23,10 +23,12 @@
 
 #include <string>
 
+#include "gtk/gtk.h"
+
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "gtk/gtk.h"
+#include "common_iget.h"
 
 #include "IRC_client_common.h"
 
@@ -38,22 +40,33 @@ class IRC_Client_GUI_Connection;
 class IRC_Client_IIRCControl;
 
 class IRC_Client_GUI_MessageHandler
+ : public Common_IGet_T<IRC_Client_GTK_HandlerCBData>
 {
  public:
   // ctor for default handler (== server log)
-  // *WARNING*: ctors/dtor need gdk_threads_enter/gdk_threads_leave protection
-  // (or call from gtk_main context...)
-  IRC_Client_GUI_MessageHandler (Common_UI_GTKState*, // GTK state handle
-                                 GtkTextView*);       // text view handle
+  IRC_Client_GUI_MessageHandler (Common_UI_GTKState*,        // GTK state handle
+                                 IRC_Client_GUI_Connection*, // connection handle
+                                 const std::string&);        // connection timestamp
+                                                             // *NOTE*: used to lookup the corresponding builder
   // ctor for regular channel handler
+  // *WARNING*: must be called with
+  //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
   IRC_Client_GUI_MessageHandler (Common_UI_GTKState*,        // GTK state handle
                                  IRC_Client_GUI_Connection*, // connection handle
                                  IRC_Client_IIRCControl*,    // controller handle
                                  const std::string&,         // identifier (channel/nick)
                                  const std::string&,         // UI (glade) file directory
-                                 GtkNotebook*);              // parent widget handle
+                                 const std::string&,         // connection timestamp
+                                                             // *NOTE*: used to lookup the corresponding builder
+                                 bool = true);               // locked access (GDK) ?
+  // *WARNING*: must be called with
+  //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
   virtual ~IRC_Client_GUI_MessageHandler ();
 
+  // implement Common_IGet_T
+  virtual const IRC_Client_GTK_HandlerCBData& get () const;
+
+  bool isPrivateDialog () const;
   bool isServerLog () const;
 
   // *WARNING*: to be called from gtk_main context ONLY (trigger with
@@ -72,11 +85,13 @@ class IRC_Client_GUI_MessageHandler
 
   // returns the toplevel widget of the channel page tab child
   // *NOTE*: the server log handler page doesn't have dynamic (!) children...
-  GtkWidget* getTopLevelPageChild ();
+  // *WARNING*: this requires gdk_threads_enter()/leave() protection !
+  GtkWidget* getTopLevelPageChild (bool = true) const; // locked access ?
 
   void setTopic (const std::string&);
-  void setModes (const std::string&,  // mode string [i.e. "+|-x"]
-                 const std::string&); // parameter, if any [i.e. <limit>,<user>,<ban mask>,...]
+  void setModes (const std::string&, // mode string [i.e. "+|-x"]
+                 const std::string&, // parameter, if any [i.e. <limit>,<user>,<ban mask>,...]
+                 bool = true);       // locked access ?
 
   // users
   void user (const std::string&,   // nick
@@ -89,27 +104,29 @@ class IRC_Client_GUI_MessageHandler
   void endUsers ();
 
   // channel members
-  void add (const std::string&);
-  void remove (const std::string&);
-  void members (const string_list_t&);
-  void endMembers ();
+  void add (const std::string&,
+            bool = true);       // locked access ?
+  void remove (const std::string&,
+               bool = true);       // locked access ?
+  void members (const string_list_t&,
+                bool = true);         // locked access ?
+  void endMembers (bool = true); // locked access ?
   void updateNick (const std::string&); // previous nickname
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler ());
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler (const IRC_Client_GUI_MessageHandler&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler& operator= (const IRC_Client_GUI_MessageHandler&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler ())
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler (const IRC_Client_GUI_MessageHandler&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler& operator= (const IRC_Client_GUI_MessageHandler&))
 
   // helper methods
-  void clearMembers ();
+  void clearMembers (bool = true); // locked access ?
 
-  IRC_Client_GTK_HandlerCBData  CBData_;
-  Common_UI_GTKEventSourceIds_t eventSourceIDs_;
-  bool                          isFirstMemberListMsg_;
-  IRC_Client_MessageQueue_t     messageQueue_;
-  ACE_SYNCH_MUTEX               messageQueueLock_;
-  GtkNotebook*                  parent_;
-  GtkTextView*                  view_;
+  IRC_Client_GTK_HandlerCBData CBData_;
+  bool                         isFirstMemberListMsg_;
+  bool                         isPrivateDialog_;
+  IRC_Client_MessageQueue_t    messageQueue_;
+  ACE_SYNCH_MUTEX              messageQueueLock_;
+  GtkTextView*                 view_; // --> server log
 };
 
 #endif

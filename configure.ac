@@ -68,10 +68,10 @@ AC_PROG_CXX
 #AC_PROG_LEX
 #AC_PROG_LN_S
 #AC_PROG_MAKE_SET
-AC_PROG_RANLIB
+#AC_PROG_RANLIB
 #AC_PROG_YACC
 AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION([0.19.4])
+AM_GNU_GETTEXT_VERSION([0.19.3])
 AM_PROG_AR
 LT_INIT
 
@@ -199,7 +199,8 @@ AC_CHECK_FUNCS([strerror])
 
 # checks for libraries
 AM_COND_IF([VALGRIND_SUPPORT],
-           [PKG_CHECK_MODULES([PKGVALGRIND], [valgrind])])
+           [PKG_CHECK_MODULES([PKGVALGRIND], [valgrind])],
+           )
 PKG_CHECK_MODULES([PKGCURSES], [ncurses panel])
 PKG_CHECK_MODULES([PKGSDL], [sdl SDL_mixer])
 dnl libgnomeui-2.0 >= 1.110.0
@@ -226,6 +227,7 @@ AC_CONFIG_FILES([Makefile
                  src/client_server/Makefile
                  test_i/Makefile
                  test_i/etc/Makefile
+                 test_i/scripts/Makefile
                  test_u/Makefile])
 
 AC_OUTPUT

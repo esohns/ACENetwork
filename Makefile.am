@@ -7,6 +7,6 @@ SUBDIRS = po \
   test_u \
   test_i
 
-EXTRA_DIST = aux_config/config.rpath  \
+EXTRA_DIST = \
   autogen.sh
 

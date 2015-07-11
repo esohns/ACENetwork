@@ -1464,16 +1464,23 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRCMessage::PART:
         {
           result = '"';
-          result = message_in.prefix.origin;
+          result += message_in.prefix.origin;
           result += ACE_TEXT_ALWAYS_CHAR ("\" (");
           result += message_in.prefix.user;
           result += '@';
           result += message_in.prefix.host;
           result += ACE_TEXT_ALWAYS_CHAR (") has left channel \"");
-          result += message_in.params.front ();
-          result += ACE_TEXT_ALWAYS_CHAR ("\" (reason: \"");
-          result += message_in.params.back ();
-          result += ACE_TEXT_ALWAYS_CHAR ("\")");
+          IRC_Client_ParametersIterator_t iterator = message_in.params.begin ();
+          result += *iterator;
+          if (message_in.params.size () >= 2)
+          {
+            ++iterator;
+            result += ACE_TEXT_ALWAYS_CHAR ("\" (reason: \"");
+            result += *iterator;
+            result += ACE_TEXT_ALWAYS_CHAR ("\")");
+          } // end IF
+          else
+            result += ACE_TEXT_ALWAYS_CHAR ("\"");
           break;
         }
         case IRC_Client_IRCMessage::NOTICE:
@@ -1558,6 +1565,7 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::RPL_LISTEND:          // 323
         case IRC_Client_IRC_Codes::RPL_INVITING:         // 341
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:       // 401
+        case IRC_Client_IRC_Codes::ERR_ERRONEUSNICKNAME: // 432
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:    // 433
         case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:    // 451
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:   // 461

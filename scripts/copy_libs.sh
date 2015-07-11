@@ -40,11 +40,13 @@ echo "copying 3rd-party libraries"
 LIB_DIR="lib"
 MODULES_DIR="${PROJECT_DIR}/modules"
 SUB_DIRS="ATCD/ACE/build/linux"
-declare -a LIBS=("libACE.so")
+#declare -a LIBS=("libACE.so")
+LIBS="libACE.so"
 i=0
 for DIR in $SUB_DIRS
 do
- LIB="${MODULES_DIR}/${DIR}/${LIB_DIR}/${LIBS[$i]}"
+# LIB="${MODULES_DIR}/${DIR}/${LIB_DIR}/${LIBS[$i]}"
+ LIB="${MODULES_DIR}/${DIR}/${LIB_DIR}/${LIBS}"
  [ ! -r "${LIB}.${VERSION}" ] && echo "ERROR: invalid library file (was: \"${LIB}.${VERSION}\"), aborting" && exit 1
  cp -f "${LIB}.${VERSION}" ${TARGET_DIR}
  [ $? -ne 0 ] && echo "ERROR: failed to copy \"${LIB}.${VERSION}\" to \"${TARGET_DIR}\": $?, aborting" && exit 1
@@ -59,19 +61,21 @@ LIB_DIR=".libs"
 SUB_DIRS="modules/libCommon/src
 modules/libCommon/src/ui
 modules/libACEStream/src"
-declare -a LIBS=("libCommon.so"
-"libCommon_UI.so"
-"libACEStream.so")
-i=0
+#declare -a LIBS=("libCommon.so"
+LIBS="libCommon.so libCommon_UI.so libACEStream.so"
+set -- $LIBS
+#i=0
 for DIR in $SUB_DIRS
 do
- LIB="${BUILD_DIR}/${DIR}/${LIB_DIR}/${LIBS[$i]}"
+# LIB="${BUILD_DIR}/${DIR}/${LIB_DIR}/${LIBS[$i]}"
+ LIB="${BUILD_DIR}/${DIR}/${LIB_DIR}/$1"
+
  [ ! -r "${LIB}.${VERSION}" ] && echo "ERROR: invalid library file (was: \"${LIB}.${VERSION}\"), aborting" && exit 1
  cp -f "${LIB}.${VERSION}" ${TARGET_DIR}
  [ $? -ne 0 ] && echo "ERROR: failed to copy \"${LIB}.${VERSION}\" to \"${TARGET_DIR}\": $?, aborting" && exit 1
  echo "copied \"$LIB.${VERSION}\"..."
-
- i=$i+1
+# i=$i+1
+ shift
 done
 
 echo "copying framework libraries"
@@ -79,17 +83,19 @@ LIB_DIR=".libs"
 SUB_DIRS="src
 src/client_server
 src/client_server"
-declare -a LIBS=("libACENetwork.so"
-"libACENetwork_Client.so"
-"libACENetwork_Server.so")
-i=0
+#declare -a LIBS=("libACENetwork.so"
+LIBS="libACENetwork.so libACENetwork_Client.so libACENetwork_Server.so"
+set -- $LIBS
+#i=0
 for DIR in $SUB_DIRS
 do
- LIB="${BUILD_DIR}/${DIR}/${LIB_DIR}/${LIBS[$i]}"
+# LIB="${BUILD_DIR}/${DIR}/${LIB_DIR}/${LIBS[$i]}"
+ LIB="${BUILD_DIR}/${DIR}/${LIB_DIR}/$1"
  [ ! -r "${LIB}.${VERSION}" ] && echo "ERROR: invalid library file (was: \"${LIB}.${VERSION}\"), aborting" && exit 1
  cp -f "${LIB}.${VERSION}" ${TARGET_DIR}
  [ $? -ne 0 ] && echo "ERROR: failed to copy \"${LIB}.${VERSION}\" to \"${TARGET_DIR}\": $?, aborting" && exit 1
  echo "copied \"$LIB.${VERSION}\"..."
-
- i=$i+1
+# i=$i+1
+ shift
 done
+

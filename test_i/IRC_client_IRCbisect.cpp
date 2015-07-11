@@ -17,7 +17,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 35
+#define YY_FLEX_SUBMINOR_VERSION 39
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -221,6 +221,11 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
+
 /* %if-not-reentrant */
 /* %endif */
 
@@ -247,6 +252,13 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
                     if ( yytext[yyl] == '\n' )\
                         --yylineno;\
             }while(0)
+    #define YY_LINENO_REWIND_TO(dst) \
+            do {\
+                const char *p;\
+                for ( p = yy_cp-1; p >= (dst); --p)\
+                    if ( *p == '\n' )\
+                        --yylineno;\
+            }while(0)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -263,11 +275,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 	while ( 0 )
 
 #define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
-
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
@@ -291,7 +298,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	int yy_n_chars;
+	yy_size_t yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -388,7 +395,7 @@ static void IRC_Client_IRCBisect__init_buffer (YY_BUFFER_STATE b,FILE *file ,yys
 
 YY_BUFFER_STATE IRC_Client_IRCBisect__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
 YY_BUFFER_STATE IRC_Client_IRCBisect__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Client_IRCBisect__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE IRC_Client_IRCBisect__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
 
 /* %endif */
 
@@ -423,7 +430,7 @@ void IRC_Client_IRCBisect_free (void * ,yyscan_t yyscanner );
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
 
-#define IRC_Client_IRCBisect_wrap(n) 1
+#define IRC_Client_IRCBisect_wrap(yyscanner) 1
 #define YY_SKIP_YYWRAP
 
 #define FLEX_DEBUG
@@ -433,6 +440,8 @@ typedef unsigned char YY_CHAR;
 typedef int yy_state_type;
 
 #define yytext_ptr yytext_r
+
+/* %% [1.5] DFA */
 static yyconst flex_int16_t yy_nxt[][256] =
     {
     {
@@ -867,7 +876,7 @@ static yyconst yy_state_type yy_NUL_trans[12] =
 
 static yyconst flex_int16_t yy_rule_linenum[6] =
     {   0,
-       22,   23,   24,   32,   35
+       32,   33,   34,   42,   45
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -877,16 +886,26 @@ static yyconst flex_int16_t yy_rule_linenum[6] =
 #define yymore() (yyg->yy_more_flag = 1)
 #define YY_MORE_ADJ yyg->yy_more_len
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "./IRCbisect.l"
-#line 2 "./IRCbisect.l"
+#line 1 "./../scripts/IRCbisect.l"
+#line 2 "./../scripts/IRCbisect.l"
 #include "stdafx.h"
+
+// *WORKAROUND*
+#include <iostream>
+using namespace std;
+// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
+//                   a problem in conjunction with the standard include headers
+//                   when ACE_USES_OLD_IOSTREAMS is defined
+//                   --> include the necessary headers manually (see above), and
+//                       prevent ace/iosfwd.h from causing any harm
+#define ACE_IOSFWD_H
 
 #include "ace/Log_Msg.h"
 #define YY_NO_UNISTD_H 1
 /* %option c++ yyclass="IRC_Client_IRCBisect" stack noline bison-bridge bison-locations */
 /* *NOTE*: "\r\n" is (ANSI-C) implementation-dependent --> use ASCII codes directly */
 
-#line 890 "IRC_client_IRCbisect.cpp"
+#line 909 "IRC_client_IRCbisect.cpp"
 
 #define INITIAL 0
 #define end_of_frame 1
@@ -923,8 +942,8 @@ struct yyguts_t
     size_t yy_buffer_stack_max; /**< capacity of stack. */
     YY_BUFFER_STATE * yy_buffer_stack; /**< Stack as an array. */
     char yy_hold_char;
-    int yy_n_chars;
-    int yyleng_r;
+    yy_size_t yy_n_chars;
+    yy_size_t yyleng_r;
     char *yy_c_buf_p;
     int yy_init;
     int yy_start;
@@ -981,13 +1000,17 @@ FILE *IRC_Client_IRCBisect_get_out (yyscan_t yyscanner );
 
 void IRC_Client_IRCBisect_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-int IRC_Client_IRCBisect_get_leng (yyscan_t yyscanner );
+yy_size_t IRC_Client_IRCBisect_get_leng (yyscan_t yyscanner );
 
 char *IRC_Client_IRCBisect_get_text (yyscan_t yyscanner );
 
 int IRC_Client_IRCBisect_get_lineno (yyscan_t yyscanner );
 
 void IRC_Client_IRCBisect_set_lineno (int line_number ,yyscan_t yyscanner );
+
+int IRC_Client_IRCBisect_get_column  (yyscan_t yyscanner );
+
+void IRC_Client_IRCBisect_set_column (int column_no ,yyscan_t yyscanner );
 
 /* %if-bison-bridge */
 /* %endif */
@@ -1158,11 +1181,6 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-/* %% [7.0] user's declarations go here */
-#line 20 "./IRCbisect.l"
-
-#line 1165 "IRC_client_IRCbisect.cpp"
-
 	if ( !yyg->yy_init )
 		{
 		yyg->yy_init = 1;
@@ -1196,6 +1214,12 @@ YY_DECL
 
 		IRC_Client_IRCBisect__load_buffer_state(yyscanner );
 		}
+
+	{
+/* %% [7.0] user's declarations go here */
+#line 30 "./../scripts/IRCbisect.l"
+
+#line 1223 "IRC_client_IRCbisect.cpp"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -1234,7 +1258,7 @@ yy_find_action:
 
 		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
 			{
-			int yyl;
+			yy_size_t yyl;
 			for ( yyl = yyg->yy_more_len; yyl < yyleng; ++yyl )
 				if ( yytext[yyl] == '\n' )
 					   
@@ -1269,17 +1293,17 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 22 "./IRCbisect.l"
+#line 32 "./../scripts/IRCbisect.l"
 { BEGIN(end_of_frame); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 23 "./IRCbisect.l"
+#line 33 "./../scripts/IRCbisect.l"
 { return yyleng; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 24 "./IRCbisect.l"
+#line 34 "./../scripts/IRCbisect.l"
 {
                          ACE_DEBUG ((LM_ERROR,
                                      ACE_TEXT ("ignoring invalid character: \"%c\" (%d)\n"),
@@ -1292,29 +1316,29 @@ YY_RULE_SETUP
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 32 "./IRCbisect.l"
+#line 42 "./../scripts/IRCbisect.l"
 { BEGIN(INITIAL);
                          /* (*yyextra)++; */
                          return -1; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 35 "./IRCbisect.l"
+#line 45 "./../scripts/IRCbisect.l"
 { BEGIN(INITIAL);
                          yymore(); }
 	YY_BREAK
 // end <end_of_frame>
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(end_of_frame):
-#line 38 "./IRCbisect.l"
+#line 48 "./../scripts/IRCbisect.l"
 { return 0; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 39 "./IRCbisect.l"
+#line 49 "./../scripts/IRCbisect.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1318 "IRC_client_IRCbisect.cpp"
+#line 1342 "IRC_client_IRCbisect.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1444,6 +1468,7 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
+	} /* end of user's declarations */
 } /* end of IRC_Client_IRCBisect_lex */
 /* %ok-for-header */
 
@@ -1512,21 +1537,21 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 	else
 		{
-			int num_to_read =
+			yy_size_t num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
 			{ /* Not enough room in the buffer - grow it. */
 
 			/* just a shorter name for the current buffer */
-			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
+			YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
 
 			int yy_c_buf_p_offset =
 				(int) (yyg->yy_c_buf_p - b->yy_ch_buf);
 
 			if ( b->yy_is_our_buffer )
 				{
-				int new_size = b->yy_buf_size * 2;
+				yy_size_t new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -1557,7 +1582,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			yyg->yy_n_chars, (size_t) num_to_read );
+			yyg->yy_n_chars, num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
 		}
@@ -1647,6 +1672,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	yy_current_state = yy_NUL_trans[yy_current_state];
 	yy_is_jam = (yy_current_state == 0);
 
+	(void)yyg;
 	return yy_is_jam ? 0 : yy_current_state;
 }
 
@@ -1683,7 +1709,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 		else
 			{ /* need more input */
-			int offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
+			yy_size_t offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
 			++yyg->yy_c_buf_p;
 
 			switch ( yy_get_next_buffer( yyscanner ) )
@@ -1877,13 +1903,6 @@ static void IRC_Client_IRCBisect__load_buffer_state  (yyscan_t yyscanner)
 	IRC_Client_IRCBisect_free((void *) b ,yyscanner );
 }
 
-/* %if-c-only */
-
-/* %endif */
-
-/* %if-c++-only */
-/* %endif */
-
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a IRC_Client_IRCBisect_restart() or at EOF.
@@ -2030,7 +2049,7 @@ static void IRC_Client_IRCBisect_ensure_buffer_stack (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-	int num_to_alloc;
+	yy_size_t num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if (!yyg->yy_buffer_stack) {
@@ -2134,12 +2153,12 @@ YY_BUFFER_STATE IRC_Client_IRCBisect__scan_string (yyconst char * yystr , yyscan
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE IRC_Client_IRCBisect__scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE IRC_Client_IRCBisect__scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 	char *buf;
 	yy_size_t n;
-	int i;
+	yy_size_t i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
@@ -2259,7 +2278,7 @@ FILE *IRC_Client_IRCBisect_get_out  (yyscan_t yyscanner)
 /** Get the length of the current token.
  * @param yyscanner The scanner object.
  */
-int IRC_Client_IRCBisect_get_leng  (yyscan_t yyscanner)
+yy_size_t IRC_Client_IRCBisect_get_leng  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyleng;
@@ -2299,7 +2318,7 @@ void IRC_Client_IRCBisect_set_lineno (int  line_number , yyscan_t yyscanner)
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "IRC_Client_IRCBisect_set_lineno called with no buffer" , yyscanner); 
+           YY_FATAL_ERROR( "IRC_Client_IRCBisect_set_lineno called with no buffer" );
     
     yylineno = line_number;
 }
@@ -2314,7 +2333,7 @@ void IRC_Client_IRCBisect_set_column (int  column_no , yyscan_t yyscanner)
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "IRC_Client_IRCBisect_set_column called with no buffer" , yyscanner); 
+           YY_FATAL_ERROR( "IRC_Client_IRCBisect_set_column called with no buffer" );
     
     yycolumn = column_no;
 }
@@ -2545,7 +2564,7 @@ void IRC_Client_IRCBisect_free (void * ptr , yyscan_t yyscanner)
 
 /* %ok-for-header */
 
-#line 39 "./IRCbisect.l"
+#line 48 "./../scripts/IRCbisect.l"
 
 
 

@@ -1395,7 +1395,7 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
   if (!Common_Tools::preInitializeSignals (signal_set,
-                                           NET_EVENT_USE_REACTOR,
+                                           use_reactor,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {

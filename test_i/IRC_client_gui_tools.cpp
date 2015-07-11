@@ -33,7 +33,7 @@
 
 bool
 IRC_Client_UI_Tools::current (const std::string& timestamp_in,
-                              const IRC_Client_GTK_CBData& CBData_in,
+                              const IRC_Client_GUI_Connections_t& connections_in,
                               std::string& nickname_out,
                               std::string& channel_out)
 {
@@ -45,8 +45,8 @@ IRC_Client_UI_Tools::current (const std::string& timestamp_in,
 
   // step1: retrieve connection handle
   IRC_Client_GUI_Connection* connection_p = NULL;
-  for (IRC_Client_GUI_ConnectionsConstIterator_t iterator = CBData_in.connections.begin ();
-       iterator != CBData_in.connections.end ();
+  for (IRC_Client_GUI_ConnectionsConstIterator_t iterator = connections_in.begin ();
+       iterator != connections_in.end ();
        ++iterator)
   {
     const IRC_Client_GTK_ConnectionCBData& connection_data_r =
@@ -70,7 +70,8 @@ IRC_Client_UI_Tools::current (const std::string& timestamp_in,
 }
 
 IRC_Client_GUI_Connection*
-IRC_Client_UI_Tools::current (const IRC_Client_GTK_CBData& CBData_in)
+IRC_Client_UI_Tools::current (const Common_UI_GTKState& GTKState_in,
+                              const IRC_Client_GUI_Connections_t& connections_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_UI_Tools::current"));
 
@@ -79,9 +80,9 @@ IRC_Client_UI_Tools::current (const IRC_Client_GTK_CBData& CBData_in)
 
   // sanity check(s)
   Common_UI_GTKBuildersConstIterator_t iterator =
-    CBData_in.GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    GTKState_in.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != CBData_in.GTKState.builders.end ());
+  ACE_ASSERT (iterator != GTKState_in.builders.end ());
 
   // step1: retrieve connections notebook
   GtkNotebook* notebook_p =
@@ -97,15 +98,15 @@ IRC_Client_UI_Tools::current (const IRC_Client_GTK_CBData& CBData_in)
 
   // step2: find connection whose main window corresponds with the currently
   //        active notebook page
-  for (IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 = CBData_in.connections.begin ();
-       iterator_2 != CBData_in.connections.end ();
+  for (IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 = connections_in.begin ();
+       iterator_2 != connections_in.end ();
        ++iterator_2)
   {
     const IRC_Client_GTK_ConnectionCBData& connection_data_r =
       (*iterator_2).second->get ();
     Common_UI_GTKBuildersConstIterator_t iterator_3 =
-      CBData_in.GTKState.builders.find (connection_data_r.timestamp);
-    if (iterator_3 == CBData_in.GTKState.builders.end ())
+      GTKState_in.builders.find (connection_data_r.timestamp);
+    if (iterator_3 == GTKState_in.builders.end ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("could not find builder (connection was: \"%s\"), aborting\n"),

@@ -1,8 +1,9 @@
 ACLOCAL_AMFLAGS = -I m4
 
+#  -I/usr/include/c++/3.4.6/backward
 AM_CPPFLAGS = \
-  -I/usr/include/c++/3.4.6/backward \
   -I$(top_srcdir)/../../modules/ATCD/ACE \
+  -I$(top_srcdir)/3rd_party/c++ \
   $(PKGCURSES_CFLAGS) \
   $(PKGSDL_CFLAGS) \
   $(PKGGTK_CFLAGS)
@@ -198,4 +199,6 @@ IRC_client_gui_LDADD = \
 
 SUBDIRS = \
   . \
-  etc
+  etc \
+  scripts
+
