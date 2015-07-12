@@ -1055,8 +1055,9 @@ clean_up:
   iterator_3 = data_p->connections->find (data_p->timestamp);
   if (iterator_3 != data_p->connections->end ())
   {
+    IRC_Client_GUI_Connections_t* connections_p = data_p->connections;
     delete (*iterator_3).second;
-    data_p->connections->erase (iterator_3);
+    connections_p->erase (iterator_3);
   } // end IF
 
   return FALSE; // G_SOURCE_REMOVE
@@ -1287,14 +1288,19 @@ idle_update_progress_cb (gpointer userData_in)
                     ACE_TEXT ("failed to ACE_Thread_Manager::join(%d): \"%m\", continuing\n"),
                     *iterator_2));
       else if (exit_status)
+      {
+#if defined (_MSC_VER)
         ACE_DEBUG ((LM_ERROR,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
                     ACE_TEXT ("thread %d has joined (status was: %d)...\n"),
-#else
-                    ACE_TEXT ("thread %u has joined (status was: %@)...\n"),
-#endif
                     *iterator_2,
                     exit_status));
+#else
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("thread %u has joined (status was: %@)...\n"),
+                    *iterator_2,
+                    exit_status));
+#endif
+      } // end IF
 
       IRC_Client_GUI_PendingActionsIterator_t iterator_3 =
         data_p->pendingActions.find (*iterator_2);

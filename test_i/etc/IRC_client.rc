@@ -91,12 +91,27 @@
 #    # parent widget (as defined in the application).
 #    bg_pixmap[NORMAL] = "<parent>"
 #}
-
 style "toggle_button"
 {
-# *NOTE*: "font" has been deprecated
+# *NOTE*: "font" has been deprecated (Gtk1)
 #  font = "-adobe-helvetica-medium-r-normal--*-100-*-*-*-*-*-*"
-  font_name = "Sans Italic 8"
+  font_name = "Sans Not-Rotated 8"
+}
+
+style "text_view"
+{
+  font_name = "Sans Not-Rotated 9"
+
+  base[NORMAL] = {0.7, 0.7, 0.7} #light grey
+#  text[NORMAL] = {0.0, 0.0, 0.0} #black
+}
+
+style "text_view_server_log" = "text_view"
+{
+  font_name = "Sans Not-Rotated 9"
+
+  base[NORMAL] = {0.0, 0.0, 0.0} #black
+  text[NORMAL] = {0.0, 1.0, 0.0} #green
 }
 
 #style "text"
@@ -110,11 +125,26 @@ style "toggle_button"
 #  font = "-adobe-helvetica-medium-r-normal--*-80-*-*-*-*-*-*"
 #}
 
+style "label_tab"
+{
+#  text[NORMAL] = "Sans Not-Rotated 9" # *BUG*: does not work (Win32)
+  font_name = "Sans Not-Rotated 13"
+}
+
+style "label_tab_server_log" = "label_tab"
+{
+#  text[NORMAL] = "Sans Bold Italic 10" # *BUG*: does not work (Win32)
+  font_name = "Sans Bold Italic Not-Rotated 10"
+}
+
 # pixmap_path "~/.pixmaps"
 
 # These set the widget types to use the styles defined above.
 # The widget types are listed in the class hierarchy, but could probably be
 # just listed in this document for the users reference.
+
+#class "GtkToggleButton" style "toggle_button" # *BUG*: does not work (Win32)
+#class "GtkTextView" style "text_view"
 
 #widget_class "GtkWindow" style "window"
 #widget_class "GtkDialog" style "window"
@@ -125,9 +155,18 @@ style "toggle_button"
 #widget_class "*GtkButton*" style "button"
 #widget_class "*Ruler" style "ruler"
 #widget_class "*GtkText" style "text"
+#widget_class "*GtkToggleButton*" style "toggle_button"
+#widget_class "*GtkTextView*" style "text_view"
+widget_class "*GtkNotebook*GtkToggleButton*" style "toggle_button"
+#widget_class "*GtkNotebook*GtkLabel" style "label_tab"
+#widget_class "*<GtkNotebook>.<GtkLabel>" style "label_tab"
 
 # This sets all the buttons that are children of the "main window" to
 # the main_button style.These must be documented to be taken advantage of.
 #widget "main window.*GtkButton*" style "main_button"
-
-widget "window_page_connection.*GtkTogglebutton*" style "toggle_button"
+#widget "hbox_page_connection_usermode.*GtkToggleButton*" style "toggle_button"
+#widget "label_notebook_page_connection_channels" style "label_tab_server_log"
+#widget "label_notebook_page_connection_channels" style "label_tab_server_log"
+#widget "*.notebook_page_connection_channels.*.GtkTextView" style "text_view"
+widget "*.textview_page_connection_channels" style "text_view_server_log"
+widget "*.textview_page_channel" style "text_view"

@@ -239,4 +239,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\test_i\etc\IRC_client.rc">
+      <Filter>Resource Files\ini</Filter>
+    </ResourceCompile>
+  </ItemGroup>
 </Project>

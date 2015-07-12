@@ -495,22 +495,25 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
   // *NOTE*: in theory, there is a race condition as the user may start
   // interacting with the new UI elements by now - as GTK will draw the new elements
   // only after we return, this is not really a problem...
-  std::pair <MESSAGE_HANDLERSITERATOR_T, bool> result =
-      messageHandlers_.insert (std::make_pair (std::string (),
-                                               message_handler_p));
-  if (!result.second)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to insert message handler: \"%m\", returning\n")));
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    std::pair <MESSAGE_HANDLERSITERATOR_T, bool> result =
+        messageHandlers_.insert (std::make_pair (std::string (),
+                                                 message_handler_p));
+    if (!result.second)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to insert message handler: \"%m\", returning\n")));
 
-    // clean up
-    delete message_handler_p;
-    g_object_unref (G_OBJECT (builder_p));
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
-    CBData_.GTKState->builders.erase (CBData_.timestamp);
+      // clean up
+      delete message_handler_p;
+      g_object_unref (G_OBJECT (builder_p));
+      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
+      CBData_.GTKState->builders.erase (CBData_.timestamp);
 
-    return;
-  } // end IF
+      return;
+    } // end IF
+  } // end lock scope
 
   { // synch access
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
@@ -536,23 +539,22 @@ IRC_Client_GUI_Connection::~IRC_Client_GUI_Connection ()
 
   // sanity check(s)
   ACE_ASSERT (CBData_.GTKState);
-  ACE_ASSERT (CBData_.connections);
 
 //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   // remove builder
-  Common_UI_GTKBuildersIterator_t iterator_2 =
+  Common_UI_GTKBuildersIterator_t iterator =
     CBData_.GTKState->builders.find (CBData_.timestamp);
   // sanity check(s)
-  if (iterator_2 == CBData_.GTKState->builders.end ())
+  if (iterator == CBData_.GTKState->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
                 ACE_TEXT (CBData_.label.c_str ())));
     return;
   } // end IF
-  g_object_unref (G_OBJECT ((*iterator_2).second.second));
-  CBData_.GTKState->builders.erase (iterator_2);
+  g_object_unref (G_OBJECT ((*iterator).second.second));
+  CBData_.GTKState->builders.erase (iterator);
 }
 
 void
@@ -1662,17 +1664,20 @@ IRC_Client_GUI_Connection::getActiveID (bool lockedAccess_in,
   widget_p = gtk_notebook_get_nth_page (notebook_p,
                                         page_number);
   ACE_ASSERT (widget_p);
-  for (MESSAGE_HANDLERSCONSTITERATOR_T iterator = messageHandlers_.begin ();
-       iterator != messageHandlers_.end ();
-       iterator++)
-  {
-    if ((*iterator).second->getTopLevelPageChild (false) == widget_p)
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    for (MESSAGE_HANDLERSCONSTITERATOR_T iterator = messageHandlers_.begin ();
+         iterator != messageHandlers_.end ();
+         iterator++)
     {
-      return_value = (*iterator).first;
+      if ((*iterator).second->getTopLevelPageChild (false) == widget_p)
+      {
+        return_value = (*iterator).first;
 
-      break;
-    } // end IF
-  } // end FOR
+        break;
+      } // end IF
+    } // end FOR
+  } // end lock scope
   if (gdkLockedAccess_in)
     gdk_threads_leave ();
 
@@ -1756,27 +1761,30 @@ IRC_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
   ACE_ASSERT (server_log_p);
   server_log_active = (widget_p == server_log_p);
 
-  for (MESSAGE_HANDLERSCONSTITERATOR_T iterator = messageHandlers_.begin ();
-       iterator != messageHandlers_.end ();
-       iterator++)
-  {
-    ACE_ASSERT ((*iterator).second);
-
-    // server log ?
-    if (server_log_active &&
-        (*iterator).second->isServerLog ())
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    for (MESSAGE_HANDLERSCONSTITERATOR_T iterator = messageHandlers_.begin ();
+         iterator != messageHandlers_.end ();
+         iterator++)
     {
-      return_value = (*iterator).second;
-      break;
-    } // end IF
+      ACE_ASSERT ((*iterator).second);
 
-    widget_2 = (*iterator).second->getTopLevelPageChild (false);
-    if (widget_2 == widget_p)
-    {
-      return_value = (*iterator).second;
-      break;
-    } // end IF
-  } // end FOR
+      // server log ?
+      if (server_log_active &&
+          (*iterator).second->isServerLog ())
+      {
+        return_value = (*iterator).second;
+        break;
+      } // end IF
+
+      widget_2 = (*iterator).second->getTopLevelPageChild (false);
+      if (widget_2 == widget_p)
+      {
+        return_value = (*iterator).second;
+        break;
+      } // end IF
+    } // end FOR
+  } // end lock scope
   if (gdkLockedAccess_in)
     gdk_threads_leave ();
 
@@ -1803,24 +1811,28 @@ IRC_Client_GUI_Connection::close ()
 
   // clean up message handlers
   IRC_Client_GTK_HandlerCBData* cb_data_p = NULL;
-  for (MESSAGE_HANDLERSITERATOR_T iterator = messageHandlers_.begin ();
-       iterator != messageHandlers_.end ();
-       iterator++)
-  {
-    cb_data_p =
-        &const_cast<IRC_Client_GTK_HandlerCBData&> ((*iterator).second->get ());
-    ACE_ASSERT (cb_data_p);
-    cb_data_p->eventSourceID =
-      g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
-                       idle_remove_channel_cb,
-                       cb_data_p,
-                       NULL);
-    if (cb_data_p->eventSourceID)
-      CBData_.GTKState->eventSourceIds.insert (cb_data_p->eventSourceID);
-    else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_idle_add_full(idle_remove_channel_cb): \"%m\", continuing\n")));
-  } // end FOR
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    for (MESSAGE_HANDLERSITERATOR_T iterator = messageHandlers_.begin ();
+         iterator != messageHandlers_.end ();
+         iterator++)
+    {
+      cb_data_p =
+          &const_cast<IRC_Client_GTK_HandlerCBData&> ((*iterator).second->get ());
+      ACE_ASSERT (cb_data_p);
+      cb_data_p->eventSourceID =
+        g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+                         idle_remove_channel_cb,
+                         cb_data_p,
+                         NULL);
+      if (cb_data_p->eventSourceID)
+        CBData_.GTKState->eventSourceIds.insert (cb_data_p->eventSourceID);
+      else
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_idle_add_full(idle_remove_channel_cb): \"%m\", continuing\n")));
+    } // end FOR
+    messageHandlers_.clear ();
+  } // end lock scope
 }
 
 void
@@ -1832,17 +1844,20 @@ IRC_Client_GUI_Connection::forward (const std::string& channel_in,
   // --> pass to channel log
 
   // retrieve message handler
-  MESSAGE_HANDLERSITERATOR_T handler_iterator =
-    messageHandlers_.find (channel_in);
-  if (handler_iterator == messageHandlers_.end ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("no handler for channel (was: \"%s\"), returning\n"),
-                ACE_TEXT (channel_in.c_str ())));
-    return;
-  } // end IF
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    MESSAGE_HANDLERSITERATOR_T handler_iterator =
+      messageHandlers_.find (channel_in);
+    if (handler_iterator == messageHandlers_.end ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("no handler for channel (was: \"%s\"), returning\n"),
+                  ACE_TEXT (channel_in.c_str ())));
+      return;
+    } // end IF
 
-  (*handler_iterator).second->queueForDisplay (messageText_in);
+    (*handler_iterator).second->queueForDisplay (messageText_in);
+  } // end lock scope
 }
 
 void
@@ -1853,10 +1868,13 @@ IRC_Client_GUI_Connection::log (const std::string& message_in)
   // --> pass to server log
 
   // retrieve message handler
-  MESSAGE_HANDLERSITERATOR_T handler_iterator =
-    messageHandlers_.find (std::string ());
-  ACE_ASSERT (handler_iterator != messageHandlers_.end ());
-  (*handler_iterator).second->queueForDisplay (message_in);
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    MESSAGE_HANDLERSITERATOR_T handler_iterator =
+      messageHandlers_.find (std::string ());
+    ACE_ASSERT (handler_iterator != messageHandlers_.end ());
+    (*handler_iterator).second->queueForDisplay (message_in);
+  } // end lock scope
 }
 
 void
@@ -1867,10 +1885,13 @@ IRC_Client_GUI_Connection::log (const IRC_Client_IRCMessage& message_in)
   // --> pass to server log
 
   // retrieve message handler
-  MESSAGE_HANDLERSITERATOR_T handler_iterator =
-    messageHandlers_.find (std::string ());
-  ACE_ASSERT (handler_iterator != messageHandlers_.end ());
-  (*handler_iterator).second->queueForDisplay (IRC_Client_Tools::IRCMessage2String (message_in));
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    MESSAGE_HANDLERSITERATOR_T handler_iterator =
+      messageHandlers_.find (std::string ());
+    ACE_ASSERT (handler_iterator != messageHandlers_.end ());
+    (*handler_iterator).second->queueForDisplay (IRC_Client_Tools::IRCMessage2String (message_in));
+  } // end lock scope
 }
 
 void
@@ -1935,54 +1956,58 @@ IRC_Client_GUI_Connection::exists (const std::string& id_in,
 
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
-  // sanity check
-  if (messageHandlers_.empty ())
-    return result;
-  MESSAGE_HANDLERSCONSTITERATOR_T iterator = messageHandlers_.find (id_in);
-  if (iterator == messageHandlers_.end ())
-    return result;
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
-  Common_UI_GTKBuildersIterator_t iterator_2 =
-      CBData_.GTKState->builders.find (CBData_.timestamp);
-  // sanity check(s)
-  if (iterator_2 == CBData_.GTKState->builders.end ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection (was: \"%s\") builder not found, aborting\n"),
-                ACE_TEXT (CBData_.label.c_str ())));
-    return result;
-  } // end IF
+    // sanity check
+    if (messageHandlers_.empty ())
+      return result;
 
-  if (gdkLockedAccess_in)
-    gdk_threads_enter ();
-  // retrieve server tab channel tabs handle
-  GtkNotebook* notebook_p =
-      GTK_NOTEBOOK (gtk_builder_get_object ((*iterator_2).second.second,
-                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
-  ACE_ASSERT (notebook_p);
+    MESSAGE_HANDLERSCONSTITERATOR_T iterator = messageHandlers_.find (id_in);
+    if (iterator == messageHandlers_.end ())
+      return result;
 
-  GtkWidget* widget_p = NULL;
-  gint num_pages = gtk_notebook_get_n_pages (notebook_p);
-  for (gint page_number = 0;
-       page_number < num_pages;
-       page_number++)
-  {
-    // *NOTE*: channel ids are unique, but notebook page numbers may change as
-    //         channels/private conversations are joined/parted and/or tabs
-    //         are rearranged
-    widget_p = gtk_notebook_get_nth_page (notebook_p,
-                                          page_number);
-    ACE_ASSERT (widget_p);
-
-    if ((*iterator).second->getTopLevelPageChild (false) == widget_p)
+    Common_UI_GTKBuildersIterator_t iterator_2 =
+        CBData_.GTKState->builders.find (CBData_.timestamp);
+    // sanity check(s)
+    if (iterator_2 == CBData_.GTKState->builders.end ())
     {
-      result = page_number;
-      break;
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("connection (was: \"%s\") builder not found, aborting\n"),
+                  ACE_TEXT (CBData_.label.c_str ())));
+      return result;
     } // end IF
-  } // end FOR
 
-  if (gdkLockedAccess_in)
-    gdk_threads_leave ();
+    if (gdkLockedAccess_in)
+      gdk_threads_enter ();
+    // retrieve server tab channel tabs handle
+    GtkNotebook* notebook_p =
+        GTK_NOTEBOOK (gtk_builder_get_object ((*iterator_2).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
+    ACE_ASSERT (notebook_p);
+
+    GtkWidget* widget_p = NULL;
+    gint num_pages = gtk_notebook_get_n_pages (notebook_p);
+    for (gint page_number = 0;
+         page_number < num_pages;
+         page_number++)
+    {
+      // *NOTE*: channel ids are unique, but notebook page numbers may change as
+      //         channels/private conversations are joined/parted and/or tabs
+      //         are rearranged
+      widget_p = gtk_notebook_get_nth_page (notebook_p,
+                                            page_number);
+      ACE_ASSERT (widget_p);
+
+      if ((*iterator).second->getTopLevelPageChild (false) == widget_p)
+      {
+        result = page_number;
+        break;
+      } // end IF
+    } // end FOR
+    if (gdkLockedAccess_in)
+      gdk_threads_leave ();
+  } // end lock scope
 
   return result;
 }
@@ -1995,11 +2020,14 @@ IRC_Client_GUI_Connection::channels (string_list_t& channels_out)
   // initialize return value
   channels_out.clear ();
 
-  for (MESSAGE_HANDLERSITERATOR_T iterator = messageHandlers_.begin ();
-       iterator != messageHandlers_.end ();
-       iterator++)
-    if (IRC_Client_Tools::isValidIRCChannelName ((*iterator).first))
-      channels_out.push_back ((*iterator).first);
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    for (MESSAGE_HANDLERSITERATOR_T iterator = messageHandlers_.begin ();
+         iterator != messageHandlers_.end ();
+         iterator++)
+      if (IRC_Client_Tools::isValidIRCChannelName ((*iterator).first))
+        channels_out.push_back ((*iterator).first);
+  } // end lock scope
 }
 
 void
@@ -2055,25 +2083,28 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
 
     goto clean_up;
   } // end IF
-  messageHandlers_.insert (std::make_pair (id_in, message_handler_p));
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    messageHandlers_.insert (std::make_pair (id_in, message_handler_p));
 
-  // check whether this is the first channel of the first connection
-  // --> enable corresponding widget(s) in the main UI
-  if ((CBData_.connections->size () == 1) &&
-      (messageHandlers_.size () == 2)) // server log + first channel
-  {
-    iterator =
-      CBData_.GTKState->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
-    // sanity check(s)
-    ACE_ASSERT (iterator != CBData_.GTKState->builders.end ());
-    gdk_threads_enter ();
-    GtkHBox* hbox_p =
-      GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_HBOX_SEND)));
-    ACE_ASSERT (hbox_p);
-    gtk_widget_set_sensitive (GTK_WIDGET (hbox_p), TRUE);
-    gdk_threads_leave ();
-  } // end IF
+    // check whether this is the first channel of the first connection
+    // --> enable corresponding widget(s) in the main UI
+    if ((CBData_.connections->size () == 1) &&
+        (messageHandlers_.size () == 2)) // server log + first channel
+    {
+      iterator =
+        CBData_.GTKState->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
+      // sanity check(s)
+      ACE_ASSERT (iterator != CBData_.GTKState->builders.end ());
+      gdk_threads_enter ();
+      GtkHBox* hbox_p =
+        GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_HBOX_SEND)));
+      ACE_ASSERT (hbox_p);
+      gtk_widget_set_sensitive (GTK_WIDGET (hbox_p), TRUE);
+      gdk_threads_leave ();
+    } // end IF
+  } // end lock scope
 
 clean_up:
   if (lockedAccess_in)

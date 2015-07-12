@@ -25,6 +25,7 @@
 #include <string>
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "gtk/gtk.h"
 
@@ -38,7 +39,6 @@
 
 // forward declaration(s)
 struct Common_UI_GTKState;
-class ACE_Thread_Mutex;
 class IRC_Client_IIRCControl;
 class IRC_Client_GUI_MessageHandler;
 
@@ -120,7 +120,7 @@ class IRC_Client_GUI_Connection
   bool                            isFirstUsersMsg_;
   std::string                     UIFileDirectory_;
 
-  ACE_Thread_Mutex                lock_;
+  mutable ACE_SYNCH_MUTEX         lock_;
   MESSAGE_HANDLERS_T              messageHandlers_;
 };
 

@@ -519,7 +519,8 @@ IRC_Client_GUI_MessageHandler::~IRC_Client_GUI_MessageHandler ()
   if (removed_events)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("%s: removed %u queued events...\n"),
-                ACE_TEXT (CBData_.id.c_str ()),
+                (isServerLog () ? ACE_TEXT (IRC_CLIENT_GUI_GTK_LABEL_DEF_LOG_TEXT)
+                                : ACE_TEXT (CBData_.id.c_str ())),
                 removed_events));
 }
 

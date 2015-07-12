@@ -24,7 +24,7 @@
 #include <map>
 #include <string>
 
-#if defined (ACE_WIN32) || defined (ACE_WIN32)
+#if defined (_MSC_VER)
 #include "curses.h"
 #else
 #include "ncurses.h"
