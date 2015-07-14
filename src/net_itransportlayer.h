@@ -21,7 +21,10 @@
 #ifndef NET_ITRANSPORTLAYER_H
 #define NET_ITRANSPORTLAYER_H
 
-#include "net_common.h"
+//#include "net_common.h"
+
+// forward declarations
+enum Net_ClientServerRole;
 
 template <typename ConfigurationType>
 class Net_ITransportLayer_T

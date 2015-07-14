@@ -60,20 +60,21 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   int result = -1;
 
   // sanity check(s)
+  ACE_ASSERT (inherited::configuration_.socketConfiguration);
   ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
 
   // step0: initialize baseclass
   inherited2::handle (handle_in);
 
   // step1: tweak socket
-  if (inherited::configuration_.socketConfiguration.bufferSize)
+  if (inherited::configuration_.socketConfiguration->bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                             SO_RCVBUF,
-                                            inherited::configuration_.socketConfiguration.bufferSize))
+                                            inherited::configuration_.socketConfiguration->bufferSize))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
-                  inherited::configuration_.socketConfiguration.bufferSize,
+                  inherited::configuration_.socketConfiguration->bufferSize,
                   handle_in));
 
       // clean up
@@ -83,13 +84,13 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
       return;
     } // end IF
   if (!Net_Common_Tools::setLinger (handle_in,
-                                    inherited::configuration_.socketConfiguration.linger,
+                                    inherited::configuration_.socketConfiguration->linger,
                                     -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                (inherited::configuration_.socketConfiguration.linger ? ACE_TEXT ("true")
-                                                                      : ACE_TEXT ("false")),
+                (inherited::configuration_.socketConfiguration->linger ? ACE_TEXT ("true")
+                                                                       : ACE_TEXT ("false")),
                 handle_in));
 
     // clean up

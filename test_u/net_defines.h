@@ -23,6 +23,9 @@
 
 #include "net_client_timeouthandler.h"
 
+// glade/GTKBuilder definitions
+#define NET_UI_GTK_UI_FILE_DIRECTORY "etc"
+
 #define NET_UI_GTKEVENT_RESOLUTION                      200 // ms --> 5 FPS
 #define NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME       "spinbutton_connections"
 #define NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME          "spinbutton_messages"

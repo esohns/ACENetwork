@@ -54,7 +54,7 @@ Net_Server_SignalHandler::~Net_Server_SignalHandler ()
 }
 
 bool
-Net_Server_SignalHandler::initialize (const Net_Server_SignalHandlerConfiguration_t& configuration_in)
+Net_Server_SignalHandler::initialize (const Net_Server_SignalHandlerConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::initialize"));
 

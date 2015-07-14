@@ -42,7 +42,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename ModuleConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketType,
@@ -55,7 +55,7 @@ class Net_StreamAsynchUDPSocketBase_T
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType>
 {
@@ -64,7 +64,7 @@ class Net_StreamAsynchUDPSocketBase_T
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType> CONNECTION_BASE_T;
 
@@ -93,6 +93,7 @@ class Net_StreamAsynchUDPSocketBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
+                                   StateType,
                                    StatisticContainerType,
                                    StreamType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<ACE_MT_SYNCH,
@@ -118,13 +119,13 @@ class Net_StreamAsynchUDPSocketBase_T
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType> inherited4;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&))
 };
 
 /////////////////////////////////////////
@@ -137,7 +138,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename ModuleConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 class Net_StreamAsynchUDPSocketBase_T<AddressType,
@@ -145,7 +146,7 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
                                       ConfigurationType,
                                       ModuleConfigurationType,
                                       UserDataType,
-                                      SessionDataType,
+                                      StateType,
                                       StatisticContainerType,
                                       StreamType,
                                       ACE_SOCK_NETLINK,
@@ -157,7 +158,7 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType>
 {
@@ -166,7 +167,7 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType> CONNECTION_BASE_T;
 
@@ -195,6 +196,7 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
+                                   StateType,
                                    StatisticContainerType,
                                    StreamType> ICONNECTION_MANAGER_T;
 
@@ -217,13 +219,13 @@ class Net_StreamAsynchUDPSocketBase_T<AddressType,
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType> inherited4;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&))
 };
 #endif
 

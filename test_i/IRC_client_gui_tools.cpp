@@ -28,6 +28,8 @@
 
 #include "net_macros.h"
 
+#include "IRC_client_network.h"
+
 #include "IRC_client_gui_connection.h"
 #include "IRC_client_gui_defines.h"
 
@@ -53,9 +55,14 @@ IRC_Client_UI_Tools::current (const std::string& timestamp_in,
       (*iterator).second->get ();
     if (connection_data_r.timestamp == timestamp_in)
     {
-      nickname_out = connection_data_r.IRCSessionState.nickname;
-      channel_out = (*iterator).second->getActiveID ();
       connection_p = (*iterator).second;
+      ACE_ASSERT (connection_p);
+      //connection_p->current (nickname_out,
+      //                       channel_out);
+      const IRC_Client_ConnectionState& connection_state_r =
+        connection_p->state ();
+      nickname_out = connection_state_r.nickname;
+      channel_out = connection_state_r.channel;
       break;
     } // end IF
   } // end FOR

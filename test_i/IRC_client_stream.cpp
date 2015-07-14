@@ -255,7 +255,7 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   // enqueue the module...
   // *NOTE*: push()ing the module will open() it
   // --> set the argument that is passed along (head module needs this)
-  IRCMarshal_.arg (const_cast<IRC_Client_StreamConfiguration&> (configuration_in).sessionData);
+  //IRCMarshal_.arg (const_cast<IRC_Client_StreamConfiguration&> (configuration_in).userData);
   if (inherited::push (&IRCMarshal_))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -276,7 +276,7 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
 }
 
 bool
-IRC_Client_Stream::collect (IRC_Client_RuntimeStatistic_t& data_out)
+IRC_Client_Stream::collect (Stream_Statistic& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::collect"));
 

@@ -21,15 +21,23 @@
 #ifndef NET_CLIENT_COMMON_H
 #define NET_CLIENT_COMMON_H
 
-#include "ace/INET_Addr.h"
+#include "net_connection_manager_common.h"
 
-#include "net_client_connector_common.h"
+// forward declarations
+struct Net_SocketHandlerConfiguration;
 
-struct Net_Client_SignalHandlerConfiguration_t
+struct Net_Client_ConnectorConfiguration
 {
-  long                     actionTimerId;
-  Net_Client_IConnector_t* connector;
-  ACE_INET_Addr            peerAddress;
+ inline Net_Client_ConnectorConfiguration ()
+  : connectionManager (NULL)
+  , socketHandlerConfiguration (NULL)
+  //, statisticCollectionInterval (0)
+  {};
+
+  Net_IInetConnectionManager_t*   connectionManager;
+  Net_SocketHandlerConfiguration* socketHandlerConfiguration;
+  //unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s))
+  //                                                             // 0 --> DON'T collect statistics
 };
 
 #endif

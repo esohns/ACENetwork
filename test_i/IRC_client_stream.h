@@ -27,6 +27,7 @@
 #include "common_time_common.h"
 
 #include "stream_base.h"
+#include "stream_common.h"
 
 #include "IRC_client_common_modules.h"
 #include "IRC_client_configuration.h"
@@ -40,10 +41,10 @@ class IRC_Client_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         Stream_State,
-                        IRC_Client_RuntimeStatistic_t,
+                        Stream_Statistic,
                         IRC_Client_StreamConfiguration,
                         IRC_Client_StreamModuleConfiguration,
-                        IRC_Client_SessionData,
+                        IRC_Client_StreamSessionData,
                         IRC_Client_StreamSessionData_t,
                         IRC_Client_SessionMessage,
                         IRC_Client_Message>
@@ -57,7 +58,7 @@ class IRC_Client_Stream
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to myRuntimeStatistic
-  virtual bool collect (IRC_Client_RuntimeStatistic_t&); // return value: statistic data
+  virtual bool collect (Stream_Statistic&); // return value: statistic data
   // this is just a dummy (use statisticsReportingInterval instead)
   virtual void report () const;
 
@@ -68,16 +69,16 @@ class IRC_Client_Stream
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         Stream_State,
-                        IRC_Client_RuntimeStatistic_t,
+                        Stream_Statistic,
                         IRC_Client_StreamConfiguration,
                         IRC_Client_StreamModuleConfiguration,
-                        IRC_Client_SessionData,
+                        IRC_Client_StreamSessionData,
                         IRC_Client_StreamSessionData_t,
                         IRC_Client_SessionMessage,
                         IRC_Client_Message> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream (const IRC_Client_Stream&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream& operator= (const IRC_Client_Stream&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream (const IRC_Client_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream& operator= (const IRC_Client_Stream&))
 
   // finalize stream
   // *NOTE*: need this to clean up queued modules if something goes wrong

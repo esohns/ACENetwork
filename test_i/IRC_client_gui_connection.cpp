@@ -33,13 +33,15 @@
 
 #include "net_macros.h"
 
+#include "IRC_client_network.h"
+
 #include "IRC_client_gui_callbacks.h"
 #include "IRC_client_gui_defines.h"
 #include "IRC_client_gui_messagehandler.h"
 #include "IRC_client_iIRCControl.h"
 #include "IRC_client_tools.h"
 
-IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_in,
+IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKState_in,
                                                       IRC_Client_GUI_Connections_t* connections_in,
                                                       guint contextID_in,
                                                       const std::string& label_in,
@@ -48,6 +50,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
  , CBData_ ()
  , contextID_ (contextID_in)
  , isFirstUsersMsg_ (true)
+ , sessionState_ (NULL)
  , UIFileDirectory_ (UIFileDirectory_in)
  , lock_ ()
  , messageHandlers_ ()
@@ -55,7 +58,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::IRC_Client_GUI_Connection"));
 
   // sanity check(s)
-  ACE_ASSERT (state_in);
+  ACE_ASSERT (GTKState_in);
   ACE_ASSERT (connections_in);
   if (!Common_File_Tools::isDirectory (UIFileDirectory_in))
   {
@@ -68,9 +71,8 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* state_
   // initialize cb data
   CBData_.connections = connections_in;
   CBData_.eventSourceID = 0;
-  CBData_.GTKState = state_in;
+  CBData_.GTKState = GTKState_in;
   //   CBData_.nick.clear(); // cannot set this now...
-  CBData_.IRCSessionState.userModes.reset ();
   CBData_.label = label_in;
   ACE_TCHAR timestamp[27]; // ISO-8601 format
   ACE_OS::memset (&timestamp, 0, sizeof (timestamp));
@@ -558,13 +560,16 @@ IRC_Client_GUI_Connection::~IRC_Client_GUI_Connection ()
 }
 
 void
-IRC_Client_GUI_Connection::initialize (IRC_Client_IIRCControl* controller_in)
+IRC_Client_GUI_Connection::initialize (IRC_Client_ConnectionState* sessionState_in,
+                                       IRC_Client_IIRCControl* controller_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::initialize"));
 
   ACE_ASSERT (controller_in);
+  ACE_ASSERT (sessionState_in);
 
   CBData_.controller = controller_in;
+  sessionState_ = sessionState_in;
 }
 
 void
@@ -668,6 +673,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
   // sanity check(s)
   ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (sessionState_);
 
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
@@ -693,7 +699,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           // *NOTE*: this is the first message in any connection !
 
           // remember nickname
-          CBData_.IRCSessionState.nickname = message_in.params.front ();
+          sessionState_->nickname = message_in.params.front ();
 
           gdk_threads_enter ();
 
@@ -818,7 +824,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           gdk_threads_enter ();
 
           // *WARNING*: needs the lock protection, otherwise there is a race...
-          CBData_.IRCSessionState.away = false;
+          sessionState_->away = false;
 
           // retrieve togglebutton
           GtkToggleButton* toggle_button_p =
@@ -838,7 +844,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           gdk_threads_enter ();
 
           // *WARNING*: needs the lock protection, otherwise there is a race...
-          CBData_.IRCSessionState.away = true;
+          sessionState_->away = true;
 
           // retrieve togglebutton
           GtkToggleButton* toggle_button_p =
@@ -1032,7 +1038,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           } // end IF
 
           // ignore own record
-          if (nickname == CBData_.IRCSessionState.nickname)
+          if (nickname == sessionState_->nickname)
           {
             // clean up
             gdk_threads_leave ();
@@ -1115,9 +1121,9 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
             converter >> nickname;
 
             // check whether user is a channel operator
-            if (nickname.find (CBData_.IRCSessionState.nickname) != std::string::npos)
+            if (nickname.find (sessionState_->nickname) != std::string::npos)
               is_operator = ((nickname[0] == '@') &&
-                             (nickname.size () == (CBData_.IRCSessionState.nickname.size () + 1)));
+                             (nickname.size () == (sessionState_->nickname.size () + 1)));
 
             list.push_back (nickname);
           } // end WHILE
@@ -1231,8 +1237,8 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRCMessage::NICK:
         {
           // remember changed nickname...
-          std::string old_nick = CBData_.IRCSessionState.nickname;
-          CBData_.IRCSessionState.nickname = message_in.params.front ();
+          std::string old_nickname = sessionState_->nickname;
+          sessionState_->nickname = message_in.params.front ();
 
           // --> display (changed) nickname
           // step1: set server tab nickname label
@@ -1244,7 +1250,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           ACE_ASSERT (label_p);
           // --> see Pango Text Attribute Markup Language...
           std::string nickname_string = ACE_TEXT_ALWAYS_CHAR ("<b><i>nickname</i></b> ");
-          nickname_string += CBData_.IRCSessionState.nickname;
+          nickname_string += sessionState_->nickname;
           gtk_label_set_markup (label_p,
                                 nickname_string.c_str ());
 
@@ -1258,7 +1264,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
             if ((*iterator).second->isServerLog ())
               continue;
 
-            (*iterator).second->updateNick (old_nick);
+            (*iterator).second->update (old_nickname);
           } // end FOR
 
           // *WARNING*: falls through !
@@ -1268,7 +1274,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         {
           log (message_in);
 
-          if ((message_in.prefix.origin == CBData_.IRCSessionState.nickname) &&
+          if ((message_in.prefix.origin == sessionState_->nickname) &&
               (command == IRC_Client_IRCMessage::QUIT))
             error (message_in, // --> show on statusbar as well...
                    false);
@@ -1284,7 +1290,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           // - stranger entering the channel
 
           // reply from a successful join request ?
-          if (message_in.prefix.origin == CBData_.IRCSessionState.nickname)
+          if (message_in.prefix.origin == sessionState_->nickname)
           {
             createMessageHandler (message_in.params.front (),
                                   false);
@@ -1333,7 +1339,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           // - someone left a common channel
 
           // reply from a successful part request ?
-          if (message_in.prefix.origin == CBData_.IRCSessionState.nickname)
+          if (message_in.prefix.origin == sessionState_->nickname)
           {
             terminateMessageHandler (message_in.params.back (),
                                      false);
@@ -1371,13 +1377,13 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
             message_in.params.begin ();
           param_iterator++;
 
-          if (message_in.params.front () == CBData_.IRCSessionState.nickname)
+          if (message_in.params.front () == sessionState_->nickname)
           {
             // --> user mode
             // *WARNING*: needs the lock protection, otherwise there is a race...
             CBData_.acknowledgements +=
               IRC_Client_Tools::merge (message_in.params.back (),
-                                       CBData_.IRCSessionState.userModes);
+                                       sessionState_->userModes);
 
             guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                                                      idle_update_user_modes_cb,
@@ -1474,7 +1480,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           // private message ?
           std::string target_id;
-          if (CBData_.IRCSessionState.nickname == message_in.params.front ())
+          if (sessionState_->nickname == message_in.params.front ())
           {
             // --> send to private conversation handler
 
@@ -1487,8 +1493,8 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           } // end IF
 
           // channel/nick message ?
-          forward (((CBData_.IRCSessionState.nickname == message_in.params.front ()) ? message_in.prefix.origin
-                                                                                     : message_in.params.front ()),
+          forward (((sessionState_->nickname == message_in.params.front ()) ? message_in.prefix.origin
+                                                                            : message_in.params.front ()),
                    message_text);
 
           break;
@@ -1591,106 +1597,28 @@ IRC_Client_GUI_Connection::getHandler (const std::string& id_in)
   return NULL;
 }
 
-std::string
-IRC_Client_GUI_Connection::getActiveID (bool lockedAccess_in,
-                                        bool gdkLockedAccess_in) const
+//void
+//IRC_Client_GUI_Connection::current (std::string& nickname_out,
+//                                    std::string& channel_out) const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::current"));
+//
+//  // sanity check(s)
+//  ACE_ASSERT (sessionState_);
+//
+//  nickname_out = sessionState_->nickname;
+//  // *TODO*: keep this information synchronized
+//  channel_out = sessionState_->channel;
+//}
+const IRC_Client_ConnectionState&
+IRC_Client_GUI_Connection::state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::getActiveID"));
-
-  // initialize result
-  std::string return_value;
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::state"));
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (sessionState_);
 
-  int result = -1;
-  GtkNotebook* notebook_p = NULL;
-  gint page_number = -1;
-  GtkWidget* widget_p = NULL;
-
-  if (lockedAccess_in)
-  {
-    result = CBData_.GTKState->lock.acquire ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
-  } // end IF
-
-  Common_UI_GTKBuildersIterator_t iterator =
-      CBData_.GTKState->builders.find (CBData_.timestamp);
-  // sanity check(s)
-  if (iterator == CBData_.GTKState->builders.end ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection (was: \"%s\") builder not found, aborting\n"),
-                ACE_TEXT (CBData_.label.c_str ())));
-    goto clean_up;
-  } // end IF
-
-  if (gdkLockedAccess_in)
-    gdk_threads_enter ();
-  // retrieve server tab channel tabs handle
-  notebook_p =
-    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
-  ACE_ASSERT (notebook_p);
-  page_number = gtk_notebook_get_current_page (notebook_p);
-  // sanity check(s)
-  if (page_number == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to gtk_notebook_get_current_page(%@): no pages, aborting\n"),
-                notebook_p));
-
-    // clean up
-    if (gdkLockedAccess_in)
-      gdk_threads_leave ();
-
-    goto clean_up;
-  } // end IF
-  // server log ? --> no active handler --> return empty string
-  if (page_number == 0)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("no active handler, aborting\n")));
-
-    // clean up
-    if (gdkLockedAccess_in)
-      gdk_threads_leave ();
-
-    goto clean_up;
-  } // end IF
-
-  widget_p = gtk_notebook_get_nth_page (notebook_p,
-                                        page_number);
-  ACE_ASSERT (widget_p);
-  { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-    for (MESSAGE_HANDLERSCONSTITERATOR_T iterator = messageHandlers_.begin ();
-         iterator != messageHandlers_.end ();
-         iterator++)
-    {
-      if ((*iterator).second->getTopLevelPageChild (false) == widget_p)
-      {
-        return_value = (*iterator).first;
-
-        break;
-      } // end IF
-    } // end FOR
-  } // end lock scope
-  if (gdkLockedAccess_in)
-    gdk_threads_leave ();
-
-clean_up:
-  if (lockedAccess_in)
-  {
-    result = CBData_.GTKState->lock.release ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
-  } // end IF
-
-  return return_value;
+  return *sessionState_;
 }
 
 IRC_Client_GUI_MessageHandler*

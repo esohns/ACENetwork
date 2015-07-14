@@ -38,7 +38,8 @@
 #include "IRC_client_common.h"
 
 // forward declarations
-struct IRC_Client_SessionState;
+struct IRC_Client_ConnectionState;
+class IRC_Client_IIRCControl;
 
 typedef std::map<std::string, PANEL*> IRC_Client_CursesChannels_t;
 typedef IRC_Client_CursesChannels_t::iterator IRC_Client_CursesChannelsIterator_t;
@@ -59,7 +60,7 @@ struct IRC_Client_CursesState
    , lock ()
    //////////////////////////////////////
    , backLog ()
-   , IRCSessionState (NULL)
+   , state (NULL)
   {
     activePanel = panels.begin ();
   };
@@ -80,7 +81,7 @@ struct IRC_Client_CursesState
 
   // session
   IRC_Client_CursesMessages_t         backLog;
-  IRC_Client_SessionState*            IRCSessionState;
+  IRC_Client_ConnectionState*         state;
 };
 
 bool curses_join (const std::string&,       // channel
@@ -89,7 +90,8 @@ void curses_log (const std::string&,      // channel (empty ? server log : chann
                  const std::string&,      // text
                  IRC_Client_CursesState&, // state
                  bool = true);            // lock ?
-bool curses_main (IRC_Client_CursesState&); // state
+bool curses_main (IRC_Client_CursesState&,  // state
+                  IRC_Client_IIRCControl*); // controller
 bool curses_part (const std::string&,       // channel
                   IRC_Client_CursesState&); // state
 

@@ -22,8 +22,8 @@
 #define TEST_U_NET_COMMON_H
 
 #include <deque>
-#include <vector>
 
+#include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 
 #include "common.h"
@@ -34,9 +34,14 @@
 #include "net_stream_common.h"
 
 #include "net_client_common.h"
+#include "net_client_connector_common.h"
 #include "net_client_timeouthandler.h"
 
 #include "net_server_common.h"
+
+// forward declarations
+struct Net_SocketConfiguration;
+class Stream_IAllocator;
 
 extern unsigned int random_seed;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -57,6 +62,26 @@ enum Net_GTK_Event
 typedef std::deque<Net_GTK_Event> Net_GTK_Events_t;
 typedef Net_GTK_Events_t::const_iterator Net_GTK_EventsIterator_t;
 
+struct Net_Client_SignalHandlerConfiguration
+{
+  inline Net_Client_SignalHandlerConfiguration ()
+   : actionTimerId (-1)
+   , connector (NULL)
+   , messageAllocator (NULL)
+   , peerAddress ()
+   , socketConfiguration (NULL)
+   , statisticCollectionInterval (0)
+  {};
+
+  long                     actionTimerId;
+  Net_Client_IConnector_t* connector;
+  Stream_IAllocator*       messageAllocator;
+  ACE_INET_Addr            peerAddress;
+  Net_SocketConfiguration* socketConfiguration;
+  unsigned int             statisticCollectionInterval; // statistics collecting interval (second(s))
+                                                        // 0 --> DON'T collect statistics
+};
+
 struct Net_GTK_CBData
 {
   inline Net_GTK_CBData ()
@@ -65,23 +90,23 @@ struct Net_GTK_CBData
    , GTKState ()
    , listenerHandle (NULL)
    , logStack ()
-   , signalHandlerConfiguration (NULL)
+   , signalHandlerConfiguration ()
    , stackLock ()
    , subscribers ()
    , subscribersLock ()
    , timeoutHandler (NULL)
- { };
+  {};
 
-  bool                                     allowUserRuntimeStatistic;
-  Net_GTK_Events_t                         eventStack;
-  Common_UI_GTKState                       GTKState;
-  Net_Server_IListener_t*                  listenerHandle;             // *NOTE*: server only !
-  Common_MessageStack_t                    logStack;
-  Net_Client_SignalHandlerConfiguration_t* signalHandlerConfiguration; // *NOTE*: client only !
-  ACE_SYNCH_RECURSIVE_MUTEX                stackLock;
-  Net_Subscribers_t                        subscribers;
-  ACE_SYNCH_RECURSIVE_MUTEX                subscribersLock;
-  Net_Client_TimeoutHandler*               timeoutHandler;             // *NOTE*: client only !
+  bool                                  allowUserRuntimeStatistic;
+  Net_GTK_Events_t                      eventStack;
+  Common_UI_GTKState                    GTKState;
+  Net_Server_IListener_t*               listenerHandle;             // *NOTE*: server only !
+  Common_MessageStack_t                 logStack;
+  Net_Client_SignalHandlerConfiguration signalHandlerConfiguration; // *NOTE*: client only !
+  ACE_SYNCH_RECURSIVE_MUTEX             stackLock;
+  Net_Subscribers_t                     subscribers;
+  ACE_SYNCH_RECURSIVE_MUTEX             subscribersLock;
+  Net_Client_TimeoutHandler*            timeoutHandler;             // *NOTE*: client only !
 };
 
 #endif

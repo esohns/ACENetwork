@@ -34,32 +34,35 @@ rem echo invalid file ^(was: "%NSISEXE%"^)^, exiting
 rem  goto Failed
 rem )
 
-set SOURCE_FILE=.\IRCclient.nsi
+set SOURCE_FILE="%~dp0\IRC_client.nsi"
 if NOT exist "%SOURCE_FILE%" (
  echo invalid file ^(was: "%SOURCE_FILE%"^)^, exiting
  goto Failed
 )
+echo generating installer...
 %NSISEXE% /V4 /Oinstaller.log /Drelease=%1 %SOURCE_FILE%
+rem %NSISEXE% /V4 /Drelease=%1 %SOURCE_FILE%
 if %ERRORLEVEL% NEQ 0 (
  echo failed to generate installer^, exiting
  set RC=%ERRORLEVEL%
  goto Failed
 )
+echo generating installer...DONE
 
-@rem move generated file into the release directory
-set TARGET_DIRECTORY=.\..\releases
+@rem move generated file into the releases directory
+set TARGET_DIRECTORY="%~dp0\..\releases"
 if NOT exist "%TARGET_DIRECTORY%" (
  echo invalid directory ^(was: "%TARGET_DIRECTORY%"^)^, exiting
  goto Failed
 )
-for /R . %FILE in (*.exe) do (
-  move /Y %FILE %TARGET_DIRECTORY% >NUL
+for /R "%~dp0" %%f in (*.exe) do (
+  move /Y "%%f" %TARGET_DIRECTORY% >NUL
   if %ERRORLEVEL% NEQ 0 (
     echo failed to move file^(s^)^, exiting
     set RC=%ERRORLEVEL%
     goto Failed
   )
-  echo moved "%~nFILE"...
+  echo moved "%%f"...
 )
 goto Clean_Up
 

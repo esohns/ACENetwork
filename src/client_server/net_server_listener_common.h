@@ -29,15 +29,16 @@
 #include "net_tcpconnection.h"
 
 #include "net_server_asynchlistener.h"
+#include "net_server_common.h"
 #include "net_server_exports.h"
 #include "net_server_listener.h"
 
-typedef Net_Server_AsynchListener_T<Net_Configuration,
+typedef Net_Server_AsynchListener_T<Net_Server_ListenerConfiguration,
                                     Net_SocketHandlerConfiguration,
                                     Net_StreamUserData,
                                     Net_AsynchTCPConnection> Net_Server_AsynchListener_t;
 
-typedef Net_Server_Listener_T<Net_Configuration,
+typedef Net_Server_Listener_T<Net_Server_ListenerConfiguration,
                               Net_SocketHandlerConfiguration,
                               Net_StreamUserData,
                               Net_TCPConnection> Net_Server_Listener_t;

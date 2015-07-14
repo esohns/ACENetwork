@@ -23,16 +23,19 @@
 
 #include "ace/Global_Macros.h"
 
+#include "common_iget.h"
+#include "common_iinitialize.h"
+
 template <typename AddressType,
-          typename ConfigurationType> // socket handler configuration
+          typename ConfigurationType>
 class Net_Client_IConnector_T
+ : public Common_IGet_T<ConfigurationType>
+ , public Common_IInitialize_T<ConfigurationType>
 {
  public:
   virtual ~Net_Client_IConnector_T () {};
 
   //virtual bool useReactor () const = 0; // ? : uses proactor
-
-  virtual const ConfigurationType* getConfiguration () const = 0;
 
   virtual void abort () = 0; // shutdown
   virtual ACE_HANDLE connect (const AddressType&) = 0;

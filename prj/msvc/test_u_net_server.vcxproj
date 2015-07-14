@@ -171,7 +171,7 @@
     <ClInclude Include="..\..\test_u\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\test_u\net_server.glade" />
+    <None Include="..\..\test_u\etc\net_server.glade" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

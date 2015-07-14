@@ -36,7 +36,7 @@
 
 class Net_Server_SignalHandler
  : public Common_SignalHandler
- , public Common_IInitialize_T<Net_Server_SignalHandlerConfiguration_t>
+ , public Common_IInitialize_T<Net_Server_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
@@ -44,7 +44,7 @@ class Net_Server_SignalHandler
   virtual ~Net_Server_SignalHandler ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Net_Server_SignalHandlerConfiguration_t&); // configuration
+  virtual bool initialize (const Net_Server_SignalHandlerConfiguration&); // configuration
 
   // implement Common_ISignal
   virtual bool handleSignal (int); // signal
@@ -52,12 +52,12 @@ class Net_Server_SignalHandler
  private:
   typedef Common_SignalHandler inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler ());
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler (const Net_Server_SignalHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler& operator= (const Net_Server_SignalHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler ())
+  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler (const Net_Server_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler& operator= (const Net_Server_SignalHandler&))
 
-  Net_Server_SignalHandlerConfiguration_t configuration_;
-  bool                                    useReactor_;
+  Net_Server_SignalHandlerConfiguration configuration_;
+  bool                                  useReactor_;
 };
 
 #endif

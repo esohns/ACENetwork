@@ -29,24 +29,23 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
-                     SessionDataType,
+                     StateType,
                      StatisticContainerType,
                      StreamType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                         unsigned int statisticCollectionInterval_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
  , configuration_ ()
+ , state_ ()
  , isRegistered_ (false)
  , manager_ (interfaceHandle_in)
- , sessionData_ (NULL)
- , status_ (NET_CONNECTION_STATUS_OK)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
  , statisticCollectHandler_ (ACTION_COLLECT,
                              this,
@@ -84,33 +83,15 @@ Net_ConnectionBase_T<AddressType,
     try
     { // (try to) get (default) configuration/user data from the connection
       // manager
+      // *TODO*: remove type inference
       manager_->get (configuration_,
-                     user_data_p);
+                     state_.userData);
     }
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnectionManager_T::get(), continuing\n")));
     }
-  } // end IF
-
-  // *TODO*: session data could be a member, then it would just require
-  //         initialization...
-  try
-  {
-    ACE_NEW_NORETURN (sessionData_,
-                      SessionDataType (user_data_p,
-                                       false));
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("caught exception in ACE_NEW_NORETURN(SessionDataType), continuing\n")));
-  }
-  if (!sessionData_)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("unable to allocate SessionDataType, continuing\n")));
   } // end IF
 
 //  // register with the connection manager, if any
@@ -123,14 +104,14 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
-                     SessionDataType,
+                     StateType,
                      StatisticContainerType,
                      StreamType>::~Net_ConnectionBase_T ()
 {
@@ -142,9 +123,11 @@ Net_ConnectionBase_T<AddressType,
   if (statisticCollectHandlerID_ != -1)
   {
     const void* act_p = NULL;
-    result =
-        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (statisticCollectHandlerID_,
-                                                                  &act_p);
+    Common_Timer_Manager_t* timer_manager_p =
+      COMMON_TIMERMANAGER_SINGLETON::instance ();
+    ACE_ASSERT (timer_manager_p);
+    result = timer_manager_p->cancel_timer (statisticCollectHandlerID_,
+                                            &act_p);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
@@ -155,9 +138,6 @@ Net_ConnectionBase_T<AddressType,
 //                  statisticCollectHandlerID_));
   } // end IF
 
-  // clean up
-  delete sessionData_;
-
 //  // deregister with the connection manager, if any
 //  deregister ();
 }
@@ -166,7 +146,7 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 bool
@@ -174,7 +154,7 @@ Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
-                     SessionDataType,
+                     StateType,
                      StatisticContainerType,
                      StreamType>::registerc ()
 {
@@ -259,7 +239,7 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 void
@@ -267,7 +247,7 @@ Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
-                     SessionDataType,
+                     StateType,
                      StatisticContainerType,
                      StreamType>::deregister ()
 {
@@ -323,7 +303,7 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 const ConfigurationType&
@@ -331,7 +311,7 @@ Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
-                     SessionDataType,
+                     StateType,
                      StatisticContainerType,
                      StreamType>::get () const
 {
@@ -344,7 +324,7 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 bool
@@ -352,7 +332,7 @@ Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
-                     SessionDataType,
+                     StateType,
                      StatisticContainerType,
                      StreamType>::initialize (const ConfigurationType& configuration_in)
 {
@@ -367,7 +347,28 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType>
+const StateType&
+Net_ConnectionBase_T<AddressType,
+                     SocketConfigurationType,
+                     ConfigurationType,
+                     UserDataType,
+                     StateType,
+                     StatisticContainerType,
+                     StreamType>::state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::state"));
+
+  return state_;
+}
+
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename UserDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 Net_Connection_Status
@@ -375,11 +376,12 @@ Net_ConnectionBase_T<AddressType,
                      SocketConfigurationType,
                      ConfigurationType,
                      UserDataType,
-                     SessionDataType,
+                     StateType,
                      StatisticContainerType,
                      StreamType>::status () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::status"));
 
-  return status_;
+  // *TODO*: remove type inference
+  return state_.status;
 }

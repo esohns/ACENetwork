@@ -37,13 +37,9 @@ Net_Server_AsynchListener_T<ConfigurationType,
                             HandlerType>::Net_Server_AsynchListener_T ()
  : inherited ()
  , addressFamily_ (ACE_ADDRESS_FAMILY_INET)
- , allocator_ (NULL)
- , configuration_ (NULL)
- , interfaceHandle_ (NULL)
+ , configuration_ ()
  , isInitialized_ (false)
  , isListening_ (false)
- , listeningPort_ (NET_SERVER_DEFAULT_LISTENING_PORT)
- , useLoopback_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::Net_Server_AsynchListener_T"));
 
@@ -135,9 +131,10 @@ Net_Server_AsynchListener_T<ConfigurationType,
 
   // Create a new message block big enough for the addresses and data
   ACE_Message_Block* message_block_p = NULL;
-  if (allocator_)
+  // *TODO*: remove type inference
+  if (configuration_.messageAllocator)
     message_block_p =
-      static_cast<ACE_Message_Block*> (allocator_->malloc (space_needed));
+      static_cast<ACE_Message_Block*> (configuration_.messageAllocator->malloc (space_needed));
   else
     ACE_NEW_NORETURN (message_block_p,
                       ACE_Message_Block (space_needed,
@@ -159,16 +156,15 @@ Net_Server_AsynchListener_T<ConfigurationType,
   } // end IF
 
   // Initiate asynchronous accepts
-  result =
-    inherited::asynch_accept ().accept (*message_block_p,
-                                        bytesToRead_in,
-                                        ACE_INVALID_HANDLE,
-                                        (act_in ? act_in
-                                                : configuration_),
-                                        0,
-                                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL,
-                                        //this->addr_family_,
-                                        addressFamily_);
+  ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
+  result = asynch_accept_r.accept (*message_block_p,
+                                   bytesToRead_in,
+                                   ACE_INVALID_HANDLE,
+                                   (act_in ? act_in : &configuration_),
+                                   0,
+                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL,
+                                   //this->addr_family_,
+                                   addressFamily_);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -207,18 +203,13 @@ bool
 Net_Server_AsynchListener_T<ConfigurationType,
                             SocketHandlerConfigurationType,
                             UserDataType,
-                            HandlerType>::initialize (const Net_Server_ListenerConfiguration_t& configuration_in)
+                            HandlerType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::initialize"));
 
+  // *TODO*: remove type inference
   addressFamily_ = configuration_in.addressFamily;
-  allocator_ = configuration_in.allocator;
-  configuration_ = configuration_in.socketHandlerConfiguration;
-  interfaceHandle_ = configuration_in.connectionManager;
-  listeningPort_ = configuration_in.portNumber;
-  statisticCollectionInterval_ = configuration_in.statisticCollectionInterval;
-  useLoopback_ = configuration_in.useLoopbackDevice;
-
+  configuration_ = configuration_in;
   isInitialized_ = true;
 
   return true;
@@ -281,15 +272,16 @@ Net_Server_AsynchListener_T<ConfigurationType,
   // not running --> start listening
   int result = -1;
   ACE_INET_Addr local_sap;
-  if (useLoopback_)
-    local_sap.set (listeningPort_, // port
+  // *TODO*: remove type inferences
+  if (configuration_.useLoopbackDevice)
+    local_sap.set (configuration_.portNumber, // port
                    // *PORTABILITY*: needed to disambiguate this under Windows :-(
                    // *TODO*: bind to specific interface/address ?
-                   ACE_LOCALHOST,  // hostname
-                   1,              // encode ?
-                   AF_INET);       // address family
+                   ACE_LOCALHOST,             // hostname
+                   1,                         // encode ?
+                   AF_INET);                  // address family
   else
-    local_sap.set (listeningPort_,                       // port
+    local_sap.set (configuration_.portNumber,            // port
                    // *PORTABILITY*: needed to disambiguate this under Windows :-(
                    // *TODO*: bind to specific interface/address ?
                    static_cast<ACE_UINT32> (INADDR_ANY), // hostname
@@ -308,13 +300,13 @@ Net_Server_AsynchListener_T<ConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Acceptor::open(%u): \"%m\", returning\n"),
-                listeningPort_));
+                configuration_.portNumber));
     return;
   } // end IF
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("started listening (port: %u)...\n"),
-              listeningPort_));
+              configuration_.portNumber));
 
   // all is well...
   isListening_ = true;
@@ -382,8 +374,8 @@ Net_Server_AsynchListener_T<ConfigurationType,
 #endif
   else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("stopped listening (port: %u)...\n"),
-                listeningPort_));
+                ACE_TEXT ("stopped listening (port was: %u)...\n"),
+                configuration_.portNumber));
 
   isListening_ = false;
 }
@@ -434,10 +426,15 @@ Net_Server_AsynchListener_T<ConfigurationType,
   // initialize return value(s)
   HandlerType* connection_p = NULL;
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_.socketHandlerConfiguration);
+
   // default behavior
+  // *TODO*: remove type inference
   ACE_NEW_NORETURN (connection_p,
-                    HandlerType (interfaceHandle_,
-                                 statisticCollectionInterval_));
+                    HandlerType (configuration_.connectionManager,
+                                 configuration_.socketHandlerConfiguration->statisticCollectionInterval));
+                                 //configuration_.statisticCollectionInterval));
   if (!connection_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

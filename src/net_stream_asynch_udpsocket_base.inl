@@ -163,7 +163,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   socket_handler_configuration.messageAllocator =
     inherited4::configuration_.streamConfiguration.streamConfiguration.messageAllocator;
   socket_handler_configuration.socketConfiguration =
-    inherited4::configuration_.socketConfiguration;
+    &inherited4::configuration_.socketConfiguration;
   if (!inherited::initialize (socket_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -178,7 +178,7 @@ Net_StreamAsynchUDPSocketBase_T<AddressType,
   // step3a: connect stream head message queue with a notification pipe/queue ?
   if (!inherited4::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
     inherited4::configuration_.streamConfiguration.streamConfiguration.notificationStrategy =
-    this;
+      this;
 
   if (inherited4::configuration_.streamConfiguration.streamConfiguration.module)
   {

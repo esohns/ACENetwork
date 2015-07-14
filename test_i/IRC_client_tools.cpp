@@ -1647,30 +1647,41 @@ IRC_Client_Tools::stringify (const IRC_Client_Parameters_t& params_in,
 }
 
 ACE_HANDLE
-IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
+IRC_Client_Tools::connect (bool asynchronousConnect_in,
+                           Stream_IAllocator* messageAllocator_in,
                            const IRC_Client_IRCLoginOptions& loginOptions_in,
                            bool debugScanner_in,
                            bool debugParser_in,
                            unsigned int statisticReportingInterval_in,
                            const std::string& serverHostname_in,
                            unsigned short serverPortNumber_in,
+                           const IRC_Client_StreamModuleConfiguration* moduleConfiguration_in,
                            bool cloneModule_in,
                            bool deleteModule_in,
-                           const Stream_Module_t* finalModule_inout,
-                           const IRC_Client_StreamModuleConfiguration* moduleConfiguration_in)
+                           Stream_Module_t*& finalModule_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::connect"));
 
-  int result = -1;
+  ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
-  // step1: setup configuration passed to processing stream
+  int result = -1;
+  IRC_Client_Connector_t connector;
+  IRC_Client_AsynchConnector_t asynch_connector;
+  IRC_Client_IClientConnector_t* connector_p = &connector;
+  if (asynchronousConnect_in)
+    connector_p = &asynch_connector;
+  IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
+  IRC_Client_ConnectorConfiguration connector_configuration;
+
+  // step1: set up configuration passed to processing stream
   IRC_Client_Configuration configuration;
-  IRC_Client_SessionData* session_data_p = NULL;
+  Net_StreamUserData* user_data_p = NULL;
   IRC_Client_IConnection_Manager_t* connection_manager_p =
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
+  // load defaults
   connection_manager_p->get (configuration,
-                             session_data_p);
+                             user_data_p);
 
   // ************ socket configuration data ************
   configuration.socketConfiguration.bufferSize =
@@ -1684,12 +1695,7 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-
-    // clean up
-    if (deleteModule_in)
-      delete finalModule_inout;
-
-    return ACE_INVALID_HANDLE;
+    goto error;
   } // end IF
   // ************ stream configuration data ****************
   configuration.streamConfiguration.crunchMessageBuffers =
@@ -1708,67 +1714,76 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
     configuration.streamConfiguration.streamConfiguration.deleteModule =
       deleteModule_in;
     configuration.streamConfiguration.streamConfiguration.module =
-      const_cast<Stream_Module_t*> (finalModule_inout);
-    configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
-      const_cast<Stream_ModuleConfiguration*> (&moduleConfiguration_in->moduleConfiguration);
+      finalModule_inout;
+    if (moduleConfiguration_in)
+      configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
+        const_cast<Stream_ModuleConfiguration*> (&moduleConfiguration_in->moduleConfiguration);
   } // end IF
   configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
-  configuration.streamConfiguration.streamModuleConfiguration =
-    *moduleConfiguration_in;
+  if (moduleConfiguration_in)
+    configuration.streamConfiguration.streamModuleConfiguration =
+      *moduleConfiguration_in;
 
   // ************ protocol configuration data **************
   configuration.protocolConfiguration.loginOptions = loginOptions_in;
 
-  session_data_p = NULL;
-  ACE_NEW_NORETURN (session_data_p,
-                    IRC_Client_SessionData ());
-  if (!session_data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocator memory: \"%m\", aborting\n")));
-
-    // clean up
-    if (deleteModule_in)
-      delete finalModule_inout;
-
-    return ACE_INVALID_HANDLE;
-  } // end IF
-  configuration.streamConfiguration.sessionData = session_data_p;
+  //user_data_p = NULL;
+  //ACE_NEW_NORETURN (user_data_p,
+  //                  Net_StreamUserData ());
+  //if (!user_data_p)
+  //{
+  //  ACE_DEBUG ((LM_CRITICAL,
+  //              ACE_TEXT ("failed to allocator memory: \"%m\", aborting\n")));
+  //  goto error;
+  //} // end IF
+  //user_data_p->userData = ;
+  //configuration.streamConfiguration.userData = user_data_p;
 
   // step2: initialize client connector
-  IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
-  ACE_NEW_NORETURN (socket_handler_configuration_p,
-                    IRC_Client_SocketHandlerConfiguration ());
-  if (!socket_handler_configuration_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+  //ACE_NEW_NORETURN (socket_handler_configuration_p,
+  //                  IRC_Client_SocketHandlerConfiguration ());
+  //if (!socket_handler_configuration_p)
+  //{
+  //  ACE_DEBUG ((LM_CRITICAL,
+  //              ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
-    // clean up
-    if (deleteModule_in)
-      delete finalModule_inout;
-    delete session_data_p;
+  //  //// clean up
+  //  //delete user_data_p;
 
-    return ACE_INVALID_HANDLE;
-  } // end IF
+  //  goto error;
+  //} // end IF
   socket_handler_configuration_p->bufferSize = IRC_CLIENT_BUFFER_SIZE;
   socket_handler_configuration_p->messageAllocator = messageAllocator_in;
   socket_handler_configuration_p->socketConfiguration =
-    configuration.socketConfiguration;
-  // *TODO*: memory leak socket handler configuration here...
-  IRC_Client_Connector_t connector (socket_handler_configuration_p,
-                                    connection_manager_p,
-                                    statisticReportingInterval_in);
+    &configuration.socketConfiguration;
+  socket_handler_configuration_p->statisticCollectionInterval =
+    statisticReportingInterval_in;
+  connector_configuration.connectionManager = connection_manager_p;
+  connector_configuration.socketHandlerConfiguration =
+    &configuration.socketHandlerConfiguration;
+  //connector_configuration.userData = user_data_p;
+  // *NOTE*: fire-and-forget socket_handler_configuration_p here
+  if (!connector_p->initialize (connector_configuration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
+
+    // clean up
+    //delete user_data_p;
+    delete socket_handler_configuration_p;
+
+    goto error;
+  } // end IF
 
   connection_manager_p->lock ();
   connection_manager_p->set (configuration,
-                             session_data_p);
+                             user_data_p);
 
   // step3: (try to) connect to the server
-  ACE_HANDLE handle =
-    connector.connect (configuration.socketConfiguration.peerAddress);
-  if (handle == ACE_INVALID_HANDLE)
+  return_value =
+    connector_p->connect (configuration.socketConfiguration.peerAddress);
+  if (return_value == ACE_INVALID_HANDLE)
   {
     // debug info
     ACE_TCHAR buffer[BUFSIZ];
@@ -1784,16 +1799,23 @@ IRC_Client_Tools::connect (Stream_IAllocator* messageAllocator_in,
                 buffer));
 
     // clean up
-    if (deleteModule_in)
-      delete finalModule_inout;
     connection_manager_p->unlock ();
 
-    return ACE_INVALID_HANDLE;
+    goto error;
   } // end IF
   connection_manager_p->unlock ();
 
   // *NOTE*: handlers automagically register with the connection manager and
   //         will also de-register and self-destruct on disconnects !
 
-  return handle;
+  return return_value;
+
+error:
+  if (deleteModule_in)
+  {
+    delete finalModule_inout;
+    finalModule_inout = NULL;
+  } // end IF
+
+  return ACE_INVALID_HANDLE;
 }

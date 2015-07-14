@@ -62,16 +62,19 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   int error = 0;
   ACE_Proactor* proactor_p = NULL;
 
+  // sanity checks
+  ACE_ASSERT (inherited::configuration_.socketConfiguration);
+
   // step1: tweak socket
   // *TODO*: remove type inference
-  if (inherited::configuration_.socketConfiguration.bufferSize)
+  if (inherited::configuration_.socketConfiguration->bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                             SO_RCVBUF,
-                                            inherited::configuration_.socketConfiguration.bufferSize))
+                                            inherited::configuration_.socketConfiguration->bufferSize))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
-                  inherited::configuration_.socketConfiguration.bufferSize,
+                  inherited::configuration_.socketConfiguration->bufferSize,
                   handle_in));
       goto close;
     } // end IF
@@ -98,15 +101,15 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     goto close;
   } // end IF
   if (!Net_Common_Tools::setLinger (handle_in,
-                                    inherited::configuration_.socketConfiguration.linger,
+                                    inherited::configuration_.socketConfiguration->linger,
                                     -1))
   {
     int error = ACE_OS::last_error ();
     if (error != ENOTSOCK) // <-- socket has been closed asynchronously
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                  (inherited::configuration_.socketConfiguration.linger ? ACE_TEXT ("true")
-                                                                        : ACE_TEXT ("false")),
+                  (inherited::configuration_.socketConfiguration->linger ? ACE_TEXT ("true")
+                                                                         : ACE_TEXT ("false")),
                   handle_in));
     goto close;
   } // end IF

@@ -126,13 +126,12 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//#if defined(_DEBUG) && !defined(DEBUG_RELEASE)
-//  path += ACE_TEXT_ALWAYS_CHAR("net");
-//  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//#endif
-  path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
+  path += ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_UI_FILE_DIRECTORY);
+  std::string UI_file = path;
+  UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UI_file += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
   std::cout << ACE_TEXT ("-g[[STRING]] : UI file [\"")
-            << path
+            << UI_file
             << ACE_TEXT ("\"] {\"\" --> no GUI}")
             << std::endl;
   std::cout << ACE_TEXT ("-h           : use thread-pool [\"")
@@ -225,12 +224,10 @@ do_processArguments (int argc_in,
   maxNumConnections_out = NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//#if defined(_DEBUG) && !defined(DEBUG_RELEASE)
-//  path += ACE_TEXT_ALWAYS_CHAR("net");
-//  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//#endif
-  path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
+  path += ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_UI_FILE_DIRECTORY);
   UIFile_out = path;
+  UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
   useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
   connectionInterval_out = NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
   logToFile_out = false;
@@ -508,7 +505,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   configuration.socketConfiguration.bufferSize =
     NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
   configuration.socketConfiguration.linger =
-      NET_SOCKET_DEFAULT_LINGER;
+    NET_SOCKET_DEFAULT_LINGER;
 
   // ********************** stream configuration data **************************
   configuration.streamConfiguration.protocolConfiguration =
@@ -527,11 +524,11 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // *TODO*: is this correct ?
   configuration.streamConfiguration.streamConfiguration.serializeOutput =
       useThreadPool_in;
-  configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
-    0;
+  //configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
+  //  0;
   configuration.streamConfiguration.streamConfiguration.useThreadPerConnection =
     false;
-  configuration.streamConfiguration.userData = &configuration.streamSessionData;
+  configuration.streamConfiguration.userData = &configuration.streamUserData;
 
   // ******************** protocol configuration data **************************
   configuration.protocolConfiguration.peerPingInterval =
@@ -565,67 +562,80 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   } // end IF
 
   // step0c: initialize client connector
-  Net_SocketHandlerConfiguration socket_handler_configuration;
-  socket_handler_configuration.bufferSize =
-    NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-  socket_handler_configuration.messageAllocator = &message_allocator;
-  socket_handler_configuration.socketConfiguration =
-    configuration.socketConfiguration;
+  //Net_StreamUserData stream_user_data;
+  if (UIDefinitionFile_in.empty () && (connectionInterval_in == 0))
+  {
+    //ACE_NEW_NORETURN (session_data_p,
+    //                  Net_SessionData ());
+    //if (!session_data_p)
+    //{
+    //  ACE_DEBUG ((LM_CRITICAL,
+    //              ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+    //  return;
+    //} // end IF
+    //session_data_p->configuration = configuration;
+    //session_data_p->userData = &configuration.streamUserData;
+    configuration.socketHandlerConfiguration.bufferSize =
+      NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
+    configuration.socketHandlerConfiguration.messageAllocator =
+      &message_allocator;
+    configuration.socketHandlerConfiguration.socketConfiguration =
+      &configuration.socketConfiguration;
+    configuration.socketHandlerConfiguration.statisticCollectionInterval =
+      configuration.streamConfiguration.streamConfiguration.statisticReportingInterval;
+  } // end IF
+  Net_Client_ConnectorConfiguration connector_configuration;
+  //Net_IInetConnectionManager_t* iconnection_manager_p =
+  //  Net_Common_Tools::getConnectionManager ();
+  //ACE_ASSERT (iconnection_manager_p);
+  //Net_InetConnectionManager_t* connection_manager_p =
+  //  dynamic_cast<Net_InetConnectionManager_t*> (iconnection_manager_p);
+  //ACE_ASSERT (connection_manager_p);
+  Net_InetConnectionManager_t* connection_manager_p =
+    NET_CONNECTIONMANAGER_SINGLETON::instance ();
+  connector_configuration.connectionManager = connection_manager_p;
+  connector_configuration.socketHandlerConfiguration =
+    &configuration.socketHandlerConfiguration;
+  Net_Client_Connector_t connector;
+  Net_Client_AsynchConnector_t asynch_connector;
   Net_Client_IConnector_t* connector_p = NULL;
   if (useReactor_in)
-    ACE_NEW_NORETURN (connector_p,
-                      Net_Client_Connector_t (&socket_handler_configuration,
-                                              NET_CONNECTIONMANAGER_SINGLETON::instance (),
-                                              0));
+    connector_p = &connector;
   else
-    ACE_NEW_NORETURN (connector_p,
-                      Net_Client_AsynchConnector_t (&socket_handler_configuration,
-                                                    NET_CONNECTIONMANAGER_SINGLETON::instance (),
-                                                    0));
-  if (!connector_p)
+    connector_p = &asynch_connector;
+  if (UIDefinitionFile_in.empty () && (connectionInterval_in == 0))
   {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, returning\n")));
-    return;
+    // *NOTE*: fire-and-forget socket_handler_configuration_p here
+    if (!connector_p->initialize (connector_configuration))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
+      return;
+    } // end IF
   } // end IF
 
   // step0d: initialize connection manager
-//  Net_IInetConnectionManager_t* iconnection_manager_p =
-//    Net_Common_Tools::getConnectionManager ();
-//  ACE_ASSERT (iconnection_manager_p);
-//  Net_InetConnectionManager_t* connection_manager_p =
-//    dynamic_cast<Net_InetConnectionManager_t*> (iconnection_manager_p);
-//  ACE_ASSERT (connection_manager_p);
-//  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-//  connection_manager_p->set (configuration,
-//                             &configuration.streamSessionData);
-  NET_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (std::numeric_limits<unsigned int>::max ());
-  NET_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
-                                                     &configuration.streamSessionData);
+  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
+  connection_manager_p->set (configuration,
+                             &configuration.streamUserData);
 
   // step0e: initialize action timer
-  Net_Client_SignalHandlerConfiguration_t signal_handler_configuration;
-  signal_handler_configuration.connector = connector_p;
+  CBData_in.signalHandlerConfiguration.connector = connector_p;
   result =
-      signal_handler_configuration.peerAddress.set (serverPortNumber_in,
-                                                    serverHostname_in.c_str (),
-                                                    1,
-                                                    AF_INET);
+    CBData_in.signalHandlerConfiguration.peerAddress.set (serverPortNumber_in,
+                                                          serverHostname_in.c_str (),
+                                                          1,
+                                                          AF_INET);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-
-    // clean up
-    delete connector_p;
-
     return;
   } // end IF
-  CBData_in.signalHandlerConfiguration = &signal_handler_configuration;
 
   Net_Client_TimeoutHandler timeout_handler (actionMode_in,
                                              maxNumConnections_in,
-                                             signal_handler_configuration.peerAddress,
+                                             CBData_in.signalHandlerConfiguration.peerAddress,
                                              connector_p);
   CBData_in.timeoutHandler = &timeout_handler;
   Common_Timer_Manager_t* timer_manager_p =
@@ -642,26 +652,25 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                                                                                           : connectionInterval_in),
                              ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000)
                                                                                           : 0));
-    signal_handler_configuration.actionTimerId =
+    CBData_in.signalHandlerConfiguration.actionTimerId =
         timer_manager_p->schedule_timer (handler_p,                  // event handler
                                          NULL,                       // ACT
                                          COMMON_TIME_NOW + interval, // first wakeup time
                                          interval);                  // interval
-    if (signal_handler_configuration.actionTimerId == -1)
+    if (CBData_in.signalHandlerConfiguration.actionTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", aborting\n")));
 
       // clean up
       timer_manager_p->stop ();
-      delete connector_p;
 
       return;
     } // end IF
   } // end IF
 
   // step0e: initialize signal handling
-  signalHandler_in.initialize (signal_handler_configuration);
+  signalHandler_in.initialize (CBData_in.signalHandlerConfiguration);
   if (!Common_Tools::initializeSignals (signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -673,7 +682,6 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     // clean up
     timer_manager_p->stop ();
     connector_p->abort ();
-    delete connector_p;
 
     return;
   } // end IF
@@ -702,7 +710,6 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
       // clean up
       timer_manager_p->stop ();
       connector_p->abort ();
-      delete connector_p;
 
       return;
     } // end IF
@@ -736,7 +743,6 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
         COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
       timer_manager_p->stop ();
       connector_p->abort ();
-      delete connector_p;
 
       return;
     } // end IF
@@ -748,7 +754,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   if (UIDefinitionFile_in.empty () && (connectionInterval_in == 0))
   {
     bool result_2 =
-        connector_p->connect (signal_handler_configuration.peerAddress);
+      connector_p->connect (CBData_in.signalHandlerConfiguration.peerAddress);
     if (!useReactor_in)
     {
       ACE_Time_Value delay (1, 0);
@@ -762,8 +768,8 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
       char buffer[BUFSIZ];
       ACE_OS::memset (buffer, 0, sizeof (buffer));
       result =
-          signal_handler_configuration.peerAddress.addr_to_string (buffer,
-                                                                   sizeof (buffer));
+        CBData_in.signalHandlerConfiguration.peerAddress.addr_to_string (buffer,
+                                                                         sizeof (buffer));
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string: \"%m\", continuing\n")));
@@ -787,7 +793,6 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
       //		} // end lock scope
       timer_manager_p->stop ();
       connector_p->abort ();
-      delete connector_p;
 
       return;
     } // end IF
@@ -876,7 +881,6 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 //				 iterator++)
 //			g_source_remove(*iterator);
 //	} // end lock scope
-  delete connector_p;
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -939,15 +943,16 @@ ACE_TMAIN (int argc_in,
   int result = -1;
 
   // step0: initialize
-//// *PORTABILITY*: on Windows, initialize ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  if (ACE::init () == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
-//    return EXIT_FAILURE;
-//  } // end IF
-//#endif
+// *PORTABILITY*: on Windows, initialize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = ACE::init ();
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
+    return EXIT_FAILURE;
+  } // end IF
+#endif
 
   // *PROCESS PROFILE*
   ACE_Profile_Timer process_profile;
@@ -971,14 +976,6 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initstate_r(): \"%s\", aborting\n")));
-
-    //    // *PORTABILITY*: on Windows, fini ACE...
-    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    //    if (ACE::fini () == -1)
-    //      ACE_DEBUG ((LM_ERROR,
-    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-    //#endif
-
     return EXIT_FAILURE;
   } // end IF
   result = ::srandom_r (random_seed, &random_data);
@@ -986,14 +983,6 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize random seed: \"%s\", aborting\n")));
-
-    //    // *PORTABILITY*: on Windows, fini ACE...
-    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    //    if (ACE::fini () == -1)
-    //      ACE_DEBUG ((LM_ERROR,
-    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-    //#endif
-
     return EXIT_FAILURE;
   } // end IF
 #else
@@ -1024,8 +1013,10 @@ ACE_TMAIN (int argc_in,
    NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
+  path += ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_UI_FILE_DIRECTORY);
   std::string UI_file = path;
+  UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UI_file += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
   bool use_threadpool = NET_EVENT_USE_THREAD_POOL;
   unsigned int connection_interval =
    NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
@@ -1066,12 +1057,13 @@ ACE_TMAIN (int argc_in,
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1094,12 +1086,13 @@ ACE_TMAIN (int argc_in,
 
     do_printUsage (ACE::basename (argv_in[0]));
 
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1110,12 +1103,13 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("invalid UI definition file (was: %s), aborting\n"),
                 ACE_TEXT (UI_file.c_str ())));
 
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1144,12 +1138,13 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeLogging(), aborting\n")));
 
-    //    // *PORTABILITY*: on Windows, need to fini ACE...
-    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    //    if (ACE::fini () == -1)
-    //      ACE_DEBUG ((LM_ERROR,
-    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-    //#endif
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1170,12 +1165,13 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE_OS::sigemptyset(): \"%m\", aborting\n")));
 
     Common_Tools::finalizeLogging ();
-    //    // *PORTABILITY*: on Windows, need to fini ACE...
-    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    //    if (ACE::fini () == -1)
-    //      ACE_DEBUG ((LM_ERROR,
-    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-    //#endif
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1188,12 +1184,13 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
 
     Common_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1208,12 +1205,13 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_SUCCESS;
   } // end IF
@@ -1238,12 +1236,13 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1308,12 +1307,13 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
     return EXIT_FAILURE;
   } // end IF
@@ -1367,15 +1367,13 @@ ACE_TMAIN (int argc_in,
                                  previous_signal_mask);
   Common_Tools::finalizeLogging ();
 
-//// *PORTABILITY*: on Windows, must fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  if (ACE::fini () == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
-//    return EXIT_FAILURE;
-//  } // end IF
-//#endif
+  // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = ACE::fini ();
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
 
   return EXIT_SUCCESS;
 } // end main

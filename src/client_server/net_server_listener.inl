@@ -36,14 +36,10 @@ Net_Server_Listener_T<ConfigurationType,
                       HandlerType>::Net_Server_Listener_T ()
  : inherited (NULL, // use global (default) reactor
               1)    // always accept ALL pending connections
- , configuration_ (NULL)
- , interfaceHandle_ (NULL)
+ , configuration_ ()
  , isInitialized_ (false)
  , isListening_ (false)
  , isOpen_ (false)
- , listeningPort_ (NET_SERVER_DEFAULT_LISTENING_PORT)
- , statisticCollectionInterval_ (0)
- , useLoopback_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::Net_Server_Listener_T"));
 
@@ -72,16 +68,11 @@ bool
 Net_Server_Listener_T<ConfigurationType,
                       SocketHandlerConfigurationType,
                       UserDataType,
-                      HandlerType>::initialize (const Net_Server_ListenerConfiguration_t& configuration_in)
+                      HandlerType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::initialize"));
 
-  configuration_ = configuration_in.socketHandlerConfiguration;
-  interfaceHandle_ = configuration_in.connectionManager;
-  listeningPort_ = configuration_in.portNumber;
-  statisticCollectionInterval_ = configuration_in.statisticCollectionInterval;
-  useLoopback_ = configuration_in.useLoopbackDevice;
-
+  configuration_ = configuration_in;
   isInitialized_ = true;
 
   return true;
@@ -184,14 +175,15 @@ Net_Server_Listener_T<ConfigurationType,
 
   // not running --> start listening
   ACE_INET_Addr local_sap;
-  if (useLoopback_)
-    result = local_sap.set (listeningPort_, // local SAP
+  // *TODO*: remove type inferences
+  if (configuration_.useLoopbackDevice)
+    result = local_sap.set (configuration_.portNumber, // port number
                             // *PORTABILITY*: disambiguation needed under Win32
-                            ACE_LOCALHOST,  // hostname
-                            1,              // encode ?
-                            AF_INET);       // address family
+                            ACE_LOCALHOST,             // hostname
+                            1,                         // encode ?
+                            AF_INET);                  // address family
   else
-    result = local_sap.set (listeningPort_,                       // local SAP
+    result = local_sap.set (configuration_.portNumber,            // port number
                             // *TODO*: bind to specific interface/address ?
                             static_cast<ACE_UINT32> (INADDR_ANY), // hostname
                             1,                                    // encode ?
@@ -221,12 +213,12 @@ Net_Server_Listener_T<ConfigurationType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening (port: %u)...\n"),
               inherited::get_handle (),
-              listeningPort_));
+              configuration_.portNumber));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: started listening (port: %u)...\n"),
               inherited::get_handle (),
-              listeningPort_));
+              configuration_.portNumber));
 #endif
 
   isListening_ = true;
@@ -340,10 +332,15 @@ Net_Server_Listener_T<ConfigurationType,
   // initialize return value(s)
   handler_out = NULL;
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_.socketHandlerConfiguration);
+
   // default behavior
+  // *TODO*: remove type inference
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (interfaceHandle_,
-                                 statisticCollectionInterval_));
+                    HandlerType (configuration_.connectionManager,
+                                 configuration_.socketHandlerConfiguration->statisticCollectionInterval));
+                                 //configuration_.statisticCollectionInterval));
   if (!handler_out)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

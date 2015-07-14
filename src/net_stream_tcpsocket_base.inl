@@ -228,7 +228,8 @@ Net_StreamTCPSocketBase_T<AddressType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
 
-    inherited2::status_ = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+    // *TODO*: remove type inference
+    inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
 
     return -1;
   } // end IF

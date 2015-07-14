@@ -39,7 +39,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename ModuleConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
@@ -49,7 +49,7 @@ class Net_StreamTCPSocketBase_T
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType>
 {
@@ -94,7 +94,7 @@ class Net_StreamTCPSocketBase_T
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType> CONNECTION_BASE_T;
 
@@ -105,6 +105,7 @@ class Net_StreamTCPSocketBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
+                                   StateType,
                                    StatisticContainerType,
                                    StreamType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<ACE_MT_SYNCH,
@@ -129,13 +130,13 @@ class Net_StreamTCPSocketBase_T
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType> inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T (const Net_StreamTCPSocketBase_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T& operator= (const Net_StreamTCPSocketBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T (const Net_StreamTCPSocketBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T& operator= (const Net_StreamTCPSocketBase_T&))
 };
 
 // include template implementation

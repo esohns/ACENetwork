@@ -26,13 +26,14 @@
 #include "common_timer_manager.h"
 #include "common_tools.h"
 
+#include "net_common.h"
 #include "net_connection_manager_common.h"
 #include "net_macros.h"
 
 Net_Client_SignalHandler::Net_Client_SignalHandler (bool useReactor_in)
  : inherited (this,          // event handler handle
               useReactor_in) // use reactor ?
- , configuration_ (NULL)
+ , configuration_ ()
  , useReactor_ (useReactor_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::Net_Client_SignalHandler"));
@@ -46,12 +47,11 @@ Net_Client_SignalHandler::~Net_Client_SignalHandler ()
 }
 
 bool
-Net_Client_SignalHandler::initialize (const Net_Client_SignalHandlerConfiguration_t& configuration_in)
+Net_Client_SignalHandler::initialize (const Net_Client_SignalHandlerConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::initialize"));
 
-  configuration_ =
-      &const_cast<Net_Client_SignalHandlerConfiguration_t&> (configuration_in);
+  configuration_ = configuration_in;
 
   return true;
 }
@@ -62,9 +62,6 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::handleSignal"));
 
   int result = -1;
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
 
   bool shutdown = false;
   bool connect = false;
@@ -128,12 +125,39 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     NET_CONNECTIONMANAGER_SINGLETON::instance ()->abortOldestConnection ();
 
   // ...connect ?
-  if (connect && configuration_->connector)
+  if (connect && configuration_.connector)
   {
+    Net_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
+    ACE_NEW_NORETURN (socket_handler_configuration_p,
+                      Net_SocketHandlerConfiguration ());
+    if (!socket_handler_configuration_p)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory: \"%m\", continuing\n")));
+      goto check_shutdown;
+    } // end IF
+    socket_handler_configuration_p->bufferSize =
+      NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
+    socket_handler_configuration_p->messageAllocator =
+      configuration_.messageAllocator;
+    socket_handler_configuration_p->socketConfiguration =
+      configuration_.socketConfiguration;
+    socket_handler_configuration_p->statisticCollectionInterval =
+      configuration_.statisticCollectionInterval;
+
+    Net_Client_ConnectorConfiguration connector_configuration;
+    connector_configuration.connectionManager =
+      NET_CONNECTIONMANAGER_SINGLETON::instance ();
+    connector_configuration.socketHandlerConfiguration =
+      socket_handler_configuration_p;
+    //connector_configuration.statisticCollectionInterval =
+    //  configuration_.statisticCollectionInterval;
+
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
     try
     {
-      handle = configuration_->connector->connect (configuration_->peerAddress);
+      configuration_.connector->initialize (connector_configuration);
+      handle = configuration_.connector->connect (configuration_.peerAddress);
     }
     catch (...)
     {
@@ -146,8 +170,8 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     {
       ACE_TCHAR buffer[BUFSIZ];
       ACE_OS::memset(buffer, 0, sizeof (buffer));
-      result = configuration_->peerAddress.addr_to_string (buffer,
-                                                           sizeof (buffer));
+      result = configuration_.peerAddress.addr_to_string (buffer,
+                                                          sizeof (buffer));
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       if (result == -1)
@@ -161,31 +185,32 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     } // end IF
   } // end IF
 
+check_shutdown:
   // ...shutdown ?
   if (shutdown)
   {
     // step1: stop action timer (if any)
-    if (configuration_->actionTimerId >= 0)
+    if (configuration_.actionTimerId >= 0)
     {
       const void* act_p = NULL;
       result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (configuration_->actionTimerId,
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (configuration_.actionTimerId,
                                                                     &act_p);
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       if (result <= 0)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", continuing\n"),
-                    configuration_->actionTimerId));
-      configuration_->actionTimerId = -1;
+                    configuration_.actionTimerId));
+      configuration_.actionTimerId = -1;
     } // end IF
 
     // step2: cancel connection attempts (if any)
-    if (configuration_->connector)
+    if (configuration_.connector)
     {
       try
       {
-        configuration_->connector->abort ();
+        configuration_.connector->abort ();
       }
       catch (...)
       {

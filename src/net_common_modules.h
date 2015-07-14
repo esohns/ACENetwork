@@ -38,7 +38,7 @@
 
 // declare module(s)
 typedef Net_Module_SocketHandler_T<Stream_State,
-                                   Net_StreamUserData,
+                                   Net_StreamSessionData,
                                    Net_StreamSessionData_t,
                                    Net_SessionMessage,
                                    Net_Message,

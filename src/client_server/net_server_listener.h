@@ -24,8 +24,8 @@
 #include "ace/Acceptor.h"
 #include "ace/Global_Macros.h"
 #include "ace/Singleton.h"
-#include "ace/Synch_Traits.h"
 #include "ace/SOCK_Acceptor.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_idumpstate.h"
 
@@ -39,7 +39,7 @@ template <typename ConfigurationType,
 class Net_Server_Listener_T
  : public ACE_Acceptor<HandlerType,
                        ACE_SOCK_ACCEPTOR>
- , public Net_Server_IListener_t
+ , public Net_Server_IListener_T<ConfigurationType>
  , public Common_IDumpState
 {
   // singleton needs access to the ctor/dtors
@@ -51,7 +51,7 @@ class Net_Server_Listener_T
 
  public:
   // implement Net_Server_IListener_T
-  virtual bool initialize (const Net_Server_ListenerConfiguration_t&);
+  virtual bool initialize (const ConfigurationType&);
   virtual bool useReactor () const;
 
   bool isInitialized () const;
@@ -79,18 +79,14 @@ class Net_Server_Listener_T
                        ACE_SOCK_ACCEPTOR> inherited;
 
   Net_Server_Listener_T ();
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_Listener_T (const Net_Server_Listener_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_Listener_T& operator= (const Net_Server_Listener_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Server_Listener_T (const Net_Server_Listener_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Server_Listener_T& operator= (const Net_Server_Listener_T&))
   virtual ~Net_Server_Listener_T ();
 
-  const SocketHandlerConfigurationType* configuration_;
-  Net_IInetConnectionManager_t*         interfaceHandle_;
-  bool                                  isInitialized_;
-  bool                                  isListening_;
-  bool                                  isOpen_;
-  unsigned short                        listeningPort_;
-  unsigned int                          statisticCollectionInterval_;
-  bool                                  useLoopback_;
+  ConfigurationType configuration_;
+  bool              isInitialized_;
+  bool              isListening_;
+  bool              isOpen_;
 };
 
 // include template implementation

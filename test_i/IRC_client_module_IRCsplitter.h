@@ -32,9 +32,11 @@
 #include "stream_statistichandler.h"
 #include "stream_streammodule_base.h"
 
+//#include "IRC_client_common.h"
 #include "IRC_client_defines.h"
 #include "IRC_client_IRCbisect.h"
 #include "IRC_client_message.h"
+//#include "IRC_client_network.h"
 #include "IRC_client_sessionmessage.h"
 #include "IRC_client_stream_common.h"
 
@@ -47,13 +49,13 @@ class IRC_Client_Module_IRCSplitter
  : public Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       Stream_State,
-                                      IRC_Client_SessionData,
+                                      IRC_Client_StreamSessionData,
                                       IRC_Client_StreamSessionData_t,
                                       IRC_Client_SessionMessage,
                                       IRC_Client_Message>
    // implement this to have a generic (timed) event handler to trigger
    // statistics collection...
- , public Common_IStatistic_T<IRC_Client_RuntimeStatistic_t>
+ , public Common_IStatistic_T<Stream_Statistic>
 {
  public:
   IRC_Client_Module_IRCSplitter ();
@@ -61,16 +63,16 @@ class IRC_Client_Module_IRCSplitter
 
   // configuration / initialization
   bool initialize (// *** base class initializers ***
-                   Stream_IAllocator*,     // message allocator
-                   bool = false,           // active object ?
-                   Stream_State* = NULL,   // stream state handle
+                   Stream_IAllocator*,               // message allocator
+                   bool = false,                     // active object ?
+                   Stream_State* = NULL,             // stream state handle
                    // *** base class initializers END ***
                    // *NOTE*: this option may be useful for (downstream) parsers that
                    // only work on one CONTIGUOUS buffer (i.e. cannot parse unaligned bits and pieces)
                    // *WARNING*: will NOT work with multithreaded stream processing --> USE WITH CAUTION !
-                   bool = false,           // "crunch" completed messages ?
-                   unsigned int = 0,       // statistics collecting interval (second(s))
-                                           // 0 --> DON'T collect statistics
+                   bool = false,                     // "crunch" completed messages ?
+                   unsigned int = 0,                 // statistics collecting interval (second(s))
+                                                     // 0 --> DON'T collect statistics
                    bool = IRC_CLIENT_DEF_LEX_TRACE); // trace scanning ?
 
   // implement (part of) Stream_ITaskBase
@@ -83,27 +85,27 @@ class IRC_Client_Module_IRCSplitter
 
   // implement Common_IStatistic
   // *NOTE*: we reuse the interface for our own purposes (to implement timer-based data collection)
-  virtual bool collect (IRC_Client_RuntimeStatistic_t&); // return value: (currently unused !)
+  virtual bool collect (Stream_Statistic&); // return value: (currently unused !)
   virtual void report () const;
 
  private:
   typedef Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       Stream_State,
-                                      IRC_Client_SessionData,
+                                      IRC_Client_StreamSessionData,
                                       IRC_Client_StreamSessionData_t,
                                       IRC_Client_SessionMessage,
                                       IRC_Client_Message> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCSplitter (const IRC_Client_Module_IRCSplitter&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCSplitter& operator= (const IRC_Client_Module_IRCSplitter&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCSplitter (const IRC_Client_Module_IRCSplitter&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCSplitter& operator= (const IRC_Client_Module_IRCSplitter&))
 
   // convenience types
-  typedef Stream_StatisticHandler_Reactor_T<IRC_Client_RuntimeStatistic_t> STATISTICHANDLER_T;
+  typedef Stream_StatisticHandler_Reactor_T<Stream_Statistic> STATISTICHANDLER_T;
   //typedef IRC_Client_SessionData SESSIONDATA_T;
 
   // helper methods
-  bool putStatisticsMessage (const IRC_Client_RuntimeStatistic_t&, // statistics info
+  bool putStatisticsMessage (const Stream_Statistic&, // statistics info
                              const ACE_Time_Value&) const;         // statistics generation time
   // helper methods (to drive the scanner)
   bool scan_begin (char*,   // base address

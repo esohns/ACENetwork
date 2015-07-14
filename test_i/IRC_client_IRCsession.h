@@ -45,12 +45,12 @@ class ACE_Message_Block;
 template <typename ConnectionType>
 class IRC_Client_IRCSession_T
  : public ConnectionType
- , virtual public Net_ISession_T<ACE_INET_Addr,
-                                 Net_SocketConfiguration,
-                                 IRC_Client_Configuration,
-                                 Stream_Statistic,
-                                 IRC_Client_Stream,
-                                 IRC_Client_SessionState>
+ //, virtual public Net_ISession_T<ACE_INET_Addr,
+ //                                Net_SocketConfiguration,
+ //                                IRC_Client_Configuration,
+ //                                Stream_Statistic,
+ //                                IRC_Client_Stream,
+ //                                IRC_Client_ConnectionState>
  , public IRC_Client_INotify_t
 {
  friend class ACE_Connector<IRC_Client_IRCSession_T<ConnectionType>,
@@ -64,7 +64,7 @@ class IRC_Client_IRCSession_T
   virtual ~IRC_Client_IRCSession_T ();
 
   // implement Net_ISession_T
-  virtual const IRC_Client_SessionState& state () const;
+  //virtual const IRC_Client_ConnectionState& state () const;
 
   // implement IRC_Client_INotify_t
   virtual void start (const IRC_Client_StreamModuleConfiguration&);
@@ -74,8 +74,8 @@ class IRC_Client_IRCSession_T
  private:
   typedef ConnectionType inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T (const IRC_Client_IRCSession_T&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T& operator= (const IRC_Client_IRCSession_T&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T (const IRC_Client_IRCSession_T&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T& operator= (const IRC_Client_IRCSession_T&))
 
   // helper methods
   virtual int open (void*); // arg
@@ -92,7 +92,6 @@ class IRC_Client_IRCSession_T
   bool                     logToFile_;
   IRC_Client_IOStream_t    output_;
   bool                     shutdownOnEnd_;
-  IRC_Client_SessionState  state_;
 };
 
 // include template implementation

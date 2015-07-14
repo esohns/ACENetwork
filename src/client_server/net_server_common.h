@@ -31,23 +31,33 @@
 
 #include "net_server_ilistener.h"
 
-struct Net_Server_ListenerConfiguration_t
+struct Net_Server_ListenerConfiguration
 {
+  inline Net_Server_ListenerConfiguration ()
+   : addressFamily (ACE_ADDRESS_FAMILY_INET)
+   , connectionManager (NULL)
+   , messageAllocator (NULL)
+   , portNumber (0)
+   , socketHandlerConfiguration (NULL)
+   //, statisticCollectionInterval (0)
+   , useLoopbackDevice (false)
+  {};
+
   int                             addressFamily;
-  Stream_IAllocator*              allocator;
   Net_IInetConnectionManager_t*   connectionManager;
+  Stream_IAllocator*              messageAllocator;
   unsigned short                  portNumber;
   Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s))
-                                                               // 0 --> DON'T collect statistics
+  //unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s))
+  //                                                             // 0 --> DON'T collect statistics
   bool                            useLoopbackDevice;
 };
 
-typedef Net_Server_IListener_T<Net_Server_ListenerConfiguration_t> Net_Server_IListener_t;
+typedef Net_Server_IListener_T<Net_Server_ListenerConfiguration> Net_Server_IListener_t;
 
 typedef Common_IStatistic_T<Stream_Statistic> Net_Server_StatisticReportingHandler_t;
 
-struct Net_Server_SignalHandlerConfiguration_t
+struct Net_Server_SignalHandlerConfiguration
 {
   Net_Server_IListener_t*                 listener;
   Net_Server_StatisticReportingHandler_t* statisticReportingHandler;

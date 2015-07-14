@@ -29,10 +29,15 @@
 #include "common_irefcount.h"
 #include "common_istatistic.h"
 
+//#include "net_common.h"
 #include "net_itransportlayer.h"
+
+// forward declarations
+enum Net_Connection_Status;
 
 template <typename AddressType,
           typename ConfigurationType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 class Net_IConnection_T
@@ -50,6 +55,7 @@ class Net_IConnection_T
                      AddressType&) const = 0; // return value: remote SAP
   virtual unsigned int id () const = 0;
 
+  virtual const StateType& state () const = 0;
   virtual Net_Connection_Status status () const = 0;
   virtual const StreamType& stream () const = 0;
 
@@ -61,11 +67,13 @@ class Net_IConnection_T
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 class Net_ISocketConnection_T
  : virtual public Net_IConnection_T<AddressType,
                                     ConfigurationType,
+                                    StateType,
                                     StatisticContainerType,
                                     StreamType>
  , virtual public Net_ITransportLayer_T<SocketConfigurationType>
@@ -74,23 +82,24 @@ class Net_ISocketConnection_T
   virtual ~Net_ISocketConnection_T () {};
 };
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename ConfigurationType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename StateType>
-class Net_ISession_T
- : virtual public Net_ISocketConnection_T<AddressType,
-                                          SocketConfigurationType,
-                                          ConfigurationType,
-                                          StatisticContainerType,
-                                          StreamType>
-{
-public:
-  virtual ~Net_ISession_T () {};
-
-  virtual const StateType& state () const = 0;
-};
+//template <typename AddressType,
+//          typename SocketConfigurationType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename StreamType>
+//class Net_ISession_T
+// : virtual public Net_ISocketConnection_T<AddressType,
+//                                          SocketConfigurationType,
+//                                          ConfigurationType,
+//                                          StateType,
+//                                          StatisticContainerType,
+//                                          StreamType>
+//{
+// public:
+//  virtual ~Net_ISession_T () {};
+//
+//  virtual const StateType& state () const = 0;
+//};
 
 #endif

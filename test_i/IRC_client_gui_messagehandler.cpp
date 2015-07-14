@@ -27,6 +27,8 @@
 
 #include "net_macros.h"
 
+#include "IRC_client_network.h"
+
 #include "IRC_client_gui_callbacks.h"
 #include "IRC_client_gui_connection.h"
 #include "IRC_client_gui_defines.h"
@@ -851,21 +853,24 @@ IRC_Client_GUI_MessageHandler::clearMembers (bool lockedAccess_in)
 }
 
 void
-IRC_Client_GUI_MessageHandler::updateNick (const std::string& oldNick_in)
+IRC_Client_GUI_MessageHandler::update (const std::string& oldNickname_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::updateNick"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::update"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_.connection);
 
-  const IRC_Client_GTK_ConnectionCBData& connection_data_r =
-    CBData_.connection->get ();
-  std::string new_nickname = connection_data_r.IRCSessionState.nickname;
+  std::string new_nickname;//, channel;
+  //CBData_.connection->current (new_nickname,
+  //                             channel);
+  const IRC_Client_ConnectionState& connection_state_r =
+    CBData_.connection->state ();
+  new_nickname = connection_state_r.nickname;
   if (CBData_.channelModes.test (CHANNELMODE_OPERATOR))
     new_nickname.insert (new_nickname.begin (), '@');
 
-  remove (oldNick_in);
-  add (new_nickname);
+  remove (oldNickname_in, true);
+  add (new_nickname, true);
 }
 
 void

@@ -21,6 +21,10 @@
 #ifndef IRC_CLIENT_DEFINES_H
 #define IRC_CLIENT_DEFINES_H
 
+//#include "common_defines.h"
+//
+#include "IRC_client_common.h"
+
 // protocol
 // "\0\0"
 #define YY_END_OF_BUFFER_CHAR                    0

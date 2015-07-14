@@ -118,7 +118,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\client_server\net_client_asynchconnector.cpp" />
     <ClCompile Include="..\..\src\client_server\net_client_connector.cpp" />
-    <ClCompile Include="..\..\src\client_server\net_client_sockethandler.cpp" />
     <ClCompile Include="..\..\src\client_server\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -132,7 +131,6 @@
     <ClInclude Include="..\..\src\client_server\net_client_defines.h" />
     <ClInclude Include="..\..\src\client_server\net_client_exports.h" />
     <ClInclude Include="..\..\src\client_server\net_client_iconnector.h" />
-    <ClInclude Include="..\..\src\client_server\net_client_sockethandler.h" />
     <ClInclude Include="..\..\src\client_server\stdafx.h" />
   </ItemGroup>
   <ItemGroup>

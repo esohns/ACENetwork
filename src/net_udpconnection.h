@@ -37,7 +37,7 @@
 #include "net_transportlayer_udp.h"
 
 template <typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename HandlerType,
           typename HandlerConfigurationType>
 class Net_UDPConnection_T
@@ -47,13 +47,13 @@ class Net_UDPConnection_T
                                      Net_Configuration,
                                      HandlerConfigurationType,
                                      UserDataType,
-                                     SessionDataType,
+                                     StateType,
                                      Stream_Statistic,
                                      Net_Stream>
  , public Net_TransportLayer_UDP
 {
   friend class ACE_Connector<Net_UDPConnection_T<UserDataType,
-                                                 SessionDataType,
+                                                 StateType,
                                                  HandlerType,
                                                  HandlerConfigurationType>,
                              ACE_SOCK_CONNECTOR>;
@@ -63,6 +63,7 @@ class Net_UDPConnection_T
                                    Net_SocketConfiguration,
                                    Net_Configuration,
                                    UserDataType,
+                                   StateType,
                                    Stream_Statistic,
                                    Net_Stream> ICONNECTION_MANAGER_T;
 
@@ -89,20 +90,20 @@ class Net_UDPConnection_T
                                      Net_Configuration,
                                      HandlerConfigurationType,
                                      UserDataType,
-                                     SessionDataType,
+                                     StateType,
                                      Stream_Statistic,
                                      Net_Stream> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T (const Net_UDPConnection_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T& operator= (const Net_UDPConnection_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T (const Net_UDPConnection_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T& operator= (const Net_UDPConnection_T&))
 };
 
 ///////////////////////////////////////////
 
 template <typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename HandlerType,
           typename HandlerConfigurationType>
 class Net_AsynchUDPConnection_T
@@ -112,13 +113,13 @@ class Net_AsynchUDPConnection_T
                                            Net_Configuration,
                                            HandlerConfigurationType,
                                            UserDataType,
-                                           SessionDataType,
+                                           StateType,
                                            Stream_Statistic,
                                            Net_Stream>
  , public Net_TransportLayer_UDP
 {
   friend class ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
-                                                              SessionDataType,
+                                                              StateType,
                                                               HandlerType,
                                                               HandlerConfigurationType> >;
 
@@ -127,6 +128,7 @@ class Net_AsynchUDPConnection_T
                                    Net_SocketConfiguration,
                                    Net_Configuration,
                                    UserDataType,
+                                   StateType,
                                    Stream_Statistic,
                                    Net_Stream> ICONNECTION_MANAGER_T;
 
@@ -150,14 +152,14 @@ class Net_AsynchUDPConnection_T
                                            Net_Configuration,
                                            HandlerConfigurationType,
                                            UserDataType,
-                                           SessionDataType,
+                                           StateType,
                                            Stream_Statistic,
                                            Net_Stream> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
   Net_AsynchUDPConnection_T ();
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T (const Net_AsynchUDPConnection_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T& operator= (const Net_AsynchUDPConnection_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T (const Net_AsynchUDPConnection_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T& operator= (const Net_AsynchUDPConnection_T&))
 };
 
 // include template implementation

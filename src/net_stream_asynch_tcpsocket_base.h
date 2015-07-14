@@ -35,7 +35,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename ModuleConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename SocketHandlerType>
@@ -46,7 +46,7 @@ class Net_StreamAsynchTCPSocketBase_T
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType>
 {
@@ -55,7 +55,7 @@ class Net_StreamAsynchTCPSocketBase_T
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType> CONNECTION_BASE_T;
 
@@ -86,6 +86,7 @@ class Net_StreamAsynchTCPSocketBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
+                                   StateType,
                                    StatisticContainerType,
                                    StreamType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<ACE_MT_SYNCH,
@@ -110,13 +111,13 @@ class Net_StreamAsynchTCPSocketBase_T
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType> inherited3;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T& operator= (const Net_StreamAsynchTCPSocketBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T& operator= (const Net_StreamAsynchTCPSocketBase_T&))
 };
 
 // include template definition

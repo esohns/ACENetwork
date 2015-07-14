@@ -70,7 +70,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\test_u\net_client.glade">
+    <None Include="..\..\test_u\etc\net_client.glade">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

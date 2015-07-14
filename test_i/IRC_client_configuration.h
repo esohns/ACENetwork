@@ -21,6 +21,8 @@
 #ifndef IRC_CLIENT_CONFIGURATION_H
 #define IRC_CLIENT_CONFIGURATION_H
 
+#include <string>
+
 #include "ace/INET_Addr.h"
 #include "ace/Time_Value.h"
 
@@ -32,8 +34,9 @@
 #include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
+#include "net_stream_common.h"
 
-#include "IRC_client_common.h"
+//#include "IRC_client_common.h"
 #include "IRC_client_defines.h"
 //#include "IRC_client_stream_common.h"
 
@@ -42,45 +45,95 @@ struct IRC_Client_Configuration;
 struct IRC_Client_CursesState;
 class IRC_Client_IIRCControl;
 class IRC_Client_IRCMessage;
-struct IRC_Client_SessionData;
+struct IRC_Client_ConnectionState;
 class IRC_Client_Stream;
 struct IRC_Client_StreamModuleConfiguration;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_SocketConfiguration,
                                  IRC_Client_Configuration,
-                                 IRC_Client_SessionData,
+                                 Net_StreamUserData,
+                                 IRC_Client_ConnectionState,
                                  Stream_Statistic,
                                  IRC_Client_Stream> IRC_Client_IConnection_Manager_t;
 typedef Common_INotify_T<IRC_Client_StreamModuleConfiguration,
                          IRC_Client_IRCMessage> IRC_Client_INotify_t;
-
-typedef Stream_Statistic IRC_Client_RuntimeStatistic_t;
-struct IRC_Client_SessionData
-{
-  inline IRC_Client_SessionData ()
-   : currentStatistics ()
-   , lastCollectionTimestamp (ACE_Time_Value::zero)
-  {};
-
-  IRC_Client_RuntimeStatistic_t currentStatistics;
-  ACE_Time_Value                lastCollectionTimestamp;
-};
+enum IRC_Client_CharacterEncoding;
 
 struct IRC_Client_SocketHandlerConfiguration
+ : public Net_SocketHandlerConfiguration
 {
   inline IRC_Client_SocketHandlerConfiguration ()
-   : bufferSize (IRC_CLIENT_BUFFER_SIZE)
+   : Net_SocketHandlerConfiguration ()
+  {
+    bufferSize = IRC_CLIENT_BUFFER_SIZE;
+  };
+};
+
+struct IRC_Client_ConnectorConfiguration
+{
+  inline IRC_Client_ConnectorConfiguration ()
+   : configuration (NULL)
    , connectionManager (NULL)
-   , messageAllocator (NULL)
-   , socketConfiguration ()
-   , statisticCollectionInterval (0)
+   , socketHandlerConfiguration (NULL)
+   //, statisticCollectionInterval (0)
+   , userData (NULL)
   {};
 
-  int                               bufferSize; // pdu size (if fixed)
-  IRC_Client_IConnection_Manager_t* connectionManager;
-  Stream_IAllocator*                messageAllocator;
-  Net_SocketConfiguration           socketConfiguration;
-  unsigned int                      statisticCollectionInterval; // seconds [0: OFF]
+  IRC_Client_Configuration*              configuration;
+  IRC_Client_IConnection_Manager_t*      connectionManager;
+  IRC_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
+  //unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s))
+  //                                                             // 0 --> DON'T collect statistics
+  Net_StreamUserData*                    userData;
+};
+
+struct IRC_Client_IRCLoginOptions
+{
+  inline IRC_Client_IRCLoginOptions ()
+   : password ()
+   , nickname ()
+   , user ()
+   , channel ()
+  {};
+
+  std::string password;
+  std::string nickname;
+  struct User
+  {
+    inline User ()
+     : username ()
+     , hostname ()
+     , servername ()
+     , realname ()
+    {};
+
+    std::string username;
+    struct Hostname
+    {
+      inline Hostname ()
+       : string (NULL)
+       , discriminator (INVALID)
+      {};
+
+      union
+      {
+        // *NOTE*: "traditional" connects (see RFC1459 Section 4.1.3)
+        std::string*  string;
+        // *NOTE*: "modern" connects (see RFC2812 Section 3.1.3)
+        unsigned char mode;
+      };
+      enum discriminator_t
+      {
+        STRING = 0,
+        BITMASK,
+        INVALID
+      };
+      discriminator_t discriminator;
+    } hostname;
+    std::string servername;
+    std::string realname;
+  } user;
+  std::string channel;
 };
 
 struct IRC_Client_ProtocolConfiguration
@@ -118,38 +171,39 @@ struct IRC_Client_StreamConfiguration
    , sessionID (0)
    , streamConfiguration ()
    , streamModuleConfiguration ()
-   , sessionData (NULL)
    , protocolConfiguration (NULL)
+   //, userData (NULL)
   {};
 
   bool                                 crunchMessageBuffers;      // crunch message buffers ?
-  bool                                 debugScanner;              // debug yacc ?
-  bool                                 debugParser;               // debug lex ?
+  bool                                 debugScanner;              // debug lex ?
+  bool                                 debugParser;               // debug yacc ?
   unsigned int                         sessionID;                 // session ID
   Stream_Configuration                 streamConfiguration;       // stream configuration
   IRC_Client_StreamModuleConfiguration streamModuleConfiguration; // stream module configuration
-  IRC_Client_SessionData*              sessionData;               // session data
   IRC_Client_ProtocolConfiguration*    protocolConfiguration;     // protocol configuration
+  //Net_StreamUserData*                  userData;                  // user data
 };
 
 struct IRC_Client_InputHandlerConfiguration
 {
   inline IRC_Client_InputHandlerConfiguration ()
-   : IRCSessionState (NULL)
+   : controller (NULL)
    , streamConfiguration (NULL)
   {};
 
-  IRC_Client_SessionState* IRCSessionState;
-  Stream_Configuration*    streamConfiguration;
+  IRC_Client_IIRCControl* controller;
+  Stream_Configuration*   streamConfiguration;
 };
 
 struct IRC_Client_Configuration
 {
   inline IRC_Client_Configuration ()
    : socketConfiguration ()
+   , socketHandlerConfiguration ()
    //////////////////////////////////////
    , streamConfiguration ()
-   //, streamSessionData ()
+   , streamUserData ()
    //////////////////////////////////////
    , protocolConfiguration ()
    //////////////////////////////////////
@@ -161,21 +215,23 @@ struct IRC_Client_Configuration
   {};
 
   // ****************************** socket *************************************
-  Net_SocketConfiguration          socketConfiguration;
+  Net_SocketConfiguration               socketConfiguration;
+  IRC_Client_SocketHandlerConfiguration socketHandlerConfiguration;
   // ****************************** stream *************************************
-  IRC_Client_StreamConfiguration   streamConfiguration;
-  //IRC_Client_SessionData*          streamSessionData;
+  IRC_Client_StreamConfiguration        streamConfiguration;
+  Net_StreamUserData                    streamUserData;
   // ***************************** protocol ************************************
-  IRC_Client_ProtocolConfiguration protocolConfiguration;
+  IRC_Client_ProtocolConfiguration      protocolConfiguration;
   // ***************************************************************************
-  IRC_Client_CursesState*          cursesState;
+  // *TODO*: move this somewhere else
+  IRC_Client_CursesState*               cursesState;
   // *NOTE*: see also https://en.wikipedia.org/wiki/Internet_Relay_Chat#Character_encoding
   // *TODO*: implement support for 7-bit ASCII (as it is the most compatible
   //         encoding)
-  IRC_Client_CharacterEncoding     encoding;
-  int                              groupID;
-  bool                             logToFile;
-  bool                             useReactor;
+  IRC_Client_CharacterEncoding          encoding;
+  int                                   groupID;
+  bool                                  logToFile;
+  bool                                  useReactor;
 };
 
 #endif

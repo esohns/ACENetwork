@@ -34,7 +34,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 class Net_SocketConnectionBase_T
@@ -42,6 +42,7 @@ class Net_SocketConnectionBase_T
  , public Net_ISocketConnection_T<AddressType,
                                   SocketConfigurationType,
                                   ConfigurationType,
+                                  StateType,
                                   StatisticContainerType,
                                   StreamType>
 {
@@ -71,6 +72,7 @@ class Net_SocketConnectionBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
+                                   StateType,
                                    StatisticContainerType,
                                    StreamType> ICONNECTION_MANAGER_T;
 
@@ -86,9 +88,9 @@ class Net_SocketConnectionBase_T
  private:
   typedef HandlerType inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T& operator= (const Net_SocketConnectionBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T& operator= (const Net_SocketConnectionBase_T&))
 
   // helper methods
 //  void shutdown ();
@@ -102,7 +104,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 class Net_AsynchSocketConnectionBase_T
@@ -110,6 +112,7 @@ class Net_AsynchSocketConnectionBase_T
  , public Net_ISocketConnection_T<AddressType,
                                   SocketConfigurationType,
                                   ConfigurationType,
+                                  StateType,
                                   StatisticContainerType,
                                   StreamType>
 {
@@ -129,6 +132,7 @@ class Net_AsynchSocketConnectionBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
+                                   StateType,
                                    StatisticContainerType,
                                    StreamType> ICONNECTION_MANAGER_T;
 
@@ -145,9 +149,9 @@ class Net_AsynchSocketConnectionBase_T
  private:
   typedef HandlerType inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T (const Net_AsynchSocketConnectionBase_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T& operator= (const Net_AsynchSocketConnectionBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T (const Net_AsynchSocketConnectionBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T& operator= (const Net_AsynchSocketConnectionBase_T&))
 };
 
 #include "net_socketconnection_base.inl"

@@ -28,17 +28,22 @@
 
 #include "common_time_common.h"
 
+#include "stream_common.h"
+#include "stream_iallocator.h"
+
 #include "IRC_client_common.h"
+//#include "IRC_client_configuration.h"
 #include "IRC_client_IRCmessage.h"
+#include "IRC_client_IRC_codes.h"
 
 // forward declaration(s)
-class Stream_IAllocator;
-template <ACE_SYNCH_DECL, class TIME_POLICY>
-class ACE_Module;
-typedef ACE_Module<ACE_MT_SYNCH,
-                   Common_TimePolicy_t> Stream_Module_t;
-//class Stream_Module_t;
+//class Stream_IAllocator;
+//template <ACE_SYNCH_DECL, class TIME_POLICY>
+//class ACE_Module;
+//typedef ACE_Module<ACE_MT_SYNCH,
+//                   Common_TimePolicy_t> Stream_Module_t;
 struct IRC_Client_StreamModuleConfiguration;
+struct IRC_Client_IRCLoginOptions;
 
 class IRC_Client_Tools
 {
@@ -63,23 +68,24 @@ class IRC_Client_Tools
 
   static bool isValidIRCChannelName (const std::string&); // string
 
-  static ACE_HANDLE connect (Stream_IAllocator*,                                  // message allocator
-                             const IRC_Client_IRCLoginOptions&,                   // login options
-                             bool,                                                // debug scanner ?
-                             bool,                                                // debug parser ?
-                             unsigned int,                                        // statistics reporting interval (0: OFF)
-                             const std::string&,                                  // hostname
-                             unsigned short,                                      // port
-                             bool = true,                                         // delete module
-                             bool = false,                                        // delete module
-                             const Stream_Module_t* = NULL,                       // final module
-                             const IRC_Client_StreamModuleConfiguration* = NULL); // module configuration
+  static ACE_HANDLE connect (bool,                                        // connect asynchronously ?
+                             Stream_IAllocator*,                          // message allocator
+                             const IRC_Client_IRCLoginOptions&,           // login options
+                             bool,                                        // debug scanner ?
+                             bool,                                        // debug parser ?
+                             unsigned int,                                // statistics reporting interval (0: OFF)
+                             const std::string&,                          // hostname
+                             unsigned short,                              // port
+                             const IRC_Client_StreamModuleConfiguration*, // module configuration
+                             bool,                                        // clone module ?
+                             bool,                                        // delete module ?
+                             Stream_Module_t*&);                          // (final) module handle
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools ());
-  ACE_UNIMPLEMENTED_FUNC (~IRC_Client_Tools ());
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools (const IRC_Client_Tools&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools& operator= (const IRC_Client_Tools&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools ())
+  ACE_UNIMPLEMENTED_FUNC (~IRC_Client_Tools ())
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools (const IRC_Client_Tools&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools& operator= (const IRC_Client_Tools&))
 
   // helper methods
   static IRC_Client_UserMode IRCUserModeChar2UserMode (char);

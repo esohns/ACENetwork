@@ -117,6 +117,10 @@
       <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
+    <PostBuildEvent>
+      <Command>$(ProjectDir)..\..\test_i\scripts\make_installer.bat $(Configuration)</Command>
+      <Message>packaging...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test_i\IRC_client_gui.cpp">
@@ -254,11 +258,10 @@
     <None Include="..\..\test_i\etc\IRC_client_connection.glade" />
     <None Include="..\..\test_i\etc\IRC_client_main.glade" />
     <None Include="..\..\test_i\etc\IRC_client_phonebook.ini" />
-    <None Include="..\..\test_i\IRC_client_IRCsession.inl" />
     <None Include="..\..\test_i\scripts\IRCbisect.l" />
-    <None Include="..\..\test_i\scripts\IRCclient.nsi" />
     <None Include="..\..\test_i\scripts\IRCparser.y" />
     <None Include="..\..\test_i\scripts\IRCscanner.l" />
+    <None Include="..\..\test_i\scripts\IRC_client.nsi" />
     <None Include="..\..\test_i\scripts\make_installer.bat" />
     <None Include="..\..\test_i\scripts\parser.bat" />
     <None Include="..\..\test_i\scripts\scanner.bat" />
@@ -317,8 +320,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="..\..\scripts\version.rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ResourceCompile>
     <ResourceCompile Include="..\..\test_i\etc\IRC_client.rc">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ResourceCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

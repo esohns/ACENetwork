@@ -506,9 +506,8 @@ do_work (bool useThreadPool_in,
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  IRC_Client_SessionData session_data;
   connection_manager_p->set (*userData_in.configuration,
-                             &session_data);
+                             NULL);
 
   // step3b: initialize timer manager
   Common_Timer_Manager_t* timer_manager_p =

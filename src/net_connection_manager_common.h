@@ -30,6 +30,7 @@
 
 #include "stream_common.h"
 
+#include "net_common.h"
 #include "net_configuration.h"
 #include "net_connection_manager.h"
 #include "net_exports.h"
@@ -59,6 +60,7 @@ typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
                                  Net_SocketConfiguration,
                                  Net_Configuration,
                                  Net_StreamUserData,
+                                 Net_ConnectionState,
                                  Stream_Statistic,
                                  Net_Stream> Net_INetlinkConnectionManager_t;
 #endif
@@ -66,6 +68,7 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_SocketConfiguration,
                                  Net_Configuration,
                                  Net_StreamUserData,
+                                 Net_ConnectionState,
                                  Stream_Statistic,
                                  Net_Stream> Net_IInetConnectionManager_t;
 
@@ -74,6 +77,7 @@ typedef Net_Connection_Manager_T<ACE_Netlink_Addr,
                                  Net_SocketConfiguration,
                                  Net_Configuration,
                                  Net_StreamUserData,
+                                 Net_ConnectionState,
                                  Stream_Statistic,
                                  Net_Stream> Net_NetlinkConnectionManager_t;
 #endif
@@ -81,6 +85,7 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  Net_SocketConfiguration,
                                  Net_Configuration,
                                  Net_StreamUserData,
+                                 Net_ConnectionState,
                                  Stream_Statistic,
                                  Net_Stream> Net_InetConnectionManager_t;
 

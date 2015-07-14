@@ -38,10 +38,12 @@ using namespace std;
 
 #include "net_macros.h"
 
+#include "IRC_client_network.h"
+
 #include "IRC_client_iIRCControl.h"
 #include "IRC_client_IRCmessage.h"
 
-IRC_Client_InputHandler::IRC_Client_InputHandler (IRC_Client_SessionState* state_in,
+IRC_Client_InputHandler::IRC_Client_InputHandler (IRC_Client_ConnectionState* state_in,
                                                   bool useReactor_in)
  : inherited (NULL,                           // reactor
               ACE_Event_Handler::LO_PRIORITY) // priority
@@ -207,8 +209,7 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
     message_text.clear (); // all newline
 
   // send the message
-  ACE_ASSERT (configuration_.IRCSessionState);
-  ACE_ASSERT (configuration_.IRCSessionState->controller);
+  ACE_ASSERT (configuration_.controller);
   string_list_t receivers;
   ACE_ASSERT (state_);
   {
@@ -226,7 +227,7 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
   } // end lock scope
   try
   {
-    configuration_.IRCSessionState->controller->send (receivers, message_text);
+    configuration_.controller->send (receivers, message_text);
   }
   catch (...)
   {

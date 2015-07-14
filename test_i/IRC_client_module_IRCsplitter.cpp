@@ -486,7 +486,7 @@ IRC_Client_Module_IRCSplitter::handleSessionMessage (IRC_Client_SessionMessage*&
 }
 
 bool
-IRC_Client_Module_IRCSplitter::collect (IRC_Client_RuntimeStatistic_t& data_out)
+IRC_Client_Module_IRCSplitter::collect (Stream_Statistic& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCSplitter::collect"));
 
@@ -496,8 +496,8 @@ IRC_Client_Module_IRCSplitter::collect (IRC_Client_RuntimeStatistic_t& data_out)
   // sanity check(s)
   ACE_ASSERT (isInitialized_);
 
-  // step1: init info container POD
-  ACE_OS::memset (&data_out, 0, sizeof (IRC_Client_RuntimeStatistic_t));
+  // step1: initialize info container POD
+  ACE_OS::memset (&data_out, 0, sizeof (Stream_Statistic));
 
   // *IMPORTANT NOTE*: information is collected by the statistic module
   //                   (if any)
@@ -528,46 +528,46 @@ IRC_Client_Module_IRCSplitter::report () const
 }
 
 bool
-IRC_Client_Module_IRCSplitter::putStatisticsMessage (const IRC_Client_RuntimeStatistic_t& info_in,
+IRC_Client_Module_IRCSplitter::putStatisticsMessage (const Stream_Statistic& statistic_in,
                                                      const ACE_Time_Value& collectionTime_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCSplitter::putStatisticsMessage"));
 
   // step1: initialize session data
-  IRC_Client_SessionData* data_p = NULL;
-  ACE_NEW_NORETURN (data_p,
-                    IRC_Client_SessionData);
-  if (!data_p)
+  IRC_Client_StreamSessionData* stream_session_data_p = NULL;
+  ACE_NEW_NORETURN (stream_session_data_p,
+                    IRC_Client_StreamSessionData ());
+  if (!stream_session_data_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     return false;
   } // end IF
   //ACE_OS::memset (data_p, 0, sizeof (IRC_Client_SessionData));
-  data_p->currentStatistics = info_in;
-  data_p->lastCollectionTimestamp = collectionTime_in;
+  stream_session_data_p->currentStatistic = statistic_in;
+  stream_session_data_p->lastCollectionTimestamp = collectionTime_in;
 
   // step2: allocate session data container
-  IRC_Client_StreamSessionData_t* session_data_p = NULL;
-  ACE_NEW_NORETURN (session_data_p,
-                    IRC_Client_StreamSessionData_t (data_p,
-                                                          true));
-  if (!session_data_p)
+  IRC_Client_StreamSessionData_t* session_data_container_p = NULL;
+  // *NOTE*: fire-and-forget stream_session_data_p
+  ACE_NEW_NORETURN (session_data_container_p,
+                    IRC_Client_StreamSessionData_t (stream_session_data_p,
+                                                    true));
+  if (!session_data_container_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
     // clean up
-    delete data_p;
+    delete stream_session_data_p;
 
     return false;
   } // end IF
 
   // step3: send the data downstream...
-  // *NOTE*: "fire-and-forget"-API for session_data_p
-  ACE_ASSERT (inherited::state_);
+  // *NOTE*: fire-and-forget session_data_container_p
   return inherited::putSessionMessage (SESSION_STATISTICS,
-                                       session_data_p,
+                                       session_data_container_p,
                                        inherited::allocator_);
 }
 

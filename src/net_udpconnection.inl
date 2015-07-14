@@ -25,11 +25,11 @@
 #include "net_macros.h"
 
 template <typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename HandlerType,
           typename HandlerConfigurationType>
 Net_UDPConnection_T<UserDataType,
-                    SessionDataType,
+                    StateType,
                     HandlerType,
                     HandlerConfigurationType>::Net_UDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                     unsigned int statisticsCollectionInterval_in)
@@ -40,9 +40,9 @@ Net_UDPConnection_T<UserDataType,
 
 }
 
-//template <typename SessionDataType,
+//template <typename StateType,
 //          typename HandlerType>
-//Net_UDPConnection_T<SessionDataType,
+//Net_UDPConnection_T<StateType,
 //                    HandlerType>::Net_UDPConnection_T ()
 // : inherited (NULL)
 //{
@@ -51,11 +51,11 @@ Net_UDPConnection_T<UserDataType,
 //}
 
 template <typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename HandlerType,
           typename HandlerConfigurationType>
 Net_UDPConnection_T<UserDataType,
-                    SessionDataType,
+                    StateType,
                     HandlerType,
                     HandlerConfigurationType>::~Net_UDPConnection_T ()
 {
@@ -64,11 +64,11 @@ Net_UDPConnection_T<UserDataType,
 }
 
 //template <typename UserDataType,
-//          typename SessionDataType,
+//          typename StateType,
 //          typename HandlerType>
 //void
 //Net_UDPConnection_T<UserDataType,
-//                    SessionDataType,
+//                    StateType,
 //                    HandlerType>::info (ACE_HANDLE& handle_out,
 //                                        ACE_INET_Addr& localSAP_out,
 //                                        ACE_INET_Addr& remoteSAP_out) const
@@ -81,12 +81,12 @@ Net_UDPConnection_T<UserDataType,
 //}
 
 template <typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename HandlerType,
           typename HandlerConfigurationType>
 void
 Net_UDPConnection_T<UserDataType,
-                    SessionDataType,
+                    StateType,
                     HandlerType,
                     HandlerConfigurationType>::close ()
 {
@@ -103,11 +103,11 @@ Net_UDPConnection_T<UserDataType,
 /////////////////////////////////////////
 
 template <typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename HandlerType,
           typename HandlerConfigurationType>
 Net_AsynchUDPConnection_T<UserDataType,
-                          SessionDataType,
+                          StateType,
                           HandlerType,
                           HandlerConfigurationType>::Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                                 unsigned int statisticsCollectionInterval_in)
@@ -119,11 +119,11 @@ Net_AsynchUDPConnection_T<UserDataType,
 }
 
 template <typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename HandlerType,
           typename HandlerConfigurationType>
 Net_AsynchUDPConnection_T<UserDataType,
-                          SessionDataType,
+                          StateType,
                           HandlerType,
                           HandlerConfigurationType>::Net_AsynchUDPConnection_T ()
  : inherited (NULL,
@@ -134,11 +134,11 @@ Net_AsynchUDPConnection_T<UserDataType,
 }
 
 template <typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename HandlerType,
           typename HandlerConfigurationType>
 Net_AsynchUDPConnection_T<UserDataType,
-                          SessionDataType,
+                          StateType,
                           HandlerType,
                           HandlerConfigurationType>::~Net_AsynchUDPConnection_T ()
 {
@@ -147,11 +147,11 @@ Net_AsynchUDPConnection_T<UserDataType,
 }
 
 //template <typename UserDataType,
-//          typename SessionDataType,
+//          typename StateType,
 //          typename HandlerType>
 //void
 //Net_AsynchUDPConnection_T<UserDataType,
-//                          SessionDataType,
+//                          StateType,
 //                          HandlerType>::info (ACE_HANDLE& handle_out,
 //                                              ACE_INET_Addr& localSAP_out,
 //                                              ACE_INET_Addr& remoteSAP_out) const

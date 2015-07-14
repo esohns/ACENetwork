@@ -121,7 +121,10 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+  path += ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_UI_FILE_DIRECTORY);
+  std::string UI_file = path;
+  UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UI_file += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
   std::cout << ACE_TEXT ("-g[[STRING]] : UI file [\"")
             << path
             << ACE_TEXT ("\"] {\"\" --> no GUI}")
@@ -216,8 +219,10 @@ do_processArguments (const int& argc_in,
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+  path += ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_UI_FILE_DIRECTORY);
   UIFile_out = path;
+  UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
   useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
   clientPingInterval_out =
     NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
@@ -524,7 +529,7 @@ do_work (unsigned int maxNumConnections_in,
     statisticsReportingInterval_in;
   configuration.streamConfiguration.streamConfiguration.useThreadPerConnection =
     false;
-  configuration.streamConfiguration.userData = &configuration.streamSessionData;
+  configuration.streamConfiguration.userData = &configuration.streamUserData;
 
   // ******************** protocol configuration data **************************
   configuration.protocolConfiguration.bufferSize =
@@ -591,10 +596,7 @@ do_work (unsigned int maxNumConnections_in,
   else
     CBData_in.listenerHandle =
       NET_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
-  Net_Server_SignalHandlerConfiguration_t signal_handler_configuration;
-  ACE_OS::memset (&signal_handler_configuration,
-                  0,
-                  sizeof (signal_handler_configuration));
+  Net_Server_SignalHandlerConfiguration signal_handler_configuration;
   signal_handler_configuration.listener = CBData_in.listenerHandle;
   signal_handler_configuration.statisticReportingHandler =
       NET_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -696,20 +698,17 @@ do_work (unsigned int maxNumConnections_in,
     NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
   socket_handler_configuration.messageAllocator = &message_allocator;
   socket_handler_configuration.socketConfiguration =
-      configuration.socketConfiguration;
-  Net_Server_ListenerConfiguration_t listener_configuration;
-  //ACE_OS::memset (&listener_configuration,
-  //                0,
-  //                sizeof (listener_configuration));
+      &configuration.socketConfiguration;
+  Net_Server_ListenerConfiguration listener_configuration;
   listener_configuration.addressFamily = ACE_ADDRESS_FAMILY_INET;
-  listener_configuration.allocator = &message_allocator;
   listener_configuration.connectionManager =
     NET_CONNECTIONMANAGER_SINGLETON::instance ();
+  listener_configuration.messageAllocator = &message_allocator;
   listener_configuration.portNumber = listeningPortNumber_in;
   listener_configuration.socketHandlerConfiguration =
     &socket_handler_configuration;
-  listener_configuration.statisticCollectionInterval =
-    statisticsReportingInterval_in;
+  //listener_configuration.statisticCollectionInterval =
+  //  statisticsReportingInterval_in;
   listener_configuration.useLoopbackDevice = useLoopback_in;
   if (!CBData_in.listenerHandle->initialize (listener_configuration))
   {
@@ -979,8 +978,10 @@ ACE_TMAIN (int argc_in,
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+  path += ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_UI_FILE_DIRECTORY);
   std::string UI_file = path;
+  UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  UI_file += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
   bool use_threadpool = NET_EVENT_USE_THREAD_POOL;
   unsigned int ping_interval = NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;

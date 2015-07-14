@@ -33,14 +33,14 @@
 
 // forward declarations
 class ACE_Message_Block;
-struct IRC_Client_SessionState;
+struct IRC_Client_ConnectionState;
 
 class IRC_Client_InputHandler
  : public ACE_Event_Handler
  , public Common_IInitialize_T<IRC_Client_InputHandlerConfiguration>
 {
  public:
-  IRC_Client_InputHandler (IRC_Client_SessionState*,      // state handle
+  IRC_Client_InputHandler (IRC_Client_ConnectionState*,   // state handle
                            bool = NET_EVENT_USE_REACTOR); // use reactor ?
   virtual ~IRC_Client_InputHandler ();
 
@@ -66,7 +66,7 @@ class IRC_Client_InputHandler
   IRC_Client_InputHandlerConfiguration configuration_;
   ACE_Message_Block*                   currentReadBuffer_;
   bool                                 registered_;
-  IRC_Client_SessionState*             state_;
+  IRC_Client_ConnectionState*          state_;
   bool                                 useReactor_;
 };
 

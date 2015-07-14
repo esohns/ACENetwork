@@ -22,6 +22,15 @@
 #define NET_COMMON_H
 
 #include "ace/Svc_Handler.h"
+#include "ace/Time_Value.h"
+
+#include "stream_common.h"
+
+#include "net_configuration.h"
+
+// forward declarations
+//struct Net_Configuration;
+struct Net_StreamUserData;
 
 enum Net_ClientServerRole
 {
@@ -63,6 +72,28 @@ enum Net_Connection_Status
   NET_CONNECTION_STATUS_INITIALIZATION_FAILED,
   ///////////////////////////////////////
   NET_CONNECTION_STATUS_MAX
+};
+
+typedef Stream_Statistic Net_RuntimeStatistic_t;
+struct Net_ConnectionState
+{
+  inline Net_ConnectionState ()
+   : configuration ()
+   , status (NET_CONNECTION_STATUS_INVALID)
+   , currentStatistic ()
+   , lastCollectionTimestamp (ACE_Time_Value::zero)
+   , userData (NULL)
+  {};
+
+  // *TODO*: consider making this a separate entity (i.e. a pointer)
+  Net_Configuration      configuration;
+
+  Net_Connection_Status  status;
+
+  Net_RuntimeStatistic_t currentStatistic;
+  ACE_Time_Value         lastCollectionTimestamp;
+
+  Net_StreamUserData*    userData;
 };
 
 #endif

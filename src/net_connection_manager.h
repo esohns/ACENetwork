@@ -21,7 +21,6 @@
 #ifndef NET_CONNECTION_MANAGER_H
 #define NET_CONNECTION_MANAGER_H
 
-//#include "ace/Condition_T.h"
 #include "ace/Containers_T.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
@@ -37,6 +36,7 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 class Net_Connection_Manager_T
@@ -44,6 +44,7 @@ class Net_Connection_Manager_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
+                                   StateType,
                                    StatisticContainerType,
                                    StreamType>
  , public Common_IStatistic_T<StatisticContainerType>
@@ -54,6 +55,7 @@ class Net_Connection_Manager_T
                                                       SocketConfigurationType,
                                                       ConfigurationType,
                                                       UserDataType,
+                                                      StateType,
                                                       StatisticContainerType,
                                                       StreamType>,
                              ACE_SYNCH_MUTEX>;
@@ -62,6 +64,7 @@ class Net_Connection_Manager_T
   // convenience types
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
+                            StateType,
                             StatisticContainerType,
                             StreamType> CONNECTION_T;
 
@@ -69,15 +72,19 @@ class Net_Connection_Manager_T
   void initialize (unsigned int); // maximum number of concurrent connections
 
   // implement Net_IConnectionManager_T
+  // *TODO*: clean this up
   virtual void set (const ConfigurationType&, // connection handler (default)
                                               // configuration
                     UserDataType*);           // (stream) user data
-  virtual void get (ConfigurationType&,    // return value: (default)
-                                           // connection handler configuration
-                    UserDataType*&) const; // return value: (stream) user data
+  // *IMPORTANT NOTE*: in terms of the (stream) user data, this works only once
+  //                   (!) for every set() call
+  virtual void get (ConfigurationType&, // return value: (default)
+                                        // connection handler configuration
+                    UserDataType*&);    // return value: (stream) user data
 
   virtual CONNECTION_T* operator[] (unsigned int) const; // index
   virtual CONNECTION_T* get (ACE_HANDLE) const; // socket handle
+  virtual CONNECTION_T* get (const AddressType&) const; // peer address
 
   virtual bool registerc (CONNECTION_T*); // connection handle
   virtual void deregister (CONNECTION_T*); // connection handle
@@ -112,6 +119,7 @@ class Net_Connection_Manager_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
+                                   StateType,
                                    StatisticContainerType,
                                    StreamType> OWN_TYPE_T;
 
@@ -121,17 +129,16 @@ class Net_Connection_Manager_T
 
   // implement (part of) Common_IStatistic_T
   // *WARNING*: this assumes lock_ is being held
-  virtual bool collect (StatisticContainerType&); // return value: statistic
-                                                  // data
+  virtual bool collect (StatisticContainerType&); // return value: statistic data
 
   Net_Connection_Manager_T ();
-  ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T (const Net_Connection_Manager_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T& operator= (const Net_Connection_Manager_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T (const Net_Connection_Manager_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T& operator= (const Net_Connection_Manager_T&))
   virtual ~Net_Connection_Manager_T ();
 
   // implement blocking wait...
   mutable ACE_SYNCH_RECURSIVE_CONDITION condition_;
-  ConfigurationType                     configuration_; // defailt-
+  ConfigurationType                     configuration_; // default-
   CONNECTION_CONTAINER_T                connections_;
   bool                                  isActive_;
   bool                                  isInitialized_;

@@ -158,7 +158,10 @@ connection_setup_function (void* arg_in)
   const IRC_Client_Stream* stream_p = NULL;
   const Stream_Module_t* module_p = NULL;
   const Stream_Module_t* current_p = NULL;
+  Stream_Module_t* tail_p = NULL;
   IRC_Client_Connection_Manager_t::CONNECTION_T* connection_2 = NULL;
+  //IRC_Client_IRCSession_t* session_p = NULL;
+  unsigned short current_port = 0;
   for (IRC_Client_PortRangesIterator_t iterator = (*data_p->phonebookIterator).second.listeningPorts.begin ();
        iterator != (*data_p->phonebookIterator).second.listeningPorts.end ();
        ++iterator)
@@ -168,7 +171,7 @@ connection_setup_function (void* arg_in)
     // port range ?
     if ((*iterator).first < (*iterator).second)
     {
-      for (unsigned short current_port = (*iterator).first;
+      for (current_port = (*iterator).first;
            current_port <= (*iterator).second;
            ++current_port)
       {
@@ -195,37 +198,41 @@ connection_setup_function (void* arg_in)
         g_free (string_p);
 
         handle =
-          IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
+          IRC_Client_Tools::connect (!data_p->configuration->useReactor,                                                        // asynch connection ?
+                                     data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
                                      data_p->loginOptions,                                                                      // login options
                                      data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
                                      data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
                                      data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
                                      (*data_p->phonebookIterator).second.hostName,                                              // server hostname
                                      current_port,                                                                              // server listening port
+                                     &data_p->configuration->streamConfiguration.streamModuleConfiguration,                     // module configuration
                                      data_p->configuration->streamConfiguration.streamConfiguration.cloneModule,                // clone final module ?
                                      data_p->configuration->streamConfiguration.streamConfiguration.deleteModule,               // delete final module ?
-                                     data_p->configuration->streamConfiguration.streamConfiguration.module,                     // final module handle
-                                     &data_p->configuration->streamConfiguration.streamModuleConfiguration);                    // module configuration
-
+                                     data_p->configuration->streamConfiguration.streamConfiguration.module);                    // final module handle
         if (handle != ACE_INVALID_HANDLE)
           break;
       } // end FOR
     } // end IF
     else
+    {
+      current_port = (*iterator).first;
       handle =
-        IRC_Client_Tools::connect (data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
+        IRC_Client_Tools::connect (!data_p->configuration->useReactor,                                                        // asynch connection ?
+                                   data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
                                    data_p->loginOptions,                                                                      // login options
                                    data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
                                    data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
                                    data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
                                    (*data_p->phonebookIterator).second.hostName,                                              // server hostname
-                                   (*iterator).first,                                                                         // server listening port
+                                   current_port,                                                                              // server listening port
+                                   &data_p->configuration->streamConfiguration.streamModuleConfiguration,                     // module configuration
                                    data_p->configuration->streamConfiguration.streamConfiguration.cloneModule,                // clone final module ?
                                    data_p->configuration->streamConfiguration.streamConfiguration.deleteModule,               // delete final module ?
-                                   data_p->configuration->streamConfiguration.streamConfiguration.module,                     // final module handle
-                                   &data_p->configuration->streamConfiguration.streamModuleConfiguration);                    // module configuration
-    if (handle != ACE_INVALID_HANDLE)
-      break;
+                                   data_p->configuration->streamConfiguration.streamConfiguration.module);                    // final module handle
+      if (handle != ACE_INVALID_HANDLE)
+        break;
+    } // end ELSE
   } // end FOR
   if (handle == ACE_INVALID_HANDLE)
   {
@@ -253,22 +260,46 @@ connection_setup_function (void* arg_in)
 
     goto remove_page;
   } // end IF
+  if (!data_p->configuration->useReactor)
+  {
+    ACE_Time_Value delay (IRC_CLIENT_CONNECTION_DEF_TIMEOUT, 0);
+    result = ACE_OS::sleep (delay);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+                  &delay));
 
-  connection_2 =
-    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->get (handle);
+    ACE_INET_Addr peer_address (current_port,
+                                (*data_p->phonebookIterator).second.hostName.c_str (),
+                                AF_INET);
+    connection_2 =
+      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->get (peer_address);
+  } // end IF
+  else
+    connection_2 =
+      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->get (handle);
   if (!connection_2)
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Connection_Manager_t::get(%u), returning\n"),
+                ACE_TEXT ("failed to IRC_Client_Connection_Manager_t::get(0x%@), returning\n"),
                 handle));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_Connection_Manager_t::get(%d), returning\n"),
+                handle));
+#endif
     goto remove_page;
   } // end IF
   stream_p = &connection_2->stream ();
   for (Stream_Iterator_t iterator_2 (*stream_p);
        iterator_2.next (current_p) != 0;
        iterator_2.advance ())
-    if (current_p != const_cast<IRC_Client_Stream*> (stream_p)->tail ())
+  {
+    tail_p = const_cast<IRC_Client_Stream*> (stream_p)->tail ();
+    if (current_p != tail_p)
       module_p = current_p;
+  } // end FOR
   ACE_ASSERT (module_p);
   IRCControl_p =
     dynamic_cast<IRC_Client_IIRCControl*> (const_cast<Stream_Module_t*> (module_p)->writer ());
@@ -285,7 +316,8 @@ connection_setup_function (void* arg_in)
   } // end IF
 
   // step3: initialize new connection handler
-  connection_p->initialize (IRCControl_p);
+  connection_p->initialize (&const_cast<IRC_Client_ConnectionState&> (connection_2->state ()),
+                            IRCControl_p);
 
   //   ACE_DEBUG((LM_DEBUG,
   //              ACE_TEXT("registering...\n")));
@@ -328,22 +360,8 @@ connection_setup_function (void* arg_in)
   goto done;
 
 remove_page:
-  { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
-
-    IRC_Client_GTK_ConnectionCBData* cb_data_p =
-      &const_cast<IRC_Client_GTK_ConnectionCBData&> (connection_p->get ());
-    cb_data_p->eventSourceID =
-        g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
-                         idle_remove_connection_cb,
-                         cb_data_p,
-                         NULL);
-    if (cb_data_p->eventSourceID)
-      data_p->CBData->GTKState.eventSourceIds.insert (cb_data_p->eventSourceID);
-    else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_idle_add_full(idle_remove_connection_cb): \"%m\", continuing\n")));
-  } // end lock scope
+  ACE_ASSERT (connection_p);
+  connection_p->close ();
 
 done:
   { // synch access
@@ -924,7 +942,7 @@ idle_remove_channel_cb (gpointer userData_in)
                                           ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
   ACE_ASSERT (notebook_p);
   if (data_p->handler->isServerLog ())
-    goto done; // skip page removal (the page belongs to the connection)
+    goto done; // skip page removal (that page belongs to the connection)
 
   // remove server page from parent notebook
   iterator_2 =
@@ -962,10 +980,11 @@ done:
   {
     IRC_Client_GTK_ConnectionCBData* cb_data_p =
         &const_cast<IRC_Client_GTK_ConnectionCBData&> (data_p->connection->get ());
-    cb_data_p->eventSourceID = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
-                                                idle_remove_connection_cb,
-                                                cb_data_p,
-                                                NULL);
+    cb_data_p->eventSourceID =
+      g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+                       idle_remove_connection_cb,
+                       cb_data_p,
+                       NULL);
     if (cb_data_p->eventSourceID)
       data_p->GTKState->eventSourceIds.insert (cb_data_p->eventSourceID);
     else
@@ -1327,6 +1346,7 @@ idle_update_user_modes_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->connections);
   ACE_ASSERT (data_p->GTKState);
 
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
@@ -1341,50 +1361,64 @@ idle_update_user_modes_cb (gpointer userData_in)
                 ACE_TEXT (data_p->label.c_str ())));
     return FALSE; // G_SOURCE_REMOVE
   } // end IF
-  
+
+  IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 =
+    data_p->connections->find (data_p->timestamp);
+  // sanity check(s)
+  if (iterator_2 == data_p->connections->end ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("connection (was: \"%s\") not found, returning\n"),
+                ACE_TEXT (data_p->label.c_str ())));
+    return FALSE; // G_SOURCE_REMOVE
+  } // end IF
+  ACE_ASSERT ((*iterator_2).second);
+  const IRC_Client_ConnectionState& connection_state_r =
+    (*iterator_2).second->state ();
+
   // display (changed) user modes
   GtkToggleButton* togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                data_p->IRCSessionState.userModes[USERMODE_AWAY]);
+                                connection_state_r.userModes[USERMODE_AWAY]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                data_p->IRCSessionState.userModes[USERMODE_INVISIBLE]);
+                                connection_state_r.userModes[USERMODE_INVISIBLE]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                data_p->IRCSessionState.userModes[USERMODE_RECVNOTICES]);
+                                connection_state_r.userModes[USERMODE_RECVNOTICES]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                data_p->IRCSessionState.userModes[USERMODE_OPERATOR]);
+                                connection_state_r.userModes[USERMODE_OPERATOR]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                data_p->IRCSessionState.userModes[USERMODE_RESTRICTEDCONN]);
+                                connection_state_r.userModes[USERMODE_RESTRICTEDCONN]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                data_p->IRCSessionState.userModes[USERMODE_LOCALOPERATOR]);
+                                connection_state_r.userModes[USERMODE_LOCALOPERATOR]);
   togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p,
-                                data_p->IRCSessionState.userModes[USERMODE_RECVWALLOPS]);
+                                connection_state_r.userModes[USERMODE_RECVWALLOPS]);
 
   return FALSE; // G_SOURCE_REMOVE
 }
@@ -1562,11 +1596,13 @@ button_connect_clicked_cb (GtkWidget* widget_in,
            ++iterator_2)
       {
         const IRC_Client_GTK_ConnectionCBData& connection_data_r =
-            (*iterator_2).second->get ();
+          (*iterator_2).second->get ();
+        const IRC_Client_ConnectionState& connection_state_r =
+          (*iterator_2).second->state ();
         // *TODO*: the structure of the tab (label) is an implementation detail
-        //         and should be encapsulated by the connection somehow...
+        //         and should be encapsulated by the connection...
         if ((connection_data_r.label == server_name_string) &&
-            (connection_data_r.IRCSessionState.nickname == login_options.nickname))
+            (connection_state_r.nickname == login_options.nickname))
         {
           nickname_taken = true;
           break;
@@ -1891,14 +1927,17 @@ button_send_clicked_cb (GtkWidget* widget_in,
   // step2: retrieve active handler(s) (channel/nick)
   // *TODO*: allow multicast to several channels ?
   //std::string active_id = (*connections_iterator).second->getActiveID ();
-  std::string active_id = connection_p->getActiveID (false,
-                                                     false);
-  if (active_id.empty ())
+  IRC_Client_GUI_MessageHandler* message_handler_p = 
+    connection_p->getActiveHandler (false,
+                                    false);
+  if (!message_handler_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_GUI_Connection::getActiveID(), returning\n")));
+                ACE_TEXT ("failed to IRC_Client_GUI_Connection::getActiveHandler(), returning\n")));
     return;
   } // end IF
+  const IRC_Client_GTK_HandlerCBData& cb_data_r = message_handler_p->get ();
+  std::string active_id = cb_data_r.id;
 
   // step3: pass data to controller
   string_list_t receivers;
@@ -1920,15 +1959,6 @@ button_send_clicked_cb (GtkWidget* widget_in,
   }
 
   // step4: echo data locally...
-  IRC_Client_GUI_MessageHandler* message_handler_p =
-      connection_p->getActiveHandler (false,
-                                      false);
-  if (!message_handler_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_GUI_Connection::getActiveHandler(), returning\n")));
-    return;
-  } // end IF
   try
   {
     message_handler_p->queueForDisplay (string_p);
@@ -2011,10 +2041,11 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::quit(), continuing\n")));
   }
 
+  // update widgets
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
 
   // *NOTE*: the server should close the connection after this...
-  //         --> the connection notebook page cleans itself in the dtor !
+  //         --> the connection notebook page cleans itself (see end ())
   IRC_Client_GUI_ConnectionsConstIterator_t iterator =
       data_p->connections->find (data_p->timestamp);
   // sanity check(s)
@@ -2515,8 +2546,9 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   // sanity check(s)
   ACE_ASSERT (toggleButton_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->connections);
   ACE_ASSERT (data_p->controller);
-  ACE_ASSERT (!data_p->IRCSessionState.nickname.empty ());
+  ACE_ASSERT (data_p->GTKState);
 
   IRC_Client_UserMode mode = USERMODE_INVALID;
   // find out which button toggled...
@@ -2589,19 +2621,35 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
     return; // done
   } // end IF
 
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+
+  IRC_Client_GUI_ConnectionsConstIterator_t iterator =
+    data_p->connections->find (data_p->timestamp);
+  // sanity check(s)
+  if (iterator == data_p->connections->end ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("connection (was: \"%s\") not found, returning\n"),
+                ACE_TEXT (data_p->label.c_str ())));
+    return;
+  } // end IF
+  ACE_ASSERT ((*iterator).second);
+  const IRC_Client_ConnectionState& connection_state_r =
+    (*iterator).second->state ();
+
   // re-toggle button (until acknowledgement from the server arrives...)
   data_p->pending = true;
   gtk_toggle_button_set_active (toggleButton_in,
-                                data_p->IRCSessionState.userModes.test (mode));
+                                connection_state_r.userModes.test (mode));
   gtk_toggle_button_set_inconsistent (toggleButton_in, TRUE);
 
   string_list_t parameters;
   try
   {
-    data_p->controller->mode (data_p->IRCSessionState.nickname,               // user mode
-                              IRC_Client_Tools::IRCUserMode2Char (mode),      // corresponding mode char
-                              !data_p->IRCSessionState.userModes.test (mode), // enable ?
-                              parameters);                                    // parameters
+    data_p->controller->mode (connection_state_r.nickname,               // user mode
+                              IRC_Client_Tools::IRCUserMode2Char (mode), // corresponding mode char
+                              !connection_state_r.userModes.test (mode), // enable ?
+                              parameters);                               // parameters
   }
   catch (...)
   {
@@ -2627,6 +2675,8 @@ switch_channel_cb (GtkNotebook* notebook_in,
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->GTKState);
+
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -2656,6 +2706,8 @@ action_away_cb (GtkAction* action_in,
   ACE_ASSERT (data_p->controller);
   ACE_ASSERT (data_p->GTKState);
 
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
@@ -2670,12 +2722,26 @@ action_away_cb (GtkAction* action_in,
 
   // check if the state is inconsistent --> submit change request, else do nothing
   // i.e. state is off and widget is "on" or vice-versa
+  IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 =
+    data_p->connections->find (data_p->timestamp);
+  // sanity check(s)
+  if (iterator_2 == data_p->connections->end ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("connection (was: \"%s\") not found, returning\n"),
+                ACE_TEXT (data_p->label.c_str ())));
+    return;
+  } // end IF
+  ACE_ASSERT ((*iterator_2).second);
+  const IRC_Client_ConnectionState& connection_state_r =
+    (*iterator_2).second->state ();
   // *NOTE*: avoid recursion
-  if (data_p->IRCSessionState.away == activating)
+  if (connection_state_r.away == activating)
     return;
   // re-toggle button for now...
   // *NOTE*: will be auto-toggled according to the outcome of the change request
-  gtk_toggle_button_set_active (togglebutton_p, data_p->IRCSessionState.away);
+  gtk_toggle_button_set_active (togglebutton_p,
+                                connection_state_r.away);
 
   // activating ? --> retrieve away message
   std::string away_message;
@@ -3181,6 +3247,8 @@ members_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p->connection);
   ACE_ASSERT (data_p->GTKState);
 
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (data_p->builderLabel);
   // sanity check(s)
@@ -3280,21 +3348,23 @@ members_clicked_cb (GtkWidget* widget_in,
   // remove current nickname from any selection...
   string_list_iterator_t iterator_2 = data_p->parameters.begin ();
   string_list_iterator_t self = data_p->parameters.end ();
-  const IRC_Client_GTK_ConnectionCBData& connection_data_r =
-    data_p->connection->get ();
+  const IRC_Client_ConnectionState& connection_state_r =
+    data_p->connection->state ();
+  //const IRC_Client_GTK_ConnectionCBData& connection_data_r =
+  //  data_p->connection->get ();
   for (;
        iterator_2 != data_p->parameters.end ();
        iterator_2++)
   {
-    if (*iterator_2 == connection_data_r.IRCSessionState.nickname)
+    if (*iterator_2 == connection_state_r.nickname)
     {
       self = iterator_2;
       continue;
     } // end IF
     // *NOTE*: ignore leading '@'
     if ((*iterator_2).find ('@', 0) == 0)
-      if (((*iterator_2).find (connection_data_r.IRCSessionState.nickname, 1) == 1) &&
-          ((*iterator_2).size () == (connection_data_r.IRCSessionState.nickname.size () + 1)))
+      if (((*iterator_2).find (connection_state_r.nickname, 1) == 1) &&
+          ((*iterator_2).size () == (connection_state_r.nickname.size () + 1)))
       {
         self = iterator_2;
         continue;

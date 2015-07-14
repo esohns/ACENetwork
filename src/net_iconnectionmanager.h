@@ -30,6 +30,7 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 class Net_IConnectionManager_T
@@ -40,6 +41,7 @@ class Net_IConnectionManager_T
   // convenience types
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
+                            StateType,
                             StatisticContainerType,
                             StreamType> CONNECTION_T;
 
@@ -48,13 +50,14 @@ class Net_IConnectionManager_T
   virtual void set (const ConfigurationType&, // connection handler (default)
                                               // configuration
                     UserDataType*) = 0;       // (stream) user data
-  virtual void get (ConfigurationType&,        // return value: (default)
-                                               // connection handler configuration
-                    UserDataType*&) const = 0; // return value: (stream) user data
+  virtual void get (ConfigurationType&,  // return value: (default)
+                                         // connection handler configuration
+                    UserDataType*&) = 0; // return value: (stream) user data
 
   // *WARNING*: if (!= NULL) callers must decrease() the returned handle
   virtual CONNECTION_T* operator[] (unsigned int) const = 0; // index
   virtual CONNECTION_T* get (ACE_HANDLE) const = 0; // socket handle
+  virtual CONNECTION_T* get (const AddressType&) const = 0; // peer address
 
   // *NOTE*: 'register' is a reserved keyword
   virtual bool registerc (CONNECTION_T*) = 0; // connection handle

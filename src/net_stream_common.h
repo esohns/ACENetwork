@@ -24,6 +24,7 @@
 #include <list>
 
 #include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
 #include "common_inotify.h"
 #include "common_isubscribe.h"
@@ -34,12 +35,15 @@
 #include "stream_session_data_base.h"
 #include "stream_messageallocatorheap_base.h"
 
+//#include "net_common.h"
 //#include "net_configuration.h"
 #include "net_message.h"
 //#include "net_sessionmessage.h"
 
 // forward declarations
+struct Net_Configuration;
 class Net_SessionMessage;
+typedef Stream_Statistic Net_RuntimeStatistic_t;
 
 // *NOTE*: I speculate that this is the main reason that C# was ever invented !
 struct Net_StreamUserData
@@ -51,10 +55,27 @@ struct Net_StreamUserData
   void* userData;
 };
 
+struct Net_StreamSessionData
+{
+  inline Net_StreamSessionData ()
+   : configuration (NULL)
+   , currentStatistic ()
+   , lastCollectionTimestamp (ACE_Time_Value::zero)
+   , userData (NULL)
+  {};
+
+  Net_Configuration*     configuration;
+
+  Net_RuntimeStatistic_t currentStatistic;
+  ACE_Time_Value         lastCollectionTimestamp;
+
+  Net_StreamUserData*    userData;
+};
+
 typedef Stream_MessageAllocatorHeapBase_T<Net_Message,
                                           Net_SessionMessage> Net_StreamMessageAllocator_t;
 
-typedef Stream_SessionDataBase_T<Net_StreamUserData> Net_StreamSessionData_t;
+typedef Stream_SessionDataBase_T<Net_StreamSessionData> Net_StreamSessionData_t;
 
 typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Common_TimePolicy_t,

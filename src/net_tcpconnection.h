@@ -40,7 +40,7 @@
 class Net_Export Net_TCPConnection
  : public Net_TCPConnectionBase_T<Net_Configuration,
                                   Net_StreamUserData,
-                                  Net_StreamSessionData_t,
+                                  Net_ConnectionState,
                                   Net_Stream,
                                   Net_TCPHandler_t,
                                   Net_SocketHandlerConfiguration>
@@ -53,6 +53,7 @@ class Net_Export Net_TCPConnection
                                     Net_SocketConfiguration,
                                     Net_Configuration,
                                     Net_StreamUserData,
+                                    Net_ConnectionState,
                                     Stream_Statistic,
                                     Net_Stream> ICONNECTION_MANAGER_T;
 
@@ -64,14 +65,14 @@ class Net_Export Net_TCPConnection
  private:
   typedef Net_TCPConnectionBase_T<Net_Configuration,
                                   Net_StreamUserData,
-                                  Net_StreamSessionData_t,
+                                  Net_ConnectionState,
                                   Net_Stream,
                                   Net_TCPHandler_t,
                                   Net_SocketHandlerConfiguration> inherited;
 
   Net_TCPConnection ();
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection (const Net_TCPConnection&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection& operator= (const Net_TCPConnection&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection (const Net_TCPConnection&))
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection& operator= (const Net_TCPConnection&))
 };
 
 /////////////////////////////////////////
@@ -79,7 +80,7 @@ class Net_Export Net_TCPConnection
 class Net_Export Net_AsynchTCPConnection
  : public Net_AsynchTCPConnectionBase_T<Net_Configuration,
                                         Net_StreamUserData,
-                                        Net_StreamSessionData_t,
+                                        Net_ConnectionState,
                                         Net_Stream,
                                         Net_AsynchTCPHandler_t,
                                         Net_SocketHandlerConfiguration>
@@ -92,6 +93,7 @@ class Net_Export Net_AsynchTCPConnection
                                    Net_SocketConfiguration,
                                    Net_Configuration,
                                    Net_StreamUserData,
+                                   Net_ConnectionState,
                                    Stream_Statistic,
                                    Net_Stream> ICONNECTION_MANAGER_T;
 
@@ -103,14 +105,14 @@ class Net_Export Net_AsynchTCPConnection
  private:
   typedef Net_AsynchTCPConnectionBase_T<Net_Configuration,
                                         Net_StreamUserData,
-                                        Net_StreamSessionData_t,
+                                        Net_ConnectionState,
                                         Net_Stream,
                                         Net_AsynchTCPHandler_t,
                                         Net_SocketHandlerConfiguration> inherited;
 
   Net_AsynchTCPConnection ();
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection (const Net_AsynchTCPConnection&));
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection& operator= (const Net_AsynchTCPConnection&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection (const Net_AsynchTCPConnection&))
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection& operator= (const Net_AsynchTCPConnection&))
 };
 
 #endif

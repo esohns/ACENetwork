@@ -212,9 +212,13 @@ release:
 }
 
 bool
-curses_main (IRC_Client_CursesState& state_in)
+curses_main (IRC_Client_CursesState& state_in,
+             IRC_Client_IIRCControl* controller_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_main"));
+
+  // sanity check(s)
+  ACE_ASSERT (controller_in);
 
   int result = ERR;
   int ch = -1;
@@ -230,9 +234,6 @@ curses_main (IRC_Client_CursesState& state_in)
   char* string_p = NULL;
   int result_2 = ERR;
   IRC_Client_CursesMessagesIterator_t iterator;
-
-  // sanity checks
-  ACE_ASSERT (state_in.IRCSessionState);
 
   // step1: initialize curses
 
@@ -566,12 +567,11 @@ curses_main (IRC_Client_CursesState& state_in)
           break; // nothing to do
 
         // step1: send the message
-        ACE_ASSERT (state_in.IRCSessionState->controller);
         {
-          ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_in.IRCSessionState->lock);
+          ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_in.state->lock);
 
           // sanity check (s)
-          if (state_in.IRCSessionState->channel.empty ())
+          if (state_in.state->channel.empty ())
           {
             ACE_DEBUG ((LM_DEBUG,
                         ACE_TEXT ("not in a channel, continuing\n")));
@@ -579,11 +579,11 @@ curses_main (IRC_Client_CursesState& state_in)
           } // end IF
 
           receivers.clear ();
-          receivers.push_front (state_in.IRCSessionState->channel);
+          receivers.push_front (state_in.state->channel);
         } // end lock scope
         try
         {
-          state_in.IRCSessionState->controller->send (receivers, message_text);
+          controller_in->send (receivers, message_text);
         }
         catch (...)
         {

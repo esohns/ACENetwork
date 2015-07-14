@@ -28,7 +28,24 @@
 #include "IRC_client_configuration.h"
 #include "IRC_client_IRCmessage.h"
 
-typedef Stream_SessionDataBase_T<IRC_Client_SessionData> IRC_Client_StreamSessionData_t;
+struct IRC_Client_StreamSessionData
+{
+  inline IRC_Client_StreamSessionData ()
+   : configuration (NULL)
+   , currentStatistic ()
+   , lastCollectionTimestamp (ACE_Time_Value::zero)
+   , userData (NULL)
+  {};
+
+  IRC_Client_Configuration* configuration;
+
+  Net_RuntimeStatistic_t    currentStatistic;
+  ACE_Time_Value            lastCollectionTimestamp;
+
+  Net_StreamUserData*       userData;
+};
+
+typedef Stream_SessionDataBase_T<IRC_Client_StreamSessionData> IRC_Client_StreamSessionData_t;
 
 typedef Common_INotify_T<IRC_Client_StreamModuleConfiguration,
                          IRC_Client_IRCMessage> IRC_Client_INotify_t;

@@ -1088,7 +1088,6 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
 
   // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->signalHandlerConfiguration);
   ACE_ASSERT (data_p->timeoutHandler);
 
   //Common_UI_GladeXMLsIterator_t iterator =
@@ -1100,7 +1099,7 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
 
   // schedule action interval timer ?
-  if (data_p->signalHandlerConfiguration->actionTimerId == -1)
+  if (data_p->signalHandlerConfiguration.actionTimerId == -1)
   {
     ACE_Event_Handler* handler_p = data_p->timeoutHandler;
     ACE_Time_Value interval = ACE_Time_Value::max_time;
@@ -1127,12 +1126,12 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
         return FALSE;
       }
     } // end SWITCH
-    data_p->signalHandlerConfiguration->actionTimerId =
+    data_p->signalHandlerConfiguration.actionTimerId =
       COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
                                                                   NULL,                       // ACT
                                                                   COMMON_TIME_NOW + interval, // first wakeup time
                                                                   interval);                  // interval
-    if (data_p->signalHandlerConfiguration->actionTimerId == -1)
+    if (data_p->signalHandlerConfiguration.actionTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", aborting\n")));
@@ -1143,15 +1142,15 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   {
     const void* act_p = NULL;
     result =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (data_p->signalHandlerConfiguration->actionTimerId,
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (data_p->signalHandlerConfiguration.actionTimerId,
                                                                 &act_p);
     if (result <= 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", continuing\n"),
-                  data_p->signalHandlerConfiguration->actionTimerId));
+                  data_p->signalHandlerConfiguration.actionTimerId));
 
     // clean up
-    data_p->signalHandlerConfiguration->actionTimerId = -1;
+    data_p->signalHandlerConfiguration.actionTimerId = -1;
   } // end ELSE
 
   // toggle button image/label

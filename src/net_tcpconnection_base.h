@@ -40,7 +40,7 @@
 
 template <typename ConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StreamType,
           typename HandlerType,
           typename HandlerConfigurationType>
@@ -51,21 +51,21 @@ class Net_TCPConnectionBase_T
                                      ConfigurationType,
                                      HandlerConfigurationType,
                                      UserDataType,
-                                     SessionDataType,
+                                     StateType,
                                      Stream_Statistic,
                                      StreamType>
  , public Net_TransportLayer_TCP
 {
  friend class ACE_Acceptor<Net_TCPConnectionBase_T<ConfigurationType,
                                                    UserDataType,
-                                                   SessionDataType,
+                                                   StateType,
                                                    StreamType,
                                                    HandlerType,
                                                    HandlerConfigurationType>,
                            ACE_SOCK_ACCEPTOR>;
  friend class ACE_Connector<Net_TCPConnectionBase_T<ConfigurationType,
                                                     UserDataType,
-                                                    SessionDataType,
+                                                    StateType,
                                                     StreamType,
                                                     HandlerType,
                                                     HandlerConfigurationType>,
@@ -76,6 +76,7 @@ class Net_TCPConnectionBase_T
                                    Net_SocketConfiguration,
                                    ConfigurationType,
                                    UserDataType,
+                                   StateType,
                                    Stream_Statistic,
                                    StreamType> ICONNECTION_MANAGER_T;
 
@@ -91,20 +92,20 @@ class Net_TCPConnectionBase_T
                                      ConfigurationType,
                                      HandlerConfigurationType,
                                      UserDataType,
-                                     SessionDataType,
+                                     StateType,
                                      Stream_Statistic,
                                      StreamType> inherited;
 
   Net_TCPConnectionBase_T ();
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnectionBase_T (const Net_TCPConnectionBase_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnectionBase_T& operator= (const Net_TCPConnectionBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnectionBase_T (const Net_TCPConnectionBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnectionBase_T& operator= (const Net_TCPConnectionBase_T&))
 };
 
 /////////////////////////////////////////
 
 template <typename ConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StreamType,
           typename HandlerType,
           typename HandlerConfigurationType>
@@ -115,20 +116,20 @@ class Net_AsynchTCPConnectionBase_T
                                            ConfigurationType,
                                            HandlerConfigurationType,
                                            UserDataType,
-                                           SessionDataType,
+                                           StateType,
                                            Stream_Statistic,
                                            StreamType>
  , public Net_TransportLayer_TCP
 {
  friend class ACE_Asynch_Acceptor<Net_AsynchTCPConnectionBase_T<ConfigurationType,
                                                                 UserDataType,
-                                                                SessionDataType,
+                                                                StateType,
                                                                 StreamType,
                                                                 HandlerType,
                                                                 HandlerConfigurationType> >;
  friend class ACE_Asynch_Connector<Net_AsynchTCPConnectionBase_T<ConfigurationType,
                                                                  UserDataType,
-                                                                 SessionDataType,
+                                                                 StateType,
                                                                  StreamType,
                                                                  HandlerType,
                                                                  HandlerConfigurationType> >;
@@ -138,6 +139,7 @@ class Net_AsynchTCPConnectionBase_T
                                    Net_SocketConfiguration,
                                    ConfigurationType,
                                    UserDataType,
+                                   StateType,
                                    Stream_Statistic,
                                    StreamType> ICONNECTION_MANAGER_T;
 
@@ -153,13 +155,13 @@ class Net_AsynchTCPConnectionBase_T
                                            ConfigurationType,
                                            HandlerConfigurationType,
                                            UserDataType,
-                                           SessionDataType,
+                                           StateType,
                                            Stream_Statistic,
                                            StreamType> inherited;
 
   Net_AsynchTCPConnectionBase_T ();
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnectionBase_T (const Net_AsynchTCPConnectionBase_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnectionBase_T& operator= (const Net_AsynchTCPConnectionBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnectionBase_T (const Net_AsynchTCPConnectionBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnectionBase_T& operator= (const Net_AsynchTCPConnectionBase_T&))
 };
 
 #include "net_tcpconnection_base.inl"

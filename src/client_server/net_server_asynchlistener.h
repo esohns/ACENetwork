@@ -39,7 +39,7 @@ template <typename ConfigurationType,
           typename HandlerType>
 class Net_Server_AsynchListener_T
  : public ACE_Asynch_Acceptor<HandlerType>
- , public Net_Server_IListener_t
+ , public Net_Server_IListener_T<ConfigurationType>
  , public Common_IDumpState
 {
   // singleton needs access to the ctor/dtors
@@ -59,7 +59,7 @@ class Net_Server_AsynchListener_T
   virtual int should_reissue_accept (void);
 
   // implement Net_Server_IListener_T
-  virtual bool initialize (const Net_Server_ListenerConfiguration_t&);
+  virtual bool initialize (const ConfigurationType&);
   virtual bool useReactor () const;
 
   bool isInitialized () const;
@@ -81,8 +81,8 @@ class Net_Server_AsynchListener_T
   typedef ACE_Asynch_Acceptor<HandlerType> inherited;
 
   Net_Server_AsynchListener_T ();
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T (const Net_Server_AsynchListener_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T& operator= (const Net_Server_AsynchListener_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T (const Net_Server_AsynchListener_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T& operator= (const Net_Server_AsynchListener_T&))
   virtual ~Net_Server_AsynchListener_T ();
 
 //  // override default accept strategy
@@ -90,15 +90,10 @@ class Net_Server_AsynchListener_T
 //  // fix this here... --> *TODO*: send patch to ACE people
 //  virtual void handle_accept(const ACE_Asynch_Accept::Result&); // result
 
-  int                                   addressFamily_;
-  Stream_IAllocator*                    allocator_;
-  const SocketHandlerConfigurationType* configuration_;
-  Net_IInetConnectionManager_t*         interfaceHandle_;
-  bool                                  isInitialized_;
-  bool                                  isListening_;
-  unsigned short                        listeningPort_;
-  unsigned int                          statisticCollectionInterval_;
-  bool                                  useLoopback_;
+  int               addressFamily_;
+  ConfigurationType configuration_;
+  bool              isInitialized_;
+  bool              isListening_;
 };
 
 // include template implementation

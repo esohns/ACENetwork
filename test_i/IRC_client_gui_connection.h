@@ -61,9 +61,11 @@ class IRC_Client_GUI_Connection
   //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
   virtual ~IRC_Client_GUI_Connection ();
 
-  void initialize (IRC_Client_IIRCControl*); // controller handle
+  void initialize (IRC_Client_ConnectionState*, // session state handle
+                   IRC_Client_IIRCControl*);    // controller handle
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
   void finalize (bool = true); // locked access ?
+  void close ();
 
   // implement IRC_Client_INotify_t
   virtual void start (const IRC_Client_StreamModuleConfiguration&);
@@ -81,15 +83,15 @@ class IRC_Client_GUI_Connection
   // *WARNING*: callers may need protection from:
   //            - the thread(s) servicing the UI (GTK) event loop
   //            - the event dispatch thread(s) (reactor/proactor)
-  // *NOTE*: can be a channel/nick !
-  std::string getActiveID (bool = true,        // locked access ?
-                           bool = true) const; // locked access (GDK) ?
+  //void current (std::string&,        // return value: nickname
+  //              std::string&) const; // return value: channel / nickname
+  const IRC_Client_ConnectionState& state () const;
   IRC_Client_GUI_MessageHandler* getActiveHandler (bool = true,        // locked access ?
                                                    bool = true) const; // locked access (GDK) ?
-  void createMessageHandler (const std::string&, // channel/nick
+  void createMessageHandler (const std::string&, // channel/nickname
                              bool = true,        // locked access ?
                              bool = true);       // locked access (GDK) ?
-  void terminateMessageHandler (const std::string&, // channel/nick
+  void terminateMessageHandler (const std::string&, // channel/nickname
                                 bool = true);       // locked access ?
 
   bool closing_;
@@ -105,7 +107,6 @@ class IRC_Client_GUI_Connection
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_Connection& operator= (const IRC_Client_GUI_Connection&))
 
   // helper methods
-  void close ();
   void forward (const std::string&,  // channel/nick
                 const std::string&); // message text
   void log (const std::string&);
@@ -118,6 +119,7 @@ class IRC_Client_GUI_Connection
   IRC_Client_GTK_ConnectionCBData CBData_;
   guint                           contextID_;
   bool                            isFirstUsersMsg_;
+  IRC_Client_ConnectionState*     sessionState_;
   std::string                     UIFileDirectory_;
 
   mutable ACE_SYNCH_MUTEX         lock_;

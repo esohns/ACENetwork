@@ -36,34 +36,42 @@
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
-          typename HandlerConfigurationType,
+          typename ConnectorConfigurationType, // connector | socket handler configuration type
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StreamType,
           typename HandlerType>
 class Net_Client_Connector_T
  : public ACE_Connector<HandlerType,
                         ACE_SOCK_CONNECTOR>
  , public Net_Client_IConnector_T<AddressType,
-                                  HandlerConfigurationType>
+                                  ConnectorConfigurationType>
 {
  public:
-  typedef Net_IConnectionManager_T<AddressType,
-                                   SocketConfigurationType,
-                                   ConfigurationType,
-                                   UserDataType,
-                                   Stream_Statistic,
-                                   StreamType> ICONNECTION_MANAGER_T;
+  //typedef Net_IConnectionManager_T<AddressType,
+  //                                 SocketConfigurationType,
+  //                                 ConfigurationType,
+  //                                 UserDataType,
+  //                                 Stream_Statistic,
+  //                                 StreamType> ICONNECTION_MANAGER_T;
 
-  Net_Client_Connector_T (const HandlerConfigurationType*, // socket handler configuration handle
-                          ICONNECTION_MANAGER_T*,          // connection manager handle
-                          unsigned int = 0);               // statistics collecting interval (second(s))
-                                                           // 0 --> DON'T collect statistics
+  Net_Client_Connector_T ();
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
   //virtual bool useReactor () const; // ? : uses proactor
-  virtual const HandlerConfigurationType* getConfiguration () const;
+
+  // *IMPORTANT NOTE*: fire-and-forget API: the first (!) generated handler
+  //                   assumes responsibility for the socket handler
+  //                   configuration (member). The handler retrieves the
+  //                   configuration object via get () (see below)
+  //                   --> instances must be (re)initialize()d for every new
+  //                       connection
+  virtual bool initialize (const ConnectorConfigurationType&);
+
+  // *IMPORTANT NOTE*: works only once (!) for every initialize() call
+  virtual const ConnectorConfigurationType& get () const; // never mind the 'const' here
+
   virtual void abort ();
   virtual ACE_HANDLE connect (const AddressType&);
 
@@ -75,13 +83,10 @@ class Net_Client_Connector_T
   typedef ACE_Connector<HandlerType,
                         ACE_SOCK_CONNECTOR> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  const HandlerConfigurationType* configuration_;
-  ICONNECTION_MANAGER_T*          interfaceHandle_;
-  unsigned int                    statisticCollectionInterval_; // seconds
+  mutable ConnectorConfigurationType configuration_;
 };
 
 /////////////////////////////////////////
@@ -90,48 +95,56 @@ class Net_Client_Connector_T
 template <typename SocketConfigurationType,
           typename HandlerType,
           typename ConfigurationType,
-          typename HandlerConfigurationType,
+          typename ConnectorConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StreamType>
 class Net_Client_Connector_T<ACE_INET_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             HandlerConfigurationType,
+                             ConnectorConfigurationType,
                              UserDataType,
-                             SessionDataType,
+                             StateType,
                              StreamType,
                              Net_UDPConnection_T<UserDataType,
-                                                 SessionDataType,
+                                                 StateType,
                                                  HandlerType,
-                                                 HandlerConfigurationType> >
+                                                 ConnectorConfigurationType> >
  : public Net_Client_IConnector_T<ACE_INET_Addr,
-                                  HandlerConfigurationType>
+                                  ConnectorConfigurationType>
 {
  public:
-  typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   SocketConfigurationType,
-                                   ConfigurationType,
-                                   UserDataType,
-                                   Stream_Statistic,
-                                   StreamType> ICONNECTION_MANAGER_T;
+  //typedef Net_IConnectionManager_T<ACE_INET_Addr,
+  //                                 SocketConfigurationType,
+  //                                 ConfigurationType,
+  //                                 UserDataType,
+  //                                 Stream_Statistic,
+  //                                 StreamType> ICONNECTION_MANAGER_T;
   typedef Net_UDPConnection_T<UserDataType,
-                              SessionDataType,
+                              StateType,
                               HandlerType,
-                              HandlerConfigurationType> CONNECTION_T;
+                              ConnectorConfigurationType> CONNECTION_T;
 
-  Net_Client_Connector_T (const HandlerConfigurationType*, // configuration handle
-                          ICONNECTION_MANAGER_T*,          // connection manager handle
-                          unsigned int = 0);               // statistics collecting interval (second(s))
-                                                           // 0 --> DON'T collect statistics
+  Net_Client_Connector_T ();
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
   //virtual bool useReactor () const; // ? : uses proactor
+
+  // *IMPORTANT NOTE*: fire-and-forget API: the first (!) generated handler
+  //                   assumes responsibility for the socket handler
+  //                   configuration (member). The configuration object is
+  //                   passed to the handler in the open() method invocation
+  //                   (see connect () code)
+  //                   --> instances must be (re)initialize()d for every new
+  //                       connection
+  virtual bool initialize (const ConnectorConfigurationType&);
+
   // *TODO*: why is it necessary to provide an implementation when there is (a
   //         more generic) one available ? (gcc complains about abort() and
   //         getConfiguration())
-  virtual const HandlerConfigurationType* getConfiguration () const;
+  // *NOTE*: this is just a stub
+  virtual const ConnectorConfigurationType& get () const;
   // *NOTE*: this is just a stub
   virtual void abort ();
   // specialize (part of) Net_Client_IConnector_T
@@ -142,13 +155,10 @@ class Net_Client_Connector_T<ACE_INET_Addr,
   virtual int make_svc_handler (CONNECTION_T*&);
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  const HandlerConfigurationType* configuration_;
-  ICONNECTION_MANAGER_T*          interfaceHandle_;
-  unsigned int                    statisticCollectionInterval_; // seconds
+  ConnectorConfigurationType configuration_;
 };
 
 /////////////////////////////////////////
@@ -158,38 +168,47 @@ class Net_Client_Connector_T<ACE_INET_Addr,
 template <typename SocketConfigurationType,
           typename HandlerType,
           typename ConfigurationType,
-          typename HandlerConfigurationType,
+          typename ConnectorConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StreamType>
 class Net_Client_Connector_T<ACE_Netlink_Addr,
                              SocketConfigurationType,
                              ConfigurationType,
-                             HandlerConfigurationType,
+                             ConnectorConfigurationType,
                              UserDataType,
-                             SessionDataType,
+                             StateType,
                              StreamType,
                              HandlerType>
  : public Net_Client_IConnector_T<ACE_Netlink_Addr,
-                                  HandlerConfigurationType>
+                                  ConnectorConfigurationType>
 {
  public:
-  typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
-                                   SocketConfigurationType,
-                                   ConfigurationType,
-                                   UserDataType,
-                                   Stream_Statistic,
-                                   StreamType> ICONNECTION_MANAGER_T;
+  //typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
+  //                                 SocketConfigurationType,
+  //                                 ConfigurationType,
+  //                                 UserDataType,
+  //                                 Stream_Statistic,
+  //                                 StreamType> ICONNECTION_MANAGER_T;
 
-  Net_Client_Connector_T (const HandlerConfigurationType*, // configuration handle
-                          ICONNECTION_MANAGER_T*,          // connection manager handle
-                          unsigned int = 0);               // statistics collecting interval (second(s))
-                                                           // 0 --> DON'T collect statistics
+  Net_Client_Connector_T ();
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
   //virtual bool useReactor () const; // ? : uses proactor
-  virtual const HandlerConfigurationType* getConfiguration () const;
+
+  // *IMPORTANT NOTE*: fire-and-forget API: the first (!) generated handler
+  //                   assumes responsibility for the socket handler
+  //                   configuration (member). The configuration object is
+  //                   passed to the handler in the open() method invocation
+  //                   (see connect () code)
+  //                   --> instances must be (re)initialize()d for every new
+  //                       connection
+  virtual bool initialize (const ConnectorConfigurationType&);
+
+  // *NOTE*: this is just a stub
+  virtual const ConnectorConfigurationType& get () const;
+  // *NOTE*: this is just a stub
   virtual void abort ();
   virtual ACE_HANDLE connect (const ACE_Netlink_Addr&);
 
@@ -198,13 +217,10 @@ class Net_Client_Connector_T<ACE_Netlink_Addr,
   virtual int make_svc_handler (HandlerType*&);
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  const HandlerConfigurationType* configuration_;
-  ICONNECTION_MANAGER_T*          interfaceHandle_;
-  unsigned int                    statisticCollectionInterval_; // seconds
+  ConnectorConfigurationType configuration_;
 };
 #endif
 

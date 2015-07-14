@@ -31,7 +31,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 Net_SocketConnectionBase_T<AddressType,
@@ -40,7 +40,7 @@ Net_SocketConnectionBase_T<AddressType,
                            ConfigurationType,
                            SocketHandlerConfigurationType,
                            UserDataType,
-                           SessionDataType,
+                           StateType,
                            StatisticContainerType,
                            StreamType>::Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                     unsigned int statisticsCollectionInterval_in)
@@ -59,7 +59,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 Net_SocketConnectionBase_T<AddressType,
@@ -68,7 +68,7 @@ Net_SocketConnectionBase_T<AddressType,
                            ConfigurationType,
                            SocketHandlerConfigurationType,
                            UserDataType,
-                           SessionDataType,
+                           StateType,
                            StatisticContainerType,
                            StreamType>::~Net_SocketConnectionBase_T ()
 {
@@ -93,7 +93,7 @@ Net_SocketConnectionBase_T<AddressType,
 //          typename ConfigurationType,
 //          typename SocketHandlerConfigurationType,
 //          typename UserDataType,
-//          typename SessionDataType,
+//          typename StateType,
 //          typename StatisticContainerType>
 //bool
 //Net_SocketConnectionBase_T<AddressType,
@@ -102,7 +102,7 @@ Net_SocketConnectionBase_T<AddressType,
 //                           ConfigurationType,
 //                           SocketHandlerConfigurationType,
 //                           UserDataType,
-//                           SessionDataType,
+//                           StateType,
 //                           StatisticContainerType>::initialize (Net_ClientServerRole_t role_in,
 //                                                                const Net_SocketConfiguration_t& configuration_in)
 //{
@@ -120,7 +120,7 @@ Net_SocketConnectionBase_T<AddressType,
 //          typename ConfigurationType,
 //          typename SocketHandlerConfigurationType,
 //          typename UserDataType,
-//          typename SessionDataType,
+//          typename StateType,
 //          typename StatisticContainerType>
 //void
 //Net_SocketConnectionBase_T<AddressType,
@@ -129,7 +129,7 @@ Net_SocketConnectionBase_T<AddressType,
 //                           ConfigurationType,
 //                           SocketHandlerConfigurationType,
 //                           UserDataType,
-//                           SessionDataType,
+//                           StateType,
 //                           StatisticContainerType>::finalize ()
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::finalize"));
@@ -142,7 +142,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 void
@@ -152,7 +152,7 @@ Net_SocketConnectionBase_T<AddressType,
                            ConfigurationType,
                            SocketHandlerConfigurationType,
                            UserDataType,
-                           SessionDataType,
+                           StateType,
                            StatisticContainerType,
                            StreamType>::ping ()
 {
@@ -164,13 +164,13 @@ Net_SocketConnectionBase_T<AddressType,
 //template <typename HandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
-//          typename SessionDataType,
+//          typename StateType,
 //          typename StatisticContainerType>
 //int
 //Net_SocketConnectionBase_T<SocketHandlerType,
 //                           ITransportLayerType,
 //                           ConfigurationType,
-//                           SessionDataType,
+//                           StateType,
 //                           StatisticContainerType>::svc (void)
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::svc"));
@@ -288,7 +288,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 int
@@ -298,7 +298,7 @@ Net_SocketConnectionBase_T<AddressType,
                            ConfigurationType,
                            SocketHandlerConfigurationType,
                            UserDataType,
-                           SessionDataType,
+                           StateType,
                            StatisticContainerType,
                            StreamType>::open (void* arg_in)
 {
@@ -418,7 +418,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 int
@@ -428,7 +428,7 @@ Net_SocketConnectionBase_T<AddressType,
                            ConfigurationType,
                            SocketHandlerConfigurationType,
                            UserDataType,
-                           SessionDataType,
+                           StateType,
                            StatisticContainerType,
                            StreamType>::close (u_long arg_in)
 {
@@ -487,8 +487,9 @@ Net_SocketConnectionBase_T<AddressType,
                     arg_in));
 
       // step2: delete this ?
+      // *TODO*: remove type inference
       if ((arg_in == NORMAL_CLOSE_OPERATION) &&
-          (inherited::status_ == NET_CONNECTION_STATUS_INITIALIZATION_FAILED))
+          (inherited::state_.status == NET_CONNECTION_STATUS_INITIALIZATION_FAILED))
         inherited::decrease ();
 
       break;
@@ -508,13 +509,13 @@ Net_SocketConnectionBase_T<AddressType,
 //template <typename HandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
-//          typename SessionDataType,
+//          typename StateType,
 //          typename StatisticContainerType>
 //int
 //Net_SocketConnectionBase_T<SocketHandlerType,
 //                           ITransportLayerType,
 //                           ConfigurationType,
-//                           SessionDataType,
+//                           StateType,
 //                           StatisticContainerType>::handle_close (ACE_HANDLE handle_in,
 //                                                                   ACE_Reactor_Mask mask_in)
 //{
@@ -605,7 +606,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 void
@@ -615,7 +616,7 @@ Net_SocketConnectionBase_T<AddressType,
                            ConfigurationType,
                            SocketHandlerConfigurationType,
                            UserDataType,
-                           SessionDataType,
+                           StateType,
                            StatisticContainerType,
                            StreamType>::open (ACE_HANDLE handle_in,
                                               ACE_Message_Block& messageBlock_in)
@@ -636,13 +637,13 @@ Net_SocketConnectionBase_T<AddressType,
 //template <typename HandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
-//          typename SessionDataType,
+//          typename StateType,
 //          typename StatisticContainerType>
 //void
 //Net_SocketConnectionBase_T<SocketHandlerType,
 //                           ITransportLayerType,
 //                           ConfigurationType,
-//                           SessionDataType,
+//                           StateType,
 //                           StatisticContainerType>::shutdown ()
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::shutdown"));
@@ -686,7 +687,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 Net_AsynchSocketConnectionBase_T<AddressType,
@@ -695,7 +696,7 @@ Net_AsynchSocketConnectionBase_T<AddressType,
                                  ConfigurationType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
-                                 SessionDataType,
+                                 StateType,
                                  StatisticContainerType,
                                  StreamType>::Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                                 unsigned int statisticsCollectionInterval_in)
@@ -715,7 +716,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 Net_AsynchSocketConnectionBase_T<AddressType,
@@ -724,7 +725,7 @@ Net_AsynchSocketConnectionBase_T<AddressType,
                                  ConfigurationType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
-                                 SessionDataType,
+                                 StateType,
                                  StatisticContainerType,
                                  StreamType>::~Net_AsynchSocketConnectionBase_T ()
 {
@@ -738,7 +739,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 void
@@ -748,7 +749,7 @@ Net_AsynchSocketConnectionBase_T<AddressType,
                                  ConfigurationType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
-                                 SessionDataType,
+                                 StateType,
                                  StatisticContainerType,
                                  StreamType>::ping ()
 {
@@ -763,7 +764,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 void
@@ -773,7 +774,7 @@ Net_AsynchSocketConnectionBase_T<AddressType,
                                  ConfigurationType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
-                                 SessionDataType,
+                                 StateType,
                                  StatisticContainerType,
                                  StreamType>::open (ACE_HANDLE handle_in,
                                                     ACE_Message_Block& messageBlock_in)
@@ -806,7 +807,7 @@ Net_AsynchSocketConnectionBase_T<AddressType,
 //          typename ConfigurationType,
 //          typename SocketHandlerConfigurationType,
 //          typename UserDataType,
-//          typename SessionDataType,
+//          typename StateType,
 //          typename StatisticContainerType>
 //void
 //Net_AsynchSocketConnectionBase_T<SocketHandlerType,
@@ -814,7 +815,7 @@ Net_AsynchSocketConnectionBase_T<AddressType,
 //                                 ConfigurationType,
 //                                 SocketHandlerConfigurationType,
 //                                 UserDataType,
-//                                 SessionDataType,
+//                                 StateType,
 //                                 StatisticContainerType>::act (const void* act_in)
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::act"));
@@ -829,7 +830,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename SocketHandlerConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 int
@@ -839,7 +840,7 @@ Net_AsynchSocketConnectionBase_T<AddressType,
                                  ConfigurationType,
                                  SocketHandlerConfigurationType,
                                  UserDataType,
-                                 SessionDataType,
+                                 StateType,
                                  StatisticContainerType,
                                  StreamType>::open (void* arg_in)
 {

@@ -95,9 +95,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\test_i\IRC_client_IRCsession.inl">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="..\..\test_i\etc\IRC_client.ini">
       <Filter>Resource Files\ini</Filter>
     </None>
@@ -131,7 +128,7 @@
     <None Include="..\..\test_i\scripts\make_installer.bat">
       <Filter>Resource Files\installer</Filter>
     </None>
-    <None Include="..\..\test_i\scripts\IRCclient.nsi">
+    <None Include="..\..\test_i\scripts\IRC_client.nsi">
       <Filter>Resource Files\installer</Filter>
     </None>
   </ItemGroup>
@@ -242,6 +239,9 @@
   <ItemGroup>
     <ResourceCompile Include="..\..\test_i\etc\IRC_client.rc">
       <Filter>Resource Files\ini</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="..\..\scripts\version.rc">
+      <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
 </Project>

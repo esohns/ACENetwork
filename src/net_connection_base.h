@@ -26,22 +26,26 @@
 #include "stream_common.h"
 #include "stream_statistichandler.h"
 
-#include "net_common.h"
+//#include "net_common.h"
 #include "net_configuration.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
+
+// forward declarations
+enum Net_Connection_Status;
 
 template <typename AddressType,
           typename SocketConfigurationType,
           typename ConfigurationType,
           typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType>
 class Net_ConnectionBase_T
  : public Common_ReferenceCounterBase
  , virtual public Net_IConnection_T<AddressType,
                                     ConfigurationType,
+                                    StateType,
                                     StatisticContainerType,
                                     StreamType>
 {
@@ -49,6 +53,7 @@ class Net_ConnectionBase_T
   // implement (part of) Net_IConnection_T
   virtual const ConfigurationType& get () const; // return value: type
   virtual bool initialize (const ConfigurationType&); // configuration
+  virtual const StateType& state () const;
   virtual Net_Connection_Status status () const;
 
   // convenient types
@@ -59,6 +64,7 @@ class Net_ConnectionBase_T
                                    SocketConfigurationType,
                                    ConfigurationType,
                                    UserDataType,
+                                   StateType,
                                    StatisticContainerType,
                                    StreamType> ICONNECTION_MANAGER_T;
 
@@ -72,28 +78,29 @@ class Net_ConnectionBase_T
   void deregister ();
 
   ConfigurationType      configuration_;
+  StateType              state_;
+
   bool                   isRegistered_;
   ICONNECTION_MANAGER_T* manager_;
-  SessionDataType*       sessionData_;
-  Net_Connection_Status  status_;
 
  private:
   typedef Common_ReferenceCounterBase inherited;
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
+                            StateType,
                             StatisticContainerType,
                             StreamType> inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&))
 
   // convenience types
   typedef Net_ConnectionBase_T<AddressType,
                                SocketConfigurationType,
                                ConfigurationType,
                                UserDataType,
-                               SessionDataType,
+                               StateType,
                                StatisticContainerType,
                                StreamType> OWN_TYPE;
 

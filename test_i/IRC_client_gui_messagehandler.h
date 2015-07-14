@@ -104,14 +104,17 @@ class IRC_Client_GUI_MessageHandler
   void endUsers ();
 
   // channel members
-  void add (const std::string&,
+  void add (const std::string&, // nickname
             bool = true);       // locked access ?
-  void remove (const std::string&,
+  void remove (const std::string&, // nickname
                bool = true);       // locked access ?
-  void members (const string_list_t&,
+  void members (const string_list_t&, // channel members
                 bool = true);         // locked access ?
   void endMembers (bool = true); // locked access ?
-  void updateNick (const std::string&); // previous nickname
+  // *WARNING*: callers may need protection from:
+  //            - the thread(s) servicing the UI (GTK) event loop
+  //            - the event dispatch thread(s) (reactor/proactor)
+  void update (const std::string&); // previous nickname
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler ())

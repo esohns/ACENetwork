@@ -27,22 +27,23 @@
 #include "stream_common.h"
 #include "stream_iallocator.h"
 
+//#include "net_common.h"
 //#include "net_connection_manager_common.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 #include "net_stream_common.h"
 
 // forward declarations
-struct Net_Configuration;
-struct Net_SocketConfiguration;
-//struct Net_StreamUserData;
-class Net_Stream;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Net_SocketConfiguration,
-                                 Net_Configuration,
-                                 Net_StreamUserData,
-                                 Stream_Statistic,
-                                 Net_Stream> Net_IInetConnectionManager_t;
+//struct Net_Configuration;
+//struct Net_SessionData;
+//struct Net_SocketConfiguration;
+//class Net_Stream;
+//typedef Net_IConnectionManager_T<ACE_INET_Addr,
+//                                 Net_SocketConfiguration,
+//                                 Net_Configuration,
+//                                 Net_SessionData,
+//                                 Stream_Statistic,
+//                                 Net_Stream> Net_IInetConnectionManager_t;
 
 struct Net_SocketConfiguration
 {
@@ -73,17 +74,15 @@ struct Net_SocketHandlerConfiguration
 {
   inline Net_SocketHandlerConfiguration ()
    : bufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
-   , connectionManager (NULL)
    , messageAllocator (NULL)
-   , socketConfiguration ()
+   , socketConfiguration (NULL)
    , statisticCollectionInterval (0)
   {};
 
-  int                           bufferSize; // pdu size (if fixed)
-  Net_IInetConnectionManager_t* connectionManager;
-  Stream_IAllocator*            messageAllocator;
-  Net_SocketConfiguration       socketConfiguration;
-  unsigned int                  statisticCollectionInterval; // seconds [0: OFF]
+  int                      bufferSize; // pdu size (if fixed)
+  Stream_IAllocator*       messageAllocator;
+  Net_SocketConfiguration* socketConfiguration;
+  unsigned int             statisticCollectionInterval; // seconds [0: OFF]
 };
 
 struct Net_ProtocolConfiguration
@@ -120,18 +119,20 @@ struct Net_Configuration
 {
   inline Net_Configuration ()
    : socketConfiguration ()
+   , socketHandlerConfiguration ()
    , streamConfiguration ()
-   , streamSessionData ()
+   , streamUserData ()
    , protocolConfiguration ()
   {};
 
   // **************************** socket data **********************************
-  Net_SocketConfiguration   socketConfiguration;
+  Net_SocketConfiguration        socketConfiguration;
+  Net_SocketHandlerConfiguration socketHandlerConfiguration;
   // **************************** stream data **********************************
-  Net_StreamConfiguration   streamConfiguration;
-  Net_StreamUserData        streamSessionData;
+  Net_StreamConfiguration        streamConfiguration;
+  Net_StreamUserData             streamUserData;
   // *************************** protocol data *********************************
-  Net_ProtocolConfiguration protocolConfiguration;
+  Net_ProtocolConfiguration      protocolConfiguration;
 };
 
 #endif

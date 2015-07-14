@@ -28,12 +28,13 @@
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
-#include "net_client_common.h"
 #include "net_client_connector_common.h"
+
+#include "net_common.h"
 
 class Net_Client_SignalHandler
  : public Common_SignalHandler
- , public Common_IInitialize_T<Net_Client_SignalHandlerConfiguration_t>
+ , public Common_IInitialize_T<Net_Client_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
@@ -41,7 +42,7 @@ class Net_Client_SignalHandler
   virtual ~Net_Client_SignalHandler ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Net_Client_SignalHandlerConfiguration_t&); // configuration
+  virtual bool initialize (const Net_Client_SignalHandlerConfiguration&); // configuration
 
   // implement Common_ISignal
   virtual bool handleSignal (int); // signal
@@ -49,12 +50,12 @@ class Net_Client_SignalHandler
  private:
   typedef Common_SignalHandler inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler ());
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler (const Net_Client_SignalHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler& operator= (const Net_Client_SignalHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler ())
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler (const Net_Client_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler& operator= (const Net_Client_SignalHandler&))
 
-  Net_Client_SignalHandlerConfiguration_t* configuration_;
-  bool                                     useReactor_;
+  Net_Client_SignalHandlerConfiguration configuration_;
+  bool                                  useReactor_;
 };
 
 #endif

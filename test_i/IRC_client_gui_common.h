@@ -31,7 +31,8 @@
 
 #include "common_ui_common.h"
 
-#include "IRC_client_common.h"
+//#include "IRC_client_common.h"
+#include "IRC_client_configuration.h"
 #include "IRC_client_IRCmessage.h"
 
 // forward declaration(s)
@@ -109,7 +110,6 @@ struct IRC_Client_GTK_ConnectionCBData
    , controller (NULL)
    , eventSourceID (0)
    , GTKState (NULL)
-   , IRCSessionState ()
    , label ()
    , pending (false)
    , timestamp ()
@@ -120,7 +120,7 @@ struct IRC_Client_GTK_ConnectionCBData
   IRC_Client_IIRCControl*       controller;
   guint                         eventSourceID;
   Common_UI_GTKState*           GTKState;
-  IRC_Client_SessionState       IRCSessionState;
+  // *TODO*: remove this
   std::string                   label;
   bool                          pending;
   std::string                   timestamp;
@@ -151,6 +151,7 @@ struct IRC_Client_GTK_HandlerCBData
   guint                          eventSourceID;
   Common_UI_GTKState*            GTKState;
   IRC_Client_GUI_MessageHandler* handler;
+  // *TODO*: remove this
   std::string                    id;
   string_list_t                  parameters;
   bool                           pending;

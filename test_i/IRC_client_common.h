@@ -31,6 +31,7 @@
 #include "ace/Date_Time.h"
 #include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
 #include "stream_common.h"
 
@@ -40,63 +41,15 @@
 
 #include "FILE_Stream.h"
 #include "IOStream_alt_T.h"
-#include "IRC_client_defines.h"
+//#include "IRC_client_configuration.h"
+//#include "IRC_client_defines.h"
 
 // forward declarations
-class IRC_Client_IIRCControl;
-class IRC_Client_Stream;
+//class IRC_Client_IIRCControl;
+//class IRC_Client_Stream;
 struct IRC_Client_Configuration;
 struct IRC_Client_CursesState;
 struct IRC_Client_StreamModuleConfiguration;
-
-struct IRC_Client_IRCLoginOptions
-{
-  inline IRC_Client_IRCLoginOptions ()
-   : password ()
-   , nickname ()
-   , user ()
-   , channel ()
-  {};
-
-  std::string password;
-  std::string nickname;
-  struct User
-  {
-    inline User ()
-     : username ()
-     , hostname ()
-     , servername ()
-     , realname ()
-    {};
-
-    std::string username;
-    struct Hostname
-    {
-      inline Hostname ()
-       : string (NULL)
-       , discriminator (INVALID)
-      {};
-
-      union
-      {
-        // *NOTE*: "traditional" connects (see RFC1459 Section 4.1.3)
-        std::string*  string;
-        // *NOTE*: "modern" connects (see RFC2812 Section 3.1.3)
-        unsigned char mode;
-      };
-      enum discriminator_t
-      {
-        STRING = 0,
-        BITMASK,
-        INVALID
-      };
-      discriminator_t discriminator;
-    } hostname;
-    std::string servername;
-    std::string realname;
-  } user;
-  std::string channel;
-};
 
 // see (RFC1459 section 4.2.3.1)
 //            b - set a ban mask to keep users out
@@ -211,32 +164,6 @@ struct IRC_Client_PhoneBook
   ACE_Date_Time         timestamp;
 };
 
-struct IRC_Client_SessionState
-{
-  inline IRC_Client_SessionState ()
-   : away (false)
-   , channel ()
-   , channelModes ()
-   , controller (NULL)
-   , cursesState (NULL)
-   , isFirstMessage (false)
-   , lock ()
-   , nickname ()
-   , userModes ()
-  {};
-
-  // *TODO*: couldn't it be done without this one ?
-  bool                      away;
-  std::string               channel;
-  IRC_Client_ChannelModes_t channelModes;
-  IRC_Client_IIRCControl*   controller;
-  IRC_Client_CursesState*   cursesState;
-  bool                      isFirstMessage;
-  ACE_SYNCH_MUTEX           lock;
-  std::string               nickname;
-  IRC_Client_UserModes_t    userModes;
-};
-
 typedef std::deque<std::string> IRC_Client_MessageQueue_t;
 typedef IRC_Client_MessageQueue_t::iterator IRC_Client_MessageQueueIterator_t;
 typedef IRC_Client_MessageQueue_t::reverse_iterator IRC_Client_MessageQueueReverseIterator_t;
@@ -251,7 +178,6 @@ struct IRC_Client_InputThreadData
    , cursesState (NULL)
    , groupID (-1)
    , moduleConfiguration (NULL)
-   , useProactor (!NET_EVENT_USE_REACTOR)
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
@@ -259,21 +185,8 @@ struct IRC_Client_InputThreadData
   IRC_Client_CursesState*               cursesState;
   int                                   groupID;
   IRC_Client_StreamModuleConfiguration* moduleConfiguration;
-  bool                                  useProactor;
   bool                                  useReactor;
 };
-
-typedef Net_IConnection_T<ACE_INET_Addr,
-                          IRC_Client_Configuration,
-                          Stream_Statistic,
-                          IRC_Client_Stream> IRC_Client_IConnection_t;
-typedef Net_ISession_T<ACE_INET_Addr,
-                       Net_SocketConfiguration,
-                       IRC_Client_Configuration,
-                       Stream_Statistic,
-                       IRC_Client_Stream,
-                       IRC_Client_SessionState> IRC_Client_ISession_t;
-
 
 enum IRC_Client_CharacterEncoding
 {

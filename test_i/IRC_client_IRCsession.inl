@@ -48,7 +48,6 @@ IRC_Client_IRCSession_T<ConnectionType>::IRC_Client_IRCSession_T (IRC_Client_ICo
  , logToFile_ (IRC_CLIENT_SESSION_DEF_LOG)
  , output_ (ACE_STREAMBUF_SIZE)
  , shutdownOnEnd_ (true) // *TODO*: allow more sessions
- , state_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::IRC_Client_IRCSession_T"));
 
@@ -213,7 +212,7 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
       return;
     } // end IF
     IRC_Client_InputHandlerConfiguration input_handler_configuration;
-    input_handler_configuration.IRCSessionState = &state_;
+    //input_handler_configuration. = &state_;
     input_handler_configuration.streamConfiguration =
       &configuration_p->streamConfiguration.streamConfiguration;
     if (!inputHandler_->initialize (input_handler_configuration))
@@ -229,14 +228,14 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
   } // end IF
 }
 
-template <typename ConnectionType>
-const IRC_Client_SessionState&
-IRC_Client_IRCSession_T<ConnectionType>::state () const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::state"));
-
-  return state_;
-}
+//template <typename ConnectionType>
+//const IRC_Client_ConnectionState&
+//IRC_Client_IRCSession_T<ConnectionType>::state () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::state"));
+//
+//  return inherited::state_;
+//}
 
 template <typename ConnectionType>
 void
@@ -750,18 +749,20 @@ IRC_Client_IRCSession_T<ConnectionType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::open"));
 
+  IRC_Client_Connector_t* connector_p =
+    reinterpret_cast<IRC_Client_Connector_t*> (arg_in);
+
+  // sanity check(s)
+  ACE_ASSERT (connector_p);
+
+  int result = -1;
+  IRC_Client_ConnectorConfiguration& connector_configuration_r =
+    const_cast<IRC_Client_ConnectorConfiguration&> (connector_p->get ());
+
   // step0: intialize configuration object
   IRC_Client_Configuration* configuration_p = NULL;
   if (!inherited::manager_)
-  {
-    IRC_Client_Connector_t* connector_p =
-      reinterpret_cast<IRC_Client_Connector_t*> (arg_in);
-    ACE_ASSERT (connector_p);
-    const IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p =
-      connector_p->getConfiguration ();
-    ACE_ASSERT (socket_handler_configuration_p);
-    //configuration_p = socket_handler_configuration_p->configuration;
-  } // end IF
+    configuration_p = connector_configuration_r.configuration;
   else
     configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
   // sanity check(s)
@@ -771,7 +772,17 @@ IRC_Client_IRCSession_T<ConnectionType>::open (void* arg_in)
 
   // step1: initialize/start stream, tweak socket, register reading data with
   //        reactor, ...
-  return inherited::open (arg_in);
+  result = inherited::open (arg_in);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ConnectionType::open(): \"%m\", continuing\n")));
+
+  // clean up
+  // *TODO*: move this somewhere else...
+  delete connector_configuration_r.socketHandlerConfiguration;
+  connector_configuration_r.socketHandlerConfiguration = NULL;
+
+  return result;
 }
 
 template <typename ConnectionType>
