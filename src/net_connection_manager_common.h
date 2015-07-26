@@ -28,10 +28,9 @@
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
-#include "stream_common.h"
-
 #include "net_common.h"
 #include "net_configuration.h"
+#include "net_connection_common.h"
 #include "net_connection_manager.h"
 #include "net_exports.h"
 //#include "net_iconnection.h"
@@ -57,37 +56,37 @@ class Net_Stream;
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
-                                 Net_SocketConfiguration,
                                  Net_Configuration,
-                                 Net_StreamUserData,
                                  Net_ConnectionState,
-                                 Stream_Statistic,
-                                 Net_Stream> Net_INetlinkConnectionManager_t;
+                                 Net_RuntimeStatistic_t,
+                                 Net_Stream,
+                                 ////////
+                                 Net_StreamUserData> Net_INetlinkConnectionManager_t;
 #endif
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Net_SocketConfiguration,
                                  Net_Configuration,
-                                 Net_StreamUserData,
                                  Net_ConnectionState,
-                                 Stream_Statistic,
-                                 Net_Stream> Net_IInetConnectionManager_t;
+                                 Net_RuntimeStatistic_t,
+                                 Net_Stream,
+                                 ////////
+                                 Net_StreamUserData> Net_IInetConnectionManager_t;
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 typedef Net_Connection_Manager_T<ACE_Netlink_Addr,
-                                 Net_SocketConfiguration,
                                  Net_Configuration,
-                                 Net_StreamUserData,
                                  Net_ConnectionState,
-                                 Stream_Statistic,
-                                 Net_Stream> Net_NetlinkConnectionManager_t;
+                                 Net_RuntimeStatistic_t,
+                                 Net_Stream,
+                                 ////////
+                                 Net_StreamUserData> Net_NetlinkConnectionManager_t;
 #endif
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
-                                 Net_SocketConfiguration,
                                  Net_Configuration,
-                                 Net_StreamUserData,
                                  Net_ConnectionState,
-                                 Stream_Statistic,
-                                 Net_Stream> Net_InetConnectionManager_t;
+                                 Net_RuntimeStatistic_t,
+                                 Net_Stream,
+                                 ////////
+                                 Net_StreamUserData> Net_InetConnectionManager_t;
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 NET_SINGLETON_DECLARE (ACE_Singleton,

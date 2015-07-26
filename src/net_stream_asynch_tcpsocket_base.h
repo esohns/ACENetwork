@@ -21,49 +21,57 @@
 #ifndef NET_STREAM_ASYNCH_TCPSOCKET_BASE_H
 #define NET_STREAM_ASYNCH_TCPSOCKET_BASE_H
 
+#include "ace/config-lite.h"
 #include "ace/Asynch_IO.h"
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
+#include "ace/Synch_Traits.h"
+
+#include "common_time_common.h"
 
 #include "stream_imodule.h"
 
 #include "net_connection_base.h"
+#include "net_iconnectionmanager.h"
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          ///////////////////////////////
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          ///////////////////////////////
+          typename UserDataType,
+          ///////////////////////////////
+          typename ModuleConfigurationType>
 class Net_StreamAsynchTCPSocketBase_T
- : public SocketHandlerType
+ : public HandlerType
  , public ACE_Event_Handler
  , public Net_ConnectionBase_T<AddressType,
-                               SocketConfigurationType,
                                ConfigurationType,
-                               UserDataType,
                                StateType,
                                StatisticContainerType,
-                               StreamType>
+                               StreamType,
+                               //////////
+                               UserDataType>
 {
  public:
   typedef Net_ConnectionBase_T<AddressType,
-                               SocketConfigurationType,
                                ConfigurationType,
-                               UserDataType,
                                StateType,
                                StatisticContainerType,
-                               StreamType> CONNECTION_BASE_T;
+                               StreamType,
+                               //////////
+                               UserDataType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchTCPSocketBase_T ();
 
   // override some service methods
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
+  int close (u_long = 0); // reason
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE); // (socket) handle
   virtual int handle_close (ACE_HANDLE,        // (socket) handle
                             ACE_Reactor_Mask); // (select) mask
@@ -75,7 +83,7 @@ class Net_StreamAsynchTCPSocketBase_T
                      AddressType&) const; // return value: remote SAP
   virtual unsigned int id () const;
   virtual const StreamType& stream () const;
-  virtual int close (u_long = 0); // reason
+  virtual void close ();
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;
@@ -83,37 +91,36 @@ class Net_StreamAsynchTCPSocketBase_T
 
  protected:
   typedef Net_IConnectionManager_T<AddressType,
-                                   SocketConfigurationType,
                                    ConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType> ICONNECTION_MANAGER_T;
+                                   StreamType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            ModuleConfigurationType> IMODULE_T;
 
   Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                   unsigned int = 0);      // statistics collecting interval (second(s))
-                                                           // 0 --> DON'T collect statistics
+                                   unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
 
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
   virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 
-  StreamType      stream_;
-  // *TODO*: handle short writes (more) gracefully...
+//  // *TODO*: handle short writes (more) gracefully...
 //  ACE_Message_Block* buffer_;
+  StreamType         stream_;
 
  private:
-  typedef SocketHandlerType inherited;
+  typedef HandlerType inherited;
   typedef ACE_Event_Handler inherited2;
   typedef Net_ConnectionBase_T<AddressType,
-                               SocketConfigurationType,
                                ConfigurationType,
-                               UserDataType,
                                StateType,
                                StatisticContainerType,
-                               StreamType> inherited3;
+                               StreamType,
+                               //////////
+                               UserDataType> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&))

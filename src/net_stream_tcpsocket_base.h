@@ -21,10 +21,16 @@
 #ifndef NET_STREAM_TCPSOCKET_BASE_H
 #define NET_STREAM_TCPSOCKET_BASE_H
 
+#include "ace/Acceptor.h"
+#include "ace/Asynch_Acceptor.h"
+#include "ace/Asynch_Connector.h"
+#include "ace/Connector.h"
 #include "ace/config-macros.h"
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
+#include "ace/SOCK_Acceptor.h"
+#include "ace/SOCK_Connector.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
@@ -34,31 +40,58 @@
 #include "net_connection_base.h"
 #include "net_iconnectionmanager.h"
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          ///////////////////////////////
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          ///////////////////////////////
+          typename UserDataType,
+          ///////////////////////////////
+          typename ModuleConfigurationType>
 class Net_StreamTCPSocketBase_T
- : public SocketHandlerType
+ : public HandlerType
  , public Net_ConnectionBase_T<AddressType,
-                               SocketConfigurationType,
                                ConfigurationType,
-                               UserDataType,
                                StateType,
                                StatisticContainerType,
-                               StreamType>
+                               StreamType,
+                               //////////
+                               UserDataType>
 {
+  friend class ACE_Acceptor<Net_StreamTCPSocketBase_T<HandlerType,
+                                                      
+                                                      AddressType,
+                                                      ConfigurationType,
+                                                      StateType,
+                                                      StatisticContainerType,
+                                                      StreamType,
+                                                      
+                                                      UserDataType,
+                                                      
+                                                      ModuleConfigurationType>,
+                            ACE_SOCK_ACCEPTOR>;
+  friend class ACE_Connector<Net_StreamTCPSocketBase_T<HandlerType,
+
+                                                       AddressType,
+                                                       ConfigurationType,
+                                                       StateType,
+                                                       StatisticContainerType,
+                                                       StreamType,
+
+                                                       UserDataType,
+
+                                                       ModuleConfigurationType>,
+                             ACE_SOCK_CONNECTOR>;
+
  public:
   virtual ~Net_StreamTCPSocketBase_T ();
 
   // override some task-based members
   virtual int open (void* = NULL); // args
-  virtual int close (u_long = 0); // args
+  virtual int close (u_long = 0); // args (reason)
 
   // override some ACE_Event_Handler methods
   // *NOTE*: enqueue any received data onto our stream for further processing
@@ -91,30 +124,29 @@ class Net_StreamTCPSocketBase_T
 
   // convenient types
   typedef Net_ConnectionBase_T<AddressType,
-                               SocketConfigurationType,
                                ConfigurationType,
-                               UserDataType,
                                StateType,
                                StatisticContainerType,
-                               StreamType> CONNECTION_BASE_T;
+                               StreamType,
+                               //////////
+                               UserDataType> CONNECTION_BASE_T;
 
  protected:
-  typedef SocketHandlerType SOCKET_HANDLER_T;
+  typedef HandlerType HANDLER_T;
 
   typedef Net_IConnectionManager_T<AddressType,
-                                   SocketConfigurationType,
                                    ConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType> ICONNECTION_MANAGER_T;
+                                   StreamType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            ModuleConfigurationType> IMODULE_T;
 
   Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                             unsigned int = 0);      // statistics collecting interval (second(s))
-                                                     // 0 --> DON'T collect statistics
+                             unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
 
   ACE_Message_Block* currentReadBuffer_;
   ACE_Message_Block* currentWriteBuffer_;
@@ -125,16 +157,19 @@ class Net_StreamTCPSocketBase_T
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
 
  private:
-  typedef SocketHandlerType inherited;
+  typedef HandlerType inherited;
   typedef Net_ConnectionBase_T<AddressType,
-                               SocketConfigurationType,
                                ConfigurationType,
-                               UserDataType,
                                StateType,
                                StatisticContainerType,
-                               StreamType> inherited2;
+                               StreamType,
+                               //////////
+                               UserDataType> inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T ())
+  // *TODO*: if there is no default ctor, MSVC will not compile this code.
+  //         For some reason, the compiler will not accept the overloaded
+  //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
+  Net_StreamTCPSocketBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T (const Net_StreamTCPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T& operator= (const Net_StreamTCPSocketBase_T&))
 };

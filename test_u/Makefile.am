@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 
+#  -I/usr/include/c++/3.4.6/backward
 AM_CPPFLAGS = \
-  -I/usr/include/c++/3.4.6/backward \
   -I$(top_srcdir)/../../modules/ATCD/ACE \
   $(PKGSDL_CFLAGS) \
   $(PKGGTK_CFLAGS)
@@ -100,10 +100,5 @@ net_server_LDADD = \
   -lACENetwork \
   -lACENetwork_Server
 
-configdir = $(confdir)
-config_DATA = \
-  net_client.glade \
-  net_server.glade
-
-EXTRA_DIST = \
-  $(config_DATA)
+SUBDIRS = \
+  etc

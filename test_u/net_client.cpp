@@ -59,6 +59,7 @@
 #include "stream_allocatorheap.h"
 
 #include "net_connection_manager_common.h"
+#include "net_iconnector.h"
 #include "net_macros.h"
 
 #include "net_client_common.h"
@@ -575,8 +576,8 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     //} // end IF
     //session_data_p->configuration = configuration;
     //session_data_p->userData = &configuration.streamUserData;
-    configuration.socketHandlerConfiguration.bufferSize =
-      NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
+    //configuration.socketHandlerConfiguration.bufferSize =
+    //  NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
     configuration.socketHandlerConfiguration.messageAllocator =
       &message_allocator;
     configuration.socketHandlerConfiguration.socketConfiguration =
@@ -584,7 +585,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     configuration.socketHandlerConfiguration.statisticCollectionInterval =
       configuration.streamConfiguration.streamConfiguration.statisticReportingInterval;
   } // end IF
-  Net_Client_ConnectorConfiguration connector_configuration;
+  //Net_Client_ConnectorConfiguration connector_configuration;
   //Net_IInetConnectionManager_t* iconnection_manager_p =
   //  Net_Common_Tools::getConnectionManager ();
   //ACE_ASSERT (iconnection_manager_p);
@@ -593,20 +594,25 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   //ACE_ASSERT (connection_manager_p);
   Net_InetConnectionManager_t* connection_manager_p =
     NET_CONNECTIONMANAGER_SINGLETON::instance ();
-  connector_configuration.connectionManager = connection_manager_p;
-  connector_configuration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
-  Net_Client_Connector_t connector;
-  Net_Client_AsynchConnector_t asynch_connector;
-  Net_Client_IConnector_t* connector_p = NULL;
+  ACE_ASSERT (connection_manager_p);
+  //connector_configuration.connectionManager = connection_manager_p;
+  //connector_configuration.socketHandlerConfiguration =
+  //  &configuration.socketHandlerConfiguration;
+  Net_IInetConnectionManager_t* iconnection_manager_p =
+    connection_manager_p;
+  Net_Client_Connector_t connector (iconnection_manager_p,
+                                    configuration.streamConfiguration.streamConfiguration.statisticReportingInterval);
+  Net_Client_AsynchConnector_t asynch_connector (iconnection_manager_p,
+                                                 configuration.streamConfiguration.streamConfiguration.statisticReportingInterval);
+  Net_IConnector_t* connector_p = NULL;
   if (useReactor_in)
     connector_p = &connector;
   else
     connector_p = &asynch_connector;
   if (UIDefinitionFile_in.empty () && (connectionInterval_in == 0))
   {
-    // *NOTE*: fire-and-forget socket_handler_configuration_p here
-    if (!connector_p->initialize (connector_configuration))
+    //if (!connector_p->initialize (connector_configuration))
+    if (!connector_p->initialize (configuration.socketHandlerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));

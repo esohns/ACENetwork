@@ -26,8 +26,6 @@
 #include "stream_common.h"
 #include "stream_statistichandler.h"
 
-//#include "net_common.h"
-#include "net_configuration.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 
@@ -35,12 +33,12 @@
 enum Net_Connection_Status;
 
 template <typename AddressType,
-          typename SocketConfigurationType,
           typename ConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          ///////////////////////////////
+          typename UserDataType>
 class Net_ConnectionBase_T
  : public Common_ReferenceCounterBase
  , virtual public Net_IConnection_T<AddressType,
@@ -61,16 +59,15 @@ class Net_ConnectionBase_T
 
  protected:
   typedef Net_IConnectionManager_T<AddressType,
-                                   SocketConfigurationType,
                                    ConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType> ICONNECTION_MANAGER_T;
+                                   StreamType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
 
   Net_ConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                        unsigned int = 0);      // statistics collecting interval (second(s))
-                                                // 0 --> DON'T collect statistics
+                        unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
   virtual ~Net_ConnectionBase_T ();
 
   // (de-)register with the connection manager (if any)
@@ -97,15 +94,15 @@ class Net_ConnectionBase_T
 
   // convenience types
   typedef Net_ConnectionBase_T<AddressType,
-                               SocketConfigurationType,
                                ConfigurationType,
-                               UserDataType,
                                StateType,
                                StatisticContainerType,
-                               StreamType> OWN_TYPE;
+                               StreamType,
+                               //////////
+                               UserDataType> OWN_TYPE;
 
   // timer
-  unsigned int                      statisticCollectionInterval_; // seconds
+  unsigned int                      statisticCollectionInterval_; // seconds [0: off]
   Stream_StatisticHandler_Reactor_t statisticCollectHandler_;
   long                              statisticCollectHandlerID_;
 };

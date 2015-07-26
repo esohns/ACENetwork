@@ -18,42 +18,50 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_CLIENT_CONNECTOR_COMMON_H
-#define NET_CLIENT_CONNECTOR_COMMON_H
+#ifndef NET_ICONNECTOR_H
+#define NET_ICONNECTOR_H
 
+#include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
+#include "common_iget.h"
+#include "common_iinitialize.h"
+
 #include "net_configuration.h"
-#include "net_stream.h"
-#include "net_stream_common.h"
-#include "net_tcpconnection.h"
 
-#include "net_client_asynchconnector.h"
-#include "net_client_common.h"
-#include "net_client_connector.h"
+template <typename AddressType,
+          typename ConfigurationType>
+class Net_IConnector_T
+ : public Common_IGet_T<ConfigurationType>
+ , public Common_IInitialize_T<ConfigurationType>
+{
+ public:
+  virtual ~Net_IConnector_T () {};
 
-// forward declarations
-struct IRC_Client_ConnectionState;
+  //virtual bool useReactor () const = 0; // ? : uses proactor
 
-typedef Net_Client_AsynchConnector_T<Net_AsynchTCPConnection,
-                                     ////
-                                     ACE_INET_Addr,
-                                     Net_Configuration,
-                                     Net_ConnectionState,
-                                     Net_Stream,
-                                     ////
-                                     Net_SocketHandlerConfiguration,
-                                     ////
-                                     Net_StreamUserData> Net_Client_AsynchConnector_t;
-typedef Net_Client_Connector_T<Net_TCPConnection,
-                               //////////
-                               ACE_INET_Addr,
-                               Net_Configuration,
-                               Net_ConnectionState,
-                               Net_Stream,
-                               //////////
-                               Net_SocketHandlerConfiguration,
-                               //////////
-                               Net_StreamUserData> Net_Client_Connector_t;
+  virtual void abort () = 0; // shutdown
+  virtual ACE_HANDLE connect (const AddressType&) = 0;
+};
+
+//template <typename AddressType,
+//          typename ConfigurationType>
+//class Net_IAsynchConnector_T
+//{
+// public:
+//  virtual ~Net_IAsynchConnector_T () {};
+//
+//  virtual const ConfigurationType* getConfiguration () const = 0;
+//
+//  virtual void abort () = 0; // shutdown
+//  virtual connect (const AddressType&) = 0;
+//};
+
+/////////////////////////////////////////
+
+typedef Net_IConnector_T<ACE_INET_Addr,
+                         Net_SocketHandlerConfiguration> Net_IConnector_t;
+//typedef Net_IConnector_T<ACE_INET_Addr,
+//                         Net_Client_ConnectorConfiguration> Net_IConnector_t;
 
 #endif

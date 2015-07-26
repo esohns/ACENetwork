@@ -21,10 +21,37 @@
 #ifndef NET_CONNECTION_COMMON_H
 #define NET_CONNECTION_COMMON_H
 
+#include "ace/Time_Value.h"
+
+#include "stream_common.h"
+
 #include "net_configuration.h"
 #include "net_iconnection.h"
 #include "net_itransportlayer.h"
 
 typedef Net_ITransportLayer_T<Net_SocketConfiguration> Net_ITransportLayer_t;
+typedef Stream_Statistic Net_RuntimeStatistic_t;
+
+struct Net_ConnectionState
+{
+  inline Net_ConnectionState ()
+   : configuration ()
+   , status (NET_CONNECTION_STATUS_INVALID)
+   , currentStatistic ()
+   , lastCollectionTimestamp (ACE_Time_Value::zero)
+   , userData (NULL)
+  {};
+
+  // *TODO*: consider making this a separate entity (i.e. a pointer)
+  Net_Configuration      configuration;
+
+  Net_Connection_Status  status;
+
+  Net_RuntimeStatistic_t currentStatistic;
+  ACE_Time_Value         lastCollectionTimestamp;
+
+  Net_StreamUserData*    userData;
+};
+
 
 #endif

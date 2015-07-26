@@ -22,19 +22,19 @@
 
 #include "net_macros.h"
 
-template <typename ConfigurationType,
-          typename UserDataType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename StateType,
           typename StreamType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-Net_TCPConnectionBase_T<ConfigurationType,
-                        UserDataType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_TCPConnectionBase_T<HandlerType,
+                        ConfigurationType,
                         StateType,
                         StreamType,
-                        HandlerType,
-                        HandlerConfigurationType>::Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                            unsigned int statisticCollectionInterval_in)
+                        HandlerConfigurationType,
+                        UserDataType>::Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -42,18 +42,18 @@ Net_TCPConnectionBase_T<ConfigurationType,
 
 }
 
-template <typename ConfigurationType,
-          typename UserDataType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename StateType,
           typename StreamType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-Net_TCPConnectionBase_T<ConfigurationType,
-                        UserDataType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_TCPConnectionBase_T<HandlerType,
+                        ConfigurationType,
                         StateType,
                         StreamType,
-                        HandlerType,
-                        HandlerConfigurationType>::Net_TCPConnectionBase_T ()
+                        HandlerConfigurationType,
+                        UserDataType>::Net_TCPConnectionBase_T ()
  : inherited (NULL,
               0)
 {
@@ -61,18 +61,18 @@ Net_TCPConnectionBase_T<ConfigurationType,
 
 }
 
-template <typename ConfigurationType,
-          typename UserDataType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename StateType,
           typename StreamType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-Net_TCPConnectionBase_T<ConfigurationType,
-                        UserDataType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_TCPConnectionBase_T<HandlerType,
+                        ConfigurationType,
                         StateType,
                         StreamType,
-                        HandlerType,
-                        HandlerConfigurationType>::~Net_TCPConnectionBase_T ()
+                        HandlerConfigurationType,
+                        UserDataType>::~Net_TCPConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::~Net_TCPConnectionBase_T"));
 
@@ -80,19 +80,19 @@ Net_TCPConnectionBase_T<ConfigurationType,
 
 /////////////////////////////////////////
 
-template <typename ConfigurationType,
-          typename UserDataType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename StateType,
           typename StreamType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-Net_AsynchTCPConnectionBase_T<ConfigurationType,
-                              UserDataType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_AsynchTCPConnectionBase_T<HandlerType,
+                              ConfigurationType,
                               StateType,
                               StreamType,
-                              HandlerType,
-                              HandlerConfigurationType>::Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                        unsigned int statisticCollectionInterval_in)
+                              HandlerConfigurationType,
+                              UserDataType>::Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                            unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -100,18 +100,18 @@ Net_AsynchTCPConnectionBase_T<ConfigurationType,
 
 }
 
-template <typename ConfigurationType,
-          typename UserDataType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename StateType,
           typename StreamType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-Net_AsynchTCPConnectionBase_T<ConfigurationType,
-                              UserDataType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_AsynchTCPConnectionBase_T<HandlerType,
+                              ConfigurationType,
                               StateType,
                               StreamType,
-                              HandlerType,
-                              HandlerConfigurationType>::Net_AsynchTCPConnectionBase_T ()
+                              HandlerConfigurationType,
+                              UserDataType>::Net_AsynchTCPConnectionBase_T ()
  : inherited (NULL,
               0)
 {
@@ -119,18 +119,18 @@ Net_AsynchTCPConnectionBase_T<ConfigurationType,
 
 }
 
-template <typename ConfigurationType,
-          typename UserDataType,
+template <typename HandlerType,
+          typename ConfigurationType,
           typename StateType,
           typename StreamType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-Net_AsynchTCPConnectionBase_T<ConfigurationType,
-                              UserDataType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_AsynchTCPConnectionBase_T<HandlerType,
+                              ConfigurationType,
                               StateType,
                               StreamType,
-                              HandlerType,
-                              HandlerConfigurationType>::~Net_AsynchTCPConnectionBase_T ()
+                              HandlerConfigurationType,
+                              UserDataType>::~Net_AsynchTCPConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::~Net_AsynchTCPConnectionBase_T"));
 

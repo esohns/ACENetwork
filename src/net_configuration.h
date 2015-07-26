@@ -77,12 +77,19 @@ struct Net_SocketHandlerConfiguration
    , messageAllocator (NULL)
    , socketConfiguration (NULL)
    , statisticCollectionInterval (0)
+   , userData (NULL)
+   //////////////////////////////////////
+   , configuration (NULL)
   {};
 
   int                      bufferSize; // pdu size (if fixed)
   Stream_IAllocator*       messageAllocator;
   Net_SocketConfiguration* socketConfiguration;
   unsigned int             statisticCollectionInterval; // seconds [0: OFF]
+  Net_StreamUserData*      userData;
+
+  // *TODO*: move this into a separate connnection/session configuration object
+  Net_Configuration*       configuration;
 };
 
 struct Net_ProtocolConfiguration

@@ -24,40 +24,45 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-template <typename UserDataType,
-          typename StateType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-Net_UDPConnection_T<UserDataType,
+template <typename HandlerType,
+          typename StateType,          
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_UDPConnection_T<HandlerType,
                     StateType,
-                    HandlerType,
-                    HandlerConfigurationType>::Net_UDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                    unsigned int statisticsCollectionInterval_in)
+                    HandlerConfigurationType,
+                    UserDataType>::Net_UDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                        unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
-              statisticsCollectionInterval_in)
+              statisticCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::Net_UDPConnection_T"));
 
 }
 
-//template <typename StateType,
-//          typename HandlerType>
-//Net_UDPConnection_T<StateType,
-//                    HandlerType>::Net_UDPConnection_T ()
-// : inherited (NULL)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::Net_UDPConnection_T"));
-//
-//}
-
-template <typename UserDataType,
+template <typename HandlerType,
           typename StateType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-Net_UDPConnection_T<UserDataType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_UDPConnection_T<HandlerType,
                     StateType,
-                    HandlerType,
-                    HandlerConfigurationType>::~Net_UDPConnection_T ()
+                    HandlerConfigurationType,
+                    UserDataType>::Net_UDPConnection_T ()
+ : inherited (NULL,
+              0)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::Net_UDPConnection_T"));
+
+}
+
+template <typename HandlerType,
+          typename StateType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_UDPConnection_T<HandlerType,
+                    StateType,
+                    HandlerConfigurationType,
+                    UserDataType>::~Net_UDPConnection_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::~Net_UDPConnection_T"));
 
@@ -80,52 +85,56 @@ Net_UDPConnection_T<UserDataType,
 //                   remoteSAP_out);
 //}
 
-template <typename UserDataType,
-          typename StateType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-void
-Net_UDPConnection_T<UserDataType,
-                    StateType,
-                    HandlerType,
-                    HandlerConfigurationType>::close ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::close"));
-
-  int result = -1;
-
-  result = inherited::close (0);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_SocketConnectionBase_T::close(0): \"%m\", continuing\n")));
-}
+//template <typename HandlerType,
+//          typename StateType,
+//          typename HandlerConfigurationType,
+//          typename UserDataType>
+//int
+//Net_UDPConnection_T<HandlerType,
+//                    StateType,
+//                    HandlerConfigurationType,
+//                    UserDataType>::close (u_long arg_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnection_T::close"));
+//
+//  ACE_UNUSED_ARG (arg_in);
+//
+//  int result = -1;
+//
+//  result = inherited::close (0);
+//  if (result == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Net_SocketConnectionBase_T::close(0): \"%m\", continuing\n")));
+//
+//  return result;
+//}
 
 /////////////////////////////////////////
 
-template <typename UserDataType,
+template <typename HandlerType,
           typename StateType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-Net_AsynchUDPConnection_T<UserDataType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_AsynchUDPConnection_T<HandlerType,
                           StateType,
-                          HandlerType,
-                          HandlerConfigurationType>::Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                unsigned int statisticsCollectionInterval_in)
+                          HandlerConfigurationType,
+                          UserDataType>::Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                    unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
-              statisticsCollectionInterval_in)
+              statisticCollectionInterval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnection_T::Net_AsynchUDPConnection_T"));
 
 }
 
-template <typename UserDataType,
+template <typename HandlerType,
           typename StateType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-Net_AsynchUDPConnection_T<UserDataType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_AsynchUDPConnection_T<HandlerType,
                           StateType,
-                          HandlerType,
-                          HandlerConfigurationType>::Net_AsynchUDPConnection_T ()
+                          HandlerConfigurationType,
+                          UserDataType>::Net_AsynchUDPConnection_T ()
  : inherited (NULL,
               0)
 {
@@ -133,14 +142,14 @@ Net_AsynchUDPConnection_T<UserDataType,
 
 }
 
-template <typename UserDataType,
+template <typename HandlerType,
           typename StateType,
-          typename HandlerType,
-          typename HandlerConfigurationType>
-Net_AsynchUDPConnection_T<UserDataType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_AsynchUDPConnection_T<HandlerType,
                           StateType,
-                          HandlerType,
-                          HandlerConfigurationType>::~Net_AsynchUDPConnection_T ()
+                          HandlerConfigurationType,
+                          UserDataType>::~Net_AsynchUDPConnection_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnection_T::~Net_AsynchUDPConnection_T"));
 

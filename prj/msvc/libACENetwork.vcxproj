@@ -421,6 +421,8 @@
     <ClInclude Include="..\..\src\net_exports.h" />
     <ClInclude Include="..\..\src\net_iconnection.h" />
     <ClInclude Include="..\..\src\net_iconnectionmanager.h" />
+    <ClInclude Include="..\..\src\net_iconnector.h" />
+    <ClInclude Include="..\..\src\net_ilistener.h" />
     <ClInclude Include="..\..\src\net_ipconnection.h" />
     <ClInclude Include="..\..\src\net_itransportlayer.h" />
     <ClInclude Include="..\..\src\net_macros.h" />

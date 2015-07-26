@@ -42,9 +42,9 @@ struct IRC_Client_SignalHandlerConfiguration
    , peerAddress ()
   {};
 
-  IRC_Client_IClientConnector_t* connector;
-  IRC_Client_CursesState*        cursesState;
-  ACE_INET_Addr                  peerAddress;
+  IRC_Client_IConnector_t* connector;
+  IRC_Client_CursesState*  cursesState;
+  ACE_INET_Addr            peerAddress;
 };
 
 class IRC_Client_SignalHandler

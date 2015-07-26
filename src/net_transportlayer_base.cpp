@@ -23,9 +23,9 @@
 
 #include "net_macros.h"
 
-Net_InetTransportLayer_Base::Net_InetTransportLayer_Base (Net_ClientServerRole role_in,
-                                                          Net_TransportLayerType transportLayer_in)
- : clientServerRole_ (role_in)
+Net_InetTransportLayer_Base::Net_InetTransportLayer_Base (Net_TransportLayerType transportLayer_in)
+ : dispatch_ (COMMON_DISPATCH_INVALID)
+ , role_ (NET_ROLE_INVALID)
  , transportLayer_ (transportLayer_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::Net_InetTransportLayer_Base"));
@@ -38,21 +38,41 @@ Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base ()
 
 }
 
+Common_DispatchType
+Net_InetTransportLayer_Base::dispatch ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::dispatch"));
+
+  return dispatch_;
+}
+
 Net_ClientServerRole
 Net_InetTransportLayer_Base::role ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::role"));
 
-  return clientServerRole_;
+  return role_;
+}
+
+Net_TransportLayerType
+Net_InetTransportLayer_Base::transportLayer ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::transportLayer"));
+
+  return transportLayer_;
 }
 
 bool
-Net_InetTransportLayer_Base::initialize (Net_ClientServerRole role_in,
+Net_InetTransportLayer_Base::initialize (Common_DispatchType dispatch_in,
+                                         Net_ClientServerRole role_in,
                                          const Net_SocketConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::initialize"));
 
-  clientServerRole_ = role_in;
+  ACE_ASSERT (false);
+
+  dispatch_ = dispatch_in;
+  role_ = role_in;
   ACE_UNUSED_ARG (configuration_in);
 
   return true;
@@ -70,7 +90,7 @@ Net_InetTransportLayer_Base::finalize ()
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
- : clientServerRole_ (NET_ROLE_INVALID)
+ : role_ (NET_ROLE_INVALID)
  , transportLayer_ (NET_TRANSPORTLAYER_NETLINK)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base"));
@@ -83,13 +103,39 @@ Net_NetlinkTransportLayer_Base::~Net_NetlinkTransportLayer_Base ()
 
 }
 
+Common_DispatchType
+Net_NetlinkTransportLayer_Base::dispatch ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::dispatch"));
+
+  return dispatch_;
+}
+
+Net_ClientServerRole
+Net_NetlinkTransportLayer_Base::role ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::role"));
+
+  return role_;
+}
+
+Net_TransportLayerType
+Net_NetlinkTransportLayer_Base::transportLayer ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::transportLayer"));
+
+  return transportLayer_;
+}
+
 bool
-Net_NetlinkTransportLayer_Base::initialize (Net_ClientServerRole role_in,
+Net_NetlinkTransportLayer_Base::initialize (Common_DispatchType dispatch_in,
+                                            Net_ClientServerRole role_in,
                                             const Net_SocketConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::initialize"));
 
-  clientServerRole_ = role_in;
+  dispatch_ = dispatch_in;
+  role_ = role_in;
 
   ACE_UNUSED_ARG (configuration_in);
 

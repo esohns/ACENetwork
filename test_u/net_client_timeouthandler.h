@@ -28,9 +28,10 @@
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
+#include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
-#include "net_client_connector_common.h"
+#include "net_iconnector.h"
 
 class Net_Client_TimeoutHandler
  : public ACE_Event_Handler
@@ -57,10 +58,10 @@ class Net_Client_TimeoutHandler
     ALTERNATING_STATE_INVALID = -1
   };
 
-  Net_Client_TimeoutHandler (ActionMode_t,              // mode
-                             unsigned int,              // max #connections
-                             const ACE_INET_Addr&,      // remote SAP
-                             Net_Client_IConnector_t*); // connector
+  Net_Client_TimeoutHandler (ActionMode_t,         // mode
+                             unsigned int,         // max #connections
+                             const ACE_INET_Addr&, // remote SAP
+                             Net_IConnector_t*);   // connector
   virtual ~Net_Client_TimeoutHandler ();
 
   void mode (ActionMode_t);
@@ -73,16 +74,21 @@ class Net_Client_TimeoutHandler
  private:
   typedef ACE_Event_Handler inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler ());
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler (const Net_Client_TimeoutHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler& operator= (const Net_Client_TimeoutHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler ())
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler (const Net_Client_TimeoutHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler& operator= (const Net_Client_TimeoutHandler&))
 
   AlternatingModeState_t             alternatingModeState_;
-  Net_Client_IConnector_t*           connector_;
-  mutable ACE_Thread_Mutex           lock_;
+  Net_IConnector_t*                  connector_;
+  mutable ACE_SYNCH_MUTEX            lock_;
   unsigned int                       maxNumConnections_;
   ActionMode_t                       mode_;
   ACE_INET_Addr                      peerAddress_;
+  unsigned int                       randomSeed_;
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+  char                               randomStateInitializationBuffer_[BUFSIZ];
+  random_data                        randomState_;
+#endif
 
   // probability
   std::uniform_int_distribution<int> randomDistribution_;

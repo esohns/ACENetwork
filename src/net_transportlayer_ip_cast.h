@@ -21,8 +21,8 @@
 #ifndef Net_TRANSPORTLAYER_IP_CAST_H
 #define Net_TRANSPORTLAYER_IP_CAST_H
 
+//#include "net_common.h"
 #include "net_exports.h"
-#include "net_common.h"
 #include "net_transportlayer_base.h"
 
 #include "ace/Global_Macros.h"
@@ -30,12 +30,15 @@
 //#include "ace/SOCK_Dgram_Bcast.h"
 //#include "ace/SOCK_Dgram_Mcast.h"
 
+// forward declarations
+enum Common_DispatchType;
+
 class Net_Export Net_TransportLayer_IP_Broadcast
  : public Net_InetTransportLayer_Base
 // , public ACE_SOCK_Dgram_Bcast
 {
  public:
-  Net_TransportLayer_IP_Broadcast (Net_ClientServerRole);
+  Net_TransportLayer_IP_Broadcast ();
   virtual ~Net_TransportLayer_IP_Broadcast ();
 
 //  // override some transport layer-based members
@@ -45,9 +48,8 @@ class Net_Export Net_TransportLayer_IP_Broadcast
   typedef Net_InetTransportLayer_Base inherited;
 //  typedef ACE_SOCK_Dgram_Bcast inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_IP_Broadcast ());
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_IP_Broadcast (const Net_TransportLayer_IP_Broadcast&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_IP_Broadcast& operator= (const Net_TransportLayer_IP_Broadcast&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_IP_Broadcast (const Net_TransportLayer_IP_Broadcast&))
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_IP_Broadcast& operator= (const Net_TransportLayer_IP_Broadcast&))
 };
 
 /////////////////////////////////////////
@@ -57,7 +59,7 @@ class Net_Export Net_TransportLayer_IP_Multicast
 // , public ACE_SOCK_Dgram_Mcast
 {
  public:
-  Net_TransportLayer_IP_Multicast (Net_ClientServerRole);
+  Net_TransportLayer_IP_Multicast ();
   virtual ~Net_TransportLayer_IP_Multicast ();
 
 //  // override some transport layer-based members
@@ -67,9 +69,8 @@ class Net_Export Net_TransportLayer_IP_Multicast
   typedef Net_InetTransportLayer_Base inherited;
 //  typedef ACE_SOCK_Dgram_Mcast inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_IP_Multicast ());
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_IP_Multicast (const Net_TransportLayer_IP_Multicast&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_IP_Multicast& operator= (const Net_TransportLayer_IP_Multicast&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_IP_Multicast (const Net_TransportLayer_IP_Multicast&))
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_IP_Multicast& operator= (const Net_TransportLayer_IP_Multicast&))
 
 //  bool joined_;
 };

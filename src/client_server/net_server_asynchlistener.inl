@@ -17,27 +17,41 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+#if defined (_MSC_VER)
+#include <crtdefs.h>
+#endif
+
 #include "ace/Default_Constants.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 #include "ace/POSIX_Asynch_IO.h"
 
+#include "common.h"
+
 #include "net_macros.h"
 
 #include "net_server_defines.h"
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::Net_Server_AsynchListener_T ()
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::Net_Server_AsynchListener_T ()
  : inherited ()
  , addressFamily_ (ACE_ADDRESS_FAMILY_INET)
  , configuration_ ()
+ , handlerConfiguration_ ()
  , isInitialized_ (false)
  , isListening_ (false)
 {
@@ -45,14 +59,20 @@ Net_Server_AsynchListener_T<ConfigurationType,
 
 }
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::~Net_Server_AsynchListener_T ()
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::~Net_Server_AsynchListener_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::~Net_Server_AsynchListener_T"));
 
@@ -67,17 +87,23 @@ Net_Server_AsynchListener_T<ConfigurationType,
   } // end IF
 }
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 int
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::validate_connection (const ACE_Asynch_Accept::Result& result_in,
-                                                               const ACE_INET_Addr& remoteSAP_in,
-                                                               const ACE_INET_Addr& localSAP_in)
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::validate_connection (const ACE_Asynch_Accept::Result& result_in,
+                                                                const ACE_INET_Addr& remoteSAP_in,
+                                                                const ACE_INET_Addr& localSAP_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::validate_connection"));
 
@@ -102,16 +128,22 @@ Net_Server_AsynchListener_T<ConfigurationType,
   return ((result == 1) ? 0 : -1);
 }
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 int
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::accept (size_t bytesToRead_in,
-                                                  const void* act_in)
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::accept (size_t bytesToRead_in,
+                                                   const void* act_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::accept"));
 
@@ -155,12 +187,14 @@ Net_Server_AsynchListener_T<ConfigurationType,
     return -1;
   } // end IF
 
-  // Initiate asynchronous accepts
+  // initiate asynchronous accepts
   ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
+  ILISTENER_T* listener_p = this;
+  const void* act_p = (act_in ? act_in : listener_p);
   result = asynch_accept_r.accept (*message_block_p,
                                    bytesToRead_in,
                                    ACE_INVALID_HANDLE,
-                                   (act_in ? act_in : &configuration_),
+                                   act_p,
                                    0,
                                    COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL,
                                    //this->addr_family_,
@@ -179,15 +213,21 @@ Net_Server_AsynchListener_T<ConfigurationType,
   return result;
 }
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 int
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::should_reissue_accept ()
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::should_reissue_accept ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::should_reissue_accept"));
 
@@ -195,15 +235,86 @@ Net_Server_AsynchListener_T<ConfigurationType,
   return inherited::should_reissue_accept ();
 }
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+const HandlerConfigurationType&
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::get () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::get"));
+
+  return handlerConfiguration_;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 bool
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::initialize (const ConfigurationType& configuration_in)
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::initialize"));
+
+  handlerConfiguration_ = configuration_in;
+
+  return true;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+bool
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::useReactor () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::useReactor"));
+
+  return false;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+bool
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::initialize"));
 
@@ -215,45 +326,42 @@ Net_Server_AsynchListener_T<ConfigurationType,
   return true;
 }
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 bool
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::useReactor () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::useReactor"));
-
-  return false;
-}
-
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
-bool
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::isInitialized () const
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::isInitialized () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::isInitialized"));
 
   return isInitialized_;
 }
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::start ()
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::start"));
 
@@ -265,29 +373,35 @@ Net_Server_AsynchListener_T<ConfigurationType,
   if (!isInitialized_)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, aborting\n")));
+                ACE_TEXT ("not initialized, returning\n")));
     return;
   } // end IF
 
   // not running --> start listening
   int result = -1;
-  ACE_INET_Addr local_sap;
+  ACE_INET_Addr local_address;
   // *TODO*: remove type inferences
   if (configuration_.useLoopbackDevice)
-    local_sap.set (configuration_.portNumber, // port
-                   // *PORTABILITY*: needed to disambiguate this under Windows :-(
-                   // *TODO*: bind to specific interface/address ?
-                   ACE_LOCALHOST,             // hostname
-                   1,                         // encode ?
-                   AF_INET);                  // address family
+    result = local_address.set (configuration_.portNumber, // port
+                                // *PORTABILITY*: needed to disambiguate this under Windows :-(
+                                // *TODO*: bind to specific interface/address ?
+                                ACE_LOCALHOST,             // hostname
+                                1,                         // encode ?
+                                AF_INET);                  // address family
   else
-    local_sap.set (configuration_.portNumber,            // port
-                   // *PORTABILITY*: needed to disambiguate this under Windows :-(
-                   // *TODO*: bind to specific interface/address ?
-                   static_cast<ACE_UINT32> (INADDR_ANY), // hostname
-                   1,                                    // encode ?
-                   0);                                   // map ?
-  result = inherited::open (local_sap,                  // local SAP
+    result = local_address.set (configuration_.portNumber,            // port
+                                // *PORTABILITY*: needed to disambiguate this under Windows :-(
+                                // *TODO*: bind to specific interface/address ?
+                                static_cast<ACE_UINT32> (INADDR_ANY), // hostname
+                                1,                                    // encode ?
+                                0);                                   // map ?
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+    return;
+  } // end IF
+  result = inherited::open (local_address,              // local SAP
                             0,                          // bytes_to_read
                             1,                          // pass_addresses ?
                             ACE_DEFAULT_ASYNCH_BACKLOG, // backlog
@@ -312,15 +426,21 @@ Net_Server_AsynchListener_T<ConfigurationType,
   isListening_ = true;
 }
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::stop (bool lockedAccess_in)
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::stop (bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::stop"));
 
@@ -339,14 +459,13 @@ Net_Server_AsynchListener_T<ConfigurationType,
   try
   {
     accept_p =
-        dynamic_cast<ACE_POSIX_Asynch_Accept*> (inherited::asynch_accept ().implementation ());
+      dynamic_cast<ACE_POSIX_Asynch_Accept*> (inherited::asynch_accept ().implementation ());
   }
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<ACE_POSIX_Asynch_Accept*>(%@) failed, aborting\n"),
                 inherited::asynch_accept ().implementation ()));
-
     accept_p = NULL;
   }
   if (!accept_p)
@@ -380,30 +499,42 @@ Net_Server_AsynchListener_T<ConfigurationType,
   isListening_ = false;
 }
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 bool
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::isRunning () const
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::isRunning () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::isRunning"));
 
   return isListening_;
 }
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::dump_state () const
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::dump_state"));
 
@@ -411,30 +542,32 @@ Net_Server_AsynchListener_T<ConfigurationType,
   ACE_ASSERT (false);
 }
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 HandlerType*
-Net_Server_AsynchListener_T<ConfigurationType,
-                            SocketHandlerConfigurationType,
-                            UserDataType,
-                            HandlerType>::make_handler (void)
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::make_handler (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::make_handler"));
 
   // initialize return value(s)
   HandlerType* connection_p = NULL;
 
-  // sanity check(s)
-  ACE_ASSERT (configuration_.socketHandlerConfiguration);
-
   // default behavior
   // *TODO*: remove type inference
   ACE_NEW_NORETURN (connection_p,
                     HandlerType (configuration_.connectionManager,
-                                 configuration_.socketHandlerConfiguration->statisticCollectionInterval));
-                                 //configuration_.statisticCollectionInterval));
+                                 configuration_.statisticCollectionInterval));
   if (!connection_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

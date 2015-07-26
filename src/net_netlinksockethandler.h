@@ -31,9 +31,9 @@
 
 #include "net_sockethandler_base.h"
 
-// *NOTE*: should be added to ACE so Svc_Handler can be parametrized with
+// *NOTE*: this should be added to ACE so Svc_Handler can be parametrized with
 //         ACE_SOCK_Netlink
-class ACE_SOCK_NETLINK
+class Net_SOCK_Netlink
  : public ACE_SOCK_Netlink
 {
  public:
@@ -44,7 +44,7 @@ class ACE_SOCK_NETLINK
 template <typename ConfigurationType>
 class Net_NetlinkSocketHandler_T
  : public Net_SocketHandlerBase<ConfigurationType>
- , public ACE_Svc_Handler<ACE_SOCK_NETLINK, ACE_MT_SYNCH>
+ , public ACE_Svc_Handler<Net_SOCK_Netlink, ACE_MT_SYNCH>
 {
  public:
   //// override some event handler methods
@@ -62,7 +62,7 @@ class Net_NetlinkSocketHandler_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
  protected:
-  typedef ACE_Svc_Handler<ACE_SOCK_NETLINK, ACE_MT_SYNCH> SVC_HANDLER_T;
+  typedef ACE_Svc_Handler<Net_SOCK_Netlink, ACE_MT_SYNCH> SVC_HANDLER_T;
 
   Net_NetlinkSocketHandler_T ();
   virtual ~Net_NetlinkSocketHandler_T ();
@@ -71,10 +71,10 @@ class Net_NetlinkSocketHandler_T
 
  private:
   typedef Net_SocketHandlerBase<ConfigurationType> inherited;
-  typedef ACE_Svc_Handler<ACE_SOCK_NETLINK, ACE_MT_SYNCH> inherited2;
+  typedef ACE_Svc_Handler<Net_SOCK_Netlink, ACE_MT_SYNCH> inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler_T (const Net_NetlinkSocketHandler_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler_T& operator= (const Net_NetlinkSocketHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler_T (const Net_NetlinkSocketHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler_T& operator= (const Net_NetlinkSocketHandler_T&))
 };
 
 // include template implementation

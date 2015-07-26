@@ -49,12 +49,12 @@ struct IRC_Client_ConnectionState;
 class IRC_Client_Stream;
 struct IRC_Client_StreamModuleConfiguration;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Net_SocketConfiguration,
                                  IRC_Client_Configuration,
-                                 Net_StreamUserData,
                                  IRC_Client_ConnectionState,
                                  Stream_Statistic,
-                                 IRC_Client_Stream> IRC_Client_IConnection_Manager_t;
+                                 IRC_Client_Stream,
+                                 ////////
+                                 Net_StreamUserData> IRC_Client_IConnection_Manager_t;
 typedef Common_INotify_T<IRC_Client_StreamModuleConfiguration,
                          IRC_Client_IRCMessage> IRC_Client_INotify_t;
 enum IRC_Client_CharacterEncoding;
@@ -64,28 +64,31 @@ struct IRC_Client_SocketHandlerConfiguration
 {
   inline IRC_Client_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
+   , configuration (NULL)
+   , streamModuleConfiguration (NULL)
   {
     bufferSize = IRC_CLIENT_BUFFER_SIZE;
   };
+
+  // *TODO*: move this into a separate connnection/session configuration object
+  IRC_Client_Configuration*             configuration;
+  IRC_Client_StreamModuleConfiguration* streamModuleConfiguration;
 };
 
-struct IRC_Client_ConnectorConfiguration
-{
-  inline IRC_Client_ConnectorConfiguration ()
-   : configuration (NULL)
-   , connectionManager (NULL)
-   , socketHandlerConfiguration (NULL)
-   //, statisticCollectionInterval (0)
-   , userData (NULL)
-  {};
-
-  IRC_Client_Configuration*              configuration;
-  IRC_Client_IConnection_Manager_t*      connectionManager;
-  IRC_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
-  //unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s))
-  //                                                             // 0 --> DON'T collect statistics
-  Net_StreamUserData*                    userData;
-};
+//struct IRC_Client_ConnectorConfiguration
+//{
+//  inline IRC_Client_ConnectorConfiguration ()
+//   : /*configuration (NULL)
+//   ,*/ connectionManager (NULL)
+//   , socketHandlerConfiguration (NULL)
+//   //, statisticCollectionInterval (0)
+//  {};
+//
+//  //IRC_Client_Configuration*              configuration;
+//  IRC_Client_IConnection_Manager_t*      connectionManager;
+//  IRC_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
+//  unsigned int                           statisticCollectionInterval; // statistics collecting interval (second(s)) [0: off]
+//};
 
 struct IRC_Client_IRCLoginOptions
 {

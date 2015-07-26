@@ -23,11 +23,26 @@
 
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
+#include "ace/Reactor_Notification_Strategy.h"
+#include "ace/SOCK_Dgram.h"
 #include "ace/Svc_Handler.h"
 #include "ace/Synch_Traits.h"
-#include "ace/Reactor_Notification_Strategy.h"
 
 #include "net_sockethandler_base.h"
+
+/////////////////////////////////////////
+
+class Net_SOCK_Dgram
+ : public ACE_SOCK_Dgram
+{
+ public:
+  int get_remote_addr (ACE_Addr&) const;
+
+ private:
+  typedef ACE_SOCK_Dgram inherited;
+};
+
+/////////////////////////////////////////
 
 template <typename SocketType,
           typename ConfigurationType>

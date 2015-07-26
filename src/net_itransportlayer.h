@@ -21,10 +21,14 @@
 #ifndef NET_ITRANSPORTLAYER_H
 #define NET_ITRANSPORTLAYER_H
 
-//#include "net_common.h"
+#include "common.h"
 
-// forward declarations
-enum Net_ClientServerRole;
+#include "net_common.h"
+
+//// forward declarations
+//enum Common_DispatchType;
+//enum Net_ClientServerRole;
+//enum Net_TransportLayerType;
 
 template <typename ConfigurationType>
 class Net_ITransportLayer_T
@@ -32,12 +36,18 @@ class Net_ITransportLayer_T
  public:
   inline virtual ~Net_ITransportLayer_T () {};
 
-  virtual Net_ClientServerRole role () = 0;
   virtual void ping () = 0;
 
+  // information
+  // *TODO*: move this somewhere else
+  virtual Common_DispatchType dispatch () = 0;
+  virtual Net_ClientServerRole role () = 0;
+  virtual Net_TransportLayerType transportLayer () = 0;
+
  protected:
-  virtual bool initialize (Net_ClientServerRole,          // role
-                           const ConfigurationType&) = 0; // configuration
+  virtual bool initialize (Common_DispatchType,
+                           Net_ClientServerRole,
+                           const ConfigurationType&) = 0;
   virtual void finalize () = 0;
 };
 

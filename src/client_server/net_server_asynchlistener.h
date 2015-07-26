@@ -29,27 +29,50 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_idumpstate.h"
+#include "common_iinitialize.h"
 
-#include "net_server_common.h"
-#include "net_server_ilistener.h"
+#include "stream_common.h"
 
-template <typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
-          typename HandlerType>
+#include "net_ilistener.h"
+
+template <typename HandlerType,
+          ///////////////////////////////
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          ///////////////////////////////
+          typename HandlerConfigurationType,
+          ///////////////////////////////
+          typename UserDataType>
 class Net_Server_AsynchListener_T
  : public ACE_Asynch_Acceptor<HandlerType>
- , public Net_Server_IListener_T<ConfigurationType>
+ , public Net_IListener_T<HandlerConfigurationType>
+ , public Common_IInitialize_T<ConfigurationType>
  , public Common_IDumpState
 {
   // singleton needs access to the ctor/dtors
-  friend class ACE_Singleton<Net_Server_AsynchListener_T<ConfigurationType,
-                                                         SocketHandlerConfigurationType,
-                                                         UserDataType,
-                                                         HandlerType>,
+  friend class ACE_Singleton<Net_Server_AsynchListener_T<HandlerType,
+
+                                                         AddressType,
+                                                         ConfigurationType,
+                                                         StateType,
+                                                         StreamType,
+
+                                                         HandlerConfigurationType,
+
+                                                         UserDataType>,
                              ACE_SYNCH_RECURSIVE_MUTEX>;
 
  public:
+  //typedef Net_IConnectionManager_T<AddressType,
+  //                                 ConfigurationType,
+  //                                 StateType,
+  //                                 Stream_Statistic,
+  //                                 StreamType,
+  //                                 //////
+  //                                 UserDataType> ICONNECTION_MANAGER_T;
+
   virtual int accept (size_t = 0,          // bytes to read
                       const void* = NULL); // ACT
   // override default accept strategy
@@ -58,17 +81,20 @@ class Net_Server_AsynchListener_T
                                    const ACE_INET_Addr&);            // local address
   virtual int should_reissue_accept (void);
 
-  // implement Net_Server_IListener_T
-  virtual bool initialize (const ConfigurationType&);
-  virtual bool useReactor () const;
-
-  bool isInitialized () const;
-
-  // implement Common_IControl
+  // implement Net_IListener_T
   // *WARNING*: this API is NOT re-entrant !
   virtual void start ();
   virtual void stop (bool = true); // locked access ?
   virtual bool isRunning () const;
+
+  virtual const HandlerConfigurationType& get () const;
+  virtual bool initialize (const HandlerConfigurationType&);
+  virtual bool useReactor () const;
+
+  // implement Common_IInitialize_T
+  virtual bool initialize (const ConfigurationType&);
+
+  bool isInitialized () const;
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -80,6 +106,8 @@ class Net_Server_AsynchListener_T
  private:
   typedef ACE_Asynch_Acceptor<HandlerType> inherited;
 
+  typedef Net_IListener_T<HandlerConfigurationType> ILISTENER_T;
+
   Net_Server_AsynchListener_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T (const Net_Server_AsynchListener_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T& operator= (const Net_Server_AsynchListener_T&))
@@ -87,13 +115,14 @@ class Net_Server_AsynchListener_T
 
 //  // override default accept strategy
 //  // *NOTE*: ACE doesn't properly handle cancellation (dangling bound port on listen socket) -->
-//  // fix this here... --> *TODO*: send patch to ACE people
+//  // fix this here... --> *TODO*: send patch to ACE maintainers
 //  virtual void handle_accept(const ACE_Asynch_Accept::Result&); // result
 
-  int               addressFamily_;
-  ConfigurationType configuration_;
-  bool              isInitialized_;
-  bool              isListening_;
+  int                      addressFamily_;
+  ConfigurationType        configuration_;
+  HandlerConfigurationType handlerConfiguration_;
+  bool                     isInitialized_;
+  bool                     isListening_;
 };
 
 // include template implementation

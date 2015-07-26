@@ -21,64 +21,65 @@
 #include "ace/Log_Msg.h"
 #include "ace/Svc_Handler.h"
 
+#include "common.h"
+
 #include "net_common.h"
 #include "net_defines.h"
 #include "net_macros.h"
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
-Net_SocketConnectionBase_T<AddressType,
-                           SocketConfigurationType,
-                           HandlerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_SocketConnectionBase_T<HandlerType,
+                           AddressType,
                            ConfigurationType,
-                           SocketHandlerConfigurationType,
-                           UserDataType,
                            StateType,
                            StatisticContainerType,
-                           StreamType>::Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                    unsigned int statisticsCollectionInterval_in)
+                           StreamType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           UserDataType>::Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                      unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
-              statisticsCollectionInterval_in)
- //, inherited2 ()
- //, inherited3 (interfaceHandle_in)
+              statisticCollectionInterval_in)
+ , configuration_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::Net_SocketConnectionBase_T"));
 
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
-Net_SocketConnectionBase_T<AddressType,
-                           SocketConfigurationType,
-                           HandlerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_SocketConnectionBase_T<HandlerType,
+                           AddressType,
                            ConfigurationType,
-                           SocketHandlerConfigurationType,
-                           UserDataType,
                            StateType,
                            StatisticContainerType,
-                           StreamType>::~Net_SocketConnectionBase_T ()
+                           StreamType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           UserDataType>::~Net_SocketConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::~Net_SocketConnectionBase_T"));
 
   int result = -1;
 
   // wait for our worker (if any)
-  // *TODO*: this clearly is a design glitch
-  if (HandlerType::CONNECTION_BASE_T::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
+  // *TODO*: remove type inference
+  if (inherited::CONNECTION_BASE_T::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
   {
     result = inherited::wait ();
     if (result == -1)
@@ -87,74 +88,77 @@ Net_SocketConnectionBase_T<AddressType,
   } // end IF
 }
 
-//template <typename AddressType,
-//          typename SocketConfigurationType,
-//          typename HandlerType,
-//          typename ConfigurationType,
-//          typename SocketHandlerConfigurationType,
-//          typename UserDataType,
-//          typename StateType,
-//          typename StatisticContainerType>
-//bool
-//Net_SocketConnectionBase_T<AddressType,
-//                           SocketConfigurationType,
-//                           HandlerType,
-//                           ConfigurationType,
-//                           SocketHandlerConfigurationType,
-//                           UserDataType,
-//                           StateType,
-//                           StatisticContainerType>::initialize (Net_ClientServerRole_t role_in,
-//                                                                const Net_SocketConfiguration_t& configuration_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::initialize"));
-//
-//  ACE_UNUSED_ARG (role_in);
-//  ACE_UNUSED_ARG (configuration_in);
-//
-//  return true;
-//}
-
-//template <typename AddressType,
-//          typename SocketConfigurationType,
-//          typename HandlerType,
-//          typename ConfigurationType,
-//          typename SocketHandlerConfigurationType,
-//          typename UserDataType,
-//          typename StateType,
-//          typename StatisticContainerType>
-//void
-//Net_SocketConnectionBase_T<AddressType,
-//                           SocketConfigurationType,
-//                           HandlerType,
-//                           ConfigurationType,
-//                           SocketHandlerConfigurationType,
-//                           UserDataType,
-//                           StateType,
-//                           StatisticContainerType>::finalize ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::finalize"));
-//
-//}
-
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
-void
-Net_SocketConnectionBase_T<AddressType,
-                           SocketConfigurationType,
-                           HandlerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+bool
+Net_SocketConnectionBase_T<HandlerType,
+                           AddressType,
                            ConfigurationType,
-                           SocketHandlerConfigurationType,
-                           UserDataType,
                            StateType,
                            StatisticContainerType,
-                           StreamType>::ping ()
+                           StreamType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::initialize"));
+
+  configuration_ = configuration_in;
+
+  return true;
+}
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+const HandlerConfigurationType&
+Net_SocketConnectionBase_T<HandlerType,
+                           AddressType,
+                           ConfigurationType,
+                           StateType,
+                           StatisticContainerType,
+                           StreamType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           //UserDataType>::get () const
+                           UserDataType>::get ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::get"));
+
+  return configuration_;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+void
+Net_SocketConnectionBase_T<HandlerType,
+                           AddressType,
+                           ConfigurationType,
+                           StateType,
+                           StatisticContainerType,
+                           StreamType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           UserDataType>::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::ping"));
 
@@ -282,78 +286,99 @@ Net_SocketConnectionBase_T<AddressType,
 //  return 0;
 //}
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 int
-Net_SocketConnectionBase_T<AddressType,
-                           SocketConfigurationType,
-                           HandlerType,
+Net_SocketConnectionBase_T<HandlerType,
+                           AddressType,
                            ConfigurationType,
-                           SocketHandlerConfigurationType,
-                           UserDataType,
                            StateType,
                            StatisticContainerType,
-                           StreamType>::open (void* arg_in)
+                           StreamType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           UserDataType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::open"));
 
   int result = -1;
 
-  // *TODO*: client-side, arg_in is a handle to the connector instance...
-  //         server-side, arg_in is a handle to the acceptor instance...
-  //const SocketHandlerConfigurationType* configuration_p = NULL;
-  //switch (role ())
-  //{
-  //  case ROLE_CLIENT:
-  //  {
-  //    Net_Client_ConnectorBase_t* connector_base_p =
-  //        static_cast<Net_Client_ConnectorBase_t*> (arg_in);
-  //    Net_Client_IConnector_t* iconnector_p =
-  //        dynamic_cast<Net_Client_IConnector_t*> (connector_base_p);
-  //    ACE_ASSERT (iconnector_p);
-  //    configuration_p =
-  //      iconnector_p->getConfiguration ();
-
-  //    break;
-  //  }
-  //  case ROLE_SERVER:
-  //  {
-
-  //    break;
-  //  }
-  //  default:
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("invalid role (was: %d), aborting\n"),
-  //                role ()));
-  //    return -1;
-  //  }
-  //} // end SWITCH
-  //ACE_ASSERT (configuration_p);
-
+  // step0: initialize this connection (if there is no connection manager)
   ConfigurationType* configuration_p = NULL;
   if (!inherited::manager_)
-    configuration_p = reinterpret_cast<ConfigurationType*> (arg_in); // *BUG*: see *TODO* above
-  else
-    configuration_p = &(HandlerType::CONNECTION_BASE_T::configuration_);
-  // sanity check(s)
-  ACE_ASSERT (configuration_p);
+  {
+    // *NOTE*: client-side: arg_in is a handle to the connector
+    //         server-side: arg_in is a handle to the listener
+    const HandlerConfigurationType* handler_configuration_p = NULL;
+    switch (this->role ())
+    {
+      case NET_ROLE_CLIENT:
+      {
+        ICONNECTOR_T* iconnector_p = NULL;
 
-  // step0: initialize this connection (if there is no connection manager)
-  if (!inherited::manager_)
-    if (!HandlerType::CONNECTION_BASE_T::initialize (*configuration_p))
+        // work around ACE code here
+        if ((this->dispatch () == COMMON_DISPATCH_REACTOR) &&
+            (this->transportLayer () == NET_TRANSPORTLAYER_TCP)) // *TODO*: UDP
+        {
+          //ACE_CONNECTOR_T* connector_p =
+          //  static_cast<ACE_CONNECTOR_T*> (arg_in);
+          //ACE_ASSERT (connector_p);
+          //iconnector_p = dynamic_cast<ICONNECTOR_T*> (connector_p);
+          iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
+          //if (!iconnector_p)
+          //{
+          //  ACE_DEBUG ((LM_ERROR,
+          //              ACE_TEXT ("failed to dynamic_cast<Net_IConnector_T*> (argument was: %@), aborting\n"),
+          //              connector_p));
+          //  return -1;
+          //} // end IF
+        } // end IF
+        else
+          iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
+        ACE_ASSERT (iconnector_p);
+        handler_configuration_p = &iconnector_p->get ();
+        break;
+      }
+      case NET_ROLE_SERVER:
+      {
+        ILISTENER_T* ilistener_p =
+          static_cast<ILISTENER_T*> (arg_in);
+        ACE_ASSERT (ilistener_p);
+        handler_configuration_p = &ilistener_p->get ();
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown role (was: %d), aborting\n"),
+                    this->role ()));
+        return -1;
+      }
+    } // end SWITCH
+    ACE_ASSERT (handler_configuration_p);
+    // *TODO*: remove type inference
+    configuration_p = handler_configuration_p->configuration;
+    ACE_ASSERT (configuration_p);
+    if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", aborting\n")));
       return -1;
     } // end IF
+  } // end IF
+  //if (!inherited::manager_)
+  //  configuration_p = reinterpret_cast<ConfigurationType*> (arg_in); // *BUG*: see *TODO* above
+  else
+    configuration_p = &(HandlerType::CONNECTION_BASE_T::configuration_);
+  // sanity check(s)
+  ACE_ASSERT (configuration_p);
 
   // step1: initialize/start stream, tweak socket, register reading data with
   //        reactor, ...
@@ -412,25 +437,25 @@ Net_SocketConnectionBase_T<AddressType,
   return 0;
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 int
-Net_SocketConnectionBase_T<AddressType,
-                           SocketConfigurationType,
-                           HandlerType,
+Net_SocketConnectionBase_T<HandlerType,
+                           AddressType,
                            ConfigurationType,
-                           SocketHandlerConfigurationType,
-                           UserDataType,
                            StateType,
                            StatisticContainerType,
-                           StreamType>::close (u_long arg_in)
+                           StreamType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           UserDataType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::close"));
 
@@ -600,26 +625,26 @@ Net_SocketConnectionBase_T<AddressType,
 //  return result;
 //}
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_SocketConnectionBase_T<AddressType,
-                           SocketConfigurationType,
-                           HandlerType,
+Net_SocketConnectionBase_T<HandlerType,
+                           AddressType,
                            ConfigurationType,
-                           SocketHandlerConfigurationType,
-                           UserDataType,
                            StateType,
                            StatisticContainerType,
-                           StreamType>::open (ACE_HANDLE handle_in,
-                                              ACE_Message_Block& messageBlock_in)
+                           StreamType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           UserDataType>::open (ACE_HANDLE handle_in,
+                                                ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::open"));
 
@@ -681,120 +706,152 @@ Net_SocketConnectionBase_T<AddressType,
 
 /////////////////////////////////////////
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
-Net_AsynchSocketConnectionBase_T<AddressType,
-                                 SocketConfigurationType,
-                                 HandlerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
                                  ConfigurationType,
-                                 SocketHandlerConfigurationType,
-                                 UserDataType,
                                  StateType,
                                  StatisticContainerType,
-                                 StreamType>::Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                unsigned int statisticsCollectionInterval_in)
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 UserDataType>::Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                  unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
-              statisticsCollectionInterval_in)
- //, inherited2 ()
- //, inherited3 (interfaceHandle_in)
- , configuration_ (NULL)
+              statisticCollectionInterval_in)
+ , configuration_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::Net_AsynchSocketConnectionBase_T"));
 
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
-Net_AsynchSocketConnectionBase_T<AddressType,
-                                 SocketConfigurationType,
-                                 HandlerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
                                  ConfigurationType,
-                                 SocketHandlerConfigurationType,
-                                 UserDataType,
                                  StateType,
                                  StatisticContainerType,
-                                 StreamType>::~Net_AsynchSocketConnectionBase_T ()
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 UserDataType>::~Net_AsynchSocketConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::~Net_AsynchSocketConnectionBase_T"));
 
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_AsynchSocketConnectionBase_T<AddressType,
-                                 SocketConfigurationType,
-                                 HandlerType,
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
                                  ConfigurationType,
-                                 SocketHandlerConfigurationType,
-                                 UserDataType,
                                  StateType,
                                  StatisticContainerType,
-                                 StreamType>::ping ()
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 UserDataType>::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::ping"));
 
   inherited::stream_.ping ();
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_AsynchSocketConnectionBase_T<AddressType,
-                                 SocketConfigurationType,
-                                 HandlerType,
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
                                  ConfigurationType,
-                                 SocketHandlerConfigurationType,
-                                 UserDataType,
                                  StateType,
                                  StatisticContainerType,
-                                 StreamType>::open (ACE_HANDLE handle_in,
-                                                    ACE_Message_Block& messageBlock_in)
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 UserDataType>::open (ACE_HANDLE handle_in,
+                                                      ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::open"));
 
   // step0: initialize this connection (if there is no connection manager)
+  ConfigurationType* configuration_p = NULL;
   if (!inherited::manager_)
   {
-    ACE_ASSERT (configuration_);
-//    HandlerType* socket_handler_p = this;
-//    typename HandlerType::CONNECTION_BASE_T* connection_base_p =
-//     socket_handler_p;
-    if (!HandlerType::CONNECTION_BASE_T::initialize (*configuration_))
+    // *NOTE*: client-side: arg_in is a handle to the connector
+    //         server-side: arg_in is a handle to the listener
+    const HandlerConfigurationType* handler_configuration_p = NULL;
+    switch (this->role ())
+    {
+      case NET_ROLE_CLIENT:
+      {
+        //ICONNECTOR_T* iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
+        //ACE_ASSERT (iconnector_p);
+        //handler_configuration_p = &iconnector_p->get ();
+        break;
+      }
+      case NET_ROLE_SERVER:
+      {
+        //ILISTENER_T* ilistener_p = static_cast<ILISTENER_T*> (arg_in);
+        //ACE_ASSERT (ilistener_p);
+        //handler_configuration_p = &ilistener_p->get ();
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown role (was: %d), returning\n"),
+                    this->role ()));
+        return;
+      }
+    } // end SWITCH
+    ACE_ASSERT (handler_configuration_p);
+    // *TODO*: remove type inference
+    configuration_p = handler_configuration_p->configuration;
+    ACE_ASSERT (configuration_p);
+    if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", returning\n")));
       return;
     } // end IF
   } // end IF
+  //if (!inherited::manager_)
+  //  configuration_p = reinterpret_cast<ConfigurationType*> (arg_in); // *BUG*: see *TODO* above
+  else
+    configuration_p = &(HandlerType::CONNECTION_BASE_T::configuration_);
+  // sanity check(s)
+  ACE_ASSERT (configuration_p);
 
   // step1: initialize/start stream, tweak socket, register reading data with
   // the reactor, ...
@@ -805,7 +862,7 @@ Net_AsynchSocketConnectionBase_T<AddressType,
 //template <typename HandlerType,
 //          typename ITransportLayerType,
 //          typename ConfigurationType,
-//          typename SocketHandlerConfigurationType,
+//          typename HandlerConfigurationType,
 //          typename UserDataType,
 //          typename StateType,
 //          typename StatisticContainerType>
@@ -813,7 +870,7 @@ Net_AsynchSocketConnectionBase_T<AddressType,
 //Net_AsynchSocketConnectionBase_T<SocketHandlerType,
 //                                 ITransportLayerType,
 //                                 ConfigurationType,
-//                                 SocketHandlerConfigurationType,
+//                                 HandlerConfigurationType,
 //                                 UserDataType,
 //                                 StateType,
 //                                 StatisticContainerType>::act (const void* act_in)
@@ -824,25 +881,77 @@ Net_AsynchSocketConnectionBase_T<AddressType,
 //      reinterpret_cast<ConfigurationType*> (const_cast<void*> (act_in));
 //}
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
-int
-Net_AsynchSocketConnectionBase_T<AddressType,
-                                 SocketConfigurationType,
-                                 HandlerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+bool
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
                                  ConfigurationType,
-                                 SocketHandlerConfigurationType,
-                                 UserDataType,
                                  StateType,
                                  StatisticContainerType,
-                                 StreamType>::open (void* arg_in)
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::initialize"));
+
+  configuration_ = configuration_in;
+
+  return true;
+}
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+const HandlerConfigurationType&
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 //UserDataType>::get () const
+                                 UserDataType>::get ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::get"));
+
+  return configuration_;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+int
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 UserDataType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::open"));
 

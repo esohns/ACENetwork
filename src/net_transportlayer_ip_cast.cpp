@@ -21,15 +21,13 @@
 
 #include "net_transportlayer_ip_cast.h"
 
-#include <sstream>
-#include <string>
+//#include "common.h"
 
-#include "net_defines.h"
+//#include "net_common.h"
 #include "net_macros.h"
 
-Net_TransportLayer_IP_Broadcast::Net_TransportLayer_IP_Broadcast (Net_ClientServerRole clientServerRole_in)
- : inherited (clientServerRole_in,
-              NET_TRANSPORTLAYER_IP_BROADCAST)
+Net_TransportLayer_IP_Broadcast::Net_TransportLayer_IP_Broadcast ()
+ : inherited (NET_TRANSPORTLAYER_IP_BROADCAST)
 // , inherited2 ()
 // , myAddress ()
 {
@@ -56,9 +54,8 @@ Net_TransportLayer_IP_Broadcast::~Net_TransportLayer_IP_Broadcast ()
 
 /////////////////////////////////////////
 
-Net_TransportLayer_IP_Multicast::Net_TransportLayer_IP_Multicast (Net_ClientServerRole clientServerRole_in)
- : inherited (clientServerRole_in,
-              NET_TRANSPORTLAYER_IP_MULTICAST)
+Net_TransportLayer_IP_Multicast::Net_TransportLayer_IP_Multicast ()
+ : inherited (NET_TRANSPORTLAYER_IP_MULTICAST)
 // , inherited2 (ACE_SOCK_Dgram_Mcast::DEFOPTS)
 // , joined_ (false)
 // , address_ ()

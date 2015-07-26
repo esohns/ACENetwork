@@ -70,9 +70,9 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
 
   int result = -1;
 
+  bool abort = false;
+  bool connect = false;
   bool shutdown = false;
-  bool connect_to_server = false;
-  bool abort_oldest = false;
   switch (signal_in)
   {
     case SIGINT:
@@ -102,7 +102,7 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
 #endif
     {
       // (try to) connect...
-      connect_to_server = true;
+      connect = true;
 
       break;
     }
@@ -112,8 +112,8 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
   case SIGABRT:
 #endif
     {
-      // (try to) abort oldest connection...
-      abort_oldest = true;
+      // abort connection...
+      abort = true;
 
       break;
     }
@@ -129,11 +129,11 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
   } // end SWITCH
 
   // ...abort ?
-  if (abort_oldest)
-    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortOldestConnection ();
+  if (abort)
+    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
 
   // ...connect ?
-  if (connect_to_server)
+  if (connect)
   {
     if (!configuration_)
     {
@@ -178,7 +178,7 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
                   buffer));
 
       // release an existing connection, maybe that helps...
-      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortOldestConnection ();
+      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
     } // end IF
   } // end IF
 done_connect:

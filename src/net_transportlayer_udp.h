@@ -34,8 +34,8 @@ class Net_Export Net_TransportLayer_UDP
  private:
   typedef Net_InetTransportLayer_Base inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_UDP (const Net_TransportLayer_UDP&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_UDP& operator= (const Net_TransportLayer_UDP&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_UDP (const Net_TransportLayer_UDP&))
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_UDP& operator= (const Net_TransportLayer_UDP&))
 };
 
 #endif

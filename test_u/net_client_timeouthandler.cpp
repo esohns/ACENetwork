@@ -22,17 +22,16 @@
 #include "net_client_timeouthandler.h"
 
 #include "ace/Log_Msg.h"
-#include "ace/Synch.h"
 
-#include "net_defines.h"
-#include "net_common.h"
+#include "net_connection_common.h"
 #include "net_connection_manager_common.h"
+#include "net_defines.h"
 #include "net_macros.h"
 
 Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
                                                       unsigned int maxNumConnections_in,
                                                       const ACE_INET_Addr& remoteSAP_in,
-                                                      Net_Client_IConnector_t* connector_in)
+                                                      Net_IConnector_t* connector_in)
  : inherited (NULL,                           // default reactor
               ACE_Event_Handler::LO_PRIORITY) // priority
  , alternatingModeState_ (ALTERNATING_STATE_CONNECT)
@@ -41,12 +40,31 @@ Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
  , maxNumConnections_ (maxNumConnections_in)
  , mode_ (mode_in)
  , peerAddress_ (remoteSAP_in)
+ , randomSeed_ (0)
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+ , randomStateInitializationBuffer_ ()
+ , randomState_ ()
+#endif
  , randomDistribution_ (1, 100)
  , randomEngine_ ()
  , randomGenerator_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::Net_Client_TimeoutHandler"));
 
+  randomSeed_ = COMMON_TIME_NOW.usec ();
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+  ACE_OS::memset (randomStateInitializationBuffer_, 0, sizeof (randomStateInitializationBuffer_));
+  int result = ::initstate_r (randomSeed_,
+                              randomStateInitializationBuffer_, sizeof (randomStateInitializationBuffer_),
+                              &randomState_);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::initstate_r(): \"%m\", continuing\n")));
+  result = ::srandom_r (randomSeed_, &randomState_);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::srandom_r(): \"%m\", continuing\n")));
+#endif
   randomGenerator_ = std::bind (randomDistribution_, randomEngine_);
 }
 
@@ -64,7 +82,7 @@ Net_Client_TimeoutHandler::mode (ActionMode_t mode_in)
   ACE_ASSERT (mode_in < ACTION_MAX);
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
     mode_ = mode_in;
   } // end lock scope
@@ -79,7 +97,7 @@ Net_Client_TimeoutHandler::mode () const
   ActionMode_t result = ACTION_INVALID;
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
     result = mode_;
   } // end lock scope
@@ -106,12 +124,15 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
   bool do_abort_youngest = false;
   bool do_connect = false;
   bool do_ping = false;
-  NET_CONNECTIONMANAGER_SINGLETON::instance ()->lock ();
+  Net_IInetConnectionManager_t* connection_manager_p =
+    NET_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  connection_manager_p->lock ();
   unsigned int num_connections =
-    NET_CONNECTIONMANAGER_SINGLETON::instance ()->numConnections ();
+    connection_manager_p->numConnections ();
 
   {
-    ACE_Guard<ACE_Thread_Mutex> aGuard (lock_);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
     switch (mode_)
     {
@@ -119,7 +140,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
       {
         if (num_connections == 0)
         {
-          NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+          connection_manager_p->unlock ();
           return 0;
         } // end IF
 
@@ -127,23 +148,22 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         // *PORTABILITY*: outside glibc, this is not very portable...
         // *TODO*: use STL funcionality instead
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-        result = ::random_r (&random_data, &index);
+        result = ::random_r (&randomState_, &index);
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ::random_r(): \"%s\", aborting\n")));
 
           // clean up
-          NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+          connection_manager_p->unlock ();
 
           return -1;
         } // end IF
         index = (index % num_connections);
 #else
-        index = (ACE_OS::rand_r (&random_seed) % num_connections);
+        index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
 #endif
-        ping_connection_p =
-          NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (index);
+        ping_connection_p = connection_manager_p->operator[] (index);
         if (!ping_connection_p)
         {
           ACE_DEBUG ((LM_ERROR,
@@ -151,7 +171,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
                       index, num_connections));
 
           // clean up
-          NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+          connection_manager_p->unlock ();
 
           return -1;
         } // end IF
@@ -186,23 +206,22 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
             // *PORTABILITY*: outside glibc, this is not very portable...
             // *TODO*: use STL funcionality instead
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-            result = ::random_r (&random_data, &index);
+            result = ::random_r (&randomState_, &index);
             if (result == -1)
             {
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to ::random_r(): \"%s\", aborting\n")));
 
               // clean up
-              NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+              connection_manager_p->unlock ();
 
               return -1;
             } // end IF
             index = (index % num_connections);
 #else
-            index = (ACE_OS::rand_r (&random_seed) % num_connections);
+            index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
 #endif
-            abort_connection_p =
-              NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (index);
+            abort_connection_p = connection_manager_p->operator[] (index);
             if (!abort_connection_p)
             {
               ACE_DEBUG ((LM_ERROR,
@@ -210,7 +229,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
                           index, num_connections));
 
               // clean up
-              NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+              connection_manager_p->unlock ();
 
               return -1;
             } // end IF
@@ -226,7 +245,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
                         alternatingModeState_));
 
             // clean up
-            NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+            connection_manager_p->unlock ();
 
             return -1;
           }
@@ -268,7 +287,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         //        std::uniform_int_distribution<int> distribution (0, num_connections - 1);
         //        index = distribution (randomGenerator_);
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-        result = ::random_r (&random_data, &index);
+        result = ::random_r (&randomState_, &index);
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,
@@ -281,10 +300,9 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         } // end IF
         index = (index % num_connections);
 #else
-        index = (ACE_OS::rand_r (&random_seed) % num_connections);
+        index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
 #endif
-        ping_connection_p =
-          NET_CONNECTIONMANAGER_SINGLETON::instance ()->operator [] (index);
+        ping_connection_p = connection_manager_p->operator[] (index);
         if (!ping_connection_p)
         {
           ACE_DEBUG ((LM_ERROR,
@@ -292,7 +310,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
                       index, num_connections));
 
           // clean up
-          NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+          connection_manager_p->unlock ();
 
           return -1;
         } // end IF
@@ -308,13 +326,13 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
                     mode_));
 
         // clean up
-        NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+        connection_manager_p->unlock ();
 
         return -1;
       }
     } // end SWITCH
   } // end lock scope
-  NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+  connection_manager_p->unlock ();
 
   // ------------------------------------
 
@@ -343,10 +361,10 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
   } // end IF
 
   if (do_abort_oldest)
-    NET_CONNECTIONMANAGER_SINGLETON::instance ()->abortOldestConnection ();
+    connection_manager_p->abortLeastRecent ();
 
   if (do_abort_youngest)
-    NET_CONNECTIONMANAGER_SINGLETON::instance ()->abortYoungestConnection ();
+    connection_manager_p->abortMostRecent ();
 
   if (do_connect)
   {

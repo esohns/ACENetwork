@@ -45,41 +45,49 @@
 //#include "IRC_client_stream_common.h"
 #include "IRC_client_IRCsession.h"
 
-typedef Net_Client_Connector_T<ACE_INET_Addr,
-                               Net_SocketConfiguration,
+typedef Net_Client_Connector_T<IRC_Client_TCPConnection_t,
+                               //////////
+                               ACE_INET_Addr,
                                IRC_Client_Configuration,
-                               IRC_Client_ConnectorConfiguration,
-                               Net_StreamUserData,
                                IRC_Client_ConnectionState,
                                IRC_Client_Stream,
-                               IRC_Client_TCPConnection_t> IRC_Client_Connector_t;
-typedef Net_Client_AsynchConnector_T<ACE_INET_Addr,
-                                     Net_SocketConfiguration,
+                               //////////
+                               IRC_Client_SocketHandlerConfiguration,
+                               //////////
+                               Net_StreamUserData> IRC_Client_Connector_t;
+typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchTCPConnection_t,
+                                     ////
+                                     ACE_INET_Addr,
                                      IRC_Client_Configuration,
-                                     IRC_Client_ConnectorConfiguration,
-                                     Net_StreamUserData,
                                      IRC_Client_ConnectionState,
                                      IRC_Client_Stream,
-                                     IRC_Client_AsynchTCPConnection_t> IRC_Client_AsynchConnector_t;
+                                     ////
+                                     IRC_Client_SocketHandlerConfiguration,
+                                     ////
+                                     Net_StreamUserData> IRC_Client_AsynchConnector_t;
 
 typedef IRC_Client_IRCSession_T<IRC_Client_TCPConnection_t> IRC_Client_IRCSession_t;
 typedef IRC_Client_IRCSession_T<IRC_Client_AsynchTCPConnection_t> IRC_Client_AsynchIRCSession_t;
 
-typedef Net_Client_Connector_T<ACE_INET_Addr,
-                               Net_SocketConfiguration,
+typedef Net_Client_Connector_T<IRC_Client_IRCSession_t,
+                               //////////
+                               ACE_INET_Addr,
                                IRC_Client_Configuration,
-                               IRC_Client_ConnectorConfiguration,
-                               Net_StreamUserData,
                                IRC_Client_ConnectionState,
                                IRC_Client_Stream,
-                               IRC_Client_IRCSession_t> IRC_Client_SessionConnector_t;
-typedef Net_Client_AsynchConnector_T<ACE_INET_Addr,
-                                     Net_SocketConfiguration,
+                               //////////
+                               IRC_Client_SocketHandlerConfiguration,
+                               //////////
+                               Net_StreamUserData> IRC_Client_SessionConnector_t;
+typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchIRCSession_t,
+                                     ////
+                                     ACE_INET_Addr,
                                      IRC_Client_Configuration,
-                                     IRC_Client_ConnectorConfiguration,
-                                     Net_StreamUserData,
                                      IRC_Client_ConnectionState,
                                      IRC_Client_Stream,
-                                     IRC_Client_AsynchIRCSession_t> IRC_Client_AsynchSessionConnector_t;
+                                     ////
+                                     IRC_Client_SocketHandlerConfiguration,
+                                     ////
+                                     Net_StreamUserData> IRC_Client_AsynchSessionConnector_t;
 
 #endif

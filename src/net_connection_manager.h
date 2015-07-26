@@ -33,31 +33,31 @@
 #include "net_iconnectionmanager.h"
 
 template <typename AddressType,
-          typename SocketConfigurationType,
           typename ConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          ///////////////////////////////
+          typename UserDataType>
 class Net_Connection_Manager_T
  : public Net_IConnectionManager_T<AddressType,
-                                   SocketConfigurationType,
                                    ConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType>
+                                   StreamType,
+                                   //////
+                                   UserDataType>
  , public Common_IStatistic_T<StatisticContainerType>
  , public Common_IDumpState
 {
   // singleton has access to the ctor/dtors
   friend class ACE_Singleton<Net_Connection_Manager_T<AddressType,
-                                                      SocketConfigurationType,
                                                       ConfigurationType,
-                                                      UserDataType,
                                                       StateType,
                                                       StatisticContainerType,
-                                                      StreamType>,
+                                                      StreamType,
+
+                                                      UserDataType>,
                              ACE_SYNCH_MUTEX>;
 
  public:
@@ -93,6 +93,11 @@ class Net_Connection_Manager_T
   virtual unsigned int numConnections () const;
   virtual void wait () const;
 
+  // ---------------------------------------------------------------------------
+  virtual void abortLeastRecent ();
+  virtual void abortMostRecent ();
+  // ---------------------------------------------------------------------------
+
   // implement Common_IControl
   virtual void start ();
   virtual void stop (bool = true); // locked access ?
@@ -101,11 +106,6 @@ class Net_Connection_Manager_T
   // implement Common_ILock
   virtual void lock ();
   virtual void unlock ();
-
-  // ---------------------------------------------------------------------------
-  void abortOldestConnection ();
-  void abortYoungestConnection ();
-  // ---------------------------------------------------------------------------
 
   // implement (part of) Common_IStatistic_T
   virtual void report () const;
@@ -116,12 +116,12 @@ class Net_Connection_Manager_T
  private:
   // convenience types
   typedef Net_Connection_Manager_T<AddressType,
-                                   SocketConfigurationType,
                                    ConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType> OWN_TYPE_T;
+                                   StreamType,
+                                   //////
+                                   UserDataType> OWN_TYPE_T;
 
   typedef ACE_DLList<CONNECTION_T> CONNECTION_CONTAINER_T;
   typedef ACE_DLList_Iterator<CONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;

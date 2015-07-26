@@ -746,25 +746,28 @@ do_work (IRC_Client_Configuration& configuration_in,
     configuration_in.streamConfiguration.streamConfiguration.messageAllocator;
   configuration_in.socketHandlerConfiguration.socketConfiguration =
     &configuration_in.socketConfiguration;
-  //configuration_in.socketHandlerConfiguration.statisticCollectionInterval = 0;
+  configuration_in.socketHandlerConfiguration.statisticCollectionInterval =
+    configuration_in.streamConfiguration.streamConfiguration.statisticReportingInterval;
   //IRC_Client_SessionState session_state;
   //session_state.configuration = configuration_in;
-  IRC_Client_ConnectorConfiguration connector_configuration;
+  //IRC_Client_ConnectorConfiguration connector_configuration;
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  connector_configuration.connectionManager = connection_manager_p;
-  connector_configuration.userData = &configuration_in.streamUserData;
-  connector_configuration.socketHandlerConfiguration =
-    &configuration_in.socketHandlerConfiguration;
-  IRC_Client_SessionConnector_t connector;
-  IRC_Client_AsynchSessionConnector_t asynch_connector;
-  IRC_Client_IClientConnector_t* connector_p = NULL;
+  //connector_configuration.connectionManager = connection_manager_p;
+  //connector_configuration.userData = &configuration_in.streamUserData;
+  //connector_configuration.socketHandlerConfiguration =
+  //  &configuration_in.socketHandlerConfiguration;
+  IRC_Client_SessionConnector_t connector (connection_manager_p,
+                                           configuration_in.streamConfiguration.streamConfiguration.statisticReportingInterval);
+  IRC_Client_AsynchSessionConnector_t asynch_connector (connection_manager_p,
+                                                        configuration_in.streamConfiguration.streamConfiguration.statisticReportingInterval);
+  IRC_Client_IConnector_t* connector_p = NULL;
   if (configuration_in.useReactor)
     connector_p = &connector;
   else
     connector_p = &asynch_connector;
-  // *NOTE*: fire-and-forget socket_handler_configuration_p here
-  if (!connector_p->initialize (connector_configuration))
+  //if (!connector_p->initialize (connector_configuration))
+  if (!connector_p->initialize (configuration_in.socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));

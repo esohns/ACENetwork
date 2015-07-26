@@ -22,39 +22,53 @@
 #define NET_SOCKETCONNECTION_BASE_H
 
 #include "ace/config-macros.h"
-#include "ace/Event_Handler.h"
+#include "ace/Connector.h"
+#include "ace/Message_Block.h"
+#include "ace/SOCK_Connector.h"
 
-#include "net_connection_base.h"
-#include "net_connection_manager.h"
 #include "net_iconnection.h"
+#include "net_iconnectionmanager.h"
+#include "net_iconnector.h"
+#include "net_ilistener.h"
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          ///////////////////////////////
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          ///////////////////////////////
+          typename SocketConfigurationType,
+          ///////////////////////////////
+          typename HandlerConfigurationType,
+          ///////////////////////////////
+          typename UserDataType>
 class Net_SocketConnectionBase_T
  : public HandlerType
  , public Net_ISocketConnection_T<AddressType,
-                                  SocketConfigurationType,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  StreamType>
+                                  StreamType,
+                                  ///////
+                                  SocketConfigurationType,
+                                  ///////
+                                  HandlerConfigurationType>
 {
  public:
   virtual ~Net_SocketConnectionBase_T ();
 
   // override some task-based members
-  virtual int open (void* = NULL); // args
-  virtual int close (u_long = 0); // args
+  virtual int open (void* = NULL); // arg
+  virtual int close (u_long = 0); // arg (reason)
 //  virtual int svc (void);
 
-  //// implement (part of) Net_ITransportLayer_T
+  // implement (part of) Net_ISocketConnection_T
+  //virtual const HandlerConfigurationType& get () const;
+  virtual const HandlerConfigurationType& get ();
+  virtual bool initialize (const HandlerConfigurationType&); // handler configuration
+
   //virtual bool initialize (Net_ClientServerRole_t,            // role
   //                         const Net_SocketConfiguration_t&); // socket configuration
   //virtual void finalize ();
@@ -69,24 +83,32 @@ class Net_SocketConnectionBase_T
 
  protected:
   typedef Net_IConnectionManager_T<AddressType,
-                                   SocketConfigurationType,
                                    ConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType> ICONNECTION_MANAGER_T;
+                                   StreamType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
 
   Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                              unsigned int = 0);      // statistics collecting interval (second(s))
-                                                      // 0 --> DON'T collect statistics
+                              unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
 
   // helper methods
   // *IMPORTANT NOTE*: dummy stub to integrate asynch/synch connection handlers
   virtual void open (ACE_HANDLE,          // handle
                      ACE_Message_Block&); // (initial) data (if any)
 
+  // *TODO*: move this into the handler
+  HandlerConfigurationType configuration_;
+
  private:
   typedef HandlerType inherited;
+
+  //typedef ACE_Connector<HandlerType,
+  //                      ACE_SOCK_CONNECTOR> ACE_CONNECTOR_T;
+  typedef Net_IConnector_T<AddressType,
+                           HandlerConfigurationType> ICONNECTOR_T;
+  typedef Net_IListener_T<HandlerConfigurationType> ILISTENER_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&))
@@ -98,23 +120,30 @@ class Net_SocketConnectionBase_T
 
 /////////////////////////////////////////
 
-template <typename AddressType,
-          typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          ///////////////////////////////
+          typename AddressType,
           typename ConfigurationType,
-          typename SocketHandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          ///////////////////////////////
+          typename SocketConfigurationType,
+          ///////////////////////////////
+          typename HandlerConfigurationType,
+          ///////////////////////////////
+          typename UserDataType>
 class Net_AsynchSocketConnectionBase_T
  : public HandlerType
  , public Net_ISocketConnection_T<AddressType,
-                                  SocketConfigurationType,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  StreamType>
+                                  StreamType,
+                                  ///////
+                                  SocketConfigurationType,
+                                  ///////
+                                  HandlerConfigurationType>
 {
  public:
   virtual ~Net_AsynchSocketConnectionBase_T ();
@@ -124,30 +153,38 @@ class Net_AsynchSocketConnectionBase_T
                      ACE_Message_Block&); // (initial) data (if any)
   //virtual void act (const void*); // (user) data handle
 
-  // implement (part of) Net_ITransportLayer
+  // implement (part of) Net_ISocketConnection_T
+  //virtual const HandlerConfigurationType& get () const;
+  virtual const HandlerConfigurationType& get ();
+  virtual bool initialize (const HandlerConfigurationType&); // handler configuration
+
   virtual void ping (); // ping the peer !
 
  protected:
   typedef Net_IConnectionManager_T<AddressType,
-                                   SocketConfigurationType,
                                    ConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType> ICONNECTION_MANAGER_T;
+                                   StreamType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
 
   Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                    unsigned int = 0);      // statistics collecting interval (second(s))
-                                                            // 0 --> DON'T collect statistics
+                                    unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
 
   // helper methods
   // *IMPORTANT NOTE*: dummy stub to integrate asynch/synch connection handlers
   virtual int open (void*); // arg
 
-  const ConfigurationType* configuration_;
+  // *TODO*: move this into the handler
+  HandlerConfigurationType configuration_;
 
  private:
   typedef HandlerType inherited;
+
+  typedef Net_IConnector_T<AddressType,
+                           HandlerConfigurationType> ICONNECTOR_T;
+  typedef Net_IListener_T<HandlerConfigurationType> ILISTENER_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T (const Net_AsynchSocketConnectionBase_T&))

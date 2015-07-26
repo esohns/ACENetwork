@@ -228,7 +228,7 @@ AC_CONFIG_FILES([Makefile
                  test_i/Makefile
                  test_i/etc/Makefile
                  test_i/scripts/Makefile
-                 test_u/Makefile])
+                 test_u/Makefile
+                 test_u/etc/Makefile])
 
 AC_OUTPUT
-

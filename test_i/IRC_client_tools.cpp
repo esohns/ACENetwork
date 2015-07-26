@@ -1665,27 +1665,29 @@ IRC_Client_Tools::connect (bool asynchronousConnect_in,
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
   int result = -1;
-  IRC_Client_Connector_t connector;
-  IRC_Client_AsynchConnector_t asynch_connector;
-  IRC_Client_IClientConnector_t* connector_p = &connector;
+  IRC_Client_IConnection_Manager_t* connection_manager_p =
+    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  IRC_Client_Connector_t connector (connection_manager_p,
+                                    statisticReportingInterval_in);
+  IRC_Client_AsynchConnector_t asynch_connector (connection_manager_p,
+                                                 statisticReportingInterval_in);
+  IRC_Client_IConnector_t* connector_p = &connector;
   if (asynchronousConnect_in)
     connector_p = &asynch_connector;
-  IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
-  IRC_Client_ConnectorConfiguration connector_configuration;
+  //IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
+  //IRC_Client_ConnectorConfiguration connector_configuration;
 
   // step1: set up configuration passed to processing stream
   IRC_Client_Configuration configuration;
   Net_StreamUserData* user_data_p = NULL;
-  IRC_Client_IConnection_Manager_t* connection_manager_p =
-      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (connection_manager_p);
   // load defaults
   connection_manager_p->get (configuration,
                              user_data_p);
 
   // ************ socket configuration data ************
-  configuration.socketConfiguration.bufferSize =
-    NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
+  //configuration.socketConfiguration.bufferSize =
+  //  NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
   result =
     configuration.socketConfiguration.peerAddress.set (serverPortNumber_in,
                                                        serverHostname_in.c_str (),
@@ -1697,6 +1699,12 @@ IRC_Client_Tools::connect (bool asynchronousConnect_in,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
     goto error;
   } // end IF
+  configuration.socketHandlerConfiguration.messageAllocator =
+    messageAllocator_in;
+  configuration.socketHandlerConfiguration.socketConfiguration =
+    &configuration.socketConfiguration;
+  configuration.socketHandlerConfiguration.statisticCollectionInterval =
+    statisticReportingInterval_in;
   // ************ stream configuration data ****************
   configuration.streamConfiguration.crunchMessageBuffers =
     IRC_CLIENT_DEF_CRUNCH_MESSAGES;
@@ -1753,25 +1761,26 @@ IRC_Client_Tools::connect (bool asynchronousConnect_in,
 
   //  goto error;
   //} // end IF
-  socket_handler_configuration_p->bufferSize = IRC_CLIENT_BUFFER_SIZE;
-  socket_handler_configuration_p->messageAllocator = messageAllocator_in;
-  socket_handler_configuration_p->socketConfiguration =
-    &configuration.socketConfiguration;
-  socket_handler_configuration_p->statisticCollectionInterval =
-    statisticReportingInterval_in;
-  connector_configuration.connectionManager = connection_manager_p;
-  connector_configuration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
+  //socket_handler_configuration_p->bufferSize = IRC_CLIENT_BUFFER_SIZE;
+  //socket_handler_configuration_p->messageAllocator = messageAllocator_in;
+  //socket_handler_configuration_p->socketConfiguration =
+  //  &configuration.socketConfiguration;
+  //socket_handler_configuration_p->statisticCollectionInterval =
+  //  statisticReportingInterval_in;
+  //connector_configuration.connectionManager = connection_manager_p;
+  //connector_configuration.socketHandlerConfiguration =
+  //  &configuration.socketHandlerConfiguration;
   //connector_configuration.userData = user_data_p;
   // *NOTE*: fire-and-forget socket_handler_configuration_p here
-  if (!connector_p->initialize (connector_configuration))
+  //if (!connector_p->initialize (connector_configuration))
+  if (!connector_p->initialize (configuration.socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
 
     // clean up
     //delete user_data_p;
-    delete socket_handler_configuration_p;
+    //delete socket_handler_configuration_p;
 
     goto error;
   } // end IF

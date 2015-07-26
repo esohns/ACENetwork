@@ -31,6 +31,8 @@
 #include "common_ui_common.h"
 
 #include "net_configuration.h"
+#include "net_iconnector.h"
+#include "net_ilistener.h"
 #include "net_stream_common.h"
 
 #include "net_client_common.h"
@@ -40,7 +42,7 @@
 #include "net_server_common.h"
 
 // forward declarations
-struct Net_SocketConfiguration;
+struct Net_SocketHandlerConfiguration;
 class Stream_IAllocator;
 
 extern unsigned int random_seed;
@@ -69,17 +71,17 @@ struct Net_Client_SignalHandlerConfiguration
    , connector (NULL)
    , messageAllocator (NULL)
    , peerAddress ()
-   , socketConfiguration (NULL)
+   , socketHandlerConfiguration (NULL)
    , statisticCollectionInterval (0)
   {};
 
-  long                     actionTimerId;
-  Net_Client_IConnector_t* connector;
-  Stream_IAllocator*       messageAllocator;
-  ACE_INET_Addr            peerAddress;
-  Net_SocketConfiguration* socketConfiguration;
-  unsigned int             statisticCollectionInterval; // statistics collecting interval (second(s))
-                                                        // 0 --> DON'T collect statistics
+  long                            actionTimerId;
+  Net_IConnector_t*               connector;
+  Stream_IAllocator*              messageAllocator;
+  ACE_INET_Addr                   peerAddress;
+  Net_SocketHandlerConfiguration* socketHandlerConfiguration;
+  unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s))
+                                                               // 0 --> DON'T collect statistics
 };
 
 struct Net_GTK_CBData
@@ -100,7 +102,7 @@ struct Net_GTK_CBData
   bool                                  allowUserRuntimeStatistic;
   Net_GTK_Events_t                      eventStack;
   Common_UI_GTKState                    GTKState;
-  Net_Server_IListener_t*               listenerHandle;             // *NOTE*: server only !
+  Net_IListener_t*                      listenerHandle;             // *NOTE*: server only !
   Common_MessageStack_t                 logStack;
   Net_Client_SignalHandlerConfiguration signalHandlerConfiguration; // *NOTE*: client only !
   ACE_SYNCH_RECURSIVE_MUTEX             stackLock;

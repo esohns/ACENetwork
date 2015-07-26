@@ -26,20 +26,18 @@
 #include "net_macros.h"
 
 template <typename AddressType,
-          typename SocketConfigurationType,
           typename ConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename UserDataType>
 Net_ConnectionBase_T<AddressType,
-                     SocketConfigurationType,
                      ConfigurationType,
-                     UserDataType,
                      StateType,
                      StatisticContainerType,
-                     StreamType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                        unsigned int statisticCollectionInterval_in)
+                     StreamType,
+                     UserDataType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                          unsigned int statisticCollectionInterval_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
  , configuration_ ()
@@ -60,11 +58,14 @@ Net_ConnectionBase_T<AddressType,
     ACE_Time_Value interval (statisticCollectionInterval_, 0);
     ACE_ASSERT (statisticCollectHandlerID_ == -1);
     ACE_Event_Handler* handler_p = &statisticCollectHandler_;
+    Common_Timer_Manager_t* timer_manager_p =
+      COMMON_TIMERMANAGER_SINGLETON::instance ();
+    ACE_ASSERT (timer_manager_p);
     statisticCollectHandlerID_ =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
-                                                                  NULL,                       // argument
-                                                                  COMMON_TIME_NOW + interval, // first wakeup time
-                                                                  interval);                  // interval
+      timer_manager_p->schedule_timer (handler_p,                  // event handler
+                                       NULL,                       // argument
+                                       COMMON_TIME_NOW + interval, // first wakeup time
+                                       interval);                  // interval
     if (statisticCollectHandlerID_ == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(), continuing\n")));
@@ -77,7 +78,6 @@ Net_ConnectionBase_T<AddressType,
 
   // initialize configuration/user data
 //  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
-  UserDataType* user_data_p = NULL;
   if (manager_)
   {
     try
@@ -101,19 +101,17 @@ Net_ConnectionBase_T<AddressType,
 }
 
 template <typename AddressType,
-          typename SocketConfigurationType,
           typename ConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename UserDataType>
 Net_ConnectionBase_T<AddressType,
-                     SocketConfigurationType,
                      ConfigurationType,
-                     UserDataType,
                      StateType,
                      StatisticContainerType,
-                     StreamType>::~Net_ConnectionBase_T ()
+                     StreamType,
+                     UserDataType>::~Net_ConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
 
@@ -143,20 +141,18 @@ Net_ConnectionBase_T<AddressType,
 }
 
 template <typename AddressType,
-          typename SocketConfigurationType,
           typename ConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename UserDataType>
 bool
 Net_ConnectionBase_T<AddressType,
-                     SocketConfigurationType,
                      ConfigurationType,
-                     UserDataType,
                      StateType,
                      StatisticContainerType,
-                     StreamType>::registerc ()
+                     StreamType,
+                     UserDataType>::registerc ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::registerc"));
 
@@ -236,20 +232,18 @@ Net_ConnectionBase_T<AddressType,
 }
 
 template <typename AddressType,
-          typename SocketConfigurationType,
           typename ConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename UserDataType>
 void
 Net_ConnectionBase_T<AddressType,
-                     SocketConfigurationType,
                      ConfigurationType,
-                     UserDataType,
                      StateType,
                      StatisticContainerType,
-                     StreamType>::deregister ()
+                     StreamType,
+                     UserDataType>::deregister ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::deregister"));
 
@@ -300,20 +294,18 @@ Net_ConnectionBase_T<AddressType,
 }
 
 template <typename AddressType,
-          typename SocketConfigurationType,
           typename ConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename UserDataType>
 const ConfigurationType&
 Net_ConnectionBase_T<AddressType,
-                     SocketConfigurationType,
                      ConfigurationType,
-                     UserDataType,
                      StateType,
                      StatisticContainerType,
-                     StreamType>::get () const
+                     StreamType,
+                     UserDataType>::get () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::get"));
 
@@ -321,43 +313,41 @@ Net_ConnectionBase_T<AddressType,
 }
 
 template <typename AddressType,
-          typename SocketConfigurationType,
           typename ConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename UserDataType>
 bool
 Net_ConnectionBase_T<AddressType,
-                     SocketConfigurationType,
                      ConfigurationType,
-                     UserDataType,
                      StateType,
                      StatisticContainerType,
-                     StreamType>::initialize (const ConfigurationType& configuration_in)
+                     StreamType,
+                     UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));
 
+  // *NOTE*: when using a connection manager, the (default) configuration is
+  //         retrieved in the ctor
   configuration_ = configuration_in;
 
   return true;
 }
 
 template <typename AddressType,
-          typename SocketConfigurationType,
           typename ConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename UserDataType>
 const StateType&
 Net_ConnectionBase_T<AddressType,
-                     SocketConfigurationType,
                      ConfigurationType,
-                     UserDataType,
                      StateType,
                      StatisticContainerType,
-                     StreamType>::state () const
+                     StreamType,
+                     UserDataType>::state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::state"));
 
@@ -365,20 +355,18 @@ Net_ConnectionBase_T<AddressType,
 }
 
 template <typename AddressType,
-          typename SocketConfigurationType,
           typename ConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          typename UserDataType>
 Net_Connection_Status
 Net_ConnectionBase_T<AddressType,
-                     SocketConfigurationType,
                      ConfigurationType,
-                     UserDataType,
                      StateType,
                      StatisticContainerType,
-                     StreamType>::status () const
+                     StreamType,
+                     UserDataType>::status () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::status"));
 

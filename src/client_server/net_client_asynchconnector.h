@@ -31,36 +31,38 @@
 #include "stream_common.h"
 
 #include "net_connection_manager_common.h"
+#include "net_iconnector.h"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "net_netlinkconnection.h"
 #endif
 #include "net_udpconnection.h"
 
-#include "net_client_iconnector.h"
-
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          ///////////////////////////////
+          typename AddressType,
           typename ConfigurationType,
-          typename ConnectorConfigurationType,
-          typename UserDataType,
           typename StateType,
           typename StreamType,
-          typename HandlerType>
+          ///////////////////////////////
+          typename HandlerConfigurationType,
+          ///////////////////////////////
+          typename UserDataType>
 class Net_Client_AsynchConnector_T
  : public ACE_Asynch_Connector<HandlerType>
- , public Net_Client_IConnector_T<AddressType,
-                                  ConnectorConfigurationType>
+ , public Net_IConnector_T<AddressType,
+                           HandlerConfigurationType>
 {
  public:
   typedef Net_IConnectionManager_T<AddressType,
-                                   SocketConfigurationType,
                                    ConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    Stream_Statistic,
-                                   StreamType> ICONNECTION_MANAGER_T;
+                                   StreamType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_Client_AsynchConnector_T ();
+  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                                unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
   virtual ~Net_Client_AsynchConnector_T ();
 
   // override default connect strategy
@@ -70,15 +72,10 @@ class Net_Client_AsynchConnector_T
 
   // implement Net_Client_IConnector_T
 
-  // *IMPORTANT NOTE*: fire-and-forget API: the first (!) generated handler
-  //                   assumes responsibility for the socket handler
-  //                   configuration (member). The handler retrieves the
-  //                   configuration object via act ()
-  //                   --> instances must be (re)initialize()d for every new
-  //                       connection
-  virtual bool initialize (const ConnectorConfigurationType&);
+  // *NOTE*: handlers receive the configuration object via act ()
+  virtual bool initialize (const HandlerConfigurationType&);
   // *NOTE*: this is just a stub
-  virtual const ConnectorConfigurationType& get () const;
+  virtual const HandlerConfigurationType& get () const;
 
   virtual bool useReactor () const; // ? : uses proactor
 
@@ -92,54 +89,74 @@ class Net_Client_AsynchConnector_T
  private:
   typedef ACE_Asynch_Connector<HandlerType> inherited;
 
+  typedef Net_IConnector_T<AddressType,
+                           HandlerConfigurationType> ICONNECTOR_T;
+
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 
-  ConnectorConfigurationType configuration_;
+  HandlerConfigurationType configuration_;
+
+  ICONNECTION_MANAGER_T*   connectionManager_;
+  unsigned int             statisticCollectionInterval_;
 };
 
 /////////////////////////////////////////
 
 // partial specialization (for UDP)
-template <typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          ///////////////////////////////
           typename ConfigurationType,
-          typename ConnectorConfigurationType,
-          typename UserDataType,
           typename StateType,
-          typename StreamType>
-class Net_Client_AsynchConnector_T<ACE_INET_Addr,
-                                   SocketConfigurationType,
+          typename StreamType,
+          ///////////////////////////////
+          typename HandlerConfigurationType,
+          ///////////////////////////////
+          typename UserDataType>
+class Net_Client_AsynchConnector_T<Net_AsynchUDPConnection_T<HandlerType,
+
+                                                             StateType,
+
+                                                             HandlerConfigurationType,
+
+                                                             UserDataType>,
+                                   //////
+                                   ACE_INET_Addr,
                                    ConfigurationType,
-                                   ConnectorConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    StreamType,
-                                   Net_AsynchUDPConnection_T<UserDataType,
-                                                             StateType,
-                                                             HandlerType,
-                                                             ConnectorConfigurationType> >
- : public ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
+                                   //////
+                                   HandlerConfigurationType,
+                                   //////
+                                   UserDataType>
+ : public ACE_Asynch_Connector<Net_AsynchUDPConnection_T<HandlerType,
+
                                                          StateType,
-                                                         HandlerType,
-                                                         ConnectorConfigurationType> >
- , public Net_Client_IConnector_T<ACE_INET_Addr,
-                                  ConnectorConfigurationType>
+
+                                                         HandlerConfigurationType,
+
+                                                         UserDataType> >
+ , public Net_IConnector_T<ACE_INET_Addr,
+                           HandlerConfigurationType>
 {
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   SocketConfigurationType,
                                    ConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    Stream_Statistic,
-                                   StreamType> ICONNECTION_MANAGER_T;
-  typedef Net_AsynchUDPConnection_T<UserDataType,
+                                   StreamType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
+  typedef Net_AsynchUDPConnection_T<HandlerType,
+                                    /////
                                     StateType,
-                                    HandlerType,
-                                    ConnectorConfigurationType> CONNECTION_T;
+                                    /////
+                                    HandlerConfigurationType,
+                                    /////
+                                    UserDataType> CONNECTION_T;
 
-  Net_Client_AsynchConnector_T ();
+  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                                unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
   virtual ~Net_Client_AsynchConnector_T ();
 
   // override default connect strategy
@@ -149,15 +166,10 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
   // implement Net_Client_IConnector_T
 
-  // *IMPORTANT NOTE*: fire-and-forget API: the first (!) generated handler
-  //                   assumes responsibility for the socket handler
-  //                   configuration (member). The handler retrieves the
-  //                   configuration object via act ()
-  //                   --> instances must be (re)initialize()d for every new
-  //                       connection
-  virtual bool initialize (const ConnectorConfigurationType&);
+  // *NOTE*: handlers receive the configuration object via act ()
+  virtual bool initialize (const HandlerConfigurationType&);
   // *NOTE*: this is just a stub
-  virtual const ConnectorConfigurationType& get () const;
+  virtual const HandlerConfigurationType& get () const;
 
   virtual bool useReactor () const; // ? : uses proactor
 
@@ -166,57 +178,73 @@ class Net_Client_AsynchConnector_T<ACE_INET_Addr,
 
  protected:
   // override default creation strategy
-  //virtual CONNECTION_T* make_handler (void);
-   virtual Net_AsynchUDPConnection_T<UserDataType,
-                                     StateType,
-                                     HandlerType,
-                                     ConnectorConfigurationType>* make_handler (void);
+  virtual Net_AsynchUDPConnection_T<HandlerType,
+                                    /////
+                                    StateType,
+                                    /////
+                                    HandlerConfigurationType,
+                                    /////
+                                    UserDataType>* make_handler (void);
 
  private:
-  typedef ACE_Asynch_Connector<Net_AsynchUDPConnection_T<UserDataType,
+  typedef ACE_Asynch_Connector<Net_AsynchUDPConnection_T<HandlerType,
+
                                                          StateType,
-                                                         HandlerType,
-                                                         ConnectorConfigurationType> > inherited;
+
+                                                         HandlerConfigurationType,
+
+                                                         UserDataType> > inherited;
+
+  typedef Net_IConnector_T<ACE_INET_Addr,
+                           HandlerConfigurationType> ICONNECTOR_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 
-  ConnectorConfigurationType configuration_;
+  HandlerConfigurationType configuration_;
+
+  ICONNECTION_MANAGER_T*   connectionManager_;
+  unsigned int             statisticCollectionInterval_;
 };
 
 /////////////////////////////////////////
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 // partial specialization (for Netlink)
-template <typename SocketConfigurationType,
-          typename HandlerType,
+template <typename HandlerType,
+          ///////////////////////////////
           typename ConfigurationType,
-          typename ConnectorConfigurationType,
-          typename UserDataType,
           typename StateType,
-          typename StreamType>
-class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
-                                   SocketConfigurationType,
+          typename StreamType,
+          ///////////////////////////////
+          typename HandlerConfigurationType,
+          ///////////////////////////////
+          typename UserDataType>
+class Net_Client_AsynchConnector_T<HandlerType,
+                                   //////
+                                   ACE_Netlink_Addr,
                                    ConfigurationType,
-                                   ConnectorConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    StreamType,
-                                   HandlerType>
+                                   //////
+                                   HandlerConfigurationType,
+                                   //////
+                                   UserDataType>
  : public ACE_Asynch_Connector<HandlerType>
- , public Net_Client_IConnector_T<ACE_Netlink_Addr,
-                                  ConnectorConfigurationType>
+ , public Net_IConnector_T<ACE_Netlink_Addr,
+                           HandlerConfigurationType>
 {
  public:
   typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
-                                   SocketConfigurationType,
                                    ConfigurationType,
-                                   UserDataType,
                                    StateType,
                                    Stream_Statistic,
-                                   StreamType> ICONNECTION_MANAGER_T;
+                                   StreamType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_Client_AsynchConnector_T ();
+  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                                unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
   virtual ~Net_Client_AsynchConnector_T ();
 
   // override default connect strategy
@@ -226,15 +254,10 @@ class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
 
   // implement Net_Client_IConnector_T
 
-  // *IMPORTANT NOTE*: fire-and-forget API: the first (!) generated handler
-  //                   assumes responsibility for the socket handler
-  //                   configuration (member). The handler retrieves the
-  //                   configuration object via act ()
-  //                   --> instances must be (re)initialize()d for every new
-  //                       connection
-  virtual bool initialize (const ConnectorConfigurationType&);
+  // *NOTE*: handlers receive the configuration object via act ()
+  virtual bool initialize (const HandlerConfigurationType&);
   // *NOTE*: this is just a stub
-  virtual const ConnectorConfigurationType& get () const;
+  virtual const HandlerConfigurationType& get () const;
 
   //virtual bool useReactor () const; // ? : uses proactor
 
@@ -248,11 +271,17 @@ class Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
  private:
   typedef ACE_Asynch_Connector<HandlerType> inherited;
 
+  typedef Net_IConnector_T<ACE_Netlink_Addr,
+                           HandlerConfigurationType> ICONNECTOR_T;
+
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 
-  ConnectorConfigurationType configuration_;
+  HandlerConfigurationType configuration_;
+
+  ICONNECTION_MANAGER_T*   connectionManager_;
+  unsigned int             statisticCollectionInterval_;
 };
 #endif
 

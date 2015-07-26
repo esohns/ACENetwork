@@ -1,6 +1,9 @@
 // *NOTE*: uncomment the line corresponding to your platform !
 #include "ace/config-linux.h"
 
+//// *NOTE*: needed for ACE_IOStream
+//#define ACE_HAS_STANDARD_CPP_LIBRARY 1
+
 // *NOTE*: don't use the regular pipe-based mechanism,
 // it has several drawbacks (see relevant documentation)
 #define ACE_HAS_REACTOR_NOTIFICATION_QUEUE
@@ -19,9 +22,10 @@
 //#include <linux/posix_types.h>
 
 // *NOTE*: ACE_IOStream support requires these definitions
-#define ACE_USES_OLD_IOSTREAMS
-#undef ACE_LACKS_ACE_IOSTREAM
-// *NOTE*: iostream.h from compat-gcc-34-c++ (3.4.6) has no support for
+////#undef ACE_LACKS_IOSTREAM_TOTALLY
+//#define ACE_USES_OLD_IOSTREAMS
+//#undef ACE_LACKS_ACE_IOSTREAM
+// *NOTE*: iostream(.h) [from compat-gcc-34-c++ (3.4.6)] has no support for
 //         iostream::ipfx/ipsx
 #define ACE_LACKS_IOSTREAM_FX
 
@@ -33,4 +37,3 @@
 // *TODO*: remove this define and add platform/compiler-specific #ifdefs to
 //         IOStream.h
 #define ACE_LACKS_SIGNED_CHAR
-

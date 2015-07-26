@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 #include "ace/Svc_Handler.h"
@@ -28,28 +29,53 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+          typename UserDataType,
+          typename ModuleConfigurationType>
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                         unsigned int statisticsCollectionInterval_in)
+                          UserDataType,
+                          ModuleConfigurationType>::Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                               unsigned int statisticCollectionInterval_in)
  : inherited ()
  , inherited2 (interfaceHandle_in,
-               statisticsCollectionInterval_in)
+               statisticCollectionInterval_in)
+ , currentReadBuffer_ (NULL)
+ , currentWriteBuffer_ (NULL)
+ , sendLock_ ()
+ , stream_ ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::Net_StreamTCPSocketBase_T"));
+
+}
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType>
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
+                          ConfigurationType,
+                          StateType,
+                          StatisticContainerType,
+                          StreamType,
+                          UserDataType,
+                          ModuleConfigurationType>::Net_StreamTCPSocketBase_T ()
+ : inherited ()
+ , inherited2 (NULL,
+               0)
  , currentReadBuffer_ (NULL)
  , currentWriteBuffer_ (NULL)
  , sendLock_ ()
@@ -59,24 +85,22 @@ Net_StreamTCPSocketBase_T<AddressType,
 
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+          typename UserDataType,
+          typename ModuleConfigurationType>
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::~Net_StreamTCPSocketBase_T ()
+                          UserDataType,
+                          ModuleConfigurationType>::~Net_StreamTCPSocketBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::~Net_StreamTCPSocketBase_T"));
 
@@ -106,25 +130,23 @@ Net_StreamTCPSocketBase_T<AddressType,
     currentWriteBuffer_->release ();
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 int
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::open (void* arg_in)
+                          UserDataType,
+                          ModuleConfigurationType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::open"));
 
@@ -262,32 +284,30 @@ Net_StreamTCPSocketBase_T<AddressType,
     ACE_UNUSED_ARG (error);
 
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
     return -1;
   } // end IF
 
   return 0;
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 int
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::close (u_long arg_in)
+                          UserDataType,
+                          ModuleConfigurationType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::close"));
 
@@ -296,13 +316,14 @@ Net_StreamTCPSocketBase_T<AddressType,
   // [*NOTE*: override the default behavior of a ACE_Svc_Handler,
   // which would call handle_close() AGAIN]
 
-  // *NOTE*: this method will be invoked
+  // this method will be invoked:
   // - by any worker after returning from svc()
-  //    --> in this case, this should be a NOP (triggered from handle_close(),
-  //        which was invoked by the reactor) - we override the default
-  //        behavior of a ACE_Svc_Handler, which would call handle_close() AGAIN
+  //    --> in this case, this is essentially a NOP
   // - by the connector/acceptor when open() fails (e.g. too many connections !)
   //    --> shutdown
+  //   *NOTE*: this gets invoked from handle_close(), in turn invoked by the
+  //           reactor) - override the default behavior of a ACE_Svc_Handler,
+  //           which would call handle_close() again erroneously
 
   switch (arg_in)
   {
@@ -324,6 +345,8 @@ Net_StreamTCPSocketBase_T<AddressType,
 //       else
 //         ACE_DEBUG ((LM_DEBUG,
 //                     ACE_TEXT ("worker thread (ID: %t) leaving...\n")));
+
+        result = 0;
 
         break;
       } // end IF
@@ -347,12 +370,9 @@ Net_StreamTCPSocketBase_T<AddressType,
         handle_close (handle,
                       ACE_Event_Handler::ALL_EVENTS_MASK);
       if (result == -1)
-      {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to SocketHandlerType::handle_close(%d,%d): \"%m\", aborting\n"),
+                    ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
                     handle, ACE_Event_Handler::ALL_EVENTS_MASK));
-        return -1;
-      } // end IF
 
       //  step2: release the socket handle
       // *IMPORTANT NOTE*: this wakes up any reactor threads that may still be
@@ -361,8 +381,8 @@ Net_StreamTCPSocketBase_T<AddressType,
       if (arg_in != CLOSE_DURING_NEW_CONNECTION) // <-- failed to connect ?
       {
         ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-        result = ACE_OS::closesocket (handle);
-        if (result == -1)
+        int result_2 = ACE_OS::closesocket (handle);
+        if (result_2 == -1)
         {
           int error = ACE_OS::last_error ();
           ACE_UNUSED_ARG (error);
@@ -373,7 +393,44 @@ Net_StreamTCPSocketBase_T<AddressType,
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
                         handle));
+
+          result = -1;
         } // end IF
+      } // end IF
+
+      break;
+    }
+    case NET_CONNECTION_CLOSE_REASON_USER_ABORT:
+    {
+      // step1: shutdown operations, release any connection resources
+      ACE_HANDLE handle = inherited::get_handle ();
+      // *NOTE*: may 'delete this'
+      result = handle_close (handle,
+                             ACE_Event_Handler::ALL_EVENTS_MASK);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
+                    handle, ACE_Event_Handler::ALL_EVENTS_MASK));
+
+      //  step2: release the socket handle
+      // *IMPORTANT NOTE*: wakes up any reactor thread(s) that may be working on
+      //                   the handle
+      if (handle != ACE_INVALID_HANDLE)
+      {
+        int result_2 = ACE_OS::closesocket (handle);
+        if (result_2 == -1)
+        {
+          int error = ACE_OS::last_error ();
+          // *TODO*: on Win32, ACE_OS::close (--> ::CloseHandle) throws an
+          //         exception, so this looks like a resource leak...
+          if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
+                        handle));
+
+          result = -1;
+        } // end IF
+        //    inherited::handle (ACE_INVALID_HANDLE);
       } // end IF
 
       break;
@@ -383,32 +440,29 @@ Net_StreamTCPSocketBase_T<AddressType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid argument (was: %u), aborting\n"),
                   arg_in));
-      return -1;
     }
   } // end SWITCH
 
-  return 0;
+  return result;
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 int
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::handle_input (ACE_HANDLE handle_in)
+                          UserDataType,
+                          ModuleConfigurationType>::handle_input (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::handle_input"));
 
@@ -504,25 +558,23 @@ Net_StreamTCPSocketBase_T<AddressType,
   return result;
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 int
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::handle_output (ACE_HANDLE handle_in)
+                          UserDataType,
+                          ModuleConfigurationType>::handle_output (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::handle_output"));
 
@@ -673,26 +725,24 @@ release:
   return result;
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 int
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::handle_close (ACE_HANDLE handle_in,
-                                                            ACE_Reactor_Mask mask_in)
+                          UserDataType,
+                          ModuleConfigurationType>::handle_close (ACE_HANDLE handle_in,
+                                                                  ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::handle_close"));
 
@@ -771,7 +821,7 @@ Net_StreamTCPSocketBase_T<AddressType,
                                     mask_in);
   if (result == -1)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to SocketHandlerType::handle_close(%d, %d): \"%m\", continuing\n"),
+                ACE_TEXT ("failed to HandlerType::handle_close(%d, %d): \"%m\", continuing\n"),
                 handle, mask_in));
 
   // step4: deregister with the connection manager (if any)
@@ -781,25 +831,23 @@ Net_StreamTCPSocketBase_T<AddressType,
   return result;
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 unsigned int
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::increase ()
+                          UserDataType,
+                          ModuleConfigurationType>::increase ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::increase"));
 
@@ -811,25 +859,23 @@ Net_StreamTCPSocketBase_T<AddressType,
   return count;
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 unsigned int
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::decrease ()
+                          UserDataType,
+                          ModuleConfigurationType>::decrease ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::decrease"));
 
@@ -852,19 +898,19 @@ Net_StreamTCPSocketBase_T<AddressType,
 //          typename SocketConfigurationType,
 //          typename ConfigurationType,
 //          typename UserDataType,
-//          typename SessionDataType,
+//          typename StateType,
 //          typename StatisticContainerType,
 //          typename StreamType,
-//          typename SocketHandlerType>
+//          typename HandlerType>
 //ACE_Event_Handler::Reference_Count
 //Net_StreamTCPSocketBase_T<AddressType,
 //                          SocketConfigurationType,
 //                          ConfigurationType,
 //                          UserDataType,
-//                          SessionDataType,
+//                          StateType,
 //                          StatisticContainerType,
 //                          StreamType,
-//                          SocketHandlerType>::add_reference (void)
+//                          HandlerType>::add_reference (void)
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::add_reference"));
 //
@@ -880,19 +926,19 @@ Net_StreamTCPSocketBase_T<AddressType,
 //          typename SocketConfigurationType,
 //          typename ConfigurationType,
 //          typename UserDataType,
-//          typename SessionDataType,
+//          typename StateType,
 //          typename StatisticContainerType,
 //          typename StreamType,
-//          typename SocketHandlerType>
+//          typename HandlerType>
 //ACE_Event_Handler::Reference_Count
 //Net_StreamTCPSocketBase_T<AddressType,
 //                          SocketConfigurationType,
 //                          ConfigurationType,
 //                          UserDataType,
-//                          SessionDataType,
+//                          StateType,
 //                          StatisticContainerType,
 //                          StreamType,
-//                          SocketHandlerType>::remove_reference (void)
+//                          HandlerType>::remove_reference (void)
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::remove_reference"));
 //
@@ -911,25 +957,23 @@ Net_StreamTCPSocketBase_T<AddressType,
 //  return count;
 //}
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 bool
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::collect (StatisticContainerType& data_out)
+                          UserDataType,
+                          ModuleConfigurationType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::collect"));
 
@@ -946,25 +990,23 @@ Net_StreamTCPSocketBase_T<AddressType,
   return false;
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 void
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::report () const
+                          UserDataType,
+                          ModuleConfigurationType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::report"));
 
@@ -979,27 +1021,25 @@ Net_StreamTCPSocketBase_T<AddressType,
   }
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 void
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::info (ACE_HANDLE& handle_out,
-                                                    AddressType& localSAP_out,
-                                                    AddressType& remoteSAP_out) const
+                          UserDataType,
+                          ModuleConfigurationType>::info (ACE_HANDLE& handle_out,
+                                                          AddressType& localSAP_out,
+                                                          AddressType& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::info"));
 
@@ -1022,25 +1062,23 @@ Net_StreamTCPSocketBase_T<AddressType,
                 ACE_TEXT ("failed to ACE_SOCK::get_remote_addr(): \"%m\", continuing\n")));
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 unsigned int
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::id () const
+                          UserDataType,
+                          ModuleConfigurationType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::id"));
 
@@ -1051,103 +1089,74 @@ Net_StreamTCPSocketBase_T<AddressType,
 #endif
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 const StreamType&
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::stream () const
+                          UserDataType,
+                          ModuleConfigurationType>::stream () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::stream"));
 
   return stream_;
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 void
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::close ()
+                          UserDataType,
+                          ModuleConfigurationType>::close ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::close"));
 
   int result = -1;
 
-  // step1: shutdown operations
-  ACE_HANDLE handle = inherited::get_handle ();
-  // *NOTE*: may 'delete this'
-  result = handle_close (handle,
-                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  result = this->close (NET_CONNECTION_CLOSE_REASON_USER_ABORT);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
-
-  //  step2: release the socket handle
-  // *IMPORTANT NOTE*: wakes up any reactor thread(s) that may be working on the
-  //                   handle
-  if (handle != ACE_INVALID_HANDLE)
-  {
-    result = ACE_OS::closesocket (handle);
-    if (result == -1)
-    {
-      int error = ACE_OS::last_error ();
-      // *TODO*: on Win32, ACE_OS::close (--> ::CloseHandle) throws an
-      //         exception, so this looks like a resource leak...
-      if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
-                    handle));
-    } // end IF
-    //    inherited::handle (ACE_INVALID_HANDLE);
-  } // end IF
+                ACE_TEXT ("failed to Net_StreamTCPSocketBase_T::close(NET_CONNECTION_CLOSE_REASON_USER_ABORT): \"%m\", continuing\n")));
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 void
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::dump_state () const
+                          UserDataType,
+                          ModuleConfigurationType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::dump_state"));
 
@@ -1182,25 +1191,23 @@ Net_StreamTCPSocketBase_T<AddressType,
               ACE_TEXT (peer_address.c_str ())));
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename AddressType,
           typename ConfigurationType,
-          typename ModuleConfigurationType,
-          typename UserDataType,
-          typename SessionDataType,
+          typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename SocketHandlerType>
+          typename UserDataType,
+          typename ModuleConfigurationType>
 ACE_Message_Block*
-Net_StreamTCPSocketBase_T<AddressType,
-                          SocketConfigurationType,
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
                           ConfigurationType,
-                          ModuleConfigurationType,
-                          UserDataType,
-                          SessionDataType,
+                          StateType,
                           StatisticContainerType,
                           StreamType,
-                          SocketHandlerType>::allocateMessage (unsigned int requestedSize_in)
+                          UserDataType,
+                          ModuleConfigurationType>::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::allocateMessage"));
 

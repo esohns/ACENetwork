@@ -190,13 +190,13 @@ struct IRC_Client_InputThreadData
 
 enum IRC_Client_CharacterEncoding
 {
+  CHARACTERENCODING_INVALID = -1,
   CHARACTERENCODING_ASCII = 0,
   CHARACTERENCODING_LOCALE, // *NOTE*: may lead to problems if clients do not
                             //         share the same configuration
   CHARACTERENCODING_UTF8,
   ///////////////////////////////////////
-  CHARACTERENCODING_MAX,
-  CHARACTERENCODING_INVALID
+  CHARACTERENCODING_MAX
 };
 
 #endif

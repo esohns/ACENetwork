@@ -51,10 +51,12 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // forward declarations
 class ACE_Time_Value;
 
+#if !defined (ACE_LACKS_ACE_IOSTREAM)
 #  if defined (ACE_HAS_STRING_CLASS)
 template <class STREAM> STREAM & operator>> (STREAM &stream, ACE_Quoted_String &str);
 template <class STREAM> STREAM & operator<< (STREAM &stream, ACE_Quoted_String &str);
 #  endif /* defined (ACE_HAS_STRING_CLASS) */
+#  endif /* !defined (ACE_LACKS_ACE_IOSTREAM) */
 
 /**
  * @class ACE_IOStream_alt_T
@@ -119,6 +121,10 @@ public:
   int eof (void) const;
 
 #  if defined (ACE_HAS_STRING_CLASS)
+  // *TODO*: add the required #defines to config(-linux).h and remove this
+  //         workaround (see IOStream.h)
+  typedef std::string ACE_IOStream_String;
+
   /**
    * A simple string operator.  The base <iostream> has them for char*
    * but that isn't always the best thing for a <String>.  If we don't

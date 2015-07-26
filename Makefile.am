@@ -1,5 +1,3 @@
-#ACLOCAL_AMFLAGS = -I m4
-
 SUBDIRS = po \
   scripts \
   modules \
@@ -9,4 +7,3 @@ SUBDIRS = po \
 
 EXTRA_DIST = \
   autogen.sh
-

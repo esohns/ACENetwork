@@ -130,7 +130,6 @@
     <ClInclude Include="..\..\src\client_server\net_client_connector_common.h" />
     <ClInclude Include="..\..\src\client_server\net_client_defines.h" />
     <ClInclude Include="..\..\src\client_server\net_client_exports.h" />
-    <ClInclude Include="..\..\src\client_server\net_client_iconnector.h" />
     <ClInclude Include="..\..\src\client_server\stdafx.h" />
   </ItemGroup>
   <ItemGroup>

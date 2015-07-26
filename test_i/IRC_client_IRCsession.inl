@@ -121,9 +121,9 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
 
     return;
   } // end IF
-  state_.controller =
+  inherited::state_.controller =
     dynamic_cast<IRC_Client_IIRCControl*> (const_cast<typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
-  if (!state_.controller)
+  if (!inherited::state_.controller)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<IRC_Client_IIRCControl*> failed, returning\n"),
@@ -137,20 +137,20 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
 
   // step0b: set initial nickname
   IRC_Client_Configuration* configuration_p = NULL;
-  if (!inherited::manager_)
-  {
-    const IRC_Client_Configuration& configuration_r = inherited::get ();
-    configuration_p = &const_cast<IRC_Client_Configuration&> (configuration_r);
-  } // end IF
-  else
+  //if (!inherited::manager_)
+  //{
+  //  const IRC_Client_Configuration& configuration_r = inherited::get ();
+  //  configuration_p = &const_cast<IRC_Client_Configuration&> (configuration_r);
+  //} // end IF
+  //else
     configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
   // sanity check(s)
   ACE_ASSERT (configuration_p);
-  state_.nickname =
+  inherited::state_.nickname =
     configuration_p->protocolConfiguration.loginOptions.nickname;
 
   // step1: initialize output
-  state_.cursesState = configuration_p->cursesState;
+  inherited::state_.cursesState = configuration_p->cursesState;
   logToFile_ = configuration_p->logToFile;
   if (logToFile_)
   {
@@ -199,7 +199,7 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
       !inputHandler_)
   {
     ACE_NEW_NORETURN (inputHandler_,
-                      IRC_Client_InputHandler (&state_,
+                      IRC_Client_InputHandler (&(inherited::state_),
                                                configuration_p->useReactor));
     if (!inputHandler_)
     {
@@ -360,7 +360,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
         {
           log (message_in);
 
-          state_.isFirstMessage = true;
+          inherited::state_.isFirstMessage = true;
 
           break;
         }
@@ -421,8 +421,8 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           converter >> hop_count;
           real_name = message_in.params.back ().substr (ws_position + 1);
 
-          if (state_.isFirstMessage)
-            state_.isFirstMessage = false;
+          if (inherited::state_.isFirstMessage)
+            inherited::state_.isFirstMessage = false;
 
           //// ignore own record
           //if (nick == nickname_)
@@ -535,8 +535,8 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
         case IRC_Client_IRCMessage::NICK:
         {
           // remember changed nickname...
-          std::string old_nick = state_.nickname;
-          state_.nickname = message_in.params.front ();
+          std::string old_nick = inherited::state_.nickname;
+          inherited::state_.nickname = message_in.params.front ();
 
           // *WARNING*: falls through !
         }
@@ -545,7 +545,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
         {
           log (message_in);
 
-          if ((message_in.prefix.origin == state_.nickname) &&
+          if ((message_in.prefix.origin == inherited::state_.nickname) &&
               (command == IRC_Client_IRCMessage::QUIT))
             error (message_in); // --> show on statusbar as well...
 
@@ -558,18 +558,18 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           // - stranger entering the channel
 
           // reply from a successful join request ?
-          if (message_in.prefix.origin == state_.nickname)
+          if (message_in.prefix.origin == inherited::state_.nickname)
           {
             std::string channel = message_in.params.front ();
-            if ((state_.channel.empty ()) &&
-                state_.cursesState)
+            if ((inherited::state_.channel.empty ()) &&
+                inherited::state_.cursesState)
               if (!curses_join (channel,
-                                *state_.cursesState))
+                                *inherited::state_.cursesState))
                 ACE_DEBUG ((LM_ERROR,
                             ACE_TEXT ("failed to curses_join(\"%s\"), continuing\n"),
                             ACE_TEXT (channel.c_str ())));
 
-            state_.channel = channel;
+            inherited::state_.channel = channel;
 
             break;
           } // end IF
@@ -586,18 +586,18 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           // - someone left a common channel
 
           // reply from a successful part request ?
-          if (message_in.prefix.origin == state_.nickname)
+          if (message_in.prefix.origin == inherited::state_.nickname)
           {
             std::string channel = message_in.params.front ();
-            if ((!state_.channel.empty ()) &&
-                 state_.cursesState)
+            if ((!inherited::state_.channel.empty ()) &&
+                 inherited::state_.cursesState)
               if (!curses_part (channel,
-                                *state_.cursesState))
+                                *inherited::state_.cursesState))
                 ACE_DEBUG ((LM_ERROR,
                             ACE_TEXT ("failed to curses_part(\"%s\"), continuing\n"),
                             ACE_TEXT (channel.c_str ())));
 
-            state_.channel.clear ();
+            inherited::state_.channel.clear ();
             break;
           } // end IF
 
@@ -618,17 +618,17 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
             message_in.params.begin ();
           param_iterator++;
 
-          if (message_in.params.front () == state_.nickname)
+          if (message_in.params.front () == inherited::state_.nickname)
           {
             // --> user mode
             IRC_Client_Tools::merge (message_in.params.back (),
-                                     state_.userModes);
+                                     inherited::state_.userModes);
           } // end IF
           else
           {
             // --> channel mode
             IRC_Client_Tools::merge (*param_iterator,
-                                     state_.channelModes);
+                                     inherited::state_.channelModes);
           } // end ELSE
 
           break;
@@ -663,7 +663,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
 
           // private message ?
 //          std::string target_id;
-          if (state_.nickname == message_in.params.front ())
+          if (inherited::state_.nickname == message_in.params.front ())
           {
             // --> send to private conversation handler
 
@@ -756,19 +756,20 @@ IRC_Client_IRCSession_T<ConnectionType>::open (void* arg_in)
   ACE_ASSERT (connector_p);
 
   int result = -1;
-  IRC_Client_ConnectorConfiguration& connector_configuration_r =
-    const_cast<IRC_Client_ConnectorConfiguration&> (connector_p->get ());
+  const IRC_Client_SocketHandlerConfiguration& socket_handler_configuration_r =
+    connector_p->get ();
 
   // step0: intialize configuration object
-  IRC_Client_Configuration* configuration_p = NULL;
+  IRC_Client_StreamModuleConfiguration* stream_module_configuration_p = NULL;
+  // *TODO*: remove type inference
   if (!inherited::manager_)
-    configuration_p = connector_configuration_r.configuration;
+    stream_module_configuration_p =
+      const_cast<IRC_Client_SocketHandlerConfiguration&> (socket_handler_configuration_r).streamModuleConfiguration;
   else
-    configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
+    stream_module_configuration_p = &inherited::CONNECTION_BASE_T::configuration_.streamConfiguration.streamModuleConfiguration;
   // sanity check(s)
-  ACE_ASSERT (configuration_p);
-  configuration_p->streamConfiguration.streamModuleConfiguration.subscriber =
-    this;
+  ACE_ASSERT (stream_module_configuration_p);
+  stream_module_configuration_p->subscriber = this;
 
   // step1: initialize/start stream, tweak socket, register reading data with
   //        reactor, ...
@@ -776,11 +777,6 @@ IRC_Client_IRCSession_T<ConnectionType>::open (void* arg_in)
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ConnectionType::open(): \"%m\", continuing\n")));
-
-  // clean up
-  // *TODO*: move this somewhere else...
-  delete connector_configuration_r.socketHandlerConfiguration;
-  connector_configuration_r.socketHandlerConfiguration = NULL;
 
   return result;
 }
@@ -835,12 +831,12 @@ IRC_Client_IRCSession_T<ConnectionType>::log (const std::string& channel_in,
 
   int result = -1;
 
-  if (state_.cursesState)
+  if (inherited::state_.cursesState)
   {
-    curses_log (channel_in,            // channel
-                messageText_in,        // text
-                *(state_.cursesState), // state
-                true);                 // locked access
+    curses_log (channel_in,                     // channel
+                messageText_in,                 // text
+                *inherited::state_.cursesState, // state
+                true);                          // locked access
 
     if (logToFile_)
       output_ << messageText_in;

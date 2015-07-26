@@ -21,9 +21,11 @@
 #ifndef NET_SERVER_LISTENER_COMMON_H
 #define NET_SERVER_LISTENER_COMMON_H
 
+#include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
+#include "net_common.h"
 #include "net_configuration.h"
 #include "net_stream_common.h"
 #include "net_tcpconnection.h"
@@ -33,15 +35,29 @@
 #include "net_server_exports.h"
 #include "net_server_listener.h"
 
-typedef Net_Server_AsynchListener_T<Net_Server_ListenerConfiguration,
-                                    Net_SocketHandlerConfiguration,
-                                    Net_StreamUserData,
-                                    Net_AsynchTCPConnection> Net_Server_AsynchListener_t;
+// foward declarations
+class Net_Stream;
 
-typedef Net_Server_Listener_T<Net_Server_ListenerConfiguration,
+typedef Net_Server_AsynchListener_T<Net_AsynchTCPConnection,
+                                    /////
+                                    ACE_INET_Addr,
+                                    Net_Server_ListenerConfiguration,
+                                    Net_ConnectionState,
+                                    Net_Stream,
+                                    /////
+                                    Net_SocketHandlerConfiguration,
+                                    /////
+                                    Net_StreamUserData> Net_Server_AsynchListener_t;
+typedef Net_Server_Listener_T<Net_TCPConnection,
+                              ///////////
+                              ACE_INET_Addr,
+                              Net_Server_ListenerConfiguration,
+                              Net_ConnectionState,
+                              Net_Stream,
+                              ///////////
                               Net_SocketHandlerConfiguration,
-                              Net_StreamUserData,
-                              Net_TCPConnection> Net_Server_Listener_t;
+                              ///////////
+                              Net_StreamUserData> Net_Server_Listener_t;
 
 typedef ACE_Singleton<Net_Server_AsynchListener_t,
                       ACE_Recursive_Thread_Mutex> NET_SERVER_ASYNCHLISTENER_SINGLETON;

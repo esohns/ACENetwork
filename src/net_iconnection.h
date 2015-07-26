@@ -61,15 +61,19 @@ class Net_IConnection_T
 
   // *NOTE*: see ACE_Svc_Handler/ACE_Task_Base
   //         (and net_common.h / ACE_Svc_Handler.h for reason codes)
-  virtual int close (u_long = 0) = 0; // reason
+//  virtual int close (u_long = 0) = 0; // reason
+  virtual void close () = 0;
 };
 
 template <typename AddressType,
-          typename SocketConfigurationType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType>
+          typename StreamType,
+          ///////////////////////////////
+          typename SocketConfigurationType,
+          ///////////////////////////////
+          typename HandlerConfigurationType>
 class Net_ISocketConnection_T
  : virtual public Net_IConnection_T<AddressType,
                                     ConfigurationType,
@@ -77,9 +81,30 @@ class Net_ISocketConnection_T
                                     StatisticContainerType,
                                     StreamType>
  , virtual public Net_ITransportLayer_T<SocketConfigurationType>
+ // *NOTE*: this next line wouldn't compile (with MSVC)
+ // *EXPLANATION*: apparently, on function signatures, the standard stipulates
+ //                (in 14.5.5.1):
+ //                "The types of its parameters and, if the function is a class
+ //                member, the cv- qualifiers (if any) on the function itself
+ //                and the class in which the member function is declared. The
+ //                signature of a function template specialization includes the
+ //                types of its template arguments...."
+ //                Note that specifically, this does NOT include the return
+ //                types.
+ //                Here, this probably means that Net_ISocketConnection_T::get
+ //                is not considered to be a distinct function, but rather an
+ //                overload (here: override) of Net_IConnection_T::get.
+ //                [Note that for differing return types, this would be allowed,
+ //                if the return types were covariant. This explains the
+ //                somewhat misleading error message returned by MSVC.]
+ //, public Common_IGet_T<HandlerConfigurationType>
+ , public Common_IInitialize_T<HandlerConfigurationType>
 {
  public:
   virtual ~Net_ISocketConnection_T () {};
+
+  // *TODO*: see above
+  virtual const HandlerConfigurationType& get () = 0;
 };
 
 //template <typename AddressType,

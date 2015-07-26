@@ -60,10 +60,10 @@ class Net_Export Net_Common_Tools
   static Net_IInetConnectionManager_t* getConnectionManager ();
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools ());
-  ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Common_Tools ());
-  ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools (const Net_Common_Tools&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools& operator= (const Net_Common_Tools&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools ())
+  ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Common_Tools ())
+  ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools (const Net_Common_Tools&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools& operator= (const Net_Common_Tools&))
 };
 
 #endif

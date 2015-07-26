@@ -21,17 +21,14 @@
 
 #include "net_transportlayer_udp.h"
 
-#include <sstream>
-#include <string>
+//#include <sstream>
+//#include <string>
 
-#include "net_defines.h"
+//#include "net_defines.h"
 #include "net_macros.h"
 
 Net_TransportLayer_UDP::Net_TransportLayer_UDP ()
- : inherited (NET_ROLE_INVALID,
-              NET_TRANSPORTLAYER_UDP)
- //, inherited2 ()
-//   address_ (),
+ : inherited (NET_TRANSPORTLAYER_UDP)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_UDP::Net_TransportLayer_UDP"));
 

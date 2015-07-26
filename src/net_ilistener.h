@@ -18,42 +18,30 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_CLIENT_CONNECTOR_COMMON_H
-#define NET_CLIENT_CONNECTOR_COMMON_H
+#ifndef NET_ILISTENER_H
+#define NET_ILISTENER_H
 
-#include "ace/INET_Addr.h"
+#include "common_icontrol.h"
+#include "common_iget.h"
+#include "common_iinitialize.h"
 
 #include "net_configuration.h"
-#include "net_stream.h"
-#include "net_stream_common.h"
-#include "net_tcpconnection.h"
 
-#include "net_client_asynchconnector.h"
-#include "net_client_common.h"
-#include "net_client_connector.h"
+template <typename ConfigurationType>
+class Net_IListener_T
+ : public Common_IControl
+ , public Common_IGet_T<ConfigurationType>
+ , public Common_IInitialize_T<ConfigurationType>
+{
+ public:
+  virtual ~Net_IListener_T () {};
 
-// forward declarations
-struct IRC_Client_ConnectionState;
+  virtual bool useReactor () const = 0; // ? : uses proactor
+};
 
-typedef Net_Client_AsynchConnector_T<Net_AsynchTCPConnection,
-                                     ////
-                                     ACE_INET_Addr,
-                                     Net_Configuration,
-                                     Net_ConnectionState,
-                                     Net_Stream,
-                                     ////
-                                     Net_SocketHandlerConfiguration,
-                                     ////
-                                     Net_StreamUserData> Net_Client_AsynchConnector_t;
-typedef Net_Client_Connector_T<Net_TCPConnection,
-                               //////////
-                               ACE_INET_Addr,
-                               Net_Configuration,
-                               Net_ConnectionState,
-                               Net_Stream,
-                               //////////
-                               Net_SocketHandlerConfiguration,
-                               //////////
-                               Net_StreamUserData> Net_Client_Connector_t;
+/////////////////////////////////////////
+
+typedef Net_IListener_T<Net_SocketHandlerConfiguration> Net_IListener_t;
+//typedef Net_IListener_T<Net_Client_ListenerConfiguration> Net_IListener_t;
 
 #endif

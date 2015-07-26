@@ -38,38 +38,46 @@
 #include "net_tcpconnection_base.h"
 
 class Net_Export Net_TCPConnection
- : public Net_TCPConnectionBase_T<Net_Configuration,
-                                  Net_StreamUserData,
+ : public Net_TCPConnectionBase_T<Net_TCPHandler_t,
+                                  ///////
+                                  Net_Configuration,
                                   Net_ConnectionState,
                                   Net_Stream,
-                                  Net_TCPHandler_t,
-                                  Net_SocketHandlerConfiguration>
+                                  ///////
+                                  Net_SocketHandlerConfiguration,
+                                  ///////
+                                  Net_StreamUserData>
 {
- friend class ACE_Acceptor<Net_TCPConnection, ACE_SOCK_ACCEPTOR>;
- friend class ACE_Connector<Net_TCPConnection, ACE_SOCK_CONNECTOR>;
+  friend class ACE_Acceptor<Net_TCPConnection, ACE_SOCK_ACCEPTOR>;
+  friend class ACE_Connector<Net_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                    Net_SocketConfiguration,
-                                    Net_Configuration,
-                                    Net_StreamUserData,
-                                    Net_ConnectionState,
-                                    Stream_Statistic,
-                                    Net_Stream> ICONNECTION_MANAGER_T;
+  typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                   Net_Configuration,
+                                   Net_ConnectionState,
+                                   Stream_Statistic,
+                                   Net_Stream,
+                                   /////
+                                   Net_StreamUserData> ICONNECTION_MANAGER_T;
 
   Net_TCPConnection (ICONNECTION_MANAGER_T*, // connection manager handle
-                     unsigned int = 0);      // statistics collecting interval (second(s))
-                                             // 0 --> DON'T collect statistics
+                     unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
   virtual ~Net_TCPConnection ();
 
  private:
-  typedef Net_TCPConnectionBase_T<Net_Configuration,
-                                  Net_StreamUserData,
+  typedef Net_TCPConnectionBase_T<Net_TCPHandler_t,
+                                  ///////
+                                  Net_Configuration,
                                   Net_ConnectionState,
                                   Net_Stream,
-                                  Net_TCPHandler_t,
-                                  Net_SocketHandlerConfiguration> inherited;
+                                  ///////
+                                  Net_SocketHandlerConfiguration,
+                                  ///////
+                                  Net_StreamUserData> inherited;
 
+  // *TODO*: if there is no default ctor, MSVC will not compile this code.
+  //         For some reason, the compiler will not accept the overloaded
+  //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
   Net_TCPConnection ();
   ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection (const Net_TCPConnection&))
   ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection& operator= (const Net_TCPConnection&))
@@ -78,38 +86,46 @@ class Net_Export Net_TCPConnection
 /////////////////////////////////////////
 
 class Net_Export Net_AsynchTCPConnection
- : public Net_AsynchTCPConnectionBase_T<Net_Configuration,
-                                        Net_StreamUserData,
+ : public Net_AsynchTCPConnectionBase_T<Net_AsynchTCPHandler_t,
+
+                                        Net_Configuration,
                                         Net_ConnectionState,
                                         Net_Stream,
-                                        Net_AsynchTCPHandler_t,
-                                        Net_SocketHandlerConfiguration>
+
+                                        Net_SocketHandlerConfiguration,
+
+                                        Net_StreamUserData>
 {
  friend class ACE_Asynch_Acceptor<Net_AsynchTCPConnection>;
  friend class ACE_Asynch_Connector<Net_AsynchTCPConnection>;
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   Net_SocketConfiguration,
                                    Net_Configuration,
-                                   Net_StreamUserData,
                                    Net_ConnectionState,
                                    Stream_Statistic,
-                                   Net_Stream> ICONNECTION_MANAGER_T;
+                                   Net_Stream,
+                                   //////
+                                   Net_StreamUserData> ICONNECTION_MANAGER_T;
 
   Net_AsynchTCPConnection (ICONNECTION_MANAGER_T*, // connection manager handle
-                           unsigned int = 0);      // statistics collecting interval (second(s))
-                                                   // 0 --> DON'T collect statistics
+                           unsigned int = 0);      // statistic collecting interval (second(s)) [0:off]
   virtual ~Net_AsynchTCPConnection ();
 
  private:
-  typedef Net_AsynchTCPConnectionBase_T<Net_Configuration,
-                                        Net_StreamUserData,
+  typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPHandler_t,
+
+                                        Net_Configuration,
                                         Net_ConnectionState,
                                         Net_Stream,
-                                        Net_AsynchTCPHandler_t,
-                                        Net_SocketHandlerConfiguration> inherited;
 
+                                        Net_SocketHandlerConfiguration,
+
+                                        Net_StreamUserData> inherited;
+
+  // *TODO*: if there is no default ctor, MSVC will not compile this code.
+  //         For some reason, the compiler will not accept the overloaded
+  //         make_handler() method of ACE_AsynchConnector/ACE_AsynchAcceptor
   Net_AsynchTCPConnection ();
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection (const Net_AsynchTCPConnection&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection& operator= (const Net_AsynchTCPConnection&))

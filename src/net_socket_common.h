@@ -51,107 +51,130 @@
 #include "net_tcpsockethandler.h"
 #include "net_udpsockethandler.h"
 
-typedef Net_StreamAsynchTCPSocketBase_T<ACE_INET_Addr,
-                                        Net_SocketConfiguration,
-                                        Net_Configuration,
-                                        Stream_ModuleConfiguration,
-                                        Net_StreamUserData,
-                                        Net_ConnectionState,
-                                        Stream_Statistic,
-                                        Net_Stream,
-                                        Net_AsynchTCPSocketHandler_T<Net_SocketHandlerConfiguration> > Net_AsynchTCPHandler_t;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-typedef Net_StreamAsynchUDPSocketBase_T<ACE_Netlink_Addr,
-                                        Net_SocketConfiguration,
-                                        Net_Configuration,
-                                        Stream_ModuleConfiguration,
-                                        Net_StreamUserData,
-                                        Net_ConnectionState,
-                                        Stream_Statistic,
-                                        Net_Stream,
-                                        ACE_SOCK_NETLINK,
-                                        Net_AsynchNetlinkSocketHandler_T<Net_SocketHandlerConfiguration> > Net_AsynchNetlinkHandler_t;
-#endif
-typedef Net_StreamAsynchUDPSocketBase_T<ACE_INET_Addr,
-                                        Net_SocketConfiguration,
-                                        Net_Configuration,
-                                        Stream_ModuleConfiguration,
-                                        Net_StreamUserData,
-                                        Net_ConnectionState,
-                                        Stream_Statistic,
-                                        Net_Stream,
-                                        ACE_SOCK_DGRAM,
-                                        Net_AsynchUDPSocketHandler_T<Net_SocketHandlerConfiguration> > Net_AsynchUDPHandler_t;
-typedef Net_StreamAsynchUDPSocketBase_T<ACE_INET_Addr,
-                                        Net_SocketConfiguration,
-                                        Net_Configuration,
-                                        Stream_ModuleConfiguration,
-                                        Net_StreamUserData,
-                                        Net_ConnectionState,
-                                        Stream_Statistic,
-                                        Net_Stream,
-                                        ACE_SOCK_DGRAM_MCAST,
-                                        Net_AsynchUDPSocketHandler_T<Net_SocketHandlerConfiguration> > Net_AsynchIPMulticastHandler_t;
-typedef Net_StreamAsynchUDPSocketBase_T<ACE_INET_Addr,
-                                        Net_SocketConfiguration,
-                                        Net_Configuration,
-                                        Stream_ModuleConfiguration,
-                                        Net_StreamUserData,
-                                        Net_ConnectionState,
-                                        Stream_Statistic,
-                                        Net_Stream,
-                                        ACE_SOCK_DGRAM_BCAST,
-                                        Net_AsynchUDPSocketHandler_T<Net_SocketHandlerConfiguration> > Net_AsynchIPBroadcastHandler_t;
+typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<Net_SocketHandlerConfiguration>,
 
-typedef Net_StreamTCPSocketBase_T<ACE_INET_Addr,
-                                  Net_SocketConfiguration,
-                                  Net_Configuration,
-                                  Stream_ModuleConfiguration,
-                                  Net_StreamUserData,
-                                  Net_ConnectionState,
-                                  Stream_Statistic,
-                                  Net_Stream,
-                                  Net_TCPSocketHandler_T<Net_SocketHandlerConfiguration> > Net_TCPHandler_t;
+                                        ACE_INET_Addr,
+                                        Net_Configuration,
+                                        Net_ConnectionState,
+                                        Stream_Statistic,
+                                        Net_Stream,
+
+                                        Net_StreamUserData,
+
+                                        Stream_ModuleConfiguration> Net_AsynchTCPHandler_t;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-typedef Net_StreamUDPSocketBase_T<ACE_Netlink_Addr,
-                                  Net_SocketConfiguration,
-                                  Net_Configuration,
-                                  Stream_ModuleConfiguration,
-                                  Net_StreamUserData,
-                                  Net_ConnectionState,
-                                  Stream_Statistic,
-                                  Net_Stream,
-                                  Net_NetlinkSocketHandler_T<Net_SocketHandlerConfiguration> > Net_NetlinkHandler_t;
+typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<Net_SocketHandlerConfiguration>,
+                                        Net_SOCK_Netlink,
+
+                                        ACE_Netlink_Addr,
+                                        Net_Configuration,
+                                        Net_ConnectionState,
+                                        Stream_Statistic,
+                                        Net_Stream,
+
+                                        Net_StreamUserData,
+
+                                        Stream_ModuleConfiguration> Net_AsynchNetlinkHandler_t;
 #endif
-typedef Net_StreamUDPSocketBase_T<ACE_INET_Addr,
-                                  Net_SocketConfiguration,
+
+typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<Net_SocketHandlerConfiguration>,
+                                        ACE_SOCK_DGRAM,
+
+                                        ACE_INET_Addr,
+                                        Net_Configuration,
+                                        Net_ConnectionState,
+                                        Stream_Statistic,
+                                        Net_Stream,
+
+                                        Net_StreamUserData,
+
+                                        Stream_ModuleConfiguration> Net_AsynchUDPHandler_t;
+typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<Net_SocketHandlerConfiguration>,
+                                        ACE_SOCK_DGRAM_MCAST,
+
+                                        ACE_INET_Addr,
+                                        Net_Configuration,
+                                        Net_ConnectionState,
+                                        Stream_Statistic,
+                                        Net_Stream,
+
+                                        Net_StreamUserData,
+
+                                        Stream_ModuleConfiguration> Net_AsynchIPMulticastHandler_t;
+typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<Net_SocketHandlerConfiguration>,
+                                        ACE_SOCK_DGRAM_BCAST,
+
+                                        ACE_INET_Addr,
+                                        Net_Configuration,
+                                        Net_ConnectionState,
+                                        Stream_Statistic,
+                                        Net_Stream,
+
+                                        Net_StreamUserData,
+
+                                        Stream_ModuleConfiguration> Net_AsynchIPBroadcastHandler_t;
+
+typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<Net_SocketHandlerConfiguration>,
+                                  ///////
+                                  ACE_INET_Addr,
                                   Net_Configuration,
-                                  Stream_ModuleConfiguration,
-                                  Net_StreamUserData,
                                   Net_ConnectionState,
                                   Stream_Statistic,
                                   Net_Stream,
-                                  Net_UDPSocketHandler_T<ACE_SOCK_DGRAM,
-                                                         Net_SocketHandlerConfiguration> > Net_UDPHandler_t;
-typedef Net_StreamUDPSocketBase_T<ACE_INET_Addr,
-                                  Net_SocketConfiguration,
-                                  Net_Configuration,
-                                  Stream_ModuleConfiguration,
+                                  ///////
                                   Net_StreamUserData,
+                                  ///////
+                                  Stream_ModuleConfiguration> Net_TCPHandler_t;
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+typedef Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<Net_SocketHandlerConfiguration>,
+                                  ///////
+                                  ACE_Netlink_Addr,
+                                  Net_Configuration,
                                   Net_ConnectionState,
                                   Stream_Statistic,
                                   Net_Stream,
-                                  Net_UDPSocketHandler_T<ACE_SOCK_DGRAM_MCAST,
-                                                         Net_SocketHandlerConfiguration> > Net_IPMulticastHandler_t;
-typedef Net_StreamUDPSocketBase_T<ACE_INET_Addr,
-                                  Net_SocketConfiguration,
-                                  Net_Configuration,
-                                  Stream_ModuleConfiguration,
+                                  ///////
                                   Net_StreamUserData,
+                                  ///////
+                                  Stream_ModuleConfiguration> Net_NetlinkHandler_t;
+#endif
+
+//typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_SOCK_DGRAM,
+typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_Dgram,
+                                                         Net_SocketHandlerConfiguration>,
+                                  ///////
+                                  ACE_INET_Addr,
+                                  Net_Configuration,
                                   Net_ConnectionState,
                                   Stream_Statistic,
                                   Net_Stream,
-                                  Net_UDPSocketHandler_T<ACE_SOCK_DGRAM_BCAST,
-                                                         Net_SocketHandlerConfiguration> > Net_IPBroadcastHandler_t;
+                                  ///////
+                                  Net_StreamUserData,
+                                  ///////
+                                  Stream_ModuleConfiguration> Net_UDPHandler_t;
+typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_SOCK_DGRAM_MCAST,
+                                                         Net_SocketHandlerConfiguration>,
+                                  ///////
+                                  ACE_INET_Addr,
+                                  Net_Configuration,
+                                  Net_ConnectionState,
+                                  Stream_Statistic,
+                                  Net_Stream,
+                                  ///////
+                                  Net_StreamUserData,
+                                  ///////
+                                  Stream_ModuleConfiguration> Net_IPMulticastHandler_t;
+typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_SOCK_DGRAM_BCAST,
+                                                         Net_SocketHandlerConfiguration>,
+                                  ///////
+                                  ACE_INET_Addr,
+                                  Net_Configuration,
+                                  Net_ConnectionState,
+                                  Stream_Statistic,
+                                  Net_Stream,
+                                  ///////
+                                  Net_StreamUserData,
+                                  ///////
+                                  Stream_ModuleConfiguration> Net_IPBroadcastHandler_t;
 
 #endif
