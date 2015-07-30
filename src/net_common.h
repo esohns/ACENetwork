@@ -23,9 +23,6 @@
 
 #include "ace/Svc_Handler.h"
 
-// forward declarations
-struct Net_StreamUserData;
-
 enum Net_ClientServerRole
 {
   NET_ROLE_INVALID = -1,

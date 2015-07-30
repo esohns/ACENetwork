@@ -30,12 +30,13 @@
 #include "IRC_client_stream_common.h"
 
 class IRC_Client_IIRCControl
- : public Common_ISubscribe_T<IRC_Client_INotify_t>
+ : public Common_ISubscribe_T<IRC_Client_IStreamNotify_t>
 {
  public:
   inline virtual ~IRC_Client_IIRCControl () {};
 
   virtual bool registerConnection (const IRC_Client_IRCLoginOptions&) = 0; // login details
+
   virtual void nick (const std::string&) = 0; // nick
   virtual void quit (const std::string&) = 0; // reason
   virtual void join (const string_list_t&,      // channel(s)

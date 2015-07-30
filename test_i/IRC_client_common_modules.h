@@ -25,11 +25,11 @@
 
 #include "common_time_common.h"
 
-#include "stream_common.h"
 #include "stream_streammodule_base.h"
 
 #include "net_module_runtimestatistic.h"
 
+#include "IRC_client_common.h"
 #include "IRC_client_message.h"
 #include "IRC_client_module_IRCsplitter.h"
 #include "IRC_client_module_IRCstreamer.h"
@@ -42,27 +42,29 @@ typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           IRC_Client_SessionMessage,
                                           IRC_Client_Message,
                                           IRC_Client_CommandType_t,
-                                          Stream_Statistic> IRC_Client_Module_Statistic_ReaderTask_t;
+                                          IRC_Client_RuntimeStatistic_t> IRC_Client_Module_Statistic_ReaderTask_t;
 typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
                                           IRC_Client_SessionMessage,
                                           IRC_Client_Message,
                                           IRC_Client_CommandType_t,
-                                          Stream_Statistic> IRC_Client_Module_Statistic_WriterTask_t;
+                                          IRC_Client_RuntimeStatistic_t> IRC_Client_Module_Statistic_WriterTask_t;
 
 // declare module(s)
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                             // task synch type
                           Common_TimePolicy_t,                      // time policy type
-                          IRC_Client_Configuration,                 // configuration type
+                          Stream_ModuleConfiguration,               // module configuration type
+                          IRC_Client_Configuration,                 // module handler configuration type
                           IRC_Client_Module_Statistic_ReaderTask_t, // reader type
                           IRC_Client_Module_Statistic_WriterTask_t, // writer type
                           IRC_Client_Module_RuntimeStatistic);      // name
 
-DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                  // task synch type
-                          Common_TimePolicy_t,           // time policy
-                          IRC_Client_Configuration,      // configuration type
-                          IRC_Client_Module_IRCStreamer, // reader type
-                          IRC_Client_Module_IRCSplitter, // writer type
-                          IRC_Client_Module_IRCMarshal); // name
+DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                      // task synch type
+                          Common_TimePolicy_t,               // time policy
+                          Stream_ModuleConfiguration,        // module configuration type
+                          IRC_Client_Configuration,          // module handler configuration type
+                          IRC_Client_Module_IRCStreamer,     // reader type
+                          IRC_Client_Module_IRCSplitter,     // writer type
+                          IRC_Client_Module_IRCMarshal);     // name
 
 #endif

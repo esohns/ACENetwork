@@ -51,7 +51,6 @@
 #include "IRC_client_stream.h"
 #include "IRC_client_stream_common.h"
 
-typedef Stream_Statistic IRC_Client_RuntimeStatistic_t;
 struct IRC_Client_ConnectionState
 {
   inline IRC_Client_ConnectionState ()
@@ -93,7 +92,7 @@ struct IRC_Client_ConnectionState
   IRC_Client_RuntimeStatistic_t currentStatistics;
   ACE_Time_Value                lastCollectionTimestamp;
 
-  Net_StreamUserData*           userData;
+  IRC_Client_StreamUserData*    userData;
 };
 
 /////////////////////////////////////////
@@ -106,9 +105,10 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<IRC_Client_SocketHandle
                                   IRC_Client_RuntimeStatistic_t,
                                   IRC_Client_Stream,
                                   ///////
-                                  Net_StreamUserData,
+                                  IRC_Client_StreamUserData,
                                   ///////
-                                  IRC_Client_StreamModuleConfiguration> IRC_Client_TCPHandler_t;
+                                  Stream_ModuleConfiguration,
+                                  IRC_Client_ModuleHandlerConfiguration> IRC_Client_TCPHandler_t;
 typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<IRC_Client_SocketHandlerConfiguration>,
 
                                         ACE_INET_Addr,
@@ -117,9 +117,10 @@ typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<IRC_Client_
                                         IRC_Client_RuntimeStatistic_t,
                                         IRC_Client_Stream,
 
-                                        Net_StreamUserData,
+                                        IRC_Client_StreamUserData,
 
-                                        IRC_Client_StreamModuleConfiguration> IRC_Client_AsynchTCPHandler_t;
+                                        Stream_ModuleConfiguration,
+                                        IRC_Client_ModuleHandlerConfiguration> IRC_Client_AsynchTCPHandler_t;
 typedef Net_TCPConnectionBase_T<IRC_Client_TCPHandler_t,
                                 /////////
                                 IRC_Client_Configuration,
@@ -128,7 +129,7 @@ typedef Net_TCPConnectionBase_T<IRC_Client_TCPHandler_t,
                                 /////////
                                 IRC_Client_SocketHandlerConfiguration,
                                 /////////
-                                Net_StreamUserData> IRC_Client_TCPConnection_t;
+                                IRC_Client_StreamUserData> IRC_Client_TCPConnection_t;
 typedef Net_AsynchTCPConnectionBase_T<IRC_Client_AsynchTCPHandler_t,
                                       ///
                                       IRC_Client_Configuration,
@@ -137,7 +138,7 @@ typedef Net_AsynchTCPConnectionBase_T<IRC_Client_AsynchTCPHandler_t,
                                       ///
                                       IRC_Client_SocketHandlerConfiguration,
                                       ///
-                                      Net_StreamUserData> IRC_Client_AsynchTCPConnection_t;
+                                      IRC_Client_StreamUserData> IRC_Client_AsynchTCPConnection_t;
 
 /////////////////////////////////////////
 
@@ -168,7 +169,7 @@ typedef Net_Client_Connector_T<IRC_Client_TCPConnection_t,
                                //////////
                                IRC_Client_SocketHandlerConfiguration,
                                //////////
-                               Net_StreamUserData> IRC_Client_Connector_t;
+                               IRC_Client_StreamUserData> IRC_Client_Connector_t;
 typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchTCPConnection_t,
                                      ////
                                      ACE_INET_Addr,
@@ -178,7 +179,7 @@ typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchTCPConnection_t,
                                      ////
                                      IRC_Client_SocketHandlerConfiguration,
                                      ////
-                                     Net_StreamUserData> IRC_Client_AsynchConnector_t;
+                                     IRC_Client_StreamUserData> IRC_Client_AsynchConnector_t;
 
 /////////////////////////////////////////
 
@@ -188,14 +189,14 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  IRC_Client_RuntimeStatistic_t,
                                  IRC_Client_Stream,
                                  ////////
-                                 Net_StreamUserData> IRC_Client_IConnection_Manager_t;
+                                 IRC_Client_StreamUserData> IRC_Client_IConnection_Manager_t;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  IRC_Client_Configuration,
                                  IRC_Client_ConnectionState,
                                  IRC_Client_RuntimeStatistic_t,
                                  IRC_Client_Stream,
                                  ////////
-                                 Net_StreamUserData> IRC_Client_Connection_Manager_t;
+                                 IRC_Client_StreamUserData> IRC_Client_Connection_Manager_t;
 
 typedef ACE_Singleton<IRC_Client_Connection_Manager_t,
                       ACE_SYNCH_MUTEX> IRC_CLIENT_CONNECTIONMANAGER_SINGLETON;

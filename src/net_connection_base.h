@@ -99,7 +99,7 @@ class Net_ConnectionBase_T
                                StatisticContainerType,
                                StreamType,
                                //////////
-                               UserDataType> OWN_TYPE;
+                               UserDataType> OWN_TYPE_T;
 
   // timer
   unsigned int                      statisticCollectionInterval_; // seconds [0: off]

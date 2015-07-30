@@ -52,7 +52,8 @@ template <typename HandlerType,
           ///////////////////////////////
           typename UserDataType,
           ///////////////////////////////
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 class Net_StreamAsynchUDPSocketBase_T
  : public HandlerType
  , public SocketType
@@ -105,7 +106,8 @@ class Net_StreamAsynchUDPSocketBase_T
                                    UserDataType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<ACE_MT_SYNCH,
                            Common_TimePolicy_t,
-                           ModuleConfigurationType> IMODULE_T;
+                           ModuleConfigurationType,
+                           ModuleHandlerConfigurationType> IMODULE_T;
 
   Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                    unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
@@ -148,7 +150,8 @@ template <typename HandlerConfigurationType,
           ///////////////////////////////
           typename UserDataType,
           ///////////////////////////////
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                       Net_SOCK_Netlink,
                                       ///
@@ -160,7 +163,8 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                       ///
                                       UserDataType,
                                       ///
-                                      ModuleConfigurationType>
+                                      ModuleConfigurationType,
+                                      ModuleHandlerConfigurationType>
  : public Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>
  , public Net_SOCK_Netlink
  , public ACE_Event_Handler

@@ -301,10 +301,12 @@ Net_Server_Listener_T<HandlerType,
                       StateType,
                       StreamType,
                       HandlerConfigurationType,
-                      UserDataType>::stop (bool lockedAccess_in)
+                      UserDataType>::stop (bool waitForCompletion_in,
+                                           bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::stop"));
 
+  ACE_UNUSED_ARG (waitForCompletion_in);
   ACE_UNUSED_ARG (lockedAccess_in);
 
   // sanity check(s)
@@ -448,8 +450,8 @@ Net_Server_Listener_T<HandlerType,
   // *TODO*: remove type inference
   ACE_NEW_NORETURN (handler_out,
                     HandlerType (configuration_.connectionManager,
-                                 configuration_.socketHandlerConfiguration->statisticCollectionInterval));
-                                 //configuration_.statisticCollectionInterval));
+                                 configuration_.socketHandlerConfiguration->statisticReportingInterval));
+                                 //configuration_.statisticReportingInterval));
   if (!handler_out)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

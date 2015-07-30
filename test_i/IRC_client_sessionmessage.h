@@ -23,7 +23,6 @@
 
 #include "ace/Global_Macros.h"
 
-#include "stream_common.h"
 #include "stream_session_message_base.h"
 
 #include "IRC_client_stream_common.h"
@@ -34,8 +33,8 @@ class ACE_Data_Block;
 class ACE_Message_Block;
 
 class IRC_Client_SessionMessage
- : public Stream_SessionMessageBase_T<Stream_State,
-                                      IRC_Client_StreamSessionData_t>
+ : public Stream_SessionMessageBase_T<IRC_Client_StreamSessionData_t,
+                                      IRC_Client_StreamUserData>
 {
 //  // enable access to private ctor(s)...
 //  friend class Net_StreamMessageAllocator;
@@ -43,9 +42,9 @@ class IRC_Client_SessionMessage
 
  public:
   // *NOTE*: assume lifetime responsibility for the second argument !
-  IRC_Client_SessionMessage (Stream_SessionMessageType,         // session message type
-                             Stream_State*,                     // stream state handle
-                             IRC_Client_StreamSessionData_t*&); // session data handle
+  IRC_Client_SessionMessage (Stream_SessionMessageType,        // session message type
+                             IRC_Client_StreamSessionData_t*&, // session data container handle
+                             IRC_Client_StreamUserData*);      // user data handle
     // *NOTE*: to be used by message allocators...
   IRC_Client_SessionMessage (ACE_Allocator*); // message allocator
   IRC_Client_SessionMessage (ACE_Data_Block*, // data block
@@ -57,13 +56,13 @@ class IRC_Client_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<Stream_State,
-                                      IRC_Client_StreamSessionData_t> inherited;
+  typedef Stream_SessionMessageBase_T<IRC_Client_StreamSessionData_t,
+                                      IRC_Client_StreamUserData> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_SessionMessage ());
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_SessionMessage ())
   // copy ctor (to be used by duplicate())
   IRC_Client_SessionMessage (const IRC_Client_SessionMessage&);
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_SessionMessage& operator= (const IRC_Client_SessionMessage&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_SessionMessage& operator= (const IRC_Client_SessionMessage&))
 };
 
 #endif

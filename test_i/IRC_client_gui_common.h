@@ -31,7 +31,6 @@
 
 #include "common_ui_common.h"
 
-//#include "IRC_client_common.h"
 #include "IRC_client_configuration.h"
 #include "IRC_client_IRCmessage.h"
 
@@ -90,16 +89,16 @@ struct IRC_Client_GTK_CBData
 struct IRC_Client_ConnectionThreadData
 {
   inline IRC_Client_ConnectionThreadData ()
-   : CBData (NULL)
-   , configuration (NULL)
+   : configuration (NULL)
+   , CBData (NULL)
    , loginOptions ()
-   , phonebookIterator ()
+   , phonebookEntry ()
   {};
 
-  IRC_Client_GTK_CBData*       CBData;
-  IRC_Client_Configuration*    configuration;
-  IRC_Client_IRCLoginOptions   loginOptions;
-  IRC_Client_ServersIterator_t phonebookIterator;
+  IRC_Client_Configuration*  configuration;
+  IRC_Client_GTK_CBData*     CBData;
+  IRC_Client_IRCLoginOptions loginOptions;
+  IRC_Client_ConnectionEntry phonebookEntry;
 };
 
 struct IRC_Client_GTK_ConnectionCBData

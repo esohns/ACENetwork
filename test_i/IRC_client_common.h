@@ -49,7 +49,7 @@
 //class IRC_Client_Stream;
 struct IRC_Client_Configuration;
 struct IRC_Client_CursesState;
-struct IRC_Client_StreamModuleConfiguration;
+struct IRC_Client_ModuleHandlerConfiguration;
 
 // see (RFC1459 section 4.2.3.1)
 //            b - set a ban mask to keep users out
@@ -147,6 +147,8 @@ struct IRC_Client_ConnectionEntry
   IRC_Client_PortRanges_t listeningPorts;
   std::string             network;
 };
+typedef std::vector<IRC_Client_ConnectionEntry> IRC_Client_Connections_t;
+typedef IRC_Client_Connections_t::const_iterator IRC_Client_ConnectionsIterator_t;
 typedef std::multimap<std::string,
                       IRC_Client_ConnectionEntry> IRC_Client_Servers_t;
 typedef IRC_Client_Servers_t::const_iterator IRC_Client_ServersIterator_t;
@@ -177,15 +179,15 @@ struct IRC_Client_InputThreadData
    : configuration (NULL)
    , cursesState (NULL)
    , groupID (-1)
-   , moduleConfiguration (NULL)
+   , moduleHandlerConfiguration (NULL)
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
-  IRC_Client_Configuration*             configuration;
-  IRC_Client_CursesState*               cursesState;
-  int                                   groupID;
-  IRC_Client_StreamModuleConfiguration* moduleConfiguration;
-  bool                                  useReactor;
+  IRC_Client_Configuration*              configuration;
+  IRC_Client_CursesState*                cursesState;
+  int                                    groupID;
+  IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+  bool                                   useReactor;
 };
 
 enum IRC_Client_CharacterEncoding
@@ -198,5 +200,7 @@ enum IRC_Client_CharacterEncoding
   ///////////////////////////////////////
   CHARACTERENCODING_MAX
 };
+
+typedef Stream_Statistic IRC_Client_RuntimeStatistic_t;
 
 #endif

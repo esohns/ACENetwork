@@ -188,6 +188,14 @@ Net_Client_AsynchConnector_T<HandlerType,
   } // end IF
 
   // *TODO*: return the "wait" handle of the asynchronous connect object
+  ACE_HANDLE return_value = ACE_INVALID_HANDLE;
+  ACE_Asynch_Connect& asynch_connect_r =
+      inherited::asynch_connect ();
+  ACE_Asynch_Operation_Impl* asynch_operation_impl_p =
+      asynch_connect_r.implementation ();
+  ACE_ASSERT (asynch_operation_impl_p);
+  ACE_UNUSED_ARG (return_value);
+
   return 0;
 }
 

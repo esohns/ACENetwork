@@ -693,10 +693,15 @@ do_work (IRC_Client_Configuration& configuration_in,
     configuration_in.cursesState = &curses_state;
 
   // step1: initialize IRC handler module
-  IRC_Client_StreamModuleConfiguration module_configuration;
-  configuration_in.streamConfiguration.streamConfiguration.moduleConfiguration =
-    &module_configuration.moduleConfiguration;
+  configuration_in.streamConfiguration.moduleHandlerConfiguration_2.protocolConfiguration =
+      &configuration_in.protocolConfiguration;
+  configuration_in.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
+      &configuration_in.streamConfiguration;
 
+  configuration_in.streamConfiguration.moduleConfiguration =
+      &configuration_in.streamConfiguration.moduleConfiguration_2;
+  configuration_in.streamConfiguration.moduleHandlerConfiguration =
+      &configuration_in.streamConfiguration.moduleHandlerConfiguration_2;
   IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_HANDLER_MODULE_NAME),
                                                    NULL);
   IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
@@ -708,22 +713,20 @@ do_work (IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
     return;
   } // end IF
-  IRCHandler_impl_p->initialize (NULL,
-                                 configuration_in.streamConfiguration.streamConfiguration.messageAllocator,
-                                 configuration_in.streamConfiguration.streamConfiguration.bufferSize,
-                                 configuration_in.protocolConfiguration.automaticPong,
-                                 configuration_in.protocolConfiguration.printPingDot);
-  configuration_in.streamConfiguration.streamConfiguration.module =
-    &IRC_handler;
-  configuration_in.streamConfiguration.streamConfiguration.cloneModule =
-    true;
-  configuration_in.streamConfiguration.streamConfiguration.deleteModule =
-    false;
+  configuration_in.streamConfiguration.cloneModule = true;
+  configuration_in.streamConfiguration.deleteModule = false;
+  configuration_in.streamConfiguration.module = &IRC_handler;
+  if (!IRCHandler_impl_p->initialize (configuration_in.streamConfiguration.moduleHandlerConfiguration_2))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler_Module::initialize(), returning\n")));
+    return;
+  } // end IF
 
   // step2: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (configuration_in.useReactor,
                                               numDispatchThreads_in,
-                                              configuration_in.streamConfiguration.streamConfiguration.serializeOutput))
+                                              configuration_in.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
@@ -743,11 +746,11 @@ do_work (IRC_Client_Configuration& configuration_in,
   //configuration_in.socketHandlerConfiguration.bufferSize =
   //  IRC_CLIENT_BUFFER_SIZE;
   configuration_in.socketHandlerConfiguration.messageAllocator =
-    configuration_in.streamConfiguration.streamConfiguration.messageAllocator;
+    configuration_in.streamConfiguration.messageAllocator;
   configuration_in.socketHandlerConfiguration.socketConfiguration =
     &configuration_in.socketConfiguration;
-  configuration_in.socketHandlerConfiguration.statisticCollectionInterval =
-    configuration_in.streamConfiguration.streamConfiguration.statisticReportingInterval;
+  configuration_in.socketHandlerConfiguration.statisticReportingInterval =
+    configuration_in.streamConfiguration.statisticReportingInterval;
   //IRC_Client_SessionState session_state;
   //session_state.configuration = configuration_in;
   //IRC_Client_ConnectorConfiguration connector_configuration;
@@ -758,9 +761,9 @@ do_work (IRC_Client_Configuration& configuration_in,
   //connector_configuration.socketHandlerConfiguration =
   //  &configuration_in.socketHandlerConfiguration;
   IRC_Client_SessionConnector_t connector (connection_manager_p,
-                                           configuration_in.streamConfiguration.streamConfiguration.statisticReportingInterval);
+                                           configuration_in.streamConfiguration.statisticReportingInterval);
   IRC_Client_AsynchSessionConnector_t asynch_connector (connection_manager_p,
-                                                        configuration_in.streamConfiguration.streamConfiguration.statisticReportingInterval);
+                                                        configuration_in.streamConfiguration.statisticReportingInterval);
   IRC_Client_IConnector_t* connector_p = NULL;
   if (configuration_in.useReactor)
     connector_p = &connector;
@@ -808,7 +811,8 @@ do_work (IRC_Client_Configuration& configuration_in,
   // step4: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   connection_manager_p->set (configuration_in,
-                             &configuration_in.streamUserData);
+                             //configuration_in.streamUserData);
+                             NULL);
 
   // event loop(s):
   // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly shutdown)
@@ -857,7 +861,8 @@ do_work (IRC_Client_Configuration& configuration_in,
   IRC_Client_InputThreadData input_thread_data;
   input_thread_data.configuration = &configuration_in;
   input_thread_data.groupID = configuration_in.groupID;
-  input_thread_data.moduleConfiguration = &module_configuration;
+  input_thread_data.moduleHandlerConfiguration =
+      &configuration_in.streamConfiguration.moduleHandlerConfiguration_2;
   if (useCursesLibrary_in)
     input_thread_data.cursesState = &curses_state;
   input_thread_data.useReactor = configuration_in.useReactor;
@@ -1355,17 +1360,12 @@ ACE_TMAIN (int argc_in,
 
   IRC_Client_Configuration configuration;
   ///////////////////////////////////////
-  configuration.streamConfiguration.streamConfiguration.bufferSize =
-    IRC_CLIENT_BUFFER_SIZE;
-  configuration.streamConfiguration.streamConfiguration.messageAllocator =
-    &message_allocator;
-  configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
+  configuration.streamConfiguration.messageAllocator = &message_allocator;
+  configuration.streamConfiguration.statisticReportingInterval =
     statistic_reporting_interval;
-  configuration.streamConfiguration.debugScanner = IRC_CLIENT_DEF_LEX_TRACE;
-  configuration.streamConfiguration.debugParser = IRC_CLIENT_DEF_YACC_TRACE;
   ///////////////////////////////////////
   configuration.protocolConfiguration.loginOptions.nickname =
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_NICK);
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_NICKNAME);
   //   userData.loginOptions.user.username = ;
   std::string hostname;
   if (!Net_Common_Tools::getHostname (hostname))

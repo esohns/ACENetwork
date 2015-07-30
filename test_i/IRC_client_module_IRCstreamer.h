@@ -51,14 +51,15 @@ class IRC_Client_Module_IRCStreamer
                                  IRC_Client_SessionMessage,
                                  IRC_Client_Message> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCStreamer (const IRC_Client_Module_IRCStreamer&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCStreamer& operator= (const IRC_Client_Module_IRCStreamer&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCStreamer (const IRC_Client_Module_IRCStreamer&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCStreamer& operator= (const IRC_Client_Module_IRCStreamer&))
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                   // task synch type
-                              Common_TimePolicy_t,            // time policy
-                              IRC_Client_Configuration,       // configuration type
-                              IRC_Client_Module_IRCStreamer); // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                          // task synch type
+                              Common_TimePolicy_t,                   // time policy
+                              Stream_ModuleConfiguration,            // module configuration type
+                              IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
+                              IRC_Client_Module_IRCStreamer);        // writer type
 
 #endif

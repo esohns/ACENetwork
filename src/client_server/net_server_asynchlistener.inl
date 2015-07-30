@@ -440,10 +440,12 @@ Net_Server_AsynchListener_T<HandlerType,
                             StateType,
                             StreamType,
                             HandlerConfigurationType,
-                            UserDataType>::stop (bool lockedAccess_in)
+                            UserDataType>::stop (bool waitForCompletion_in,
+                                                 bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::stop"));
 
+  ACE_UNUSED_ARG (waitForCompletion_in);
   ACE_UNUSED_ARG (lockedAccess_in);
 
   if (!isListening_)
@@ -455,27 +457,28 @@ Net_Server_AsynchListener_T<HandlerType,
 
   int result = -1;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  ACE_POSIX_Asynch_Accept* accept_p = NULL;
+  const ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
+  ACE_POSIX_Asynch_Accept* posix_asynch_accept_p = NULL;
   try
   {
-    accept_p =
-      dynamic_cast<ACE_POSIX_Asynch_Accept*> (inherited::asynch_accept ().implementation ());
+    posix_asynch_accept_p =
+      dynamic_cast<ACE_POSIX_Asynch_Accept*> (asynch_accept_r.implementation ());
   }
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<ACE_POSIX_Asynch_Accept*>(%@) failed, aborting\n"),
-                inherited::asynch_accept ().implementation ()));
-    accept_p = NULL;
+                asynch_accept_r.implementation ()));
+    posix_asynch_accept_p = NULL;
   }
-  if (!accept_p)
+  if (!posix_asynch_accept_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<ACE_POSIX_Asynch_Accept*>(%@) failed, aborting\n"),
-                inherited::asynch_accept ().implementation ()));
+                asynch_accept_r.implementation ()));
     return;
   }
-  result = accept_p->close ();
+  result = posix_asynch_accept_p->close ();
   if (result == -1)
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT("failed to ACE_POSIX_Asynch_Accept::close(): \"%m\", continuing\n")));

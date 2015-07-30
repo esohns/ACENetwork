@@ -46,7 +46,7 @@ class IRC_Client_GUI_MessageHandler;
   @author Erik Sohns <erik.sohns@web.de>
 */
 class IRC_Client_GUI_Connection
- : public IRC_Client_INotify_t
+ : public IRC_Client_IStreamNotify_t
  , public Common_IGet_T<IRC_Client_GTK_ConnectionCBData>
 {
   friend class IRC_Client_GUI_MessageHandler;
@@ -67,8 +67,8 @@ class IRC_Client_GUI_Connection
   void finalize (bool = true); // locked access ?
   void close ();
 
-  // implement IRC_Client_INotify_t
-  virtual void start (const IRC_Client_StreamModuleConfiguration&);
+  // implement IRC_Client_IStreamNotify_t
+  virtual void start (const IRC_Client_StreamSessionData&);
   virtual void notify (const IRC_Client_IRCMessage&);
   virtual void end ();
 
@@ -107,14 +107,14 @@ class IRC_Client_GUI_Connection
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_Connection& operator= (const IRC_Client_GUI_Connection&))
 
   // helper methods
-  void forward (const std::string&,  // channel/nick
+  void forward (const std::string&,  // channel/nickname
                 const std::string&); // message text
   void log (const std::string&);
   void log (const IRC_Client_IRCMessage&);
   void error (const IRC_Client_IRCMessage&,
               bool = true); // locked access ?
 
-  IRC_Client_GUI_MessageHandler* getHandler (const std::string&); // id (channel/nick)
+  IRC_Client_GUI_MessageHandler* getHandler (const std::string&); // id (channel/nickname)
 
   IRC_Client_GTK_ConnectionCBData CBData_;
   guint                           contextID_;

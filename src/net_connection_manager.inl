@@ -233,9 +233,9 @@ Net_Connection_Manager_T<AddressType,
       break;
   if (!connection_p)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("invalid index (was: %u), aborting\n"),
-                index_in));
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("invalid index (was: %u), aborting\n"),
+//                index_in));
     return NULL;
   } // end IF
 
@@ -280,18 +280,18 @@ Net_Connection_Manager_T<AddressType,
          break;
   if (result)
     result->increase (); // increase reference count
-  else
-  {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection not found (handle was: %@), aborting\n"),
-                handle_in));
-#else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection not found (handle was: %d), aborting\n"),
-                handle_in));
-#endif
-  } // end ELSE
+//  else
+//  {
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("connection not found (handle was: %@), aborting\n"),
+//                handle_in));
+//#else
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("connection not found (handle was: %d), aborting\n"),
+//                handle_in));
+//#endif
+//  } // end ELSE
 
   return result;
 }
@@ -335,19 +335,19 @@ Net_Connection_Manager_T<AddressType,
     } // end FOR
     if (result)
       result->increase (); // increase reference count
-    else
-    {
-      ACE_TCHAR buffer[BUFSIZ];
-      ACE_OS::memset (buffer, 0, sizeof (buffer));
-      // *TODO*: find a replacement for ACE_Netlink_Addr::addr_to_string
-      //    result = peerAddress_in.addr_to_string (buffer, sizeof (buffer));
-      //    if (result == -1)
-      //      ACE_DEBUG ((LM_ERROR,
-      //                  ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("connection not found (address was: \"%s\"), aborting\n"),
-                  ACE_TEXT (buffer)));
-    } // end ELSE
+//    else
+//    {
+//      ACE_TCHAR buffer[BUFSIZ];
+//      ACE_OS::memset (buffer, 0, sizeof (buffer));
+//      // *TODO*: find a replacement for ACE_Netlink_Addr::addr_to_string
+//      int result_2 = peerAddress_in.addr_to_string (buffer, sizeof (buffer));
+//      if (result_2 == -1)
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("connection not found (address was: \"%s\"), aborting\n"),
+//                  ACE_TEXT (buffer)));
+//    } // end ELSE
   } // end lock scope
 
   return result;
@@ -505,10 +505,12 @@ Net_Connection_Manager_T<AddressType,
                          StateType,
                          StatisticContainerType,
                          StreamType,
-                         UserDataType>::stop (bool lockedAccess_in)
+                         UserDataType>::stop (bool waitForCompletion_in,
+                                              bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
 
+  ACE_UNUSED_ARG (waitForCompletion_in);
   int result = -1;
 
   if (lockedAccess_in)
@@ -837,13 +839,13 @@ Net_Connection_Manager_T<AddressType,
     } // end IF
 
     ACE_DEBUG ((LM_INFO,
-                ACE_TEXT ("*** RUNTIME STATISTICS ***\n--> [%u] Connection(s) <--\n# data messages: %u (avg.: %u)\ndata: %.0f (avg.: %.2f) bytes\n*** RUNTIME STATISTICS ***\\END\n"),
+                ACE_TEXT ("*** RUNTIME STATISTICS ***\n--> [%u] connection(s) <--\n# data messages: %u (avg.: %u)\ndata: %.0f (avg.: %.2f) bytes\n*** RUNTIME STATISTICS ***\\END\n"),
                 connections_.size (),
-                result.numDataMessages,
-                (connections_.size () ? (result.numDataMessages / connections_.size ())
+                result.dataMessages,
+                (connections_.size () ? (result.dataMessages / connections_.size ())
                                       : 0),
-                result.numBytes,
-                (connections_.size () ? (result.numBytes / connections_.size ())
+                result.bytes,
+                (connections_.size () ? (result.bytes / connections_.size ())
                                       : 0.0)));
   } // end lock scope
 }

@@ -34,17 +34,15 @@
 #include "net_macros.h"
 
 #include "IRC_client_defines.h"
+#include "IRC_client_network.h"
 #include "IRC_client_tools.h"
 
 IRC_Client_Module_IRCHandler::IRC_Client_Module_IRCHandler ()
  : inherited ()
  , lock_ ()
  , subscribers_ ()
- , allocator_ (NULL)
- , automaticPong_ (false) // *NOTE*: the idea really is not to play PONG...
- , bufferSize_ (IRC_CLIENT_BUFFER_SIZE)
+ , configuration_ ()
  , isInitialized_ (false)
- , printPingPongDot_ (false)
  , conditionLock_ ()
  , condition_ (conditionLock_)
  , connectionIsAlive_ (false)
@@ -62,28 +60,20 @@ IRC_Client_Module_IRCHandler::~IRC_Client_Module_IRCHandler ()
 }
 
 bool
-IRC_Client_Module_IRCHandler::initialize (IRC_Client_INotify_t* subscriber_in,
-                                          Stream_IAllocator* allocator_in,
-                                          unsigned int bufferSize_in,
-                                          bool autoAnswerPings_in,
-                                          bool printPingPongDot_in)
+IRC_Client_Module_IRCHandler::initialize (const IRC_Client_ModuleHandlerConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::initialize"));
 
+  configuration_ = configuration_in;
+
   // sanity check(s)
-  ACE_ASSERT (allocator_in);
+  ACE_ASSERT (configuration_.streamConfiguration);
+  ACE_ASSERT (configuration_.streamConfiguration->messageAllocator);
 
   if (isInitialized_)
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
-
-    // reset state
-    allocator_ = NULL;
-    bufferSize_ = IRC_CLIENT_BUFFER_SIZE;
-    automaticPong_ = false;
-    printPingPongDot_ = false;
-    isInitialized_ = false;
 
     {
       ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
@@ -91,41 +81,42 @@ IRC_Client_Module_IRCHandler::initialize (IRC_Client_INotify_t* subscriber_in,
       connectionIsAlive_ = false;
     } // end lock scope
 
-    // synch access to state machine
-    {
-      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (inherited2::lock_);
+    { // synch access to state machine
+      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (inherited::lock_);
 
-      inherited2::state_ = REGISTRATION_STATE_NICK;
+      inherited::state_ = REGISTRATION_STATE_NICK;
     } // end lock scope
     initialRegistration_ = true;
     receivedInitialNotice_ = false;
 
-    // synch access to subscribers
-    {
+    { // synch access to subscribers
       ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
       subscribers_.clear ();
     } // end lock scope
   } // end IF
 
-  allocator_ = allocator_in;
-  bufferSize_ = bufferSize_in;
-  automaticPong_ = autoAnswerPings_in;
-//   if (automaticPong_)
+//   if (configuration_.automaticPong)
 //     ACE_DEBUG((LM_DEBUG,
 //                ACE_TEXT("auto-answering ping messages...\n")));
-  printPingPongDot_ = printPingPongDot_in;
 
-  if (subscriber_in)
+  if (configuration_.subscriber)
   {
     ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
-    subscribers_.push_back (subscriber_in);
+    subscribers_.push_back (configuration_.subscriber);
   } // end IF
 
   isInitialized_ = true;
 
-  return isInitialized_;
+  return true;
+}
+const IRC_Client_ModuleHandlerConfiguration&
+IRC_Client_Module_IRCHandler::get () const
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::handleDataMessage"));
+
+  return configuration_;
 }
 
 void
@@ -140,6 +131,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
   // sanity check(s)
   const IRC_Client_IRCMessage* message_data_p = message_inout->getData ();
   ACE_ASSERT (message_data_p);
+  ACE_ASSERT (configuration_.protocolConfiguration);
 
 //   try
 //   {
@@ -170,10 +162,10 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
           if (initialRegistration_)
           {
             initialRegistration_ = false;
-            if (!inherited2::change (REGISTRATION_STATE_FINISHED))
+            if (!inherited::change (REGISTRATION_STATE_FINISHED))
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to Common_IStateMachine_T::change(\"%s\"), continuing\n"),
-                          ACE_TEXT (inherited2::state2String (REGISTRATION_STATE_FINISHED).c_str ())));
+                          ACE_TEXT (inherited::state2String (REGISTRATION_STATE_FINISHED).c_str ())));
           } // end IF
 
           // *WARNING*: falls through !
@@ -211,6 +203,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
         case IRC_Client_IRC_Codes::RPL_MOTD:                 // 372
         case IRC_Client_IRC_Codes::RPL_MOTDSTART:            // 375
         case IRC_Client_IRC_Codes::RPL_ENDOFMOTD:            // 376
+        case IRC_Client_IRC_Codes::RPL_HOSTHIDDEN:           // 396
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:           // 401
         case IRC_Client_IRC_Codes::ERR_NOTEXTTOSEND:         // 412
         case IRC_Client_IRC_Codes::ERR_UNKNOWNCOMMAND:       // 421
@@ -350,7 +343,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
 //                      message_inout->getData()->params.back().c_str()));
 
           // auto-answer ?
-          if (automaticPong_)
+          if (configuration_.protocolConfiguration->automaticPong)
           {
             // --> reply with a "PONG"
 
@@ -384,10 +377,8 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
             sendMessage (reply_p);
           } // end IF
 
-          if (printPingPongDot_)
-          {
+          if (configuration_.protocolConfiguration->printPingDot)
             std::clog << '.';
-          } // end IF
 
           break;
         }
@@ -503,11 +494,42 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
   ACE_ASSERT (message_inout);
   ACE_ASSERT (isInitialized_);
 
-  switch (message_inout->getType ())
+  switch (message_inout->type ())
   {
     case SESSION_BEGIN:
     {
-      // remember connection has been opened...
+      // step0: initialize session state
+      // *NOTE*: the IRC protocol does not foresee a 'handshake' during session
+      //         initialization for client-to-server communications.
+      //         (see: RFC 1459 page 13f)
+      //         In particular, this means that the initial user nickname is not
+      //         'acknowledged' during the (PASS-)NICK-USER sequence
+      Stream_Module_t* module_p = inherited2::module ();
+      ACE_ASSERT (module_p);
+      IRC_Client_IModule_t* imodule_p =
+          dynamic_cast<IRC_Client_IModule_t*> (module_p);
+      if (!imodule_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to dynamic_cast<Stream_IModule_T*>(%@), returning\n"),
+                    module_p));
+        break;
+      } // end IF
+      const IRC_Client_ModuleHandlerConfiguration& module_handler_configuration_r =
+          imodule_p->get ();
+      ACE_ASSERT (module_handler_configuration_r.protocolConfiguration);
+      const IRC_Client_StreamSessionData_t& session_data_container_r =
+          message_inout->get ();
+      const IRC_Client_StreamSessionData* session_data_p =
+          session_data_container_r.getData ();
+      ACE_ASSERT (session_data_p->connectionState);
+      {
+        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (session_data_p->connectionState->lock);
+        session_data_p->connectionState->nickname =
+            module_handler_configuration_r.protocolConfiguration->loginOptions.nickname;
+      } // end lock scope
+
+      // step1: remember connection has been opened...
       {
         ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
 
@@ -517,24 +539,18 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
         result = condition_.broadcast ();
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
+                      ACE_TEXT ("failed to ACE_SYNCH_CONDITION::broadcast(): \"%m\", continuing\n")));
       } // end lock scope
 
-      // announce this information to any subscriber(s)
-      IRC_Client_Module_IRCHandler_Module* module_p =
-        dynamic_cast<IRC_Client_Module_IRCHandler_Module*> (inherited::module ());
-      ACE_ASSERT (module_p);
-      const IRC_Client_StreamModuleConfiguration& module_configuration_r =
-          module_p->get ();
-      //IRC_Client_INotify_t* subscriber_p =
-      //  dynamic_cast<IRC_Client_INotify_t*> (module_configuration_r.connection);
+      // step2: announce this state to any subscriber(s)
 
+      // forward the (current) session data to any subscriber(s)
       {
         ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
-        // initial subscriber ?
-        if (module_configuration_r.subscriber)
-          subscribers_.push_back (module_configuration_r.subscriber);
+        //// initial subscriber ?
+        //if (module_handler_configuration_r.subscriber)
+        //  subscribers_.push_back (module_handler_configuration_r.subscriber);
 
 //         ACE_DEBUG ((LM_DEBUG,
 //                     ACE_TEXT ("session starting, notifying %u subscriber(s)...\n"),
@@ -554,12 +570,12 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
         {
           try
           {
-            (*iterator++)->start (module_configuration_r);
+            (*iterator++)->start (*session_data_p);
           }
           catch (...)
           {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("caught exception in IRC_Client_INotify::start(), continuing\n")));
+                        ACE_TEXT ("caught exception in IRC_Client_IStreamNotify::start(), continuing\n")));
           }
         } // end FOR
       } // end lock scope
@@ -595,17 +611,15 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
           catch (...)
           {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("caught exception in IRC_Client_INotify_t::end(), continuing\n")));
+                        ACE_TEXT ("caught exception in IRC_Client_IStreamNotify_t::end(), continuing\n")));
           }
         } // end FOR
 
         if (!subscribers_.empty ())
           ACE_DEBUG ((LM_DEBUG,
                       ACE_TEXT ("%s: removing %u subscription(s)...\n"),
-                      ACE_TEXT (inherited::mod_->name ()),
+                      ACE_TEXT (inherited2::name ()),
                       subscribers_.size ()));
-
-        // clean subscribers
         subscribers_.clear ();
       } // end lock scope
 
@@ -619,7 +633,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
         result = condition_.broadcast ();
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
+                      ACE_TEXT ("failed to ACE_SYNCH_CONDITION::broadcast(): \"%m\", continuing\n")));
       } // end lock scope
 
       break;
@@ -734,21 +748,10 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
   // step3b: send it upstream
   sendMessage (message_p);
 
-  // step4a: initialize NICK
-  message_p = allocateMessage (IRC_Client_IRCMessage::NICK);
-  if (!message_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
+  // step4: initialize nickname
+  nick (loginOptions_in.nickname);
 
-  message_p->params.push_back (loginOptions_in.nickname);
-
-  // step4b: send it upstream
-  sendMessage (message_p);
-
-  // step5a: initialize USER
+  // step5a: initialize user
   message_p = allocateMessage (IRC_Client_IRCMessage::USER);
   if (!message_p)
   {
@@ -837,7 +840,7 @@ IRC_Client_Module_IRCHandler::wait (const ACE_Time_Value* timeout_in)
 }
 
 void
-IRC_Client_Module_IRCHandler::subscribe (IRC_Client_INotify_t* interfaceHandle_in)
+IRC_Client_Module_IRCHandler::subscribe (IRC_Client_IStreamNotify_t* interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::subscribe"));
 
@@ -851,7 +854,7 @@ IRC_Client_Module_IRCHandler::subscribe (IRC_Client_INotify_t* interfaceHandle_i
 }
 
 void
-IRC_Client_Module_IRCHandler::unsubscribe (IRC_Client_INotify_t* interfaceHandle_in)
+IRC_Client_Module_IRCHandler::unsubscribe (IRC_Client_IStreamNotify_t* interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::unsubscribe"));
 
@@ -1367,20 +1370,23 @@ IRC_Client_Module_IRCHandler::onChange (IRC_Client_RegistrationState newState_in
 }
 
 IRC_Client_Message*
-IRC_Client_Module_IRCHandler::allocateMessage(unsigned int requestedSize_in)
+IRC_Client_Module_IRCHandler::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::allocateMessage"));
 
   // initialize return value(s)
   IRC_Client_Message* message_p = NULL;
 
-  if (allocator_)
+  // sanity check(s)
+  ACE_ASSERT (configuration_.streamConfiguration);
+
+  if (configuration_.streamConfiguration->messageAllocator)
   {
 allocate:
     try
     {
       message_p =
-        static_cast<IRC_Client_Message*> (allocator_->malloc (requestedSize_in));
+        static_cast<IRC_Client_Message*> (configuration_.streamConfiguration->messageAllocator->malloc (requestedSize_in));
     }
     catch (...)
     {
@@ -1392,7 +1398,7 @@ allocate:
 
     // keep retrying ?
     if (!message_p &&
-        !allocator_->block ())
+        !configuration_.streamConfiguration->messageAllocator->block ())
         goto allocate;
   } // end IF
   else
@@ -1400,9 +1406,9 @@ allocate:
                       IRC_Client_Message (requestedSize_in));
   if (!message_p)
   {
-    if (allocator_)
+    if (configuration_.streamConfiguration->messageAllocator)
     {
-      if (allocator_->block ())
+      if (configuration_.streamConfiguration->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
     } // end IF
@@ -1454,13 +1460,17 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Client_IRCMessage*& command_in)
 
   int result = -1;
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_.streamConfiguration);
+
   // step1: get a message buffer
-  IRC_Client_Message* message_p = allocateMessage (bufferSize_);
+  IRC_Client_Message* message_p =
+      allocateMessage (configuration_.streamConfiguration->bufferSize);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(%u), returning\n"),
-                bufferSize_));
+                configuration_.streamConfiguration->bufferSize));
     return;
   } // end IF
 
@@ -1489,7 +1499,7 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Client_IRCMessage*& command_in)
     return;
   } // end IF
 
-  result = inherited::reply (message_p, NULL);
+  result = inherited2::reply (message_p, NULL);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1514,7 +1524,7 @@ IRC_Client_Module_IRCHandler::clone ()
   Stream_Module_t* module_p = NULL;
 
   ACE_NEW_NORETURN (module_p,
-                    IRC_Client_Module_IRCHandler_Module (ACE_TEXT_ALWAYS_CHAR (inherited::name ()),
+                    IRC_Client_Module_IRCHandler_Module (ACE_TEXT_ALWAYS_CHAR (inherited2::name ()),
                     NULL));
   if (!module_p)
     ACE_DEBUG ((LM_CRITICAL,
@@ -1534,21 +1544,16 @@ IRC_Client_Module_IRCHandler::clone ()
 
       return NULL;
     } // end IF
-    // *TODO*: override Stream_Module_Base_T::initialize instead
-    if (!handler_p->initialize (NULL,
-                                allocator_,
-                                bufferSize_,
-                                automaticPong_,
-                                printPingPongDot_))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("IRC_Client_Module_IRCHandler::initialize(), aborting\n")));
+//    if (!handler_p->initialize (configuration_))
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::initialize(), aborting\n")));
 
-      // clean up
-      delete module_p;
+//      // clean up
+//      delete module_p;
 
-      return NULL;
-    } // end IF
+//      return NULL;
+//    } // end IF
   } // end ELSE
 
   return module_p;

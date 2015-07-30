@@ -40,10 +40,16 @@
 class IRC_Client_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        Stream_State,
-                        Stream_Statistic,
+                        /////////////////
+                        IRC_Client_StreamState,
+                        /////////////////
                         IRC_Client_StreamConfiguration,
-                        IRC_Client_StreamModuleConfiguration,
+                        /////////////////
+                        IRC_Client_RuntimeStatistic_t,
+                        /////////////////
+                        Stream_ModuleConfiguration,
+                        IRC_Client_ModuleHandlerConfiguration,
+                        /////////////////
                         IRC_Client_StreamSessionData,
                         IRC_Client_StreamSessionData_t,
                         IRC_Client_SessionMessage,
@@ -57,21 +63,27 @@ class IRC_Client_Stream
   virtual bool initialize (const IRC_Client_StreamConfiguration&); // configuration
 
   // implement Common_IStatistic_T
-  // *NOTE*: delegate this to myRuntimeStatistic
-  virtual bool collect (Stream_Statistic&); // return value: statistic data
+  // *NOTE*: delegate this to rntimeStatistic_
+  virtual bool collect (IRC_Client_RuntimeStatistic_t&); // return value: statistic data
   // this is just a dummy (use statisticsReportingInterval instead)
   virtual void report () const;
 
-  // *TODO*: re-consider this API
+  // *TODO*: remove this API
   void ping ();
 
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        Stream_State,
-                        Stream_Statistic,
+                        /////////////////
+                        IRC_Client_StreamState,
+                        /////////////////
                         IRC_Client_StreamConfiguration,
-                        IRC_Client_StreamModuleConfiguration,
+                        /////////////////
+                        IRC_Client_RuntimeStatistic_t,
+                        /////////////////
+                        Stream_ModuleConfiguration,
+                        IRC_Client_ModuleHandlerConfiguration,
+                        /////////////////
                         IRC_Client_StreamSessionData,
                         IRC_Client_StreamSessionData_t,
                         IRC_Client_SessionMessage,

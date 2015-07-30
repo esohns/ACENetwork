@@ -35,6 +35,7 @@ class IRC_Client_IRC_Codes
     RPL_MYINFO	          = 4,
     RPL_PROTOCTL          = 5,
 //     RPL_BOUNCE            = 5,
+//     RPL_ISUPPORT          = 5,
 //     RPL_MAP               = 5,
     RPL_MAPMORE           = 6,
 //     RPL_MAP               = 6,
@@ -43,13 +44,15 @@ class IRC_Client_IRC_Codes
     RPL_STATMEMTOT        = 9,
     RPL_STATMEM           = 10,
 //     RPL_BOUNCE            = 10,
+//     RPL_REDIR             = 10,
 
     RPL_YOURCOOKIE        = 14,
 //     RPL_MAP               = 15,
 //     RPL_MAPMORE           = 16,
 //     RPL_MAPEND            = 17,
+    RPL_YOURID            = 20,
 
-    RPL_YOURID            = 42,
+//    RPL_YOURID            = 42,
     RPL_SAVENICK          = 43,
 
     RPL_ATTEMPTINGJUNC    = 50,

@@ -27,11 +27,11 @@
 #include "net_macros.h"
 
 Net_SessionMessage::Net_SessionMessage (Stream_SessionMessageType messageType_in,
-                                        Stream_State* streamState_in,
-                                        Net_StreamSessionData_t*& sessionData_inout)
+                                        Net_StreamSessionData_t*& sessionData_inout,
+                                        Net_StreamUserData* userData_in)
  : inherited (messageType_in,
-              streamState_in,
-              sessionData_inout)
+              sessionData_inout,
+              userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionMessage::Net_SessionMessage"));
 

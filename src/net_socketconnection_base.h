@@ -22,9 +22,10 @@
 #define NET_SOCKETCONNECTION_BASE_H
 
 #include "ace/config-macros.h"
-#include "ace/Connector.h"
+//#include "ace/Connector.h"
+#include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
-#include "ace/SOCK_Connector.h"
+//#include "ace/SOCK_Connector.h"
 
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
@@ -82,6 +83,12 @@ class Net_SocketConnectionBase_T
 //                            ACE_Reactor_Mask);
 
  protected:
+  //typedef ACE_Connector<HandlerType,
+  //                      ACE_SOCK_CONNECTOR> ACE_CONNECTOR_T;
+  typedef Net_IConnector_T<AddressType,
+                           HandlerConfigurationType> ICONNECTOR_T;
+  typedef Net_IListener_T<ConfigurationType,
+                          HandlerConfigurationType> ILISTENER_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
@@ -103,12 +110,6 @@ class Net_SocketConnectionBase_T
 
  private:
   typedef HandlerType inherited;
-
-  //typedef ACE_Connector<HandlerType,
-  //                      ACE_SOCK_CONNECTOR> ACE_CONNECTOR_T;
-  typedef Net_IConnector_T<AddressType,
-                           HandlerConfigurationType> ICONNECTOR_T;
-  typedef Net_IListener_T<HandlerConfigurationType> ILISTENER_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&))
@@ -161,6 +162,10 @@ class Net_AsynchSocketConnectionBase_T
   virtual void ping (); // ping the peer !
 
  protected:
+  typedef Net_IConnector_T<AddressType,
+                           HandlerConfigurationType> ICONNECTOR_T;
+  typedef Net_IListener_T<ConfigurationType,
+                          HandlerConfigurationType> ILISTENER_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
@@ -181,10 +186,6 @@ class Net_AsynchSocketConnectionBase_T
 
  private:
   typedef HandlerType inherited;
-
-  typedef Net_IConnector_T<AddressType,
-                           HandlerConfigurationType> ICONNECTOR_T;
-  typedef Net_IListener_T<HandlerConfigurationType> ILISTENER_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T (const Net_AsynchSocketConnectionBase_T&))

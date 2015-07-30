@@ -37,32 +37,37 @@
 #include "net_stream_common.h"
 
 // declare module(s)
-typedef Net_Module_SocketHandler_T<Stream_State,
-                                   Net_StreamSessionData,
-                                   Net_StreamSessionData_t,
-                                   Net_SessionMessage,
+typedef Net_Module_SocketHandler_T<Net_SessionMessage,
                                    Net_Message,
+                                   //////
+                                   Net_StreamState,
+                                   //////
+                                   Net_StreamSessionData,   // session data
+                                   Net_StreamSessionData_t, // session message payload (reference counted)
+                                   //////
                                    Net_Remote_Comm::MessageHeader> Net_Module_SocketHandler;
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,               // task synch type
-                              Common_TimePolicy_t,        // time policy type
-                              Stream_ModuleConfiguration, // configuration type
-                              Net_Module_SocketHandler);  // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                   // task synch type
+                              Common_TimePolicy_t,            // time policy type
+                              Stream_ModuleConfiguration,     // module configuration type
+                              Net_ModuleHandlerConfiguration, // module handler configuration type
+                              Net_Module_SocketHandler);      // writer type
 
 typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
                                           Net_SessionMessage,
                                           Net_Message,
                                           Net_MessageType_t,
-                                          Stream_Statistic> Net_Module_Statistic_ReaderTask_t;
+                                          Net_RuntimeStatistic_t> Net_Module_Statistic_ReaderTask_t;
 typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
                                           Net_SessionMessage,
                                           Net_Message,
                                           Net_MessageType_t,
-                                          Stream_Statistic> Net_Module_Statistic_WriterTask_t;
+                                          Net_RuntimeStatistic_t> Net_Module_Statistic_WriterTask_t;
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                      // task synch type
                           Common_TimePolicy_t,               // time policy type
-                          Stream_ModuleConfiguration,        // configuration type
+                          Stream_ModuleConfiguration,        // module configuration type
+                          Stream_ModuleHandlerConfiguration, // module handler configuration type
                           Net_Module_Statistic_ReaderTask_t, // reader type
                           Net_Module_Statistic_WriterTask_t, // writer type
                           Net_Module_RuntimeStatistic);      // name

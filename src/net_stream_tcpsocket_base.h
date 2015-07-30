@@ -50,7 +50,8 @@ template <typename HandlerType,
           ///////////////////////////////
           typename UserDataType,
           ///////////////////////////////
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 class Net_StreamTCPSocketBase_T
  : public HandlerType
  , public Net_ConnectionBase_T<AddressType,
@@ -71,7 +72,8 @@ class Net_StreamTCPSocketBase_T
                                                       
                                                       UserDataType,
                                                       
-                                                      ModuleConfigurationType>,
+                                                      ModuleConfigurationType,
+                                                      ModuleHandlerConfigurationType>,
                             ACE_SOCK_ACCEPTOR>;
   friend class ACE_Connector<Net_StreamTCPSocketBase_T<HandlerType,
 
@@ -83,7 +85,8 @@ class Net_StreamTCPSocketBase_T
 
                                                        UserDataType,
 
-                                                       ModuleConfigurationType>,
+                                                       ModuleConfigurationType,
+                                                       ModuleHandlerConfigurationType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
@@ -143,7 +146,8 @@ class Net_StreamTCPSocketBase_T
                                    UserDataType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<ACE_MT_SYNCH,
                            Common_TimePolicy_t,
-                           ModuleConfigurationType> IMODULE_T;
+                           ModuleConfigurationType,
+                           ModuleHandlerConfigurationType> IMODULE_T;
 
   Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]

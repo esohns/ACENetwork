@@ -231,13 +231,17 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
   ACE_ASSERT (isInitialized_);
 
   int result = -1;
-  switch (message_inout->getType ())
+  switch (message_inout->type ())
   {
     case SESSION_BEGIN:
     {
-      const Stream_State* state_p = message_inout->getState ();
-      ACE_ASSERT (state_p);
-      sessionID_ = state_p->sessionID;
+      // retain session ID for reporting...
+      const Net_StreamSessionData_t& session_data_container_r =
+          message_inout->get ();
+      const Net_StreamSessionData* session_data_p =
+          session_data_container_r.getData ();
+      ACE_ASSERT (session_data_p);
+      sessionID_ = session_data_p->sessionID;
 
       if (pingInterval_)
       {

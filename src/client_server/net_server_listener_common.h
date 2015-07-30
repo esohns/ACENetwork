@@ -31,7 +31,7 @@
 #include "net_tcpconnection.h"
 
 #include "net_server_asynchlistener.h"
-#include "net_server_common.h"
+//#include "net_server_common.h"
 #include "net_server_exports.h"
 #include "net_server_listener.h"
 
@@ -41,7 +41,7 @@ class Net_Stream;
 typedef Net_Server_AsynchListener_T<Net_AsynchTCPConnection,
                                     /////
                                     ACE_INET_Addr,
-                                    Net_Server_ListenerConfiguration,
+                                    Net_ListenerConfiguration,
                                     Net_ConnectionState,
                                     Net_Stream,
                                     /////
@@ -51,7 +51,7 @@ typedef Net_Server_AsynchListener_T<Net_AsynchTCPConnection,
 typedef Net_Server_Listener_T<Net_TCPConnection,
                               ///////////
                               ACE_INET_Addr,
-                              Net_Server_ListenerConfiguration,
+                              Net_ListenerConfiguration,
                               Net_ConnectionState,
                               Net_Stream,
                               ///////////

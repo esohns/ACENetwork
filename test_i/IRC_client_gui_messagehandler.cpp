@@ -173,7 +173,8 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   } // end IF
   std::string ui_definition_filename = UIFileDirectory_in;
   ui_definition_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  ui_definition_filename += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_CHANNEL_FILE);
+  ui_definition_filename +=
+      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_CHANNEL_FILE);
   if (!Common_File_Tools::isReadable (ui_definition_filename))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -485,6 +486,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
                   ACE_TEXT ("failed to g_idle_add_full(idle_add_channel_cb): \"%m\", returning\n")));
       return;
     } // end IF
+    // *TODO*: this id is never removed from the list again...
     CBData_.GTKState->eventSourceIds.insert (CBData_.eventSourceID);
   } // end lock scope
 }
@@ -520,10 +522,12 @@ IRC_Client_GUI_MessageHandler::~IRC_Client_GUI_MessageHandler ()
     removed_events++;
   if (removed_events)
     ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("%s: removed %u queued events...\n"),
+                ACE_TEXT ("%s: removed %u queued event(s)...\n"),
                 (isServerLog () ? ACE_TEXT (IRC_CLIENT_GUI_GTK_LABEL_DEF_LOG_TEXT)
                                 : ACE_TEXT (CBData_.id.c_str ())),
                 removed_events));
+//  if (CBData_.eventSourceID)
+//    CBData_.GTKState->eventSourceIds.erase (CBData_.eventSourceID);
 }
 
 const IRC_Client_GTK_HandlerCBData&
@@ -683,7 +687,7 @@ IRC_Client_GUI_MessageHandler::getTopLevelPageChild (bool lockedAccess_in) const
     result = CBData_.GTKState->lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
   } // end IF
 
   // *WARNING*: the server log handler doesn't have a builder...
@@ -780,7 +784,7 @@ IRC_Client_GUI_MessageHandler::setModes (const std::string& modes_in,
     result = CBData_.GTKState->lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
   } // end IF
 
   CBData_.acknowledgements +=
@@ -833,13 +837,13 @@ IRC_Client_GUI_MessageHandler::clearMembers (bool lockedAccess_in)
   gdk_threads_enter ();
 
   // retrieve channel liststore handle
-  GtkListStore* liststore_p =
+  GtkListStore* list_store_p =
     GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                             ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LISTSTORE_CHANNEL)));
-  ACE_ASSERT (liststore_p);
+  ACE_ASSERT (list_store_p);
 
   // clear liststore
-  gtk_list_store_clear (liststore_p);
+  gtk_list_store_clear (list_store_p);
 
   gdk_threads_leave ();
 

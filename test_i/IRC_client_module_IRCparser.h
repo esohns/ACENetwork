@@ -26,6 +26,7 @@
 
 #include "common_time_common.h"
 
+#include "stream_common.h"
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
@@ -62,8 +63,8 @@ class IRC_Client_Module_IRCParser
                                  IRC_Client_SessionMessage,
                                  IRC_Client_Message> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCParser (const IRC_Client_Module_IRCParser&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCParser& operator= (const IRC_Client_Module_IRCParser&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCParser (const IRC_Client_Module_IRCParser&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCParser& operator= (const IRC_Client_Module_IRCParser&))
 
   // helper methods
   IRC_Client_Message* allocateMessage (unsigned int); // requested size
@@ -83,7 +84,8 @@ class IRC_Client_Module_IRCParser
 // declare module
 DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                 // task synch type
                               Common_TimePolicy_t,          // time policy
-                              IRC_Client_Configuration,     // configuration type
+                              Stream_ModuleConfiguration,   // module configuration type
+                              IRC_Client_Configuration,     // module handler configuration type
                               IRC_Client_Module_IRCParser); // writer type
 
 #endif

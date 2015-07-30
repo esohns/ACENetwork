@@ -27,21 +27,25 @@
 
 #include "net_configuration.h"
 
-template <typename ConfigurationType>
+template <typename ConfigurationType,
+          typename HandlerConfigurationType>
 class Net_IListener_T
  : public Common_IControl
- , public Common_IGet_T<ConfigurationType>
- , public Common_IInitialize_T<ConfigurationType>
+ , public Common_IGet_T<HandlerConfigurationType>
+ , public Common_IInitialize_T<HandlerConfigurationType>
+ //, public Common_IInitialize_T<ConfigurationType>
 {
  public:
   virtual ~Net_IListener_T () {};
+
+  virtual bool initialize (const ConfigurationType&) = 0;
 
   virtual bool useReactor () const = 0; // ? : uses proactor
 };
 
 /////////////////////////////////////////
 
-typedef Net_IListener_T<Net_SocketHandlerConfiguration> Net_IListener_t;
-//typedef Net_IListener_T<Net_Client_ListenerConfiguration> Net_IListener_t;
+typedef Net_IListener_T<Net_ListenerConfiguration,
+                        Net_SocketHandlerConfiguration> Net_IListener_t;
 
 #endif

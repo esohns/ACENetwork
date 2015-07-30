@@ -263,7 +263,7 @@ Net_ConnectionBase_T<AddressType,
                   ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
     }
 
-    OWN_TYPE* this_p = this;
+    OWN_TYPE_T* this_p = this;
     unsigned int num_connections = manager_->numConnections () - 1;
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

@@ -248,16 +248,18 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     //messageCounter_++;
   } // end lock scope
 
-  switch (message_inout->getType ())
+  switch (message_inout->type ())
   {
     case SESSION_BEGIN:
     {
       // retain session ID for reporting...
-      // *TODO*: clearly, this isn't good design...
-      const typename SessionMessageType::STREAM_STATE_TYPE* state_p =
-        message_inout->getState ();
-      ACE_ASSERT (state_p);
-      sessionID_ = state_p->sessionID;
+      // *TODO*: remove type inferences
+      const typename SessionMessageType::SESSION_DATA_TYPE& session_data_container_r =
+          message_inout->get ();
+      const typename SessionMessageType::SESSION_DATA_TYPE::SESSION_DATA_TYPE* session_data_p =
+          session_data_container_r.getData ();
+      ACE_ASSERT (session_data_p);
+      sessionID_ = session_data_p->sessionID;
 
       // statistics reporting
       if (reportingInterval_)
@@ -380,9 +382,9 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   {
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
-    data_out.numDataMessages = (numInboundMessages_ + numOutboundMessages_);
-    data_out.numDroppedMessages = 0;
-    data_out.numBytes = (numInboundBytes_ + numOutboundBytes_);
+    data_out.bytes = (numInboundBytes_ + numOutboundBytes_);
+    data_out.dataMessages = (numInboundMessages_ + numOutboundMessages_);
+//    data_out.droppedMessages = 0;
   } // end lock scope
 
   return true;

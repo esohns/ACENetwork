@@ -24,12 +24,13 @@
 #include <list>
 #include <string>
 
-#include "ace/Condition_T.h"
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_iclone.h"
 #include "common_time_common.h"
 
+#include "stream_common.h"
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
@@ -44,23 +45,20 @@ class ACE_Time_Value;
 class Stream_IAllocator;
 
 class IRC_Client_Module_IRCHandler
- : public Stream_TaskBaseSynch_T<Common_TimePolicy_t,
+ : public IRC_Client_StateMachine_Registration
+ , public Stream_TaskBaseSynch_T<Common_TimePolicy_t,
                                  IRC_Client_SessionMessage,
                                  IRC_Client_Message>
- , public IRC_Client_StateMachine_Registration
  , public IRC_Client_IIRCControl
+ , public IRC_Client_IModuleHandler_t
  , public Common_IClone_T<Stream_Module_t>
 {
  public:
   IRC_Client_Module_IRCHandler ();
   virtual ~IRC_Client_Module_IRCHandler ();
 
-  // initialization
-  bool initialize (IRC_Client_INotify_t* = NULL,          // (initial) subscriber
-                   Stream_IAllocator* = NULL,             // message allocator
-                   unsigned int = IRC_CLIENT_BUFFER_SIZE, // default (message) buffer size
-                   bool = false,                          // automatically answer "ping" messages
-                   bool = false);                         // print dot ('.') for every answered PING to stdlog
+  // implement (part of) Common_IStateMachine_T
+  virtual bool wait (const ACE_Time_Value* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (IRC_Client_Message*&, // data message handle
@@ -68,12 +66,9 @@ class IRC_Client_Module_IRCHandler
   virtual void handleSessionMessage (IRC_Client_SessionMessage*&, // session message handle
                                      bool&);                      // return value: pass message downstream ?
 
-  // implement (part of) Common_IStateMachine_T
-  virtual bool wait (const ACE_Time_Value* = NULL);
-
   // implement IRC_Client_IIRCControl
-  virtual void subscribe (IRC_Client_INotify_t*); // new subscriber
-  virtual void unsubscribe (IRC_Client_INotify_t*); // existing subscriber
+  virtual void subscribe (IRC_Client_IStreamNotify_t*); // new subscriber
+  virtual void unsubscribe (IRC_Client_IStreamNotify_t*); // existing subscriber
   virtual bool registerConnection (const IRC_Client_IRCLoginOptions&); // login details
   virtual void nick (const std::string&); // nick
   virtual void quit (const std::string&); // reason
@@ -109,17 +104,21 @@ class IRC_Client_Module_IRCHandler
   // override Common_IDumpState
   virtual void dump_state () const;
 
+  // implement IRC_Client_IModuleHandler_t
+  virtual bool initialize (const IRC_Client_ModuleHandlerConfiguration&);
+  virtual const IRC_Client_ModuleHandlerConfiguration& get () const;
+
   // implement Common_IClone_T
   virtual Stream_Module_t* clone ();
 
  private:
+  typedef IRC_Client_StateMachine_Registration inherited;
   typedef Stream_TaskBaseSynch_T<Common_TimePolicy_t,
                                  IRC_Client_SessionMessage,
-                                 IRC_Client_Message> inherited;
-  typedef IRC_Client_StateMachine_Registration inherited2;
+                                 IRC_Client_Message> inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler (const IRC_Client_Module_IRCHandler&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler& operator= (const IRC_Client_Module_IRCHandler&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler (const IRC_Client_Module_IRCHandler&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler& operator= (const IRC_Client_Module_IRCHandler&))
 
   // implement (part of) Common_IStateMachine_T
   virtual void onChange (IRC_Client_RegistrationState); // new state
@@ -132,7 +131,7 @@ class IRC_Client_Module_IRCHandler
   void sendMessage (IRC_Client_IRCMessage*&); // command handle
 
   // convenient types
-  typedef std::list<IRC_Client_INotify_t*> Subscribers_t;
+  typedef std::list<IRC_Client_IStreamNotify_t*> Subscribers_t;
   typedef Subscribers_t::iterator SubscribersIterator_t;
 
   // *NOTE*: lock subscribers_ and connectionIsAlive_
@@ -141,27 +140,25 @@ class IRC_Client_Module_IRCHandler
   ACE_SYNCH_RECURSIVE_MUTEX             lock_;
   Subscribers_t                         subscribers_;
 
-  Stream_IAllocator*                    allocator_;
-  bool                                  automaticPong_;
-  unsigned int                          bufferSize_;
+  IRC_Client_ModuleHandlerConfiguration configuration_;
   bool                                  isInitialized_;
-  bool                                  printPingPongDot_;
 
   // *NOTE*: obviously, there is a delay between connection establishment and
-  //         reception of the welcome NOTICE: let the users wait for it so they
+  //         reception of the welcome NOTICE; let clients wait for it so they
   //         can start registering connections in accordance with the IRC
   //         protocol (*TODO*: reference)
   ACE_SYNCH_MUTEX                       conditionLock_;
-  ACE_Thread_Condition<ACE_SYNCH_MUTEX> condition_;
+  ACE_SYNCH_CONDITION                   condition_;
   bool                                  connectionIsAlive_;
   bool                                  initialRegistration_;
   bool                                  receivedInitialNotice_;
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                         // task synch type
-                              Common_TimePolicy_t,                  // time policy
-                              IRC_Client_StreamModuleConfiguration, // configuration type
-                              IRC_Client_Module_IRCHandler);        // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                          // task synch type
+                              Common_TimePolicy_t,                   // time policy
+                              Stream_ModuleConfiguration,            // module configuration type
+                              IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
+                              IRC_Client_Module_IRCHandler);         // writer type
 
 #endif

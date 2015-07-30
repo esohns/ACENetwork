@@ -44,9 +44,11 @@ Net_EventHandler::~Net_EventHandler ()
 }
 
 void
-Net_EventHandler::start (const Stream_ModuleConfiguration& configuration_in)
+Net_EventHandler::start (const Net_StreamSessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::start"));
+
+  ACE_UNUSED_ARG (sessionData_in);
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 

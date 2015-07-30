@@ -45,7 +45,8 @@ template <typename HandlerType,
           ///////////////////////////////
           typename UserDataType,
           ///////////////////////////////
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 class Net_StreamAsynchTCPSocketBase_T
  : public HandlerType
  , public ACE_Event_Handler
@@ -99,7 +100,8 @@ class Net_StreamAsynchTCPSocketBase_T
                                    UserDataType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<ACE_MT_SYNCH,
                            Common_TimePolicy_t,
-                           ModuleConfigurationType> IMODULE_T;
+                           ModuleConfigurationType,
+                           ModuleHandlerConfigurationType> IMODULE_T;
 
   Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                    unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]

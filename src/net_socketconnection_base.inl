@@ -79,7 +79,7 @@ Net_SocketConnectionBase_T<HandlerType,
 
   // wait for our worker (if any)
   // *TODO*: remove type inference
-  if (inherited::CONNECTION_BASE_T::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
+  if (inherited::CONNECTION_BASE_T::configuration_.streamConfiguration.useThreadPerConnection)
   {
     result = inherited::wait ();
     if (result == -1)
@@ -348,8 +348,7 @@ Net_SocketConnectionBase_T<HandlerType,
       }
       case NET_ROLE_SERVER:
       {
-        ILISTENER_T* ilistener_p =
-          static_cast<ILISTENER_T*> (arg_in);
+        ILISTENER_T* ilistener_p = static_cast<ILISTENER_T*> (arg_in);
         ACE_ASSERT (ilistener_p);
         handler_configuration_p = &ilistener_p->get ();
         break;
@@ -364,7 +363,8 @@ Net_SocketConnectionBase_T<HandlerType,
     } // end SWITCH
     ACE_ASSERT (handler_configuration_p);
     // *TODO*: remove type inference
-    configuration_p = handler_configuration_p->configuration;
+    ACE_ASSERT (handler_configuration_p->userData);
+    configuration_p = handler_configuration_p->userData->configuration;
     ACE_ASSERT (configuration_p);
     if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
     {
@@ -373,12 +373,10 @@ Net_SocketConnectionBase_T<HandlerType,
       return -1;
     } // end IF
   } // end IF
-  //if (!inherited::manager_)
-  //  configuration_p = reinterpret_cast<ConfigurationType*> (arg_in); // *BUG*: see *TODO* above
-  else
-    configuration_p = &(HandlerType::CONNECTION_BASE_T::configuration_);
-  // sanity check(s)
-  ACE_ASSERT (configuration_p);
+//  else
+//    configuration_p = &(HandlerType::CONNECTION_BASE_T::configuration_);
+//  // sanity check(s)
+//  ACE_ASSERT (configuration_p);
 
   // step1: initialize/start stream, tweak socket, register reading data with
   //        reactor, ...
@@ -503,6 +501,7 @@ Net_SocketConnectionBase_T<HandlerType,
     // *NOTE*: this (eventually) calls handle_close() (see below)
     case CLOSE_DURING_NEW_CONNECTION:
     case NET_CONNECTION_CLOSE_REASON_INITIALIZATION:
+    case NET_CONNECTION_CLOSE_REASON_USER_ABORT:
     {
       // step1: release resources
       result = inherited::close (arg_in);
@@ -837,7 +836,9 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
     } // end SWITCH
     ACE_ASSERT (handler_configuration_p);
     // *TODO*: remove type inference
-    configuration_p = handler_configuration_p->configuration;
+    ACE_ASSERT (handler_configuration_p->userData);
+    configuration_p =
+        handler_configuration_p->userData->configuration;
     ACE_ASSERT (configuration_p);
     if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
     {

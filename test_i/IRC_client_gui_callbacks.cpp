@@ -108,7 +108,7 @@ connection_setup_function (void* arg_in)
     //} // end IF
     context_id =
       gtk_statusbar_get_context_id (statusbar_p,
-                                    (*data_p->phonebookIterator).second.hostName.c_str ());
+                                    data_p->phonebookEntry.hostName.c_str ());
                                     //string_p);
     gdk_threads_leave ();
     //g_free (string_p);
@@ -122,7 +122,7 @@ connection_setup_function (void* arg_in)
                     IRC_Client_GUI_Connection (&data_p->CBData->GTKState,
                                                &data_p->CBData->connections,
                                                context_id,
-                                               (*data_p->phonebookIterator).second.hostName,
+                                               data_p->phonebookEntry.hostName,
                                                data_p->CBData->UIFileDirectory));
   if (!connection_p)
   {
@@ -138,17 +138,8 @@ connection_setup_function (void* arg_in)
     return result;
   } // end IF
 //  gdk_threads_leave ();
-  data_p->configuration->streamConfiguration.streamModuleConfiguration.subscriber =
+  data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2.subscriber =
     connection_p;
-
-  const IRC_Client_GTK_ConnectionCBData& connection_data_r =
-    connection_p->get ();
-  { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
-    // *TODO*: who deletes the module ? (the stream won't do it !)
-    data_p->CBData->connections.insert (std::make_pair (connection_data_r.timestamp,
-                                                        connection_p));
-  } // end lock scope
 
   // step2: connect to the server
   std::stringstream converter;
@@ -162,11 +153,17 @@ connection_setup_function (void* arg_in)
   IRC_Client_Connection_Manager_t::CONNECTION_T* connection_2 = NULL;
   //IRC_Client_IRCSession_t* session_p = NULL;
   unsigned short current_port = 0;
-  for (IRC_Client_PortRangesIterator_t iterator = (*data_p->phonebookIterator).second.listeningPorts.begin ();
-       iterator != (*data_p->phonebookIterator).second.listeningPorts.end ();
+  ACE_INET_Addr peer_address;
+  int result_3 = -1;
+  bool done = false;
+  for (IRC_Client_PortRangesIterator_t iterator = data_p->phonebookEntry.listeningPorts.begin ();
+       iterator != data_p->phonebookEntry.listeningPorts.end ();
        ++iterator)
   {
     // *TODO*: update progress bar units
+
+    if (done)
+      break;
 
     // port range ?
     if ((*iterator).first < (*iterator).second)
@@ -197,49 +194,73 @@ connection_setup_function (void* arg_in)
         gdk_threads_leave ();
         g_free (string_p);
 
+        result_3 =
+            peer_address.set (current_port,
+                              data_p->phonebookEntry.hostName.c_str (),
+                              1,
+                              ACE_ADDRESS_FAMILY_INET);
+        if (result_3 == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+          goto remove_page;
+        } // end IF
+
         handle =
-          IRC_Client_Tools::connect (!data_p->configuration->useReactor,                                                        // asynch connection ?
-                                     data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
-                                     data_p->loginOptions,                                                                      // login options
-                                     data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
-                                     data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
-                                     data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
-                                     (*data_p->phonebookIterator).second.hostName,                                              // server hostname
-                                     current_port,                                                                              // server listening port
-                                     &data_p->configuration->streamConfiguration.streamModuleConfiguration,                     // module configuration
-                                     data_p->configuration->streamConfiguration.streamConfiguration.cloneModule,                // clone final module ?
-                                     data_p->configuration->streamConfiguration.streamConfiguration.deleteModule,               // delete final module ?
-                                     data_p->configuration->streamConfiguration.streamConfiguration.module);                    // final module handle
+          IRC_Client_Tools::connect (!data_p->configuration->useReactor,                                      // asynch connection ?
+                                     data_p->loginOptions,                                                    // login options
+                                     peer_address,                                                            // peer address
+                                     data_p->configuration->streamConfiguration.moduleConfiguration_2,        // module configuration
+                                     data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2, // module handler configuration
+                                     data_p->configuration->streamConfiguration.cloneModule,                  // clone final module ?
+                                     data_p->configuration->streamConfiguration.deleteModule,                 // delete final module ?
+                                     data_p->configuration->streamConfiguration.module);                      // final module handle
         if (handle != ACE_INVALID_HANDLE)
+        {
+          done = true;
           break;
+        } // end IF
       } // end FOR
     } // end IF
     else
     {
       current_port = (*iterator).first;
+
+      result_3 =
+          peer_address.set (current_port,
+                            data_p->phonebookEntry.hostName.c_str (),
+                            1,
+                            ACE_ADDRESS_FAMILY_INET);
+      if (result_3 == -1)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+        goto remove_page;
+      } // end IF
+
       handle =
-        IRC_Client_Tools::connect (!data_p->configuration->useReactor,                                                        // asynch connection ?
-                                   data_p->configuration->streamConfiguration.streamConfiguration.messageAllocator,           // message allocator
-                                   data_p->loginOptions,                                                                      // login options
-                                   data_p->configuration->streamConfiguration.debugScanner,                                   // debug scanner ?
-                                   data_p->configuration->streamConfiguration.debugParser,                                    // debug parser ?
-                                   data_p->configuration->streamConfiguration.streamConfiguration.statisticReportingInterval, // statistics reporting interval [seconds: 0 --> OFF]
-                                   (*data_p->phonebookIterator).second.hostName,                                              // server hostname
-                                   current_port,                                                                              // server listening port
-                                   &data_p->configuration->streamConfiguration.streamModuleConfiguration,                     // module configuration
-                                   data_p->configuration->streamConfiguration.streamConfiguration.cloneModule,                // clone final module ?
-                                   data_p->configuration->streamConfiguration.streamConfiguration.deleteModule,               // delete final module ?
-                                   data_p->configuration->streamConfiguration.streamConfiguration.module);                    // final module handle
+        IRC_Client_Tools::connect (!data_p->configuration->useReactor,                                      // asynch connection ?
+                                   data_p->loginOptions,                                                    // login options
+                                   peer_address,                                                            // peer address
+                                   data_p->configuration->streamConfiguration.moduleConfiguration_2,        // module configuration
+                                   data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2, // module handler configuration
+                                   data_p->configuration->streamConfiguration.cloneModule,                  // clone final module ?
+                                   data_p->configuration->streamConfiguration.deleteModule,                 // delete final module ?
+                                   data_p->configuration->streamConfiguration.module);                      // final module handle
       if (handle != ACE_INVALID_HANDLE)
+      {
+        done = true;
         break;
+      } // end IF
     } // end ELSE
   } // end FOR
   if (handle == ACE_INVALID_HANDLE)
   {
+connection_failed:
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
     converter.clear ();
     converter << ACE_TEXT_ALWAYS_CHAR ("failed to connect to server \"");
-    converter << (*data_p->phonebookIterator).second.hostName;
+    converter << data_p->phonebookEntry.hostName;
     converter << ACE_TEXT_ALWAYS_CHAR ("\"");
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s, returning\n"),
@@ -263,15 +284,12 @@ connection_setup_function (void* arg_in)
   if (!data_p->configuration->useReactor)
   {
     ACE_Time_Value delay (IRC_CLIENT_CONNECTION_DEF_TIMEOUT, 0);
-    result = ACE_OS::sleep (delay);
-    if (result == -1)
+    int result_3 = ACE_OS::sleep (delay);
+    if (result_3 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
                   &delay));
 
-    ACE_INET_Addr peer_address (current_port,
-                                (*data_p->phonebookIterator).second.hostName.c_str (),
-                                AF_INET);
     connection_2 =
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->get (peer_address);
   } // end IF
@@ -279,18 +297,7 @@ connection_setup_function (void* arg_in)
     connection_2 =
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->get (handle);
   if (!connection_2)
-  {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Connection_Manager_t::get(0x%@), returning\n"),
-                handle));
-#else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Connection_Manager_t::get(%d), returning\n"),
-                handle));
-#endif
-    goto remove_page;
-  } // end IF
+    goto connection_failed;
   stream_p = &connection_2->stream ();
   for (Stream_Iterator_t iterator_2 (*stream_p);
        iterator_2.next (current_p) != 0;
@@ -318,6 +325,12 @@ connection_setup_function (void* arg_in)
   // step3: initialize new connection handler
   connection_p->initialize (&const_cast<IRC_Client_ConnectionState&> (connection_2->state ()),
                             IRCControl_p);
+  { // synch access
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    // *TODO*: who deletes the module ? (the stream won't do it !)
+    data_p->CBData->connections.insert (std::make_pair (connection_p->get ().timestamp,
+                                                        connection_p));
+  } // end lock scope
 
   //   ACE_DEBUG((LM_DEBUG,
   //              ACE_TEXT("registering...\n")));
@@ -342,6 +355,8 @@ connection_setup_function (void* arg_in)
     // clean up
     connection_2->close ();
     connection_2->decrease ();
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    data_p->CBData->connections.erase (connection_p->get ().timestamp);
 
     goto remove_page;
   } // end IF
@@ -536,8 +551,14 @@ idle_add_channel_cb (gpointer userData_in)
 
   // activate new page (iff it's a channel tab !)
   if (IRC_Client_Tools::isValidIRCChannelName (data_p->id))
+  {
+    // *IMPORTANT NOTE*: release lock while switching pages
+    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
+    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_MUTEX> > aGuard_2 (reverse_lock);
+
     gtk_notebook_set_current_page (notebook_p,
                                    page_number);
+  } // end IF
 
 clean_up:
   data_p->GTKState->eventSourceIds.erase (data_p->eventSourceID);
@@ -683,9 +704,26 @@ idle_finalize_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
 
-  ACE_UNUSED_ARG (userData_in);
+  IRC_Client_GTK_CBData* data_p =
+    static_cast<IRC_Client_GTK_CBData*> (userData_in);
 
-  // leave GTK
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+
+  // step1: remove any remaining event sources
+  // *NOTE*: should be 2: 'this', and idle_update_display_cb...
+  unsigned int removed_events = 0;
+  while (g_idle_remove_by_data (userData_in))
+    removed_events++;
+  if (removed_events)
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("removed %u queued event(s)...\n"),
+                removed_events));
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+  ACE_ASSERT (removed_events == data_p->GTKState.eventSourceIds.size ());
+  data_p->GTKState.eventSourceIds.clear ();
+
+  // step2: leave GTK
   gtk_main_quit ();
 
   return FALSE; // G_SOURCE_REMOVE
@@ -707,75 +745,75 @@ idle_initialize_UI_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
 
-  // step2: populate phonebook liststore
-  GtkTreeStore* treestore_p =
+  // step2: populate phonebook
+  GtkTreeStore* tree_store_p =
     GTK_TREE_STORE (gtk_builder_get_object ((*iterator).second.second,
                                             ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TREESTORE_SERVERS)));
-  ACE_ASSERT (treestore_p);
-  GtkComboBox* combobox_p =
+  ACE_ASSERT (tree_store_p);
+  GtkComboBox* combo_box_p =
     GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_COMBOBOX_SERVERS)));
-  ACE_ASSERT (combobox_p);
+  ACE_ASSERT (combo_box_p);
   // *NOTE*: the combobox displays (selectable) column headers
   //         --> don't want that
   GList* list_p =
-    gtk_cell_layout_get_cells (GTK_CELL_LAYOUT (combobox_p));
-  GtkCellRenderer* renderer_p =
+    gtk_cell_layout_get_cells (GTK_CELL_LAYOUT (combo_box_p));
+  GtkCellRenderer* cell_renderer_p =
     GTK_CELL_RENDERER (g_list_first (list_p)->data);
-  ACE_ASSERT (renderer_p);
+  ACE_ASSERT (cell_renderer_p);
   g_list_free (list_p);
-  gtk_cell_layout_set_cell_data_func (GTK_CELL_LAYOUT (combobox_p), renderer_p,
+  gtk_cell_layout_set_cell_data_func (GTK_CELL_LAYOUT (combo_box_p), cell_renderer_p,
                                       is_entry_sensitive,
                                       NULL, NULL);
   std::map<std::string, GtkTreeIter> network_map;
   std::map<std::string, GtkTreeIter>::iterator network_map_iterator;
-  GtkTreeIter tree_iterator, current_row;
-  for (IRC_Client_ServersIterator_t iterator = data_p->phoneBook.servers.begin ();
-       iterator != data_p->phoneBook.servers.end ();
-       iterator++)
+  GtkTreeIter tree_iter, tree_iter_2;
+  for (IRC_Client_ServersIterator_t iterator_2 = data_p->phoneBook.servers.begin ();
+       iterator_2 != data_p->phoneBook.servers.end ();
+       ++iterator_2)
   {
     // known network ?
-    network_map_iterator = network_map.find ((*iterator).second.network);
+    network_map_iterator = network_map.find ((*iterator_2).second.network);
     if (network_map_iterator == network_map.end ())
     {
-      // new toplevel row
-      gtk_tree_store_append (treestore_p,
-                             &tree_iterator,
+      // append new (network) entry
+      gtk_tree_store_append (tree_store_p,
+                             &tree_iter,
                              NULL);
       std::string network_label =
-        ((*iterator).second.network.empty () ? ACE_TEXT_ALWAYS_CHAR ("<none>")
-                                             : (*iterator).second.network);
-      gtk_tree_store_set (treestore_p, &tree_iterator,
-                          0, network_label.c_str (),
+        ((*iterator_2).second.network.empty () ? ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_PHONEBOOK_DEF_NETWORK_LABEL)
+                                               : (*iterator_2).second.network);
+      gtk_tree_store_set (tree_store_p, &tree_iter,
+                          0, network_label.c_str (), // column 0
                           -1);
 
-      network_map.insert (std::make_pair ((*iterator).second.network,
-                                          tree_iterator));
-
-      network_map_iterator = network_map.find ((*iterator).second.network);
+      network_map.insert (std::make_pair ((*iterator_2).second.network,
+                                          tree_iter));
+      network_map_iterator = network_map.find ((*iterator_2).second.network);
       ACE_ASSERT (network_map_iterator != network_map.end ());
     } // end IF
 
-    // append new (text) entry
-    gtk_tree_store_append (treestore_p,
-                           &current_row,
+    // append new (server) entry
+    gtk_tree_store_append (tree_store_p,
+                           &tree_iter_2,
                            &(*network_map_iterator).second);
-    gtk_tree_store_set (treestore_p, &current_row,
-                        0, (*iterator).first.c_str (), // column 0
+    gtk_tree_store_set (tree_store_p, &tree_iter_2,
+                        0, (*iterator_2).first.c_str (), // column 0
                         -1);
 
     // set active item
-    if ((*iterator).first == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SERVER_HOSTNAME))
-      gtk_combo_box_set_active_iter (combobox_p,
-                                     &current_row);
+    if ((*iterator_2).first ==
+        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SERVER_HOSTNAME))
+      gtk_combo_box_set_active_iter (combo_box_p,
+                                     &tree_iter_2);
   } // end FOR
   if (!data_p->phoneBook.servers.empty ())
   {
     // sort entries (toplevel: ascending)
-    gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (treestore_p),
+    gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (tree_store_p),
                                           0, GTK_SORT_ASCENDING);
 
-    gtk_widget_set_sensitive (GTK_WIDGET (combobox_p), TRUE);
+    gtk_widget_set_sensitive (GTK_WIDGET (combo_box_p), TRUE);
   } // end IF
 
   // step3: connect signals/slots
@@ -897,6 +935,12 @@ idle_initialize_UI_cb (gpointer userData_in)
                 ACE_TEXT ("failed to g_idle_add_full(idle_update_display_cb): \"%m\", aborting\n")));
     return FALSE; // G_SOURCE_REMOVE
   } // end IF
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("idle_update_display_cb: %d\n"),
+//              event_source_id));
+
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+  data_p->GTKState.eventSourceIds.clear ();
   data_p->GTKState.eventSourceIds.insert (event_source_id);
 
   return FALSE; // G_SOURCE_REMOVE
@@ -944,7 +988,6 @@ idle_remove_channel_cb (gpointer userData_in)
   if (data_p->handler->isServerLog ())
     goto done; // skip page removal (that page belongs to the connection)
 
-  // remove server page from parent notebook
   iterator_2 =
       data_p->GTKState->builders.find (data_p->builderLabel);
   // sanity check(s)
@@ -963,16 +1006,16 @@ idle_remove_channel_cb (gpointer userData_in)
   page_number = gtk_notebook_page_num (notebook_p,
                                        GTK_WIDGET (vbox_p));
 
-  // flip away from "this" page ?
   if (gtk_notebook_get_current_page (notebook_p) == page_number)
-    gtk_notebook_prev_page (notebook_p);
+  { // flip away from "this" page ?
+    // *IMPORTANT NOTE*: release lock while switching pages
+    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
+    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_MUTEX> > aGuard_2 (reverse_lock);
 
-  // remove channel page from channel tabs notebook
+    gtk_notebook_prev_page (notebook_p);
+  } // end IF
   gtk_notebook_remove_page (notebook_p,
                             page_number);
-
-//  g_object_unref (G_OBJECT ((*iterator_2).second.second));
-//  data_p->GTKState->builders.erase (iterator_2);
 
 done:
   num_pages = gtk_notebook_get_n_pages (notebook_p);
@@ -1055,7 +1098,13 @@ idle_remove_connection_cb (gpointer userData_in)
                                        GTK_WIDGET (vbox_p));
   // flip away from "this" page ?
   if (gtk_notebook_get_current_page (notebook_p) == page_number)
+  {
+    // *IMPORTANT NOTE*: release lock while switching pages
+    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
+    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_MUTEX> > aGuard_2 (reverse_lock);
+
     gtk_notebook_prev_page (notebook_p);
+  } // end IF
   gtk_notebook_remove_page (notebook_p,
                             page_number);
 
@@ -1308,7 +1357,7 @@ idle_update_progress_cb (gpointer userData_in)
                     *iterator_2));
       else if (exit_status)
       {
-#if defined (_MSC_VER)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("thread %d has joined (status was: %d)...\n"),
                     *iterator_2,
@@ -1377,47 +1426,47 @@ idle_update_user_modes_cb (gpointer userData_in)
     (*iterator_2).second->state ();
 
   // display (changed) user modes
-  GtkToggleButton* togglebutton_p =
+  GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
-  ACE_ASSERT (togglebutton_p);
-  gtk_toggle_button_set_active (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_r.userModes[USERMODE_AWAY]);
-  togglebutton_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)));
-  ACE_ASSERT (togglebutton_p);
-  gtk_toggle_button_set_active (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_r.userModes[USERMODE_INVISIBLE]);
-  togglebutton_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
-  ACE_ASSERT (togglebutton_p);
-  gtk_toggle_button_set_active (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_r.userModes[USERMODE_RECVNOTICES]);
-  togglebutton_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
-  ACE_ASSERT (togglebutton_p);
-  gtk_toggle_button_set_active (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_r.userModes[USERMODE_OPERATOR]);
-  togglebutton_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
-  ACE_ASSERT (togglebutton_p);
-  gtk_toggle_button_set_active (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_r.userModes[USERMODE_RESTRICTEDCONN]);
-  togglebutton_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
-  ACE_ASSERT (togglebutton_p);
-  gtk_toggle_button_set_active (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_r.userModes[USERMODE_LOCALOPERATOR]);
-  togglebutton_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
-  ACE_ASSERT (togglebutton_p);
-  gtk_toggle_button_set_active (togglebutton_p,
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_r.userModes[USERMODE_RECVWALLOPS]);
 
   return FALSE; // G_SOURCE_REMOVE
@@ -1477,7 +1526,6 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
 
   // step1: retrieve active phonebook entry
-  // retrieve serverlist handle
   GtkComboBox* combo_box_p =
     GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_COMBOBOX_SERVERS)));
@@ -1485,7 +1533,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   GtkTreeIter tree_iter;
   //   GValue active_value;
   gchar* value_p = NULL;
-  std::string server_name_string;
+  std::string network_name_string, server_name_string;
   if (!gtk_combo_box_get_active_iter (combo_box_p,
                                       &tree_iter))
   {
@@ -1494,10 +1542,12 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                 combo_box_p));
     return;
   } // end IF
+  GtkTreeModel* tree_model_p = gtk_combo_box_get_model (combo_box_p);
+  ACE_ASSERT (tree_model_p);
   //   gtk_tree_model_get_value(gtk_combo_box_get_model(serverlist),
   //                            &active_iter,
   //                            0, &active_value);
-  gtk_tree_model_get (gtk_combo_box_get_model (combo_box_p),
+  gtk_tree_model_get (tree_model_p,
                       &tree_iter,
                       0, &value_p,
                       -1);
@@ -1505,18 +1555,66 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (value_p);
   // *TODO*: convert UTF8 to locale ?
   server_name_string = value_p;
+  g_free (value_p);
+
+  GtkTreePath* tree_path_p = gtk_tree_model_get_path (tree_model_p,
+                                                      &tree_iter);
+  ACE_ASSERT (tree_path_p);
+  if (!gtk_tree_path_up (tree_path_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to gtk_tree_path_up(%@), returning\n"),
+                tree_path_p));
+
+    // clean up
+    gtk_tree_path_free (tree_path_p);
+
+    return;
+  } // end IF
+  if (!gtk_tree_model_get_iter (tree_model_p,
+                                &tree_iter,
+                                tree_path_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to gtk_tree_model_get_iter(%@,%@), returning\n"),
+                tree_model_p, tree_path_p));
+
+    // clean up
+    gtk_tree_path_free (tree_path_p);
+
+    return;
+  } // end IF
+  gtk_tree_path_free (tree_path_p);
+  //   gtk_tree_model_get_value(gtk_combo_box_get_model(serverlist),
+  //                            &active_iter,
+  //                            0, &active_value);
+  gtk_tree_model_get (tree_model_p,
+                      &tree_iter,
+                      0, &value_p,
+                      -1);
+  //   ACE_ASSERT(G_VALUE_HOLDS_STRING(&active_value));
+  ACE_ASSERT (value_p);
+  // *TODO*: convert UTF8 to locale ?
+  network_name_string = value_p;
   //   entry_name = g_value_get_string(&active_value);
 
   // clean up
   //   g_value_unset(&active_value);
   g_free (value_p);
 
-  IRC_Client_ServersIterator_t phonebook_iterator =
-    data_p->phoneBook.servers.find (server_name_string);
+  if (network_name_string == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_PHONEBOOK_DEF_NETWORK_LABEL))
+    network_name_string.clear ();
+  IRC_Client_ServersIterator_t phonebook_iterator;
+  for (phonebook_iterator = data_p->phoneBook.servers.begin ();
+       phonebook_iterator != data_p->phoneBook.servers.end ();
+       phonebook_iterator++)
+    if (((*phonebook_iterator).second.network == network_name_string) &&
+        ((*phonebook_iterator).first == server_name_string))
+      break;
   if (phonebook_iterator == data_p->phoneBook.servers.end ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to lookup active phonebook entry (was: \"%s\"), returning\n"),
+                ACE_TEXT ("failed to look up active phonebook entry (was: \"%s\"), returning\n"),
                 ACE_TEXT (server_name_string.c_str ())));
     return;
   } // end IF
@@ -1641,7 +1739,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   } // end IF
   connection_thread_data_p->CBData = data_p;
   connection_thread_data_p->configuration = data_p->configuration;
-  connection_thread_data_p->phonebookIterator = phonebook_iterator;
+  connection_thread_data_p->phonebookEntry = (*phonebook_iterator).second;
   connection_thread_data_p->loginOptions = login_options;
   ACE_thread_t thread_id = -1;
   ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
@@ -1760,6 +1858,9 @@ button_connect_clicked_cb (GtkWidget* widget_in,
       return;
     } // end IF
     data_p->progressData.pendingActions[thread_id] = event_source_id;
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("idle_update_progress_cb: %d\n"),
+//                event_source_id));
     data_p->GTKState.eventSourceIds.insert (event_source_id);
   } // end lock scope
 }
@@ -2546,9 +2647,6 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   // sanity check(s)
   ACE_ASSERT (toggleButton_in);
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->connections);
-  ACE_ASSERT (data_p->controller);
-  ACE_ASSERT (data_p->GTKState);
 
   IRC_Client_UserMode mode = USERMODE_INVALID;
   // find out which button toggled...
@@ -2620,6 +2718,11 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
       data_p->pending = false;
     return; // done
   } // end IF
+
+  // sanity check(s)
+  ACE_ASSERT (data_p->connections);
+  ACE_ASSERT (data_p->controller);
+  ACE_ASSERT (data_p->GTKState);
 
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
 

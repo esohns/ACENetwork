@@ -33,7 +33,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
                                 ConfigurationType,
@@ -41,8 +42,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                           unsigned int statisticCollectionInterval_in)
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                                  unsigned int statisticCollectionInterval_in)
  : inherited ()
  , inherited2 ()
  , inherited3 (interfaceHandle_in,
@@ -60,7 +62,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
                                 ConfigurationType,
@@ -68,27 +71,29 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::~Net_StreamAsynchTCPSocketBase_T ()
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::~Net_StreamAsynchTCPSocketBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::~Net_StreamAsynchTCPSocketBase_T"));
 
   // step1: remove enqueued module (if any)
-  if (inherited3::configuration_.streamConfiguration.streamConfiguration.module)
+  // *TODO*: remove type inferences
+  if (inherited3::configuration_.streamConfiguration.module)
   {
     Stream_Module_t* module_p =
-      stream_.find (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ());
+      stream_.find (inherited3::configuration_.streamConfiguration.module->name ());
     if (module_p)
     {
       int result =
-        stream_.remove (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name (),
+        stream_.remove (inherited3::configuration_.streamConfiguration.module->name (),
                         ACE_Module_Base::M_DELETE_NONE);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ()));
+                    inherited3::configuration_.streamConfiguration.module->name ()));
     } // end IF
-    if (inherited3::configuration_.streamConfiguration.streamConfiguration.deleteModule)
-      delete inherited3::configuration_.streamConfiguration.streamConfiguration.module;
+    if (inherited3::configuration_.streamConfiguration.deleteModule)
+      delete inherited3::configuration_.streamConfiguration.module;
   } // end IF
 }
 
@@ -99,7 +104,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -108,34 +114,40 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::open (ACE_HANDLE handle_in,
-                                                                ACE_Message_Block& messageBlock_in)
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::open (ACE_HANDLE handle_in,
+                                                                       ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::open"));
+
+//  // sanity check(s)
+//  ACE_ASSERT (inherited3::configuration_.moduleConfiguration);
+//  ACE_ASSERT (inherited3::configuration_.moduleConfiguration->streamConfiguration);
 
   // step1: tweak socket, initialize I/O, ...
   inherited::open (handle_in, messageBlock_in);
 
   // step2: initialize/start stream
+  // *TODO*: remove type inferences
+  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   // step2a: connect stream head message queue with a notification pipe/queue ?
-  if (!inherited3::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
-    inherited3::configuration_.streamConfiguration.streamConfiguration.notificationStrategy =
-      this;
+  if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
+    inherited3::configuration_.streamConfiguration.notificationStrategy = this;
 
-  if (inherited3::configuration_.streamConfiguration.streamConfiguration.module)
+  if (inherited3::configuration_.streamConfiguration.module)
   {
     // step2b: clone final module (if any) ?
-    if (inherited3::configuration_.streamConfiguration.streamConfiguration.cloneModule)
+    if (inherited3::configuration_.streamConfiguration.cloneModule)
     {
       IMODULE_T* imodule_p = NULL;
       // need a downcast...
       imodule_p =
-        dynamic_cast<IMODULE_T*> (inherited3::configuration_.streamConfiguration.streamConfiguration.module);
+        dynamic_cast<IMODULE_T*> (inherited3::configuration_.streamConfiguration.module);
       if (!imodule_p)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
-                    ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+                    ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
         goto close;
       } // end IF
       Stream_Module_t* clone_p = NULL;
@@ -147,26 +159,24 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), aborting\n"),
-                    ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+                    ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
         goto close;
       }
       if (!clone_p)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
-                    ACE_TEXT (inherited3::configuration_.streamConfiguration.streamConfiguration.module->name ())));
+                    ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
         goto close;
       }
-      inherited3::configuration_.streamConfiguration.streamConfiguration.module =
-        clone_p;
-      inherited3::configuration_.streamConfiguration.streamConfiguration.deleteModule =
-        true;
+      inherited3::configuration_.streamConfiguration.module = clone_p;
+      inherited3::configuration_.streamConfiguration.deleteModule = true;
     } // end IF
 
     // *TODO*: step2b: initialize final module (if any)
   } // end IF
 
-  // *TODO*: this clearly is a design glitch
+  // *TODO*: remove type inferences
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inherited3::configuration_.streamConfiguration.sessionID =
     reinterpret_cast<unsigned int> (handle_in); // (== socket handle)
@@ -180,8 +190,12 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
     goto close;
   } // end IF
+  session_data_p = &stream_.sessionData ();
+  const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
+      &const_cast<StateType&> (inherited3::state ());
   //stream_.dump_state ();
-  // *NOTE*: as soon as this returns, data starts arriving at handle_output()[/msg_queue()]
+  // *NOTE*: as soon as this returns, data starts arriving at
+  //         handle_output()[/msg_queue()]
   stream_.start ();
   if (!stream_.isRunning ())
   {
@@ -279,7 +293,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 int
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -288,7 +303,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::handle_output (ACE_HANDLE handle_in)
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::handle_output (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::handle_output"));
 
@@ -349,7 +365,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 int
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -358,8 +375,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::handle_close (ACE_HANDLE handle_in,
-                                                                        ACE_Reactor_Mask mask_in)
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::handle_close (ACE_HANDLE handle_in,
+                                                                               ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::handle_close"));
 
@@ -369,14 +387,11 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // step1: wait for all workers within the stream (if any)
   if (stream_.isRunning ())
-  {
-    stream_.stop ();
-    stream_.waitForCompletion ();
-  } // end IF
+    stream_.stop (true); // <-- wait for completion
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
-  if (!inherited3::configuration_.streamConfiguration.streamConfiguration.useThreadPerConnection)
+  if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
   {
     Stream_Iterator_t iterator (stream_);
     const Stream_Module_t* module_p = NULL;
@@ -440,7 +455,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -449,9 +465,10 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::info (ACE_HANDLE& handle_out,
-                                                                AddressType& localSAP_out,
-                                                                AddressType& remoteSAP_out) const
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::info (ACE_HANDLE& handle_out,
+                                                                       AddressType& localSAP_out,
+                                                                       AddressType& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::info"));
 
@@ -467,7 +484,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 unsigned int
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -476,7 +494,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::id () const
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::id"));
 
@@ -494,7 +513,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 const StreamType&
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -503,7 +523,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::stream () const
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::stream () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::stream"));
 
@@ -517,7 +538,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 int
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -526,7 +548,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::close (u_long arg_in)
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::close"));
 
@@ -546,7 +569,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -556,7 +580,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StreamType,
                                 UserDataType,
 //                                ModuleConfigurationType>::close (u_long arg_in)
-                                ModuleConfigurationType>::close ()
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::close ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::close"));
 
@@ -594,7 +619,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 bool
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -603,7 +629,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::collect (StatisticContainerType& data_out)
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::collect"));
 
@@ -627,7 +654,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -636,7 +664,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::report () const
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::report"));
 
@@ -658,7 +687,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -667,7 +697,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::dump_state () const
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::dump_state"));
 
@@ -711,7 +742,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -720,7 +752,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::handle_read_stream (const ACE_Asynch_Read_Stream::Result& result_in)
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::handle_read_stream (const ACE_Asynch_Read_Stream::Result& result_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::handle_read_stream"));
 
@@ -838,7 +871,8 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -847,7 +881,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-                                ModuleConfigurationType>::handle_write_stream (const ACE_Asynch_Write_Stream::Result& result_in)
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::handle_write_stream (const ACE_Asynch_Write_Stream::Result& result_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::handle_write_stream"));
 

@@ -635,11 +635,12 @@ IRC_Client_GUI_Connection::finalize (bool lockedAccess_in)
 }
 
 void
-IRC_Client_GUI_Connection::start (const IRC_Client_StreamModuleConfiguration& configuration_in)
+IRC_Client_GUI_Connection::start (const IRC_Client_StreamSessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::start"));
 
-  ACE_UNUSED_ARG (configuration_in);
+  ACE_UNUSED_ARG (sessionData_in);
+
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
@@ -673,7 +674,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
   // sanity check(s)
   ACE_ASSERT (CBData_.GTKState);
-  ACE_ASSERT (sessionState_);
+//  ACE_ASSERT (sessionState_);
 
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
@@ -699,6 +700,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           // *NOTE*: this is the first message in any connection !
 
           // remember nickname
+          ACE_ASSERT (sessionState_);
           sessionState_->nickname = message_in.params.front ();
 
           gdk_threads_enter ();
@@ -736,7 +738,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::RPL_MYINFO:           //   4
         case IRC_Client_IRC_Codes::RPL_PROTOCTL:         //   5
         case IRC_Client_IRC_Codes::RPL_SNOMASK:          //   8
-        case IRC_Client_IRC_Codes::RPL_YOURID:           //  42
+        case IRC_Client_IRC_Codes::RPL_YOURID:           //  20
         case IRC_Client_IRC_Codes::RPL_STATSDLINE:       // 250
         case IRC_Client_IRC_Codes::RPL_LUSERCLIENT:      // 251
         case IRC_Client_IRC_Codes::RPL_LUSEROP:          // 252
@@ -824,6 +826,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           gdk_threads_enter ();
 
           // *WARNING*: needs the lock protection, otherwise there is a race...
+          ACE_ASSERT (sessionState_);
           sessionState_->away = false;
 
           // retrieve togglebutton
@@ -844,6 +847,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           gdk_threads_enter ();
 
           // *WARNING*: needs the lock protection, otherwise there is a race...
+          ACE_ASSERT (sessionState_);
           sessionState_->away = true;
 
           // retrieve togglebutton
@@ -966,19 +970,24 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::RPL_TOPIC:            // 332
         case IRC_Client_IRC_Codes::RPL_TOPICWHOTIME:     // 333
         {
+          IRC_Client_ParametersIterator_t iterator_2 =
+            message_in.params.begin ();
+          iterator_2++;
+
           // retrieve message handler
           MESSAGE_HANDLERSITERATOR_T handler_iterator =
-            messageHandlers_.find (message_in.params.front ());
+            messageHandlers_.find (*iterator_2);
           if (handler_iterator == messageHandlers_.end ())
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("no handler for channel (was: \"%s\"), returning\n"),
-                        ACE_TEXT (message_in.params.front ().c_str ())));
+                        ACE_TEXT ((*iterator_2).c_str ())));
             break;
           } // end IF
 
-          (*handler_iterator).second->setTopic (((message_in.command.numeric == IRC_Client_IRC_Codes::RPL_NOTOPIC) ? ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LABEL_DEF_TOPIC_TEXT)
-                                                                                                                   : message_in.params.back ()));
+          if ((message_in.command.numeric == IRC_Client_IRC_Codes::RPL_NOTOPIC) ||
+              (message_in.command.numeric == IRC_Client_IRC_Codes::RPL_TOPIC))
+            (*handler_iterator).second->setTopic (message_in.params.back ());
 
           break;
         }
@@ -1038,6 +1047,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           } // end IF
 
           // ignore own record
+          ACE_ASSERT (sessionState_);
           if (nickname == sessionState_->nickname)
           {
             // clean up
@@ -1121,6 +1131,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
             converter >> nickname;
 
             // check whether user is a channel operator
+            ACE_ASSERT (sessionState_);
             if (nickname.find (sessionState_->nickname) != std::string::npos)
               is_operator = ((nickname[0] == '@') &&
                              (nickname.size () == (sessionState_->nickname.size () + 1)));
@@ -1185,6 +1196,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::RPL_MOTD:             // 372
         case IRC_Client_IRC_Codes::RPL_MOTDSTART:        // 375
         case IRC_Client_IRC_Codes::RPL_ENDOFMOTD:        // 376
+        case IRC_Client_IRC_Codes::RPL_HOSTHIDDEN:       // 396
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:       // 401
         case IRC_Client_IRC_Codes::ERR_UNKNOWNCOMMAND:   // 421
         case IRC_Client_IRC_Codes::ERR_NOMOTD:           // 422
@@ -1237,6 +1249,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRCMessage::NICK:
         {
           // remember changed nickname...
+          ACE_ASSERT (sessionState_);
           std::string old_nickname = sessionState_->nickname;
           sessionState_->nickname = message_in.params.front ();
 
@@ -1274,6 +1287,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         {
           log (message_in);
 
+          ACE_ASSERT (sessionState_);
           if ((message_in.prefix.origin == sessionState_->nickname) &&
               (command == IRC_Client_IRCMessage::QUIT))
             error (message_in, // --> show on statusbar as well...
@@ -1290,6 +1304,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           // - stranger entering the channel
 
           // reply from a successful join request ?
+          ACE_ASSERT (sessionState_);
           if (message_in.prefix.origin == sessionState_->nickname)
           {
             createMessageHandler (message_in.params.front (),
@@ -1339,6 +1354,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           // - someone left a common channel
 
           // reply from a successful part request ?
+          ACE_ASSERT (sessionState_);
           if (message_in.prefix.origin == sessionState_->nickname)
           {
             terminateMessageHandler (message_in.params.back (),
@@ -1377,6 +1393,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
             message_in.params.begin ();
           param_iterator++;
 
+          ACE_ASSERT (sessionState_);
           if (message_in.params.front () == sessionState_->nickname)
           {
             // --> user mode
@@ -1385,16 +1402,18 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
               IRC_Client_Tools::merge (message_in.params.back (),
                                        sessionState_->userModes);
 
-            guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
-                                                     idle_update_user_modes_cb,
-                                                     &CBData_,
-                                                     NULL);
+            guint event_source_id =
+                g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+                                 idle_update_user_modes_cb,
+                                 &CBData_,
+                                 NULL);
             if (!event_source_id)
             {
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to g_idle_add_full(idle_update_user_modes_cb): \"%m\", returning\n")));
               break;
             } // end IF
+            // *TODO*: this id is never removed from the list
             CBData_.GTKState->eventSourceIds.insert (event_source_id);
           } // end IF
           else
@@ -1480,6 +1499,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           // private message ?
           std::string target_id;
+          ACE_ASSERT (sessionState_);
           if (sessionState_->nickname == message_in.params.front ())
           {
             // --> send to private conversation handler
@@ -1554,23 +1574,22 @@ IRC_Client_GUI_Connection::end ()
               ACE_TEXT ("connection \"%s\" closed/lost\n"),
               ACE_TEXT (CBData_.label.c_str ())));
 
-  // sanity check(s)
-  ACE_ASSERT (CBData_.controller);
-  ACE_ASSERT (CBData_.GTKState);
-
   // *NOTE*: this is the final invocation from the controller
   //         --> unsubscribe anyway
-  try
+  if (CBData_.controller)
   {
-    CBData_.controller->unsubscribe (this);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in IRC_Client_IIRCControl::unsubscribe(%@), continuing\n"),
-                this));
-  }
-  CBData_.controller = NULL;
+    try
+    {
+      CBData_.controller->unsubscribe (this);
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in IRC_Client_IIRCControl::unsubscribe(%@), continuing\n"),
+                  this));
+    }
+    CBData_.controller = NULL;
+  } // end IF
 
   close ();
 }
@@ -1733,14 +1752,12 @@ IRC_Client_GUI_Connection::close ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::close"));
 
-  closing_ = true;
-
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
+  IRC_Client_GTK_HandlerCBData* cb_data_p = NULL;
 
   // clean up message handlers
-  IRC_Client_GTK_HandlerCBData* cb_data_p = NULL;
   { // synch access
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+
     for (MESSAGE_HANDLERSITERATOR_T iterator = messageHandlers_.begin ();
          iterator != messageHandlers_.end ();
          iterator++)
@@ -1760,6 +1777,7 @@ IRC_Client_GUI_Connection::close ()
                     ACE_TEXT ("failed to g_idle_add_full(idle_remove_channel_cb): \"%m\", continuing\n")));
     } // end FOR
     messageHandlers_.clear ();
+    closing_ = true;
   } // end lock scope
 }
 
@@ -1774,6 +1792,10 @@ IRC_Client_GUI_Connection::forward (const std::string& channel_in,
   // retrieve message handler
   { // synch access
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+
+    if (closing_)
+      return; // done
+
     MESSAGE_HANDLERSITERATOR_T handler_iterator =
       messageHandlers_.find (channel_in);
     if (handler_iterator == messageHandlers_.end ())
@@ -1798,6 +1820,10 @@ IRC_Client_GUI_Connection::log (const std::string& message_in)
   // retrieve message handler
   { // synch access
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+
+    if (closing_)
+      return; // done
+
     MESSAGE_HANDLERSITERATOR_T handler_iterator =
       messageHandlers_.find (std::string ());
     ACE_ASSERT (handler_iterator != messageHandlers_.end ());
@@ -1815,6 +1841,10 @@ IRC_Client_GUI_Connection::log (const IRC_Client_IRCMessage& message_in)
   // retrieve message handler
   { // synch access
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+
+    if (closing_)
+      return; // done
+
     MESSAGE_HANDLERSITERATOR_T handler_iterator =
       messageHandlers_.find (std::string ());
     ACE_ASSERT (handler_iterator != messageHandlers_.end ());

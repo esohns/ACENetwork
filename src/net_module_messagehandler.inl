@@ -194,16 +194,17 @@ Net_Module_MessageHandler_T<ConfigurationType,
   ACE_ASSERT (lock_ && subscribers_);
   ACE_ASSERT (message_inout);
 
-  switch (message_inout->getType ())
+  switch (message_inout->type ())
   {
     case SESSION_BEGIN:
     {
-      // refer the data back to any subscriber(s)
-      Net_IModule_t* module_p =
-       dynamic_cast<Net_IModule_t*> (inherited::module ());
-      ACE_ASSERT (module_p);
-      const Stream_ModuleConfiguration& module_configuration =
-          module_p->get ();
+      // refer the session data back to any subscriber(s)
+      // *TODO*: remove type inferences
+      const typename SessionMessageType::SESSION_DATA_TYPE& session_data_container_r =
+          message_inout->get ();
+      const typename SessionMessageType::SESSION_DATA_TYPE::SESSION_DATA_TYPE* session_data_p =
+          session_data_container_r.getData ();
+      ACE_ASSERT (session_data_p);
 
       // synch access
       {
@@ -220,7 +221,7 @@ Net_Module_MessageHandler_T<ConfigurationType,
         {
           try
           {
-            (*iterator++)->start (module_configuration);
+            (*iterator++)->start (*session_data_p);
           }
           catch (...)
           {

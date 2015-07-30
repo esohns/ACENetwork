@@ -29,7 +29,6 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_idumpstate.h"
-#include "common_iinitialize.h"
 
 #include "stream_common.h"
 
@@ -47,8 +46,8 @@ template <typename HandlerType,
           typename UserDataType>
 class Net_Server_AsynchListener_T
  : public ACE_Asynch_Acceptor<HandlerType>
- , public Net_IListener_T<HandlerConfigurationType>
- , public Common_IInitialize_T<ConfigurationType>
+ , public Net_IListener_T<ConfigurationType,
+                          HandlerConfigurationType>
  , public Common_IDumpState
 {
   // singleton needs access to the ctor/dtors
@@ -84,15 +83,14 @@ class Net_Server_AsynchListener_T
   // implement Net_IListener_T
   // *WARNING*: this API is NOT re-entrant !
   virtual void start ();
-  virtual void stop (bool = true); // locked access ?
+  virtual void stop (bool = true,  // wait for completion ?
+                     bool = true); // locked access ?
   virtual bool isRunning () const;
 
   virtual const HandlerConfigurationType& get () const;
   virtual bool initialize (const HandlerConfigurationType&);
-  virtual bool useReactor () const;
-
-  // implement Common_IInitialize_T
   virtual bool initialize (const ConfigurationType&);
+  virtual bool useReactor () const;
 
   bool isInitialized () const;
 
@@ -106,7 +104,8 @@ class Net_Server_AsynchListener_T
  private:
   typedef ACE_Asynch_Acceptor<HandlerType> inherited;
 
-  typedef Net_IListener_T<HandlerConfigurationType> ILISTENER_T;
+  typedef Net_IListener_T<ConfigurationType,
+                          HandlerConfigurationType> ILISTENER_T;
 
   Net_Server_AsynchListener_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T (const Net_Server_AsynchListener_T&))

@@ -21,33 +21,79 @@
 #ifndef IRC_CLIENT_STREAM_COMMON_H
 #define IRC_CLIENT_STREAM_COMMON_H
 
-#include "common_inotify.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
+#include "common_inotify.h"
+#include "common_time_common.h"
+
+#include "stream_common.h"
+#include "stream_imodule.h"
 #include "stream_session_data_base.h"
 
 #include "IRC_client_configuration.h"
 #include "IRC_client_IRCmessage.h"
 
+// forward declarations
+struct IRC_Client_ConnectionState;
+
+typedef Stream_IModuleHandler_T<IRC_Client_ModuleHandlerConfiguration> IRC_Client_IModuleHandler_t;
+typedef Stream_IModule_T<ACE_MT_SYNCH,
+                         Common_TimePolicy_t,
+                         Stream_ModuleConfiguration,
+                         IRC_Client_ModuleHandlerConfiguration> IRC_Client_IModule_t;
+
 struct IRC_Client_StreamSessionData
 {
   inline IRC_Client_StreamSessionData ()
-   : configuration (NULL)
+   : aborted (false)
+   , connectionState (NULL)
    , currentStatistic ()
-   , lastCollectionTimestamp (ACE_Time_Value::zero)
+   , lock ()
+   , sessionID (0)
+   , startOfSession (ACE_Time_Value::zero)
+  {};
+
+  bool                          aborted;
+
+  IRC_Client_ConnectionState*   connectionState;
+
+  IRC_Client_RuntimeStatistic_t currentStatistic;
+  ACE_SYNCH_MUTEX               lock;
+
+  unsigned int                  sessionID; // (== socket handle !)
+  ACE_Time_Value                startOfSession;
+};
+
+struct IRC_Client_StreamUserData
+{
+  inline IRC_Client_StreamUserData ()
+   : configuration (NULL)
+   , moduleConfiguration (NULL)
+   , moduleHandlerConfiguration (NULL)
+  {};
+
+  IRC_Client_Configuration*              configuration;
+
+  // *TODO*: remove these ASAP
+  Stream_ModuleConfiguration*            moduleConfiguration;
+  IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+};
+
+struct IRC_Client_StreamState
+{
+  inline IRC_Client_StreamState ()
+   : currentSessionData (NULL)
    , userData (NULL)
   {};
 
-  IRC_Client_Configuration* configuration;
-
-  Net_RuntimeStatistic_t    currentStatistic;
-  ACE_Time_Value            lastCollectionTimestamp;
-
-  Net_StreamUserData*       userData;
+  IRC_Client_StreamSessionData* currentSessionData;
+  IRC_Client_StreamUserData*    userData;
 };
 
 typedef Stream_SessionDataBase_T<IRC_Client_StreamSessionData> IRC_Client_StreamSessionData_t;
 
-typedef Common_INotify_T<IRC_Client_StreamModuleConfiguration,
-                         IRC_Client_IRCMessage> IRC_Client_INotify_t;
+typedef Common_INotify_T<IRC_Client_StreamSessionData,
+                         IRC_Client_IRCMessage> IRC_Client_IStreamNotify_t;
 
 #endif

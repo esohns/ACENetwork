@@ -66,9 +66,10 @@ class Net_Export Net_Module_HeaderParser
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,               // task synch type
-                              Common_TimePolicy_t,        // time policy type
-                              Stream_ModuleConfiguration, // configuration type
-                              Net_Module_HeaderParser);   // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                      // task synch type
+                              Common_TimePolicy_t,               // time policy type
+                              Stream_ModuleConfiguration,        // module configuration type
+                              Stream_ModuleHandlerConfiguration, // module handler configuration type
+                              Net_Module_HeaderParser);          // writer type
 
 #endif

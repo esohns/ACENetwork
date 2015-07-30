@@ -29,33 +29,31 @@
 #include "common_inotify.h"
 #include "common_isubscribe.h"
 #include "common_iclone.h"
+#include "common_time_common.h"
 
 #include "stream_common.h"
 #include "stream_task_base_synch.h"
-#include "stream_streammodule_base.h"
 
-#include "net_common.h"
-
-template <typename ConfigurationType,
+template <typename SessionDataType,
           typename SessionMessageType,
           typename MessageType>
 class Net_Module_MessageHandler_T
  : public Stream_TaskBaseSynch_T<Common_TimePolicy_t,
                                  SessionMessageType,
                                  MessageType>
- , public Common_ISubscribe_T<Common_INotify_T<ConfigurationType,
+ , public Common_ISubscribe_T<Common_INotify_T<SessionDataType,
                                                MessageType> >
  , public Common_IClone_T<Stream_Module_t>
 {
  public:
-  typedef Common_INotify_T<ConfigurationType,
+  typedef Common_INotify_T<SessionDataType,
                            MessageType> INOTIFY_T;
   typedef std::list<INOTIFY_T*> SUBSCRIBERS_T;
 
   Net_Module_MessageHandler_T ();
   virtual ~Net_Module_MessageHandler_T ();
 
-  void initialize (SUBSCRIBERS_T* = NULL,               // subscribers (handle)
+  void initialize (SUBSCRIBERS_T* = NULL,              // subscribers (handle)
                    ACE_SYNCH_RECURSIVE_MUTEX* = NULL); // subscribers lock
 
   // implement (part of) Stream_ITaskBase_T
@@ -69,8 +67,8 @@ class Net_Module_MessageHandler_T
   virtual void unsubscribe (INOTIFY_T*); // existing subscriber
 
  protected:
-   // *NOTE*: recursive so that users may unsubscribe from within the
-   // notification callbacks...
+   // *NOTE*: recursive so that callees may unsubscribe from within the
+   //         notification callbacks...
    ACE_SYNCH_RECURSIVE_MUTEX* lock_;
    SUBSCRIBERS_T*             subscribers_;
 
@@ -79,13 +77,13 @@ class Net_Module_MessageHandler_T
                                  SessionMessageType,
                                  MessageType> inherited;
 
-  typedef Net_Module_MessageHandler_T<ConfigurationType,
+  typedef Net_Module_MessageHandler_T<SessionDataType,
                                       SessionMessageType,
                                       MessageType> OWN_TYPE_T;
   typedef typename SUBSCRIBERS_T::iterator SUBSCRIBERS_ITERATOR_T;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_MessageHandler_T (const Net_Module_MessageHandler_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_MessageHandler_T& operator= (const Net_Module_MessageHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_MessageHandler_T (const Net_Module_MessageHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_MessageHandler_T& operator= (const Net_Module_MessageHandler_T&))
 
   bool                        delete_;
 };

@@ -34,45 +34,48 @@
 #include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
-#include "net_stream_common.h"
 
-//#include "IRC_client_common.h"
+#include "IRC_client_common.h"
 #include "IRC_client_defines.h"
 //#include "IRC_client_stream_common.h"
 
 // forward declarations
 struct IRC_Client_Configuration;
 struct IRC_Client_CursesState;
+struct IRC_Client_ConnectionState;
 class IRC_Client_IIRCControl;
 class IRC_Client_IRCMessage;
-struct IRC_Client_ConnectionState;
+struct IRC_Client_ModuleHandlerConfiguration;
 class IRC_Client_Stream;
-struct IRC_Client_StreamModuleConfiguration;
+struct IRC_Client_StreamSessionData;
+struct IRC_Client_StreamUserData;
+//typedef Net_IConnection_T<ACE_INET_Addr,
+//                          IRC_Client_Configuration,
+//                          IRC_Client_ConnectionState,
+//                          IRC_Client_RuntimeStatistic_t,
+//                          IRC_Client_Stream> IRC_Client_IConnection_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  IRC_Client_Configuration,
                                  IRC_Client_ConnectionState,
-                                 Stream_Statistic,
+                                 IRC_Client_RuntimeStatistic_t,
                                  IRC_Client_Stream,
                                  ////////
-                                 Net_StreamUserData> IRC_Client_IConnection_Manager_t;
-typedef Common_INotify_T<IRC_Client_StreamModuleConfiguration,
-                         IRC_Client_IRCMessage> IRC_Client_INotify_t;
-enum IRC_Client_CharacterEncoding;
+                                 IRC_Client_StreamUserData> IRC_Client_IConnection_Manager_t;
+typedef Common_INotify_T<IRC_Client_StreamSessionData,
+                         IRC_Client_IRCMessage> IRC_Client_IStreamNotify_t;
 
 struct IRC_Client_SocketHandlerConfiguration
  : public Net_SocketHandlerConfiguration
 {
   inline IRC_Client_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
-   , configuration (NULL)
-   , streamModuleConfiguration (NULL)
+   //////////////////////////////////////
+   , userData (NULL)
   {
     bufferSize = IRC_CLIENT_BUFFER_SIZE;
   };
 
-  // *TODO*: move this into a separate connnection/session configuration object
-  IRC_Client_Configuration*             configuration;
-  IRC_Client_StreamModuleConfiguration* streamModuleConfiguration;
+  IRC_Client_StreamUserData* userData;
 };
 
 //struct IRC_Client_ConnectorConfiguration
@@ -94,7 +97,7 @@ struct IRC_Client_IRCLoginOptions
 {
   inline IRC_Client_IRCLoginOptions ()
    : password ()
-   , nickname ()
+   , nickname (IRC_CLIENT_DEF_IRC_NICKNAME)
    , user ()
    , channel ()
   {};
@@ -147,45 +150,64 @@ struct IRC_Client_ProtocolConfiguration
    , printPingDot (IRC_CLIENT_DEF_PRINT_PINGDOT)
   {};
 
-  bool                       automaticPong;
+  bool                       automaticPong; // automatically answer "ping" messages
   IRC_Client_IRCLoginOptions loginOptions;
-  bool                       printPingDot;
+  bool                       printPingDot;  // print dot ('.') for every answered PING to stdlog
 };
 
-struct IRC_Client_StreamModuleConfiguration
+struct IRC_Client_ModuleHandlerConfiguration
+ : public Stream_ModuleHandlerConfiguration
 {
-  inline IRC_Client_StreamModuleConfiguration ()
-   : //connection (NULL),
-     subscriber (NULL)
-   , moduleConfiguration ()
+  inline IRC_Client_ModuleHandlerConfiguration ()
+   : crunchMessages (IRC_CLIENT_DEF_CRUNCH_MESSAGES)
+   , headModuleIsActive (false)
+   , traceParsing (IRC_CLIENT_DEF_YACC_TRACE)
+   , traceScanning (IRC_CLIENT_DEF_LEX_TRACE)
+   , protocolConfiguration (NULL)
+   , streamConfiguration (NULL)
+   , subscriber (NULL)
+   , userData (NULL)
   {};
 
-  //IRC_Client_IConnection_t*  connection;
-  IRC_Client_INotify_t*      subscriber; // (initial) subscriber
-  Stream_ModuleConfiguration moduleConfiguration;
+  /* splitter */
+  // *NOTE*: this option may be useful for (downstream) parsers that only work
+  //         on CONTIGUOUS buffers (i.e. cannot parse chained message blocks)
+  // *WARNING*: currently, this does NOT work with multithreaded streams
+  //            --> USE WITH CAUTION !
+  bool                              crunchMessages;
+  bool                              headModuleIsActive; // dedicated thread ?
+  bool                              traceParsing;  // debug yacc (bison) ?
+  bool                              traceScanning; // debug (f)lex ?
+
+  IRC_Client_ProtocolConfiguration* protocolConfiguration;
+
+  Stream_Configuration*             streamConfiguration;
+
+  /* handler */
+  IRC_Client_IStreamNotify_t*       subscriber; // (initial) subscriber
+  IRC_Client_StreamUserData*        userData;
 };
 
 struct IRC_Client_StreamConfiguration
+ : Stream_Configuration
 {
   inline IRC_Client_StreamConfiguration ()
-   : crunchMessageBuffers (IRC_CLIENT_DEF_CRUNCH_MESSAGES)
-   , debugScanner (IRC_CLIENT_DEF_LEX_TRACE)
-   , debugParser (IRC_CLIENT_DEF_YACC_TRACE)
-   , sessionID (0)
-   , streamConfiguration ()
-   , streamModuleConfiguration ()
+   : Stream_Configuration ()
+   , moduleConfiguration_2 ()
+   , moduleHandlerConfiguration_2 ()
    , protocolConfiguration (NULL)
-   //, userData (NULL)
-  {};
+   , sessionID (0)
+   , userData (NULL)
+  {
+    bufferSize = IRC_CLIENT_BUFFER_SIZE;
+  };
 
-  bool                                 crunchMessageBuffers;      // crunch message buffers ?
-  bool                                 debugScanner;              // debug lex ?
-  bool                                 debugParser;               // debug yacc ?
-  unsigned int                         sessionID;                 // session ID
-  Stream_Configuration                 streamConfiguration;       // stream configuration
-  IRC_Client_StreamModuleConfiguration streamModuleConfiguration; // stream module configuration
-  IRC_Client_ProtocolConfiguration*    protocolConfiguration;     // protocol configuration
-  //Net_StreamUserData*                  userData;                  // user data
+  Stream_ModuleConfiguration            moduleConfiguration_2;        // stream module configuration
+  IRC_Client_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
+  IRC_Client_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
+  unsigned int                          sessionID;                    // session ID
+
+  IRC_Client_StreamUserData*            userData;
 };
 
 struct IRC_Client_InputHandlerConfiguration
@@ -206,7 +228,7 @@ struct IRC_Client_Configuration
    , socketHandlerConfiguration ()
    //////////////////////////////////////
    , streamConfiguration ()
-   , streamUserData ()
+//   , streamUserData (NULL)
    //////////////////////////////////////
    , protocolConfiguration ()
    //////////////////////////////////////
@@ -222,7 +244,7 @@ struct IRC_Client_Configuration
   IRC_Client_SocketHandlerConfiguration socketHandlerConfiguration;
   // ****************************** stream *************************************
   IRC_Client_StreamConfiguration        streamConfiguration;
-  Net_StreamUserData                    streamUserData;
+//  IRC_Client_StreamUserData             streamUserData;
   // ***************************** protocol ************************************
   IRC_Client_ProtocolConfiguration      protocolConfiguration;
   // ***************************************************************************

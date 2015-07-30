@@ -21,8 +21,6 @@
 #ifndef NET_CONNECTION_COMMON_H
 #define NET_CONNECTION_COMMON_H
 
-#include "ace/Time_Value.h"
-
 #include "stream_common.h"
 
 #include "net_configuration.h"
@@ -38,7 +36,6 @@ struct Net_ConnectionState
    : configuration ()
    , status (NET_CONNECTION_STATUS_INVALID)
    , currentStatistic ()
-   , lastCollectionTimestamp (ACE_Time_Value::zero)
    , userData (NULL)
   {};
 
@@ -48,7 +45,6 @@ struct Net_ConnectionState
   Net_Connection_Status  status;
 
   Net_RuntimeStatistic_t currentStatistic;
-  ACE_Time_Value         lastCollectionTimestamp;
 
   Net_StreamUserData*    userData;
 };

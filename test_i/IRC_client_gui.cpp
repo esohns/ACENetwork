@@ -444,7 +444,6 @@ do_initializeSignals (bool useReactor_in,
 
 void
 do_work (bool useThreadPool_in,
-         bool useReactor_in,
          unsigned int numDispatchThreads_in,
          IRC_Client_GTK_CBData& userData_in,
          const std::string& UIDefinitionFile_in,
@@ -459,9 +458,15 @@ do_work (bool useThreadPool_in,
   ACE_ASSERT (userData_in.configuration);
 
   // step1: initialize IRC handler module
-  IRC_Client_StreamModuleConfiguration module_configuration;
-  userData_in.configuration->streamConfiguration.streamConfiguration.moduleConfiguration =
-      &module_configuration.moduleConfiguration;
+  userData_in.configuration->streamConfiguration.moduleHandlerConfiguration_2.protocolConfiguration =
+      &userData_in.configuration->protocolConfiguration;
+  userData_in.configuration->streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
+      &userData_in.configuration->streamConfiguration;
+
+  userData_in.configuration->streamConfiguration.moduleConfiguration =
+      &userData_in.configuration->streamConfiguration.moduleConfiguration_2;
+  userData_in.configuration->streamConfiguration.moduleHandlerConfiguration =
+      &userData_in.configuration->streamConfiguration.moduleHandlerConfiguration_2;
 
   IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_HANDLER_MODULE_NAME),
                                                    NULL);
@@ -474,27 +479,20 @@ do_work (bool useThreadPool_in,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
     return;
   } // end IF
-  if (!IRCHandler_impl_p->initialize (NULL,
-                                      userData_in.configuration->streamConfiguration.streamConfiguration.messageAllocator,
-                                      userData_in.configuration->streamConfiguration.streamConfiguration.bufferSize,
-                                      userData_in.configuration->protocolConfiguration.automaticPong,
-                                      userData_in.configuration->protocolConfiguration.printPingDot))
+  if (!IRCHandler_impl_p->initialize (userData_in.configuration->streamConfiguration.moduleHandlerConfiguration_2))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::initialize(), returning\n")));
     return;
   } // end IF
-  userData_in.configuration->streamConfiguration.streamConfiguration.module =
-    &IRC_handler;
-  userData_in.configuration->streamConfiguration.streamConfiguration.cloneModule =
-    true;
-  userData_in.configuration->streamConfiguration.streamConfiguration.deleteModule =
-    false;
+  userData_in.configuration->streamConfiguration.module = &IRC_handler;
+  userData_in.configuration->streamConfiguration.cloneModule = true;
+  userData_in.configuration->streamConfiguration.deleteModule = false;
 
   // step2: initialize event dispatch
-  if (!Common_Tools::initializeEventDispatch (useReactor_in,
+  if (!Common_Tools::initializeEventDispatch (userData_in.configuration->useReactor,
                                               numDispatchThreads_in,
-                                              userData_in.configuration->streamConfiguration.streamConfiguration.serializeOutput))
+                                              userData_in.configuration->streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returning\n")));
@@ -570,7 +568,7 @@ do_work (bool useThreadPool_in,
   int group_id = -1;
   // *NOTE*: this variable needs to stay on the working stack, it's passed to
   //         the worker(s) (if any)
-  bool use_reactor = useReactor_in;
+  bool use_reactor = userData_in.configuration->useReactor;
   if (!Common_Tools::startEventDispatch (use_reactor,
                                          numDispatchThreads_in,
                                          group_id))
@@ -588,8 +586,8 @@ do_work (bool useThreadPool_in,
   // *NOTE*: from this point on, clean up any remote connections !
 
   // step7: dispatch events
-  Common_Tools::dispatchEvents (useReactor_in,
-                                !useReactor_in,
+  Common_Tools::dispatchEvents (userData_in.configuration->useReactor,
+                                !userData_in.configuration->useReactor,
                                 group_id);
 
   // step8: clean up
@@ -670,8 +668,7 @@ do_parsePhonebookFile (const std::string& serverConfigFile_in,
 //                val_name.c_str(),
 //                val_type));
 
-    // *TODO*: move these strings...
-    if (val_name == ACE_TEXT_ALWAYS_CHAR ("date"))
+    if (val_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DATE_SECTION_HEADER))
     {
       std::string timestamp = ACE_TEXT_ALWAYS_CHAR (val_value.c_str ());
       // parse timestamp
@@ -953,7 +950,7 @@ do_parsePhonebookFile (const std::string& serverConfigFile_in,
       // skip to next port(range)
       if (next_comma == group)
       {
-        // this means we've reached the end of the list...
+        // this means that the end of the list has been reached...
         // --> skip over "GROUP:"
         last_position = next_comma + 5;
 
@@ -972,14 +969,6 @@ do_parsePhonebookFile (const std::string& serverConfigFile_in,
 
     ++val_index;
   } // end WHILE
-
-//   for (IRC_Client_NetworksIterator_t iterator = phoneBook_out.networks.begin ();
-//        iterator != phoneBook_out.networks.end ();
-//        iterator++)
-//     ACE_DEBUG ((LM_DEBUG,
-//                 ACE_TEXT ("network: \"%s\"\n"),
-//                 ACE_TEXT ((*iterator).c_str ())));
-
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("parsed %u phonebook (timestamp: %u/%u/%u) entries (%u network(s))...\n"),
               phoneBook_out.servers.size (),
@@ -987,14 +976,32 @@ do_parsePhonebookFile (const std::string& serverConfigFile_in,
               phoneBook_out.timestamp.day (),
               phoneBook_out.timestamp.year (),
               phoneBook_out.networks.size ()));
+
+  // add localhost
+  entry.hostName = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SERVER_HOSTNAME);
+  entry.listeningPorts.clear ();
+  entry.listeningPorts.push_back (std::make_pair (IRC_CLIENT_DEF_SERVER_PORT,
+                                                  IRC_CLIENT_DEF_SERVER_PORT));
+  entry.network.clear ();
+  phoneBook_out.servers.insert (std::make_pair (entry.hostName, entry));
+
+  //   for (IRC_Client_NetworksIterator_t iterator = phoneBook_out.networks.begin ();
+  //        iterator != phoneBook_out.networks.end ();
+  //        iterator++)
+  //     ACE_DEBUG ((LM_DEBUG,
+  //                 ACE_TEXT ("network: \"%s\"\n"),
+  //                 ACE_TEXT ((*iterator).c_str ())));
 }
 
 void
 do_parseConfigurationFile (const std::string& configFilename_in,
                            IRC_Client_IRCLoginOptions& loginOptions_out,
-                           IRC_Client_PhoneBook& phoneBook_out)
+                           IRC_Client_Connections_t& connections_out)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_parseConfigurationFile"));
+
+  // initialize return value(s)
+  connections_out.clear ();
 
   ACE_Configuration_Heap config_heap;
   if (config_heap.open ())
@@ -1051,16 +1058,15 @@ do_parseConfigurationFile (const std::string& configFilename_in,
 //                 ACE_TEXT (val_name.c_str ()),
 //                 val_type));
 
-    // *TODO*: move these strings...
-    if (val_name == ACE_TEXT_ALWAYS_CHAR ("password"))
+    if (val_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_PASSWORD_LABEL))
       loginOptions_out.password = ACE_TEXT_ALWAYS_CHAR (val_string_value.c_str ());
-    else if (val_name == ACE_TEXT_ALWAYS_CHAR ("nick"))
+    else if (val_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_NICKNAME_LABEL))
       loginOptions_out.nickname = ACE_TEXT_ALWAYS_CHAR (val_string_value.c_str ());
-    else if (val_name == ACE_TEXT_ALWAYS_CHAR ("user"))
+    else if (val_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_USER_LABEL))
       loginOptions_out.user.username = ACE_TEXT_ALWAYS_CHAR (val_string_value.c_str ());
-    else if (val_name == ACE_TEXT_ALWAYS_CHAR ("realname"))
+    else if (val_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_REALNAME_LABEL))
       loginOptions_out.user.realname = ACE_TEXT_ALWAYS_CHAR (val_string_value.c_str ());
-    else if (val_name == ACE_TEXT_ALWAYS_CHAR ("channel"))
+    else if (val_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_CHANNEL_LABEL))
       loginOptions_out.channel = ACE_TEXT_ALWAYS_CHAR (val_string_value.c_str ());
     else
     {
@@ -1110,15 +1116,14 @@ do_parseConfigurationFile (const std::string& configFilename_in,
       return;
     } // end IF
 
-    // *TODO*: move these strings...
-    if (val_name == ACE_TEXT_ALWAYS_CHAR ("server"))
+    if (val_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_SERVER_LABEL))
     {
       entry.hostName = ACE_TEXT_ALWAYS_CHAR (val_string_value.c_str ());
 
       if (!entry.listeningPorts.empty ())
-        phoneBook_out.servers.insert (std::make_pair (entry.hostName, entry));
-    }
-    else if (val_name == ACE_TEXT_ALWAYS_CHAR ("port"))
+        connections_out.push_back (entry);
+    } // end IF
+    else if (val_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_PORT_LABEL))
     {
 //       ACE_ASSERT (val_type == ACE_Configuration::INTEGER);
 //       if (config_heap.get_integer_value (section_key,
@@ -1140,8 +1145,8 @@ do_parseConfigurationFile (const std::string& configFilename_in,
       entry.listeningPorts.push_back (port_range);
 
       if (!entry.hostName.empty ())
-        phoneBook_out.servers.insert (std::make_pair (entry.hostName, entry));
-    }
+        connections_out.push_back (entry);
+    } // end IF
     else
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT ("unexpected key \"%s\", continuing\n"),
@@ -1444,14 +1449,13 @@ ACE_TMAIN (int argc_in,
 
   IRC_Client_Configuration configuration;
 
-  configuration.streamConfiguration.streamConfiguration.bufferSize =
-      IRC_CLIENT_BUFFER_SIZE;
-  configuration.streamConfiguration.streamConfiguration.messageAllocator =
-      &message_allocator;
-  configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
+  configuration.streamConfiguration.messageAllocator = &message_allocator;
+  configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
+      &configuration.streamConfiguration;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.traceParsing =
+      debug;
+  configuration.streamConfiguration.statisticReportingInterval =
       reporting_interval;
-  configuration.streamConfiguration.debugScanner = IRC_CLIENT_DEF_LEX_TRACE;
-  configuration.streamConfiguration.debugParser = debug;
 
   IRC_Client_GTK_CBData user_data;
   user_data.configuration = &configuration;
@@ -1459,7 +1463,7 @@ ACE_TMAIN (int argc_in,
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
   user_data.configuration->protocolConfiguration.loginOptions.nickname =
-      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_NICK);
+      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_NICKNAME);
 //   userData.loginOptions.user.username = ;
   std::string hostname;
   if (!Net_Common_Tools::getHostname (hostname))
@@ -1511,9 +1515,15 @@ ACE_TMAIN (int argc_in,
     do_parsePhonebookFile (phonebook_file,
                            user_data.phoneBook);
   if (!configuration_file.empty ())
+  {
+    IRC_Client_Connections_t connections;
     do_parseConfigurationFile (configuration_file,
                                configuration.protocolConfiguration.loginOptions,
-                               user_data.phoneBook);
+                               connections);
+  } // end IF
+
+  configuration.useReactor = use_reactor;
+
   user_data.progressData.GTKState = &user_data.GTKState;
 
   // step8: initialize GTK UI
@@ -1528,7 +1538,6 @@ ACE_TMAIN (int argc_in,
   ACE_High_Res_Timer timer;
   timer.start ();
   do_work (use_thread_pool,
-           use_reactor,
            num_thread_pool_threads,
            user_data,
            ui_definition_filename,

@@ -66,7 +66,7 @@ IRC_Client_Message::~IRC_Client_Message ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Message::~IRC_Client_Message"));
 
-  // *NOTE*: will be called just BEFORE we're passed back to the allocator
+  // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
 IRC_Client_CommandType_t
@@ -138,30 +138,29 @@ IRC_Client_Message::crunch ()
 
   int result = -1;
 
-  // sanity check
-  // *WARNING*: this check is NOT enough, it's a race. Anyway, there may be
-  //            trailing messages and/or pieces referencing the same buffer...
-  //            --> in fact, that should be the norm
-//   ACE_ASSERT(reference_count() == 1);
-  // ... assuming stream processing is indeed single-threaded, then the
-  // reference count at this stage should be just 2: "this", and the next,
-  // trailing "message head" (of course, it could be just "this").
-  result = reference_count ();
-  if (result <= 2)
-  {  // step1: align rd_ptr() with base()
-    result = inherited::crunch ();
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Block::crunch(): \"%m\", returning\n")));
-      return;
-    } // end IF
+//  // sanity check(s)
+//  // *IMPORTANT NOTE*: this check is NOT enough (race condition). Also, there
+//  //                   may be trailing messages (in fact, that should be the
+//  //                   norm), and/or (almost any) number(s) of fragments
+//  //                   referencing the same buffer
+//  ACE_ASSERT (inherited::reference_count () <= 2);
+  // ... assuming stream processing is indeed single-threaded (CHECK !!!), then
+  // the reference count at this stage should be <=2: "this", and (most
+  // probably), the next, trailing "message head" (of course, it could be just
+  // "this")
+  // step1: align rd_ptr() with base()
+  result = inherited::crunch ();
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Message_Block::crunch(): \"%m\", returning\n")));
+    return;
   } // end IF
 
   // step2: copy (part of) the data
   ACE_Message_Block* message_block_p = NULL;
   size_t amount, space, length = 0;
-  for (message_block_p = cont ();
+  for (message_block_p = inherited::cont ();
        message_block_p;
        message_block_p = message_block_p->cont ())
   {
@@ -181,7 +180,7 @@ IRC_Client_Message::crunch ()
   } // end FOR
 
   // step3: release any thusly obsoleted continuations
-  message_block_p = cont ();
+  message_block_p = inherited::cont ();
   ACE_Message_Block* previous_p = this;
   ACE_Message_Block* obsolete_p = NULL;
   do

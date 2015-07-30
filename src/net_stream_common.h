@@ -42,33 +42,49 @@
 
 // forward declarations
 struct Net_Configuration;
+struct Net_ConnectionState;
 class Net_SessionMessage;
 typedef Stream_Statistic Net_RuntimeStatistic_t;
-
-// *NOTE*: I speculate that this is the main reason that C# was ever invented !
-struct Net_StreamUserData
-{
-  inline Net_StreamUserData ()
-   : userData (NULL)
-  {};
-
-  void* userData;
-};
 
 struct Net_StreamSessionData
 {
   inline Net_StreamSessionData ()
-   : configuration (NULL)
+   : aborted (false)
+   , connectionState (NULL)
    , currentStatistic ()
-   , lastCollectionTimestamp (ACE_Time_Value::zero)
+   , lock (NULL)
+   , sessionID (0)
+   , startOfSession (ACE_Time_Value::zero)
+  {};
+
+  bool                   aborted;
+
+  Net_ConnectionState*   connectionState;
+
+  Net_RuntimeStatistic_t currentStatistic;
+  ACE_SYNCH_MUTEX*       lock;
+
+  unsigned int           sessionID; // (== socket handle !)
+  ACE_Time_Value         startOfSession;
+};
+
+struct Net_StreamUserData
+{
+  inline Net_StreamUserData ()
+   : configuration (NULL)
+  {};
+
+  Net_Configuration* configuration;
+};
+
+struct Net_StreamState
+{
+  inline Net_StreamState ()
+   : currentSessionData (NULL)
    , userData (NULL)
   {};
 
-  Net_Configuration*     configuration;
-
-  Net_RuntimeStatistic_t currentStatistic;
-  ACE_Time_Value         lastCollectionTimestamp;
-
+  Net_StreamSessionData* currentSessionData;
   Net_StreamUserData*    userData;
 };
 
@@ -79,13 +95,14 @@ typedef Stream_SessionDataBase_T<Net_StreamSessionData> Net_StreamSessionData_t;
 
 typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Common_TimePolicy_t,
-                         Stream_ModuleConfiguration> Net_IModule_t;
+                         Stream_ModuleConfiguration,
+                         Stream_ModuleHandlerConfiguration> Net_IModule_t;
 
-typedef Common_INotify_T<Stream_ModuleConfiguration,
-                         Net_Message> Net_INotify_t;
-typedef std::list<Net_INotify_t*> Net_Subscribers_t;
+typedef Common_INotify_T<Net_StreamSessionData,
+                         Net_Message> Net_IStreamNotify_t;
+typedef std::list<Net_IStreamNotify_t*> Net_Subscribers_t;
 typedef Net_Subscribers_t::iterator Net_SubscribersIterator_t;
 
-typedef Common_ISubscribe_T<Net_INotify_t> Net_ISubscribe_t;
+typedef Common_ISubscribe_T<Net_IStreamNotify_t> Net_ISubscribe_t;
 
 #endif

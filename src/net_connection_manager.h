@@ -100,7 +100,8 @@ class Net_Connection_Manager_T
 
   // implement Common_IControl
   virtual void start ();
-  virtual void stop (bool = true); // locked access ?
+  virtual void stop (bool = true,  // wait for completion ?
+                     bool = true); // locked access ?
   virtual bool isRunning () const;
 
   // implement Common_ILock

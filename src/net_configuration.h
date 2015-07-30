@@ -34,16 +34,16 @@
 #include "net_stream_common.h"
 
 // forward declarations
-//struct Net_Configuration;
-//struct Net_SessionData;
-//struct Net_SocketConfiguration;
-//class Net_Stream;
-//typedef Net_IConnectionManager_T<ACE_INET_Addr,
-//                                 Net_SocketConfiguration,
-//                                 Net_Configuration,
-//                                 Net_SessionData,
-//                                 Stream_Statistic,
-//                                 Net_Stream> Net_IInetConnectionManager_t;
+struct Net_Configuration;
+struct Net_ConnectionState;
+class Net_Stream;
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                 Net_Configuration,
+                                 Net_ConnectionState,
+                                 Net_RuntimeStatistic_t,
+                                 Net_Stream,
+                                 ////////
+                                 Net_StreamUserData> Net_IInetConnectionManager_t;
 
 struct Net_SocketConfiguration
 {
@@ -76,20 +76,17 @@ struct Net_SocketHandlerConfiguration
    : bufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , messageAllocator (NULL)
    , socketConfiguration (NULL)
-   , statisticCollectionInterval (0)
-   , userData (NULL)
+   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTICS_REPORTING)
    //////////////////////////////////////
-   , configuration (NULL)
+   , userData (NULL)
   {};
 
   int                      bufferSize; // pdu size (if fixed)
   Stream_IAllocator*       messageAllocator;
   Net_SocketConfiguration* socketConfiguration;
-  unsigned int             statisticCollectionInterval; // seconds [0: OFF]
-  Net_StreamUserData*      userData;
+  unsigned int             statisticReportingInterval; // seconds [0: OFF]
 
-  // *TODO*: move this into a separate connnection/session configuration object
-  Net_Configuration*       configuration;
+  Net_StreamUserData*      userData;
 };
 
 struct Net_ProtocolConfiguration
@@ -107,19 +104,37 @@ struct Net_ProtocolConfiguration
   bool         printPongMessages;
 };
 
-struct Net_StreamConfiguration
+struct Net_ModuleHandlerConfiguration
+ : public Stream_ModuleHandlerConfiguration
 {
-  inline Net_StreamConfiguration ()
-   : protocolConfiguration (NULL)
-   , sessionID (0)
-   , streamConfiguration ()
-   , userData (NULL)
+  inline Net_ModuleHandlerConfiguration ()
+   : sessionData (NULL)
   {};
 
-  Net_ProtocolConfiguration* protocolConfiguration; // protocol configuration
-  unsigned int               sessionID;             // session ID
-  Stream_Configuration       streamConfiguration;   // stream configuration
-  Net_StreamUserData*        userData;              // user data
+  // *TODO*: remove this (--> session message data)
+  Stream_SessionData* sessionData;
+};
+
+struct Net_StreamConfiguration
+ : Stream_Configuration
+{
+  inline Net_StreamConfiguration ()
+   : Stream_Configuration ()
+   , moduleConfiguration_2 ()
+   , moduleHandlerConfiguration_2 ()
+   , protocolConfiguration (NULL)
+   , sessionID (0)
+   , userData (NULL)
+  {
+    bufferSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
+  };
+
+  Stream_ModuleConfiguration     moduleConfiguration_2;        // module configuration
+  Net_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
+  Net_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
+  unsigned int                   sessionID;                    // session ID
+
+  Net_StreamUserData*            userData;                     // user data
 };
 
 struct Net_Configuration
@@ -140,6 +155,27 @@ struct Net_Configuration
   Net_StreamUserData             streamUserData;
   // *************************** protocol data *********************************
   Net_ProtocolConfiguration      protocolConfiguration;
+};
+
+struct Net_ListenerConfiguration
+{
+  inline Net_ListenerConfiguration ()
+   : addressFamily (ACE_ADDRESS_FAMILY_INET)
+   , connectionManager (NULL)
+   , messageAllocator (NULL)
+   , portNumber (0)
+   , socketHandlerConfiguration (NULL)
+   , statisticCollectionInterval (0)
+   , useLoopbackDevice (false)
+  {};
+
+  int                             addressFamily;
+  Net_IInetConnectionManager_t*   connectionManager;
+  Stream_IAllocator*              messageAllocator;
+  unsigned short                  portNumber;
+  Net_SocketHandlerConfiguration* socketHandlerConfiguration;
+  unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s)) [0: off]
+  bool                            useLoopbackDevice;
 };
 
 #endif

@@ -51,7 +51,7 @@ class IRC_Client_IRCSession_T
  //                                Stream_Statistic,
  //                                IRC_Client_Stream,
  //                                IRC_Client_ConnectionState>
- , public IRC_Client_INotify_t
+ , public IRC_Client_IStreamNotify_t
 {
  friend class ACE_Connector<IRC_Client_IRCSession_T<ConnectionType>,
                             ACE_SOCK_CONNECTOR>;
@@ -59,15 +59,14 @@ class IRC_Client_IRCSession_T
 
  public:
   IRC_Client_IRCSession_T (IRC_Client_IConnection_Manager_t* = NULL, // connection manager handle
-                           unsigned int = 0);                        // statistics collecting interval (second(s))
-                                                                     // 0 --> DON'T collect statistics
+                           unsigned int = 0);                        // statistic collecting interval (second(s)) [0: off]
   virtual ~IRC_Client_IRCSession_T ();
 
   // implement Net_ISession_T
   //virtual const IRC_Client_ConnectionState& state () const;
 
-  // implement IRC_Client_INotify_t
-  virtual void start (const IRC_Client_StreamModuleConfiguration&);
+  // implement IRC_Client_IStreamNotify_t
+  virtual void start (const IRC_Client_StreamSessionData&);
   virtual void notify (const IRC_Client_IRCMessage&);
   virtual void end ();
 

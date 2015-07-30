@@ -511,24 +511,23 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // ********************** stream configuration data **************************
   configuration.streamConfiguration.protocolConfiguration =
     &configuration.protocolConfiguration;
-  configuration.streamConfiguration.streamConfiguration.bufferSize =
+  configuration.streamConfiguration.bufferSize =
     NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-  configuration.streamConfiguration.streamConfiguration.deleteModule = false;
-  configuration.streamConfiguration.streamConfiguration.messageAllocator =
-    &message_allocator;
-  configuration.streamConfiguration.streamConfiguration.module =
+  configuration.streamConfiguration.deleteModule = false;
+  configuration.streamConfiguration.messageAllocator = &message_allocator;
+  configuration.streamConfiguration.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
                                    : NULL);
-  configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
-    &module_configuration;
-  configuration.streamConfiguration.streamConfiguration.printFinalReport = true;
+  configuration.streamConfiguration.moduleConfiguration =
+      &configuration.streamConfiguration.moduleConfiguration_2;
+  configuration.streamConfiguration.moduleHandlerConfiguration =
+      &configuration.streamConfiguration.moduleHandlerConfiguration_2;
+  configuration.streamConfiguration.printFinalReport = true;
   // *TODO*: is this correct ?
-  configuration.streamConfiguration.streamConfiguration.serializeOutput =
-      useThreadPool_in;
-  //configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
+  configuration.streamConfiguration.serializeOutput = useThreadPool_in;
+  //configuration.streamConfiguration.statisticReportingInterval =
   //  0;
-  configuration.streamConfiguration.streamConfiguration.useThreadPerConnection =
-    false;
+  configuration.streamConfiguration.useThreadPerConnection = false;
   configuration.streamConfiguration.userData = &configuration.streamUserData;
 
   // ******************** protocol configuration data **************************
@@ -555,7 +554,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // step0b: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (useReactor_in,
                                               useThreadPool_in,
-                                              configuration.streamConfiguration.streamConfiguration.serializeOutput))
+                                              configuration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returing\n")));
@@ -579,11 +578,11 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     //configuration.socketHandlerConfiguration.bufferSize =
     //  NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
     configuration.socketHandlerConfiguration.messageAllocator =
-      &message_allocator;
+        &message_allocator;
     configuration.socketHandlerConfiguration.socketConfiguration =
       &configuration.socketConfiguration;
-    configuration.socketHandlerConfiguration.statisticCollectionInterval =
-      configuration.streamConfiguration.streamConfiguration.statisticReportingInterval;
+    configuration.socketHandlerConfiguration.statisticReportingInterval =
+      configuration.streamConfiguration.statisticReportingInterval;
   } // end IF
   //Net_Client_ConnectorConfiguration connector_configuration;
   //Net_IInetConnectionManager_t* iconnection_manager_p =
@@ -601,9 +600,9 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   Net_IInetConnectionManager_t* iconnection_manager_p =
     connection_manager_p;
   Net_Client_Connector_t connector (iconnection_manager_p,
-                                    configuration.streamConfiguration.streamConfiguration.statisticReportingInterval);
+                                    configuration.streamConfiguration.statisticReportingInterval);
   Net_Client_AsynchConnector_t asynch_connector (iconnection_manager_p,
-                                                 configuration.streamConfiguration.streamConfiguration.statisticReportingInterval);
+                                                 configuration.streamConfiguration.statisticReportingInterval);
   Net_IConnector_t* connector_p = NULL;
   if (useReactor_in)
     connector_p = &connector;

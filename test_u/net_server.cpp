@@ -513,22 +513,19 @@ do_work (unsigned int maxNumConnections_in,
   // ********************** stream configuration data **************************
   configuration.streamConfiguration.protocolConfiguration =
     &configuration.protocolConfiguration;
-  configuration.streamConfiguration.streamConfiguration.bufferSize =
+  configuration.streamConfiguration.bufferSize =
     NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-  configuration.streamConfiguration.streamConfiguration.deleteModule = false;
-  configuration.streamConfiguration.streamConfiguration.messageAllocator =
-    &message_allocator;
-  configuration.streamConfiguration.streamConfiguration.module =
+  configuration.streamConfiguration.deleteModule = false;
+  configuration.streamConfiguration.messageAllocator = &message_allocator;
+  configuration.streamConfiguration.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
                                    : NULL);
-  configuration.streamConfiguration.streamConfiguration.moduleConfiguration =
+  configuration.streamConfiguration.moduleConfiguration =
     &module_configuration;
-  configuration.streamConfiguration.streamConfiguration.printFinalReport =
-    false;
-  configuration.streamConfiguration.streamConfiguration.statisticReportingInterval =
+  configuration.streamConfiguration.printFinalReport = false;
+  configuration.streamConfiguration.statisticReportingInterval =
     statisticsReportingInterval_in;
-  configuration.streamConfiguration.streamConfiguration.useThreadPerConnection =
-    false;
+  configuration.streamConfiguration.useThreadPerConnection = false;
   configuration.streamConfiguration.userData = &configuration.streamUserData;
 
   // ******************** protocol configuration data **************************
@@ -550,7 +547,7 @@ do_work (unsigned int maxNumConnections_in,
   // step0b: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (useReactor_in,
                                               useThreadPool_in,
-                                              configuration.streamConfiguration.streamConfiguration.serializeOutput))
+                                              configuration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
@@ -699,7 +696,7 @@ do_work (unsigned int maxNumConnections_in,
   socket_handler_configuration.messageAllocator = &message_allocator;
   socket_handler_configuration.socketConfiguration =
       &configuration.socketConfiguration;
-  Net_Server_ListenerConfiguration listener_configuration;
+  Net_ListenerConfiguration listener_configuration;
   listener_configuration.addressFamily = ACE_ADDRESS_FAMILY_INET;
   listener_configuration.connectionManager =
     NET_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -710,7 +707,8 @@ do_work (unsigned int maxNumConnections_in,
   //listener_configuration.statisticCollectionInterval =
   //  statisticsReportingInterval_in;
   listener_configuration.useLoopbackDevice = useLoopback_in;
-  if (!NET_SERVER_LISTENER_SINGLETON::instance ()->initialize (listener_configuration))
+
+  if (!CBData_in.listenerHandle->initialize (listener_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize listener, returning\n")));

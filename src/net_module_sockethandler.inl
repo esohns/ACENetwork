@@ -24,19 +24,20 @@
 
 #include "stream_session_message_base.h"
 
+#include "net_defines.h"
 #include "net_macros.h"
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
+template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
           typename ProtocolHeaderType>
-Net_Module_SocketHandler_T<StreamStateType,
+Net_Module_SocketHandler_T<SessionMessageType,
+                           ProtocolMessageType,
+                           StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           SessionMessageType,
-                           ProtocolMessageType,
                            ProtocolHeaderType>::Net_Module_SocketHandler_T ()
  : inherited (false, // inactive by default
               false) // DON'T auto-start !
@@ -47,24 +48,23 @@ Net_Module_SocketHandler_T<StreamStateType,
  , statisticCollectionHandler_ (ACTION_COLLECT,
                                 this,
                                 false)
- , statisticCollectionInterval_ (0)
  , timerID_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::Net_Module_SocketHandler_T"));
 
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
+template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
           typename ProtocolHeaderType>
-Net_Module_SocketHandler_T<StreamStateType,
+Net_Module_SocketHandler_T<SessionMessageType,
+                           ProtocolMessageType,
+                           StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           SessionMessageType,
-                           ProtocolMessageType,
                            ProtocolHeaderType>::~Net_Module_SocketHandler_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::~Net_Module_SocketHandler_T"));
@@ -91,22 +91,19 @@ Net_Module_SocketHandler_T<StreamStateType,
     currentMessage_->release ();
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
+template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<StreamStateType,
+Net_Module_SocketHandler_T<SessionMessageType,
+                           ProtocolMessageType,
+                           StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           SessionMessageType,
-                           ProtocolMessageType,
-                           ProtocolHeaderType>::initialize (StreamStateType* state_in,
-                                                            Stream_IAllocator* allocator_in,
-                                                            bool isActive_in,
-                                                            unsigned int statisticCollectionInterval_in)
+                           ProtocolHeaderType>::initialize (const Net_ModuleHandlerConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::initialize"));
 
@@ -138,30 +135,26 @@ Net_Module_SocketHandler_T<StreamStateType,
     isInitialized_ = false;
   } // end IF
 
-  statisticCollectionInterval_ = statisticCollectionInterval_in;
-
-  inherited::allocator_ = allocator_in;
-  inherited::isActive_ = isActive_in;
-  inherited::state_ = state_in;
-
-  // OK: all's well...
-  isInitialized_ = true;
+  isInitialized_ = inherited::initialize (configuration_in);
+  if (!isInitialized_)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
 
   return isInitialized_;
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
+template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
           typename ProtocolHeaderType>
 void
-Net_Module_SocketHandler_T<StreamStateType,
+Net_Module_SocketHandler_T<SessionMessageType,
+                           ProtocolMessageType,
+                           StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           SessionMessageType,
-                           ProtocolMessageType,
                            ProtocolHeaderType>::handleDataMessage (ProtocolMessageType*& message_inout,
                                                                    bool& passMessageDownstream_out)
 {
@@ -205,18 +198,18 @@ Net_Module_SocketHandler_T<StreamStateType,
   } // end WHILE
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
+template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
           typename ProtocolHeaderType>
 void
-Net_Module_SocketHandler_T<StreamStateType,
+Net_Module_SocketHandler_T<SessionMessageType,
+                           ProtocolMessageType,
+                           StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           SessionMessageType,
-                           ProtocolMessageType,
                            ProtocolHeaderType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                       bool& passMessageDownstream_out)
 {
@@ -228,17 +221,20 @@ Net_Module_SocketHandler_T<StreamStateType,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
+  // *TODO*: remove type inference
+  ACE_ASSERT (inherited::configuration_.streamConfiguration);
   ACE_ASSERT (message_inout);
   ACE_ASSERT (isInitialized_);
 
-  switch (message_inout->getType ())
+  switch (message_inout->type ())
   {
     case SESSION_BEGIN:
     {
-      if (statisticCollectionInterval_)
+      if (inherited::configuration_.streamConfiguration->statisticReportingInterval)
       {
         // schedule regular statistics collection...
-        ACE_Time_Value interval (statisticCollectionInterval_, 0);
+        ACE_Time_Value interval (NET_STREAM_DEFAULT_STATISTICS_COLLECTION,
+                                 0);
         ACE_ASSERT (timerID_ == -1);
         ACE_Event_Handler* handler_p = &statisticCollectionHandler_;
         timerID_ =
@@ -252,10 +248,10 @@ Net_Module_SocketHandler_T<StreamStateType,
                       ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(): \"%m\", aborting\n")));
           return;
         } // end IF
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
-                    timerID_,
-                    statisticCollectionInterval_));
+        //        ACE_DEBUG ((LM_DEBUG,
+        //                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for interval %#T...\n"),
+        //                    timerID_,
+        //                    &interval));
       } // end IF
 
 //      // start profile timer...
@@ -285,19 +281,19 @@ Net_Module_SocketHandler_T<StreamStateType,
   } // end SWITCH
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
+template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<StreamStateType,
+Net_Module_SocketHandler_T<SessionMessageType,
+                           ProtocolMessageType,
+                           StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           SessionMessageType,
-                           ProtocolMessageType,
-                           ProtocolHeaderType>::collect (Stream_Statistic& data_out)
+                           ProtocolHeaderType>::collect (Net_RuntimeStatistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::collect"));
 
@@ -305,14 +301,16 @@ Net_Module_SocketHandler_T<StreamStateType,
   ACE_ASSERT (isInitialized_);
 
   // step0: initialize container
-  ACE_OS::memset (&data_out, 0, sizeof (data_out));
+//  data_out.dataMessages = 0;
+//  data_out.droppedMessages = 0;
+//  data_out.bytes = 0.0;
+  data_out.timestamp = COMMON_TIME_NOW;
 
   // *TODO*: collect socket statistics information
   //         (and propagate it downstream ?)
 
   // step1: send the container downstream
-  if (!putStatisticsMessage (data_out,               // data container
-                             COMMON_TIME_NOW)) // timestamp
+  if (!putStatisticsMessage (data_out)) // data container
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to putSessionMessage(SESSION_STATISTICS), aborting\n")));
@@ -322,38 +320,42 @@ Net_Module_SocketHandler_T<StreamStateType,
   return true;
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
+template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
           typename ProtocolHeaderType>
 void
-Net_Module_SocketHandler_T<StreamStateType,
+Net_Module_SocketHandler_T<SessionMessageType,
+                           ProtocolMessageType,
+                           StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           SessionMessageType,
-                           ProtocolMessageType,
                            ProtocolHeaderType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::report"));
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
+
+#if defined (_MSC_VER)
+  ACE_NOTREACHED (return);
+#endif
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
+template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<StreamStateType,
+Net_Module_SocketHandler_T<SessionMessageType,
+                           ProtocolMessageType,
+                           StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           SessionMessageType,
-                           ProtocolMessageType,
                            ProtocolHeaderType>::bisectMessages (ProtocolMessageType*& message_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::bisectMessages"));
@@ -512,26 +514,30 @@ Net_Module_SocketHandler_T<StreamStateType,
 //   return message_out;
 // }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
+template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<StreamStateType,
+Net_Module_SocketHandler_T<SessionMessageType,
+                           ProtocolMessageType,
+                           StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           SessionMessageType,
-                           ProtocolMessageType,
-                           ProtocolHeaderType>::putStatisticsMessage (const Stream_Statistic& statistic_in,
-                                                                      const ACE_Time_Value& collectionTime_in) const
+                           ProtocolHeaderType>::putStatisticsMessage (const Net_RuntimeStatistic_t& statisticData_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::putStatisticsMessage"));
 
-  // step1: init information object
-  inherited::state_->currentStatistics = statistic_in;
-  inherited::state_->lastCollectionTimestamp = collectionTime_in;
+  // sanity check(s)
+  ACE_ASSERT (inherited::sessionData_);
+  // *TODO*: remove type inferences
+  ACE_ASSERT (inherited::configuration_.streamConfiguration);
+
+  // step1: update session state
+  // *TODO*: remove type inferences
+  inherited::sessionData_->currentStatistic = statisticData_in;
 
   // *TODO*: attach stream state information to the session data
 
@@ -544,29 +550,29 @@ Net_Module_SocketHandler_T<StreamStateType,
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate SessionDataContainerType: \"%m\", aborting\n")));
-
     return false;
   } // end IF
 
-  // step3: send the data downstream
-  // *NOTE*: this is a "fire-and-forget" API, so don't worry about session_data_p
+  // step3: send the statistic data downstream
+  // *NOTE*: fire-and-forget session_data_p here
+  // *TODO*: remove type inference
   return inherited::putSessionMessage (SESSION_STATISTICS,
                                        session_data_p,
-                                       inherited::allocator_);
+                                       inherited::configuration_.streamConfiguration->messageAllocator);
 }
 
 /////////////////////////////////////////
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
-          typename ProtocolMessageType>
-Net_Module_UDPSocketHandler_T<StreamStateType,
+template <typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType>
+Net_Module_UDPSocketHandler_T<SessionMessageType,
+                              ProtocolMessageType,
+                              StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType,
-                              SessionMessageType,
-                              ProtocolMessageType>::Net_Module_UDPSocketHandler_T ()
+                              SessionDataContainerType>::Net_Module_UDPSocketHandler_T ()
  : inherited (false, // inactive by default
               false) // DON'T auto-start !
  , isInitialized_ (false)
@@ -579,16 +585,16 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
 
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
-          typename ProtocolMessageType>
-Net_Module_UDPSocketHandler_T<StreamStateType,
+template <typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType>
+Net_Module_UDPSocketHandler_T<SessionMessageType,
+                              ProtocolMessageType,
+                              StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType,
-                              SessionMessageType,
-                              ProtocolMessageType>::~Net_Module_UDPSocketHandler_T ()
+                              SessionDataContainerType>::~Net_Module_UDPSocketHandler_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::~Net_Module_UDPSocketHandler_T"));
 
@@ -611,20 +617,17 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
   } // end IF
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+template <typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType>
 bool
-Net_Module_UDPSocketHandler_T<StreamStateType,
+Net_Module_UDPSocketHandler_T<SessionMessageType,
+                              ProtocolMessageType,
+                              StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType,
-                              SessionMessageType,
-                              ProtocolMessageType>::initialize (StreamStateType* state_in,
-                                                                Stream_IAllocator* allocator_in,
-                                                                bool isActive_in,
-                                                                unsigned int statisticCollectionInterval_in)
+                              SessionDataContainerType>::initialize (const Net_ModuleHandlerConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::initialize"));
 
@@ -650,14 +653,10 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
     isInitialized_ = false;
   } // end IF
 
-  statisticCollectionInterval_ = statisticCollectionInterval_in;
-
-  inherited::allocator_ = allocator_in;
-  inherited::isActive_ = isActive_in;
-  inherited::state_ = state_in;
-
-  // OK: all's well...
-  isInitialized_ = true;
+  isInitialized_ = inherited::initialize (configuration_in);
+  if (!isInitialized_)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
 
   return isInitialized_;
 }
@@ -675,18 +674,18 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
 //  return inherited::sessionID_;
 //}
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+template <typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType>
 void
-Net_Module_UDPSocketHandler_T<StreamStateType,
+Net_Module_UDPSocketHandler_T<SessionMessageType,
+                              ProtocolMessageType,
+                              StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType,
-                              SessionMessageType,
-                              ProtocolMessageType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                                       bool& passMessageDownstream_out)
+                              SessionDataContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                                                                            bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::handleDataMessage"));
 
@@ -709,18 +708,18 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
 //  } // end IF
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+template <typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType>
 void
-Net_Module_UDPSocketHandler_T<StreamStateType,
+Net_Module_UDPSocketHandler_T<SessionMessageType,
+                              ProtocolMessageType,
+                              StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType,
-                              SessionMessageType,
-                              ProtocolMessageType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                          bool& passMessageDownstream_out)
+                              SessionDataContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                               bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::handleSessionMessage"));
 
@@ -728,6 +727,7 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
+  ACE_ASSERT (inherited::configuration_.streamConfiguration);
   ACE_ASSERT (message_inout);
   ACE_ASSERT (isInitialized_);
 
@@ -735,10 +735,11 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
   {
     case SESSION_BEGIN:
     {
-      if (statisticCollectionInterval_)
+      if (inherited::configuration_.streamConfiguration->statisticReportingInterval)
       {
         // schedule regular statistics collection...
-        ACE_Time_Value interval (statisticCollectionInterval_, 0);
+        ACE_Time_Value interval (NET_STREAM_DEFAULT_STATISTICS_COLLECTION,
+                                 0);
         ACE_ASSERT (timerID_ == -1);
         ACE_Event_Handler* handler_p = &statisticCollectionHandler_;
         timerID_ =
@@ -786,17 +787,17 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
   } // end SWITCH
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+template <typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType>
 bool
-Net_Module_UDPSocketHandler_T<StreamStateType,
+Net_Module_UDPSocketHandler_T<SessionMessageType,
+                              ProtocolMessageType,
+                              StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType,
-                              SessionMessageType,
-                              ProtocolMessageType>::collect (Stream_Statistic& data_out)
+                              SessionDataContainerType>::collect (Net_RuntimeStatistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::collect"));
 
@@ -821,17 +822,17 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
   return true;
 }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+template <typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType>
 void
-Net_Module_UDPSocketHandler_T<StreamStateType,
+Net_Module_UDPSocketHandler_T<SessionMessageType,
+                              ProtocolMessageType,
+                              StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType,
-                              SessionMessageType,
-                              ProtocolMessageType>::report () const
+                              SessionDataContainerType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::report"));
 
@@ -876,24 +877,22 @@ Net_Module_UDPSocketHandler_T<StreamStateType,
 //   return message_out;
 // }
 
-template <typename StreamStateType,
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // (reference counted)
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+template <typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType>
 bool
-Net_Module_UDPSocketHandler_T<StreamStateType,
+Net_Module_UDPSocketHandler_T<SessionMessageType,
+                              ProtocolMessageType,
+                              StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType,
-                              SessionMessageType,
-                              ProtocolMessageType>::putStatisticsMessage (const Stream_Statistic& statistic_in,
-                                                                          const ACE_Time_Value& collectionTime_in) const
+                              SessionDataContainerType>::putStatisticsMessage (const Net_RuntimeStatistic_t& statistic_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::putStatisticsMessage"));
 
-  // step1: init information object
-  inherited::state_->currentStatistics = statistic_in;
-  inherited::state_->lastCollectionTimestamp = collectionTime_in;
+  // step1: initialize information object
+  inherited::state_->sessionData.currentStatistic = statistic_in;
 
   // *TODO*: attach stream state information to the session data
 

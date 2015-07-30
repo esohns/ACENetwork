@@ -24,25 +24,18 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common_iclone.h"
-#include "common_isubscribe.h"
 #include "common_time_common.h"
 
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
-#include "stream_task_base_synch.h"
 
-#include "net_common.h"
 #include "net_message.h"
 #include "net_module_messagehandler.h"
 #include "net_sessionmessage.h"
-
-// forward declaration(s)
-class Net_SessionMessage;
-class Net_Message;
+#include "net_stream_common.h"
 
 class Net_Module_EventHandler
- : public Net_Module_MessageHandler_T<Stream_ModuleConfiguration,
+ : public Net_Module_MessageHandler_T<Net_StreamSessionData,
                                       Net_SessionMessage,
                                       Net_Message>
 {
@@ -54,18 +47,19 @@ class Net_Module_EventHandler
   virtual Stream_Module_t* clone ();
 
  private:
-  typedef Net_Module_MessageHandler_T<Stream_ModuleConfiguration,
+  typedef Net_Module_MessageHandler_T<Net_StreamSessionData,
                                       Net_SessionMessage,
                                       Net_Message> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler (const Net_Module_EventHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler& operator= (const Net_Module_EventHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler (const Net_Module_EventHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler& operator= (const Net_Module_EventHandler&))
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,               // task synch type
-                              Common_TimePolicy_t,        // time policy
-                              Stream_ModuleConfiguration, // configuration type
-                              Net_Module_EventHandler);   // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                      // task synch type
+                              Common_TimePolicy_t,               // time policy
+                              Stream_ModuleConfiguration,        // module configuration type
+                              Stream_ModuleHandlerConfiguration, // module handler configuration type
+                              Net_Module_EventHandler);          // writer type
 
 #endif

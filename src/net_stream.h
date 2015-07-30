@@ -43,12 +43,18 @@
 class Net_Export Net_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        Stream_State,
-                        Stream_Statistic,
+                        /////////////////
+                        Net_StreamState,
+                        /////////////////
                         Net_StreamConfiguration,
+                        /////////////////
+                        Net_RuntimeStatistic_t,
+                        /////////////////
                         Stream_ModuleConfiguration,
-                        Net_StreamUserData,
-                        Net_StreamSessionData_t,
+                        Stream_ModuleHandlerConfiguration,
+                        /////////////////
+                        Net_StreamSessionData,   // session data
+                        Net_StreamSessionData_t, // session data container (reference counted)
                         Net_SessionMessage,
                         Net_Message>
 {
@@ -64,17 +70,23 @@ class Net_Export Net_Stream
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (Stream_Statistic&); // return value: statistic data
+  virtual bool collect (Net_RuntimeStatistic_t&); // return value: statistic data
   virtual void report () const;
 
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        Stream_State,
-                        Stream_Statistic,
+                        /////////////////
+                        Net_StreamState,
+                        /////////////////
                         Net_StreamConfiguration,
+                        /////////////////
+                        Net_RuntimeStatistic_t,
+                        /////////////////
                         Stream_ModuleConfiguration,
-                        Net_StreamUserData,
+                        Stream_ModuleHandlerConfiguration,
+                        /////////////////
+                        Net_StreamSessionData,
                         Net_StreamSessionData_t,
                         Net_SessionMessage,
                         Net_Message> inherited;

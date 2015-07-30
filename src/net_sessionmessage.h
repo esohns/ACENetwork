@@ -23,7 +23,6 @@
 
 #include "ace/Global_Macros.h"
 
-#include "stream_common.h"
 #include "stream_session_message_base.h"
 
 #include "net_exports.h"
@@ -33,24 +32,23 @@
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-class Net_Message;
 // class Net_StreamMessageAllocator;
 //template <typename MessageType,
 //          typename SessionMessageType> class Stream_MessageAllocatorHeapBase;
 
 class Net_Export Net_SessionMessage
- : public Stream_SessionMessageBase_T<Stream_State,
-                                      Net_StreamSessionData_t>
+ : public Stream_SessionMessageBase_T<Net_StreamSessionData_t,
+                                      Net_StreamUserData>
 {
 //  // enable access to private ctor(s)...
 //  friend class Net_StreamMessageAllocator;
 //  friend class Stream_MessageAllocatorHeapBase<Net_Message, Net_SessionMessage>;
 
  public:
-  // *NOTE*: assume lifetime responsibility for the second argument !
-  Net_SessionMessage (Stream_SessionMessageType,  // session message type
-                      Stream_State*,              // stream state handle
-                      Net_StreamSessionData_t*&); // session data handle
+  // *NOTE*: assumes responsibility for the second argument !
+  Net_SessionMessage (Stream_SessionMessageType, // session message type
+                      Net_StreamSessionData_t*&, // session data handle
+                      Net_StreamUserData*);      // user data handle
     // *NOTE*: to be used by message allocators...
   Net_SessionMessage (ACE_Allocator*); // message allocator
   Net_SessionMessage (ACE_Data_Block*, // data block
@@ -62,13 +60,13 @@ class Net_Export Net_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<Stream_State,
-                                      Net_StreamSessionData_t> inherited;
+  typedef Stream_SessionMessageBase_T<Net_StreamSessionData_t,
+                                      Net_StreamUserData> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage ());
+  ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage ())
   // copy ctor (to be used by duplicate())
   Net_SessionMessage (const Net_SessionMessage&);
-  ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage& operator= (const Net_SessionMessage&));
+  ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage& operator= (const Net_SessionMessage&))
 };
 
 #endif

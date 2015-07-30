@@ -27,11 +27,11 @@
 #include "net_macros.h"
 
 IRC_Client_SessionMessage::IRC_Client_SessionMessage (Stream_SessionMessageType messageType_in,
-                                                      Stream_State* streamState_in,
-                                                      IRC_Client_StreamSessionData_t*& sessionData_inout)
+                                                      IRC_Client_StreamSessionData_t*& sessionData_inout,
+                                                      IRC_Client_StreamUserData* userData_in)
  : inherited (messageType_in,
-              streamState_in,
-              sessionData_inout)
+              sessionData_inout,
+              userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SessionMessage::IRC_Client_SessionMessage"));
 

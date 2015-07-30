@@ -53,7 +53,8 @@ template <typename HandlerType,
           ///////////////////////////////
           typename UserDataType,
           ///////////////////////////////
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 class Net_StreamUDPSocketBase_T
  : public HandlerType
  , public Net_ConnectionBase_T<AddressType,
@@ -124,7 +125,8 @@ class Net_StreamUDPSocketBase_T
                                    UserDataType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<ACE_MT_SYNCH,
                            Common_TimePolicy_t,
-                           ModuleConfigurationType> IMODULE_T;
+                           ModuleConfigurationType,
+                           ModuleHandlerConfigurationType> IMODULE_T;
 
   Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
@@ -173,7 +175,8 @@ template <typename HandlerConfigurationType,
           ///////////////////////////////
           typename UserDataType,
           ///////////////////////////////
-          typename ModuleConfigurationType>
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                                 /////////
                                 AddressType,
@@ -184,7 +187,8 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                 /////////
                                 UserDataType,
                                 /////////
-                                ModuleConfigurationType>
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>
  : public Net_NetlinkSocketHandler_T<HandlerConfigurationType>
  , public Net_ConnectionBase_T<AddressType,
                                ConfigurationType,

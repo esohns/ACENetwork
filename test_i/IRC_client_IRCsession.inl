@@ -95,10 +95,11 @@ IRC_Client_IRCSession_T<ConnectionType>::~IRC_Client_IRCSession_T ()
 
 template <typename ConnectionType>
 void
-IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleConfiguration& configuration_in)
+IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamSessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::start"));
 
+  ACE_UNUSED_ARG (sessionData_in);
   int result = -1;
 
   // step0a: retrieve controller handle
@@ -214,7 +215,7 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamModuleCon
     IRC_Client_InputHandlerConfiguration input_handler_configuration;
     //input_handler_configuration. = &state_;
     input_handler_configuration.streamConfiguration =
-      &configuration_p->streamConfiguration.streamConfiguration;
+      &configuration_p->streamConfiguration;
     if (!inputHandler_->initialize (input_handler_configuration))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -484,6 +485,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
         case IRC_Client_IRC_Codes::RPL_MOTD:             // 372
         case IRC_Client_IRC_Codes::RPL_MOTDSTART:        // 375
         case IRC_Client_IRC_Codes::RPL_ENDOFMOTD:        // 376
+        case IRC_Client_IRC_Codes::RPL_HOSTHIDDEN:       // 396
         case IRC_Client_IRC_Codes::ERR_NOSUCHNICK:       // 401
         case IRC_Client_IRC_Codes::ERR_UNKNOWNCOMMAND:   // 421
         case IRC_Client_IRC_Codes::ERR_NOMOTD:           // 422
@@ -749,31 +751,84 @@ IRC_Client_IRCSession_T<ConnectionType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::open"));
 
-  IRC_Client_Connector_t* connector_p =
-    reinterpret_cast<IRC_Client_Connector_t*> (arg_in);
+  // step0: initialize this connection
+  // *NOTE*: client-side: arg_in is a handle to the connector
+  //         server-side: arg_in is a handle to the listener
+  const IRC_Client_SocketHandlerConfiguration* handler_configuration_p = NULL;
+  switch (inherited::role ())
+  {
+    case NET_ROLE_CLIENT:
+    {
+      typename inherited::ICONNECTOR_T* iconnector_p = NULL;
 
-  // sanity check(s)
-  ACE_ASSERT (connector_p);
+      // work around ACE code here
+      if ((inherited::dispatch () == COMMON_DISPATCH_REACTOR) &&
+          (inherited::transportLayer () == NET_TRANSPORTLAYER_TCP))
+      {
+        //ACE_CONNECTOR_T* connector_p =
+        //  static_cast<ACE_CONNECTOR_T*> (arg_in);
+        //ACE_ASSERT (connector_p);
+        //iconnector_p = dynamic_cast<ICONNECTOR_T*> (connector_p);
+        iconnector_p =
+            static_cast<typename inherited::ICONNECTOR_T*> (arg_in);
+        //if (!iconnector_p)
+        //{
+        //  ACE_DEBUG ((LM_ERROR,
+        //              ACE_TEXT ("failed to dynamic_cast<Net_IConnector_T*> (argument was: %@), aborting\n"),
+        //              connector_p));
+        //  return -1;
+        //} // end IF
+      } // end IF
+      else
+        iconnector_p =
+            static_cast<typename inherited::ICONNECTOR_T*> (arg_in);
+      ACE_ASSERT (iconnector_p);
+      handler_configuration_p = &iconnector_p->get ();
+      break;
+    }
+    case NET_ROLE_SERVER:
+    {
+      typename inherited::ILISTENER_T* ilistener_p =
+          static_cast<typename inherited::ILISTENER_T*> (arg_in);
+      ACE_ASSERT (ilistener_p);
+      handler_configuration_p = &ilistener_p->get ();
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown role (was: %d), aborting\n"),
+                  inherited::role ()));
+      return -1;
+    }
+  } // end SWITCH
+  ACE_ASSERT (handler_configuration_p);
 
-  int result = -1;
-  const IRC_Client_SocketHandlerConfiguration& socket_handler_configuration_r =
-    connector_p->get ();
-
-  // step0: intialize configuration object
-  IRC_Client_StreamModuleConfiguration* stream_module_configuration_p = NULL;
-  // *TODO*: remove type inference
+  IRC_Client_ModuleHandlerConfiguration* module_handler_configuration_p = NULL;
   if (!inherited::manager_)
-    stream_module_configuration_p =
-      const_cast<IRC_Client_SocketHandlerConfiguration&> (socket_handler_configuration_r).streamModuleConfiguration;
+  {
+    // *TODO*: remove type inference
+    ACE_ASSERT (handler_configuration_p->userData);
+    module_handler_configuration_p =
+        handler_configuration_p->userData->moduleHandlerConfiguration;
+    ACE_ASSERT (module_handler_configuration_p);
+  } // end IF
   else
-    stream_module_configuration_p = &inherited::CONNECTION_BASE_T::configuration_.streamConfiguration.streamModuleConfiguration;
-  // sanity check(s)
-  ACE_ASSERT (stream_module_configuration_p);
-  stream_module_configuration_p->subscriber = this;
+    module_handler_configuration_p =
+        &(inherited::CONNECTION_BASE_T::configuration_.streamConfiguration.moduleHandlerConfiguration_2);
+  ACE_ASSERT (module_handler_configuration_p);
+
+  module_handler_configuration_p->subscriber = this;
+  module_handler_configuration_p->userData =
+      handler_configuration_p->userData;
+  ACE_ASSERT (module_handler_configuration_p->userData);
+//  const IRC_Client_ConnectionState& connection_state_r = inherited::state ();
+//  module_handler_configuration_p->userData->connectionState =
+//      &const_cast<IRC_Client_ConnectionState&> (connection_state_r);
 
   // step1: initialize/start stream, tweak socket, register reading data with
   //        reactor, ...
-  result = inherited::open (arg_in);
+  int result = inherited::open (arg_in);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ConnectionType::open(): \"%m\", continuing\n")));
@@ -789,20 +844,52 @@ IRC_Client_IRCSession_T<ConnectionType>::open (ACE_HANDLE handle_in,
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::open"));
 
   // step0: intialize configuration object
-  IRC_Client_Configuration* configuration_p = NULL;
-  if (!inherited::manager_)
-  {
-//    const IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p =
-//        reinterpret_cast<IRC_Client_Configuration*> (inherited::act ());
-//    ACE_ASSERT (socket_handler_configuration_p);
-//    configuration_p = socket_handler_configuration_p->configuration;
-  } // end IF
-  else
-    configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
+  IRC_Client_ModuleHandlerConfiguration* module_handler_configuration_p = NULL;
+//  if (!inherited::manager_)
+//  {
+//    // *NOTE*: client-side: arg_in is a handle to the connector
+//    //         server-side: arg_in is a handle to the listener
+//    const IRC_Client_SocketHandlerConfiguration* handler_configuration_p = NULL;
+//    switch (inherited::role ())
+//    {
+//      case NET_ROLE_CLIENT:
+//      {
+//        typename inherited::ICONNECTOR_T* iconnector_p = inherited::act ();
+//        ACE_ASSERT (iconnector_p);
+//        handler_configuration_p = &iconnector_p->get ();
+//        break;
+//      }
+//      case NET_ROLE_SERVER:
+//      {
+//        typename inherited::ILISTENER_T* ilistener_p = inherited::act ();
+//        ACE_ASSERT (ilistener_p);
+//        handler_configuration_p = &ilistener_p->get ();
+//        break;
+//      }
+//      default:
+//      {
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("invalid/unknown role (was: %d), aborting\n"),
+//                    inherited::role ()));
+//        return -1;
+//      }
+//    } // end SWITCH
+//    ACE_ASSERT (handler_configuration_p);
+//    // *TODO*: remove type inference
+//    module_handler_configuration_p =
+//        handler_configuration_p->streamModuleHandlerConfiguration;
+//    ACE_ASSERT (module_handler_configuration_p);
+//  } // end IF
+//  else
+    module_handler_configuration_p =
+        &(inherited::CONNECTION_BASE_T::configuration_.streamConfiguration.moduleHandlerConfiguration_2);
   // sanity check(s)
-  ACE_ASSERT (configuration_p);
-  configuration_p->streamConfiguration.streamModuleConfiguration.subscriber =
-    this;
+  ACE_ASSERT (module_handler_configuration_p);
+  module_handler_configuration_p->subscriber = this;
+//  ACE_ASSERT (module_handler_configuration_p->userData);
+//  const IRC_Client_ConnectionState& connection_state_r = inherited::state ();
+//  module_handler_configuration_p->userData->connectionState =
+//      &const_cast<IRC_Client_ConnectionState&> (connection_state_r);
 
   // step1: initialize/start stream, tweak socket, register reading data with
   //        reactor, ...
