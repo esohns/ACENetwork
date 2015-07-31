@@ -115,14 +115,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
 
-  // *NOTE*: should NEVER be reached !
-  ACE_ASSERT (false);
-
-#if defined (_MSC_VER)
   return configuration_;
-#else
-  ACE_NOTREACHED (return configuration_;)
-#endif
 }
 
 template <typename HandlerType,
@@ -273,6 +266,115 @@ Net_Client_AsynchConnector_T<HandlerType,
   return ((result == 0) ? -1 : 0);
 }
 
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+void
+Net_Client_AsynchConnector_T<HandlerType,
+                             AddressType,
+                             ConfigurationType,
+                             StateType,
+                             StreamType,
+                             HandlerConfigurationType,
+                             UserDataType>::handle_connect (const ACE_Asynch_Connect::Result& result_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::handle_connect"));
+
+  // *IMPORTANT NOTE*: this bit is mostly copy/pasted from Asynch_Connector.cpp
+
+  // Variable for error tracking
+  int error = 0;
+
+  // If the asynchronous connect fails.
+  if (!result_in.success () ||
+      result_in.connect_handle () == ACE_INVALID_HANDLE)
+  {
+    error = 1;
+  }
+
+  if (result_in.error () != 0)
+  {
+    error = 1;
+  }
+
+  // set blocking mode
+  if (!error &&
+      ACE::clr_flags
+      (result_in.connect_handle (), ACE_NONBLOCK) != 0)
+  {
+    error = 1;
+    ACELIB_ERROR ((LM_ERROR,
+      ACE_TEXT ("%p\n"),
+      ACE_TEXT ("ACE_Asynch_Connector::handle_connect : Set blocking mode")));
+  }
+
+  // Parse the addresses.
+  ACE_INET_Addr local_address;
+  ACE_INET_Addr remote_address;
+  if (!error &&
+      (this->validate_new_connection () || this->pass_addresses ()))
+      this->parse_address (result_in,
+      remote_address,
+      local_address);
+
+  // Call validate_connection even if there was an error - it's the only
+  // way the application can learn the connect disposition.
+  if (this->validate_new_connection () &&
+      this->validate_connection (result_in, remote_address, local_address) == -1)
+  {
+    error = 1;
+  }
+
+  HandlerType *new_handler = 0;
+  if (!error)
+  {
+    // The Template method
+    new_handler = this->make_handler ();
+    if (new_handler == 0)
+    {
+      error = 1;
+      ACELIB_ERROR ((LM_ERROR,
+        ACE_TEXT ("%p\n"),
+        ACE_TEXT ("ACE_Asynch_Connector::handle_connect : Making of new handler failed")));
+    }
+  }
+
+  // If no errors
+  if (!error)
+  {
+    // Update the Proactor.
+    new_handler->proactor (this->proactor ());
+
+    // Pass the addresses
+    if (this->pass_addresses ())
+      new_handler->addresses (remote_address,
+      local_address);
+
+    // *EDIT*: set role
+    new_handler->set (NET_ROLE_CLIENT);
+
+    // Pass the ACT
+    if (result_in.act () != 0)
+      new_handler->act (result_in.act ());
+
+    // Set up the handler's new handle value
+    new_handler->handle (result_in.connect_handle ());
+
+    ACE_Message_Block  mb;
+
+    // Initiate the handler with empty message block;
+    new_handler->open (result_in.connect_handle (), mb);
+  }
+
+  // On failure, no choice but to close the socket
+  if (error &&
+      result_in.connect_handle () != ACE_INVALID_HANDLE)
+      ACE_OS::closesocket (result_in.connect_handle ());
+}
 template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
@@ -431,10 +533,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnection_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (configuration_);
-
-  ACE_NOTREACHED (return configuration_;)
+  return configuration_;
 }
 
 template <typename HandlerType,
@@ -690,10 +789,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (configuration_);
-
-  ACE_NOTREACHED (return configuration_;)
+  return configuration_;
 }
 
 //template <typename SocketConfigurationType,

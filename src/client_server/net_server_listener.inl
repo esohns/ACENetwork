@@ -87,71 +87,6 @@ template <typename HandlerType,
           typename StreamType,
           typename HandlerConfigurationType,
           typename UserDataType>
-const HandlerConfigurationType&
-Net_Server_Listener_T<HandlerType,
-                      AddressType,
-                      ConfigurationType,
-                      StateType,
-                      StreamType,
-                      HandlerConfigurationType,
-                      UserDataType>::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::get"));
-
-  return handlerConfiguration_;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StreamType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-bool
-Net_Server_Listener_T<HandlerType,
-                      AddressType,
-                      ConfigurationType,
-                      StateType,
-                      StreamType,
-                      HandlerConfigurationType,
-                      UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::initialize"));
-
-  handlerConfiguration_ = configuration_in;
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StreamType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-bool
-Net_Server_Listener_T<HandlerType,
-                      AddressType,
-                      ConfigurationType,
-                      StateType,
-                      StreamType,
-                      HandlerConfigurationType,
-                      UserDataType>::useReactor () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::useReactor"));
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StreamType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
 bool
 Net_Server_Listener_T<HandlerType,
                       AddressType,
@@ -375,6 +310,71 @@ template <typename HandlerType,
           typename StreamType,
           typename HandlerConfigurationType,
           typename UserDataType>
+const HandlerConfigurationType&
+Net_Server_Listener_T<HandlerType,
+                      AddressType,
+                      ConfigurationType,
+                      StateType,
+                      StreamType,
+                      HandlerConfigurationType,
+                      UserDataType>::get () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::get"));
+
+  return handlerConfiguration_;
+}
+
+//template <typename HandlerType,
+//          typename AddressType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StreamType,
+//          typename HandlerConfigurationType,
+//          typename UserDataType>
+//bool
+//Net_Server_Listener_T<HandlerType,
+//                      AddressType,
+//                      ConfigurationType,
+//                      StateType,
+//                      StreamType,
+//                      HandlerConfigurationType,
+//                      UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::initialize"));
+//
+//  handlerConfiguration_ = configuration_in;
+//
+//  return true;
+//}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+bool
+Net_Server_Listener_T<HandlerType,
+                      AddressType,
+                      ConfigurationType,
+                      StateType,
+                      StreamType,
+                      HandlerConfigurationType,
+                      UserDataType>::useReactor () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::useReactor"));
+
+  return true;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 bool
 Net_Server_Listener_T<HandlerType,
                       AddressType,
@@ -386,7 +386,11 @@ Net_Server_Listener_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::initialize"));
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.socketHandlerConfiguration);
+
   configuration_ = configuration_in;
+  handlerConfiguration_ = *configuration_in.socketHandlerConfiguration;
   isInitialized_ = true;
 
   return true;

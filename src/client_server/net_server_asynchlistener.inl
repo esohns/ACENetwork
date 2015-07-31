@@ -49,7 +49,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             HandlerConfigurationType,
                             UserDataType>::Net_Server_AsynchListener_T ()
  : inherited ()
- , addressFamily_ (ACE_ADDRESS_FAMILY_INET)
+ //, addressFamily_ (ACE_ADDRESS_FAMILY_INET)
  , configuration_ ()
  , handlerConfiguration_ ()
  , isInitialized_ (false)
@@ -197,7 +197,7 @@ Net_Server_AsynchListener_T<HandlerType,
                                    0,
                                    COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL,
                                    //this->addr_family_,
-                                   addressFamily_);
+                                   configuration_.addressFamily);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -255,28 +255,28 @@ Net_Server_AsynchListener_T<HandlerType,
   return handlerConfiguration_;
 }
 
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StreamType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-bool
-Net_Server_AsynchListener_T<HandlerType,
-                            AddressType,
-                            ConfigurationType,
-                            StateType,
-                            StreamType,
-                            HandlerConfigurationType,
-                            UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::initialize"));
-
-  handlerConfiguration_ = configuration_in;
-
-  return true;
-}
+//template <typename HandlerType,
+//          typename AddressType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StreamType,
+//          typename HandlerConfigurationType,
+//          typename UserDataType>
+//bool
+//Net_Server_AsynchListener_T<HandlerType,
+//                            AddressType,
+//                            ConfigurationType,
+//                            StateType,
+//                            StreamType,
+//                            HandlerConfigurationType,
+//                            UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::initialize"));
+//
+//  handlerConfiguration_ = configuration_in;
+//
+//  return true;
+//}
 
 template <typename HandlerType,
           typename AddressType,
@@ -317,9 +317,13 @@ Net_Server_AsynchListener_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::initialize"));
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.socketHandlerConfiguration);
+
   // *TODO*: remove type inference
-  addressFamily_ = configuration_in.addressFamily;
+  //addressFamily_ = configuration_in.addressFamily;
   configuration_ = configuration_in;
+  handlerConfiguration_ = *configuration_in.socketHandlerConfiguration;
   isInitialized_ = true;
 
   return true;
@@ -633,15 +637,15 @@ Net_Server_AsynchListener_T<HandlerType,
       new_handler->addresses (remote_address,
       local_address);
 
+    // *EDIT*: set role
+    new_handler->set (NET_ROLE_SERVER);
+
     // Pass the ACT
     if (result.act () != 0)
       new_handler->act (result.act ());
 
     // Set up the handler's new handle value
     new_handler->handle (result.accept_handle ());
-
-    // *EDIT*: set role
-    new_handler->set (NET_ROLE_SERVER);
 
     // Initiate the handler
     new_handler->open (result.accept_handle (),
@@ -695,7 +699,7 @@ Net_Server_AsynchListener_T<HandlerType,
   // *TODO*: remove type inference
   ACE_NEW_NORETURN (connection_p,
                     HandlerType (configuration_.connectionManager,
-                                 configuration_.statisticCollectionInterval));
+                                 configuration_.statisticReportingInterval));
   if (!connection_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

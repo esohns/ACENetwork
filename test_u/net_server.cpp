@@ -479,9 +479,9 @@ do_work (unsigned int maxNumConnections_in,
 
   int result = -1;
 
-  // step0a: initialize stream configuration object
-  Stream_ModuleConfiguration module_configuration;
-  ACE_OS::memset (&module_configuration, 0, sizeof (module_configuration));
+  // step0a: initialize configuration
+  Net_Server_Configuration configuration;
+  CBData_in.serverConfiguration = &configuration;
 
   Net_EventHandler ui_event_handler (&CBData_in);
   Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
@@ -503,37 +503,37 @@ do_work (unsigned int maxNumConnections_in,
                                                   &heap_allocator,         // heap allocator handle
                                                   true);                   // block ?
 
-  Net_Configuration configuration;
-  // ********************** socket configuration data **************************
-  configuration.socketConfiguration.bufferSize =
-    NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
-  configuration.socketConfiguration.linger =
-      NET_SERVER_SOCKET_DEFAULT_LINGER;
-
+  // ******************** protocol configuration data **************************
+  configuration.protocolConfiguration.peerPingInterval = pingInterval_in;
   // ********************** stream configuration data **************************
   configuration.streamConfiguration.protocolConfiguration =
     &configuration.protocolConfiguration;
-  configuration.streamConfiguration.bufferSize =
-    NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-  configuration.streamConfiguration.deleteModule = false;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
                                    : NULL);
   configuration.streamConfiguration.moduleConfiguration =
-    &module_configuration;
-  configuration.streamConfiguration.printFinalReport = false;
+    &configuration.streamConfiguration.moduleConfiguration_2;
+  configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
+    &configuration.streamConfiguration;
+  configuration.streamConfiguration.moduleHandlerConfiguration =
+    &configuration.streamConfiguration.moduleHandlerConfiguration_2;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
+    &configuration.streamConfiguration;
+  // *TODO*: is this correct ?
+  configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.statisticReportingInterval =
     statisticsReportingInterval_in;
-  configuration.streamConfiguration.useThreadPerConnection = false;
   configuration.streamConfiguration.userData = &configuration.streamUserData;
-
-  // ******************** protocol configuration data **************************
-  configuration.protocolConfiguration.bufferSize =
-    NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-  configuration.protocolConfiguration.peerPingInterval = pingInterval_in;
-  configuration.protocolConfiguration.pingAutoAnswer = true;
-  configuration.protocolConfiguration.printPongMessages = true;
+  configuration.streamUserData.configuration = &configuration;
+  // ********************** socket configuration data **************************
+  // ****************** socket handler configuration data **********************
+  configuration.socketHandlerConfiguration.messageAllocator =
+    &message_allocator;
+  configuration.socketHandlerConfiguration.socketConfiguration =
+    &configuration.socketConfiguration;
+  configuration.socketHandlerConfiguration.userData =
+    &configuration.streamUserData;
 
   //  config.delete_module = false;
   // *WARNING*: set at runtime, by the appropriate connection handler
@@ -589,12 +589,12 @@ do_work (unsigned int maxNumConnections_in,
 
   // step2: signal handling
   if (useReactor_in)
-    CBData_in.listenerHandle = NET_SERVER_LISTENER_SINGLETON::instance ();
+    CBData_in.serverConfiguration->listener = NET_SERVER_LISTENER_SINGLETON::instance ();
   else
-    CBData_in.listenerHandle =
+    CBData_in.serverConfiguration->listener =
       NET_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
   Net_Server_SignalHandlerConfiguration signal_handler_configuration;
-  signal_handler_configuration.listener = CBData_in.listenerHandle;
+  signal_handler_configuration.listener = CBData_in.serverConfiguration->listener;
   signal_handler_configuration.statisticReportingHandler =
       NET_CONNECTIONMANAGER_SINGLETON::instance ();
   signal_handler_configuration.statisticReportingTimerID = timer_id;
@@ -631,13 +631,13 @@ do_work (unsigned int maxNumConnections_in,
   // step4a: start GTK event loop ?
   if (!UIDefinitionFile_in.empty ())
   {
-    CBData_in.GTKState.finalizationHook = idle_finalize_UI_cb;
-    CBData_in.GTKState.initializationHook = idle_initialize_server_UI_cb;
-    //CBData_in.GTKState.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+    CBData_in.finalizationHook = idle_finalize_UI_cb;
+    CBData_in.initializationHook = idle_initialize_server_UI_cb;
+    //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
-    CBData_in.GTKState.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+    CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-    CBData_in.GTKState.userData = &CBData_in;
+    CBData_in.userData = &CBData_in;
 
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
     if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
@@ -687,28 +687,17 @@ do_work (unsigned int maxNumConnections_in,
   } // end IF
 
   // step4c: start listening
-  Net_SocketHandlerConfiguration socket_handler_configuration;
-  //ACE_OS::memset (&socket_handler_configuration,
-  //                0,
-  //                sizeof (socket_handler_configuration));
-  socket_handler_configuration.bufferSize =
-    NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-  socket_handler_configuration.messageAllocator = &message_allocator;
-  socket_handler_configuration.socketConfiguration =
-      &configuration.socketConfiguration;
-  Net_ListenerConfiguration listener_configuration;
-  listener_configuration.addressFamily = ACE_ADDRESS_FAMILY_INET;
-  listener_configuration.connectionManager =
+  configuration.listenerConfiguration.connectionManager =
     NET_CONNECTIONMANAGER_SINGLETON::instance ();
-  listener_configuration.messageAllocator = &message_allocator;
-  listener_configuration.portNumber = listeningPortNumber_in;
-  listener_configuration.socketHandlerConfiguration =
-    &socket_handler_configuration;
-  //listener_configuration.statisticCollectionInterval =
-  //  statisticsReportingInterval_in;
-  listener_configuration.useLoopbackDevice = useLoopback_in;
+  configuration.listenerConfiguration.messageAllocator = &message_allocator;
+  configuration.listenerConfiguration.portNumber = listeningPortNumber_in;
+  configuration.listenerConfiguration.socketHandlerConfiguration =
+    &configuration.socketHandlerConfiguration;
+  configuration.listenerConfiguration.statisticReportingInterval =
+    statisticsReportingInterval_in;
+  configuration.listenerConfiguration.useLoopbackDevice = useLoopback_in;
 
-  if (!CBData_in.listenerHandle->initialize (listener_configuration))
+  if (!CBData_in.serverConfiguration->listener->initialize (configuration.listenerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize listener, returning\n")));
@@ -733,8 +722,8 @@ do_work (unsigned int maxNumConnections_in,
 
     return;
   } // end IF
-  CBData_in.listenerHandle->start ();
-  if (!CBData_in.listenerHandle->isRunning ())
+  CBData_in.serverConfiguration->listener->start ();
+  if (!CBData_in.serverConfiguration->listener->isRunning ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start listener (port: %u), returning\n"),
@@ -1206,7 +1195,7 @@ ACE_TMAIN (int argc_in,
   if (!UI_file.empty ())
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                               argv_in,
-                                                              &gtk_cb_user_data.GTKState,
+                                                              &gtk_cb_user_data,
                                                               &ui_definition);
 
   ACE_High_Res_Timer timer;

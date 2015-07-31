@@ -85,7 +85,7 @@ class Net_Server_Listener_T
   virtual bool isRunning () const;
 
   virtual const HandlerConfigurationType& get () const;
-  virtual bool initialize (const HandlerConfigurationType&);
+  //virtual bool initialize (const HandlerConfigurationType&);
   virtual bool initialize (const ConfigurationType&);
   virtual bool useReactor () const;
 

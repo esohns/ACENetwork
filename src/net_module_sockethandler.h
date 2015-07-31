@@ -64,6 +64,12 @@ class Net_Module_SocketHandler_T
   Net_Module_SocketHandler_T ();
   virtual ~Net_Module_SocketHandler_T ();
 
+#if defined (__GNUG__) || defined (_MSC_VER)
+  // *PORTABILITY*: for some reason, this base class member is not exposed
+  //                (MSVC/gcc)
+  using Stream_HeadModuleTaskBase_T::initialize;
+#endif
+
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const Net_ModuleHandlerConfiguration&);
 

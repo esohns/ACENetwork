@@ -72,10 +72,10 @@ class Net_Client_AsynchConnector_T
 
   // implement Net_Client_IConnector_T
 
-  // *NOTE*: handlers receive the configuration object via act ()
-  virtual bool initialize (const HandlerConfigurationType&);
-  // *NOTE*: this is just a stub
+  // *NOTE*: handlers receive the configuration object via
+  //         ACE_Service_Handler::act ()
   virtual const HandlerConfigurationType& get () const;
+  virtual bool initialize (const HandlerConfigurationType&);
 
   virtual bool useReactor () const; // ? : uses proactor
 
@@ -83,6 +83,8 @@ class Net_Client_AsynchConnector_T
   virtual ACE_HANDLE connect (const AddressType&);
 
  protected:
+  // override default connect strategy
+  virtual void handle_connect (const ACE_Asynch_Connect::Result&);
   // override default creation strategy
   virtual HandlerType* make_handler (void);
 
@@ -166,10 +168,10 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnection_T<HandlerType,
 
   // implement Net_Client_IConnector_T
 
-  // *NOTE*: handlers receive the configuration object via act ()
-  virtual bool initialize (const HandlerConfigurationType&);
-  // *NOTE*: this is just a stub
+  // *NOTE*: handlers receive the configuration object via
+  //         ACE_Service_Handler::act ()
   virtual const HandlerConfigurationType& get () const;
+  virtual bool initialize (const HandlerConfigurationType&);
 
   virtual bool useReactor () const; // ? : uses proactor
 
@@ -254,10 +256,10 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
   // implement Net_Client_IConnector_T
 
-  // *NOTE*: handlers receive the configuration object via act ()
-  virtual bool initialize (const HandlerConfigurationType&);
-  // *NOTE*: this is just a stub
+  // *NOTE*: handlers receive the configuration object via
+  //         ACE_Service_Handler::act ()
   virtual const HandlerConfigurationType& get () const;
+  virtual bool initialize (const HandlerConfigurationType&);
 
   //virtual bool useReactor () const; // ? : uses proactor
 

@@ -35,9 +35,12 @@
 #include "net_stream_common.h"
 
 class Net_Module_EventHandler
- : public Net_Module_MessageHandler_T<Net_StreamSessionData,
-                                      Net_SessionMessage,
-                                      Net_Message>
+ : public Net_Module_MessageHandler_T<Net_SessionMessage,
+                                      Net_Message,
+                                      ///
+                                      Stream_ModuleHandlerConfiguration,
+                                      ///
+                                      Net_StreamSessionData>
 {
  public:
   Net_Module_EventHandler ();
@@ -47,9 +50,12 @@ class Net_Module_EventHandler
   virtual Stream_Module_t* clone ();
 
  private:
-  typedef Net_Module_MessageHandler_T<Net_StreamSessionData,
-                                      Net_SessionMessage,
-                                      Net_Message> inherited;
+  typedef Net_Module_MessageHandler_T<Net_SessionMessage,
+                                      Net_Message,
+                                      ///
+                                      Stream_ModuleHandlerConfiguration,
+                                      ///
+                                      Net_StreamSessionData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler (const Net_Module_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler& operator= (const Net_Module_EventHandler&))

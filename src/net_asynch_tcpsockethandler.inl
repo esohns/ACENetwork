@@ -162,17 +162,17 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::addresses (const ACE_INET_Addr&
   remoteSAP_ = remoteAddress_in;
 }
 
-template <typename ConfigurationType>
-void
-Net_AsynchTCPSocketHandler_T<ConfigurationType>::act (const void* act_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::act"));
-
-  const ConfigurationType* configuration_p =
-    reinterpret_cast<const ConfigurationType*> (act_in);
-  ACE_ASSERT (configuration_p);
-  inherited::initialize (*configuration_p);
-}
+//template <typename ConfigurationType>
+//void
+//Net_AsynchTCPSocketHandler_T<ConfigurationType>::act (const void* act_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::act"));
+//
+//  const ConfigurationType* configuration_p =
+//    reinterpret_cast<const ConfigurationType*> (act_in);
+//  ACE_ASSERT (configuration_p);
+//  inherited::initialize (*configuration_p);
+//}
 
 template <typename ConfigurationType>
 int

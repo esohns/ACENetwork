@@ -58,7 +58,7 @@ struct Net_SocketConfiguration
    , useLoopbackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
-  int                 bufferSize;
+  int                 bufferSize; // socket buffer size (I/O)
   bool                linger;
   // *TODO*: remove address information (pass as AddressType in open() instead)
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -67,7 +67,8 @@ struct Net_SocketConfiguration
 #endif
   ACE_INET_Addr       peerAddress;
   bool                useLoopbackDevice;
-  // *TODO*: add network interface specifier (interface index on linux, (G)UID on windows)
+  // *TODO*: add network interface specifier (interface index on linux, (G)UID
+  //         on windows)
 };
 
 struct Net_SocketHandlerConfiguration
@@ -84,7 +85,7 @@ struct Net_SocketHandlerConfiguration
   int                      bufferSize; // pdu size (if fixed)
   Stream_IAllocator*       messageAllocator;
   Net_SocketConfiguration* socketConfiguration;
-  unsigned int             statisticReportingInterval; // seconds [0: OFF]
+  unsigned int             statisticReportingInterval; // seconds [0: off]
 
   Net_StreamUserData*      userData;
 };
@@ -99,7 +100,7 @@ struct Net_ProtocolConfiguration
   {};
 
   int          bufferSize; // pdu size (if fixed)
-  unsigned int peerPingInterval; // ms {0 --> OFF}
+  unsigned int peerPingInterval; // ms [0: off]
   bool         pingAutoAnswer;
   bool         printPongMessages;
 };
@@ -165,7 +166,7 @@ struct Net_ListenerConfiguration
    , messageAllocator (NULL)
    , portNumber (0)
    , socketHandlerConfiguration (NULL)
-   , statisticCollectionInterval (0)
+   , statisticReportingInterval (0)
    , useLoopbackDevice (false)
   {};
 
@@ -174,7 +175,7 @@ struct Net_ListenerConfiguration
   Stream_IAllocator*              messageAllocator;
   unsigned short                  portNumber;
   Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s)) [0: off]
+  unsigned int                    statisticReportingInterval; // (second(s)) [0: off]
   bool                            useLoopbackDevice;
 };
 

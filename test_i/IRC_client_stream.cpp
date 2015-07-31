@@ -131,14 +131,14 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
-                  ACE_TEXT (configuration_in.module->name ())));
+                  configuration_in.module->name ()));
       return false;
     } // end IF
     if (!module_2->initialize (configuration_in.moduleConfiguration_2))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to initialize module, aborting\n"),
-                  ACE_TEXT (configuration_in.module->name ())));
+                  configuration_in.module->name ()));
       return false;
     } // end IF
     Stream_Task_t* task_p = configuration_in.module->writer ();
@@ -149,14 +149,14 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Common_IInitialize_T<HandlerConfigurationType>> failed, aborting\n"),
-                  ACE_TEXT (configuration_in.module->name ())));
+                  configuration_in.module->name ()));
       return false;
     } // end IF
     if (!module_handler_p->initialize (configuration_in.moduleHandlerConfiguration_2))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to initialize module handler, aborting\n"),
-                  ACE_TEXT (configuration_in.module->name ())));
+                  configuration_in.module->name ()));
       return false;
     } // end IF
     result = inherited::push (configuration_in.module);
@@ -164,7 +164,7 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                  ACE_TEXT (configuration_in.module->name ())));
+                  configuration_in.module->name ()));
       return false;
     } // end IF
   } // end IF
@@ -172,20 +172,20 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   // ---------------------------------------------------------------------------
 
   // ******************* Runtime Statistics ************************
-  IRC_Client_Module_Statistic_WriterTask_t* runtimeStatistic_impl =
+  IRC_Client_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p =
     dynamic_cast<IRC_Client_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
-  if (!runtimeStatistic_impl)
+  if (!runtimeStatistic_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_Statistic_WriterTask_t> failed, aborting\n")));
     return false;
   } // end IF
-  if (!runtimeStatistic_impl->initialize (configuration_in.statisticReportingInterval,
-                                          configuration_in.messageAllocator))
+  if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
+                                            configuration_in.messageAllocator))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                ACE_TEXT (runtimeStatistic_.name ())));
+                runtimeStatistic_.name ()));
     return false;
   } // end IF
 
@@ -195,7 +195,7 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-                ACE_TEXT (runtimeStatistic_.name ())));
+                runtimeStatistic_.name ()));
     return false;
   } // end IF
 
@@ -215,37 +215,37 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
 //   {
 //     ACE_DEBUG((LM_ERROR,
 //                ACE_TEXT("failed to initialize module: \"%s\", aborting\n"),
-//                myIRCHandler.name()));
+//                IRCHandler.name()));
 //     return false;
 //   } // end IF
 //
 //   // enqueue the module...
-//   if (inherited::push(&myIRCHandler))
+//   if (inherited::push(&IRCHandler))
 //   {
 //     ACE_DEBUG((LM_ERROR,
 //                ACE_TEXT("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-//                myIRCHandler.name()));
+//                IRCHandler.name()));
 //     return false;
 //   } // end IF
 
   // ******************* IRC Parser ************************
-  IRC_Client_Module_IRCParser* IRCParser_impl = NULL;
-  IRCParser_impl =
+  IRC_Client_Module_IRCParser* IRCParser_impl_p = NULL;
+  IRCParser_impl_p =
     dynamic_cast<IRC_Client_Module_IRCParser*> (IRCParser_.writer ());
-  if (!IRCParser_impl)
+  if (!IRCParser_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCParser) failed> (aborting\n")));
     return false;
   } // end IF
-  if (!IRCParser_impl->initialize (configuration_in.messageAllocator,                            // message allocator
-                                   configuration_in.moduleHandlerConfiguration_2.crunchMessages, // "crunch" messages ?
-                                   configuration_in.moduleHandlerConfiguration_2.traceScanning,  // debug scanner ?
-                                   configuration_in.moduleHandlerConfiguration_2.traceParsing))  // debug parser ?
+  if (!IRCParser_impl_p->initialize (configuration_in.messageAllocator,                            // message allocator
+                                     configuration_in.moduleHandlerConfiguration_2.crunchMessages, // "crunch" messages ?
+                                     configuration_in.moduleHandlerConfiguration_2.traceScanning,  // debug scanner ?
+                                     configuration_in.moduleHandlerConfiguration_2.traceParsing))  // debug parser ?
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                ACE_TEXT (IRCParser_.name ())));
+                IRCParser_.name ()));
     return false;
   } // end IF
 
@@ -255,32 +255,32 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-                ACE_TEXT (IRCParser_.name ())));
+                IRCParser_.name ()));
     return false;
   } // end IF
 
   // ******************* IRC Marshal ************************
-  IRC_Client_Module_IRCSplitter* IRCSplitter_impl = NULL;
-  IRCSplitter_impl =
+  IRC_Client_Module_IRCSplitter* IRCSplitter_impl_p = NULL;
+  IRCSplitter_impl_p =
    dynamic_cast<IRC_Client_Module_IRCSplitter*> (IRCMarshal_.writer ());
-  if (!IRCSplitter_impl)
+  if (!IRCSplitter_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCSplitter> failed, aborting\n")));
     return false;
   } // end IF
-  if (!IRCSplitter_impl->initialize (configuration_in.moduleHandlerConfiguration_2))
+  if (!IRCSplitter_impl_p->initialize (configuration_in.moduleHandlerConfiguration_2))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                ACE_TEXT (IRCMarshal_.name ())));
+                IRCMarshal_.name ()));
     return false;
   } // end IF
-  if (!IRCSplitter_impl->initialize (state_))
+  if (!IRCSplitter_impl_p->initialize (inherited::state_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                ACE_TEXT (IRCMarshal_.name ())));
+                IRCMarshal_.name ()));
     return false;
   } // end IF
 

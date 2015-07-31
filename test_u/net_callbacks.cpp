@@ -56,16 +56,17 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->timeoutHandler);
+  ACE_ASSERT (data_p->clientConfiguration);
+  ACE_ASSERT (data_p->clientConfiguration->timeoutHandler);
 
   //Common_UI_GladeXMLsIterator_t iterator =
-  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   //// sanity check(s)
-  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
+  //ACE_ASSERT (iterator != data_p->gladeXML.end ());
   Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+  ACE_ASSERT (iterator != data_p->builders.end ());
 
   // step1: initialize dialog window(s)
   GtkWidget* dialog_p =
@@ -111,7 +112,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 
   // step3: initialize options
   Net_Client_TimeoutHandler::ActionMode_t action_mode =
-    data_p->timeoutHandler->mode ();
+    data_p->clientConfiguration->timeoutHandler->mode ();
   std::string radio_button_name;
   switch (action_mode)
   {
@@ -196,14 +197,14 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 
   // step5: initialize updates
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->lock);
 
     // schedule asynchronous updates of the log view
     guint event_source_id = g_timeout_add_seconds (1,
                                                    idle_update_log_display_cb,
                                                    userData_in);
     if (event_source_id > 0)
-      data_p->GTKState.eventSourceIds.insert (event_source_id);
+      data_p->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -215,7 +216,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                                      idle_update_info_display_cb,
                                      userData_in);
     if (event_source_id > 0)
-      data_p->GTKState.eventSourceIds.insert (event_source_id);
+      data_p->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -399,12 +400,12 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   ACE_ASSERT (data_p);
 
   //Common_UI_GladeXMLsIterator_t iterator =
-  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
-  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+  //ACE_ASSERT (iterator != data_p->gladeXML.end ());
+  ACE_ASSERT (iterator != data_p->builders.end ());
 
   // step1: initialize dialog window(s)
   GtkWidget* dialog_p =
@@ -495,14 +496,14 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 
   // step4: initialize updates
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->lock);
 
     // schedule asynchronous updates of the log view
     guint event_source_id = g_timeout_add_seconds (1,
                                                    idle_update_log_display_cb,
                                                    userData_in);
     if (event_source_id > 0)
-      data_p->GTKState.eventSourceIds.insert (event_source_id);
+      data_p->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -514,7 +515,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
                                      idle_update_info_display_cb,
                                      userData_in);
     if (event_source_id > 0)
-      data_p->GTKState.eventSourceIds.insert (event_source_id);
+      data_p->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -666,12 +667,12 @@ idle_update_log_display_cb (gpointer userData_in)
   ACE_ASSERT (data_p);
 
   //Common_UI_GladeXMLsIterator_t iterator =
-  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
-  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+  //ACE_ASSERT (iterator != data_p->gladeXML.end ());
+  ACE_ASSERT (iterator != data_p->builders.end ());
 
   GtkTextView* view_p =
       //GTK_TEXT_VIEW (glade_xml_get_widget ((*iterator).second.second,
@@ -759,12 +760,12 @@ idle_update_info_display_cb (gpointer userData_in)
   ACE_ASSERT (data_p);
 
   //Common_UI_GladeXMLsIterator_t iterator =
-  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
-  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+  //ACE_ASSERT (iterator != data_p->gladeXML.end ());
+  ACE_ASSERT (iterator != data_p->builders.end ());
 
   bool update_buttons = false;
   GtkSpinButton* spinbutton_p = NULL;
@@ -798,7 +799,7 @@ idle_update_info_display_cb (gpointer userData_in)
         }
         case NET_GTKEVENT_DATA:
         {
-          if (!data_p->listenerHandle) // <-- client
+          if (!data_p->serverConfiguration) // <-- client
           {
             spinbutton_p =
               //GTK_SPIN_BUTTON (glade_xml_get_widget ((*iterator).second.second,
@@ -852,7 +853,7 @@ idle_update_info_display_cb (gpointer userData_in)
     bool active_connections =
         (gtk_spin_button_get_value_as_int (spinbutton_p) > 0);
     GtkWidget* widget_p = NULL;
-    if (!data_p->listenerHandle) // <-- client
+    if (!data_p->serverConfiguration) // <-- client
     {
       widget_p =
         //GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
@@ -877,7 +878,7 @@ idle_update_info_display_cb (gpointer userData_in)
                   ACE_TEXT (NET_UI_GTK_BUTTON_CLOSEALL_NAME)));
     else
       gtk_widget_set_sensitive (widget_p, active_connections);
-    if (!data_p->listenerHandle) // <-- client
+    if (!data_p->serverConfiguration) // <-- client
     {
       widget_p =
         //GTK_WIDGET (glade_xml_get_widget ((*iterator).second.second,
@@ -893,7 +894,7 @@ idle_update_info_display_cb (gpointer userData_in)
     } // end IF
 
     if (!active_connections &&
-        !data_p->listenerHandle) // <-- client
+        !data_p->serverConfiguration) // <-- client
     {
       spinbutton_p =
         //GTK_SPIN_BUTTON (glade_xml_get_widget ((*iterator).second.second,
@@ -926,9 +927,9 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   //ACE_ASSERT (data_p);
 
   //Common_UI_GladeXMLsIterator_t iterator =
-  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   //// sanity check(s)
-  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
+  //ACE_ASSERT (iterator != data_p->gladeXML.end ());
 
 // *PORTABILITY*: on Windows SIGUSRx are not defined
 // --> use SIGBREAK (21) and SIGTERM (15) instead...
@@ -961,9 +962,9 @@ button_close_clicked_cb (GtkWidget* widget_in,
   //ACE_ASSERT (data_p);
 
   //Common_UI_GladeXMLsIterator_t iterator =
-  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   //// sanity check(s)
-  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
+  //ACE_ASSERT (iterator != data_p->gladeXML.end ());
 
 // *PORTABILITY*: on Windows SIGUSRx are not defined
 // --> use SIGBREAK (21) and SIGTERM (15) instead...
@@ -995,9 +996,9 @@ button_close_all_clicked_cb (GtkWidget* widget_in,
   //ACE_ASSERT (data_p);
 
   //Common_UI_GladeXMLsIterator_t iterator =
-  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   //// sanity check(s)
-  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
+  //ACE_ASSERT (iterator != data_p->gladeXML.end ());
 
   NET_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
 
@@ -1088,22 +1089,23 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
 
   // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->timeoutHandler);
+  ACE_ASSERT (data_p->clientConfiguration);
+  ACE_ASSERT (data_p->clientConfiguration->timeoutHandler);
 
   //Common_UI_GladeXMLsIterator_t iterator =
-  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
-  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+  //ACE_ASSERT (iterator != data_p->gladeXML.end ());
+  ACE_ASSERT (iterator != data_p->builders.end ());
 
   // schedule action interval timer ?
-  if (data_p->signalHandlerConfiguration.actionTimerId == -1)
+  if (data_p->clientConfiguration->signalHandlerConfiguration.actionTimerId == -1)
   {
-    ACE_Event_Handler* handler_p = data_p->timeoutHandler;
+    ACE_Event_Handler* handler_p = data_p->clientConfiguration->timeoutHandler;
     ACE_Time_Value interval = ACE_Time_Value::max_time;
-    switch (data_p->timeoutHandler->mode ())
+    switch (data_p->clientConfiguration->timeoutHandler->mode ())
     {
       case Net_Client_TimeoutHandler::ActionMode_t::ACTION_ALTERNATING:
       case Net_Client_TimeoutHandler::ActionMode_t::ACTION_NORMAL:
@@ -1122,16 +1124,16 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown action mode (was: %d), aborting\n"),
-                    data_p->timeoutHandler->mode ()));
+                    data_p->clientConfiguration->timeoutHandler->mode ()));
         return FALSE;
       }
     } // end SWITCH
-    data_p->signalHandlerConfiguration.actionTimerId =
+    data_p->clientConfiguration->signalHandlerConfiguration.actionTimerId =
       COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
                                                                   NULL,                       // ACT
                                                                   COMMON_TIME_NOW + interval, // first wakeup time
                                                                   interval);                  // interval
-    if (data_p->signalHandlerConfiguration.actionTimerId == -1)
+    if (data_p->clientConfiguration->signalHandlerConfiguration.actionTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", aborting\n")));
@@ -1142,15 +1144,15 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   {
     const void* act_p = NULL;
     result =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (data_p->signalHandlerConfiguration.actionTimerId,
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (data_p->clientConfiguration->signalHandlerConfiguration.actionTimerId,
                                                                 &act_p);
     if (result <= 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", continuing\n"),
-                  data_p->signalHandlerConfiguration.actionTimerId));
+                  data_p->clientConfiguration->signalHandlerConfiguration.actionTimerId));
 
     // clean up
-    data_p->signalHandlerConfiguration.actionTimerId = -1;
+    data_p->clientConfiguration->signalHandlerConfiguration.actionTimerId = -1;
   } // end ELSE
 
   // toggle button image/label
@@ -1183,15 +1185,16 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
   // sanity check(s)
   ACE_ASSERT (widget_in);
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->timeoutHandler);
+  ACE_ASSERT (data_p->clientConfiguration);
+  ACE_ASSERT (data_p->clientConfiguration->timeoutHandler);
 
 //  //Common_UI_GladeXMLsIterator_t iterator =
-//  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+//  //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 //  Common_UI_GTKBuildersIterator_t iterator =
-//    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+//    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 //  // sanity check(s)
-//  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
-//  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+//  //ACE_ASSERT (iterator != data_p->gladeXML.end ());
+//  ACE_ASSERT (iterator != data_p->builders.end ());
 
   // step0: activated ?
   GtkToggleButton* toggle_button_p = GTK_TOGGLE_BUTTON (widget_in);
@@ -1232,7 +1235,7 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
 
   try
   {
-    data_p->timeoutHandler->mode (mode);
+    data_p->clientConfiguration->timeoutHandler->mode (mode);
   }
   catch (...)
   {
@@ -1257,21 +1260,22 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
   // sanity check(s)
   ACE_ASSERT (widget_in);
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->listenerHandle);
+  ACE_ASSERT (data_p->serverConfiguration);
+  ACE_ASSERT (data_p->serverConfiguration->listener);
 
   ////Common_UI_GladeXMLsIterator_t iterator =
-  ////  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  ////  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   //Common_UI_GTKBuildersIterator_t iterator =
-  //  data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  //  data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   //// sanity check(s)
-  ////ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
-  //ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+  ////ACE_ASSERT (iterator != data_p->gladeXML.end ());
+  //ACE_ASSERT (iterator != data_p->builders.end ());
 
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget_in)))
   {
     try
     {
-      data_p->listenerHandle->start ();
+      data_p->serverConfiguration->listener->start ();
     }
     catch (...)
     {
@@ -1283,7 +1287,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
   {
     try
     {
-      data_p->listenerHandle->stop ();
+      data_p->serverConfiguration->listener->stop ();
     }
     catch (...)
     {
@@ -1335,12 +1339,12 @@ button_clear_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p);
 
   //Common_UI_GladeXMLsIterator_t iterator =
-  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
-  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+  //ACE_ASSERT (iterator != data_p->gladeXML.end ());
+  ACE_ASSERT (iterator != data_p->builders.end ());
 
   GtkTextView* view_p =
     //GTK_TEXT_VIEW (glade_xml_get_widget ((*iterator).second.second,
@@ -1371,12 +1375,12 @@ button_about_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p);
 
   //Common_UI_GladeXMLsIterator_t iterator =
-  //  data_p->GTKState.gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  //ACE_ASSERT (iterator != data_p->GTKState.gladeXML.end ());
-  ACE_ASSERT (iterator != data_p->GTKState.builders.end ());
+  //ACE_ASSERT (iterator != data_p->gladeXML.end ());
+  ACE_ASSERT (iterator != data_p->builders.end ());
 
   // retrieve about dialog handle
   GtkDialog* about_dialog =
@@ -1422,16 +1426,16 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 
   //// step1: remove event sources
   //{
-  //  ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->GTKState.lock);
+  //  ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->lock);
 
-  //  for (Common_UI_GTKEventSourceIdsIterator_t iterator = data_p->GTKState.eventSourceIds.begin ();
-  //       iterator != data_p->GTKState.eventSourceIds.end ();
+  //  for (Common_UI_GTKEventSourceIdsIterator_t iterator = data_p->eventSourceIds.begin ();
+  //       iterator != data_p->eventSourceIds.end ();
   //       iterator++)
   //    if (!g_source_remove (*iterator))
   //      ACE_DEBUG ((LM_ERROR,
   //                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
   //                  *iterator));
-  //  data_p->GTKState.eventSourceIds.clear ();
+  //  data_p->eventSourceIds.clear ();
   //} // end lock scope
 
   // step2: initiate shutdown sequence

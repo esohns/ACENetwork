@@ -27,6 +27,7 @@
 #include "ace/config-macros.h"
 #include "ace/Connector.h"
 #include "ace/Global_Macros.h"
+#include "ace/SOCK_Connector.h"
 #include "ace/Synch_Traits.h"
 
 #include "stream_common.h"
@@ -71,18 +72,16 @@ class IRC_Client_IRCSession_T
   virtual void end ();
 
   // override some task-based members
-  // *TODO*: make this private (--> befriend Net_Client_Connector_T)
+  // *TODO*: make these private
   virtual int open (void* = NULL); // arg
+  virtual void open (ACE_HANDLE,          // (socket) handle
+                     ACE_Message_Block&); // initial data (if any)
 
  private:
   typedef ConnectionType inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T (const IRC_Client_IRCSession_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T& operator= (const IRC_Client_IRCSession_T&))
-
-  // helper methods
-  virtual void open (ACE_HANDLE,          // (socket) handle
-                     ACE_Message_Block&); // initial data (if any)
 
   void error (const IRC_Client_IRCMessage&);
   void log (const IRC_Client_IRCMessage&);

@@ -32,13 +32,13 @@ template <typename ConfigurationType,
 class Net_IListener_T
  : public Common_IControl
  , public Common_IGet_T<HandlerConfigurationType>
- , public Common_IInitialize_T<HandlerConfigurationType>
- //, public Common_IInitialize_T<ConfigurationType>
+ //, public Common_IInitialize_T<HandlerConfigurationType>
+ , public Common_IInitialize_T<ConfigurationType>
 {
  public:
   virtual ~Net_IListener_T () {};
 
-  virtual bool initialize (const ConfigurationType&) = 0;
+  //virtual bool initialize (const HandlerConfigurationType&) = 0;
 
   virtual bool useReactor () const = 0; // ? : uses proactor
 };

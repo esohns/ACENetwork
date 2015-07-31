@@ -88,27 +88,29 @@ Net_TCPSocketHandler_T<ConfigurationType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::open"));
 
+  ConfigurationType* configuration_p =
+    static_cast<ConfigurationType*> (arg_in);
+  ACE_ASSERT (configuration_p);
+  ACE_ASSERT (configuration_p->socketConfiguration);
+
   // initialize return value
   int result = -1;
 
   // sanity check(s)
   ACE_ASSERT (arg_in);
 
-  Net_SocketConfiguration* socket_configuration_p =
-      reinterpret_cast<Net_SocketConfiguration*> (arg_in);
-  ACE_ASSERT (socket_configuration_p);
-
   // step1: tweak socket
+  // *TODO*: remove type inferences
   ACE_HANDLE handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-  if (socket_configuration_p->bufferSize)
+  if (configuration_p->socketConfiguration->bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_RCVBUF,
-                                            socket_configuration_p->bufferSize))
+                                            configuration_p->socketConfiguration->bufferSize))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
-                  socket_configuration_p->bufferSize,
+                  configuration_p->socketConfiguration->bufferSize,
                   handle));
       return -1;
     } // end IF
@@ -133,13 +135,13 @@ Net_TCPSocketHandler_T<ConfigurationType>::open (void* arg_in)
     return -1;
   } // end IF
   if (!Net_Common_Tools::setLinger (handle,
-                                    socket_configuration_p->linger,
+                                    configuration_p->socketConfiguration->linger,
                                     -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                (socket_configuration_p->linger ? ACE_TEXT ("true")
-                                                : ACE_TEXT ("false")),
+                (configuration_p->socketConfiguration->linger ? ACE_TEXT ("true")
+                                                              : ACE_TEXT ("false")),
                 handle));
     return -1;
   } // end IF

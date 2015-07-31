@@ -127,36 +127,10 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
   // connect ?
   if (connect && configuration_.connector)
   {
-    //Net_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
-    //ACE_NEW_NORETURN (socket_handler_configuration_p,
-    //                  Net_SocketHandlerConfiguration ());
-    //if (!socket_handler_configuration_p)
-    //{
-    //  ACE_DEBUG ((LM_CRITICAL,
-    //              ACE_TEXT ("failed to allocate memory: \"%m\", continuing\n")));
-    //  goto check_shutdown;
-    //} // end IF
-    //socket_handler_configuration_p->bufferSize =
-    //  NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-    //socket_handler_configuration_p->messageAllocator =
-    //  configuration_.messageAllocator;
-    //socket_handler_configuration_p->socketConfiguration =
-    //  configuration_.socketConfiguration;
-    //socket_handler_configuration_p->statisticCollectionInterval =
-    //  configuration_.statisticCollectionInterval;
-
-    //Net_Client_ConnectorConfiguration connector_configuration;
-    //connector_configuration.connectionManager =
-    //  NET_CONNECTIONMANAGER_SINGLETON::instance ();
-    //connector_configuration.socketHandlerConfiguration =
-    //  socket_handler_configuration_p;
-    //connector_configuration.statisticCollectionInterval =
-    //  configuration_.statisticCollectionInterval;
-
+    ACE_ASSERT (configuration_.socketHandlerConfiguration);
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
     try
     {
-      //configuration_.connector->initialize (connector_configuration);
       configuration_.connector->initialize (*configuration_.socketHandlerConfiguration);
       handle = configuration_.connector->connect (configuration_.peerAddress);
     }

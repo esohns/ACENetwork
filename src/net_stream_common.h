@@ -93,6 +93,7 @@ typedef Stream_MessageAllocatorHeapBase_T<Net_Message,
 
 typedef Stream_SessionDataBase_T<Net_StreamSessionData> Net_StreamSessionData_t;
 
+typedef Stream_IModuleHandler_T<Stream_ModuleHandlerConfiguration> Net_IModuleHandler_t;
 typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Common_TimePolicy_t,
                          Stream_ModuleConfiguration,

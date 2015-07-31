@@ -87,8 +87,10 @@ class Net_Server_AsynchListener_T
                      bool = true); // locked access ?
   virtual bool isRunning () const;
 
+  // *NOTE*: handlers receive the configuration object via
+  //         ACE_Service_Handler::act ()
   virtual const HandlerConfigurationType& get () const;
-  virtual bool initialize (const HandlerConfigurationType&);
+  //virtual bool initialize (const HandlerConfigurationType&);
   virtual bool initialize (const ConfigurationType&);
   virtual bool useReactor () const;
 
@@ -119,7 +121,7 @@ class Net_Server_AsynchListener_T
 //  // fix this here... --> *TODO*: send patch to ACE maintainers
 //  virtual void handle_accept(const ACE_Asynch_Accept::Result&); // result
 
-  int                      addressFamily_;
+  //int                      addressFamily_;
   ConfigurationType        configuration_;
   HandlerConfigurationType handlerConfiguration_;
   bool                     isInitialized_;

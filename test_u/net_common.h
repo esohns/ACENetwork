@@ -42,7 +42,6 @@
 #include "net_server_common.h"
 
 // forward declarations
-struct Net_SocketHandlerConfiguration;
 class Stream_IAllocator;
 
 extern unsigned int random_seed;
@@ -84,31 +83,57 @@ struct Net_Client_SignalHandlerConfiguration
                                                                // 0 --> DON'T collect statistics
 };
 
-struct Net_GTK_CBData
+struct Net_Client_Configuration
+ : Net_Configuration
 {
-  inline Net_GTK_CBData ()
-   : allowUserRuntimeStatistic (true)
-   , eventStack ()
-   , GTKState ()
-   , listenerHandle (NULL)
-   , logStack ()
+  inline Net_Client_Configuration ()
+   : Net_Configuration ()
    , signalHandlerConfiguration ()
-   , stackLock ()
-   , subscribers ()
-   , subscribersLock ()
    , timeoutHandler (NULL)
   {};
 
-  bool                                  allowUserRuntimeStatistic;
-  Net_GTK_Events_t                      eventStack;
-  Common_UI_GTKState                    GTKState;
-  Net_IListener_t*                      listenerHandle;             // *NOTE*: server only !
-  Common_MessageStack_t                 logStack;
-  Net_Client_SignalHandlerConfiguration signalHandlerConfiguration; // *NOTE*: client only !
-  ACE_SYNCH_RECURSIVE_MUTEX             stackLock;
-  Net_Subscribers_t                     subscribers;
-  ACE_SYNCH_RECURSIVE_MUTEX             subscribersLock;
-  Net_Client_TimeoutHandler*            timeoutHandler;             // *NOTE*: client only !
+  Net_Client_SignalHandlerConfiguration signalHandlerConfiguration;
+  Net_Client_TimeoutHandler*            timeoutHandler;
+};
+
+struct Net_Server_Configuration
+ : Net_Configuration
+{
+  inline Net_Server_Configuration ()
+   : Net_Configuration ()
+   , listener (NULL)
+   , listenerConfiguration ()
+   , signalHandlerConfiguration ()
+  {};
+
+  Net_IListener_t*                      listener;
+  Net_ListenerConfiguration             listenerConfiguration;
+  Net_Server_SignalHandlerConfiguration signalHandlerConfiguration;
+};
+
+struct Net_GTK_CBData
+ : Common_UI_GTKState
+{
+  inline Net_GTK_CBData ()
+   : Common_UI_GTKState ()
+   , allowUserRuntimeStatistic (true)
+   , clientConfiguration (NULL)
+   , eventStack ()
+   , logStack ()
+   , serverConfiguration (NULL)
+   , stackLock ()
+   , subscribers ()
+   , subscribersLock ()
+  {};
+
+  bool                       allowUserRuntimeStatistic;
+  Net_Client_Configuration*  clientConfiguration;
+  Net_GTK_Events_t           eventStack;
+  Common_MessageStack_t      logStack;
+  Net_Server_Configuration*  serverConfiguration;
+  ACE_SYNCH_RECURSIVE_MUTEX  stackLock;
+  Net_Subscribers_t          subscribers;
+  ACE_SYNCH_RECURSIVE_MUTEX  subscribersLock;
 };
 
 #endif

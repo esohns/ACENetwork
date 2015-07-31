@@ -120,11 +120,16 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::open"));
 
-//  // sanity check(s)
-//  ACE_ASSERT (inherited3::configuration_.moduleConfiguration);
-//  ACE_ASSERT (inherited3::configuration_.moduleConfiguration->streamConfiguration);
+  //// sanity check(s)
+  //ACE_ASSERT (inherited3::configuration_.socketHandlerConfiguration);
 
   // step1: tweak socket, initialize I/O, ...
+  if (!inherited::initialize (inherited3::configuration_.socketHandlerConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HandlerType::initialize(), aborting\n")));
+    goto close;
+  } // end IF
   inherited::open (handle_in, messageBlock_in);
 
   // step2: initialize/start stream
@@ -147,7 +152,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
-                    ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
+                    inherited3::configuration_.streamConfiguration.module->name ()));
         goto close;
       } // end IF
       Stream_Module_t* clone_p = NULL;
@@ -159,14 +164,14 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), aborting\n"),
-                    ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
+                    inherited3::configuration_.streamConfiguration.module->name ()));
         goto close;
       }
       if (!clone_p)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
-                    ACE_TEXT (inherited3::configuration_.streamConfiguration.module->name ())));
+                    inherited3::configuration_.streamConfiguration.module->name ()));
         goto close;
       }
       inherited3::configuration_.streamConfiguration.module = clone_p;

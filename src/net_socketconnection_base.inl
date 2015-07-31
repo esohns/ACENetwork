@@ -346,7 +346,7 @@ Net_SocketConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::open"));
 
-  // step0: initialize this connection (if there is no connection manager)
+  // step0: initialize this connection
   // *NOTE*: client-side: arg_in is a handle to the connector
   //         server-side: arg_in is a handle to the listener
   const HandlerConfigurationType* handler_configuration_p = NULL;
@@ -785,8 +785,10 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::set"));
 
   // sanity check(s)
-  // *TODO*: remove type inference
-  ACE_ASSERT (configuration_.socketConfiguration);
+  SocketConfigurationType socket_configuration;
+  //// *TODO*: remove type inference
+  //if (configuration_.socketConfiguration)
+  //  socket_configuration = *configuration_.socketConfiguration;
 
   ITRANSPORTLAYER_T* itransportlayer_p = this;
   ACE_ASSERT (itransportlayer_p);
@@ -846,84 +848,77 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::open"));
 
-  // step0: initialize this connection (if there is no connection manager)
-  ConfigurationType* configuration_p = NULL;
-  if (!inherited::manager_)
-  {
-    // *NOTE*: client-side: arg_in is a handle to the connector
-    //         server-side: arg_in is a handle to the listener
-    const HandlerConfigurationType* handler_configuration_p = NULL;
-    switch (this->role ())
-    {
-      case NET_ROLE_CLIENT:
-      {
-        //ICONNECTOR_T* iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
-        //ACE_ASSERT (iconnector_p);
-        //handler_configuration_p = &iconnector_p->get ();
-        break;
-      }
-      case NET_ROLE_SERVER:
-      {
-        //ILISTENER_T* ilistener_p = static_cast<ILISTENER_T*> (arg_in);
-        //ACE_ASSERT (ilistener_p);
-        //handler_configuration_p = &ilistener_p->get ();
-        break;
-      }
-      default:
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("invalid/unknown role (was: %d), returning\n"),
-                    this->role ()));
-        return;
-      }
-    } // end SWITCH
-    ACE_ASSERT (handler_configuration_p);
-    // *TODO*: remove type inference
-    ACE_ASSERT (handler_configuration_p->userData);
-    configuration_p =
-        handler_configuration_p->userData->configuration;
-    ACE_ASSERT (configuration_p);
-    if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", returning\n")));
-      return;
-    } // end IF
-  } // end IF
-  //if (!inherited::manager_)
-  //  configuration_p = reinterpret_cast<ConfigurationType*> (arg_in); // *BUG*: see *TODO* above
-  else
-    configuration_p = &(HandlerType::CONNECTION_BASE_T::configuration_);
-  // sanity check(s)
-  ACE_ASSERT (configuration_p);
-
-  // step1: initialize/start stream, tweak socket, register reading data with
-  // the reactor, ...
+  // initialize/start stream, tweak socket, register reading data with the
+  // reactor, ...
   inherited::open (handle_in,
                    messageBlock_in);
 }
 
-//template <typename HandlerType,
-//          typename ITransportLayerType,
-//          typename ConfigurationType,
-//          typename HandlerConfigurationType,
-//          typename UserDataType,
-//          typename StateType,
-//          typename StatisticContainerType>
-//void
-//Net_AsynchSocketConnectionBase_T<SocketHandlerType,
-//                                 ITransportLayerType,
-//                                 ConfigurationType,
-//                                 HandlerConfigurationType,
-//                                 UserDataType,
-//                                 StateType,
-//                                 StatisticContainerType>::act (const void* act_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::act"));
-//
-//  configuration_ =
-//      reinterpret_cast<ConfigurationType*> (const_cast<void*> (act_in));
-//}
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+void
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 UserDataType>::act (const void* act_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::act"));
+
+  // initialize this connection
+
+  // *NOTE*: client-side: arg_in is a handle to the connector
+  //         server-side: arg_in is a handle to the listener
+  const HandlerConfigurationType* handler_configuration_p = NULL;
+  switch (this->role ())
+  {
+    case NET_ROLE_CLIENT:
+    {
+      const ICONNECTOR_T* iconnector_p =
+        static_cast<const ICONNECTOR_T*> (act_in);
+      ACE_ASSERT (iconnector_p);
+      handler_configuration_p = &iconnector_p->get ();
+      break;
+    }
+    case NET_ROLE_SERVER:
+    {
+      const ILISTENER_T* ilistener_p = static_cast<const ILISTENER_T*> (act_in);
+      ACE_ASSERT (ilistener_p);
+      handler_configuration_p = &ilistener_p->get ();
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown role (was: %d), returning\n"),
+                  this->role ()));
+      return;
+    }
+  } // end SWITCH
+  ACE_ASSERT (handler_configuration_p);
+  // *TODO*: remove type inference
+  ACE_ASSERT (handler_configuration_p->userData);
+  ConfigurationType* configuration_p =
+    handler_configuration_p->userData->configuration;
+  ACE_ASSERT (configuration_p);
+  if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(): \"%m\", returning\n")));
+    return;
+  } // end IF
+}
 
 template <typename HandlerType,
           typename AddressType,

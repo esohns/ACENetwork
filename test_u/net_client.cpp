@@ -478,9 +478,9 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
   int result = -1;
 
-  // step0a: initialize stream configuration object
-  Stream_ModuleConfiguration module_configuration;
-  ACE_OS::memset (&module_configuration, 0, sizeof (module_configuration));
+  // step0a: initialize configuration
+  Net_Client_Configuration configuration;
+  CBData_in.clientConfiguration = &configuration;
 
   Net_EventHandler ui_event_handler (&CBData_in);
   Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
@@ -501,42 +501,40 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   Net_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                   &heap_allocator,         // heap allocator handle
                                                   true);                   // block ?
-  Net_Configuration configuration;
-  // ********************** socket configuration data **************************
-  configuration.socketConfiguration.bufferSize =
-    NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE;
-  configuration.socketConfiguration.linger =
-    NET_SOCKET_DEFAULT_LINGER;
-
+  // ********************* protocol configuration data *************************
+  configuration.protocolConfiguration.peerPingInterval =
+    ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? 0
+                                                                 : serverPingInterval_in);
+  configuration.protocolConfiguration.printPongMessages =
+    UIDefinitionFile_in.empty ();
   // ********************** stream configuration data **************************
   configuration.streamConfiguration.protocolConfiguration =
     &configuration.protocolConfiguration;
-  configuration.streamConfiguration.bufferSize =
-    NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-  configuration.streamConfiguration.deleteModule = false;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
                                    : NULL);
   configuration.streamConfiguration.moduleConfiguration =
-      &configuration.streamConfiguration.moduleConfiguration_2;
+    &configuration.streamConfiguration.moduleConfiguration_2;
+  configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
+    &configuration.streamConfiguration;
   configuration.streamConfiguration.moduleHandlerConfiguration =
-      &configuration.streamConfiguration.moduleHandlerConfiguration_2;
+    &configuration.streamConfiguration.moduleHandlerConfiguration_2;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
+    &configuration.streamConfiguration;
   configuration.streamConfiguration.printFinalReport = true;
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
-  //configuration.streamConfiguration.statisticReportingInterval =
-  //  0;
-  configuration.streamConfiguration.useThreadPerConnection = false;
   configuration.streamConfiguration.userData = &configuration.streamUserData;
-
-  // ******************** protocol configuration data **************************
-  configuration.protocolConfiguration.peerPingInterval =
-    ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? 0
-    : serverPingInterval_in);
-  configuration.protocolConfiguration.pingAutoAnswer = true;
-  configuration.protocolConfiguration.printPongMessages =
-    UIDefinitionFile_in.empty ();
+  configuration.streamUserData.configuration = &configuration;
+  // ********************** socket configuration data **************************
+  // ****************** socket handler configuration data **********************
+  configuration.socketHandlerConfiguration.messageAllocator =
+    &message_allocator;
+  configuration.socketHandlerConfiguration.socketConfiguration =
+    &configuration.socketConfiguration;
+  configuration.socketHandlerConfiguration.userData =
+    &configuration.streamUserData;
 
   //  config.useThreadPerConnection = false;
   //  config.serializeOutput = false;
@@ -625,12 +623,12 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                              &configuration.streamUserData);
 
   // step0e: initialize action timer
-  CBData_in.signalHandlerConfiguration.connector = connector_p;
+  configuration.signalHandlerConfiguration.connector = connector_p;
   result =
-    CBData_in.signalHandlerConfiguration.peerAddress.set (serverPortNumber_in,
-                                                          serverHostname_in.c_str (),
-                                                          1,
-                                                          AF_INET);
+    configuration.signalHandlerConfiguration.peerAddress.set (serverPortNumber_in,
+                                                              serverHostname_in.c_str (),
+                                                              1,
+                                                              ACE_ADDRESS_FAMILY_INET);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -640,9 +638,9 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
   Net_Client_TimeoutHandler timeout_handler (actionMode_in,
                                              maxNumConnections_in,
-                                             CBData_in.signalHandlerConfiguration.peerAddress,
+                                             configuration.signalHandlerConfiguration.peerAddress,
                                              connector_p);
-  CBData_in.timeoutHandler = &timeout_handler;
+  configuration.timeoutHandler = &timeout_handler;
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
@@ -657,12 +655,12 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                                                                                           : connectionInterval_in),
                              ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000)
                                                                                           : 0));
-    CBData_in.signalHandlerConfiguration.actionTimerId =
+    configuration.signalHandlerConfiguration.actionTimerId =
         timer_manager_p->schedule_timer (handler_p,                  // event handler
                                          NULL,                       // ACT
                                          COMMON_TIME_NOW + interval, // first wakeup time
                                          interval);                  // interval
-    if (CBData_in.signalHandlerConfiguration.actionTimerId == -1)
+    if (configuration.signalHandlerConfiguration.actionTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", aborting\n")));
@@ -675,7 +673,11 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   } // end IF
 
   // step0e: initialize signal handling
-  signalHandler_in.initialize (CBData_in.signalHandlerConfiguration);
+  configuration.signalHandlerConfiguration.messageAllocator =
+    &message_allocator;
+  configuration.signalHandlerConfiguration.socketHandlerConfiguration =
+    &configuration.socketHandlerConfiguration;
+  signalHandler_in.initialize (configuration.signalHandlerConfiguration);
   if (!Common_Tools::initializeSignals (signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -698,13 +700,13 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // step1a: start GTK event loop ?
   if (!UIDefinitionFile_in.empty ())
   {
-    CBData_in.GTKState.finalizationHook = idle_finalize_UI_cb;
-    CBData_in.GTKState.initializationHook = idle_initialize_client_UI_cb;
-    //CBData_in.GTKState.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+    CBData_in.finalizationHook = idle_finalize_UI_cb;
+    CBData_in.initializationHook = idle_initialize_client_UI_cb;
+    //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
-    CBData_in.GTKState.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+    CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-    CBData_in.GTKState.userData = &CBData_in;
+    CBData_in.userData = &CBData_in;
 
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
     if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
@@ -759,7 +761,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   if (UIDefinitionFile_in.empty () && (connectionInterval_in == 0))
   {
     bool result_2 =
-      connector_p->connect (CBData_in.signalHandlerConfiguration.peerAddress);
+      connector_p->connect (configuration.signalHandlerConfiguration.peerAddress);
     if (!useReactor_in)
     {
       ACE_Time_Value delay (1, 0);
@@ -773,8 +775,8 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
       char buffer[BUFSIZ];
       ACE_OS::memset (buffer, 0, sizeof (buffer));
       result =
-        CBData_in.signalHandlerConfiguration.peerAddress.addr_to_string (buffer,
-                                                                         sizeof (buffer));
+        configuration.signalHandlerConfiguration.peerAddress.addr_to_string (buffer,
+                                                                             sizeof (buffer));
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string: \"%m\", continuing\n")));
@@ -1260,7 +1262,7 @@ ACE_TMAIN (int argc_in,
   if (!UI_file.empty ())
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                               argv_in,
-                                                              &gtk_cb_user_data.GTKState,
+                                                              &gtk_cb_user_data,
                                                               &ui_definition);
 
   ACE_High_Res_Timer timer;

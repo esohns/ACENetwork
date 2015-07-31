@@ -137,18 +137,40 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
   // ---------------------------------------------------------------------------
   if (configuration_in.module)
   {
+    // *TODO*: (at least part of) this procedure belongs in libACEStream
+    //         --> remove type inferences
     inherited::IMODULE_T* module_2 =
       dynamic_cast<inherited::IMODULE_T*> (configuration_in.module);
     if (!module_2)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("dynamic_cast<Stream_IModule_T> failed, aborting\n")));
+                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
+                  configuration_in.module->name ()));
       return false;
     } // end IF
     if (!module_2->initialize (configuration_in.moduleConfiguration_2))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Stream_IModule_T::initialize, aborting\n")));
+                  ACE_TEXT ("%s: failed to initialize module, aborting\n"),
+                  configuration_in.module->name ()));
+      return false;
+    } // end IF
+    Stream_Task_t* task_p = configuration_in.module->writer ();
+    ACE_ASSERT (task_p);
+    inherited::IMODULEHANDLER_T* module_handler_p =
+      dynamic_cast<inherited::IMODULEHANDLER_T*> (task_p);
+    if (!module_handler_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: dynamic_cast<Common_IInitialize_T<HandlerConfigurationType>> failed, aborting\n"),
+                  configuration_in.module->name ()));
+      return false;
+    } // end IF
+    if (!module_handler_p->initialize (configuration_in.moduleHandlerConfiguration_2))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: failed to initialize module handler, aborting\n"),
+                  configuration_in.module->name ()));
       return false;
     } // end IF
     result = inherited::push (configuration_in.module);
@@ -156,7 +178,7 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                  ACE_TEXT (configuration_in.module->name ())));
+                  configuration_in.module->name ()));
       return false;
     } // end IF
   } // end IF
@@ -165,23 +187,22 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
 
   // ******************* Protocol Handler ************************
   protocolHandler_.initialize (configuration_in.moduleConfiguration_2);
-  Net_Module_ProtocolHandler* protocolHandler_impl = NULL;
-  protocolHandler_impl =
-      dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
-  if (!protocolHandler_impl)
+  Net_Module_ProtocolHandler* protocolHandler_impl_p =
+    dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
+  if (!protocolHandler_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_ProtocolHandler> failed, aborting\n")));
     return false;
   } // end IF
-  if (!protocolHandler_impl->initialize (configuration_in.messageAllocator,
-                                         configuration_in.protocolConfiguration->peerPingInterval,
-                                         configuration_in.protocolConfiguration->pingAutoAnswer,
-                                         configuration_in.protocolConfiguration->printPongMessages)) // print ('.') for received "pong"s...
+  if (!protocolHandler_impl_p->initialize (configuration_in.messageAllocator,
+                                           configuration_in.protocolConfiguration->peerPingInterval,
+                                           configuration_in.protocolConfiguration->pingAutoAnswer,
+                                           configuration_in.protocolConfiguration->printPongMessages)) // print ('.') for received "pong"s...
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                ACE_TEXT (protocolHandler_.name ())));
+                protocolHandler_.name ()));
     return false;
   } // end IF
   result = inherited::push (&protocolHandler_);
@@ -189,28 +210,27 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (protocolHandler_.name ())));
+                protocolHandler_.name ()));
     return false;
   } // end IF
 
   // ******************* Runtime Statistics ************************
   runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
-  Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl = NULL;
-  runtimeStatistic_impl =
+  Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p =
     dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
-  if (!runtimeStatistic_impl)
+  if (!runtimeStatistic_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_RuntimeStatistic> failed, aborting\n")));
     return false;
   } // end IF
-  if (!runtimeStatistic_impl->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
-                                          configuration_in.printFinalReport,           // print final report ?
-                                          configuration_in.messageAllocator))          // message allocator handle
+  if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
+                                            configuration_in.printFinalReport,           // print final report ?
+                                            configuration_in.messageAllocator))          // message allocator handle
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                ACE_TEXT (runtimeStatistic_.name ())));
+                runtimeStatistic_.name ()));
     return false;
   } // end IF
   result = inherited::push (&runtimeStatistic_);
@@ -224,20 +244,19 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
 
   // ******************* Header Parser ************************
   headerParser_.initialize (*configuration_in.moduleConfiguration);
-  Net_Module_HeaderParser* headerParser_impl = NULL;
-  headerParser_impl =
+  Net_Module_HeaderParser* headerParser_impl_p =
     dynamic_cast<Net_Module_HeaderParser*> (headerParser_.writer ());
-  if (!headerParser_impl)
+  if (!headerParser_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_HeaderParser> failed, aborting\n")));
     return false;
   } // end IF
-  if (!headerParser_impl->initialize ())
+  if (!headerParser_impl_p->initialize ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                ACE_TEXT (headerParser_.name ())));
+                headerParser_.name ()));
     return false;
   } // end IF
   result = inherited::push (&headerParser_);
@@ -245,26 +264,32 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (headerParser_.name ())));
+                headerParser_.name ()));
     return false;
   } // end IF
 
   // ******************* Socket Handler ************************
   socketHandler_.initialize (configuration_in.moduleConfiguration_2);
-  Net_Module_SocketHandler* socketHandler_impl = NULL;
-  socketHandler_impl =
+  Net_Module_SocketHandler* socketHandler_impl_p =
     dynamic_cast<Net_Module_SocketHandler*> (socketHandler_.writer ());
-  if (!socketHandler_impl)
+  if (!socketHandler_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_SocketHandler> failed, aborting\n")));
     return false;
   } // end IF
-  if (!socketHandler_impl->initialize (configuration_in.moduleHandlerConfiguration_2))
+  if (!socketHandler_impl_p->initialize (configuration_in.moduleHandlerConfiguration_2))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                ACE_TEXT (socketHandler_.name ())));
+                socketHandler_.name ()));
+    return false;
+  } // end IF
+  if (!socketHandler_impl_p->initialize (inherited::state_))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+                socketHandler_.name ()));
     return false;
   } // end IF
 

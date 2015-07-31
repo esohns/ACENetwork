@@ -25,12 +25,14 @@
 #include "net_macros.h"
 #include "net_stream_common.h"
 
-template <typename ConfigurationType,
-          typename SessionMessageType,
-          typename MessageType>
-Net_Module_MessageHandler_T<ConfigurationType,
-                            SessionMessageType,
-                            MessageType>::Net_Module_MessageHandler_T ()
+template <typename SessionMessageType,
+          typename MessageType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType>
+Net_Module_MessageHandler_T<SessionMessageType,
+                            MessageType,
+                            ModuleHandlerConfigurationType,
+                            SessionDataType>::Net_Module_MessageHandler_T ()
  : inherited ()
  , lock_ (NULL)
  , subscribers_ (NULL)
@@ -40,12 +42,14 @@ Net_Module_MessageHandler_T<ConfigurationType,
 
 }
 
-template <typename ConfigurationType,
-          typename SessionMessageType,
-          typename MessageType>
-Net_Module_MessageHandler_T<ConfigurationType,
-                            SessionMessageType,
-                            MessageType>::~Net_Module_MessageHandler_T ()
+template <typename SessionMessageType,
+          typename MessageType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType>
+Net_Module_MessageHandler_T<SessionMessageType,
+                            MessageType,
+                            ModuleHandlerConfigurationType,
+                            SessionDataType>::~Net_Module_MessageHandler_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_MessageHandler_T::~Net_Module_MessageHandler_T"));
 
@@ -57,14 +61,16 @@ Net_Module_MessageHandler_T<ConfigurationType,
   } // end IF
 }
 
-template <typename ConfigurationType,
-          typename SessionMessageType,
-          typename MessageType>
+template <typename SessionMessageType,
+          typename MessageType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType>
 void
-Net_Module_MessageHandler_T<ConfigurationType,
-                            SessionMessageType,
-                            MessageType>::initialize (SUBSCRIBERS_T* subscribers_in,
-                                                      ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
+Net_Module_MessageHandler_T<SessionMessageType,
+                            MessageType,
+                            ModuleHandlerConfigurationType,
+                            SessionDataType>::initialize (SUBSCRIBERS_T* subscribers_in,
+                                                          ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_MessageHandler_T::initialize"));
 
@@ -120,14 +126,16 @@ Net_Module_MessageHandler_T<ConfigurationType,
   } // end IF
 }
 
-template <typename ConfigurationType,
-          typename SessionMessageType,
-          typename MessageType>
+template <typename SessionMessageType,
+          typename MessageType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType>
 void
-Net_Module_MessageHandler_T<ConfigurationType,
-                            SessionMessageType,
-                            MessageType>::handleDataMessage (MessageType*& message_inout,
-                                                             bool& passMessageDownstream_out)
+Net_Module_MessageHandler_T<SessionMessageType,
+                            MessageType,
+                            ModuleHandlerConfigurationType,
+                            SessionDataType>::handleDataMessage (MessageType*& message_inout,
+                                                                 bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_MessageHandler_T::handleDataMessage"));
 
@@ -176,14 +184,16 @@ Net_Module_MessageHandler_T<ConfigurationType,
   } // end lock scope
 }
 
-template <typename ConfigurationType,
-          typename SessionMessageType,
-          typename MessageType>
+template <typename SessionMessageType,
+          typename MessageType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType>
 void
-Net_Module_MessageHandler_T<ConfigurationType,
-                            SessionMessageType,
-                            MessageType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                bool& passMessageDownstream_out)
+Net_Module_MessageHandler_T<SessionMessageType,
+                            MessageType,
+                            ModuleHandlerConfigurationType,
+                            SessionDataType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                    bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_MessageHandler_T::handleSessionMessage"));
 
@@ -269,13 +279,46 @@ Net_Module_MessageHandler_T<ConfigurationType,
   } // end SWITCH
 }
 
-template <typename ConfigurationType,
-          typename SessionMessageType,
-          typename MessageType>
+template <typename SessionMessageType,
+          typename MessageType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType>
+bool
+Net_Module_MessageHandler_T<SessionMessageType,
+                            MessageType,
+                            ModuleHandlerConfigurationType,
+                            SessionDataType>::initialize (const ModuleHandlerConfigurationType& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_MessageHandler_T::initialize"));
+
+  configuration_ = configuration_in;
+
+  return true;
+}
+template <typename SessionMessageType,
+          typename MessageType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType>
+const ModuleHandlerConfigurationType&
+Net_Module_MessageHandler_T<SessionMessageType,
+                            MessageType,
+                            ModuleHandlerConfigurationType,
+                            SessionDataType>::get () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_MessageHandler_T::get"));
+
+  return configuration_;
+}
+
+template <typename SessionMessageType,
+          typename MessageType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType>
 void
-Net_Module_MessageHandler_T<ConfigurationType,
-                            SessionMessageType,
-                            MessageType>::subscribe (INOTIFY_T* interfaceHandle_in)
+Net_Module_MessageHandler_T<SessionMessageType,
+                            MessageType,
+                            ModuleHandlerConfigurationType,
+                            SessionDataType>::subscribe (INOTIFY_T* interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_MessageHandler_T::subscribe"));
 
@@ -296,13 +339,15 @@ Net_Module_MessageHandler_T<ConfigurationType,
   subscribers_->push_back (interfaceHandle_in);
 }
 
-template <typename ConfigurationType,
-          typename SessionMessageType,
-          typename MessageType>
+template <typename SessionMessageType,
+          typename MessageType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType>
 void
-Net_Module_MessageHandler_T<ConfigurationType,
-                            SessionMessageType,
-                            MessageType>::unsubscribe (INOTIFY_T* interfaceHandle_in)
+Net_Module_MessageHandler_T<SessionMessageType,
+                            MessageType,
+                            ModuleHandlerConfigurationType,
+                            SessionDataType>::unsubscribe (INOTIFY_T* interfaceHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_MessageHandler_T::unsubscribe"));
 
