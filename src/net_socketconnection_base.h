@@ -70,8 +70,7 @@ class Net_SocketConnectionBase_T
   virtual const HandlerConfigurationType& get ();
   virtual bool initialize (const HandlerConfigurationType&); // handler configuration
 
-  //virtual bool initialize (Net_ClientServerRole_t,            // role
-  //                         const Net_SocketConfiguration_t&); // socket configuration
+  virtual void set (Net_ClientServerRole);
   //virtual void finalize ();
   virtual void ping (); // ping the peer !
 
@@ -81,6 +80,9 @@ class Net_SocketConnectionBase_T
 //  // handle_xxx() returns -1
 //  virtual int handle_close (ACE_HANDLE,
 //                            ACE_Reactor_Mask);
+
+ // convenient typedefs
+ typedef Net_ITransportLayer_T<SocketConfigurationType> ITRANSPORTLAYER_T;
 
  protected:
   //typedef ACE_Connector<HandlerType,
@@ -159,7 +161,12 @@ class Net_AsynchSocketConnectionBase_T
   virtual const HandlerConfigurationType& get ();
   virtual bool initialize (const HandlerConfigurationType&); // handler configuration
 
+  virtual void set (Net_ClientServerRole);
+  //virtual void finalize ();
   virtual void ping (); // ping the peer !
+
+  // convenient typedefs
+  typedef Net_ITransportLayer_T<SocketConfigurationType> ITRANSPORTLAYER_T;
 
  protected:
   typedef Net_IConnector_T<AddressType,

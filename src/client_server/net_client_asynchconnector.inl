@@ -188,13 +188,13 @@ Net_Client_AsynchConnector_T<HandlerType,
   } // end IF
 
   // *TODO*: return the "wait" handle of the asynchronous connect object
-  ACE_HANDLE return_value = ACE_INVALID_HANDLE;
-  ACE_Asynch_Connect& asynch_connect_r =
-      inherited::asynch_connect ();
-  ACE_Asynch_Operation_Impl* asynch_operation_impl_p =
-      asynch_connect_r.implementation ();
-  ACE_ASSERT (asynch_operation_impl_p);
-  ACE_UNUSED_ARG (return_value);
+  //ACE_HANDLE return_value = ACE_INVALID_HANDLE;
+  //ACE_Asynch_Connect& asynch_connect_r =
+  //    inherited::asynch_connect ();
+  //ACE_Asynch_Operation_Impl* asynch_operation_impl_p =
+  //    asynch_connect_r.implementation ();
+  //ACE_ASSERT (asynch_operation_impl_p);
+  //ACE_UNUSED_ARG (return_value);
 
   return 0;
 }
@@ -431,16 +431,10 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnection_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
 
-  ACE_ASSERT (configuration_);
-
-  // *NOTE*: should NEVER be reached !
   ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (configuration_);
 
-#if defined (_MSC_VER)
-  return NULL;
-#else
-  ACE_NOTREACHED (return NULL;)
-#endif
+  ACE_NOTREACHED (return configuration_;)
 }
 
 template <typename HandlerType,
@@ -549,6 +543,11 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnection_T<HandlerType,
     return ACE_INVALID_HANDLE;
   } // end IF
   ACE_ASSERT (handler_p);
+
+  // pre-initialize the connection handler
+  // *TODO*: remove type inference
+  handler_p->set (NET_ROLE_CLIENT);
+
   ICONNECTOR_T* iconnector_p = this;
   const void* act_p = iconnector_p;
   handler_p->act (act_p);
@@ -691,16 +690,10 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
 
-  ACE_ASSERT (configuration_);
-
-  // *NOTE*: should NEVER be reached !
   ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (configuration_);
 
-#if defined (_MSC_VER)
-  return NULL;
-#else
-  ACE_NOTREACHED (return NULL;)
-#endif
+  ACE_NOTREACHED (return configuration_;)
 }
 
 //template <typename SocketConfigurationType,
@@ -823,6 +816,11 @@ Net_Client_AsynchConnector_T<HandlerType,
     return ACE_INVALID_HANDLE;
   } // end IF
   ACE_ASSERT (handler_p);
+
+  // pre-initialize the connection handler
+  // *TODO*: remove type inference
+  handler_p->set (NET_ROLE_CLIENT);
+
   ICONNECTOR_T* iconnector_p = this;
   const void* act_p = iconnector_p;
   handler_p->act (act_p);

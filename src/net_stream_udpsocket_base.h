@@ -65,18 +65,19 @@ class Net_StreamUDPSocketBase_T
                                //////////
                                UserDataType>
 {
-  //friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerType,
+  friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerType,
 
-  //                                                     AddressType,
-  //                                                     ConfigurationType,
-  //                                                     StateType,
-  //                                                     StatisticContainerType,
-  //                                                     StreamType,
+                                                       AddressType,
+                                                       ConfigurationType,
+                                                       StateType,
+                                                       StatisticContainerType,
+                                                       StreamType,
 
-  //                                                     UserDataType,
+                                                       UserDataType,
 
-  //                                                     ModuleConfigurationType>,
-  //                           ACE_SOCK_CONNECTOR>;
+                                                       ModuleConfigurationType,
+                                                       ModuleHandlerConfigurationType>,
+                             ACE_SOCK_CONNECTOR>;
 
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
@@ -198,18 +199,19 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                //////////
                                UserDataType>
 {
-  //friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerConfigurationType,
+  friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerConfigurationType,
 
-  //                                                     AddressType,
-  //                                                     ConfigurationType,
-  //                                                     StateType,
-  //                                                     StatisticContainerType,
-  //                                                     StreamType,
+                                                       AddressType,
+                                                       ConfigurationType,
+                                                       StateType,
+                                                       StatisticContainerType,
+                                                       StreamType,
 
-  //                                                     UserDataType,
+                                                       UserDataType,
 
-  //                                                     ModuleConfigurationType>,
-  //                           ACE_SOCK_CONNECTOR>;
+                                                       ModuleConfigurationType,
+                                                       ModuleHandlerConfigurationType>,
+                             ACE_SOCK_CONNECTOR>;
 
  public:
   virtual ~Net_StreamUDPSocketBase_T ();

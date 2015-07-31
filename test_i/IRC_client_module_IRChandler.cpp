@@ -1399,7 +1399,7 @@ allocate:
     // keep retrying ?
     if (!message_p &&
         !configuration_.streamConfiguration->messageAllocator->block ())
-        goto allocate;
+      goto allocate;
   } // end IF
   else
     ACE_NEW_NORETURN (message_p,
@@ -1471,11 +1471,16 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Client_IRCMessage*& command_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(%u), returning\n"),
                 configuration_.streamConfiguration->bufferSize));
+
+    // clean up
+    command_in->decrease ();
+    command_in = NULL;
+
     return;
   } // end IF
 
   // step2: attach the command
-  // *NOTE*: message assumes control over the reference...
+  // *NOTE*: message assumes control over command_in
   message_p->initialize (command_in);
   // --> bye bye...
   command_in = NULL;

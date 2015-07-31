@@ -147,8 +147,7 @@ Net_Server_AsynchListener_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::accept"));
 
-  // *IMPORTANT NOTE*: with minor modifications, this code was copied from
-  //                   Asynch_Acceptor.cpp
+  // *IMPORTANT NOTE*: this bit is mostly copy/pasted from Asynch_Acceptor.cpp
 
   int result = -1;
 
@@ -543,6 +542,132 @@ Net_Server_AsynchListener_T<HandlerType,
 
   // *TODO*: do something meaningful here...
   ACE_ASSERT (false);
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+void
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::handle_accept (const ACE_Asynch_Accept::Result &result)
+{
+  ACE_TRACE ("Net_Server_AsynchListener_T::handle_accept");
+
+  // *IMPORTANT NOTE*: this bit is mostly copy/pasted from Asynch_Acceptor.cpp
+
+  // Variable for error tracking
+  int error = 0;
+
+  // If the asynchronous accept fails.
+  if (!result.success () || result.accept_handle () == ACE_INVALID_HANDLE)
+  {
+    error = 1;
+  }
+
+  ACE_HANDLE listen_handle = this->handle ();
+#if defined (ACE_WIN32)
+  // In order to use accept handle with other Window Sockets 1.1
+  // functions, we call the setsockopt function with the
+  // SO_UPDATE_ACCEPT_CONTEXT option. This option initializes the
+  // socket so that other Windows Sockets routines to access the
+  // socket correctly.
+  if (!error &&
+      ACE_OS::setsockopt (result.accept_handle (),
+      SOL_SOCKET,
+      SO_UPDATE_ACCEPT_CONTEXT,
+      (char *)&listen_handle,
+      sizeof (listen_handle)) == -1)
+  {
+    error = 1;
+  }
+#endif /* ACE_WIN32 */
+
+  // Parse address.
+  ACE_INET_Addr local_address;
+  ACE_INET_Addr remote_address;
+  if (!error &&
+      (this->validate_new_connection () || this->pass_addresses ()))
+      // Parse the addresses.
+      this->parse_address (result,
+      remote_address,
+      local_address);
+
+  // Validate remote address
+  if (!error &&
+      this->validate_new_connection () &&
+      (this->validate_connection (result, remote_address, local_address) == -1))
+  {
+    error = 1;
+  }
+
+  HandlerType *new_handler = 0;
+  if (!error)
+  {
+    // The Template method
+    new_handler = this->make_handler ();
+    if (new_handler == 0)
+    {
+      error = 1;
+    }
+  }
+
+  // If no errors
+  if (!error)
+  {
+    // Update the Proactor unless make_handler() or constructed handler
+    // set up its own.
+    if (new_handler->proactor () == 0)
+      new_handler->proactor (this->proactor ());
+
+    // Pass the addresses
+    if (this->pass_addresses ())
+      new_handler->addresses (remote_address,
+      local_address);
+
+    // Pass the ACT
+    if (result.act () != 0)
+      new_handler->act (result.act ());
+
+    // Set up the handler's new handle value
+    new_handler->handle (result.accept_handle ());
+
+    // *EDIT*: set role
+    new_handler->set (NET_ROLE_SERVER);
+
+    // Initiate the handler
+    new_handler->open (result.accept_handle (),
+                       result.message_block ());
+  }
+
+  // On failure, no choice but to close the socket
+  if (error &&
+      result.accept_handle () != ACE_INVALID_HANDLE)
+      ACE_OS::closesocket (result.accept_handle ());
+
+  // Delete the dynamically allocated message_block
+  result.message_block ().release ();
+
+  // Start off another asynchronous accept to keep the backlog going,
+  // unless we closed the listen socket already (from the destructor),
+  // or this callback is the result of a canceled/aborted accept.
+  if (this->should_reissue_accept () &&
+      listen_handle != ACE_INVALID_HANDLE
+#if defined (ACE_WIN32)
+      && result.error () != ERROR_OPERATION_ABORTED
+#else
+      && result.error () != ECANCELED
+#endif
+      )
+      this->accept (this->bytes_to_read (), result.act ());
 }
 
 template <typename HandlerType,

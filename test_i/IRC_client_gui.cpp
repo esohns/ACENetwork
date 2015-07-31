@@ -505,7 +505,7 @@ do_work (bool useThreadPool_in,
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   connection_manager_p->set (*userData_in.configuration,
-                             NULL);
+                             userData_in.configuration->streamUserData);
 
   // step3b: initialize timer manager
   Common_Timer_Manager_t* timer_manager_p =
@@ -1448,6 +1448,9 @@ ACE_TMAIN (int argc_in,
                                                  &heap_allocator);
 
   IRC_Client_Configuration configuration;
+  IRC_Client_StreamUserData stream_user_data;
+
+  stream_user_data.configuration = &configuration;
 
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
@@ -1456,6 +1459,7 @@ ACE_TMAIN (int argc_in,
       debug;
   configuration.streamConfiguration.statisticReportingInterval =
       reporting_interval;
+  configuration.streamUserData = &stream_user_data;
 
   IRC_Client_GTK_CBData user_data;
   user_data.configuration = &configuration;
@@ -1521,6 +1525,15 @@ ACE_TMAIN (int argc_in,
                                configuration.protocolConfiguration.loginOptions,
                                connections);
   } // end IF
+
+  configuration.socketHandlerConfiguration.messageAllocator =
+    configuration.streamConfiguration.messageAllocator;
+  configuration.socketHandlerConfiguration.socketConfiguration =
+    &configuration.socketConfiguration;
+  configuration.socketHandlerConfiguration.statisticReportingInterval =
+    configuration.streamConfiguration.statisticReportingInterval;
+  configuration.socketHandlerConfiguration.userData =
+    configuration.streamUserData;
 
   configuration.useReactor = use_reactor;
 

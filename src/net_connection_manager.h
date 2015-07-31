@@ -72,12 +72,12 @@ class Net_Connection_Manager_T
   void initialize (unsigned int); // maximum number of concurrent connections
 
   // implement Net_IConnectionManager_T
-  // *TODO*: clean this up
+  // *WARNING*: these two methods are NOT (!) re-entrant. If you want to set a
+  //            specific configuration /user data per connection, use the
+  //            locking API (see below)
   virtual void set (const ConfigurationType&, // connection handler (default)
                                               // configuration
                     UserDataType*);           // (stream) user data
-  // *IMPORTANT NOTE*: in terms of the (stream) user data, this works only once
-  //                   (!) for every set() call
   virtual void get (ConfigurationType&, // return value: (default)
                                         // connection handler configuration
                     UserDataType*&);    // return value: (stream) user data

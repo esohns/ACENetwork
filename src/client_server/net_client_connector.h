@@ -34,6 +34,12 @@
 #include "net_netlinkconnection.h"
 #include "net_udpconnection.h"
 
+// forward declarations
+struct Net_Configuration;
+struct Net_ConnectionState;
+class Net_Stream;
+struct Net_StreamUserData;
+
 template <typename HandlerType,
           ///////////////////////////////
           typename AddressType,
@@ -54,7 +60,7 @@ class Net_Client_Connector_T
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
-                                   Stream_Statistic,
+                                   Net_RuntimeStatistic_t,
                                    StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
@@ -74,12 +80,18 @@ class Net_Client_Connector_T
   virtual ACE_HANDLE connect (const AddressType&);
 
  protected:
+  // override default activation strategy
+  virtual int activate_svc_handler (HandlerType*);
   // override default instantiation strategy
   virtual int make_svc_handler (HandlerType*&);
 
  private:
   typedef ACE_Connector<HandlerType,
                         ACE_SOCK_CONNECTOR> inherited;
+
+  // convenient typedefs
+  typedef Net_IConnector_T<AddressType,
+                           HandlerConfigurationType> ICONNECTOR_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
@@ -93,7 +105,7 @@ class Net_Client_Connector_T
 
 /////////////////////////////////////////
 
-// partial specialization (for UDP)
+// (partial) specializations (for UDP)
 template <typename HandlerType,
           ///////////////////////////////
           typename ConfigurationType,
@@ -126,7 +138,7 @@ class Net_Client_Connector_T<Net_UDPConnection_T<HandlerType,
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
-                                   Stream_Statistic,
+                                   Net_RuntimeStatistic_t,
                                    StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
@@ -157,10 +169,34 @@ class Net_Client_Connector_T<Net_UDPConnection_T<HandlerType,
   virtual ACE_HANDLE connect (const ACE_INET_Addr&);
 
  protected:
+  //typedef ACE_Connector<CONNECTION_T,
+  //                      ACE_SOCK_CONNECTOR> ACE_CONNECTOR_T;
+
   // override default instantiation strategy
   virtual int make_svc_handler (CONNECTION_T*&);
+  //virtual int connect_svc_handler (CONNECTION_T*&,
+  //                                 const ACE_SOCK_Connector::PEER_ADDR&,
+  //                                 ACE_Time_Value*,
+  //                                 const ACE_SOCK_Connector::PEER_ADDR&,
+  //                                 int,
+  //                                 int,
+  //                                 int);
+  //// *TODO*: it's not quite clear what this API does (see Connector.h:514),
+  ////         needs overriding to please the compiler...
+  //virtual int connect_svc_handler (CONNECTION_T*&,
+  //                                 CONNECTION_T*&,
+  //                                 const ACE_SOCK_Connector::PEER_ADDR&,
+  //                                 ACE_Time_Value*,
+  //                                 const ACE_SOCK_Connector::PEER_ADDR&,
+  //                                 int,
+  //                                 int,
+  //                                 int);
 
  private:
+  // convenient typedefs
+  typedef Net_IConnector_T<ACE_INET_Addr,
+                           HandlerConfigurationType> ICONNECTOR_T;
+
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
@@ -225,6 +261,10 @@ class Net_Client_Connector_T<HandlerType,
   virtual int make_svc_handler (HandlerType*&);
 
  private:
+  // convenient typedefs
+  typedef Net_IConnector_T<ACE_Netlink_Addr,
+                           HandlerConfigurationType> ICONNECTOR_T;
+
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))

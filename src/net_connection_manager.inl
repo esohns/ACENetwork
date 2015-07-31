@@ -193,13 +193,13 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
+  // sanity check(s)
+  ACE_ASSERT (isInitialized_);
+
   //ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
   configuration_out = configuration_;
   userData_out = userData_;
-
-  userData_ = NULL;
-  isInitialized_ = false;
 }
 
 template <typename AddressType,

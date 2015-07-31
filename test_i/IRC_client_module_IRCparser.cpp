@@ -49,9 +49,9 @@ IRC_Client_Module_IRCParser::~IRC_Client_Module_IRCParser ()
 
 bool
 IRC_Client_Module_IRCParser::initialize (Stream_IAllocator* allocator_in,
-                                               bool crunchMessages_in,
-                                               bool debugScanner_in,
-                                               bool debugParser_in)
+                                         bool crunchMessages_in,
+                                         bool debugScanner_in,
+                                         bool debugParser_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCParser::initialize"));
 
@@ -141,7 +141,7 @@ IRC_Client_Module_IRCParser::handleDataMessage (IRC_Client_Message*& message_ino
 
     // step3: append the "\0\0"-sequence, as required by flex
     ACE_ASSERT (message_p->space () >= IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE);
-    ACE_ASSERT (IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE == 2);
+    //ACE_ASSERT (IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE == 2);
     *(message_p->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
     *(message_p->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
     // *NOTE*: DO NOT adjust the write pointer --> length() should stay as it

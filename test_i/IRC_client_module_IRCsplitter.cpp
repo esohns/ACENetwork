@@ -43,7 +43,6 @@ IRC_Client_Module_IRCSplitter::IRC_Client_Module_IRCSplitter ()
  , currentNumFrames_ (0)
  , scannerContext_ (NULL)
  , buffer_ (NULL)
- , currentMessage_ (NULL)
  , currentMessageLength_ (0)
  , isInitialized_ (false)
 {
@@ -78,8 +77,8 @@ IRC_Client_Module_IRCSplitter::~IRC_Client_Module_IRCSplitter ()
     IRC_Client_IRCBisect_lex_destroy (scannerContext_);
 
   // clean up any unprocessed (chained) buffer(s)
-  if (currentMessage_)
-    currentMessage_->release ();
+  if (buffer_)
+    buffer_->release ();
 }
 
 bool
@@ -113,9 +112,8 @@ IRC_Client_Module_IRCSplitter::initialize (const IRC_Client_ModuleHandlerConfigu
                                            scannerContext_);
       currentBufferState_ = NULL;
     } // end IF
-    if (currentMessage_)
-      currentMessage_->release ();
-    currentMessage_ = NULL;
+    if (buffer_)
+      buffer_->release ();
     buffer_ = NULL;
     currentMessageLength_ = 0;
 //     currentBufferIsResized_ = false;
@@ -181,6 +179,7 @@ IRC_Client_Module_IRCSplitter::handleDataMessage (IRC_Client_Message*& message_i
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCSplitter::handleDataMessage"));
 
   int result = -1;
+  ACE_Message_Block* message_block_p = NULL;
 
   // initialize return value(s), default behavior is to pass all messages along
   // --> don't want that !
@@ -192,80 +191,41 @@ IRC_Client_Module_IRCSplitter::handleDataMessage (IRC_Client_Message*& message_i
 
   // perhaps part of this message has already been received ?
   if (buffer_)
-    buffer_->cont (message_inout); // chain the buffer
+  {
+    message_block_p = buffer_->cont ();
+    if (message_block_p)
+    {
+      while (message_block_p->cont ()) // skip to end
+        message_block_p = message_block_p->cont ();
+    } // end IF
+    else
+      message_block_p = buffer_;
+    message_block_p->cont (message_inout); // chain the buffer
+  } // end IF
   else
     buffer_ = message_inout;
 
   // scan the bytestream for frame bounds "\r\n"
 
-  // if necessary, initialize current message
-  if (!currentMessage_)
-    currentMessage_ = buffer_; // start scanning at offset 0...
-
   // *NOTE*: the scanner splits sequences of >= 2 bytes (.*\r\n)
   //         --> make sure a minimum amount of data has been received
   //         --> more sanity check(s)
-  if (currentMessage_->total_length () < IRC_CLIENT_IRC_FRAME_BOUNDARY_SIZE)
+  if (buffer_->total_length () < IRC_CLIENT_IRC_FRAME_BOUNDARY_SIZE)
     return; // don't have enough data, cannot proceed
-//  if (message_inout->length () < IRC_CLIENT_IRC_FRAME_BOUNDARY_SIZE)
-//  {
-//    // *sigh*: OK, this CAN actually happen (single byte received)
-//    // case1: if anything OTHER than '\n' was received, there's nothing to do
-//    //        but wait for more data
-//    // case2: if an '\n' was received, check the trailing character
-//    //        of the PRECEDING buffer:
-//    //        - if it's an '\r' --> voilà, found a frame boundary
-//    //        - else            --> wait for more data
-//    if (((*buffer_->rd_ptr ()) == '\n') &&
-//        (currentMessage_ != buffer_))
-//    {
-//      ACE_Message_Block* preceding_buffer = currentMessage_;
-//      for (;
-//           preceding_buffer->cont () != buffer_;
-//           preceding_buffer = preceding_buffer->cont ());
-//      if (*(preceding_buffer->rd_ptr () + (preceding_buffer->length () - 1)) == '\r')
-//      {
-//        // OK, message complete !
-//        if (inherited::configuration_.crunchMessages)
-//          currentMessage_->crunch ();
-
-//        // --> push it downstream...
-//        result = put_next (currentMessage_, NULL);
-//        if (result == -1)
-//        {
-//          ACE_DEBUG((LM_ERROR,
-//                     ACE_TEXT("failed to ACE_Task::put_next(): \"%m\", continuing\n")));
-
-//          // clean up
-//          currentMessage_->release ();
-//        } // end IF
-
-//        // bye bye...
-//        currentMessageLength_ = 0;
-//        currentMessage_ = NULL;
-//        buffer_ = NULL;
-
-//        return;
-//      } // end IF
-//    } // end IF
-
-//    return; // don't have enough data, cannot proceed
-//  } // end IF
 
   // OK, initialize scanner...
 
-  // *WARNING*: cannot use yy_scan_buffer(), as flex modifies the data... :-(
-//   // *NOTE*: in order to accomodate flex, the buffer needs two trailing
-//   // '\0' characters...
-//   // --> make sure it has this capacity
+  //// *NOTE*: in order to accomodate flex, the current (!) buffer needs two
+  ////         trailing '\0' characters (--> make sure it has this capacity)
+  //ACE_ASSERT (message_inout->space () >= IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE);
 //   if (buffer_->space () < IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE)
 //   {
 //     // *sigh*: (try to) resize it then...
-//     if (myCurrentBuffer->size(myCurrentBuffer->size() + IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE))
+//     if (buffer_->size (buffer_->size () + IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE))
 //     {
-//       ACE_DEBUG((LM_ERROR,
-//                  ACE_TEXT("failed to ACE_Message_Block::size(%u), aborting\n"),
-//                  (myCurrentBuffer->size() + IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE)));
+//       ACE_DEBUG ((LM_ERROR,
+//                   ACE_TEXT ("failed to ACE_Message_Block::size(%u), returning\n"),
+//                   (buffer_->size () + IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE)));
 //       return;
 //     } // end IF
 //     myCurrentBufferIsResized = true;
@@ -274,22 +234,20 @@ IRC_Client_Module_IRCSplitter::handleDataMessage (IRC_Client_Message*& message_i
 //     //            length...
 //     // *NOTE*: this is safe, as realloc() just crops the trailing bytes again
 //   } // end IF
-// //   for (int i = 0;
-// //        i < IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE;
-// //        i++)
-// //     *(buffer_->wr_ptr () + i) = YY_END_OF_BUFFER_CHAR;
-//   *(buffer_->wr_ptr ()) = '\0';
-//   *(buffer_->wr_ptr () + 1) = '\0';
+  //*(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
+  //*(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
 
-//   if (!scan_begin (buffer_->rd_ptr (),
-//                    buffer_->length () + IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE))
-  if (!scan_begin (buffer_->rd_ptr (),
-                   buffer_->length ()))
+  //if (!scan_begin (message_inout->rd_ptr (),
+  //                 message_inout->length () + IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE))
+
+  message_block_p = message_inout;
+  if (!scan_begin (message_block_p->rd_ptr (),
+                   message_block_p->length ()))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to scan_begin(%@, %u), aborting\n"),
-                buffer_->rd_ptr (),
-                buffer_->length ()));
+                ACE_TEXT ("failed to scan_begin(%@, %u), returning\n"),
+                message_block_p->rd_ptr (),
+                message_block_p->length ()));
     return;
   } // end IF
 
@@ -314,10 +272,12 @@ IRC_Client_Module_IRCSplitter::handleDataMessage (IRC_Client_Message*& message_i
       case 0:
       {
         // --> finished scanning this buffer
-        finished_scanning = true; // no (more) frame boundaries found
 
         // remember how much data was scanned so far...
         currentMessageLength_ += scanned_bytes;
+
+        // no more data at this time...
+        finished_scanning = true; // done
 
         break;
       }
@@ -331,7 +291,7 @@ IRC_Client_Module_IRCSplitter::handleDataMessage (IRC_Client_Message*& message_i
         //                   - a "\r\n"
         // *NOTE*: in either case, a new frame has been found...
         if ((scanned_bytes == 0) &&
-            (*buffer_->rd_ptr () == '\n'))
+            (*message_block_p->rd_ptr () == '\n'))
         {
           scanned_bytes = 1;
           currentMessageLength_ += IRC_CLIENT_IRC_FRAME_BOUNDARY_SIZE;
@@ -350,37 +310,47 @@ IRC_Client_Module_IRCSplitter::handleDataMessage (IRC_Client_Message*& message_i
 //                     (scanned_bytes + (buffer_->rd_ptr () - buffer_->base ())),
 //                     ACE_TEXT (std::string (buffer_->rd_ptr (), scanned_bytes).c_str ())));
 
-        IRC_Client_Message* message_p = currentMessage_;
-        if (currentMessageLength_ < currentMessage_->total_length ())
+        ACE_Message_Block* message_p = buffer_;
+        if (currentMessageLength_ < buffer_->total_length ())
         {
           // more data to scan...
 
-          // *NOTE*: copy ctor shallow-copies the current data block
-          currentMessage_ =
-              dynamic_cast<IRC_Client_Message*> (buffer_->duplicate ());
-          ACE_ASSERT (currentMessage_);
+          // *NOTE*: shallow-copy the current data block
+          buffer_ = message_block_p->duplicate ();
+          if (!buffer_)
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to IRC_Client_Message::duplicate(): \"%m\", returning\n")));
+
+            // clean up
+            buffer_ = message_p;
+
+            return;
+          } // end IF
           // adjust wr_ptr (point to one-past-the-end of the current message)
-          buffer_->wr_ptr (buffer_->rd_ptr () + scanned_bytes);
+          message_block_p->wr_ptr (message_block_p->rd_ptr () + scanned_bytes);
           ACE_ASSERT (currentMessageLength_ == message_p->total_length ());
           // adjust rd_ptr (point to the beginning of the next message)
-          currentMessage_->rd_ptr (scanned_bytes);
+          buffer_->rd_ptr (scanned_bytes);
+          message_block_p = buffer_; // move to next message
         } // end IF
         else
         {
-          // NO more data to scan...
-          ACE_ASSERT (currentMessageLength_ == currentMessage_->total_length ());
+          // no more data to scan...
+          ACE_ASSERT (currentMessageLength_ == message_p->total_length ());
 
-          // set new message head
-          currentMessage_ = NULL;
+          buffer_ = NULL;
+
+          finished_scanning = true; // done
         } // end ELSE
 
 //        if (inherited::configuration_.crunchMessages)
-//          message_p->crunch ();
+//          message_block_p->crunch ();
 
 //        ACE_DEBUG ((LM_DEBUG,
 //                    ACE_TEXT ("processing message (ID: %u - %u byte(s))...\n"),
-//                    message_p->getID (),
-//                    message_p->total_length ()));
+//                    message_block_p->getID (),
+//                    message_block_p->total_length ()));
 
         // --> push it downstream...
         result = put_next (message_p, NULL);
@@ -393,13 +363,11 @@ IRC_Client_Module_IRCSplitter::handleDataMessage (IRC_Client_Message*& message_i
           message_p->release ();
         } // end IF
 
-        // set new current buffer
-        buffer_ = currentMessage_;
         // reset state
         currentMessageLength_ = 0;
         scanned_bytes = 0;
 
-        // ...continue scanning !
+        // ...continue scanning ?
         break;
       }
       default:
@@ -559,12 +527,12 @@ IRC_Client_Module_IRCSplitter::scan_begin (char* data_in,
   // sanity check(s)
   ACE_ASSERT (!currentBufferState_);
 
-  // create/init a new buffer state
-  // *WARNING*: cannot use yy_scan_buffer(), as flex modifies the data... :-(
-//   // *WARNING*: length_in IS already adjusted for two trailing \0's
-//   currentState_ = yy_scan_buffer (data_in,
-//                                   length_in,
-//                                   scannerContext_);
+  // create/initialize a new buffer state
+//  // *IMPORTANT NOTE*: length_in IS already adjusted for two trailing \0's
+  // *TODO*: cannot use yy_scan_buffer(), as it modifies the input data...
+  //currentBufferState_ = IRC_Client_IRCBisect__scan_buffer (data_in,
+  //                                                         length_in,
+  //                                                         scannerContext_);
   currentBufferState_ =
       IRC_Client_IRCBisect__scan_bytes (data_in,
                                         length_in,
@@ -572,13 +540,16 @@ IRC_Client_Module_IRCSplitter::scan_begin (char* data_in,
   if (!currentBufferState_)
   {
     ACE_DEBUG ((LM_ERROR,
+                //ACE_TEXT ("failed to yy_scan_buffer(%@,%d), aborting\n"),
                 ACE_TEXT ("failed to yy_scan_bytes(%@,%d), aborting\n"),
                 data_in,
                 length_in));
     return false;
   } // end IF
 
-  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
+  // *NOTE*: contrary (!) to the documentation
+  // (e.g. http://flex.sourceforge.net/manual/Multiple-Input-Buffers.html),
+  //         one still needs to yy_switch_to_buffer()
   IRC_Client_IRCBisect__switch_to_buffer (currentBufferState_,
                                           scannerContext_);
 

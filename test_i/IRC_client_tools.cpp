@@ -1686,14 +1686,13 @@ IRC_Client_Tools::connect (bool asynchronousConnect_in,
 
   // ************ socket configuration data ************
   configuration.socketConfiguration.peerAddress = peerAddress_in;
-  configuration.socketHandlerConfiguration.socketConfiguration =
-    &configuration.socketConfiguration;
   // ************ stream configuration data ****************
   if (finalModule_inout)
   {
     configuration.streamConfiguration.cloneModule = cloneModule_in;
     configuration.streamConfiguration.deleteModule = deleteModule_in;
     configuration.streamConfiguration.module = finalModule_inout;
+    finalModule_inout = NULL;
   } // end IF
   configuration.streamConfiguration.moduleConfiguration =
       &const_cast<Stream_ModuleConfiguration&> (moduleConfiguration_in);
@@ -1707,6 +1706,9 @@ IRC_Client_Tools::connect (bool asynchronousConnect_in,
   // ************ protocol configuration data **************
   configuration.protocolConfiguration.loginOptions = loginOptions_in;
 
+  if (stream_user_data_p)
+    stream_user_data_p->configuration = &configuration;
+
   // step2: initialize client connector
   if (!connector_p->initialize (configuration.socketHandlerConfiguration))
   {
@@ -1715,9 +1717,10 @@ IRC_Client_Tools::connect (bool asynchronousConnect_in,
     goto error;
   } // end IF
 
-  connection_manager_p->lock ();
-  connection_manager_p->set (configuration,
-                             stream_user_data_p);
+  //connection_manager_p->lock ();
+  //stream_user_data_p->configuration = &configuration;
+  //connection_manager_p->set (configuration,
+  //                           stream_user_data_p);
 
   // step3: (try to) connect to the server
   return_value =
@@ -1737,12 +1740,12 @@ IRC_Client_Tools::connect (bool asynchronousConnect_in,
                 ACE_TEXT ("failed to connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));
 
-    // clean up
-    connection_manager_p->unlock ();
+    //// clean up
+    //connection_manager_p->unlock ();
 
     goto error;
   } // end IF
-  connection_manager_p->unlock ();
+  //connection_manager_p->unlock ();
 
   // *NOTE*: handlers automagically register with the connection manager and
   //         will also de-register and self-destruct on disconnects !
@@ -1750,11 +1753,8 @@ IRC_Client_Tools::connect (bool asynchronousConnect_in,
   return return_value;
 
 error:
-  if (deleteModule_in)
-  {
-    delete finalModule_inout;
-    finalModule_inout = NULL;
-  } // end IF
+  if (configuration.streamConfiguration.deleteModule)
+    delete configuration.streamConfiguration.module;
 
   return ACE_INVALID_HANDLE;
 }

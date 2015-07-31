@@ -69,8 +69,6 @@ Net_InetTransportLayer_Base::initialize (Common_DispatchType dispatch_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::initialize"));
 
-  ACE_ASSERT (false);
-
   dispatch_ = dispatch_in;
   role_ = role_in;
   ACE_UNUSED_ARG (configuration_in);

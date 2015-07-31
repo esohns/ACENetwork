@@ -95,6 +95,8 @@ class Net_Server_Listener_T
  protected:
   // override default instantiation strategy
   virtual int make_svc_handler (HandlerType*&);
+  // override default accept strategy
+  virtual int accept_svc_handler (HandlerType*);
 
  private:
   typedef ACE_Acceptor<HandlerType,

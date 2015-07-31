@@ -124,7 +124,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
+                    inherited2::configuration_.streamConfiguration.module->name ()));
     } // end IF
     if (inherited2::configuration_.streamConfiguration.deleteModule)
       delete inherited2::configuration_.streamConfiguration.module;
@@ -158,9 +158,12 @@ Net_StreamTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::open"));
 
-  ACE_UNUSED_ARG (arg_in);
+  ConfigurationType* configuration_p =
+    static_cast<ConfigurationType*> (arg_in);
+  ACE_ASSERT (configuration_p);
 
-  // *TODO*: remove type inferences
+  int result = -1;
+  bool handle_module = true;
   const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
   // step0: initialize this
@@ -191,29 +194,25 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // step1a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
-  if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
-  {
-    // *NOTE*: must use 'this' (inherited2:: does not work here for some
-    //         strange reason)...
-    inherited2::configuration_.streamConfiguration.notificationStrategy =
-      &this->notificationStrategy_;
-  } // end IF
+  if (!configuration_p->streamConfiguration.useThreadPerConnection)
+    configuration_p->streamConfiguration.notificationStrategy =
+      &(inherited::notificationStrategy_);
   // step1b: initialize final module (if any)
-  if (inherited2::configuration_.streamConfiguration.module)
+  if (configuration_p->streamConfiguration.module)
   {
     // step1ba: clone final module ?
-    if (inherited2::configuration_.streamConfiguration.cloneModule)
+    if (configuration_p->streamConfiguration.cloneModule)
     {
       IMODULE_T* imodule_p = NULL;
       // need a downcast...
       imodule_p =
-        dynamic_cast<IMODULE_T*> (inherited2::configuration_.streamConfiguration.module);
+        dynamic_cast<IMODULE_T*> (configuration_p->streamConfiguration.module);
       if (!imodule_p)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T*> failed, aborting\n"),
-                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-        return -1;
+                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+        goto error;
       } // end IF
       Stream_Module_t* clone_p = NULL;
       try
@@ -223,37 +222,39 @@ Net_StreamTCPSocketBase_T<HandlerType,
       catch (...)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), aborting\n"),
-                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-        return -1;
+                    ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), continuing\n"),
+                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+        clone_p = NULL;
       }
       if (!clone_p)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
-                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-        return -1;
+                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+        goto error;
       } // end IF
-      inherited2::configuration_.streamConfiguration.deleteModule = true;
-      inherited2::configuration_.streamConfiguration.module = clone_p;
+      configuration_p->streamConfiguration.deleteModule = true;
+      configuration_p->streamConfiguration.module = clone_p;
     } // end IF
     // *TODO*: step1bb: initialize final module
   } // end IF
   // step1c: initialize stream
   // *TODO*: this clearly is a design glitch
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inherited2::configuration_.streamConfiguration.sessionID =
+  configuration_p->streamConfiguration.sessionID =
     reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #else
-  inherited2::configuration_.streamConfiguration.sessionID =
+  configuration_p->streamConfiguration.sessionID =
     static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (inherited2::configuration_.streamConfiguration))
+  if (!stream_.initialize (configuration_p->streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
-    return -1;
+    goto error;
   } // end IF
+  // *NOTE*: do not worry about the enqueued module (if any) beyond this point !
+  handle_module = false;
   session_data_p = &stream_.sessionData ();
   const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
       &const_cast<StateType&> (inherited2::state ());
@@ -267,11 +268,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
     //         initialize
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
-
-    // *TODO*: remove type inference
-    inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
-
-    return -1;
+    goto error;
   } // end IF
 
   // step2: register with the connection manager (if any)
@@ -283,13 +280,12 @@ Net_StreamTCPSocketBase_T<HandlerType,
     // *NOTE*: perhaps max# connections has been reached
     //ACE_DEBUG ((LM_ERROR,
     //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-    return -1;
+    goto error;
   } // end IF
 
   // step3: tweak socket, register I/O handle with the reactor, ...
   // *NOTE*: as soon as this returns, data starts arriving at handle_input()
-  int result = -1;
-  result = inherited::open (&inherited2::configuration_.socketConfiguration);
+  result = inherited::open (&configuration_p->socketConfiguration);
   if (result == -1)
   {
     // *NOTE*: this can happen when the connection handle is still registered
@@ -303,12 +299,30 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
-    return -1;
+    goto error;
   } // end IF
 
+  inherited2::initialize (*configuration_p);
   inherited2::state_.status = NET_CONNECTION_STATUS_OK;
 
   return 0;
+
+error:
+  // clean up
+  if (handle_module                               &&
+      configuration_p->streamConfiguration.module &&
+      configuration_p->streamConfiguration.deleteModule)
+  {
+    delete configuration_p->streamConfiguration.module;
+    configuration_p->streamConfiguration.module = NULL;
+    configuration_p->streamConfiguration.deleteModule = false;
+  } // end IF
+  stream_.stop (true); // <-- wait for completion
+
+  // *TODO*: remove type inference
+  inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+
+  return -1;
 }
 
 template <typename HandlerType,
@@ -665,12 +679,13 @@ Net_StreamTCPSocketBase_T<HandlerType,
   if (inherited2::configuration_.streamConfiguration.useThreadPerConnection &&
       currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
   {
+    //       ACE_DEBUG ((LM_DEBUG,
+    //                   ACE_TEXT ("[%u]: finished sending...\n"),
+    //                   peer_.get_handle ()));
+
+    // clean up
     currentWriteBuffer_->release ();
     currentWriteBuffer_ = NULL;
-
-//       ACE_DEBUG ((LM_DEBUG,
-//                   ACE_TEXT ("[%u]: finished sending...\n"),
-//                   peer_.get_handle ()));
     result = -1; // <-- deregister
 
     goto release;
@@ -790,8 +805,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                                              //     user abort
     {
       // step1: wait for all workers within the stream (if any)
-      if (stream_.isRunning ())
-        stream_.stop (true); // <-- wait for completion
+      stream_.stop (true); // <-- wait for completion
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference

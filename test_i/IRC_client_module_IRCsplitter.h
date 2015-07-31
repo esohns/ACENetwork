@@ -39,6 +39,7 @@
 #include "IRC_client_sessionmessage.h"
 
 // forward declaration(s)
+class ACE_Message_Block;
 class Stream_IAllocator;
 //typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
@@ -122,9 +123,8 @@ class IRC_Client_Module_IRCSplitter
   unsigned int        currentNumFrames_;
   yyscan_t            scannerContext_;
 
-  // message buffers
-  IRC_Client_Message* buffer_;
-  IRC_Client_Message* currentMessage_;
+  // message buffer(s)
+  ACE_Message_Block*  buffer_; // <-- continuation chain
   unsigned int        currentMessageLength_;
 
   bool                isInitialized_;

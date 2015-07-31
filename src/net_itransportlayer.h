@@ -42,9 +42,10 @@ class Net_ITransportLayer_T
   // *TODO*: move this somewhere else
   virtual Common_DispatchType dispatch () = 0;
   virtual Net_ClientServerRole role () = 0;
+  virtual void set (Net_ClientServerRole) = 0;
   virtual Net_TransportLayerType transportLayer () = 0;
 
- protected:
+ //protected:
   virtual bool initialize (Common_DispatchType,
                            Net_ClientServerRole,
                            const ConfigurationType&) = 0;

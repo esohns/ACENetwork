@@ -45,7 +45,7 @@ IRC_Client_Message::IRC_Client_Message (const IRC_Client_Message& message_in)
 }
 
 IRC_Client_Message::IRC_Client_Message (ACE_Data_Block* dataBlock_in,
-                                                    ACE_Allocator* messageAllocator_in)
+                                        ACE_Allocator* messageAllocator_in)
  : inherited (dataBlock_in,        // use (don't own !) this data block
               messageAllocator_in) // use this when destruction is imminent...
 {

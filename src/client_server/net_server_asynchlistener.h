@@ -98,6 +98,8 @@ class Net_Server_AsynchListener_T
   virtual void dump_state () const;
 
  protected:
+  // override default accept strategy
+  virtual void handle_accept (const ACE_Asynch_Accept::Result&);
   // override default creation strategy
   virtual HandlerType* make_handler (void);
 

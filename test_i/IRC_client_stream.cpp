@@ -190,7 +190,8 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   } // end IF
 
   // enqueue the module...
-  if (inherited::push (&runtimeStatistic_))
+  result = inherited::push (&runtimeStatistic_);
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
@@ -249,7 +250,8 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   } // end IF
 
   // enqueue the module...
-  if (inherited::push (&IRCParser_))
+  result = inherited::push (&IRCParser_);
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
@@ -287,7 +289,8 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
   IRCMarshal_.arg (inherited::sessionData_);
-  if (inherited::push (&IRCMarshal_))
+  result = inherited::push (&IRCMarshal_);
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),

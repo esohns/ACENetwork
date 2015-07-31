@@ -228,7 +228,7 @@ struct IRC_Client_Configuration
    , socketHandlerConfiguration ()
    //////////////////////////////////////
    , streamConfiguration ()
-//   , streamUserData (NULL)
+   , streamUserData ()
    //////////////////////////////////////
    , protocolConfiguration ()
    //////////////////////////////////////
@@ -244,7 +244,7 @@ struct IRC_Client_Configuration
   IRC_Client_SocketHandlerConfiguration socketHandlerConfiguration;
   // ****************************** stream *************************************
   IRC_Client_StreamConfiguration        streamConfiguration;
-//  IRC_Client_StreamUserData             streamUserData;
+  IRC_Client_StreamUserData*            streamUserData;
   // ***************************** protocol ************************************
   IRC_Client_ProtocolConfiguration      protocolConfiguration;
   // ***************************************************************************

@@ -68,6 +68,7 @@ class IRC_Client_Tools
 
   static bool isValidIRCChannelName (const std::string&); // string
 
+  // *NOTE*: iff (delete module == true), fire-and-forget the last argument !
   static ACE_HANDLE connect (bool,                                         // connect asynchronously ?
                              const IRC_Client_IRCLoginOptions&,            // login options
                              const ACE_INET_Addr&,                         // peer address

@@ -70,6 +70,10 @@ class IRC_Client_IRCSession_T
   virtual void notify (const IRC_Client_IRCMessage&);
   virtual void end ();
 
+  // override some task-based members
+  // *TODO*: make this private (--> befriend Net_Client_Connector_T)
+  virtual int open (void* = NULL); // arg
+
  private:
   typedef ConnectionType inherited;
 
@@ -77,7 +81,6 @@ class IRC_Client_IRCSession_T
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_IRCSession_T& operator= (const IRC_Client_IRCSession_T&))
 
   // helper methods
-  virtual int open (void*); // arg
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
 

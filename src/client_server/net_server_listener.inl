@@ -69,8 +69,15 @@ Net_Server_Listener_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::~Net_Server_Listener_T"));
 
+  int result = -1;
+
   if (isOpen_)
-    inherited::close ();
+  {
+    result = inherited::close ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", continuing\n")));
+  } // end IF
 }
 
 template <typename HandlerType,
@@ -237,14 +244,14 @@ Net_Server_Listener_T<HandlerType,
   } // end IF
 
   // not running --> start listening
-  ACE_INET_Addr local_address;
+  AddressType local_address;
   // *TODO*: remove type inferences
   if (configuration_.useLoopbackDevice)
-    result = local_address.set (configuration_.portNumber, // port number
+    result = local_address.set (configuration_.portNumber,            // port number
                                 // *PORTABILITY*: disambiguation needed under Win32
-                                ACE_LOCALHOST,             // hostname
-                                1,                         // encode ?
-                                ACE_ADDRESS_FAMILY_INET);  // address family
+                                ACE_TEXT_ALWAYS_CHAR (ACE_LOCALHOST), // hostname
+                                1,                                    // encode ?
+                                configuration_.addressFamily);        // address family
   else
     result = local_address.set (configuration_.portNumber,            // port number
                                 // *TODO*: bind to specific interface/address ?
@@ -269,8 +276,7 @@ Net_Server_Listener_T<HandlerType,
                 ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", returning\n")));
     return;
   } // end IF
-  else
-    isOpen_ = true;
+  isOpen_ = true;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
@@ -410,8 +416,8 @@ Net_Server_Listener_T<HandlerType,
   result = inherited::info (&buffer_p, BUFSIZ);
   if ((result == -1) || !buffer_p)
   {
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("failed to ACE_Acceptor::info(): \"%m\", returning\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Acceptor::info(): \"%m\", returning\n")));
     return;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
@@ -444,6 +450,7 @@ Net_Server_Listener_T<HandlerType,
   handler_out = NULL;
 
   // sanity check(s)
+  // *TODO*: remove type inference
   ACE_ASSERT (configuration_.socketHandlerConfiguration);
 
   // default behavior
@@ -451,10 +458,34 @@ Net_Server_Listener_T<HandlerType,
   ACE_NEW_NORETURN (handler_out,
                     HandlerType (configuration_.connectionManager,
                                  configuration_.socketHandlerConfiguration->statisticReportingInterval));
-                                 //configuration_.statisticReportingInterval));
   if (!handler_out)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
   return (handler_out ? 0 : -1);
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+int
+Net_Server_Listener_T<HandlerType,
+                      AddressType,
+                      ConfigurationType,
+                      StateType,
+                      StreamType,
+                      HandlerConfigurationType,
+                      UserDataType>::accept_svc_handler (HandlerType* handler_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::accept_svc_handler"));
+
+  // pre-initialize the connection handler
+  // *TODO*: remove type inference
+  handler_in->set (NET_ROLE_SERVER);
+
+  return inherited::accept_svc_handler (handler_in);
 }

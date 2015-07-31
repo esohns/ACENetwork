@@ -755,7 +755,7 @@ IRC_Client_IRCSession_T<ConnectionType>::open (void* arg_in)
   // *NOTE*: client-side: arg_in is a handle to the connector
   //         server-side: arg_in is a handle to the listener
   const IRC_Client_SocketHandlerConfiguration* handler_configuration_p = NULL;
-  switch (inherited::role ())
+  switch (this->role ())
   {
     case NET_ROLE_CLIENT:
     {
@@ -798,7 +798,7 @@ IRC_Client_IRCSession_T<ConnectionType>::open (void* arg_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown role (was: %d), aborting\n"),
-                  inherited::role ()));
+                  this->role ()));
       return -1;
     }
   } // end SWITCH

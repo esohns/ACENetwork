@@ -937,31 +937,50 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           param_iterator--;
 
           // convert text
-          const gchar* string_p = (*param_iterator).c_str ();
-          //  Common_UI_Tools::Locale2UTF8 (*param_iterator);
-          //if (!converted_text)
-          //{
-          //  ACE_DEBUG ((LM_ERROR,
-          //              ACE_TEXT ("failed to convert message text (was: \"%s\"), aborting\n"),
-          //              ACE_TEXT ((*param_iterator).c_str ())));
+          gchar* string_p =
+            Common_UI_Tools::Locale2UTF8 (*param_iterator);
+          if (!string_p)
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to convert message text (was: \"%s\"), aborting\n"),
+                        ACE_TEXT ((*param_iterator).c_str ())));
 
-          //  // clean up
-          //  gdk_threads_leave ();
+            // clean up
+            gdk_threads_leave ();
 
-          //  break;
-          //} // end IF
+            break;
+          } // end IF
+          gchar* string_2 = NULL;
+          if (message_in.params.size () > 3)
+          {
+            param_iterator++;
+            string_2 = Common_UI_Tools::Locale2UTF8 (*param_iterator);
+            if (!string_2)
+            {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("failed to convert message text (was: \"%s\"), aborting\n"),
+                          ACE_TEXT ((*param_iterator).c_str ())));
+
+              // clean up
+              g_free (string_p);
+              gdk_threads_leave ();
+
+              break;
+            } // end IF
+          } // end IF
 
           GtkTreeIter tree_iter;
           gtk_list_store_append (list_store_p,
                                  &tree_iter);
           gtk_list_store_set (list_store_p, &tree_iter,
-                              0, string_p,                           // channel name
-                              1, num_members,                        // # visible members
-                              2, message_in.params.back ().c_str (), // topic
+                              0, string_p,    // channel name
+                              1, num_members, // # visible members
+                              2, string_2,    // topic
                               -1);
 
           // clean up
-          //g_free (string_p);
+          g_free (string_p);
+          g_free (string_2);
           gdk_threads_leave ();
 
           break;
