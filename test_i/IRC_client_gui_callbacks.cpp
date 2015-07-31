@@ -141,6 +141,9 @@ connection_setup_function (void* arg_in)
   data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2.subscriber =
     connection_p;
 
+  // *WARNING*: beyond this point, need to remove the connection page !
+  //            --> goto remove_page
+
   // step2: connect to the server
   std::stringstream converter;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
@@ -151,11 +154,39 @@ connection_setup_function (void* arg_in)
   const Stream_Module_t* current_p = NULL;
   Stream_Module_t* tail_p = NULL;
   IRC_Client_Connection_Manager_t::CONNECTION_T* connection_2 = NULL;
-  //IRC_Client_IRCSession_t* session_p = NULL;
   unsigned short current_port = 0;
-  ACE_INET_Addr peer_address;
   int result_3 = -1;
   bool done = false;
+
+  // step2a: set up connector
+  IRC_Client_IConnection_Manager_t* connection_manager_p =
+    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  IRC_Client_Connector_t connector (connection_manager_p,
+                                    data_p->configuration->streamConfiguration.statisticReportingInterval);
+  IRC_Client_AsynchConnector_t asynch_connector (connection_manager_p,
+                                                 data_p->configuration->streamConfiguration.statisticReportingInterval);
+  IRC_Client_IConnector_t* connector_p = &connector;
+  if (!data_p->configuration->useReactor)
+    connector_p = &asynch_connector;
+  //IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
+  //IRC_Client_ConnectorConfiguration connector_configuration;
+
+  // step2b: set up configuration passed to processing stream
+  IRC_Client_Configuration configuration;
+  IRC_Client_StreamUserData* stream_user_data_p = NULL;
+  // load defaults
+  connection_manager_p->get (configuration,
+                             stream_user_data_p);
+
+  // step2c: initialize connector
+  if (!connector_p->initialize (configuration.socketHandlerConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
+    goto remove_page;
+  } // end IF
+
   for (IRC_Client_PortRangesIterator_t iterator = data_p->phonebookEntry.listeningPorts.begin ();
        iterator != data_p->phonebookEntry.listeningPorts.end ();
        ++iterator)
@@ -166,71 +197,37 @@ connection_setup_function (void* arg_in)
       break;
 
     // port range ?
-    if ((*iterator).first < (*iterator).second)
+    for (current_port = (*iterator).first;
+         current_port <= (*iterator).second;
+         ++current_port)
     {
-      for (current_port = (*iterator).first;
-           current_port <= (*iterator).second;
-           ++current_port)
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter << ACE_TEXT_ALWAYS_CHAR ("trying port ");
+      converter << current_port;
+      converter << ACE_TEXT_ALWAYS_CHAR ("...");
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s\n"),
+                  ACE_TEXT (converter.str ().c_str ())));
+      string_p = Common_UI_Tools::Locale2UTF8 (converter.str ());
+      if (!string_p)
       {
-        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter.clear ();
-        converter << ACE_TEXT_ALWAYS_CHAR ("trying port ");
-        converter << current_port;
-        converter << ACE_TEXT_ALWAYS_CHAR ("...");
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("%s\n"),
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
                     ACE_TEXT (converter.str ().c_str ())));
-        string_p = Common_UI_Tools::Locale2UTF8 (converter.str ());
-        if (!string_p)
-        {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
-                      ACE_TEXT (converter.str ().c_str ())));
-          goto remove_page;
-        } // end IF
-        gdk_threads_enter ();
-        gtk_progress_bar_set_text (progress_bar_p,
-                                   string_p);
-        gdk_threads_leave ();
-        g_free (string_p);
-
-        result_3 =
-            peer_address.set (current_port,
-                              data_p->phonebookEntry.hostName.c_str (),
-                              1,
-                              ACE_ADDRESS_FAMILY_INET);
-        if (result_3 == -1)
-        {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
-          goto remove_page;
-        } // end IF
-
-        handle =
-          IRC_Client_Tools::connect (!data_p->configuration->useReactor,                                      // asynch connection ?
-                                     data_p->loginOptions,                                                    // login options
-                                     peer_address,                                                            // peer address
-                                     data_p->configuration->streamConfiguration.moduleConfiguration_2,        // module configuration
-                                     data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2, // module handler configuration
-                                     data_p->configuration->streamConfiguration.cloneModule,                  // clone final module ?
-                                     data_p->configuration->streamConfiguration.deleteModule,                 // delete final module ?
-                                     data_p->configuration->streamConfiguration.module);                      // final module handle
-        if (handle != ACE_INVALID_HANDLE)
-        {
-          done = true;
-          break;
-        } // end IF
-      } // end FOR
-    } // end IF
-    else
-    {
-      current_port = (*iterator).first;
+        goto remove_page;
+      } // end IF
+      gdk_threads_enter ();
+      gtk_progress_bar_set_text (progress_bar_p,
+                                 string_p);
+      gdk_threads_leave ();
+      g_free (string_p);
 
       result_3 =
-          peer_address.set (current_port,
-                            data_p->phonebookEntry.hostName.c_str (),
-                            1,
-                            ACE_ADDRESS_FAMILY_INET);
+        configuration.socketConfiguration.peerAddress.set (current_port,
+                                                           data_p->phonebookEntry.hostName.c_str (),
+                                                           1,
+                                                           ACE_ADDRESS_FAMILY_INET);
       if (result_3 == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -238,21 +235,27 @@ connection_setup_function (void* arg_in)
         goto remove_page;
       } // end IF
 
+      // step3: (try to) connect to the server
       handle =
-        IRC_Client_Tools::connect (!data_p->configuration->useReactor,                                      // asynch connection ?
-                                   data_p->loginOptions,                                                    // login options
-                                   peer_address,                                                            // peer address
-                                   data_p->configuration->streamConfiguration.moduleConfiguration_2,        // module configuration
-                                   data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2, // module handler configuration
-                                   data_p->configuration->streamConfiguration.cloneModule,                  // clone final module ?
-                                   data_p->configuration->streamConfiguration.deleteModule,                 // delete final module ?
-                                   data_p->configuration->streamConfiguration.module);                      // final module handle
-      if (handle != ACE_INVALID_HANDLE)
+        connector_p->connect (configuration.socketConfiguration.peerAddress);
+      if (handle == ACE_INVALID_HANDLE)
       {
-        done = true;
-        break;
+        // debug info
+        ACE_TCHAR buffer[BUFSIZ];
+        ACE_OS::memset (buffer, 0, sizeof (buffer));
+        result =
+          configuration.socketConfiguration.peerAddress.addr_to_string (buffer,
+                                                                        sizeof (buffer));
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("failed to connect(\"%s\"): \"%m\", continuing\n"),
+                    buffer));
       } // end IF
-    } // end ELSE
+      else
+        done = true;
+    } // end FOR
   } // end FOR
   if (handle == ACE_INVALID_HANDLE)
   {
@@ -283,19 +286,27 @@ connection_failed:
   } // end IF
   if (!data_p->configuration->useReactor)
   {
-    ACE_Time_Value delay (IRC_CLIENT_CONNECTION_DEF_TIMEOUT, 0);
-    int result_3 = ACE_OS::sleep (delay);
-    if (result_3 == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-                  &delay));
+    ACE_Time_Value deadline = COMMON_TIME_NOW +
+                              ACE_Time_Value (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT, 0);
+    ACE_Time_Value delay (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
+    int result_3 = -1;
+    do
+    {
+      result_3 = ACE_OS::sleep (delay);
+      if (result_3 == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+                    &delay));
 
-    connection_2 =
-      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->get (peer_address);
+      // *TODO*: this does not work...
+      connection_2 =
+        connection_manager_p->get (configuration.socketConfiguration.peerAddress);
+      if (connection_2)
+        break; // done
+    } while (COMMON_TIME_NOW < deadline);
   } // end IF
   else
-    connection_2 =
-      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->get (handle);
+    connection_2 = connection_manager_p->get (handle);
   if (!connection_2)
     goto connection_failed;
   stream_p = &connection_2->stream ();
@@ -720,7 +731,7 @@ idle_finalize_UI_cb (gpointer userData_in)
                 ACE_TEXT ("removed %u queued event(s)...\n"),
                 removed_events));
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
-  ACE_ASSERT (removed_events == data_p->GTKState.eventSourceIds.size ());
+  //ACE_ASSERT (removed_events == data_p->GTKState.eventSourceIds.size ());
   data_p->GTKState.eventSourceIds.clear ();
 
   // step2: leave GTK

@@ -77,7 +77,6 @@ Net_ConnectionBase_T<AddressType,
   } // end IF
 
   // initialize configuration/user data
-//  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
   if (manager_)
   {
     try

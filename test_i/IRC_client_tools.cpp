@@ -1647,70 +1647,49 @@ IRC_Client_Tools::stringify (const IRC_Client_Parameters_t& params_in,
 }
 
 ACE_HANDLE
-IRC_Client_Tools::connect (bool asynchronousConnect_in,
-                           const IRC_Client_IRCLoginOptions& loginOptions_in,
+IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
                            const ACE_INET_Addr& peerAddress_in,
-                           const Stream_ModuleConfiguration& moduleConfiguration_in,
-                           const IRC_Client_ModuleHandlerConfiguration& moduleHandlerConfiguration_in,
+                           const IRC_Client_IRCLoginOptions& loginOptions_in,
                            bool cloneModule_in,
                            bool deleteModule_in,
                            Stream_Module_t*& finalModule_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::connect"));
 
-  // sanity check(s)
-  ACE_ASSERT (moduleConfiguration_in.streamConfiguration);
-
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
   int result = -1;
+  IRC_Client_Configuration configuration;
+  IRC_Client_StreamUserData* stream_user_data_p = NULL;
+
+  // step0: retrive default configuration
   IRC_Client_IConnection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  IRC_Client_Connector_t connector (connection_manager_p,
-                                    moduleConfiguration_in.streamConfiguration->statisticReportingInterval);
-  IRC_Client_AsynchConnector_t asynch_connector (connection_manager_p,
-                                                 moduleConfiguration_in.streamConfiguration->statisticReportingInterval);
-  IRC_Client_IConnector_t* connector_p = &connector;
-  if (asynchronousConnect_in)
-    connector_p = &asynch_connector;
-  //IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
-  //IRC_Client_ConnectorConfiguration connector_configuration;
-
-  // step1: set up configuration passed to processing stream
-  IRC_Client_Configuration configuration;
-  IRC_Client_StreamUserData* stream_user_data_p = NULL;
-  // load defaults
   connection_manager_p->get (configuration,
                              stream_user_data_p);
+  ACE_ASSERT (stream_user_data_p);
+  // *TODO*: remove type inferences
+  ACE_ASSERT (stream_user_data_p->configuration);
 
-  // ************ socket configuration data ************
-  configuration.socketConfiguration.peerAddress = peerAddress_in;
-  // ************ stream configuration data ****************
+  // step1: set up configuration
+  stream_user_data_p->configuration->protocolConfiguration.loginOptions =
+    loginOptions_in;
+  stream_user_data_p->configuration->socketConfiguration.peerAddress =
+    peerAddress_in;
   if (finalModule_inout)
   {
-    configuration.streamConfiguration.cloneModule = cloneModule_in;
-    configuration.streamConfiguration.deleteModule = deleteModule_in;
-    configuration.streamConfiguration.module = finalModule_inout;
-    finalModule_inout = NULL;
+    stream_user_data_p->configuration->streamConfiguration.cloneModule =
+      cloneModule_in;
+    stream_user_data_p->configuration->streamConfiguration.deleteModule =
+      deleteModule_in;
+    stream_user_data_p->configuration->streamConfiguration.module =
+      finalModule_inout;
+    if (deleteModule_in) finalModule_inout = NULL;
   } // end IF
-  configuration.streamConfiguration.moduleConfiguration =
-      &const_cast<Stream_ModuleConfiguration&> (moduleConfiguration_in);
-  configuration.streamConfiguration.moduleHandlerConfiguration =
-      &const_cast<IRC_Client_ModuleHandlerConfiguration&> (moduleHandlerConfiguration_in);
-  configuration.streamConfiguration.moduleConfiguration_2 =
-      moduleConfiguration_in;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2 =
-      moduleHandlerConfiguration_in;
 
-  // ************ protocol configuration data **************
-  configuration.protocolConfiguration.loginOptions = loginOptions_in;
-
-  if (stream_user_data_p)
-    stream_user_data_p->configuration = &configuration;
-
-  // step2: initialize client connector
-  if (!connector_p->initialize (configuration.socketHandlerConfiguration))
+  // step2: initialize connector
+  if (!connector_in.initialize (stream_user_data_p->configuration->socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
@@ -1723,28 +1702,23 @@ IRC_Client_Tools::connect (bool asynchronousConnect_in,
   //                           stream_user_data_p);
 
   // step3: (try to) connect to the server
-  return_value =
-    connector_p->connect (configuration.socketConfiguration.peerAddress);
+  return_value = connector_in.connect (peerAddress_in);
   if (return_value == ACE_INVALID_HANDLE)
   {
     // debug info
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result =
-      configuration.socketConfiguration.peerAddress.addr_to_string (buffer,
-                                                                    sizeof (buffer));
+    result = peerAddress_in.addr_to_string (buffer,
+                                            sizeof (buffer));
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-    ACE_DEBUG ((LM_ERROR,
+    ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));
-
-    //// clean up
-    //connection_manager_p->unlock ();
-
     goto error;
   } // end IF
+
   //connection_manager_p->unlock ();
 
   // *NOTE*: handlers automagically register with the connection manager and
@@ -1753,8 +1727,11 @@ IRC_Client_Tools::connect (bool asynchronousConnect_in,
   return return_value;
 
 error:
-  if (configuration.streamConfiguration.deleteModule)
-    delete configuration.streamConfiguration.module;
+  if (deleteModule_in)
+  {
+    delete finalModule_inout;
+    finalModule_inout = NULL;
+  } // end IF
 
   return ACE_INVALID_HANDLE;
 }

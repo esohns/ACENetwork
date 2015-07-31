@@ -32,9 +32,9 @@
 #include "stream_common.h"
 
 #include "IRC_client_common.h"
-//#include "IRC_client_configuration.h"
 #include "IRC_client_IRCmessage.h"
 #include "IRC_client_IRC_codes.h"
+#include "IRC_client_network.h"
 
 // forward declaration(s)
 //template <ACE_SYNCH_DECL, class TIME_POLICY>
@@ -69,14 +69,12 @@ class IRC_Client_Tools
   static bool isValidIRCChannelName (const std::string&); // string
 
   // *NOTE*: iff (delete module == true), fire-and-forget the last argument !
-  static ACE_HANDLE connect (bool,                                         // connect asynchronously ?
-                             const IRC_Client_IRCLoginOptions&,            // login options
-                             const ACE_INET_Addr&,                         // peer address
-                             const Stream_ModuleConfiguration&,            // module configuration
-                             const IRC_Client_ModuleHandlerConfiguration&, // module handler configuration
-                             bool,                                         // clone module ?
-                             bool,                                         // delete module ?
-                             Stream_Module_t*&);                           // (final) module handle
+  static ACE_HANDLE connect (IRC_Client_IConnector_t&,          // connector handle
+                             const ACE_INET_Addr&,              // peer address
+                             const IRC_Client_IRCLoginOptions&, // login options
+                             bool,                              // clone module ?
+                             bool,                              // delete module ?
+                             Stream_Module_t*&);                // (final) module handle
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools ())

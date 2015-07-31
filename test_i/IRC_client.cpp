@@ -408,7 +408,7 @@ connection_setup_curses_function (void* arg_in)
   ACE_ASSERT (thread_data_p);
 
   int result = -1;
-  ACE_Time_Value delay (IRC_CLIENT_CONNECTION_DEF_TIMEOUT, 0);
+  ACE_Time_Value delay (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
 
   IRC_Client_IConnection_t* connection_p = NULL;
   bool result_2 = false;
@@ -419,37 +419,33 @@ connection_setup_curses_function (void* arg_in)
   ACE_Time_Value deadline = ACE_Time_Value::zero;
   std::string channel_string;
   string_list_t channels, keys;
-  //const IRC_Client_SessionState* session_state_p = NULL;
+  IRC_Client_IConnection_Manager_t* connection_manager_p =
+    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
 
   // step1: wait for connection ?
   if (!thread_data_p->useReactor)
   {
-    result = ACE_OS::sleep (delay);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-                  &delay));
+    ACE_Time_Value deadline = COMMON_TIME_NOW +
+                              ACE_Time_Value (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT, 0);
+
+    do
+    {
+      result = ACE_OS::sleep (delay);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+                    &delay));
+
+      if (connection_manager_p->numConnections () >= 1)
+        break; // done
+    } while (COMMON_TIME_NOW < deadline);
   } // end IF
   // *NOTE*: signal main thread (resumes dispatching)
   Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
                                        !thread_data_p->useReactor,
                                        -1);
 
-  IRC_Client_IConnection_Manager_t* connection_manager_p =
-    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  if (connection_manager_p->numConnections () < 1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect (timeout: %#T), aborting\n"),
-                &delay));
-
-    // clean up
-    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                         !thread_data_p->useReactor,
-                                         -1);
-
-    goto clean_up;
-  } // end IF
   connection_p = connection_manager_p->operator[] (0);
   if (!connection_p)
   {
