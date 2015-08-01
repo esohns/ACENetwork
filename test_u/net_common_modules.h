@@ -25,10 +25,9 @@
 
 #include "common_time_common.h"
 
-#include "stream_common.h"
 #include "stream_streammodule_base.h"
 
-#include "net_common.h"
+#include "net_configuration.h"
 #include "net_message.h"
 #include "net_module_runtimestatistic.h"
 #include "net_module_sockethandler.h"
@@ -40,10 +39,14 @@
 typedef Net_Module_SocketHandler_T<Net_SessionMessage,
                                    Net_Message,
                                    //////
+                                   Net_ModuleHandlerConfiguration,
+                                   //////
                                    Net_StreamState,
                                    //////
                                    Net_StreamSessionData,   // session data
                                    Net_StreamSessionData_t, // session message payload (reference counted)
+                                   //////
+                                   Net_RuntimeStatistic_t,
                                    //////
                                    Net_Remote_Comm::MessageHeader> Net_Module_SocketHandler;
 DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                   // task synch type

@@ -28,7 +28,7 @@
 #include "stream_common.h"
 //
 //#include "net_asynch_tcpsockethandler.h"
-#include "net_configuration.h"
+//#include "net_configuration.h"
 //#include "net_connection_manager.h"
 //#include "net_iconnectionmanager.h"
 //#include "net_stream_asynch_tcpsocket_base.h"
@@ -50,6 +50,7 @@ typedef Net_Client_Connector_T<IRC_Client_TCPConnection_t,
                                ACE_INET_Addr,
                                IRC_Client_Configuration,
                                IRC_Client_ConnectionState,
+                               IRC_Client_RuntimeStatistic_t,
                                IRC_Client_Stream,
                                //////////
                                IRC_Client_SocketHandlerConfiguration,
@@ -60,6 +61,7 @@ typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
                                      IRC_Client_Configuration,
                                      IRC_Client_ConnectionState,
+                                     IRC_Client_RuntimeStatistic_t,
                                      IRC_Client_Stream,
                                      ////
                                      IRC_Client_SocketHandlerConfiguration,
@@ -74,6 +76,7 @@ typedef Net_Client_Connector_T<IRC_Client_IRCSession_t,
                                ACE_INET_Addr,
                                IRC_Client_Configuration,
                                IRC_Client_ConnectionState,
+                               IRC_Client_RuntimeStatistic_t,
                                IRC_Client_Stream,
                                //////////
                                IRC_Client_SocketHandlerConfiguration,
@@ -84,6 +87,7 @@ typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchIRCSession_t,
                                      ACE_INET_Addr,
                                      IRC_Client_Configuration,
                                      IRC_Client_ConnectionState,
+                                     IRC_Client_RuntimeStatistic_t,
                                      IRC_Client_Stream,
                                      ////
                                      IRC_Client_SocketHandlerConfiguration,

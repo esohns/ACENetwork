@@ -28,14 +28,13 @@
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
+#include "net_connection_manager.h"
+#include "net_iconnectionmanager.h"
+#include "net_stream_common.h"
+
 #include "net_common.h"
 #include "net_configuration.h"
 #include "net_connection_common.h"
-#include "net_connection_manager.h"
-#include "net_exports.h"
-//#include "net_iconnection.h"
-#include "net_iconnectionmanager.h"
-#include "net_stream_common.h"
 
 // forward declarations
 //struct Net_Configuration;
@@ -89,16 +88,9 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  Net_StreamUserData> Net_InetConnectionManager_t;
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-NET_SINGLETON_DECLARE (ACE_Singleton,
-                       Net_NetlinkConnectionManager_t,
-                       ACE_SYNCH_MUTEX);
 typedef ACE_Singleton<Net_NetlinkConnectionManager_t,
                       ACE_SYNCH_MUTEX> NET_NETLINKCONNECTIONMANAGER_SINGLETON;
 #endif
 typedef ACE_Singleton<Net_InetConnectionManager_t,
                       ACE_SYNCH_MUTEX> NET_CONNECTIONMANAGER_SINGLETON;
-NET_SINGLETON_DECLARE (ACE_Singleton,
-                       Net_InetConnectionManager_t,
-                       ACE_SYNCH_MUTEX);
-
 #endif

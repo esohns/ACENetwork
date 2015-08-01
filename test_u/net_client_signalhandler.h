@@ -28,9 +28,8 @@
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
-#include "net_client_connector_common.h"
-
 #include "net_common.h"
+#include "net_configuration.h"
 
 class Net_Client_SignalHandler
  : public Common_SignalHandler

@@ -30,10 +30,6 @@
 #include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Connector.h"
 
-#include "stream_common.h"
-
-#include "net_common.h"
-#include "net_configuration.h"
 #include "net_iconnectionmanager.h"
 #include "net_socketconnection_base.h"
 #include "net_transportlayer_tcp.h"
@@ -42,6 +38,7 @@ template <typename HandlerType,
           ///////////////////////////////
           typename ConfigurationType,
           typename StateType,
+          typename StatisticContainerType,
           typename StreamType,
           ///////////////////////////////
           typename HandlerConfigurationType,
@@ -53,7 +50,7 @@ class Net_TCPConnectionBase_T
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
-                                     Stream_Statistic,
+                                     StatisticContainerType,
                                      StreamType,
                                      ////
                                      Net_SocketConfiguration,
@@ -66,6 +63,7 @@ class Net_TCPConnectionBase_T
  friend class ACE_Acceptor<Net_TCPConnectionBase_T<HandlerType,
                                                    ConfigurationType,
                                                    StateType,
+                                                   StatisticContainerType,
                                                    StreamType,
                                                    HandlerConfigurationType,
                                                    UserDataType>,
@@ -73,6 +71,7 @@ class Net_TCPConnectionBase_T
  friend class ACE_Connector<Net_TCPConnectionBase_T<HandlerType,
                                                     ConfigurationType,
                                                     StateType,
+                                                    StatisticContainerType,
                                                     StreamType,
                                                     HandlerConfigurationType,
                                                     UserDataType>,
@@ -82,14 +81,13 @@ class Net_TCPConnectionBase_T
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
-                                   Stream_Statistic,
+                                   StatisticContainerType,
                                    StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                           unsigned int = 0);      // statistics collecting interval (second(s))
-                                                   // 0 --> DON'T collect statistics
+                           unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
   virtual ~Net_TCPConnectionBase_T ();
 
  private:
@@ -98,13 +96,14 @@ class Net_TCPConnectionBase_T
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
-                                     Stream_Statistic,
+                                     StatisticContainerType,
                                      StreamType,
                                      ////
                                      Net_SocketConfiguration,
                                      HandlerConfigurationType,
                                      ////
                                      UserDataType> inherited;
+  typedef Net_TransportLayer_TCP inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded
@@ -120,6 +119,7 @@ template <typename HandlerType,
           ///////////////////////////////
           typename ConfigurationType,
           typename StateType,
+          typename StatisticContainerType,
           typename StreamType,
           ///////////////////////////////
           typename HandlerConfigurationType,
@@ -131,7 +131,7 @@ class Net_AsynchTCPConnectionBase_T
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,
-                                           Stream_Statistic,
+                                           StatisticContainerType,
                                            StreamType,
 
                                            Net_SocketConfiguration,
@@ -145,6 +145,7 @@ class Net_AsynchTCPConnectionBase_T
 
                                                                 ConfigurationType,
                                                                 StateType,
+                                                                StatisticContainerType,
                                                                 StreamType,
 
                                                                 HandlerConfigurationType,
@@ -154,6 +155,7 @@ class Net_AsynchTCPConnectionBase_T
 
                                                                  ConfigurationType,
                                                                  StateType,
+                                                                 StatisticContainerType,
                                                                  StreamType,
                                                                  
                                                                  HandlerConfigurationType,
@@ -164,14 +166,13 @@ class Net_AsynchTCPConnectionBase_T
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
-                                   Stream_Statistic,
+                                   StatisticContainerType,
                                    StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                 unsigned int = 0);      // statistics collecting interval (second(s))
-                                                         // 0 --> DON'T collect statistics
+                                 unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
   virtual ~Net_AsynchTCPConnectionBase_T ();
 
  private:
@@ -180,7 +181,7 @@ class Net_AsynchTCPConnectionBase_T
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,
-                                           Stream_Statistic,
+                                           StatisticContainerType,
                                            StreamType,
 
                                            Net_SocketConfiguration,
@@ -188,6 +189,7 @@ class Net_AsynchTCPConnectionBase_T
                                            HandlerConfigurationType,
 
                                            UserDataType> inherited;
+  typedef Net_TransportLayer_TCP inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded

@@ -24,7 +24,6 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-//#include "common.h"
 #include "common_istatistic.h"
 #include "common_time_common.h"
 
@@ -32,18 +31,20 @@
 #include "stream_headmoduletask_base.h"
 //#include "stream_iallocator.h"
 
-#include "net_configuration.h"
-
 // forward declarations
 class Stream_IAllocator;
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
           ///////////////////////////////
+          typename ConfigurationType,
+          ///////////////////////////////
           typename StreamStateType,
           ///////////////////////////////
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
+          ///////////////////////////////
+          typename StatisticContainerType,
           ///////////////////////////////
           typename ProtocolHeaderType>
 class Net_Module_SocketHandler_T
@@ -52,13 +53,13 @@ class Net_Module_SocketHandler_T
                                       SessionMessageType,
                                       ProtocolMessageType,
                                       ///
-                                      Net_ModuleHandlerConfiguration,
+                                      ConfigurationType,
                                       ///
                                       StreamStateType,
                                       ///
                                       SessionDataType,
                                       SessionDataContainerType>
- , public Common_IStatistic_T<Net_RuntimeStatistic_t>
+ , public Common_IStatistic_T<StatisticContainerType>
 {
  public:
   Net_Module_SocketHandler_T ();
@@ -67,11 +68,18 @@ class Net_Module_SocketHandler_T
 #if defined (__GNUG__) || defined (_MSC_VER)
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
-  using Stream_HeadModuleTaskBase_T::initialize;
+  using Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
+                                    Common_TimePolicy_t,
+                                    SessionMessageType,
+                                    ProtocolMessageType,
+                                    ConfigurationType,
+                                    StreamStateType,
+                                    SessionDataType,
+                                    SessionDataContainerType>::initialize;
 #endif
 
   // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const Net_ModuleHandlerConfiguration&);
+  virtual bool initialize (const ConfigurationType&);
 
   // info
   bool isInitialized () const;
@@ -85,7 +93,7 @@ class Net_Module_SocketHandler_T
 
   // implement Common_IStatistic
   // *NOTE*: implements regular (timer-based) statistics collection
-  virtual bool collect (Net_RuntimeStatistic_t&); // return value: (currently unused !)
+  virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
   virtual void report () const;
 
  private:
@@ -94,7 +102,7 @@ class Net_Module_SocketHandler_T
                                       SessionMessageType,
                                       ProtocolMessageType,
                                       ///
-                                      Net_ModuleHandlerConfiguration,
+                                      ConfigurationType,
                                       ///
                                       StreamStateType,
                                       ///
@@ -107,7 +115,7 @@ class Net_Module_SocketHandler_T
   // helper methods
   bool bisectMessages (ProtocolMessageType*&); // return value: complete message (chain)
 //   Net_Message* allocateMessage(const unsigned int&); // requested size
-  bool putStatisticsMessage (const Net_RuntimeStatistic_t&) const; // statistics info
+  bool putStatisticsMessage (const StatisticContainerType&) const; // statistics info
 
   // protocol
   ProtocolMessageType*              currentBuffer_;
@@ -126,30 +134,34 @@ class Net_Module_SocketHandler_T
 template <typename SessionMessageType,
           typename ProtocolMessageType,
           ///////////////////////////////
+          typename ConfigurationType,
+          ///////////////////////////////
           typename StreamStateType,
           ///////////////////////////////
           typename SessionDataType,          // session data
-          typename SessionDataContainerType> // session message payload (reference counted)
+          typename SessionDataContainerType, // session message payload (reference counted)
+          ///////////////////////////////
+          typename StatisticContainerType>
 class Net_Module_UDPSocketHandler_T
  : public Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       SessionMessageType,
                                       ProtocolMessageType,
                                       ///
-                                      Stream_ModuleConfiguration,
+                                      ConfigurationType,
                                       ///
                                       StreamStateType,
                                       ///
                                       SessionDataType,
                                       SessionDataContainerType>
- , public Common_IStatistic_T<Net_RuntimeStatistic_t>
+ , public Common_IStatistic_T<StatisticContainerType>
 {
  public:
   Net_Module_UDPSocketHandler_T ();
   virtual ~Net_Module_UDPSocketHandler_T ();
 
   // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const Net_ModuleHandlerConfiguration&);
+  virtual bool initialize (const ConfigurationType&);
 
   // info
   bool isInitialized () const;
@@ -163,7 +175,7 @@ class Net_Module_UDPSocketHandler_T
 
   // implement Common_IStatistic
   // *NOTE*: implements regular (timer-based) statistics collection
-  virtual bool collect (Net_RuntimeStatistic_t&); // return value: (currently unused !)
+  virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
   virtual void report () const;
 
  private:
@@ -172,7 +184,7 @@ class Net_Module_UDPSocketHandler_T
                                       SessionMessageType,
                                       ProtocolMessageType,
                                       ///
-                                      Stream_ModuleConfiguration,
+                                      ConfigurationType,
                                       ///
                                       StreamStateType,
                                       ///
@@ -183,7 +195,7 @@ class Net_Module_UDPSocketHandler_T
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T& operator= (const Net_Module_UDPSocketHandler_T&))
 
   // helper methods
-  bool putStatisticsMessage (const Net_RuntimeStatistic_t&) const; // statistics info
+  bool putStatisticsMessage (const StatisticContainerType&) const; // statistics info
 
   bool                              isInitialized_;
 

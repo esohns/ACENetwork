@@ -937,10 +937,10 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
   return (result == 0);
 }
 
-Net_IInetConnectionManager_t*
-Net_Common_Tools::getConnectionManager ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getConnectionManager"));
+//Net_IInetConnectionManager_t*
+//Net_Common_Tools::getConnectionManager ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getConnectionManager"));
 
-  return NET_CONNECTIONMANAGER_SINGLETON::instance ();
-}
+//  return NET_CONNECTIONMANAGER_SINGLETON::instance ();
+//}

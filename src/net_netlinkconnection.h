@@ -21,39 +21,45 @@
 #ifndef NET_NETLINKCONNECTION_H
 #define NET_NETLINKCONNECTION_H
 
+#include "ace/Asynch_Connector.h"
+#include "ace/Connector.h"
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Netlink_Addr.h"
 #include "ace/SOCK_Connector.h"
 
-#include "stream_common.h"
-
-#include "net_configuration.h"
-#include "net_socket_common.h"
+#include "net_common.h"
+#include "net_iconnectionmanager.h"
+//#include "net_socket_common.h"
 #include "net_socketconnection_base.h"
-#include "net_stream.h"
-#include "net_stream_common.h"
+//#include "net_stream_common.h"
 #include "net_transportlayer_netlink.h"
 
-// forward declarations
-template <typename SVC_HANDLER,
-          typename PEER_CONNECTOR> class ACE_Connector;
-template <class HANDLER> class ACE_Asynch_Connector;
-
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          ///////////////////////////////
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          ///////////////////////////////
+          typename HandlerConfigurationType,
+          ///////////////////////////////
+          typename UserDataType>
 class Net_NetlinkConnection_T
- : public Net_SocketConnectionBase_T<ACE_Netlink_Addr,
+ : public Net_SocketConnectionBase_T<HandlerType,
+                                     ////
+                                     ACE_Netlink_Addr,
+                                     ConfigurationType,
+                                     StateType,
+                                     StatisticContainerType,
+                                     StreamType,
+                                     ////
                                      Net_SocketConfiguration,
-                                     HandlerType,
-                                     Net_Configuration,
-                                     Net_SocketHandlerConfiguration,
-                                     UserDataType,
-                                     SessionDataType,
-                                     Stream_Statistic,
-                                     Net_Stream>
+                                     ////
+                                     HandlerConfigurationType,
+                                     ////
+                                     UserDataType>
  , public Net_TransportLayer_Netlink
 {
   friend class ACE_Connector<HandlerType,
@@ -61,15 +67,15 @@ class Net_NetlinkConnection_T
 
  public:
   typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
-                                   Net_SocketConfiguration,
-                                   Net_Configuration,
-                                   UserDataType,
-                                   Stream_Statistic,
-                                   Net_Stream> ICONNECTION_MANAGER_T;
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   StreamType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
 
    Net_NetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                            unsigned int = 0);      // statistics collecting interval (second(s))
-                                                    // 0 --> DON'T collect statistics
+                            unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
    virtual ~Net_NetlinkConnection_T ();
 
    // override some task-based members
@@ -94,56 +100,78 @@ class Net_NetlinkConnection_T
    virtual void dump_state () const;
 
  private:
-  typedef Net_SocketConnectionBase_T<ACE_Netlink_Addr,
+  typedef Net_SocketConnectionBase_T<HandlerType,
+                                     ////
+                                     ACE_Netlink_Addr,
+                                     ConfigurationType,
+                                     StateType,
+                                     StatisticContainerType,
+                                     StreamType,
+                                     ////
                                      Net_SocketConfiguration,
-                                     HandlerType,
-                                     Net_Configuration,
-                                     Net_SocketHandlerConfiguration,
-                                     UserDataType,
-                                     SessionDataType,
-                                     Stream_Statistic,
-                                     Net_Stream> inherited;
+                                     ////
+                                     HandlerConfigurationType,
+                                     ////
+                                     UserDataType> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 
   // *TODO*: remove this ASAP
   Net_NetlinkConnection_T ();
-//  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T (const Net_NetlinkConnection_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T& operator= (const Net_NetlinkConnection_T&));
+//  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T (const Net_NetlinkConnection_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T& operator= (const Net_NetlinkConnection_T&))
 };
 
 /////////////////////////////////////////
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          ///////////////////////////////
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          ///////////////////////////////
+          typename HandlerConfigurationType,
+          ///////////////////////////////
+          typename UserDataType>
 class Net_AsynchNetlinkConnection_T
- : public Net_AsynchSocketConnectionBase_T<ACE_Netlink_Addr,
+ : public Net_AsynchSocketConnectionBase_T<HandlerType,
+                                           ////
+                                           ACE_Netlink_Addr,
+                                           ConfigurationType,
+                                           StateType,
+                                           StatisticContainerType,
+                                           StreamType,
+                                           ////
                                            Net_SocketConfiguration,
-                                           HandlerType,
-                                           Net_Configuration,
-                                           Net_SocketHandlerConfiguration,
-                                           UserDataType,
-                                           SessionDataType,
-                                           Stream_Statistic,
-                                           Net_Stream>
+                                           ////
+                                           HandlerConfigurationType,
+                                           ////
+                                           UserDataType>
  , public Net_TransportLayer_Netlink
 {
-  friend class ACE_Asynch_Connector<Net_AsynchNetlinkConnection_T<UserDataType,
-                                                                  SessionDataType,
-                                                                  HandlerType> >;
+  friend class ACE_Asynch_Connector<Net_AsynchNetlinkConnection_T<HandlerType,
+
+                                                                  ConfigurationType,
+                                                                  StateType,
+                                                                  StatisticContainerType,
+                                                                  StreamType,
+
+                                                                  HandlerConfigurationType,
+
+                                                                  UserDataType> >;
 
  public:
   typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
-                                   Net_SocketConfiguration,
-                                   Net_Configuration,
-                                   UserDataType,
-                                   Stream_Statistic,
-                                   Net_Stream> ICONNECTION_MANAGER_T;
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   StreamType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
 
   Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                 unsigned int = 0);      // statistics collecting interval (second(s))
-                                                         // 0 --> DON'T collect statistics
+                                 unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
   virtual ~Net_AsynchNetlinkConnection_T ();
 
   // implement (part of) Net_INetlinkTransportLayer
@@ -169,22 +197,26 @@ class Net_AsynchNetlinkConnection_T
                               ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef Net_AsynchSocketConnectionBase_T<ACE_Netlink_Addr,
+  typedef Net_AsynchSocketConnectionBase_T<HandlerType,
+                                           ////
+                                           ACE_Netlink_Addr,
+                                           ConfigurationType,
+                                           StateType,
+                                           StatisticContainerType,
+                                           StreamType,
+                                           ////
                                            Net_SocketConfiguration,
-                                           HandlerType,
-                                           Net_Configuration,
-                                           Net_SocketHandlerConfiguration,
-                                           UserDataType,
-                                           SessionDataType,
-                                           Stream_Statistic,
-                                           Net_Stream> inherited;
+                                           ////
+                                           HandlerConfigurationType,
+                                           ////
+                                           UserDataType> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 
   // *TODO*: remove this ASAP
   Net_AsynchNetlinkConnection_T ();
-  //  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T ());
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T (const Net_AsynchNetlinkConnection_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T& operator= (const Net_AsynchNetlinkConnection_T&));
+  //  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T (const Net_AsynchNetlinkConnection_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T& operator= (const Net_AsynchNetlinkConnection_T&))
 };
 
 // include template implementation

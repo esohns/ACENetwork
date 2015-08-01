@@ -31,18 +31,17 @@
 #include "common_ui_common.h"
 
 #include "net_configuration.h"
-#include "net_iconnector.h"
-#include "net_ilistener.h"
 #include "net_stream_common.h"
 
 #include "net_client_common.h"
 #include "net_client_connector_common.h"
-#include "net_client_timeouthandler.h"
+//#include "net_client_timeouthandler.h"
 
 #include "net_server_common.h"
 
 // forward declarations
 class Stream_IAllocator;
+class Net_Client_TimeoutHandler;
 
 extern unsigned int random_seed;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)

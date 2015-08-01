@@ -28,16 +28,35 @@ net_client_SOURCES = \
   net_callbacks.cpp \
   net_callbacks.h \
   net_client.cpp \
+  net_client_common.h \
+  net_client_connector_common.h \
   net_client_signalhandler.cpp \
   net_client_signalhandler.h \
   net_client_timeouthandler.cpp \
   net_client_timeouthandler.h \
   net_common.h \
+  net_common_modules.h \
+  net_configuration.h \
+  net_connection_common.h \
+  net_connection_manager_common.h \
   net_defines.h \
   net_eventhandler.cpp \
   net_eventhandler.h \
+  net_message.cpp \
+  net_message.h \
   net_module_eventhandler.cpp \
-  net_module_eventhandler.h
+  net_module_eventhandler.h \
+  net_module_headerparser.cpp \
+  net_module_headerparser.h \
+  net_module_protocolhandler.cpp \
+  net_module_protocolhandler.h \
+  net_sessionmessage.cpp \
+  net_sessionmessage.h \
+  net_stream.cpp \
+  net_stream.h \
+  net_stream_common.h \
+  net_tcpconnection.cpp \
+  net_tcpconnection.h
 net_client_CPPFLAGS = \
   $(AM_CPPFLAGS) \
   -I$(top_srcdir)/modules/libCommon/src \
@@ -67,14 +86,32 @@ net_server_SOURCES = \
   net_client_timeouthandler.cpp \
   net_client_timeouthandler.h \
   net_common.h \
+  net_common_modules.h \
+  net_configuration.h \
+  net_connection_common.h \
+  net_connection_manager_common.h \
   net_defines.h \
-  net_server.cpp \
-  net_server_signalhandler.cpp \
-  net_server_signalhandler.h \
+  net_message.cpp \
+  net_message.h \
   net_eventhandler.cpp \
   net_eventhandler.h \
   net_module_eventhandler.cpp \
-  net_module_eventhandler.h
+  net_module_eventhandler.h \
+  net_module_headerparser.cpp \
+  net_module_headerparser.h \
+  net_module_protocolhandler.cpp \
+  net_module_protocolhandler.h \
+  net_server.cpp \
+  net_server_common.h \
+  net_server_signalhandler.cpp \
+  net_server_signalhandler.h \
+  net_sessionmessage.cpp \
+  net_sessionmessage.h \
+  net_stream.cpp \
+  net_stream.h \
+  net_stream_common.h \
+  net_tcpconnection.cpp \
+  net_tcpconnection.h
 net_server_CPPFLAGS = \
   $(AM_CPPFLAGS) \
   -I$(top_srcdir)/modules/libCommon/src \
@@ -102,3 +139,4 @@ net_server_LDADD = \
 
 SUBDIRS = \
   etc
+

@@ -123,6 +123,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   //// sanity check(s)
   //ACE_ASSERT (inherited3::configuration_.socketHandlerConfiguration);
 
+  // *TODO*: remove type inferences
+  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
+
   // step1: tweak socket, initialize I/O, ...
   if (!inherited::initialize (inherited3::configuration_.socketHandlerConfiguration))
   {
@@ -133,8 +136,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   inherited::open (handle_in, messageBlock_in);
 
   // step2: initialize/start stream
-  // *TODO*: remove type inferences
-  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   // step2a: connect stream head message queue with a notification pipe/queue ?
   if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
     inherited3::configuration_.streamConfiguration.notificationStrategy = this;

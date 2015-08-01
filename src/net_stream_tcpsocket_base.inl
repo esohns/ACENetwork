@@ -285,7 +285,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // step3: tweak socket, register I/O handle with the reactor, ...
   // *NOTE*: as soon as this returns, data starts arriving at handle_input()
-  result = inherited::open (&configuration_p->socketConfiguration);
+  result = inherited::open (&configuration_p->socketHandlerConfiguration);
   if (result == -1)
   {
     // *NOTE*: this can happen when the connection handle is still registered

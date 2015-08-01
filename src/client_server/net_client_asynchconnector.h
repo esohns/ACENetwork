@@ -28,20 +28,19 @@
 #include "ace/Netlink_Addr.h"
 #endif
 
-#include "stream_common.h"
-
-#include "net_connection_manager_common.h"
+#include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include "net_netlinkconnection.h"
-#endif
-#include "net_udpconnection.h"
+//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+//#include "net_netlinkconnection_base.h"
+//#endif
+#include "net_udpconnection_base.h"
 
 template <typename HandlerType,
           ///////////////////////////////
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
+          typename StatisticContainerType,
           typename StreamType,
           ///////////////////////////////
           typename HandlerConfigurationType,
@@ -56,13 +55,13 @@ class Net_Client_AsynchConnector_T
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
-                                   Stream_Statistic,
+                                   StatisticContainerType,
                                    StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
+                                unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
   virtual ~Net_Client_AsynchConnector_T ();
 
   // override default connect strategy
@@ -110,34 +109,42 @@ template <typename HandlerType,
           ///////////////////////////////
           typename ConfigurationType,
           typename StateType,
+          typename StatisticContainerType,
           typename StreamType,
           ///////////////////////////////
           typename HandlerConfigurationType,
           ///////////////////////////////
           typename UserDataType>
-class Net_Client_AsynchConnector_T<Net_AsynchUDPConnection_T<HandlerType,
+class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
-                                                             StateType,
+                                                                 ConfigurationType,
+                                                                 StateType,
+                                                                 StatisticContainerType,
+                                                                 StreamType,
 
-                                                             HandlerConfigurationType,
+                                                                 HandlerConfigurationType,
 
-                                                             UserDataType>,
+                                                                 UserDataType>,
                                    //////
                                    ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
+                                   StatisticContainerType,
                                    StreamType,
                                    //////
                                    HandlerConfigurationType,
                                    //////
                                    UserDataType>
- : public ACE_Asynch_Connector<Net_AsynchUDPConnection_T<HandlerType,
+ : public ACE_Asynch_Connector<Net_AsynchUDPConnectionBase_T<HandlerType,
 
-                                                         StateType,
+                                                             ConfigurationType,
+                                                             StateType,
+                                                             StatisticContainerType,
+                                                             StreamType,
 
-                                                         HandlerConfigurationType,
+                                                             HandlerConfigurationType,
 
-                                                         UserDataType> >
+                                                             UserDataType> >
  , public Net_IConnector_T<ACE_INET_Addr,
                            HandlerConfigurationType>
 {
@@ -145,20 +152,23 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnection_T<HandlerType,
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
-                                   Stream_Statistic,
+                                   StatisticContainerType,
                                    StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Net_AsynchUDPConnection_T<HandlerType,
-                                    /////
-                                    StateType,
-                                    /////
-                                    HandlerConfigurationType,
-                                    /////
-                                    UserDataType> CONNECTION_T;
+  typedef Net_AsynchUDPConnectionBase_T<HandlerType,
+
+                                        ConfigurationType,
+                                        StateType,
+                                        StatisticContainerType,
+                                        StreamType,
+
+                                        HandlerConfigurationType,
+
+                                        UserDataType> CONNECTION_T;
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
+                                unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
   virtual ~Net_Client_AsynchConnector_T ();
 
   // override default connect strategy
@@ -180,22 +190,28 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnection_T<HandlerType,
 
  protected:
   // override default creation strategy
-  virtual Net_AsynchUDPConnection_T<HandlerType,
-                                    /////
-                                    StateType,
-                                    /////
-                                    HandlerConfigurationType,
-                                    /////
-                                    UserDataType>* make_handler (void);
+  virtual Net_AsynchUDPConnectionBase_T<HandlerType,
+
+                                        ConfigurationType,
+                                        StateType,
+                                        StatisticContainerType,
+                                        StreamType,
+
+                                        HandlerConfigurationType,
+
+                                        UserDataType>* make_handler (void);
 
  private:
-  typedef ACE_Asynch_Connector<Net_AsynchUDPConnection_T<HandlerType,
+  typedef ACE_Asynch_Connector<Net_AsynchUDPConnectionBase_T<HandlerType,
 
-                                                         StateType,
+                                                             ConfigurationType,
+                                                             StateType,
+                                                             StatisticContainerType,
+                                                             StreamType,
 
-                                                         HandlerConfigurationType,
+                                                             HandlerConfigurationType,
 
-                                                         UserDataType> > inherited;
+                                                             UserDataType> > inherited;
 
   typedef Net_IConnector_T<ACE_INET_Addr,
                            HandlerConfigurationType> ICONNECTOR_T;
@@ -217,6 +233,7 @@ template <typename HandlerType,
           ///////////////////////////////
           typename ConfigurationType,
           typename StateType,
+          typename StatisticContainerType,
           typename StreamType,
           ///////////////////////////////
           typename HandlerConfigurationType,
@@ -227,6 +244,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    ACE_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
+                                   StatisticContainerType,
                                    StreamType,
                                    //////
                                    HandlerConfigurationType,
@@ -240,13 +258,13 @@ class Net_Client_AsynchConnector_T<HandlerType,
   typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
-                                   Stream_Statistic,
+                                   StatisticContainerType,
                                    StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
+                                unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
   virtual ~Net_Client_AsynchConnector_T ();
 
   // override default connect strategy

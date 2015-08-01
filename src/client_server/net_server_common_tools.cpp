@@ -31,7 +31,7 @@
 #include "net_macros.h"
 
 #include "net_server_defines.h"
-#include "net_server_listener_common.h"
+//#include "net_server_listener_common.h"
 
 // initialize statics
 unsigned int
@@ -268,18 +268,18 @@ Net_Server_Common_Tools::getNextLogFilename (const std::string& directory_in,
   return true;
 }
 
-Net_IListener_t*
-Net_Server_Common_Tools::getListenerSingleton ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_Common_Tools::getListenerSingleton"));
+//Net_IListener_t*
+//Net_Server_Common_Tools::getListenerSingleton ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Server_Common_Tools::getListenerSingleton"));
 
-  return NET_SERVER_LISTENER_SINGLETON::instance ();
-}
+//  return NET_SERVER_LISTENER_SINGLETON::instance ();
+//}
 
-Net_IListener_t*
-Net_Server_Common_Tools::getAsynchListenerSingleton ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_Common_Tools::getAsynchListenerSingleton"));
+//Net_IListener_t*
+//Net_Server_Common_Tools::getAsynchListenerSingleton ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Server_Common_Tools::getAsynchListenerSingleton"));
 
-  return NET_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
-}
+//  return NET_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
+//}

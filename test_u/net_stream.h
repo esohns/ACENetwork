@@ -32,7 +32,6 @@
 
 #include "net_common_modules.h"
 #include "net_configuration.h"
-#include "net_exports.h"
 #include "net_message.h"
 #include "net_module_headerparser.h"
 #include "net_module_protocolhandler.h"
@@ -40,7 +39,7 @@
 #include "net_sessionmessage.h"
 #include "net_stream_common.h"
 
-class Net_Export Net_Stream
+class Net_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////

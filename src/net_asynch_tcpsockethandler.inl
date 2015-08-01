@@ -23,10 +23,10 @@
 #include "ace/OS_Memory.h"
 #include "ace/Proactor.h"
 
-#include "stream_defines.h"
+#include "common_defines.h"
 
-#include "net_defines.h"
 #include "net_common_tools.h"
+#include "net_defines.h"
 #include "net_macros.h"
 
 template <typename ConfigurationType>
@@ -247,14 +247,10 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (ACE_Event_Handler* hand
   ACE_UNUSED_ARG (handler_in);
   ACE_UNUSED_ARG (mask_in);
 
-  // *NOTE*: should NEVER be reached !
   ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (-1);
 
-#if defined (_MSC_VER)
-  return -1;
-#else
   ACE_NOTREACHED (return -1;)
-#endif
 }
 
 template <typename ConfigurationType>
@@ -337,8 +333,11 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
                   result_in.handle (),
-                  //ACE_TEXT (ACE_OS::strerror (error))));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
                   ACE_TEXT (ACE::sock_error (error))));
+#else
+                  ACE_TEXT (ACE_OS::strerror (error))));
+#endif
   } // end IF
 
   switch (bytes_transferred)
@@ -354,8 +353,11 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
                     result_in.handle (),
-                    //ACE_TEXT (ACE_OS::strerror (error))));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
                     ACE_TEXT (ACE::sock_error (error))));
+#else
+                    ACE_TEXT (ACE_OS::strerror (error))));
+#endif
 
       break;
     }

@@ -23,7 +23,6 @@
 #include "ace/OS_Memory.h"
 
 #include "net_macros.h"
-#include "net_stream_common.h"
 
 template <typename SessionMessageType,
           typename MessageType,

@@ -32,7 +32,6 @@
 
 #include "net_server_asynchlistener.h"
 //#include "net_server_common.h"
-#include "net_server_exports.h"
 #include "net_server_listener.h"
 
 // foward declarations
@@ -61,14 +60,7 @@ typedef Net_Server_Listener_T<Net_TCPConnection,
 
 typedef ACE_Singleton<Net_Server_AsynchListener_t,
                       ACE_Recursive_Thread_Mutex> NET_SERVER_ASYNCHLISTENER_SINGLETON;
-NET_SERVER_SINGLETON_DECLARE (ACE_Singleton,
-                              Net_Server_AsynchListener_t,
-                              ACE_SYNCH_RECURSIVE_MUTEX);
-
 typedef ACE_Singleton<Net_Server_Listener_t,
                       ACE_SYNCH_RECURSIVE_MUTEX> NET_SERVER_LISTENER_SINGLETON;
-NET_SERVER_SINGLETON_DECLARE (ACE_Singleton,
-                              Net_Server_Listener_t,
-                              ACE_SYNCH_RECURSIVE_MUTEX);
 
 #endif

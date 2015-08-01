@@ -36,8 +36,8 @@ class Net_Export Net_TransportLayer_Netlink
  private:
   typedef Net_NetlinkTransportLayer_Base inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Netlink (const Net_TransportLayer_Netlink&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Netlink& operator= (const Net_TransportLayer_Netlink&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Netlink (const Net_TransportLayer_Netlink&))
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Netlink& operator= (const Net_TransportLayer_Netlink&))
 };
 #endif
 

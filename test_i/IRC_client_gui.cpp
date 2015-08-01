@@ -1452,6 +1452,10 @@ ACE_TMAIN (int argc_in,
 
   stream_user_data.configuration = &configuration;
 
+  ////////////////////// socket handler configuration //////////////////////////
+  configuration.socketHandlerConfiguration.socketConfiguration =
+      &configuration.socketConfiguration;
+  ////////////////////////// stream configuration //////////////////////////////
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
       &configuration.streamConfiguration;

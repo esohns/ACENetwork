@@ -34,6 +34,7 @@ class Net_MessageHandlerBase_T
   virtual ~Net_MessageHandlerBase_T ();
 
   // implement Common_INotify_T
+  // *WARNING*: these are NOP stubs
   virtual void start (const ConfigurationType&);
   virtual void notify (const MessageType&);
   virtual void end ();

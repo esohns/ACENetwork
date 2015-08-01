@@ -23,12 +23,20 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
-Net_NetlinkConnection_T<UserDataType,
-                        SessionDataType,
-                        HandlerType>::Net_NetlinkConnection_T ()
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_NetlinkConnection_T<HandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        StreamType,
+                        HandlerConfigurationType,
+                        UserDataType>::Net_NetlinkConnection_T ()
  : inherited (NULL,
               0)
 {
@@ -36,13 +44,21 @@ Net_NetlinkConnection_T<UserDataType,
 
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
-Net_NetlinkConnection_T<UserDataType,
-                        SessionDataType,
-                        HandlerType>::Net_NetlinkConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                               unsigned int statisticCollectionInterval_in)
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_NetlinkConnection_T<HandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        StreamType,
+                        HandlerConfigurationType,
+                        UserDataType>::Net_NetlinkConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -50,25 +66,41 @@ Net_NetlinkConnection_T<UserDataType,
 
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
-Net_NetlinkConnection_T<UserDataType,
-                        SessionDataType,
-                        HandlerType>::~Net_NetlinkConnection_T ()
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_NetlinkConnection_T<HandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        StreamType,
+                        HandlerConfigurationType,
+                        UserDataType>::~Net_NetlinkConnection_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::~Net_NetlinkConnection_T"));
 
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 bool
-Net_NetlinkConnection_T<UserDataType,
-                        SessionDataType,
-                        HandlerType>::initialize (Net_ClientServerRole role_in,
-                                                  const Net_SocketConfiguration& configuration_in)
+Net_NetlinkConnection_T<HandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        StreamType,
+                        HandlerConfigurationType,
+                        UserDataType>::initialize (Net_ClientServerRole role_in,
+                                                   const Net_SocketConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::initialize"));
 
@@ -132,13 +164,21 @@ Net_NetlinkConnection_T<UserDataType,
   return true;
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_NetlinkConnection_T<UserDataType,
-                        SessionDataType,
-                        HandlerType>::finalize ()
+Net_NetlinkConnection_T<HandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        StreamType,
+                        HandlerConfigurationType,
+                        UserDataType>::finalize ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::finalize"));
 
@@ -174,15 +214,23 @@ Net_NetlinkConnection_T<UserDataType,
 #endif
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_NetlinkConnection_T<UserDataType,
-                        SessionDataType,
-                        HandlerType>::info (ACE_HANDLE& handle_out,
-                                            ACE_Netlink_Addr& localSAP_out,
-                                            ACE_Netlink_Addr& remoteSAP_out) const
+Net_NetlinkConnection_T<HandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        StreamType,
+                        HandlerConfigurationType,
+                        UserDataType>::info (ACE_HANDLE& handle_out,
+                                             ACE_Netlink_Addr& localSAP_out,
+                                             ACE_Netlink_Addr& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::info"));
 
@@ -195,13 +243,21 @@ Net_NetlinkConnection_T<UserDataType,
                 ACE_TEXT ("failed to ACE_SOCK::get_remote_addr(): \"%m\", continuing\n")));
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 unsigned int
-Net_NetlinkConnection_T<UserDataType,
-                        SessionDataType,
-                        HandlerType>::id () const
+Net_NetlinkConnection_T<HandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        StreamType,
+                        HandlerConfigurationType,
+                        UserDataType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::id"));
 
@@ -218,13 +274,21 @@ Net_NetlinkConnection_T<UserDataType,
 #endif
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_NetlinkConnection_T<UserDataType,
-                        SessionDataType,
-                        HandlerType>::dump_state () const
+Net_NetlinkConnection_T<HandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        StreamType,
+                        HandlerConfigurationType,
+                        UserDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::dump_state"));
 
@@ -493,14 +557,22 @@ Net_NetlinkConnection_T<UserDataType,
 //  return 0;
 //}
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 int
-Net_NetlinkConnection_T<UserDataType,
-                        SessionDataType,
-                        HandlerType>::handle_close (ACE_HANDLE handle_in,
-                                                    ACE_Reactor_Mask mask_in)
+Net_NetlinkConnection_T<HandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        StreamType,
+                        HandlerConfigurationType,
+                        UserDataType>::handle_close (ACE_HANDLE handle_in,
+                                                     ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::handle_close"));
 
@@ -619,12 +691,20 @@ Net_NetlinkConnection_T<UserDataType,
 
 /////////////////////////////////////////
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
-Net_AsynchNetlinkConnection_T<UserDataType,
-                              SessionDataType,
-                              HandlerType>::Net_AsynchNetlinkConnection_T ()
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_AsynchNetlinkConnection_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              HandlerConfigurationType,
+                              UserDataType>::Net_AsynchNetlinkConnection_T ()
  : inherited (NULL,
               0)
 {
@@ -632,13 +712,21 @@ Net_AsynchNetlinkConnection_T<UserDataType,
 
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
-Net_AsynchNetlinkConnection_T<UserDataType,
-                              SessionDataType,
-                              HandlerType>::Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                           unsigned int statisticCollectionInterval_in)
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_AsynchNetlinkConnection_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              HandlerConfigurationType,
+                              UserDataType>::Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                            unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -646,12 +734,20 @@ Net_AsynchNetlinkConnection_T<UserDataType,
 
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
-Net_AsynchNetlinkConnection_T<UserDataType,
-                              SessionDataType,
-                              HandlerType>::~Net_AsynchNetlinkConnection_T ()
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+Net_AsynchNetlinkConnection_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              HandlerConfigurationType,
+                              UserDataType>::~Net_AsynchNetlinkConnection_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::~Net_AsynchNetlinkConnection_T"));
 
@@ -764,14 +860,22 @@ Net_AsynchNetlinkConnection_T<UserDataType,
 ////  return 0;
 ////}
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 bool
-Net_AsynchNetlinkConnection_T<UserDataType,
-                              SessionDataType,
-                              HandlerType>::initialize (Net_ClientServerRole role_in,
-                                                        const Net_SocketConfiguration& configuration_in)
+Net_AsynchNetlinkConnection_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              HandlerConfigurationType,
+                              UserDataType>::initialize (Net_ClientServerRole role_in,
+                                                         const Net_SocketConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::initialize"));
 
@@ -834,13 +938,21 @@ Net_AsynchNetlinkConnection_T<UserDataType,
   return true;
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_AsynchNetlinkConnection_T<UserDataType,
-                              SessionDataType,
-                              HandlerType>::finalize ()
+Net_AsynchNetlinkConnection_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              HandlerConfigurationType,
+                              UserDataType>::finalize ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::finalize"));
 
@@ -876,15 +988,23 @@ Net_AsynchNetlinkConnection_T<UserDataType,
 #endif
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_AsynchNetlinkConnection_T<UserDataType,
-                              SessionDataType,
-                              HandlerType>::info (ACE_HANDLE& handle_out,
-                                                  ACE_Netlink_Addr& localSAP_out,
-                                                  ACE_Netlink_Addr& remoteSAP_out) const
+Net_AsynchNetlinkConnection_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              HandlerConfigurationType,
+                              UserDataType>::info (ACE_HANDLE& handle_out,
+                                                   ACE_Netlink_Addr& localSAP_out,
+                                                   ACE_Netlink_Addr& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::info"));
 
@@ -893,13 +1013,21 @@ Net_AsynchNetlinkConnection_T<UserDataType,
   remoteSAP_out = inherited::remoteSAP_;
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 unsigned int
-Net_AsynchNetlinkConnection_T<UserDataType,
-                              SessionDataType,
-                              HandlerType>::id () const
+Net_AsynchNetlinkConnection_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              HandlerConfigurationType,
+                              UserDataType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::id"));
 
@@ -916,13 +1044,21 @@ Net_AsynchNetlinkConnection_T<UserDataType,
 #endif
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_AsynchNetlinkConnection_T<UserDataType,
-                              SessionDataType,
-                              HandlerType>::dump_state () const
+Net_AsynchNetlinkConnection_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              HandlerConfigurationType,
+                              UserDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::dump_state"));
 
@@ -958,14 +1094,22 @@ Net_AsynchNetlinkConnection_T<UserDataType,
               ACE_TEXT (peer_address.c_str ())));
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 void
-Net_AsynchNetlinkConnection_T<UserDataType,
-                              SessionDataType,
-                              HandlerType>::open (ACE_HANDLE handle_in,
-                                                  ACE_Message_Block& messageBlock_in)
+Net_AsynchNetlinkConnection_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              HandlerConfigurationType,
+                              UserDataType>::open (ACE_HANDLE handle_in,
+                                                   ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::open"));
 
@@ -1024,14 +1168,22 @@ Net_AsynchNetlinkConnection_T<UserDataType,
 #endif
 }
 
-template <typename UserDataType,
-          typename SessionDataType,
-          typename HandlerType>
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 int
-Net_AsynchNetlinkConnection_T<UserDataType,
-                              SessionDataType,
-                              HandlerType>::handle_close (ACE_HANDLE handle_in,
-                                                          ACE_Reactor_Mask mask_in)
+Net_AsynchNetlinkConnection_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              HandlerConfigurationType,
+                              UserDataType>::handle_close (ACE_HANDLE handle_in,
+                                                           ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::handle_close"));
 

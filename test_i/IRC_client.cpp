@@ -67,7 +67,7 @@ using namespace std;
 #include "libacenetwork_config.h"
 #endif
 
-#include "net_client_connector_common.h"
+//#include "net_client_connector_common.h"
 #include "net_defines.h"
 
 #include "IRC_common.h"

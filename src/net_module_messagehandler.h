@@ -31,7 +31,7 @@
 #include "common_iclone.h"
 #include "common_time_common.h"
 
-//#include "stream_common.h"
+#include "stream_common.h"
 #include "stream_imodule.h"
 #include "stream_task_base_synch.h"
 

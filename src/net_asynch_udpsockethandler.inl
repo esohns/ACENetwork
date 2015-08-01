@@ -18,11 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "ace/Log_Msg.h"
 #include "ace/OS.h"
 #include "ace/OS_Memory.h"
 #include "ace/Proactor.h"
 
-#include "stream_defines.h"
+#include "common_defines.h"
 
 #include "net_common_tools.h"
 #include "net_defines.h"
@@ -145,8 +146,10 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::addresses (const ACE_INET_Addr&
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::addresses"));
 
+  ACE_UNUSED_ARG (remoteAddress_in);
+
   localSAP_ = localAddress_in;
-//  remoteSAP_ = remoteAddress_in;
+//  remoteSAP_ = ACE_sap_any_cast (const ACE_INET_Addr&);
 }
 
 template <typename ConfigurationType>
@@ -249,14 +252,10 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::notify (ACE_Event_Handler* hand
   ACE_UNUSED_ARG (handler_in);
   ACE_UNUSED_ARG (mask_in);
 
-  // *NOTE*: should NEVER be reached !
   ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (-1);
 
-#if defined (_MSC_VER)
-  return -1;
-#else
   ACE_NOTREACHED (return -1;)
-#endif
 }
 
 template <typename ConfigurationType>
@@ -333,7 +332,11 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
                   result_in.handle (),
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                  ACE_TEXT (ACE::sock_error (error))));
+#else
                   ACE_TEXT (ACE_OS::strerror (error))));
+#endif
 
     close = true;
   } // end IF
@@ -351,7 +354,11 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
                     result_in.handle (),
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                    ACE_TEXT (ACE::sock_error (error))));
+#else
                     ACE_TEXT (ACE_OS::strerror (error))));
+#endif
 
       close = true;
 

@@ -25,7 +25,7 @@
 
 #include "ace/Global_Macros.h"
 
-#include "net_connection_manager_common.h"
+//#include "net_connection_manager_common.h"
 #include "net_exports.h"
 
 class Net_Export Net_Common_Tools
@@ -57,7 +57,7 @@ class Net_Export Net_Common_Tools
                          int = -1);  // seconds {0  --> send RST on close,
                                      //          -1 --> reuse current value}
 
-  static Net_IInetConnectionManager_t* getConnectionManager ();
+//  static Net_IInetConnectionManager_t* getConnectionManager ();
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools ())

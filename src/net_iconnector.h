@@ -27,8 +27,6 @@
 #include "common_iget.h"
 #include "common_iinitialize.h"
 
-#include "net_configuration.h"
-
 template <typename AddressType,
           typename ConfigurationType>
 class Net_IConnector_T
@@ -56,12 +54,5 @@ class Net_IConnector_T
 //  virtual void abort () = 0; // shutdown
 //  virtual connect (const AddressType&) = 0;
 //};
-
-/////////////////////////////////////////
-
-typedef Net_IConnector_T<ACE_INET_Addr,
-                         Net_SocketHandlerConfiguration> Net_IConnector_t;
-//typedef Net_IConnector_T<ACE_INET_Addr,
-//                         Net_Client_ConnectorConfiguration> Net_IConnector_t;
 
 #endif

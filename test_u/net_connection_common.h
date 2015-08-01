@@ -23,11 +23,11 @@
 
 #include "stream_common.h"
 
-#include "net_configuration.h"
-#include "net_iconnection.h"
-#include "net_itransportlayer.h"
+#define TEST_U_NET_COMMON_H
+#include "net_common.h"
 
-typedef Net_ITransportLayer_T<Net_SocketConfiguration> Net_ITransportLayer_t;
+#include "net_configuration.h"
+
 typedef Stream_Statistic Net_RuntimeStatistic_t;
 
 struct Net_ConnectionState

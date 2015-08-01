@@ -25,7 +25,6 @@
 
 #include "stream_session_message_base.h"
 
-#include "net_exports.h"
 #include "net_stream_common.h"
 
 // forward declarations
@@ -36,7 +35,7 @@ class ACE_Message_Block;
 //template <typename MessageType,
 //          typename SessionMessageType> class Stream_MessageAllocatorHeapBase;
 
-class Net_Export Net_SessionMessage
+class Net_SessionMessage
  : public Stream_SessionMessageBase_T<Net_StreamSessionData_t,
                                       Net_StreamUserData>
 {

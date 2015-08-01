@@ -18,26 +18,28 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_CLIENT_COMMON_H
-#define NET_CLIENT_COMMON_H
+#ifndef NET_SERVER_COMMON_H
+#define NET_SERVER_COMMON_H
 
-#include "net_connection_manager_common.h"
+#include "common_istatistic.h"
 
-// forward declarations
-struct Net_SocketHandlerConfiguration;
+#include "net_ilistener.h"
+#include "net_stream_common.h"
 
-struct Net_Client_ConnectorConfiguration
+#include "net_configuration.h"
+
+typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Net_Server_StatisticReportingHandler_t;
+
+typedef Net_IListener_T<Net_ListenerConfiguration,
+                        Net_SocketHandlerConfiguration> Net_IListener_t;
+
+/////////////////////////////////////////
+
+struct Net_Server_SignalHandlerConfiguration
 {
- inline Net_Client_ConnectorConfiguration ()
-  : connectionManager (NULL)
-  , socketHandlerConfiguration (NULL)
-  //, statisticCollectionInterval (0)
-  {};
-
-  Net_IInetConnectionManager_t*   connectionManager;
-  Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  //unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s))
-  //                                                             // 0 --> DON'T collect statistics
+  Net_IListener_t*                        listener;
+  Net_Server_StatisticReportingHandler_t* statisticReportingHandler;
+  long                                    statisticReportingTimerID;
 };
 
 #endif

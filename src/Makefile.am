@@ -17,12 +17,8 @@ include_HEADERS = \
   net_asynch_netlinksockethandler.h \
   net_asynch_tcpsockethandler.h \
   net_asynch_udpsockethandler.h \
-  net_common_modules.h \
   net_common_tools.h \
-  net_configuration.h \
   net_connection_base.h \
-  net_connection_common.h \
-  net_connection_manager_common.h \
   net_connection_manager.h \
   net_controller_base.h \
   net_defines.h \
@@ -32,13 +28,10 @@ include_HEADERS = \
   net_ipconnection.h \
   net_itransportlayer.h \
   net_macros.h \
-  net_message.h \
   net_message_base.h \
   net_message_base.inl \
-  net_module_headerparser.h \
   net_module_messagehandler.h \
   net_module_messagehandler.inl \
-  net_module_protocolhandler.h \
   net_module_runtimestatistic.h \
   net_module_runtimestatistic.inl \
   net_module_sockethandler.h \
@@ -49,7 +42,6 @@ include_HEADERS = \
   net_packet_headers.h \
   net_protocol_layer.h \
   net_remote_comm.h \
-  net_sessionmessage.h \
   net_socket_common.h \
   net_socketconnection_base.h \
   net_socketconnection_base.inl \
@@ -59,13 +51,10 @@ include_HEADERS = \
   net_stream_asynch_tcpsocket_base.inl \
   net_stream_asynch_udpsocket_base.h \
   net_stream_asynch_udpsocket_base.inl \
-  net_stream_common.h \
   net_stream_tcpsocket_base.h \
   net_stream_tcpsocket_base.inl \
   net_stream_udpsocket_base.h \
   net_stream_udpsocket_base.inl \
-  net_stream.h \
-  net_tcpconnection.h \
   net_tcpconnection_base.h \
   net_tcpconnection_base.inl \
   net_tcpsockethandler.h \
@@ -74,8 +63,8 @@ include_HEADERS = \
   net_transportlayer_netlink.h \
   net_transportlayer_tcp.h \
   net_transportlayer_udp.h \
-  net_udpconnection.h \
-  net_udpconnection.inl \
+  net_udpconnection_base.h \
+  net_udpconnection_base.inl \
   net_udpsockethandler.h \
   net_udpsockethandler.inl
 
@@ -92,7 +81,6 @@ libACENetwork_la_SOURCES = \
   net_common_tools.cpp \
   net_common_tools.h \
   net_common.h \
-  net_configuration.h \
   net_connection_base.cpp \
   net_connection_base.h \
   net_connection_base.inl \
@@ -111,18 +99,12 @@ libACENetwork_la_SOURCES = \
   net_ipconnection.h \
   net_itransportlayer.h \
   net_macros.h \
-  net_message.cpp \
-  net_message.h \
   net_message_base.cpp \
   net_message_base.h \
   net_message_base.inl \
-  net_module_headerparser.cpp \
-  net_module_headerparser.h \
   net_module_messagehandler.cpp \
   net_module_messagehandler.h \
   net_module_messagehandler.inl \
-  net_module_protocolhandler.cpp \
-  net_module_protocolhandler.h \
   net_module_runtimestatistic.cpp \
   net_module_runtimestatistic.h \
   net_module_runtimestatistic.inl \
@@ -138,8 +120,6 @@ libACENetwork_la_SOURCES = \
   net_protocol_layer.cpp \
   net_protocol_layer.h \
   net_remote_comm.h \
-  net_sessionmessage.cpp \
-  net_sessionmessage.h \
   net_socket_common.h \
   net_socketconnection_base.cpp \
   net_socketconnection_base.h \
@@ -153,17 +133,12 @@ libACENetwork_la_SOURCES = \
   net_stream_asynch_udpsocket_base.cpp \
   net_stream_asynch_udpsocket_base.h \
   net_stream_asynch_udpsocket_base.inl \
-  net_stream_common.h \
   net_stream_tcpsocket_base.cpp \
   net_stream_tcpsocket_base.h \
   net_stream_tcpsocket_base.inl \
   net_stream_udpsocket_base.cpp \
   net_stream_udpsocket_base.h \
   net_stream_udpsocket_base.inl \
-  net_stream.cpp \
-  net_stream.h \
-  net_tcpconnection.cpp \
-  net_tcpconnection.h \
   net_tcpconnection_base.cpp \
   net_tcpconnection_base.h \
   net_tcpconnection_base.inl \
@@ -179,9 +154,9 @@ libACENetwork_la_SOURCES = \
   net_transportlayer_tcp.h \
   net_transportlayer_udp.cpp \
   net_transportlayer_udp.h \
-  net_udpconnection.cpp \
-  net_udpconnection.h \
-  net_udpconnection.inl \
+  net_udpconnection_base.cpp \
+  net_udpconnection_base.h \
+  net_udpconnection_base.inl \
   net_udpsockethandler.cpp \
   net_udpsockethandler.h \
   net_udpsockethandler.inl

@@ -29,7 +29,6 @@
 #include "common_irefcount.h"
 #include "common_istatistic.h"
 
-//#include "net_common.h"
 #include "net_itransportlayer.h"
 
 // forward declarations

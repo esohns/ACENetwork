@@ -18,14 +18,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "ace/Log_Msg.h"
 #include "ace/OS.h"
 #include "ace/OS_Memory.h"
 #include "ace/Proactor.h"
 
-#include "stream_defines.h"
+#include "common_defines.h"
 
-#include "net_defines.h"
 #include "net_common_tools.h"
+#include "net_defines.h"
 #include "net_macros.h"
 
 template <typename ConfigurationType>
@@ -255,14 +256,10 @@ Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::notify (ACE_Event_Handler* 
   ACE_UNUSED_ARG (handler_in);
   ACE_UNUSED_ARG (mask_in);
 
-  // *NOTE*: should NEVER be reached !
   ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (-1);
 
-#if defined (_MSC_VER)
-  return -1;
-#else
   ACE_NOTREACHED (return -1;)
-#endif
 }
 
 template <typename ConfigurationType>

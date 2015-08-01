@@ -29,15 +29,19 @@
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
+          typename StatisticContainerType,
           typename ProtocolHeaderType>
 Net_Module_SocketHandler_T<SessionMessageType,
                            ProtocolMessageType,
+                           ConfigurationType,
                            StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
+                           StatisticContainerType,
                            ProtocolHeaderType>::Net_Module_SocketHandler_T ()
  : inherited (false, // inactive by default
               false) // DON'T auto-start !
@@ -56,15 +60,19 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
+          typename StatisticContainerType,
           typename ProtocolHeaderType>
 Net_Module_SocketHandler_T<SessionMessageType,
                            ProtocolMessageType,
+                           ConfigurationType,
                            StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
+                           StatisticContainerType,
                            ProtocolHeaderType>::~Net_Module_SocketHandler_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::~Net_Module_SocketHandler_T"));
@@ -93,17 +101,21 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
+          typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
 Net_Module_SocketHandler_T<SessionMessageType,
                            ProtocolMessageType,
+                           ConfigurationType,
                            StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           ProtocolHeaderType>::initialize (const Net_ModuleHandlerConfiguration& configuration_in)
+                           StatisticContainerType,
+                           ProtocolHeaderType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::initialize"));
 
@@ -145,16 +157,20 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
+          typename StatisticContainerType,
           typename ProtocolHeaderType>
 void
 Net_Module_SocketHandler_T<SessionMessageType,
                            ProtocolMessageType,
+                           ConfigurationType,
                            StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
+                           StatisticContainerType,
                            ProtocolHeaderType>::handleDataMessage (ProtocolMessageType*& message_inout,
                                                                    bool& passMessageDownstream_out)
 {
@@ -200,16 +216,20 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
+          typename StatisticContainerType,
           typename ProtocolHeaderType>
 void
 Net_Module_SocketHandler_T<SessionMessageType,
                            ProtocolMessageType,
+                           ConfigurationType,
                            StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
+                           StatisticContainerType,
                            ProtocolHeaderType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                       bool& passMessageDownstream_out)
 {
@@ -283,17 +303,21 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
+          typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
 Net_Module_SocketHandler_T<SessionMessageType,
                            ProtocolMessageType,
+                           ConfigurationType,
                            StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           ProtocolHeaderType>::collect (Net_RuntimeStatistic_t& data_out)
+                           StatisticContainerType,
+                           ProtocolHeaderType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::collect"));
 
@@ -322,16 +346,20 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
+          typename StatisticContainerType,
           typename ProtocolHeaderType>
 void
 Net_Module_SocketHandler_T<SessionMessageType,
                            ProtocolMessageType,
+                           ConfigurationType,
                            StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
+                           StatisticContainerType,
                            ProtocolHeaderType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::report"));
@@ -339,23 +367,25 @@ Net_Module_SocketHandler_T<SessionMessageType,
   ACE_ASSERT (false);
   ACE_NOTSUP;
 
-#if defined (_MSC_VER)
-  ACE_NOTREACHED (return);
-#endif
+  ACE_NOTREACHED (return;)
 }
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
+          typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
 Net_Module_SocketHandler_T<SessionMessageType,
                            ProtocolMessageType,
+                           ConfigurationType,
                            StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
+                           StatisticContainerType,
                            ProtocolHeaderType>::bisectMessages (ProtocolMessageType*& message_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::bisectMessages"));
@@ -516,17 +546,21 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
+          typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
 Net_Module_SocketHandler_T<SessionMessageType,
                            ProtocolMessageType,
+                           ConfigurationType,
                            StreamStateType,
                            SessionDataType,
                            SessionDataContainerType,
-                           ProtocolHeaderType>::putStatisticsMessage (const Net_RuntimeStatistic_t& statisticData_in) const
+                           StatisticContainerType,
+                           ProtocolHeaderType>::putStatisticsMessage (const StatisticContainerType& statisticData_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::putStatisticsMessage"));
 
@@ -565,14 +599,18 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
-          typename SessionDataContainerType>
+          typename SessionDataContainerType,
+          typename StatisticContainerType>
 Net_Module_UDPSocketHandler_T<SessionMessageType,
                               ProtocolMessageType,
+                              ConfigurationType,
                               StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType>::Net_Module_UDPSocketHandler_T ()
+                              SessionDataContainerType,
+                              StatisticContainerType>::Net_Module_UDPSocketHandler_T ()
  : inherited (false, // inactive by default
               false) // DON'T auto-start !
  , isInitialized_ (false)
@@ -587,14 +625,18 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
-          typename SessionDataContainerType>
+          typename SessionDataContainerType,
+          typename StatisticContainerType>
 Net_Module_UDPSocketHandler_T<SessionMessageType,
                               ProtocolMessageType,
+                              ConfigurationType,
                               StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType>::~Net_Module_UDPSocketHandler_T ()
+                              SessionDataContainerType,
+                              StatisticContainerType>::~Net_Module_UDPSocketHandler_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::~Net_Module_UDPSocketHandler_T"));
 
@@ -619,15 +661,19 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
-          typename SessionDataContainerType>
+          typename SessionDataContainerType,
+          typename StatisticContainerType>
 bool
 Net_Module_UDPSocketHandler_T<SessionMessageType,
                               ProtocolMessageType,
+                              ConfigurationType,
                               StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType>::initialize (const Net_ModuleHandlerConfiguration& configuration_in)
+                              SessionDataContainerType,
+                              StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::initialize"));
 
@@ -676,16 +722,20 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
-          typename SessionDataContainerType>
+          typename SessionDataContainerType,
+          typename StatisticContainerType>
 void
 Net_Module_UDPSocketHandler_T<SessionMessageType,
                               ProtocolMessageType,
+                              ConfigurationType,
                               StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                                            bool& passMessageDownstream_out)
+                              SessionDataContainerType,
+                              StatisticContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                                                                          bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::handleDataMessage"));
 
@@ -710,16 +760,20 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
-          typename SessionDataContainerType>
+          typename SessionDataContainerType,
+          typename StatisticContainerType>
 void
 Net_Module_UDPSocketHandler_T<SessionMessageType,
                               ProtocolMessageType,
+                              ConfigurationType,
                               StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                               bool& passMessageDownstream_out)
+                              SessionDataContainerType,
+                              StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                             bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::handleSessionMessage"));
 
@@ -789,15 +843,19 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
-          typename SessionDataContainerType>
+          typename SessionDataContainerType,
+          typename StatisticContainerType>
 bool
 Net_Module_UDPSocketHandler_T<SessionMessageType,
                               ProtocolMessageType,
+                              ConfigurationType,
                               StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType>::collect (Net_RuntimeStatistic_t& data_out)
+                              SessionDataContainerType,
+                              StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::collect"));
 
@@ -824,24 +882,26 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
-          typename SessionDataContainerType>
+          typename SessionDataContainerType,
+          typename StatisticContainerType>
 void
 Net_Module_UDPSocketHandler_T<SessionMessageType,
                               ProtocolMessageType,
+                              ConfigurationType,
                               StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType>::report () const
+                              SessionDataContainerType,
+                              StatisticContainerType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::report"));
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
 
-#if defined (_MSC_VER)
-  ACE_NOTREACHED (true);
-#endif
+  ACE_NOTREACHED (return;)
 }
 
 //template <typename StreamStateType,
@@ -879,15 +939,19 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 
 template <typename SessionMessageType,
           typename ProtocolMessageType,
+          typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
-          typename SessionDataContainerType>
+          typename SessionDataContainerType,
+          typename StatisticContainerType>
 bool
 Net_Module_UDPSocketHandler_T<SessionMessageType,
                               ProtocolMessageType,
+                              ConfigurationType,
                               StreamStateType,
                               SessionDataType,
-                              SessionDataContainerType>::putStatisticsMessage (const Net_RuntimeStatistic_t& statistic_in) const
+                              SessionDataContainerType,
+                              StatisticContainerType>::putStatisticsMessage (const StatisticContainerType& statistic_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::putStatisticsMessage"));
 

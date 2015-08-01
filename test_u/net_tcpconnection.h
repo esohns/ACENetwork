@@ -30,18 +30,19 @@
 #include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Connector.h"
 
-#include "net_common.h"
-#include "net_configuration.h"
-#include "net_exports.h"
-#include "net_socket_common.h"
-#include "net_stream.h"
 #include "net_tcpconnection_base.h"
 
-class Net_Export Net_TCPConnection
+#include "net_configuration.h"
+#include "net_connection_common.h"
+#include "net_socket_common.h"
+#include "net_stream.h"
+
+class Net_TCPConnection
  : public Net_TCPConnectionBase_T<Net_TCPHandler_t,
                                   ///////
                                   Net_Configuration,
                                   Net_ConnectionState,
+                                  Net_RuntimeStatistic_t,
                                   Net_Stream,
                                   ///////
                                   Net_SocketHandlerConfiguration,
@@ -55,7 +56,7 @@ class Net_Export Net_TCPConnection
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    Net_Configuration,
                                    Net_ConnectionState,
-                                   Stream_Statistic,
+                                   Net_RuntimeStatistic_t,
                                    Net_Stream,
                                    /////
                                    Net_StreamUserData> ICONNECTION_MANAGER_T;
@@ -69,6 +70,7 @@ class Net_Export Net_TCPConnection
                                   ///////
                                   Net_Configuration,
                                   Net_ConnectionState,
+                                  Net_RuntimeStatistic_t,
                                   Net_Stream,
                                   ///////
                                   Net_SocketHandlerConfiguration,
@@ -85,11 +87,12 @@ class Net_Export Net_TCPConnection
 
 /////////////////////////////////////////
 
-class Net_Export Net_AsynchTCPConnection
+class Net_AsynchTCPConnection
  : public Net_AsynchTCPConnectionBase_T<Net_AsynchTCPHandler_t,
 
                                         Net_Configuration,
                                         Net_ConnectionState,
+                                        Net_RuntimeStatistic_t,
                                         Net_Stream,
 
                                         Net_SocketHandlerConfiguration,
@@ -103,7 +106,7 @@ class Net_Export Net_AsynchTCPConnection
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    Net_Configuration,
                                    Net_ConnectionState,
-                                   Stream_Statistic,
+                                   Net_RuntimeStatistic_t,
                                    Net_Stream,
                                    //////
                                    Net_StreamUserData> ICONNECTION_MANAGER_T;
@@ -117,6 +120,7 @@ class Net_Export Net_AsynchTCPConnection
 
                                         Net_Configuration,
                                         Net_ConnectionState,
+                                        Net_RuntimeStatistic_t,
                                         Net_Stream,
 
                                         Net_SocketHandlerConfiguration,

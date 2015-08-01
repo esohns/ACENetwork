@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_UDPCONNECTION_H
-#define NET_UDPCONNECTION_H
+#ifndef NET_UDPCONNECTION_BASE_H
+#define NET_UDPCONNECTION_BASE_H
 
 #include "ace/Asynch_Connector.h"
 #include "ace/Connector.h"
@@ -27,30 +27,28 @@
 #include "ace/INET_Addr.h"
 #include "ace/SOCK_Connector.h"
 
-#include "stream_common.h"
-
-#include "net_configuration.h"
-#include "net_connection_manager_common.h"
+#include "net_iconnectionmanager.h"
 #include "net_socketconnection_base.h"
-#include "net_stream.h"
-#include "net_stream_common.h"
 #include "net_transportlayer_udp.h"
 
 template <typename HandlerType,
           ///////////////////////////////
+          typename ConfigurationType,
           typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
           ///////////////////////////////
           typename HandlerConfigurationType,
           ///////////////////////////////
           typename UserDataType>
-class Net_UDPConnection_T
+class Net_UDPConnectionBase_T
  : public Net_SocketConnectionBase_T<HandlerType,
                                      ////
                                      ACE_INET_Addr,
-                                     Net_Configuration,
+                                     ConfigurationType,
                                      StateType,
-                                     Stream_Statistic,
-                                     Net_Stream,
+                                     StatisticContainerType,
+                                     StreamType,
                                      ////
                                      Net_SocketConfiguration,
                                      ////
@@ -59,27 +57,30 @@ class Net_UDPConnection_T
                                      UserDataType>
  , public Net_TransportLayer_UDP
 {
-  //friend class ACE_Connector<Net_UDPConnection_T<HandlerType,
+  friend class ACE_Connector<Net_UDPConnectionBase_T<HandlerType,
 
-  //                                               StateType,
+                                                     ConfigurationType,
+                                                     StateType,
+                                                     StatisticContainerType,
+                                                     StreamType,
 
-  //                                               HandlerConfigurationType,
+                                                     HandlerConfigurationType,
 
-  //                                               UserDataType>,
-  //                           ACE_SOCK_CONNECTOR>;
+                                                     UserDataType>,
+                             ACE_SOCK_CONNECTOR>;
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   Net_Configuration,
+                                   ConfigurationType,
                                    StateType,
-                                   Stream_Statistic,
-                                   Net_Stream,
+                                   StatisticContainerType,
+                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_UDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                       unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
-  virtual ~Net_UDPConnection_T ();
+  Net_UDPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                           unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
+  virtual ~Net_UDPConnectionBase_T ();
 
   // override / implement (part of) Net_IInetTransportLayer
   //typedef Net_ConnectionBase_T<ACE_INET_Addr,
@@ -105,13 +106,12 @@ class Net_UDPConnection_T
   typedef Net_SocketConnectionBase_T<HandlerType,
                                      ////
                                      ACE_INET_Addr,
-                                     Net_Configuration,
+                                     ConfigurationType,
                                      StateType,
-                                     Stream_Statistic,
-                                     Net_Stream,
+                                     StatisticContainerType,
+                                     StreamType,
                                      ////
                                      Net_SocketConfiguration,
-                                     ////
                                      HandlerConfigurationType,
                                      ////
                                      UserDataType> inherited;
@@ -120,28 +120,31 @@ class Net_UDPConnection_T
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded
   //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
-  Net_UDPConnection_T ();
-  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T (const Net_UDPConnection_T&))
-  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnection_T& operator= (const Net_UDPConnection_T&))
+  Net_UDPConnectionBase_T ();
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnectionBase_T (const Net_UDPConnectionBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPConnectionBase_T& operator= (const Net_UDPConnectionBase_T&))
 };
 
 /////////////////////////////////////////
 
 template <typename HandlerType,
           ///////////////////////////////
+          typename ConfigurationType,
           typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
           ///////////////////////////////
           typename HandlerConfigurationType,
           ///////////////////////////////
           typename UserDataType>
-class Net_AsynchUDPConnection_T
+class Net_AsynchUDPConnectionBase_T
  : public Net_AsynchSocketConnectionBase_T<HandlerType,
 
                                            ACE_INET_Addr,
-                                           Net_Configuration,
+                                           ConfigurationType,
                                            StateType,
-                                           Stream_Statistic,
-                                           Net_Stream,
+                                           StatisticContainerType,
+                                           StreamType,
 
                                            Net_SocketConfiguration,
 
@@ -150,26 +153,29 @@ class Net_AsynchUDPConnection_T
                                            UserDataType>
  , public Net_TransportLayer_UDP
 {
-  //friend class ACE_Asynch_Connector<Net_AsynchUDPConnection_T<HandlerType,
+  friend class ACE_Asynch_Connector<Net_AsynchUDPConnectionBase_T<HandlerType,
 
-  //                                                            StateType,
+                                                                  ConfigurationType,
+                                                                  StateType,
+                                                                  StatisticContainerType,
+                                                                  StreamType,
 
-  //                                                            HandlerConfigurationType,
+                                                                  HandlerConfigurationType,
 
-  //                                                            UserDataType> >;
+                                                                  UserDataType> >;
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   Net_Configuration,
+                                   ConfigurationType,
                                    StateType,
-                                   Stream_Statistic,
-                                   Net_Stream,
+                                   StatisticContainerType,
+                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_AsynchUDPConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                             unsigned int = 0);      // statistic collecting interval (second(s)) [0:off]
-  virtual ~Net_AsynchUDPConnection_T ();
+  Net_AsynchUDPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
+                                 unsigned int = 0);      // statistic collecting interval (second(s)) [0:off]
+  virtual ~Net_AsynchUDPConnectionBase_T ();
 
   // override / implement (part of) Net_IInetTransportLayer
   //using Net_AsynchSocketConnectionBase_T::inherited::Net_ConnectionBase_T::initialize;
@@ -183,10 +189,10 @@ class Net_AsynchUDPConnection_T
   typedef Net_AsynchSocketConnectionBase_T<HandlerType,
 
                                            ACE_INET_Addr,
-                                           Net_Configuration,
+                                           ConfigurationType,
                                            StateType,
-                                           Stream_Statistic,
-                                           Net_Stream,
+                                           StatisticContainerType,
+                                           StreamType,
 
                                            Net_SocketConfiguration,
 
@@ -198,12 +204,12 @@ class Net_AsynchUDPConnection_T
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded
   //         make_handler() method of ACE_AsynchConnector/ACE_AsynchAcceptor
-  Net_AsynchUDPConnection_T ();
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T (const Net_AsynchUDPConnection_T&))
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnection_T& operator= (const Net_AsynchUDPConnection_T&))
+  Net_AsynchUDPConnectionBase_T ();
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnectionBase_T (const Net_AsynchUDPConnectionBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnectionBase_T& operator= (const Net_AsynchUDPConnectionBase_T&))
 };
 
 // include template implementation
-#include "net_udpconnection.inl"
+#include "net_udpconnection_base.inl"
 
 #endif

@@ -29,13 +29,11 @@
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
-#include "net_exports.h"
-
 // forward declaration(s)
 class Net_Message;
 class Net_SessionMessage;
 
-class Net_Export Net_Module_HeaderParser
+class Net_Module_HeaderParser
  : public Stream_TaskBaseSynch_T<Common_TimePolicy_t,
                                  Net_SessionMessage,
                                  Net_Message>

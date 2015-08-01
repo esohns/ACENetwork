@@ -243,10 +243,10 @@ connection_setup_function (void* arg_in)
         // debug info
         ACE_TCHAR buffer[BUFSIZ];
         ACE_OS::memset (buffer, 0, sizeof (buffer));
-        result =
+        result_3 =
           configuration.socketConfiguration.peerAddress.addr_to_string (buffer,
                                                                         sizeof (buffer));
-        if (result == -1)
+        if (result_3 == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
         ACE_DEBUG ((LM_DEBUG,
@@ -289,7 +289,6 @@ connection_failed:
     ACE_Time_Value deadline = COMMON_TIME_NOW +
                               ACE_Time_Value (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT, 0);
     ACE_Time_Value delay (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
-    int result_3 = -1;
     do
     {
       result_3 = ACE_OS::sleep (delay);

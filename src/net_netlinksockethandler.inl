@@ -21,10 +21,10 @@
 #include "ace/Log_Msg.h"
 #include "ace/Reactor.h"
 
-#include "net_defines.h"
+#include "net_common.h"
 #include "net_common_tools.h"
-#include "net_configuration.h"
-#include "net_iconnectionmanager.h"
+#include "net_defines.h"
+//#include "net_iconnectionmanager.h"
 #include "net_macros.h"
 
 template <typename ConfigurationType>

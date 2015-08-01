@@ -31,12 +31,12 @@
 #include "stream_common.h"
 
 #include "net_asynch_tcpsockethandler.h"
-#include "net_configuration.h"
+//#include "net_configuration.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
 #include "net_stream_asynch_tcpsocket_base.h"
-#include "net_stream_common.h"
+//#include "net_stream_common.h"
 #include "net_stream_tcpsocket_base.h"
 #include "net_tcpsockethandler.h"
 #include "net_tcpconnection_base.h"
@@ -125,6 +125,7 @@ typedef Net_TCPConnectionBase_T<IRC_Client_TCPHandler_t,
                                 /////////
                                 IRC_Client_Configuration,
                                 IRC_Client_ConnectionState,
+                                IRC_Client_RuntimeStatistic_t,
                                 IRC_Client_Stream,
                                 /////////
                                 IRC_Client_SocketHandlerConfiguration,
@@ -134,6 +135,7 @@ typedef Net_AsynchTCPConnectionBase_T<IRC_Client_AsynchTCPHandler_t,
                                       ///
                                       IRC_Client_Configuration,
                                       IRC_Client_ConnectionState,
+                                      IRC_Client_RuntimeStatistic_t,
                                       IRC_Client_Stream,
                                       ///
                                       IRC_Client_SocketHandlerConfiguration,
@@ -165,6 +167,7 @@ typedef Net_Client_Connector_T<IRC_Client_TCPConnection_t,
                                ACE_INET_Addr,
                                IRC_Client_Configuration,
                                IRC_Client_ConnectionState,
+                               IRC_Client_RuntimeStatistic_t,
                                IRC_Client_Stream,
                                //////////
                                IRC_Client_SocketHandlerConfiguration,
@@ -175,6 +178,7 @@ typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
                                      IRC_Client_Configuration,
                                      IRC_Client_ConnectionState,
+                                     IRC_Client_RuntimeStatistic_t,
                                      IRC_Client_Stream,
                                      ////
                                      IRC_Client_SocketHandlerConfiguration,

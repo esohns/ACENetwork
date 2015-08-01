@@ -39,8 +39,8 @@ class Net_Server_Export Net_Server_Common_Tools
   static bool getNextLogFilename (const std::string&, // directory
                                   std::string&);      // return value: log filename
 
-  static Net_IListener_t* getListenerSingleton ();
-  static Net_IListener_t* getAsynchListenerSingleton ();
+//  static Net_IListener_t* getListenerSingleton ();
+//  static Net_IListener_t* getAsynchListenerSingleton ();
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Server_Common_Tools ())

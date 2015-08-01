@@ -25,8 +25,6 @@
 #include "common_iget.h"
 #include "common_iinitialize.h"
 
-#include "net_configuration.h"
-
 template <typename ConfigurationType,
           typename HandlerConfigurationType>
 class Net_IListener_T
@@ -42,10 +40,5 @@ class Net_IListener_T
 
   virtual bool useReactor () const = 0; // ? : uses proactor
 };
-
-/////////////////////////////////////////
-
-typedef Net_IListener_T<Net_ListenerConfiguration,
-                        Net_SocketHandlerConfiguration> Net_IListener_t;
 
 #endif

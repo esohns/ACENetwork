@@ -130,12 +130,15 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   ACE_UNUSED_ARG (handle_in);
 
+  //// sanity check(s)
+  //ACE_ASSERT (inherited4::configuration_.socketHandlerConfiguration);
+
   int result = -1;
-  Net_SocketHandlerConfiguration socket_handler_configuration;
   // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
   // step1: open socket
+  // *TODO*: do this somewhere else...
   ACE_INET_Addr local_SAP (inherited4::configuration_.socketConfiguration.peerAddress.get_port_number (),
                            (inherited4::configuration_.socketConfiguration.useLoopbackDevice ? INADDR_LOOPBACK
                                                                                              : INADDR_ANY));
@@ -160,14 +163,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step2a: initialize base-class
-  // *TODO*: this should not be happening here...
-  socket_handler_configuration.bufferSize =
-    inherited4::configuration_.protocolConfiguration.bufferSize;
-  socket_handler_configuration.messageAllocator =
-    inherited4::configuration_.streamConfiguration.messageAllocator;
-  socket_handler_configuration.socketConfiguration =
-    &inherited4::configuration_.socketConfiguration;
-  if (!inherited::initialize (socket_handler_configuration))
+  if (!inherited::initialize (inherited4::configuration_.socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SocketHandlerBase::initialize(): \"%m\", aborting\n")));
@@ -950,18 +946,16 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   ACE_UNUSED_ARG (handle_in);
 
+  //// sanity check(s)
+  //ACE_ASSERT (inherited4::configuration_.socketHandlerConfiguration);
+
   int result = -1;
-  unsigned int session_id = 0;
-  Net_SocketHandlerConfiguration socket_handler_configuration;
   // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
-  // *TODO*: ???
-  ACE_Netlink_Addr address =
-      inherited4::configuration_.socketConfiguration.netlinkAddress;
   // step1: open socket
   result =
-      inherited2::open (address,                                                         // local SAP
+      inherited2::open (inherited4::configuration_.socketConfiguration.netlinkAddress,   // local SAP
                         ACE_PROTOCOL_FAMILY_NETLINK,                                     // protocol family
                         inherited4::configuration_.socketConfiguration.netlinkProtocol); // protocol
                         // NETLINK_USERSOCK);                                             // protocol
@@ -984,14 +978,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   } // end IF
 
   // step2a: initialize base-class
-  // *TODO*: this should not be happening here...
-  socket_handler_configuration.bufferSize =
-      inherited4::configuration_.protocolConfiguration.bufferSize;
-  socket_handler_configuration.messageAllocator =
-      inherited4::configuration_.streamConfiguration.messageAllocator;
-  socket_handler_configuration.socketConfiguration =
-      inherited4::configuration_.socketConfiguration;
-  if (!inherited::initialize (socket_handler_configuration))
+  if (!inherited::initialize (inherited4::configuration_.socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SocketHandlerBase::initialize(): \"%m\", aborting\n")));
@@ -1045,15 +1032,15 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
     // *TODO*: step3b: initialize final module
   } // end IF
+  // *TODO*: this clearly is a design glitch
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  session_id =
+  inherited4::configuration_.streamConfiguration.sessionID =
     reinterpret_cast<unsigned int> (inherited2::get_handle ()); // (== socket handle)
 #else
-  session_id =
+  inherited4::configuration_.streamConfiguration.sessionID =
     static_cast<unsigned int> (inherited2::get_handle ()); // (== socket handle)
 #endif
-  // *TODO*: this clearly is a design glitch
-  if (!stream_.initialize (session_id,
+  if (!stream_.initialize (inherited4::configuration_.streamConfiguration.sessionID,
                            inherited4::configuration_.streamConfiguration,
                            inherited4::configuration_.protocolConfiguration,
                            inherited4::configuration_.streamSessionData))

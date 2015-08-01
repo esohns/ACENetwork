@@ -45,32 +45,6 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  ////////
                                  Net_StreamUserData> Net_IInetConnectionManager_t;
 
-struct Net_SocketConfiguration
-{
-  inline Net_SocketConfiguration ()
-   : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
-   , linger (NET_SOCKET_DEFAULT_LINGER)
- #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-    , netlinkAddress (ACE_sap_any_cast (const ACE_Netlink_Addr&))
-    , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
- #endif
-   , peerAddress (ACE_sap_any_cast (const ACE_INET_Addr&))
-   , useLoopbackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
-  {};
-
-  int                 bufferSize; // socket buffer size (I/O)
-  bool                linger;
-  // *TODO*: remove address information (pass as AddressType in open() instead)
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  ACE_Netlink_Addr    netlinkAddress;
-  int                 netlinkProtocol;
-#endif
-  ACE_INET_Addr       peerAddress;
-  bool                useLoopbackDevice;
-  // *TODO*: add network interface specifier (interface index on linux, (G)UID
-  //         on windows)
-};
-
 struct Net_SocketHandlerConfiguration
 {
   inline Net_SocketHandlerConfiguration ()

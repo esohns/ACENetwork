@@ -26,7 +26,7 @@
 #include "common.h"
 
 #include "net_common.h"
-#include "net_configuration.h"
+//#include "net_configuration.h"
 #include "net_exports.h"
 #include "net_itransportlayer.h"
 

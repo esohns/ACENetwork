@@ -21,7 +21,18 @@
 #ifndef NET_COMMON_H
 #define NET_COMMON_H
 
+#include "ace/INET_Addr.h"
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#include "ace/Netlink_Addr.h"
+#endif
 #include "ace/Svc_Handler.h"
+
+#include "net_defines.h"
+//#include "net_itransportlayer.h"
+
+// forward declarations
+template <typename ConfigurationType>
+class Net_ITransportLayer_T;
 
 enum Net_ClientServerRole
 {
@@ -65,5 +76,33 @@ enum Net_Connection_Status
   ///////////////////////////////////////
   NET_CONNECTION_STATUS_MAX
 };
+
+struct Net_SocketConfiguration
+{
+  inline Net_SocketConfiguration ()
+   : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
+   , linger (NET_SOCKET_DEFAULT_LINGER)
+ #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+    , netlinkAddress (ACE_sap_any_cast (const ACE_Netlink_Addr&))
+    , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
+ #endif
+   , peerAddress (ACE_sap_any_cast (const ACE_INET_Addr&))
+   , useLoopbackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
+  {};
+
+  int              bufferSize; // socket buffer size (I/O)
+  bool             linger;
+  // *TODO*: remove address information (pass as AddressType in open() instead)
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+  ACE_Netlink_Addr netlinkAddress;
+  int              netlinkProtocol;
+#endif
+  ACE_INET_Addr    peerAddress;
+  bool             useLoopbackDevice;
+  // *TODO*: add network interface specifier (interface index on linux, (G)UID
+  //         on windows)
+};
+
+typedef Net_ITransportLayer_T<Net_SocketConfiguration> Net_ITransportLayer_t;
 
 #endif

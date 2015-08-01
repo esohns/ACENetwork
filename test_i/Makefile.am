@@ -3,6 +3,7 @@ ACLOCAL_AMFLAGS = -I m4
 #  -I/usr/include/c++/3.4.6/backward
 AM_CPPFLAGS = \
   -I$(top_srcdir)/../../modules/ATCD/ACE \
+  -I$(top_srcdir)/3rd_party/bison \
   -I$(top_srcdir)/3rd_party/c++ \
   $(PKGCURSES_CFLAGS) \
   $(PKGSDL_CFLAGS) \
@@ -94,7 +95,7 @@ IRC_client_CPPFLAGS = \
   -I$(top_srcdir)/modules/libACEStream/src \
   -I$(top_srcdir)/src \
   -I$(top_srcdir)/src/client_server \
-  -I$(top_srcdir)/3rd_party/bison \
+  -I$(srcdir)/../test_u \
   -I$(builddir)/../..
 IRC_client_LDFLAGS = \
   -L$(abs_top_srcdir)/modules/ATCD/ACE/build/linux/lib \
@@ -178,7 +179,7 @@ IRC_client_gui_CPPFLAGS = \
   -I$(top_srcdir)/modules/libACEStream/src \
   -I$(top_srcdir)/src \
   -I$(top_srcdir)/src/client_server \
-  -I$(top_srcdir)/3rd_party/bison \
+  -I$(srcdir)/../test_u \
   -I$(builddir)/../..
 IRC_client_gui_LDFLAGS = \
   -L$(abs_top_srcdir)/modules/ATCD/ACE/build/linux/lib \

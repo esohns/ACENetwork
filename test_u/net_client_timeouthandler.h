@@ -31,7 +31,7 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
-#include "net_iconnector.h"
+#include "net_client_connector_common.h"
 
 class Net_Client_TimeoutHandler
  : public ACE_Event_Handler
@@ -87,7 +87,7 @@ class Net_Client_TimeoutHandler
   unsigned int                       randomSeed_;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
   char                               randomStateInitializationBuffer_[BUFSIZ];
-  random_data                        randomState_;
+  struct random_data                 randomState_;
 #endif
 
   // probability

@@ -31,6 +31,8 @@
 
 #include "net_sockethandler_base.h"
 
+// *TODO*: subclass ACE_Netlink_Addr, implement addr_to_string()
+
 // *NOTE*: this should be added to ACE so Svc_Handler can be parametrized with
 //         ACE_SOCK_Netlink
 class Net_SOCK_Netlink
