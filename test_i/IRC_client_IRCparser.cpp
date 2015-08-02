@@ -1154,8 +1154,8 @@ namespace yy {
   const unsigned char
   IRC_Client_IRCParser::yyrline_[] =
   {
-       0,   106,   106,   107,   108,   109,   114,   119,   124,   125,
-     126,   135,   141,   142,   143,   149,   150,   156
+       0,   104,   104,   105,   106,   107,   112,   117,   122,   123,
+     124,   133,   139,   140,   141,   146,   147,   152
   };
 
   // Print the state stack on the debug stream.

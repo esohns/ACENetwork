@@ -1,0 +1,92 @@
+# author:      Erik Sohns <eriksohns@123mail.org>
+# rpm spec file
+
+AutoReqProv:  yes
+BuildRoot:    %{_tmppath}/%{name}-root
+Distribution: N/A
+Group:        Development/Libraries
+#Icon: N/A
+License:      LGPL
+Name:         @PACKAGE_NAME@
+Packager:     Erik Sohns <eriksohns@123mail.org>
+Prefix:       /usr/local
+Provides:     %{name}
+Release:      1
+Requires:     libCommon, libACEStream
+#Serial:       1
+Source:       %{name}-%{version}.tar.gz
+Summary:      (wrapper) library for network functionality, based on the ACE framework
+URL:          @PACKAGE_URL@
+Vendor:       N/A
+Version:      @VERSION@
+
+%description
+(wrapper) library for network functionality, based on the ACE \
+framework (see: http://www.cs.wustl.edu/~schmidt/ACE.html). Specifically, the \
+library encapsulates descriptor-based (network) event propagation logic (i.e. \
+user-space dispatching APIs), as implemented and found on several common \
+operating system platforms. The library forsees dispatching these events using \
+dedicated threads, which facilitates efficient processing of data and \
+communication protocols. In conjunction with other (modularized) functionality \
+(see e.g.: https://github.com/esohns/libACEStream), this facilitates a modular \
+(i.e. less monolithic), and therefore reusable application design, which \
+cleanly separates network data from application-specific processing (i.e. \
+business logic).
+
+%prep
+#rm -rf %{_topdir}/BUILD/*
+%setup -q
+
+%build
+#./autogen.sh
+cd test_i/scripts
+./scanner.sh
+[ $? -ne 0 ] && echo "ERROR: failed to generate scanner, aborting" && exit 1
+./parser.sh
+[ $? -ne 0 ] && echo "ERROR: failed to generate parser, aborting" && exit 1
+cd ../..
+ATCD_ROOT=/mnt/win_d/projects/ATCD
+[ ! -d $ATCD_ROOT ] && echo "ERROR: ATCD project not found, aborting" && exit 1
+ln -s  $ATCD_ROOT modules/ATCD
+[ $? -ne 0 ] && echo "ERROR: failed to link ATCD project, aborting" && exit 1
+rm -rf modules/libCommon
+[ $? -ne 0 ] && echo "ERROR: failed to rm modules/libCommon, aborting" && exit 1
+LIBCOMMON_ROOT=/mnt/win_d/projects/yarp/modules/libCommon
+[ ! -d $LIBCOMMON_ROOT ] && echo "ERROR: libCommon project not found, aborting" && exit 1
+ln -s  $LIBCOMMON_ROOT modules/libCommon
+[ $? -ne 0 ] && echo "ERROR: failed to link libCommon project, aborting" && exit 1
+rm -rf modules/libACEStream
+[ $? -ne 0 ] && echo "ERROR: failed to rm modules/libACEStream, aborting" && exit 1
+LIBACESTREAM_ROOT=/mnt/win_d/projects/yarp/modules/libACEStream
+[ ! -d $LIBACESTREAM_ROOT ] && echo "ERROR: libACEStream project not found, aborting" && exit 1
+ln -s  $LIBACESTREAM_ROOT modules/libACEStream
+[ $? -ne 0 ] && echo "ERROR: failed to link libACEStream project, aborting" && exit 1
+%configure
+make %{?_smp_mflags}
+
+%install
+#rm -rf %{buildroot} # redundant except for RHEL 5
+%make_install
+#%makeinstall
+#libtool --finish /usr/lib64
+
+%clean
+rm -rf %{buildroot}
+
+%pre
+%post -p /sbin/ldconfig
+%verifyscript
+
+%preun
+%postun -p /sbin/ldconfig
+
+%files
+%defattr(-, root, root)
+%doc AUTHORS ChangeLog INSTALL LICENSE NEWS README.md TODO
+%{_bindir}/*
+%{_includedir}/*
+%{_libdir}/*
+%{_datadir}/%{name}/*
+
+%changelog
+

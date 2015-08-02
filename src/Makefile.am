@@ -1,5 +1,4 @@
-ACLOCAL_AMFLAGS = \
-  -I m4
+#ACLOCAL_AMFLAGS = -I m4
 
 DEFS += \
   -DHAVE_CONFIG_H \
@@ -9,14 +8,21 @@ DEFS += \
 #  -I/usr/include/c++/3.4.6/backward
 #  -I$(top_srcdir)/3rd_party/c++
 AM_CPPFLAGS = \
-  -I$(top_srcdir)/../ATCD/ACE
+  -I$(top_srcdir)/modules/ATCD/ACE
+if VALGRIND_SUPPORT
+AM_CPPFLAGS += \
+  $(PKGVALGRIND_CFLAGS)
+endif
 
 noinst_HEADERS = \
   stdafx.h
 include_HEADERS = \
   net_asynch_netlinksockethandler.h \
+  net_asynch_netlinksockethandler.inl \
   net_asynch_tcpsockethandler.h \
+  net_asynch_tcpsockethandler.inl \
   net_asynch_udpsockethandler.h \
+  net_asynch_udpsockethandler.inl \
   net_common_tools.h \
   net_connection_base.h \
   net_connection_manager.h \
@@ -25,6 +31,8 @@ include_HEADERS = \
   net_exports.h \
   net_iconnection.h \
   net_iconnectionmanager.h \
+  net_iconnector.h \
+  net_ilistener.h \
   net_ipconnection.h \
   net_itransportlayer.h \
   net_macros.h \
@@ -39,6 +47,7 @@ include_HEADERS = \
   net_netlinkconnection.h \
   net_netlinkconnection.inl \
   net_netlinksockethandler.h \
+  net_netlinksockethandler.inl \
   net_packet_headers.h \
   net_protocol_layer.h \
   net_remote_comm.h \
@@ -58,6 +67,7 @@ include_HEADERS = \
   net_tcpconnection_base.h \
   net_tcpconnection_base.inl \
   net_tcpsockethandler.h \
+  net_tcpsockethandler.inl \
   net_transportlayer_base.h \
   net_transportlayer_ip_cast.h \
   net_transportlayer_netlink.h \
@@ -73,19 +83,19 @@ lib_LTLIBRARIES = libACENetwork.la
 libACENetwork_la_SOURCES = \
   net_asynch_netlinksockethandler.cpp \
   net_asynch_netlinksockethandler.h \
+  net_asynch_netlinksockethandler.inl \
   net_asynch_tcpsockethandler.cpp \
   net_asynch_tcpsockethandler.h \
+  net_asynch_tcpsockethandler.inl \
   net_asynch_udpsockethandler.cpp \
   net_asynch_udpsockethandler.h \
-  net_common_modules.h \
+  net_asynch_udpsockethandler.inl \
   net_common_tools.cpp \
   net_common_tools.h \
   net_common.h \
   net_connection_base.cpp \
   net_connection_base.h \
   net_connection_base.inl \
-  net_connection_common.h \
-  net_connection_manager_common.h \
   net_connection_manager.cpp \
   net_connection_manager.h \
   net_connection_manager.inl \
@@ -95,6 +105,8 @@ libACENetwork_la_SOURCES = \
   net_exports.h \
   net_iconnection.h \
   net_iconnectionmanager.h \
+  net_iconnector.h \
+  net_ilistener.h \
   net_ipconnection.cpp \
   net_ipconnection.h \
   net_itransportlayer.h \
@@ -116,6 +128,7 @@ libACENetwork_la_SOURCES = \
   net_netlinkconnection.inl \
   net_netlinksockethandler.cpp \
   net_netlinksockethandler.h \
+  net_netlinksockethandler.inl \
   net_packet_headers.h \
   net_protocol_layer.cpp \
   net_protocol_layer.h \
@@ -144,6 +157,7 @@ libACENetwork_la_SOURCES = \
   net_tcpconnection_base.inl \
   net_tcpsockethandler.cpp \
   net_tcpsockethandler.h \
+  net_tcpsockethandler.inl \
   net_transportlayer_base.cpp \
   net_transportlayer_base.h \
   net_transportlayer_ip_cast.cpp \
@@ -165,11 +179,12 @@ libACENetwork_la_SOURCES = \
 
 libACENetwork_la_CPPFLAGS = \
   $(AM_CPPFLAGS) \
-  -I$(top_srcdir)/../libCommon/src \
-  -I$(top_srcdir)/../libACEStream/src
+  -I$(top_srcdir)/modules/libCommon/src \
+  -I$(top_srcdir)/modules/libACEStream/src
 libACENetwork_la_LDFLAGS = \
   -version-info @LIBACENETWORK_LT_VERSION_INFO@
 
 SUBDIRS = \
   . \
   client_server
+

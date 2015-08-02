@@ -18,11 +18,9 @@
 /* %define           api.pure */
 /* %define           api.push_pull */
 /* %define           parse.lac full */
-/* %define api.namespace     { yy } */
-%define namespace            "yy"
+%define api.namespace     {yy}
 %error-verbose
-/* %define parser_class_name { IRC_Client_IRCParser } */
-%define parser_class_name "IRC_Client_IRCParser"
+%define parser_class_name {IRC_Client_IRCParser}
 
 %code requires {
 class IRC_Client_IRCParserDriver;
@@ -101,7 +99,7 @@ using namespace std;
 
 %%
 %start                    message;
-%nonassoc                 ':' '!' '@';
+/* %nonassoc                 ':' '!' '@'; */
 
 message:      prefix body                                     /* default */
               | body                                          /* default */
@@ -145,15 +143,13 @@ params:       "space" params                                  /* default */
                                                                              ACE_TEXT("set param: \"%s\"\n"),
                                                                              driver->currentMessage_->params.front().c_str())); */
                                                               };
-//              | %empty                                        /* empty */
-              |                                               /* empty */
+              | %empty                                        /* empty */
 trailing:     "param"                                         { driver->currentMessage_->params.push_front (*$1);
 /*                                                                ACE_DEBUG((LM_DEBUG,
                                                                              ACE_TEXT("set final param: \"%s\"\n"),
                                                                              driver->currentMessage_->params.front().c_str())); */
                                                               };
-//              | %empty                                        /* empty */
-              |                                               /* empty */
+              | %empty                                        /* empty */
 %%
 
 void

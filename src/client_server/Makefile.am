@@ -1,4 +1,4 @@
-ACLOCAL_AMFLAGS = -I m4
+#ACLOCAL_AMFLAGS = -I m4
 
 DEFS = \
   -DNET_CLIENT_BUILD_DLL=1 \
@@ -6,10 +6,11 @@ DEFS = \
   -DMETA_PACKAGE=\"@PACKAGE_NAME@\"
 
 AM_CPPFLAGS = \
-  -I$(top_srcdir)/../ATCD/ACE \
-  -I$(top_srcdir)/../libCommon/src \
-  -I$(top_srcdir)/../libACEStream/src \
-  -I$(srcdir)/..
+  -I$(top_srcdir)/modules/ATCD/ACE
+if VALGRIND_SUPPORT
+AM_CPPFLAGS += \
+  $(PKGVALGRIND_CFLAGS)
+endif
 
 noinst_HEADERS = stdafx.h
 include_HEADERS = \
@@ -35,16 +36,21 @@ libACENetwork_Client_la_SOURCES = \
   net_client_asynchconnector.cpp \
   net_client_asynchconnector.h \
   net_client_asynchconnector.inl \
-  net_client_common.h \
   net_client_connector.cpp \
   net_client_connector.h \
   net_client_connector.inl \
-  net_client_connector_common.h \
   net_client_defines.h \
   net_client_exports.h \
   net_client_iconnector.h \
   stdafx.cpp \
   stdafx.h
+libACENetwork_Client_la_CPPFLAGS = \
+  $(AM_CPPFLAGS) \
+  -I$(top_srcdir)/modules/libCommon/src \
+  -I$(top_srcdir)/modules/libACEStream/src \
+  -I$(srcdir)/..
+libACENetwork_Client_la_LDFLAGS = \
+  -version-info @LIBACENETWORK_LT_VERSION_INFO@
 
 libACENetwork_Server_la_SOURCES = \
   net_server_asynchlistener.cpp \
@@ -58,7 +64,13 @@ libACENetwork_Server_la_SOURCES = \
   net_server_listener.cpp \
   net_server_listener.h \
   net_server_listener.inl \
-  net_server_listener_common.h \
   stdafx.cpp \
   stdafx.h
+libACENetwork_Server_la_CPPFLAGS = \
+  $(AM_CPPFLAGS) \
+  -I$(top_srcdir)/modules/libCommon/src \
+  -I$(top_srcdir)/modules/libACEStream/src \
+  -I$(srcdir)/..
+libACENetwork_Server_la_LDFLAGS = \
+  -version-info @LIBACENETWORK_LT_VERSION_INFO@
 

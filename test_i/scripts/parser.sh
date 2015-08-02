@@ -36,6 +36,7 @@ SOURCE_FILE=${SCRIPTS_DIRECTORY}/IRC_client_IRCparser_patched.h
 [ ! -f ${SOURCE_FILE} ] && echo "ERROR: file ${SOURCE_FILE} not found, aborting" && exit 1
 cp -f ${SOURCE_FILE} ${TARGET_FILE}
 [ $? -ne 0 ] && echo "ERROR: failed to cp \"${SOURCE_FILE}\", aborting" && exit 1
+echo "copied \"$SOURCE_FILE\"..."
 # clean up
 SOURCE_FILE=IRC_client_IRCparser.h
 rm -f ${SOURCE_FILE}

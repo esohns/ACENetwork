@@ -1,8 +1,8 @@
-ACLOCAL_AMFLAGS = -I m4
+#ACLOCAL_AMFLAGS = -I m4
 
 #  -I/usr/include/c++/3.4.6/backward
 AM_CPPFLAGS = \
-  -I$(top_srcdir)/../../modules/ATCD/ACE \
+  -I$(top_srcdir)/modules/ATCD/ACE \
   $(PKGSDL_CFLAGS) \
   $(PKGGTK_CFLAGS)
 if VALGRIND_SUPPORT
@@ -103,6 +103,7 @@ net_server_SOURCES = \
   net_module_protocolhandler.h \
   net_server.cpp \
   net_server_common.h \
+  net_server_listener_common.h \
   net_server_signalhandler.cpp \
   net_server_signalhandler.h \
   net_sessionmessage.cpp \

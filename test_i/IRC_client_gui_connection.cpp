@@ -224,6 +224,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
                                G_CALLBACK (refresh_channels_clicked_cb),
                                &CBData_);
   ACE_ASSERT (result_2);
+  ACE_UNUSED_ARG (result_2);
 
   // togglebuttons
   GtkToggleButton* toggle_button_p =

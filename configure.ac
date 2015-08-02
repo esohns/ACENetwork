@@ -5,7 +5,7 @@
 m4_define([M4_LIBACENETWORK_VERSION_MAJOR], [0])
 m4_define([M4_LIBACENETWORK_VERSION_MINOR], [0])
 m4_define([M4_LIBACENETWORK_VERSION_MICRO], [1])
-m4_define([M4_LIBACENETWORK_VERSION_DEVEL], [devel])
+#m4_define([M4_LIBACENETWORK_VERSION_DEVEL], [devel])
 m4_define([M4_LIBACENETWORK_VERSION],
           [M4_LIBACENETWORK_VERSION_MAJOR.M4_LIBACENETWORK_VERSION_MINOR.M4_LIBACENETWORK_VERSION_MICRO[]m4_ifset([M4_LIBACENETWORK_VERSION_DEVEL],-[M4_LIBACENETWORK_VERSION_DEVEL])])
 m4_define([M4_LIBACENETWORK_VERSION_API], [1])
@@ -36,11 +36,6 @@ AC_INIT([M4_PACKAGE_NAME],
 AC_CONFIG_AUX_DIR([aux_config])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([config.h.in])
-dnl AC_CONFIG_SUBDIRS([modules/ATCD
-dnl                    modules/libCommon
-dnl                    modules/libACEStream])
-AC_CONFIG_SUBDIRS([modules/libCommon
-                   modules/libACEStream])
 AM_PO_SUBDIRS
 
 LIBACENETWORK_VERSION_API=M4_LIBACENETWORK_VERSION_API
@@ -76,7 +71,7 @@ AM_PROG_AR
 LT_INIT
 
 # initialize other tools
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([tar-ustar -Wall -Werror foreign])
 # build time sanity check...
 AM_SANITY_CHECK
 AM_XGETTEXT_OPTION([--language=C++])
@@ -118,10 +113,11 @@ AC_ARG_ENABLE([debug],
               [debug=$debug_default])
 AM_CONDITIONAL([DEBUG], [test x$debug = xyes])
 if test x$debug = xyes; then
-  CXXFLAGS_DEBUG="-g -O0 -fno-inline -D_DEBUG"
+  CXXFLAGS_DEBUG="-g -O0 -fno-inline -Wall -D_DEBUG"
   AC_MSG_RESULT([yes])
 else
-  CXXFLAGS_DEBUG="-O3 -Werror -DACE_NDEBUG"
+#  CXXFLAGS_DEBUG="-O3 -Werror -DACE_NDEBUG"
+  CXXFLAGS_DEBUG="-O3 -DACE_NDEBUG"
   AC_MSG_RESULT([no])
 fi
 
@@ -172,6 +168,39 @@ CXXFLAGS_BASE="-ansi -std=c++11 -Wall -D_GNU_SOURCE"
 CXXFLAGS="${CXXFLAGS_BASE} ${CXXFLAGS_DEBUG} ${CXXFLAGS_TRACING} ${CXXFLAGS_VALGRIND}"
 AC_SUBST(CXXFLAGS)
 
+# build modules ?
+AC_MSG_CHECKING([enable module support])
+module_support_default="yes"
+AC_ARG_ENABLE([module-support],
+              [AS_HELP_STRING([--enable-module_support], [compile submodules [default="$module_support_default"]])],
+              [case "${enableval}" in
+                 yes) module_support=yes ;;
+                 no)  module_support=no  ;;
+                 *) AC_MSG_ERROR([bad value ${enableval} for --enable-module-support]) ;;
+               esac],
+              [module_support=$module_support_default])
+AM_CONDITIONAL([BUILD_MODULES], [test x$module_support = xyes])
+if test x$module_support = xyes; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+AM_COND_IF([BUILD_MODULES],
+           [AC_CONFIG_SUBDIRS([modules/libCommon
+                               modules/libACEStream])])
+dnl AC_CONFIG_SUBDIRS([modules/ATCD
+dnl                    modules/libCommon
+dnl                    modules/libACEStream])
+#AM_COND_IF([BUILD_MODULES],
+#           [AC_CONFIG_FILES([modules/Makefile])])
+
+# pkgconfig directory (.pc file location)
+AC_ARG_WITH([pkgconfigdir],
+  [AS_HELP_STRING([--with-pkgconfigdir=DIR], [pkgconfig files])],
+  [pkgconfigdir=$withval],
+  [pkgconfigdir="\${libdir}/pkgconfig"])
+AC_SUBST([pkgconfigdir], [$pkgconfigdir])
+
 # checks for typedefs, structures, and compiler characteristics
 AC_C_INLINE
 AC_TYPE_SIZE_T
@@ -219,9 +248,13 @@ AC_SEARCH_LIBS([pthread_create], [pthread], , AC_MSG_ERROR([unable to find pthre
 AC_CONFIG_HEADERS([config.h])
 
 AC_CONFIG_FILES([Makefile
+                 3rd_party/Makefile
+                 3rd_party/bison/Makefile
                  m4/Makefile
-                 po/Makefile.in
                  modules/Makefile
+                 po/Makefile.in
+                 scripts/libACENetwork.pc
+                 scripts/libACENetwork.spec
                  scripts/Makefile
                  src/Makefile
                  src/client_server/Makefile
@@ -230,5 +263,5 @@ AC_CONFIG_FILES([Makefile
                  test_i/scripts/Makefile
                  test_u/Makefile
                  test_u/etc/Makefile])
-
 AC_OUTPUT
+

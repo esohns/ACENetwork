@@ -1,8 +1,8 @@
-ACLOCAL_AMFLAGS = -I m4
+#ACLOCAL_AMFLAGS = -I m4
 
 #  -I/usr/include/c++/3.4.6/backward
 AM_CPPFLAGS = \
-  -I$(top_srcdir)/../../modules/ATCD/ACE \
+  -I$(top_srcdir)/modules/ATCD/ACE \
   -I$(top_srcdir)/3rd_party/bison \
   -I$(top_srcdir)/3rd_party/c++ \
   $(PKGCURSES_CFLAGS) \
@@ -31,6 +31,7 @@ IRC_client_SOURCES = \
   FILE_Stream.cpp \
   FILE_Stream.h \
   FILE_Stream.inl \
+  IOStream_alt_macros.h \
   IOStream_alt_T.cpp \
   IOStream_alt_T.h \
   IOStream_alt_T.inl \
@@ -71,6 +72,7 @@ IRC_client_SOURCES = \
   IRC_client_module_IRCstreamer.cpp \
   IRC_client_module_IRCstreamer.h \
   IRC_client_network.h \
+  IRC_client_session_common.h \
   IRC_client_sessionmessage.cpp \
   IRC_client_sessionmessage.h \
   IRC_client_signalhandler.cpp \

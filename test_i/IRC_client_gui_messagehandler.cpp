@@ -451,6 +451,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
                              G_CALLBACK (action_ban_cb),
                              &CBData_);
   ACE_ASSERT (result);
+  ACE_UNUSED_ARG (result);
 
   // *TODO*: there must be a better way to do this
   //         (see: IRC_client_gui_callbacks.cpp:2236, 2347, ...)

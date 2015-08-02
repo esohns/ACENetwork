@@ -464,7 +464,7 @@ extern int IRC_Client_IRCBisect_lex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 48 "./../scripts/IRCbisect.l"
+#line 48 "./test_i/scripts/../scripts/IRCbisect.l"
 
 
 #line 471 "IRC_client_IRCbisect.h"

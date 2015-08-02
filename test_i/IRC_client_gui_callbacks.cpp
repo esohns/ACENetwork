@@ -879,6 +879,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                              G_CALLBACK (button_quit_clicked_cb),
                              NULL);
   ACE_ASSERT (result);
+  ACE_UNUSED_ARG (result);
 
   // step4: retrieve toplevel handle
   GtkWindow* window_p =

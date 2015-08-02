@@ -886,8 +886,8 @@ static yyconst flex_int16_t yy_rule_linenum[6] =
 #define yymore() (yyg->yy_more_flag = 1)
 #define YY_MORE_ADJ yyg->yy_more_len
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "./../scripts/IRCbisect.l"
-#line 2 "./../scripts/IRCbisect.l"
+#line 1 "./test_i/scripts/../scripts/IRCbisect.l"
+#line 2 "./test_i/scripts/../scripts/IRCbisect.l"
 #include "stdafx.h"
 
 // *WORKAROUND*
@@ -1217,7 +1217,7 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 30 "./../scripts/IRCbisect.l"
+#line 30 "./test_i/scripts/../scripts/IRCbisect.l"
 
 #line 1223 "IRC_client_IRCbisect.cpp"
 
@@ -1293,17 +1293,17 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 32 "./../scripts/IRCbisect.l"
+#line 32 "./test_i/scripts/../scripts/IRCbisect.l"
 { BEGIN(end_of_frame); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 33 "./../scripts/IRCbisect.l"
+#line 33 "./test_i/scripts/../scripts/IRCbisect.l"
 { return yyleng; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 34 "./../scripts/IRCbisect.l"
+#line 34 "./test_i/scripts/../scripts/IRCbisect.l"
 {
                          ACE_DEBUG ((LM_ERROR,
                                      ACE_TEXT ("ignoring invalid character: \"%c\" (%d)\n"),
@@ -1316,26 +1316,26 @@ YY_RULE_SETUP
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 42 "./../scripts/IRCbisect.l"
+#line 42 "./test_i/scripts/../scripts/IRCbisect.l"
 { BEGIN(INITIAL);
                          /* (*yyextra)++; */
                          return -1; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 45 "./../scripts/IRCbisect.l"
+#line 45 "./test_i/scripts/../scripts/IRCbisect.l"
 { BEGIN(INITIAL);
                          yymore(); }
 	YY_BREAK
 // end <end_of_frame>
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(end_of_frame):
-#line 48 "./../scripts/IRCbisect.l"
+#line 48 "./test_i/scripts/../scripts/IRCbisect.l"
 { return 0; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 49 "./../scripts/IRCbisect.l"
+#line 49 "./test_i/scripts/../scripts/IRCbisect.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
 #line 1342 "IRC_client_IRCbisect.cpp"
@@ -2564,7 +2564,7 @@ void IRC_Client_IRCBisect_free (void * ptr , yyscan_t yyscanner)
 
 /* %ok-for-header */
 
-#line 48 "./../scripts/IRCbisect.l"
+#line 48 "./test_i/scripts/../scripts/IRCbisect.l"
 
 
 
