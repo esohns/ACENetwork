@@ -50,7 +50,7 @@ if %ERRORLEVEL% NEQ 0 (
 echo generating installer...DONE
 
 @rem move generated file into the releases directory
-set TARGET_DIRECTORY="%~dp0\..\releases"
+set TARGET_DIRECTORY="%~dp0..\..\releases"
 if NOT exist "%TARGET_DIRECTORY%" (
  echo invalid directory ^(was: "%TARGET_DIRECTORY%"^)^, exiting
  goto Failed

@@ -15,6 +15,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\test_u\etc\net_client.glade">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="..\..\test_u\net_callbacks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -30,10 +35,25 @@
     <ClCompile Include="..\..\test_u\net_eventhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test_u\net_message.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\test_u\net_module_eventhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test_u\net_server_signalhandler.cpp">
+    <ClCompile Include="..\..\test_u\net_module_headerparser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\net_module_protocolhandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\net_sessionmessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\net_stream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\net_tcpconnection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test_u\stdafx.cpp">
@@ -42,6 +62,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test_u\net_callbacks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test_u\net_client_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test_u\net_client_connector_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test_u\net_client_signalhandler.h">
@@ -53,25 +79,50 @@
     <ClInclude Include="..\..\test_u\net_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\test_u\net_common_modules.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test_u\net_configuration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test_u\net_connection_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test_u\net_connection_manager_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\test_u\net_defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test_u\net_eventhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\test_u\net_message.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\test_u\net_module_eventhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\test_u\net_server_signalhandler.h">
+    <ClInclude Include="..\..\test_u\net_module_headerparser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test_u\net_module_protocolhandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test_u\net_sessionmessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test_u\net_stream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test_u\net_stream_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test_u\net_tcpconnection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test_u\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\test_u\etc\net_client.glade">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

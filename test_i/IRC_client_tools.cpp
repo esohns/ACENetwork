@@ -31,8 +31,6 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-#include "net_client_common.h"
-
 #include "IRC_client_configuration.h"
 #include "IRC_client_defines.h"
 #include "IRC_client_network.h"

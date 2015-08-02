@@ -3,6 +3,8 @@
 *.lo
 *.o
 *.obj
+*.Po
+*.Plo
 
 # Precompiled Headers
 *.gch
@@ -28,6 +30,7 @@
 *.app
 
 # Automake
+Makefile
 Makefile.in
 aclocal.m4
 autom4te.cache/

@@ -273,12 +273,15 @@ Net_Client_AsynchConnector_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     //if (error != ECONNREFUSED) // happens intermittently on Win32
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
                 buffer,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
                 ACE::sock_error (error)));
 #else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
+                buffer,
                 ACE_TEXT (ACE_OS::strerror (error))));
 #endif
   } // end IF
@@ -658,12 +661,15 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
     if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
                 buffer,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
                 ACE::sock_error (error)));
 #else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
+                buffer,
                 ACE_TEXT (ACE_OS::strerror (error))));
 #endif
   } // end IF

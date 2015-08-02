@@ -330,12 +330,15 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
     if ((error != ECONNRESET) &&
         (error != EPIPE)      &&
         (error != EBADF)) // 9 happens on Linux (local close())
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
                   result_in.handle (),
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
                   ACE_TEXT (ACE::sock_error (error))));
 #else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
+                  result_in.handle (),
                   ACE_TEXT (ACE_OS::strerror (error))));
 #endif
   } // end IF
@@ -350,12 +353,15 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
       if ((error != ECONNRESET) &&
           (error != EPIPE)      &&
           (error != EBADF)) // 9 happens on Linux (local close())
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
                     result_in.handle (),
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
                     ACE_TEXT (ACE::sock_error (error))));
 #else
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
+                    result_in.handle (),
                     ACE_TEXT (ACE_OS::strerror (error))));
 #endif
 

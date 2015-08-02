@@ -72,7 +72,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>YY_NEVER_INTERACTIVE;DEBUG_DEBUGGER;BASEDIR="$(ProgramFiles.Replace('\', "\\"))\\$(SolutionName)";HAVE_CONFIG_H;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;$(ProjectDir)..\..\3rd_party;$(ProjectDir)..\..\3rd_party\bison;$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;$(ProjectDir)..\..\3rd_party;$(ProjectDir)..\..\3rd_party\bison;$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;$(ProjectDir)..\..\test_u;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
@@ -93,7 +93,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>YY_NEVER_INTERACTIVE;BASEDIR="$(ProgramFiles.Replace('\', "\\"))\\$(SolutionName)";HAVE_CONFIG_H;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;$(ProjectDir)..\..\3rd_party;$(ProjectDir)..\..\3rd_party\bison;$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;$(ProjectDir)..\..\3rd_party;$(ProjectDir)..\..\3rd_party\bison;$(ProjectDir)..\..\modules\libCommon\src;$(ProjectDir)..\..\modules\libCommon\src\ui;$(ProjectDir)..\..\modules\libACEStream\src;$(ProjectDir)..\..\src;$(ProjectDir)..\..\src\client_server;$(ProjectDir)..\..\include;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libCommon\src\ui;$(ProjectDir)..\..\..\libACEStream\src;$(ProjectDir)..\..\test_u;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
