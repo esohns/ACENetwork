@@ -70,7 +70,7 @@ struct Net_Client_SignalHandlerConfiguration
    , messageAllocator (NULL)
    , peerAddress ()
    , socketHandlerConfiguration (NULL)
-   , statisticCollectionInterval (0)
+   , statisticReportingInterval (0)
   {};
 
   long                            actionTimerId;
@@ -78,8 +78,7 @@ struct Net_Client_SignalHandlerConfiguration
   Stream_IAllocator*              messageAllocator;
   ACE_INET_Addr                   peerAddress;
   Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s))
-                                                               // 0 --> DON'T collect statistics
+  unsigned int                    statisticReportingInterval; // statistics collecting interval (second(s)) [0: off]
 };
 
 struct Net_Client_Configuration
