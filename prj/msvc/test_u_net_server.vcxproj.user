@@ -8,7 +8,7 @@
     </LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>-g$(ProjectDir)..\..\src\test_u\net_server.glade -i 1000 -l -o -s 0 -t</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-g$(ProjectDir)..\..\src\test_u\net_server.glade -i 1000 -l -o -r -s 0 -t</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\..</LocalDebuggerWorkingDirectory>
     <LocalDebuggerEnvironment>

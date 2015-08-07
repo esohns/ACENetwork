@@ -23,7 +23,8 @@
 
 #include <string>
 
-#include "net_message_base.h"
+#include "stream_message_base.h"
+
 #include "net_remote_comm.h"
 
 // forward declaration(s)
@@ -35,8 +36,8 @@ template <typename MessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Net_Message
- : public Net_MessageBase_T<Net_Remote_Comm::MessageHeader,
-                            Net_MessageType_t>
+ : public Stream_MessageBase_T<Net_Remote_Comm::MessageHeader,
+                               Net_MessageType_t>
 {
   // enable access to specific private ctors...
   friend class Stream_MessageAllocatorHeapBase_T<Net_Message,
@@ -46,7 +47,7 @@ class Net_Message
   Net_Message (unsigned int); // size
   virtual ~Net_Message ();
 
-  virtual Net_MessageType_t getCommand () const; // return value: message type
+  virtual const Net_MessageType_t& command () const; // return value: message type
   static std::string CommandType2String (Net_MessageType_t);
 
   // overrides from ACE_Message_Block
@@ -63,15 +64,15 @@ class Net_Message
   Net_Message (const Net_Message&);
 
  private:
-  typedef Net_MessageBase_T<Net_Remote_Comm::MessageHeader,
-                            Net_MessageType_t> inherited;
+  typedef Stream_MessageBase_T<Net_Remote_Comm::MessageHeader,
+                               Net_MessageType_t> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Message ());
+  ACE_UNIMPLEMENTED_FUNC (Net_Message ())
   // *NOTE*: to be used by allocators...
   Net_Message (ACE_Data_Block*, // data block to use
                ACE_Allocator*); // message allocator
 //   Net_Message (ACE_Allocator*); // message allocator
-  ACE_UNIMPLEMENTED_FUNC (Net_Message& operator= (const Net_Message&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Message& operator= (const Net_Message&))
 };
 
 #endif

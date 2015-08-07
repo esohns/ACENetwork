@@ -1326,6 +1326,44 @@ idle_update_progress_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_PROGRESSBAR)));
   ACE_ASSERT (progress_bar_p);
 
+  // synch access
+  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+
+  ACE_THR_FUNC_RETURN exit_status;
+  ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
+  ACE_ASSERT (thread_manager_p);
+  for (IRC_Client_GUI_CompletedActionsIterator_t iterator_2 = data_p->completedActions.begin ();
+       iterator_2 != data_p->completedActions.end ();
+       ++iterator_2)
+  {
+    result = thread_manager_p->join (*iterator_2, &exit_status);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Thread_Manager::join(%d): \"%m\", continuing\n"),
+                  *iterator_2));
+    else if (exit_status)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("thread %d has joined (status was: %d)...\n"),
+                  *iterator_2,
+                  exit_status));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("thread %u has joined (status was: %@)...\n"),
+                  *iterator_2,
+                  exit_status));
+#endif
+    } // end IF
+
+    IRC_Client_GUI_PendingActionsIterator_t iterator_3 =
+        data_p->pendingActions.find (*iterator_2);
+    ACE_ASSERT (iterator_3 != data_p->pendingActions.end ());
+    data_p->GTKState->eventSourceIds.erase ((*iterator_3).second);
+    data_p->pendingActions.erase (iterator_3);
+  } // end FOR
+  data_p->completedActions.clear ();
+
   if (data_p->pendingActions.empty ())
   {
     //if (data_p->cursorType != GDK_LAST_CURSOR)
@@ -1350,45 +1388,6 @@ idle_update_progress_cb (gpointer userData_in)
     gtk_widget_hide (GTK_WIDGET (progress_bar_p));
     return FALSE; // G_SOURCE_REMOVE
   } // end IF
-
-  { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
-
-    ACE_THR_FUNC_RETURN exit_status;
-    ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
-    ACE_ASSERT (thread_manager_p);
-    for (IRC_Client_GUI_CompletedActionsIterator_t iterator_2 = data_p->completedActions.begin ();
-          iterator_2 != data_p->completedActions.end ();
-          ++iterator_2)
-    {
-      result = thread_manager_p->join (*iterator_2, &exit_status);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Thread_Manager::join(%d): \"%m\", continuing\n"),
-                    *iterator_2));
-      else if (exit_status)
-      {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("thread %d has joined (status was: %d)...\n"),
-                    *iterator_2,
-                    exit_status));
-#else
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("thread %u has joined (status was: %@)...\n"),
-                    *iterator_2,
-                    exit_status));
-#endif
-      } // end IF
-
-      IRC_Client_GUI_PendingActionsIterator_t iterator_3 =
-        data_p->pendingActions.find (*iterator_2);
-      ACE_ASSERT (iterator_3 != data_p->pendingActions.end ());
-      data_p->GTKState->eventSourceIds.erase ((*iterator_3).second);
-      data_p->pendingActions.erase (iterator_3);
-    } // end FOR
-    data_p->completedActions.clear ();
-  } // end lock scope
 
   gtk_progress_bar_pulse (progress_bar_p);
 

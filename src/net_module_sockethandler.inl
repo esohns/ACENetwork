@@ -44,7 +44,8 @@ Net_Module_SocketHandler_T<SessionMessageType,
                            StatisticContainerType,
                            ProtocolHeaderType>::Net_Module_SocketHandler_T ()
  : inherited (false, // inactive by default
-              false) // DON'T auto-start !
+              false, // DON'T auto-start !
+              false) // do not run svc()
  , currentBuffer_ (NULL)
  , currentMessage_ (NULL)
  , currentMessageLength_ (0)
@@ -248,13 +249,12 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
   switch (message_inout->type ())
   {
-    case SESSION_BEGIN:
+    case STREAM_SESSION_BEGIN:
     {
       if (inherited::configuration_.streamConfiguration->statisticReportingInterval)
       {
         // schedule regular statistics collection...
-        ACE_Time_Value interval (NET_STREAM_DEFAULT_STATISTICS_COLLECTION,
-                                 0);
+        ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION, 0);
         ACE_ASSERT (timerID_ == -1);
         ACE_Event_Handler* handler_p = &statisticCollectionHandler_;
         timerID_ =
@@ -279,7 +279,7 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
       break;
     }
-    case SESSION_END:
+    case STREAM_SESSION_END:
     {
       if (timerID_ != -1)
       {
@@ -421,7 +421,7 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
     // OK, start interpreting this message...
 
-    ProtocolHeaderType message_header = currentMessage_->getHeader ();
+    ProtocolHeaderType message_header = currentMessage_->get ();
     // *PORTABILITY*: handle endianness && type issues !
     // see also net_remote_comm.h
     currentMessageLength_ =
@@ -590,7 +590,7 @@ Net_Module_SocketHandler_T<SessionMessageType,
   // step3: send the statistic data downstream
   // *NOTE*: fire-and-forget session_data_p here
   // *TODO*: remove type inference
-  return inherited::putSessionMessage (SESSION_STATISTICS,
+  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
                                        session_data_p,
                                        inherited::configuration_.streamConfiguration->messageAllocator);
 }

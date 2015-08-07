@@ -56,18 +56,43 @@ Net_Message::~Net_Message ()
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
-Net_MessageType_t
-Net_Message::getCommand () const
+const Net_MessageType_t&
+Net_Message::command () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Message::getCommand"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Message::command"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::length () >= sizeof (Net_MessageHeader_t));
+  ACE_ASSERT (inherited::total_length () >= sizeof (Net_MessageHeader_t));
 
-  Net_MessageHeader_t* message_header =
+  if (inherited::length () < sizeof (Net_MessageHeader_t))
+  { // assemble the header
+    Net_MessageHeader_t message_header;
+    ACE_OS::memset (&message_header, 0, sizeof (Net_MessageHeader_t));
+    unsigned int remaining = sizeof (Net_MessageHeader_t);
+    unsigned int bytes_to_write = 0;
+    char* wr_ptr_p = reinterpret_cast<char*> (&message_header);
+    for (const ACE_Message_Block* message_block_p = this;
+         message_block_p;
+         message_block_p = message_block_p->cont ())
+    {
+      bytes_to_write =
+        (message_block_p->length () < remaining ? message_block_p->length ()
+                                                : remaining);
+      ACE_OS::memcpy (wr_ptr_p, message_block_p->rd_ptr (), bytes_to_write);
+      remaining -= bytes_to_write;
+      if (!remaining) break; // done
+
+      wr_ptr_p += bytes_to_write;
+    } // end FOR
+    ACE_ASSERT (!remaining);
+
+    return message_header.messageType;
+  } // end IF
+
+  Net_MessageHeader_t* message_header_p =
       reinterpret_cast<Net_MessageHeader_t*> (inherited::rd_ptr ());
 
-  return message_header->messageType;
+  return message_header_p->messageType;
 }
 
 std::string
@@ -79,16 +104,15 @@ Net_Message::CommandType2String (Net_MessageType_t messageType_in)
 
   switch (messageType_in)
   {
-    case Net_Remote_Comm::NET_PING:
-      result = ACE_TEXT ("NET_PING"); break;
-    case Net_Remote_Comm::NET_PONG:
-      result = ACE_TEXT ("NET_PONG"); break;
+    case Net_Remote_Comm::NET_MESSAGE_PING:
+      result = ACE_TEXT ("PING"); break;
+    case Net_Remote_Comm::NET_MESSAGE_PONG:
+      result = ACE_TEXT ("PONG"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid message type (was: %d), aborting\n"),
+                  ACE_TEXT ("invalid/unknown message type (was: %d), aborting\n"),
                   messageType_in));
-
       break;
     }
   } // end SWITCH

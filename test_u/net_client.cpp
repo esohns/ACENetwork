@@ -484,7 +484,8 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
   Net_EventHandler ui_event_handler (&CBData_in);
   Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
-                                                NULL);
+                                                NULL,
+                                                true);
   Net_Module_EventHandler* event_handler_p =
     dynamic_cast<Net_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
@@ -508,8 +509,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   configuration.protocolConfiguration.printPongMessages =
     UIDefinitionFile_in.empty ();
   // ********************** stream configuration data **************************
-  configuration.streamConfiguration.protocolConfiguration =
-    &configuration.protocolConfiguration;
+  configuration.streamConfiguration.cloneModule = !(UIDefinitionFile_in.empty ());
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
@@ -523,6 +523,8 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
   configuration.streamConfiguration.printFinalReport = true;
+  configuration.streamConfiguration.protocolConfiguration =
+    &configuration.protocolConfiguration;
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.userData = &configuration.streamUserData;
@@ -533,6 +535,8 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     &message_allocator;
   configuration.socketHandlerConfiguration.socketConfiguration =
     &configuration.socketConfiguration;
+  configuration.socketHandlerConfiguration.statisticReportingInterval =
+    configuration.streamConfiguration.statisticReportingInterval;
   configuration.socketHandlerConfiguration.userData =
     &configuration.streamUserData;
 
@@ -552,6 +556,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // step0b: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (useReactor_in,
                                               useThreadPool_in,
+                                              numDispatchThreads_in,
                                               configuration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -560,41 +565,9 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   } // end IF
 
   // step0c: initialize client connector
-  //Net_StreamUserData stream_user_data;
-  if (UIDefinitionFile_in.empty () && (connectionInterval_in == 0))
-  {
-    //ACE_NEW_NORETURN (session_data_p,
-    //                  Net_SessionData ());
-    //if (!session_data_p)
-    //{
-    //  ACE_DEBUG ((LM_CRITICAL,
-    //              ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-    //  return;
-    //} // end IF
-    //session_data_p->configuration = configuration;
-    //session_data_p->userData = &configuration.streamUserData;
-    //configuration.socketHandlerConfiguration.bufferSize =
-    //  NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-    configuration.socketHandlerConfiguration.messageAllocator =
-        &message_allocator;
-    configuration.socketHandlerConfiguration.socketConfiguration =
-      &configuration.socketConfiguration;
-    configuration.socketHandlerConfiguration.statisticReportingInterval =
-      configuration.streamConfiguration.statisticReportingInterval;
-  } // end IF
-  //Net_Client_ConnectorConfiguration connector_configuration;
-  //Net_IInetConnectionManager_t* iconnection_manager_p =
-  //  Net_Common_Tools::getConnectionManager ();
-  //ACE_ASSERT (iconnection_manager_p);
-  //Net_InetConnectionManager_t* connection_manager_p =
-  //  dynamic_cast<Net_InetConnectionManager_t*> (iconnection_manager_p);
-  //ACE_ASSERT (connection_manager_p);
   Net_InetConnectionManager_t* connection_manager_p =
     NET_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  //connector_configuration.connectionManager = connection_manager_p;
-  //connector_configuration.socketHandlerConfiguration =
-  //  &configuration.socketHandlerConfiguration;
   Net_IInetConnectionManager_t* iconnection_manager_p =
     connection_manager_p;
   Net_Client_Connector_t connector (iconnection_manager_p,
@@ -606,15 +579,11 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     connector_p = &connector;
   else
     connector_p = &asynch_connector;
-  if (UIDefinitionFile_in.empty () && (connectionInterval_in == 0))
+  if (!connector_p->initialize (configuration.socketHandlerConfiguration))
   {
-    //if (!connector_p->initialize (connector_configuration))
-    if (!connector_p->initialize (configuration.socketHandlerConfiguration))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
-      return;
-    } // end IF
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
+    return;
   } // end IF
 
   // step0d: initialize connection manager
@@ -727,34 +696,28 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // *NOTE*: this variable needs to stay on the working stack, it's passed to
   //         the worker(s) (if any)
   bool use_reactor = useReactor_in;
-  if (useThreadPool_in &&
-      (numDispatchThreads_in > 1))
+  if (!Common_Tools::startEventDispatch (use_reactor,
+                                         numDispatchThreads_in,
+                                         group_id))
   {
-    if (!Common_Tools::startEventDispatch (use_reactor,
-                                           numDispatchThreads_in,
-                                           group_id))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to start event dispatch, aborting\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to start event dispatch, aborting\n")));
 
-      // clean up
-  //		{ // synch access
-  //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
+    // clean up
+//		{ // synch access
+//			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
-  //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-  //					 iterator != CBData_in.event_source_ids.end();
-  //					 iterator++)
-  //				g_source_remove(*iterator);
-  //		} // end lock scope
-      if (!UIDefinitionFile_in.empty ())
-        COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
-      timer_manager_p->stop ();
-      connector_p->abort ();
+//			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
+//					 iterator != CBData_in.event_source_ids.end();
+//					 iterator++)
+//				g_source_remove(*iterator);
+//		} // end lock scope
+    if (!UIDefinitionFile_in.empty ())
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+    timer_manager_p->stop ();
+    connector_p->abort ();
 
-      return;
-    } // end IF
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("started event dispatch...\n")));
+    return;
   } // end IF
 
   // step1c: connect immediately ?
@@ -808,57 +771,8 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // *NOTE*: from this point on, clean up any remote connections !
 
   // step2: dispatch events
-  // *NOTE*: when using a thread pool, handle things differently...
-  if (useThreadPool_in &&
-      (numDispatchThreads_in > 1))
-  {
-    if (ACE_Thread_Manager::instance ()->wait_grp (group_id) == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
-                  group_id));
-  } // end IF
-  else
-  {
-    if (useReactor_in)
-    {
-      ACE_Reactor* reactor_p = ACE_Reactor::instance ();
-      ACE_ASSERT (reactor_p);
-      result = reactor_p->run_reactor_event_loop (0);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to handle events: \"%m\", continuing\n")));
-    } // end IF
-    else
-    {
-      ACE_Proactor* proactor_p = ACE_Proactor::instance ();
-      ACE_ASSERT (proactor_p);
-//      // *NOTE*: unblock [SIGRTMIN,SIGRTMAX] IFF on POSIX AND using the
-//      // ACE_POSIX_SIG_Proactor (the default)
-//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-//      ACE_POSIX_Proactor* proactor_impl_p =
-//          dynamic_cast<ACE_POSIX_Proactor*> (proactor_p->implementation ());
-//      ACE_ASSERT (proactor_impl_p);
-//      ACE_POSIX_Proactor::Proactor_Type proactor_type =
-//          proactor_impl_p->get_impl_type ();
-//      sigset_t original_mask;
-//      if (!useReactor_in &&
-//          (proactor_type == ACE_POSIX_Proactor::PROACTOR_SIG))
-//        Common_Tools::unblockRealtimeSignals (original_mask);
-//#endif
-      result = proactor_p->proactor_run_event_loop (0);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to handle events: \"%m\", continuing\n")));
-//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-//      // reset signal mask
-//      result = ACE_OS::thr_sigsetmask (SIG_SETMASK,
-//                                       &original_mask,
-//                                       NULL);
-//#endif
-    } // end ELSE
-  } // end ELSE
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("finished event dispatch...\n")));
+  Common_Tools::dispatchEvents (useReactor_in,
+                                group_id);
 
   // step3: clean up
   if (!UIDefinitionFile_in.empty ())
@@ -888,6 +802,12 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 //				 iterator++)
 //			g_source_remove(*iterator);
 //	} // end lock scope
+
+  result = event_handler.close (ACE_Module_Base::M_DELETE_NONE);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to ACE_Module::close (): \"%m\", continuing\n"),
+                event_handler.name ()));
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -952,6 +872,20 @@ ACE_TMAIN (int argc_in,
   // step0: initialize
 // *PORTABILITY*: on Windows, initialize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  HWND window_p = GetConsoleWindow ();
+  if (!window_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetConsoleWindow(), aborting\n")));
+    return EXIT_FAILURE;
+  } // end IF
+  if (!ShowWindow (window_p, SW_HIDE))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::ShowWindow(), aborting\n")));
+    return EXIT_FAILURE;
+  } // end IF
+
   result = ACE::init ();
   if (result == -1)
   {

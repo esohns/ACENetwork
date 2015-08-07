@@ -205,7 +205,7 @@ Net_Module_MessageHandler_T<SessionMessageType,
 
   switch (message_inout->type ())
   {
-    case SESSION_BEGIN:
+    case STREAM_SESSION_BEGIN:
     {
       // refer the session data back to any subscriber(s)
       // *TODO*: remove type inferences
@@ -242,7 +242,7 @@ Net_Module_MessageHandler_T<SessionMessageType,
 
       break;
     }
-    case SESSION_END:
+    case STREAM_SESSION_END:
     {
       // refer the data back to any subscriber(s)
 

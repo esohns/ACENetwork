@@ -138,7 +138,6 @@
     <ClCompile Include="..\..\src\net_controller_base.cpp" />
     <ClCompile Include="..\..\src\net_ipconnection.cpp" />
     <ClCompile Include="..\..\src\net_messagehandler_base.cpp" />
-    <ClCompile Include="..\..\src\net_message_base.cpp" />
     <ClCompile Include="..\..\src\net_module_messagehandler.cpp" />
     <ClCompile Include="..\..\src\net_module_runtimestatistic.cpp" />
     <ClCompile Include="..\..\src\net_module_sockethandler.cpp" />
@@ -190,7 +189,6 @@
     <ClInclude Include="..\..\src\net_itransportlayer.h" />
     <ClInclude Include="..\..\src\net_macros.h" />
     <ClInclude Include="..\..\src\net_messagehandler_base.h" />
-    <ClInclude Include="..\..\src\net_message_base.h" />
     <ClInclude Include="..\..\src\net_module_messagehandler.h" />
     <ClInclude Include="..\..\src\net_module_runtimestatistic.h" />
     <ClInclude Include="..\..\src\net_module_sockethandler.h" />
@@ -226,7 +224,6 @@
     <None Include="..\..\src\net_connection_base.inl" />
     <None Include="..\..\src\net_connection_manager.inl" />
     <None Include="..\..\src\net_messagehandler_base.inl" />
-    <None Include="..\..\src\net_message_base.inl" />
     <None Include="..\..\src\net_module_messagehandler.inl" />
     <None Include="..\..\src\net_module_runtimestatistic.inl" />
     <None Include="..\..\src\net_module_sockethandler.inl" />

@@ -61,7 +61,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
  , numOutboundBytes_ (0.0F)
  , byteCounter_ (0)
  , lastBytesPerSecondCount_ (0)
-// , messageTypeStatistics_.clear()
+ , messageTypeStatistic_ ()
  , allocator_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::Net_Module_Statistic_WriterTask_T"));
@@ -132,7 +132,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
       byteCounter_ = 0;
       lastBytesPerSecondCount_ = 0;
 
-      messageTypeStatistics_.clear ();
+      messageTypeStatistic_.clear ();
     } // end lock scope
     allocator_ = NULL;
 
@@ -210,7 +210,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
     messageCounter_++;
 
     // add message to statistic...
-    messageTypeStatistics_[message_inout->getCommand ()]++;
+    messageTypeStatistic_[message_inout->command ()]++;
   } // end lock scope
 }
 
@@ -250,7 +250,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
   switch (message_inout->type ())
   {
-    case SESSION_BEGIN:
+    case STREAM_SESSION_BEGIN:
     {
       // retain session ID for reporting...
       // *TODO*: remove type inferences
@@ -293,7 +293,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
       break;
     }
-    case SESSION_END:
+    case STREAM_SESSION_END:
     {
       // stop reporting timer
       fini_timers (false);
@@ -304,7 +304,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
       break;
     }
-    case SESSION_STATISTICS:
+    case STREAM_SESSION_STATISTIC:
     {
 //       // *NOTE*: protect access to statistics data
 //       // from asynchronous API calls (as well as local reporting)...
@@ -450,8 +450,8 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
                   numInboundMessages_, numOutboundMessages_));
 
       std::string protocol_string;
-      for (Net_MessageStatisticIterator_t iterator = messageTypeStatistics_.begin ();
-           iterator != messageTypeStatistics_.end ();
+      for (Net_MessageStatisticIterator_t iterator = messageTypeStatistic_.begin ();
+           iterator != messageTypeStatistic_.end ();
            iterator++)
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("\"%s\": %u --> %.2f %%\n"),
@@ -610,7 +610,7 @@ Net_Module_Statistic_ReaderTask_T<TaskSynchType,
     sibling_p->messageCounter_++;
 
     // add message to statistic...
-    sibling_p->messageTypeStatistics_[message_p->getCommand ()]++;
+    sibling_p->messageTypeStatistic_[message_p->command ()]++;
   } // end lock scope
 
   return inherited::put (mb_in, tv_in);

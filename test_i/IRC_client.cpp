@@ -721,6 +721,7 @@ do_work (IRC_Client_Configuration& configuration_in,
 
   // step2: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (configuration_in.useReactor,
+                                              (numDispatchThreads_in > 1),
                                               numDispatchThreads_in,
                                               configuration_in.streamConfiguration.serializeOutput))
   {
@@ -912,7 +913,6 @@ do_work (IRC_Client_Configuration& configuration_in,
     return;
   } // end IF
   Common_Tools::dispatchEvents (configuration_in.useReactor,
-                                !configuration_in.useReactor,
                                 configuration_in.groupID);
   // *NOTE*: awoken by the worker thread (see above)...
   if (connection_manager_p->numConnections () < 1)
@@ -962,7 +962,6 @@ do_work (IRC_Client_Configuration& configuration_in,
     return;
   } // end IF
   Common_Tools::dispatchEvents (configuration_in.useReactor,
-                                !configuration_in.useReactor,
                                 configuration_in.groupID);
 
   // step7: clean up

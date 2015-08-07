@@ -26,13 +26,17 @@
 IRC_Client_Stream::IRC_Client_Stream ()
  : inherited ()
  , IRCMarshal_ (ACE_TEXT_ALWAYS_CHAR ("IRCMarshal"),
-                NULL)
+                NULL,
+                false)
  , IRCParser_ (ACE_TEXT_ALWAYS_CHAR ("IRCParser"),
-               NULL)
+               NULL,
+               false)
  //, IRCHandler_ (ACE_TEXT_ALWAYS_CHAR ("IRCHandler"),
- //               NULL)
+ //               NULL,
+ //               false)
  , runtimeStatistic_ (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
-                      NULL)
+                      NULL,
+                      false)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::IRC_Client_Stream"));
 

@@ -1,5 +1,3 @@
-#ACLOCAL_AMFLAGS = -I m4
-
 DEFS += \
   -DHAVE_CONFIG_H \
   -DNET_BUILD_DLL=1 \
@@ -187,4 +185,3 @@ libACENetwork_la_LDFLAGS = \
 SUBDIRS = \
   . \
   client_server
-

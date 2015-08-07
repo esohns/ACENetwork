@@ -69,10 +69,10 @@ IRC_Client_Message::~IRC_Client_Message ()
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
-IRC_Client_CommandType_t
-IRC_Client_Message::getCommand () const
+const IRC_Client_CommandType_t&
+IRC_Client_Message::command () const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Message::getCommand"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Message::command"));
 
   const IRC_Client_IRCMessage* data_p = inherited::getData ();
 

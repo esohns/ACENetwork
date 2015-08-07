@@ -496,7 +496,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
 
   switch (message_inout->type ())
   {
-    case SESSION_BEGIN:
+    case STREAM_SESSION_BEGIN:
     {
       // step0: initialize session state
       // *NOTE*: the IRC protocol does not foresee a 'handshake' during session
@@ -582,7 +582,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
 
       break;
     }
-    case SESSION_END:
+    case STREAM_SESSION_END:
     {
       // announce this information to any subscriber(s)
       {
@@ -1530,7 +1530,8 @@ IRC_Client_Module_IRCHandler::clone ()
 
   ACE_NEW_NORETURN (module_p,
                     IRC_Client_Module_IRCHandler_Module (ACE_TEXT_ALWAYS_CHAR (inherited2::name ()),
-                    NULL));
+                                                         NULL,
+                                                         true));
   if (!module_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

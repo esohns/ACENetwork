@@ -39,9 +39,6 @@
     <ClCompile Include="..\..\src\net_ipconnection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\net_message_base.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\net_messagehandler_base.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -164,9 +161,6 @@
     <ClInclude Include="..\..\src\net_macros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\net_message_base.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\net_messagehandler_base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -260,9 +254,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\src\net_connection_manager.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="..\..\src\net_message_base.inl">
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\src\net_messagehandler_base.inl">

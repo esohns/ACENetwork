@@ -71,7 +71,6 @@
 // stream
 #define NET_STREAM_MAX_MESSAGES                  0  // 0 --> no limits
 #define NET_STREAM_MESSAGE_DATA_BUFFER_SIZE      STREAM_MESSAGE_DATA_BUFFER_SIZE
-//#define NET_STREAM_DEFAULT_STATISTICS_COLLECTION 60 // seconds
 #define NET_STREAM_DEFAULT_STATISTICS_REPORTING  0  // seconds [0 --> OFF]
 
 #endif

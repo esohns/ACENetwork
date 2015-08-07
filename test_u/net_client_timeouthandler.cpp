@@ -369,10 +369,10 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
   if (do_connect)
   {
     ACE_ASSERT (connector_);
-    bool result_2 = false;
+    ACE_HANDLE handle = ACE_INVALID_HANDLE;
     try
     {
-      result_2 = connector_->connect (peerAddress_);
+      handle = connector_->connect (peerAddress_);
     }
     catch (...)
     {
@@ -385,7 +385,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
 
       return -1;
     }
-    if (!result_2)
+    if (handle == ACE_INVALID_HANDLE)
     {
       ACE_TCHAR buffer[BUFSIZ];
       ACE_OS::memset (buffer, 0, sizeof (buffer));
@@ -394,7 +394,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Client_IConnector::connect(\"%s\"): \"%m\", continuing\n"),
+                  ACE_TEXT ("failed to Net_Client_IConnector::connect(\"%s\"), continuing\n"),
                   buffer));
     } // end IF
   } // end IF

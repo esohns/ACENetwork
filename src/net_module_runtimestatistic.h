@@ -179,7 +179,7 @@ class Net_Module_Statistic_WriterTask_T
   unsigned int                      lastBytesPerSecondCount_;
 
   // *MESSAGE TYPE STATS*
-  Net_MessageStatistic_t            messageTypeStatistics_;
+  Net_MessageStatistic_t            messageTypeStatistic_;
 
   // *CACHE STATS*
   const Stream_IAllocator*          allocator_;

@@ -51,7 +51,7 @@ class IRC_Client_Message
   IRC_Client_Message (unsigned int); // size
   virtual ~IRC_Client_Message ();
 
-  virtual IRC_Client_CommandType_t getCommand () const; // return value: message type
+  virtual const IRC_Client_CommandType_t& command () const; // return value: message type
 
   // implement Common_IDumpState
   virtual void dump_state () const;

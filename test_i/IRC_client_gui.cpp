@@ -469,7 +469,8 @@ do_work (bool useThreadPool_in,
       &userData_in.configuration->streamConfiguration.moduleHandlerConfiguration_2;
 
   IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_HANDLER_MODULE_NAME),
-                                                   NULL);
+                                                   NULL,
+                                                   true);
   IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
   IRCHandler_impl_p =
     dynamic_cast<IRC_Client_Module_IRCHandler*> (IRC_handler.writer ());
@@ -487,10 +488,10 @@ do_work (bool useThreadPool_in,
   } // end IF
   userData_in.configuration->streamConfiguration.module = &IRC_handler;
   userData_in.configuration->streamConfiguration.cloneModule = true;
-  userData_in.configuration->streamConfiguration.deleteModule = false;
 
   // step2: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (userData_in.configuration->useReactor,
+                                              (numDispatchThreads_in > 1),
                                               numDispatchThreads_in,
                                               userData_in.configuration->streamConfiguration.serializeOutput))
   {
@@ -587,7 +588,6 @@ do_work (bool useThreadPool_in,
 
   // step7: dispatch events
   Common_Tools::dispatchEvents (userData_in.configuration->useReactor,
-                                !userData_in.configuration->useReactor,
                                 group_id);
 
   // step8: clean up
@@ -1223,6 +1223,20 @@ ACE_TMAIN (int argc_in,
   // --> ACE::init is not called automatically (see OS_main.cpp:74),
   //     which would call WSAStartup(); do it manually (doesn't hurt anyway)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  HWND window_p = GetConsoleWindow ();
+  if (!window_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetConsoleWindow(), aborting\n")));
+    return EXIT_FAILURE;
+  } // end IF
+  if (!ShowWindow (window_p, SW_HIDE))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::ShowWindow(), aborting\n")));
+    return EXIT_FAILURE;
+  } // end IF
+
   result = ACE::init ();
   if (result == -1)
   {

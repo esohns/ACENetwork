@@ -46,7 +46,8 @@ Net_Module_EventHandler::clone ()
 
   ACE_NEW_NORETURN (module_p,
                     Net_Module_EventHandler_Module (ACE_TEXT_ALWAYS_CHAR (inherited::name ()),
-                    NULL));
+                                                    NULL,
+                                                    true));
   if (!module_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

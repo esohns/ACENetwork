@@ -29,11 +29,11 @@ class Net_Remote_Comm
   // define different types of messages
   enum MessageType_t
   {
-    NET_INVALID = -1,
-    NET_PING,
-    NET_PONG,
+    NET_MESSAGE_INVALID = -1,
+    NET_MESSAGE_PING,
+    NET_MESSAGE_PONG,
     /////////////////////////////////////
-    NET_MAX
+    NET_MESSAGE_MAX
   };
 
   // define a common message header
@@ -76,10 +76,10 @@ class Net_Remote_Comm
 #endif
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_Remote_Comm ());
-  ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Remote_Comm ());
-  ACE_UNIMPLEMENTED_FUNC (Net_Remote_Comm (const Net_Remote_Comm&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Remote_Comm& operator= (const Net_Remote_Comm&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Remote_Comm ())
+  ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Remote_Comm ())
+  ACE_UNIMPLEMENTED_FUNC (Net_Remote_Comm (const Net_Remote_Comm&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Remote_Comm& operator= (const Net_Remote_Comm&))
 };
 
 // convenient typedefs

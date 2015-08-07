@@ -6,4 +6,3 @@ configdir = $(test_udir)/etc
 dist_config_DATA = \
   net_client.glade \
   net_server.glade
-

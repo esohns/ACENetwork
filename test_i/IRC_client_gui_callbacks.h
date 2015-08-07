@@ -86,6 +86,7 @@ G_MODULE_EXPORT void action_invite_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void action_info_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void action_kick_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void action_ban_cb (GtkAction*, gpointer);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

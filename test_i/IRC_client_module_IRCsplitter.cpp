@@ -34,7 +34,8 @@
 
 IRC_Client_Module_IRCSplitter::IRC_Client_Module_IRCSplitter ()
  : inherited (false, // inactive by default
-              false) // DON'T auto-start !
+              false, // DON'T auto-start !
+              false) // do not run the svc() routine on start
  , statisticCollectHandler_ (ACTION_COLLECT,
                              this,
                              false)
@@ -123,7 +124,7 @@ IRC_Client_Module_IRCSplitter::initialize (const IRC_Client_ModuleHandlerConfigu
   if (configuration_in.streamConfiguration->statisticReportingInterval)
   {
     // schedule regular statistics collection...
-    ACE_Time_Value interval (NET_STREAM_DEFAULT_STATISTICS_COLLECTION, 0);
+    ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION, 0);
     ACE_ASSERT (statisticCollectHandlerID_ == -1);
     ACE_Event_Handler* handler_p = &statisticCollectHandler_;
     statisticCollectHandlerID_ =
@@ -403,7 +404,7 @@ IRC_Client_Module_IRCSplitter::handleSessionMessage (IRC_Client_SessionMessage*&
 
   switch (message_inout->type ())
   {
-    case SESSION_BEGIN:
+    case STREAM_SESSION_BEGIN:
     {
       // retain session ID for reporting...
       const IRC_Client_StreamSessionData_t& session_data_container_r =
@@ -513,7 +514,7 @@ IRC_Client_Module_IRCSplitter::putStatisticMessage (const IRC_Client_RuntimeStat
 
   // step3: send the data downstream...
   // *NOTE*: fire-and-forget session_data_container_p
-  return inherited::putSessionMessage (SESSION_STATISTICS,
+  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
                                        session_data_container_p,
                                        inherited::configuration_.streamConfiguration->messageAllocator);
 }

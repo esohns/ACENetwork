@@ -407,6 +407,8 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read_stream ()
   } // end IF
 
   // start (asynchronous) read...
+  //// *TODO*: let the ACE_Handler handle reference counting
+  //inherited3::increase ();
   result = inputStream_.read (*message_block_p,                     // buffer
                               message_block_p->size (),             // bytes to read
                               NULL,                                 // ACT

@@ -146,10 +146,10 @@ Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // retrieve type of message and other details...
-  Net_MessageHeader_t message_header = message_inout->getHeader ();
+  Net_MessageHeader_t message_header = message_inout->get ();
   switch (message_header.messageType)
   {
-    case Net_Remote_Comm::NET_PING:
+    case Net_Remote_Comm::NET_MESSAGE_PING:
     {
       // auto-answer ?
       if (automaticPong_)
@@ -173,7 +173,8 @@ Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
         ACE_OS::memset (pong_struct, 0, sizeof (Net_Remote_Comm::PongMessage));
         pong_struct->messageHeader.messageLength =
           sizeof (Net_Remote_Comm::PongMessage) - sizeof (unsigned int);
-        pong_struct->messageHeader.messageType = Net_Remote_Comm::NET_PONG;
+        pong_struct->messageHeader.messageType =
+          Net_Remote_Comm::NET_MESSAGE_PONG;
         message_p->wr_ptr (sizeof (Net_Remote_Comm::PongMessage));
         // step2: send it upstream
         result = inherited::reply (message_p, NULL);
@@ -191,7 +192,7 @@ Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
 
       break;
     }
-    case Net_Remote_Comm::NET_PONG:
+    case Net_Remote_Comm::NET_MESSAGE_PONG:
     {
       //ACE_DEBUG ((LM_DEBUG,
       //            ACE_TEXT ("received PONG (connection ID: %u)...\n"),
@@ -233,7 +234,7 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
   int result = -1;
   switch (message_inout->type ())
   {
-    case SESSION_BEGIN:
+    case STREAM_SESSION_BEGIN:
     {
       // retain session ID for reporting...
       const Net_StreamSessionData_t& session_data_container_r =
@@ -271,7 +272,7 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
 
       break;
     }
-    case SESSION_END:
+    case STREAM_SESSION_END:
     {
       if (pingTimerID_ != -1)
       {
@@ -324,7 +325,7 @@ Net_Module_ProtocolHandler::handleTimeout (const void* arg_in)
   ACE_OS::memset (ping_struct, 0, sizeof (Net_Remote_Comm::PingMessage));
   ping_struct->messageHeader.messageLength =
     (sizeof (Net_Remote_Comm::PingMessage) - sizeof (unsigned int));
-  ping_struct->messageHeader.messageType = Net_Remote_Comm::NET_PING;
+  ping_struct->messageHeader.messageType = Net_Remote_Comm::NET_MESSAGE_PING;
   ping_struct->counter = counter_++;
   message_p->wr_ptr (sizeof (Net_Remote_Comm::PingMessage));
 

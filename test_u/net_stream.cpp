@@ -31,13 +31,17 @@
 Net_Stream::Net_Stream ()
  : inherited ()
  , socketHandler_ (std::string("SocketHandler"),
-                   NULL)
+                   NULL,
+                   false)
  , headerParser_ (std::string("HeaderParser"),
-                  NULL)
+                  NULL,
+                  false)
  , protocolHandler_ (std::string("ProtocolHandler"),
-                     NULL)
+                     NULL,
+                     false)
  , runtimeStatistic_ (std::string("RuntimeStatistic"),
-                      NULL)
+                      NULL,
+                      false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::Net_Stream"));
 
@@ -294,8 +298,9 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
   } // end IF
 
   // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along
-  socketHandler_.arg (&const_cast<Net_StreamConfiguration&> (configuration_in).userData);
+  //         --> set the argument that is passed along (head module expects a
+  //             handle to the session data)
+  socketHandler_.arg (inherited::sessionData_);
   result = inherited::push (&socketHandler_);
   if (result == -1)
   {

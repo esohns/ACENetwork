@@ -159,15 +159,23 @@ struct IRC_Client_ModuleHandlerConfiguration
  : public Stream_ModuleHandlerConfiguration
 {
   inline IRC_Client_ModuleHandlerConfiguration ()
-   : crunchMessages (IRC_CLIENT_DEF_CRUNCH_MESSAGES)
-   , headModuleIsActive (false)
+   : Stream_ModuleHandlerConfiguration ()
+   //////////////////////////////////////
+   , active (false)
+   //////////////////////////////////////
+   , crunchMessages (IRC_CLIENT_DEF_CRUNCH_MESSAGES)
    , traceParsing (IRC_CLIENT_DEF_YACC_TRACE)
    , traceScanning (IRC_CLIENT_DEF_LEX_TRACE)
+   //////////////////////////////////////
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)
+   //////////////////////////////////////
    , subscriber (NULL)
    , userData (NULL)
   {};
+
+  /* socket handler */
+  bool                              active;
 
   /* splitter */
   // *NOTE*: this option may be useful for (downstream) parsers that only work
@@ -175,9 +183,8 @@ struct IRC_Client_ModuleHandlerConfiguration
   // *WARNING*: currently, this does NOT work with multithreaded streams
   //            --> USE WITH CAUTION !
   bool                              crunchMessages;
-  bool                              headModuleIsActive; // dedicated thread ?
-  bool                              traceParsing;  // debug yacc (bison) ?
-  bool                              traceScanning; // debug (f)lex ?
+  bool                              traceParsing;       // debug yacc (bison) ?
+  bool                              traceScanning;      // debug (f)lex ?
 
   IRC_Client_ProtocolConfiguration* protocolConfiguration;
 

@@ -279,8 +279,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
     goto close;
   } // end IF
-  // *NOTE*: --> let the proactor manage this handler...
-  //inherited3::decrease ();
 
   return;
 
@@ -334,6 +332,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   } // end IF
 
   // start (asynchronous) write
+  // *TODO*: let the ACE_Handler handle reference counting
   inherited3::increase ();
   // *NOTE*: this is a fire-and-forget API for message_block...
 //  if (inherited::outputStream_.write (*buffer_,               // data
@@ -425,10 +424,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   // step4: deregister with the connection manager (if any)
   if (inherited3::isRegistered_)
     inherited3::deregister ();
-
-  //// step5: release a reference (and let the reactor manage the lifecycle) ?
-  //// *IMPORTANT NOTE*: may 'delete this'
-  //inherited3::decrease ();
 
   return result;
 }

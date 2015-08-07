@@ -83,9 +83,11 @@ struct Net_ModuleHandlerConfiguration
  : public Stream_ModuleHandlerConfiguration
 {
   inline Net_ModuleHandlerConfiguration ()
-   : sessionData (NULL)
+   : active (false)
+   , sessionData (NULL)
   {};
 
+  bool                active;
   // *TODO*: remove this (--> session message data)
   Stream_SessionData* sessionData;
 };
