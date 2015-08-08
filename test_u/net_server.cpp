@@ -592,12 +592,14 @@ do_work (unsigned int maxNumConnections_in,
 
   // step2: signal handling
   if (useReactor_in)
-    CBData_in.serverConfiguration->listener = NET_SERVER_LISTENER_SINGLETON::instance ();
+    CBData_in.serverConfiguration->listener =
+      NET_SERVER_LISTENER_SINGLETON::instance ();
   else
     CBData_in.serverConfiguration->listener =
       NET_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
   Net_Server_SignalHandlerConfiguration signal_handler_configuration;
-  signal_handler_configuration.listener = CBData_in.serverConfiguration->listener;
+  signal_handler_configuration.listener =
+    CBData_in.serverConfiguration->listener;
   signal_handler_configuration.statisticReportingHandler =
       NET_CONNECTIONMANAGER_SINGLETON::instance ();
   signal_handler_configuration.statisticReportingTimerID = timer_id;
@@ -653,6 +655,32 @@ do_work (unsigned int maxNumConnections_in,
 
       return;
     } // end IF
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    HWND window_p = GetConsoleWindow ();
+    if (!window_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
+
+      // clean up
+      timer_manager_p->stop ();
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
+
+      return;
+    } // end IF
+    if (!ShowWindow (window_p, SW_HIDE))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ::ShowWindow(), returning\n")));
+
+      // clean up
+      timer_manager_p->stop ();
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
+
+      return;
+    } // end IF
+#endif
   } // end IF
 
   // step4b: initialize worker(s)

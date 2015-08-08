@@ -689,6 +689,34 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
       return;
     } // end IF
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    HWND window_p = GetConsoleWindow ();
+    if (!window_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
+
+      // clean up
+      timer_manager_p->stop ();
+      connector_p->abort ();
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
+
+      return;
+    } // end IF
+    if (!ShowWindow (window_p, SW_HIDE))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ::ShowWindow(), returning\n")));
+
+      // clean up
+      timer_manager_p->stop ();
+      connector_p->abort ();
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
+
+      return;
+    } // end IF
+#endif
   } // end IF
 
   // step1b: initialize worker(s)
@@ -872,20 +900,6 @@ ACE_TMAIN (int argc_in,
   // step0: initialize
 // *PORTABILITY*: on Windows, initialize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  HWND window_p = GetConsoleWindow ();
-  if (!window_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::GetConsoleWindow(), aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-  if (!ShowWindow (window_p, SW_HIDE))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::ShowWindow(), aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-
   result = ACE::init ();
   if (result == -1)
   {

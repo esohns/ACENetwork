@@ -258,8 +258,6 @@
                             <property name="invisible_char">&#x25CF;</property>
                             <property name="xalign">1</property>
                             <property name="caps_lock_warning">False</property>
-                            <property name="primary_icon_sensitive">True</property>
-                            <property name="secondary_icon_sensitive">True</property>
                             <property name="adjustment">spinbutton_messages_adjustment</property>
                             <property name="snap_to_ticks">True</property>
                             <property name="numeric">True</property>
