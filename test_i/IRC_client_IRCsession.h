@@ -69,6 +69,7 @@ class IRC_Client_IRCSession_T
   // implement IRC_Client_IStreamNotify_t
   virtual void start (const IRC_Client_StreamSessionData&);
   virtual void notify (const IRC_Client_IRCMessage&);
+  virtual void notify (const IRC_Client_SessionMessage&);
   virtual void end ();
 
   // override some task-based members

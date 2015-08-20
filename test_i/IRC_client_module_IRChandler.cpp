@@ -212,6 +212,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Client_Message*& message_in
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:        // 433
         case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:        // 451
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:       // 461
+        case IRC_Client_IRC_Codes::ERR_ALREADYREGISTRED:     // 462
         case IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP:     // 465
         case IRC_Client_IRC_Codes::ERR_BADCHANNAME:          // 479
         case IRC_Client_IRC_Codes::ERR_CHANOPRIVSNEEDED:     // 482
@@ -525,8 +526,8 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       ACE_ASSERT (session_data_p->connectionState);
       {
         ACE_Guard<ACE_SYNCH_MUTEX> aGuard (session_data_p->connectionState->lock);
-        session_data_p->connectionState->nickname =
-            module_handler_configuration_r.protocolConfiguration->loginOptions.nickname;
+        session_data_p->connectionState->nickName =
+            module_handler_configuration_r.protocolConfiguration->loginOptions.nickName;
       } // end lock scope
 
       // step1: remember connection has been opened...
@@ -639,7 +640,38 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       break;
     }
     default:
+    {
+      // forward the data to subscriber(s)
+
+      // synch access to subscribers
+      {
+        ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
+
+        // *WARNING* if the user unsubscribes() within the callback
+        // BAD THINGS (TM) WILL happen, because the current iter WILL be invalidated
+        // --> use a slightly modified for-loop (advance first and THEN invoke the
+        //     callback, works for MOST containers)
+        // *NOTE*: this can only happen due to the ACE_RECURSIVE_Thread_Mutex
+        //         used as a lock in order to avoid deadlocks in precisely this
+        //         situation...
+        for (SubscribersIterator_t iterator = subscribers_.begin ();
+             iterator != subscribers_.end ();
+            )
+        {
+          try
+          {
+            (*iterator++)->notify (*message_inout);
+          }
+          catch (...)
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("caught exception in IRC_Client_INotify::notify(): \"%m\", continuing\n")));
+          }
+        } // end FOR
+      } // end lock scope
+
       break;
+    }
   } // end SWITCH
 }
 
@@ -743,13 +775,13 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
     return false;
   } // end IF
 
-  message_p->params.push_back (loginOptions_in.password);
+  message_p->params.push_back (loginOptions_in.passWord);
 
   // step3b: send it upstream
   sendMessage (message_p);
 
   // step4: initialize nickname
-  nick (loginOptions_in.nickname);
+  nick (loginOptions_in.nickName);
 
   // step5a: initialize user
   message_p = allocateMessage (IRC_Client_IRCMessage::USER);
@@ -760,26 +792,27 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
     return false;
   } // end IF
 
-  message_p->params.push_back (loginOptions_in.user.username);
-  switch (loginOptions_in.user.hostname.discriminator)
+  message_p->params.push_back (loginOptions_in.user.userName);
+  switch (loginOptions_in.user.hostName.discriminator)
   {
     case IRC_Client_IRCLoginOptions::User::Hostname::STRING:
     {
-      message_p->params.push_back (*loginOptions_in.user.hostname.string);
+      ACE_ASSERT (loginOptions_in.user.hostName.string);
+      message_p->params.push_back (*loginOptions_in.user.hostName.string);
       break;
     }
-    case IRC_Client_IRCLoginOptions::User::Hostname::BITMASK:
+    case IRC_Client_IRCLoginOptions::User::Hostname::MODE:
     {
       std::ostringstream converter;
-      converter << static_cast<unsigned long> (loginOptions_in.user.hostname.mode);
+      converter << static_cast<unsigned int> (loginOptions_in.user.hostName.mode);
       message_p->params.push_back (std::string (converter.str ()));
       break;
     }
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid USER <hostname> parameter field type (was: %d), aborting\n"),
-                  loginOptions_in.user.hostname.discriminator));
+                  ACE_TEXT ("invalid USER <host name> parameter field type (was: %d), aborting\n"),
+                  loginOptions_in.user.hostName.discriminator));
 
       // clean up
       message_p->decrease ();
@@ -787,8 +820,8 @@ IRC_Client_Module_IRCHandler::registerConnection (const IRC_Client_IRCLoginOptio
       return false;
     }
   } // end SWITCH
-  message_p->params.push_back (loginOptions_in.user.servername);
-  message_p->params.push_back (loginOptions_in.user.realname);
+  message_p->params.push_back (loginOptions_in.user.serverName);
+  message_p->params.push_back (loginOptions_in.user.realName);
 
   // step5b: send it upstream
   sendMessage (message_p);
@@ -880,7 +913,7 @@ IRC_Client_Module_IRCHandler::unsubscribe (IRC_Client_IStreamNotify_t* interface
 }
 
 void
-IRC_Client_Module_IRCHandler::nick (const std::string& nick_in)
+IRC_Client_Module_IRCHandler::nick (const std::string& nickName_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::nick"));
 
@@ -894,7 +927,7 @@ IRC_Client_Module_IRCHandler::nick (const std::string& nick_in)
     return;
   } // end IF
 
-  message_p->params.push_back (nick_in);
+  message_p->params.push_back (nickName_in);
 
   // step2: send it upstream
   sendMessage (message_p);

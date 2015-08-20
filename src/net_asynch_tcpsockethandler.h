@@ -67,14 +67,18 @@ class Net_AsynchTCPSocketHandler_T
   ACE_Asynch_Write_Stream outputStream_;
   ACE_INET_Addr           localSAP_;
   ACE_INET_Addr           remoteSAP_;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  ACE_HANDLE              writeHandle_;
+#endif
 
  private:
   typedef Net_SocketHandlerBase<ConfigurationType> inherited;
   typedef ACE_Service_Handler inherited2;
   typedef ACE_Notification_Strategy inherited3;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPSocketHandler_T (const Net_AsynchTCPSocketHandler_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPSocketHandler_T& operator= (const Net_AsynchTCPSocketHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPSocketHandler_T (const Net_AsynchTCPSocketHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPSocketHandler_T& operator= (const Net_AsynchTCPSocketHandler_T&))
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size

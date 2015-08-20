@@ -47,12 +47,14 @@ class Net_Module_MessageHandler_T
                                  MessageType>
  , public Stream_IModuleHandler_T<ModuleHandlerConfigurationType>
  , public Common_ISubscribe_T<Common_INotify_T<SessionDataType,
-                                               MessageType> >
+                                               MessageType,
+                                               SessionMessageType> >
  , public Common_IClone_T<Stream_Module_t>
 {
  public:
   typedef Common_INotify_T<SessionDataType,
-                           MessageType> INOTIFY_T;
+                           MessageType,
+                           SessionMessageType> INOTIFY_T;
   typedef std::list<INOTIFY_T*> SUBSCRIBERS_T;
 
   Net_Module_MessageHandler_T ();

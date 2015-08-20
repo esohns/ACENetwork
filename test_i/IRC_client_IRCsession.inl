@@ -28,6 +28,10 @@
 #include "common_file_tools.h"
 #include "common_tools.h"
 
+#ifdef HAVE_CONFIG_H
+#include "libacenetwork_config.h"
+#endif
+
 #include "net_common.h"
 #include "net_macros.h"
 
@@ -147,25 +151,26 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamSessionDa
     configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
   // sanity check(s)
   ACE_ASSERT (configuration_p);
-  inherited::state_.nickname =
-    configuration_p->protocolConfiguration.loginOptions.nickname;
+  inherited::state_.nickName =
+    configuration_p->protocolConfiguration.loginOptions.nickName;
 
   // step1: initialize output
   inherited::state_.cursesState = configuration_p->cursesState;
   logToFile_ = configuration_p->logToFile;
   if (logToFile_)
   {
-    std::string filename = Common_File_Tools::getLogDirectory ();
-    filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-    filename += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_SESSION_LOG_FILENAME_PREFIX);
-    filename += COMMON_LOG_FILENAME_SUFFIX;
+    std::string file_name =
+        Common_File_Tools::getLogDirectory (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME));
+    file_name += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    file_name += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_SESSION_LOG_FILENAME_PREFIX);
+    file_name += COMMON_LOG_FILENAME_SUFFIX;
     ACE_FILE_Addr address;
-    result = address.set (ACE_TEXT (filename.c_str ()));
+    result = address.set (ACE_TEXT (file_name.c_str ()));
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_FILE_Addr::set(\"%s\"): \"%m\", returning\n"),
-                  ACE_TEXT (filename.c_str ())));
+                  ACE_TEXT (file_name.c_str ())));
 
       // close connection
       inherited::close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
@@ -183,7 +188,7 @@ IRC_Client_IRCSession_T<ConnectionType>::start (const IRC_Client_StreamSessionDa
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_FILE_Connector::connect(\"%s\"): \"%m\", returning\n"),
-                  ACE_TEXT (filename.c_str ())));
+                  ACE_TEXT (file_name.c_str ())));
 
       // close connection
       inherited::close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
@@ -493,6 +498,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:    // 433
         case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:    // 451
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:   // 461
+        case IRC_Client_IRC_Codes::ERR_ALREADYREGISTRED: // 462
         case IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
         case IRC_Client_IRC_Codes::ERR_BADCHANNAME:      // 479
         case IRC_Client_IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
@@ -505,6 +511,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_ERRONEUSNICKNAME) ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE)    ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOTREGISTERED)    ||
+              (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_ALREADYREGISTRED) ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP) ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_BADCHANNAME)      ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_CHANOPRIVSNEEDED) ||
@@ -536,9 +543,9 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
       {
         case IRC_Client_IRCMessage::NICK:
         {
-          // remember changed nickname...
-          std::string old_nick = inherited::state_.nickname;
-          inherited::state_.nickname = message_in.params.front ();
+          // remember changed nick name
+          std::string nick_name = inherited::state_.nickName;
+          inherited::state_.nickName = message_in.params.front ();
 
           // *WARNING*: falls through !
         }
@@ -547,9 +554,9 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
         {
           log (message_in);
 
-          if ((message_in.prefix.origin == inherited::state_.nickname) &&
+          if ((message_in.prefix.origin == inherited::state_.nickName) &&
               (command == IRC_Client_IRCMessage::QUIT))
-            error (message_in); // --> show on statusbar as well...
+            error (message_in); // --> show on statusbar as well
 
           break;
         }
@@ -560,7 +567,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           // - stranger entering the channel
 
           // reply from a successful join request ?
-          if (message_in.prefix.origin == inherited::state_.nickname)
+          if (message_in.prefix.origin == inherited::state_.nickName)
           {
             std::string channel = message_in.params.front ();
             if ((inherited::state_.channel.empty ()) &&
@@ -588,7 +595,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
           // - someone left a common channel
 
           // reply from a successful part request ?
-          if (message_in.prefix.origin == inherited::state_.nickname)
+          if (message_in.prefix.origin == inherited::state_.nickName)
           {
             std::string channel = message_in.params.front ();
             if ((!inherited::state_.channel.empty ()) &&
@@ -620,7 +627,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
             message_in.params.begin ();
           param_iterator++;
 
-          if (message_in.params.front () == inherited::state_.nickname)
+          if (message_in.params.front () == inherited::state_.nickName)
           {
             // --> user mode
             IRC_Client_Tools::merge (message_in.params.back (),
@@ -665,7 +672,7 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
 
           // private message ?
 //          std::string target_id;
-          if (inherited::state_.nickname == message_in.params.front ())
+          if (inherited::state_.nickName == message_in.params.front ())
           {
             // --> send to private conversation handler
 
@@ -720,6 +727,18 @@ IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_IRCMessage& me
       break;
     }
   } // end SWITCH
+}
+template <typename ConnectionType>
+void
+IRC_Client_IRCSession_T<ConnectionType>::notify (const IRC_Client_SessionMessage& sessionMessage_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_IRCSession_T::notify"));
+
+//  IRC_Client_GTK_Event event =
+//    ((sessionMessage_in.type () == STREAM_SESSION_STATISTIC) ? NET_GTKEVENT_STATISTIC
+//                                                             : NET_GKTEVENT_INVALID);
+//  ACE_UNUSED_ARG (event);
+    ACE_UNUSED_ARG (sessionMessage_in);
 }
 
 template <typename ConnectionType>

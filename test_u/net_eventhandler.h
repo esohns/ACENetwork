@@ -21,16 +21,22 @@
 #ifndef NET_EVENTHANDLER_H
 #define NET_EVENTHANDLER_H
 
+#include "ace/Global_Macros.h"
+
 #include "common_inotify.h"
+
+//#include "net_configuration.h"
+#include "net_message.h"
+#include "net_sessionmessage.h"
 
 // forward declaration(s)
 struct Net_GTK_CBData;
-class Net_Message;
 struct Net_StreamSessionData;
 
 class Net_EventHandler
  : public Common_INotify_T<Net_StreamSessionData,
-                           Net_Message>
+                           Net_Message,
+                           Net_SessionMessage>
 {
  public:
   Net_EventHandler (Net_GTK_CBData*); // GTK state
@@ -39,6 +45,7 @@ class Net_EventHandler
   // implement Common_INotify_T
   virtual void start (const Net_StreamSessionData&);
   virtual void notify (const Net_Message&);
+  virtual void notify (const Net_SessionMessage&);
   virtual void end ();
 
  private:

@@ -37,7 +37,7 @@
 
 IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState* GTKState_in,
                                                               IRC_Client_GUI_Connection* connection_in,
-                                                              const std::string& timestamp_in)
+                                                              const std::string& timeStamp_in)
  : CBData_ ()
  , isFirstMemberListMsg_ (true)
  , isPrivateDialog_ (false)
@@ -62,19 +62,19 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   CBData_.handler = this;
   CBData_.id.clear ();
   //  CBData_.parameters ();
-  CBData_.timestamp = timestamp_in;
+  CBData_.timeStamp = timeStamp_in;
 
   // step1: retrieve server log view
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.timestamp);
+    CBData_.GTKState->builders.find (CBData_.timeStamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (timestamp was: \"%s\") builder not found, returning\n"),
-                ACE_TEXT (CBData_.timestamp.c_str ())));
+                ACE_TEXT (CBData_.timeStamp.c_str ())));
     return;
   } // end IF
 
@@ -137,20 +137,20 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   CBData_.handler = this;
   CBData_.id = id_in;
 //  CBData_.parameters ();
-  CBData_.timestamp = timestamp_in;
+  CBData_.timeStamp = timestamp_in;
 
   { // synch access
 //    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
     // step1: retrieve server log view
     Common_UI_GTKBuildersIterator_t iterator =
-      CBData_.GTKState->builders.find (CBData_.timestamp);
+      CBData_.GTKState->builders.find (CBData_.timeStamp);
     // sanity check(s)
     if (iterator == CBData_.GTKState->builders.end ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("connection (timestamp was: \"%s\") builder not found, returning\n"),
-                  ACE_TEXT (CBData_.timestamp.c_str ())));
+                  ACE_TEXT (CBData_.timeStamp.c_str ())));
       return;
     } // end IF
     if (gdkLockedAccess_in)
@@ -466,7 +466,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   } // end IF
   else
     page_tab_label_string = CBData_.id;
-  CBData_.builderLabel = CBData_.timestamp;
+  CBData_.builderLabel = CBData_.timeStamp;
   CBData_.builderLabel += ACE_TEXT_ALWAYS_CHAR ("::");
   CBData_.builderLabel += page_tab_label_string;
 
@@ -596,59 +596,60 @@ IRC_Client_GUI_MessageHandler::update ()
 
   //gchar* string_p = NULL;
   std::string message_text;
+  GtkTextMark* text_mark_p = NULL;
   {  // synch access
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (messageQueueLock_);
 
     // sanity check
-    if (messageQueue_.empty ())
-      return; // nothing to do...
+    for (IRC_Client_MessageQueueReverseIterator_t iterator = messageQueue_.rbegin ();
+         iterator != messageQueue_.rend ();
+         ++iterator)
+    {
+      message_text = *iterator + '\n';
 
-    message_text = messageQueue_.back () + '\n';
-    //// step1: convert text (GTK uses UTF-8 to represent strings)
-    //string_p =
-    //  Common_UI_Tools::Locale2UTF8 (messageQueue_.back () + '\n');
-    //if (!string_p)
-    //{
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"), returning\n"),
-    //              ACE_TEXT (messageQueue_.back ().c_str ())));
+      //// step1: convert text (GTK uses UTF-8 to represent strings)
+      //string_p =
+      //  Common_UI_Tools::Locale2UTF8 (message_text);
+      //if (!string_p)
+      //{
+      //  ACE_DEBUG ((LM_ERROR,
+      //              ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"), returning\n"),
+      //              ACE_TEXT (message_text.c_str ())));
+      //  return;
+      //} // end IF
 
-    //  // clean up
-    //  messageQueue_.pop_back ();
+      // step2: display text
+      //gtk_text_buffer_insert (gtk_text_view_get_buffer (view_), &text_iterator,
+      //                        string_p, -1);
+      gtk_text_buffer_insert (gtk_text_view_get_buffer (text_view_p), &text_iter,
+                              message_text.c_str (), -1);
 
-    //  return;
-    //} // end IF
-    messageQueue_.pop_back ();
+      //// clean up
+      //g_free (string_p);
+
+    //   // get the new "end"...
+    //   gtk_text_buffer_get_end_iter(myTargetBuffer,
+    //                                &iter);
+      // move the iterator to the beginning of line, so the view doesn't scroll
+      // in horizontal direction
+      gtk_text_iter_set_line_offset (&text_iter, 0);
+
+      // ...and place the mark at iter. The mark will stay there after text is
+      // inserted at the end, because it has right gravity
+      text_mark_p =
+        gtk_text_buffer_get_mark (gtk_text_view_get_buffer (text_view_p),
+                                  ACE_TEXT_ALWAYS_CHAR ("scroll"));
+      ACE_ASSERT (text_mark_p);
+      gtk_text_buffer_move_mark (gtk_text_view_get_buffer (text_view_p),
+                                 text_mark_p,
+                                 &text_iter);
+
+      // scroll the mark onscreen
+      gtk_text_view_scroll_mark_onscreen (text_view_p,
+                                          text_mark_p);
+    } // end FOR
+    messageQueue_.clear ();
   } // end lock scope
-  // step2: display text
-  //gtk_text_buffer_insert (gtk_text_view_get_buffer (view_), &text_iterator,
-  //                        string_p, -1);
-  gtk_text_buffer_insert (gtk_text_view_get_buffer (text_view_p), &text_iter,
-                          message_text.c_str (), -1);
-
-  //// clean up
-  //g_free (string_p);
-
-//   // get the new "end"...
-//   gtk_text_buffer_get_end_iter(myTargetBuffer,
-//                                &iter);
-  // move the iterator to the beginning of line, so we don't scroll
-  // in horizontal direction
-  gtk_text_iter_set_line_offset (&text_iter, 0);
-
-  // ...and place the mark at iter. The mark will stay there after we
-  // insert some text at the end because it has right gravity
-  GtkTextMark* text_mark_p =
-    gtk_text_buffer_get_mark (gtk_text_view_get_buffer (text_view_p),
-                              ACE_TEXT_ALWAYS_CHAR ("scroll"));
-  ACE_ASSERT (text_mark_p);
-  gtk_text_buffer_move_mark (gtk_text_view_get_buffer (text_view_p),
-                             text_mark_p,
-                             &text_iter);
-
-  // scroll the mark onscreen
-  gtk_text_view_scroll_mark_onscreen (text_view_p,
-                                      text_mark_p);
 
   // redraw view area...
 //   // sanity check(s)
@@ -858,24 +859,24 @@ IRC_Client_GUI_MessageHandler::clearMembers (bool lockedAccess_in)
 }
 
 void
-IRC_Client_GUI_MessageHandler::update (const std::string& oldNickname_in)
+IRC_Client_GUI_MessageHandler::update (const std::string& currentNickName_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::update"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_.connection);
 
-  std::string new_nickname;//, channel;
-  //CBData_.connection->current (new_nickname,
+  std::string new_nick_name;//, channel;
+  //CBData_.connection->current (new_nick_name,
   //                             channel);
   const IRC_Client_ConnectionState& connection_state_r =
     CBData_.connection->state ();
-  new_nickname = connection_state_r.nickname;
+  new_nick_name = connection_state_r.nickName;
   if (CBData_.channelModes.test (CHANNELMODE_OPERATOR))
-    new_nickname.insert (new_nickname.begin (), '@');
+    new_nick_name.insert (new_nick_name.begin (), '@');
 
-  remove (oldNickname_in, true);
-  add (new_nickname, true);
+  remove (currentNickName_in, true);
+  add (new_nick_name, true);
 }
 
 void

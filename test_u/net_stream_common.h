@@ -100,7 +100,8 @@ typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Stream_ModuleHandlerConfiguration> Net_IModule_t;
 
 typedef Common_INotify_T<Net_StreamSessionData,
-                         Net_Message> Net_IStreamNotify_t;
+                         Net_Message,
+                         Net_SessionMessage> Net_IStreamNotify_t;
 typedef std::list<Net_IStreamNotify_t*> Net_Subscribers_t;
 typedef Net_Subscribers_t::iterator Net_SubscribersIterator_t;
 

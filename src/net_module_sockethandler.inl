@@ -22,9 +22,9 @@
 
 #include "common_timer_manager_common.h"
 
+#include "stream_defines.h"
 #include "stream_session_message_base.h"
 
-#include "net_defines.h"
 #include "net_macros.h"
 
 template <typename SessionMessageType,
@@ -787,13 +787,12 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 
   switch (message_inout->getType ())
   {
-    case SESSION_BEGIN:
+    case STREAM_SESSION_BEGIN:
     {
       if (inherited::configuration_.streamConfiguration->statisticReportingInterval)
       {
         // schedule regular statistics collection...
-        ACE_Time_Value interval (NET_STREAM_DEFAULT_STATISTICS_COLLECTION,
-                                 0);
+        ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION, 0);
         ACE_ASSERT (timerID_ == -1);
         ACE_Event_Handler* handler_p = &statisticCollectionHandler_;
         timerID_ =
@@ -818,7 +817,7 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 
       break;
     }
-    case SESSION_END:
+    case STREAM_SESSION_END:
     {
       if (timerID_ != -1)
       {
@@ -975,7 +974,7 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
   // step3: send the data downstream
   // *NOTE*: this is a "fire-and-forget" API, so don't worry about
   //         session_data_p
-  return inherited::putSessionMessage (SESSION_STATISTICS,
+  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
                                        session_data_p,
                                        inherited::allocator_);
 }

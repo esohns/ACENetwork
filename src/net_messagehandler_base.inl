@@ -23,28 +23,34 @@
 #include "net_macros.h"
 
 template <typename ConfigurationType,
-          typename MessageType>
+          typename MessageType,
+          typename SessionMessageType>
 Net_MessageHandlerBase_T<ConfigurationType,
-                         MessageType>::Net_MessageHandlerBase_T ()
+                         MessageType,
+                         SessionMessageType>::Net_MessageHandlerBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_MessageHandlerBase_T::Net_MessageHandlerBase_T"));
 
 }
 
 template <typename ConfigurationType,
-          typename MessageType>
+          typename MessageType,
+          typename SessionMessageType>
 Net_MessageHandlerBase_T<ConfigurationType,
-                         MessageType>::~Net_MessageHandlerBase_T ()
+                         MessageType,
+                         SessionMessageType>::~Net_MessageHandlerBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_MessageHandlerBase_T::~Net_MessageHandlerBase_T"));
 
 }
 
 template <typename ConfigurationType,
-          typename MessageType>
+          typename MessageType,
+          typename SessionMessageType>
 void
 Net_MessageHandlerBase_T<ConfigurationType,
-                         MessageType>::start (const ConfigurationType& configuration_in)
+                         MessageType,
+                         SessionMessageType>::start (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_MessageHandlerBase_T::start"));
 
@@ -52,10 +58,12 @@ Net_MessageHandlerBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename MessageType>
+          typename MessageType,
+          typename SessionMessageType>
 void
 Net_MessageHandlerBase_T<ConfigurationType,
-                         MessageType>::notify (const MessageType& message_in)
+                         MessageType,
+                         SessionMessageType>::notify (const MessageType& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_MessageHandlerBase_T::notify"));
 
@@ -63,10 +71,12 @@ Net_MessageHandlerBase_T<ConfigurationType,
 }
 
 template <typename ConfigurationType,
-          typename MessageType>
+          typename MessageType,
+          typename SessionMessageType>
 void
 Net_MessageHandlerBase_T<ConfigurationType,
-                         MessageType>::end ()
+                         MessageType,
+                         SessionMessageType>::end ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_MessageHandlerBase_T::end"));
 

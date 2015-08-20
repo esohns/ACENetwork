@@ -33,9 +33,11 @@
 
 #include "IRC_client_configuration.h"
 #include "IRC_client_IRCmessage.h"
+//#include "IRC_client_sessionmessage.h"
 
 // forward declarations
 struct IRC_Client_ConnectionState;
+class IRC_Client_SessionMessage;
 
 typedef Stream_IModuleHandler_T<IRC_Client_ModuleHandlerConfiguration> IRC_Client_IModuleHandler_t;
 typedef Stream_IModule_T<ACE_MT_SYNCH,
@@ -94,6 +96,7 @@ struct IRC_Client_StreamState
 typedef Stream_SessionDataBase_T<IRC_Client_StreamSessionData> IRC_Client_StreamSessionData_t;
 
 typedef Common_INotify_T<IRC_Client_StreamSessionData,
-                         IRC_Client_IRCMessage> IRC_Client_IStreamNotify_t;
+                         IRC_Client_IRCMessage,
+                         IRC_Client_SessionMessage> IRC_Client_IStreamNotify_t;
 
 #endif

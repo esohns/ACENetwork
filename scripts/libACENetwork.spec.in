@@ -1,4 +1,4 @@
-# author:      Erik Sohns <eriksohns@123mail.org>
+# author:      Erik Sohns <@MAINTAINER_EMAIL_ADDRESS@>
 # rpm spec file
 
 AutoReqProv:  yes
@@ -8,65 +8,82 @@ Group:        Development/Libraries
 #Icon: N/A
 License:      LGPL
 Name:         @PACKAGE_NAME@
-Packager:     Erik Sohns <eriksohns@123mail.org>
+Packager:     Erik Sohns <@MAINTAINER_EMAIL_ADDRESS@>
 Prefix:       /usr/local
 Provides:     %{name}
 Release:      1
 Requires:     libCommon, libACEStream
 #Serial:       1
 Source:       %{name}-%{version}.tar.gz
-Summary:      (wrapper) library for network functionality, based on the ACE framework
+Summary:      (wrapper) library for networking functionality, based on the ACE framework
 URL:          @PACKAGE_URL@
 Vendor:       N/A
 Version:      @VERSION@
 
 %description
-(wrapper) library for network functionality, based on the ACE \
-framework (see: http://www.cs.wustl.edu/~schmidt/ACE.html). Specifically, the \
-library encapsulates descriptor-based (network) event propagation logic (i.e. \
-user-space dispatching APIs), as implemented and found on several common \
-operating system platforms. The library forsees dispatching these events using \
-dedicated threads, which facilitates efficient processing of data and \
-communication protocols. In conjunction with other (modularized) functionality \
-(see e.g.: https://github.com/esohns/libACEStream), this facilitates a modular \
-(i.e. less monolithic), and therefore reusable application design, which \
-cleanly separates network data from application-specific processing (i.e. \
-business logic).
+user-space wrapper library for (socket-oriented) network functionality, based \
+on the ACE framework (see: http://www.cs.wustl.edu/~schmidt/ACE.html).
+In particular, the library encapsulates (descriptor-based) (network) event \
+propagation logic (i.e. user-space dispatching APIs), as implemented and found \
+on several common operating system platforms. The library forsees dispatching \
+such events using (dedicated) threads (thread-pool approach), which facilitates \
+efficient processing of communication protocols and data. \
+In conjunction with additional, modular data processing functionality \
+(see e.g.: https://github.com/esohns/libACEStream), this approach facilitates a \
+portable, microkernel style approach to application design
 
 %prep
 #rm -rf %{_topdir}/BUILD/*
 %setup -q
 
 %build
+PROJECT_ROOT_MODULES=/mnt/win_d/projects
+%if %{?project_root:1}0
+  PROJECT_ROOT_MODULES=%{project_root}/modules
+%endif
+
+#rm -rf modules/ATCD
+#[ $? -ne 0 ] && echo "ERROR: failed to rm modules/ATCD, aborting" && exit 1
+ATCD_ROOT=$PROJECT_ROOT_MODULES/ATCD
+[ ! -d $ATCD_ROOT ] && echo "ERROR: ATCD project not found, aborting" && exit 1
+ln -s  $ATCD_ROOT modules/ATCD
+[ $? -ne 0 ] && echo "ERROR: failed to link ATCD project, aborting" && exit 1
+
+#rm -rf modules/libCommon
+#[ $? -ne 0 ] && echo "ERROR: failed to rm modules/libCommon, aborting" && exit 1
+LIBCOMMON_ROOT=$PROJECT_ROOT_MODULES/libCommon
+[ ! -d $LIBCOMMON_ROOT ] && echo "ERROR: libCommon project not found, aborting" && exit 1
+ln -s  $LIBCOMMON_ROOT modules/libCommon
+[ $? -ne 0 ] && echo "ERROR: failed to link libCommon project, aborting" && exit 1
+
+#rm -rf modules/libACEStream
+#[ $? -ne 0 ] && echo "ERROR: failed to rm modules/libACEStream, aborting" && exit 1
+LIBACESTREAM_ROOT=$PROJECT_ROOT_MODULES/libACEStream
+[ ! -d $LIBACESTREAM_ROOT ] && echo "ERROR: libACEStream project not found, aborting" && exit 1
+ln -s  $LIBACESTREAM_ROOT modules/libACEStream
+[ $? -ne 0 ] && echo "ERROR: failed to link libACEStream project, aborting" && exit 1
+
 #./autogen.sh
+
 cd test_i/scripts
 ./scanner.sh
 [ $? -ne 0 ] && echo "ERROR: failed to generate scanner, aborting" && exit 1
 ./parser.sh
 [ $? -ne 0 ] && echo "ERROR: failed to generate parser, aborting" && exit 1
 cd ../..
-ATCD_ROOT=/mnt/win_d/projects/ATCD
-[ ! -d $ATCD_ROOT ] && echo "ERROR: ATCD project not found, aborting" && exit 1
-ln -s  $ATCD_ROOT modules/ATCD
-[ $? -ne 0 ] && echo "ERROR: failed to link ATCD project, aborting" && exit 1
-rm -rf modules/libCommon
-[ $? -ne 0 ] && echo "ERROR: failed to rm modules/libCommon, aborting" && exit 1
-LIBCOMMON_ROOT=/mnt/win_d/projects/yarp/modules/libCommon
-[ ! -d $LIBCOMMON_ROOT ] && echo "ERROR: libCommon project not found, aborting" && exit 1
-ln -s  $LIBCOMMON_ROOT modules/libCommon
-[ $? -ne 0 ] && echo "ERROR: failed to link libCommon project, aborting" && exit 1
-rm -rf modules/libACEStream
-[ $? -ne 0 ] && echo "ERROR: failed to rm modules/libACEStream, aborting" && exit 1
-LIBACESTREAM_ROOT=/mnt/win_d/projects/yarp/modules/libACEStream
-[ ! -d $LIBACESTREAM_ROOT ] && echo "ERROR: libACEStream project not found, aborting" && exit 1
-ln -s  $LIBACESTREAM_ROOT modules/libACEStream
-[ $? -ne 0 ] && echo "ERROR: failed to link libACEStream project, aborting" && exit 1
+
 %configure
 make %{?_smp_mflags}
 
 %install
 #rm -rf %{buildroot} # redundant except for RHEL 5
 %make_install
+# *PORTABILITY*: this is highly platform-specific
+mkdir /var/log/@PACKAGE_NAME@
+[ $? -ne 0 ] && echo "ERROR: failed to mkdir \"@PACKAGE_NAME@\", aborting" && exit 1
+# *TODO*: specify package owner/group ?
+chmod go+w /var/log/@PACKAGE_NAME@
+[ $? -ne 0 ] && echo "ERROR: failed to chmod \"@PACKAGE_NAME@\", aborting" && exit 1
 #%makeinstall
 #libtool --finish /usr/lib64
 
@@ -89,4 +106,3 @@ rm -rf %{buildroot}
 %{_datadir}/%{name}/*
 
 %changelog
-

@@ -37,13 +37,8 @@
 #include "IRC_client_network.h"
 
 // forward declaration(s)
-//template <ACE_SYNCH_DECL, class TIME_POLICY>
-//class ACE_Module;
-//typedef ACE_Module<ACE_MT_SYNCH,
-//                   Common_TimePolicy_t> Stream_Module_t;
 struct IRC_Client_IRCLoginOptions;
 struct IRC_Client_ModuleHandlerConfiguration;
-//struct Stream_ModuleConfiguration;
 
 class IRC_Client_Tools
 {
@@ -57,6 +52,10 @@ class IRC_Client_Tools
   static std::string IRCChannelMode2String (const IRC_Client_ChannelMode&);
   static std::string IRCUserMode2String (const IRC_Client_UserMode&);
   static std::string IRCMessage2String (const IRC_Client_IRCMessage&);
+
+  static void parseConfigurationFile (const std::string&,
+                                      IRC_Client_IRCLoginOptions&,
+                                      IRC_Client_Connections_t&);
 
   static IRC_Client_CommandType_t IRCCommandString2Type (const std::string&);
   static unsigned int merge (const std::string&,       // mode string (e.g. "+i")

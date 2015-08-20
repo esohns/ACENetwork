@@ -21,6 +21,8 @@
 
 #include "IRC_client_tools.h"
 
+#include "ace/Configuration.h"
+#include "ace/Configuration_Import_Export.h"
 #include "ace/Log_Msg.h"
 
 #include "common.h"
@@ -1537,6 +1539,7 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::RPL_MOTDSTART:        // 375
         case IRC_Client_IRC_Codes::RPL_ENDOFMOTD:        // 376
         case IRC_Client_IRC_Codes::ERR_NOMOTD:           // 422
+        case IRC_Client_IRC_Codes::ERR_ALREADYREGISTRED: // 462
         case IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
         case IRC_Client_IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         {
@@ -1574,13 +1577,13 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
                                                 1);
           break;
         }
-        case IRC_Client_IRC_Codes::RPL_ENDOFWHO:      // 315
+        case IRC_Client_IRC_Codes::RPL_ENDOFWHO:         // 315
         {
           result = IRC_Client_Tools::stringify (message_in.params,
                                                 2);
           break;
         }
-        case IRC_Client_IRC_Codes::RPL_WHOREPLY:      // 352
+        case IRC_Client_IRC_Codes::RPL_WHOREPLY:         // 352
         {
           result = IRC_Client_Tools::stringify (message_in.params,
                                                 5);
@@ -1611,6 +1614,193 @@ IRC_Client_Tools::IRCMessage2String (const IRC_Client_IRCMessage& message_in)
   } // end SWITCH
 
   return result;
+}
+
+void
+IRC_Client_Tools::parseConfigurationFile (const std::string& fileName_in,
+                                          IRC_Client_IRCLoginOptions& loginOptions_out,
+                                          IRC_Client_Connections_t& connections_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::parseConfigurationFile"));
+
+  // initialize return value(s)
+  connections_out.clear ();
+
+  ACE_Configuration_Heap configuration_heap;
+  int result = configuration_heap.open ();
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("ACE_Configuration_Heap::open() failed: \"%m\", returning\n")));
+    return;
+  } // end IF
+
+  ACE_Ini_ImpExp ini_import_export (configuration_heap);
+  result = ini_import_export.import_config (fileName_in.c_str ());
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("ACE_Ini_ImpExp::import_config(\"%s\") failed, returning\n"),
+                ACE_TEXT (fileName_in.c_str ())));
+    return;
+  } // end IF
+
+  // find/open "login" section...
+  ACE_Configuration_Section_Key section_key;
+  result =
+    configuration_heap.open_section (configuration_heap.root_section (),
+                                     ACE_TEXT (IRC_CLIENT_CNF_LOGIN_SECTION_HEADER),
+                                     0, // MUST exist !
+                                     section_key);
+  if (result == -1)
+  {
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(%s), returning\n"),
+                ACE_TEXT (IRC_CLIENT_CNF_LOGIN_SECTION_HEADER)));
+    return;
+  } // end IF
+
+  // import values...
+  int index = 0;
+  ACE_TString item_name, item_value;
+  ACE_Configuration::VALUETYPE item_type;
+  while (configuration_heap.enumerate_values (section_key,
+                                              index,
+                                              item_name,
+                                              item_type) == 0)
+  {
+    switch (item_type)
+    {
+      case ACE_Configuration::STRING:
+      {
+        result =
+            configuration_heap.get_string_value (section_key,
+                                                 ACE_TEXT (item_name.c_str ()),
+                                                 item_value);
+        if (result == -1)
+        {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(\"%s\"): \"%m\", returning\n"),
+                      ACE_TEXT (item_name.c_str ())));
+          return;
+        } // end IF
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown item type (was: %d)\n"),
+                    item_type));
+        break;
+      }
+    } // end SWITCH
+
+//     ACE_DEBUG ((LM_DEBUG,
+//                 ACE_TEXT ("enumerated %s, type %d\n"),
+//                 ACE_TEXT (item_name.c_str ()),
+//                 item_type));
+
+    if (item_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_PASSWORD_LABEL))
+      loginOptions_out.passWord = ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
+    else if (item_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_NICKNAME_LABEL))
+      loginOptions_out.nickName = ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
+    else if (item_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_USER_LABEL))
+      loginOptions_out.user.userName =
+          ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
+    else if (item_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_REALNAME_LABEL))
+      loginOptions_out.user.realName =
+          ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
+    else if (item_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_CHANNEL_LABEL))
+      loginOptions_out.channel = ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
+    else
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("unexpected key (was: \"%s\"), continuing\n"),
+                  ACE_TEXT (item_name.c_str ())));
+
+    ++index;
+  } // end WHILE
+
+  // find/open "connection" section...
+  result =
+    configuration_heap.open_section (configuration_heap.root_section (),
+                                     ACE_TEXT (IRC_CLIENT_CNF_CONNECTION_SECTION_HEADER),
+                                     0, // MUST exist !
+                                     section_key);
+  if (result == -1)
+  {
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(%s), returning\n"),
+                ACE_TEXT (IRC_CLIENT_CNF_CONNECTION_SECTION_HEADER)));
+    return;
+  } // end IF
+
+  // import values...
+  index = 0;
+  IRC_Client_ConnectionEntry entry;
+//   u_int port = 0;
+  std::stringstream converter;
+  while (configuration_heap.enumerate_values (section_key,
+                                              index,
+                                              item_name,
+                                              item_type) == 0)
+  {
+//     ACE_DEBUG ((LM_DEBUG,
+//                 ACE_TEXT ("enumerated %s, type %d\n"),
+//                 ACE_TEXT (val_name.c_str ()),
+//                 val_type));
+
+    ACE_ASSERT (item_type == ACE_Configuration::STRING);
+    result = configuration_heap.get_string_value (section_key,
+                                                  ACE_TEXT (item_name.c_str ()),
+                                                  item_value);
+    if (result == -1)
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(%s), returning\n"),
+                  ACE_TEXT (item_name.c_str ())));
+      return;
+    } // end IF
+
+    if (item_name == ACE_TEXT (IRC_CLIENT_CNF_SERVER_LABEL))
+    {
+      entry.hostName = ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
+
+      if (!entry.ports.empty ()) connections_out.push_back (entry);
+    } // end IF
+    else if (item_name == ACE_TEXT (IRC_CLIENT_CNF_PORT_LABEL))
+    {
+//       ACE_ASSERT (val_type == ACE_Configuration::INTEGER);
+//       if (config_heap.get_integer_value (section_key,
+//                                          val_name.c_str (),
+//                                          port))
+//       {
+//         ACE_ERROR ((LM_ERROR,
+//                     ACE_TEXT ("failed to ACE_Configuration_Heap::get_integer_value(%s), returning\n"),
+//                     ACE_TEXT (val_name.c_str ())));
+//         return;
+//       } // end IF
+      IRC_Client_PortRange_t port_range;
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter << item_value.c_str ();
+      converter >> port_range.first;
+//       port_range.first = static_cast<unsigned short> (port);
+      port_range.second = port_range.first;
+      entry.ports.push_back (port_range);
+
+      if (!entry.hostName.empty ()) connections_out.push_back (entry);
+    } // end IF
+    else
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("unexpected key (was: \"%s\"), continuing\n"),
+                  ACE_TEXT (item_name.c_str ())));
+
+    ++index;
+  } // end WHILE
+
+//   ACE_DEBUG ((LM_DEBUG,
+//               ACE_TEXT ("imported \"%s\"...\n"),
+//               ACE_TEXT (configurationFilename_in.c_str ())));
 }
 
 std::string

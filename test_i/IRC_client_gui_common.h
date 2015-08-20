@@ -111,7 +111,7 @@ struct IRC_Client_GTK_ConnectionCBData
    , GTKState (NULL)
    , label ()
    , pending (false)
-   , timestamp ()
+   , timeStamp ()
   {};
 
   unsigned int                  acknowledgements;
@@ -122,7 +122,7 @@ struct IRC_Client_GTK_ConnectionCBData
   // *TODO*: remove this
   std::string                   label;
   bool                          pending;
-  std::string                   timestamp;
+  std::string                   timeStamp;
 };
 
 struct IRC_Client_GTK_HandlerCBData
@@ -139,7 +139,7 @@ struct IRC_Client_GTK_HandlerCBData
    , id ()
    , parameters ()
    , pending (false)
-   , timestamp ()
+   , timeStamp ()
   {};
 
   unsigned int                   acknowledgements;
@@ -154,7 +154,7 @@ struct IRC_Client_GTK_HandlerCBData
   std::string                    id;
   string_list_t                  parameters;
   bool                           pending;
-  std::string                    timestamp;
+  std::string                    timeStamp;
 };
 
 #endif

@@ -5,10 +5,14 @@
 ;!include "FileFunc.nsh"
 ;--------------------------------
 
+; Metadata
+!searchparse /file "..\IRC_client_gui_defines.h" `#define IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY  "` CONFIGURATION_SUBDIR `"`
+!searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MAJOR], [` VER_MAJOR `])`
+!searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MINOR], [` VER_MINOR `])`
+!searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MACRO], [` VER_MICRO `])`
+!searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_DEVEL], [` DEVEL `])`
 !define PROGRAM "IRC_client"
-!define CONFIGURATION_SUBDIR "etc"
 !define SCRIPTS_SUBDIR "scripts"
-
 
 ; Languages
 LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
@@ -20,23 +24,19 @@ Name ${PROGRAM}
 !searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MAJOR], [` VER_MAJOR `])`
 !searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MINOR], [` VER_MINOR `])`
 !searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MICRO], [` VER_MICRO `])`
-!searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_DEVEL], [` DEVEL `])`
-;VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" ${PROGRAM}
-;VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "a IRC client"
-
-;;VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" ""
-
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" ${PROGRAM}
+VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "a IRC client"
+;VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" ""
 !define /date CURRENT_YEAR "%Y"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "© ${CURRENT_YEAR}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${PROGRAM} installer"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${VER_MAJOR}.${VER_MINOR}.${VER_MICRO}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "${VER_MAJOR}.${VER_MINOR}.${VER_MICRO}"
-
-;VIAddVersionKey /LANG=${LANG_ENGLISH} "InternalName" ""
-;VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" ""
-;VIAddVersionKey /LANG=${LANG_ENGLISH} "OriginalFilename" ""
-;VIAddVersionKey /LANG=${LANG_ENGLISH} "PrivateBuild" ""
-;VIAddVersionKey /LANG=${LANG_ENGLISH} "SpecialBuild" ""
+VIAddVersionKey /LANG=${LANG_ENGLISH} "InternalName" ""
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" ""
+VIAddVersionKey /LANG=${LANG_ENGLISH} "OriginalFilename" ""
+VIAddVersionKey /LANG=${LANG_ENGLISH} "PrivateBuild" ""
+VIAddVersionKey /LANG=${LANG_ENGLISH} "SpecialBuild" ""
 ; *TODO*: improve output file naming
 ;!if ${DEVEL} == "devel"
 ;  !define VER_DEVEL 0
@@ -80,7 +80,7 @@ LicenseData "..\..\LICENSE"
 ; Other options
 AutoCloseWindow true
 ;Icon "..\..\graphics\data\images\image_icon.ico"
-XPStyle on
+;XPStyle on
 
 ;--------------------------------
 
@@ -100,7 +100,7 @@ UninstPage instfiles
 Section "${PROGRAM} (required)"
 
 SectionIn RO
-  
+
 ; set output path to the installation directory
 SetOutPath $INSTDIR
 
@@ -117,7 +117,7 @@ File "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\x86\Microsof
 File "D:\projects\ATCD\ACE\lib\ACE.dll"
 !endif
 
-File "D:\projects\SDL-1.2.15\VisualC\SDL\${release}\SDL.dll"
+;File "D:\projects\SDL-1.2.15\VisualC\SDL\${release}\SDL.dll"
 ;File "D:\projects\SDL_mixer-1.2.12\lib\x86\libogg-0.dll"
 ;File "D:\projects\SDL_mixer-1.2.12\lib\x86\libvorbis-0.dll"
 ;File "D:\projects\SDL_mixer-1.2.12\lib\x86\libvorbisfile-3.dll"

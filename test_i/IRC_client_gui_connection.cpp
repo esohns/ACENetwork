@@ -74,11 +74,11 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
   CBData_.GTKState = GTKState_in;
   //   CBData_.nick.clear(); // cannot set this now...
   CBData_.label = label_in;
-  ACE_TCHAR timestamp[27]; // ISO-8601 format
-  ACE_OS::memset (&timestamp, 0, sizeof (timestamp));
+  ACE_TCHAR time_stamp[27]; // ISO-8601 format
+  ACE_OS::memset (&time_stamp, 0, sizeof (time_stamp));
   ACE_TCHAR* result_p = ACE::timestamp (COMMON_TIME_NOW,
-                                        timestamp,
-                                        sizeof (timestamp),
+                                        time_stamp,
+                                        sizeof (time_stamp),
                                         false);
   if (result_p == NULL)
   {
@@ -86,7 +86,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
                 ACE_TEXT ("failed to ACE::timestamp(): \"%m\", returning\n")));
     return;
   } // end IF
-  CBData_.timestamp = ACE_TEXT_ALWAYS_CHAR (timestamp);
+  CBData_.timeStamp = ACE_TEXT_ALWAYS_CHAR (time_stamp);
 
   // create new GtkBuilder
   GtkBuilder* builder_p = gtk_builder_new ();
@@ -470,7 +470,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
   { // synch access
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
-    CBData_.GTKState->builders[CBData_.timestamp] =
+    CBData_.GTKState->builders[CBData_.timeStamp] =
         std::make_pair (ui_definition_filename, builder_p);
   } // end lock scope
 
@@ -479,7 +479,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
   ACE_NEW_NORETURN (message_handler_p,
                     IRC_Client_GUI_MessageHandler (CBData_.GTKState,
                                                    this,
-                                                   CBData_.timestamp));
+                                                   CBData_.timeStamp));
   if (!message_handler_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -488,7 +488,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
     // clean up
     g_object_unref (G_OBJECT (builder_p));
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
-    CBData_.GTKState->builders.erase (CBData_.timestamp);
+    CBData_.GTKState->builders.erase (CBData_.timeStamp);
 
     return;
   } // end IF
@@ -512,7 +512,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
       delete message_handler_p;
       g_object_unref (G_OBJECT (builder_p));
       ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
-      CBData_.GTKState->builders.erase (CBData_.timestamp);
+      CBData_.GTKState->builders.erase (CBData_.timeStamp);
 
       return;
     } // end IF
@@ -547,7 +547,7 @@ IRC_Client_GUI_Connection::~IRC_Client_GUI_Connection ()
 
   // remove builder
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.timestamp);
+    CBData_.GTKState->builders.find (CBData_.timeStamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {
@@ -645,7 +645,7 @@ IRC_Client_GUI_Connection::start (const IRC_Client_StreamSessionData& sessionDat
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.timestamp);
+    CBData_.GTKState->builders.find (CBData_.timeStamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {
@@ -680,7 +680,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
-      CBData_.GTKState->builders.find (CBData_.timestamp);
+      CBData_.GTKState->builders.find (CBData_.timeStamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {
@@ -702,7 +702,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           // remember nickname
           ACE_ASSERT (sessionState_);
-          sessionState_->nickname = message_in.params.front ();
+          sessionState_->nickName = message_in.params.front ();
 
           gdk_threads_enter ();
 
@@ -1040,7 +1040,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           // retrieve server tab users store
           Common_UI_GTKBuildersIterator_t iterator_3 =
-            CBData_.GTKState->builders.find (CBData_.timestamp);
+            CBData_.GTKState->builders.find (CBData_.timeStamp);
           // sanity check(s)
           if (iterator_3 == CBData_.GTKState->builders.end ())
           {
@@ -1068,7 +1068,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           // ignore own record
           ACE_ASSERT (sessionState_);
-          if (nickname == sessionState_->nickname)
+          if (nickname == sessionState_->nickName)
           {
             // clean up
             gdk_threads_leave ();
@@ -1152,9 +1152,9 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
             // check whether user is a channel operator
             ACE_ASSERT (sessionState_);
-            if (nickname.find (sessionState_->nickname) != std::string::npos)
+            if (nickname.find (sessionState_->nickName) != std::string::npos)
               is_operator = ((nickname[0] == '@') &&
-                             (nickname.size () == (sessionState_->nickname.size () + 1)));
+                             (nickname.size () == (sessionState_->nickName.size () + 1)));
 
             list.push_back (nickname);
           } // end WHILE
@@ -1224,6 +1224,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         case IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE:    // 433
         case IRC_Client_IRC_Codes::ERR_NOTREGISTERED:    // 451
         case IRC_Client_IRC_Codes::ERR_NEEDMOREPARAMS:   // 461
+        case IRC_Client_IRC_Codes::ERR_ALREADYREGISTRED: // 462
         case IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
         case IRC_Client_IRC_Codes::ERR_BADCHANNAME:      // 479
         case IRC_Client_IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
@@ -1236,6 +1237,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_ERRONEUSNICKNAME) ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NICKNAMEINUSE)    ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_NOTREGISTERED)    ||
+              (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_ALREADYREGISTRED) ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_YOUREBANNEDCREEP) ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_BADCHANNAME)      ||
               (message_in.command.numeric == IRC_Client_IRC_Codes::ERR_CHANOPRIVSNEEDED) ||
@@ -1270,8 +1272,8 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
         {
           // remember changed nickname...
           ACE_ASSERT (sessionState_);
-          std::string old_nickname = sessionState_->nickname;
-          sessionState_->nickname = message_in.params.front ();
+          std::string old_nickname = sessionState_->nickName;
+          sessionState_->nickName = message_in.params.front ();
 
           // --> display (changed) nickname
           // step1: set server tab nickname label
@@ -1283,7 +1285,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           ACE_ASSERT (label_p);
           // --> see Pango Text Attribute Markup Language...
           std::string nickname_string = ACE_TEXT_ALWAYS_CHAR ("<b><i>nickname</i></b> ");
-          nickname_string += sessionState_->nickname;
+          nickname_string += sessionState_->nickName;
           gtk_label_set_markup (label_p,
                                 nickname_string.c_str ());
 
@@ -1308,7 +1310,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           log (message_in);
 
           ACE_ASSERT (sessionState_);
-          if ((message_in.prefix.origin == sessionState_->nickname) &&
+          if ((message_in.prefix.origin == sessionState_->nickName) &&
               (command == IRC_Client_IRCMessage::QUIT))
             error (message_in, // --> show on statusbar as well...
                    false);
@@ -1325,7 +1327,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           // reply from a successful join request ?
           ACE_ASSERT (sessionState_);
-          if (message_in.prefix.origin == sessionState_->nickname)
+          if (message_in.prefix.origin == sessionState_->nickName)
           {
             createMessageHandler (message_in.params.front (),
                                   false);
@@ -1375,7 +1377,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
 
           // reply from a successful part request ?
           ACE_ASSERT (sessionState_);
-          if (message_in.prefix.origin == sessionState_->nickname)
+          if (message_in.prefix.origin == sessionState_->nickName)
           {
             terminateMessageHandler (message_in.params.back (),
                                      false);
@@ -1414,7 +1416,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           param_iterator++;
 
           ACE_ASSERT (sessionState_);
-          if (message_in.params.front () == sessionState_->nickname)
+          if (message_in.params.front () == sessionState_->nickName)
           {
             // --> user mode
             // *WARNING*: needs the lock protection, otherwise there is a race...
@@ -1520,7 +1522,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           // private message ?
           std::string target_id;
           ACE_ASSERT (sessionState_);
-          if (sessionState_->nickname == message_in.params.front ())
+          if (sessionState_->nickName == message_in.params.front ())
           {
             // --> send to private conversation handler
 
@@ -1533,7 +1535,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
           } // end IF
 
           // channel/nick message ?
-          forward (((sessionState_->nickname == message_in.params.front ()) ? message_in.prefix.origin
+          forward (((sessionState_->nickName == message_in.params.front ()) ? message_in.prefix.origin
                                                                             : message_in.params.front ()),
                    message_text);
 
@@ -1583,6 +1585,13 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
       break;
     }
   } // end SWITCH
+}
+void
+IRC_Client_GUI_Connection::notify (const IRC_Client_SessionMessage& sessionMessage_in)
+{
+  NETWORK_TRACE(ACE_TEXT("IRC_Client_GUI_Connection::notify"));
+
+  ACE_UNUSED_ARG (sessionMessage_in);
 }
 
 void
@@ -1645,7 +1654,7 @@ IRC_Client_GUI_Connection::getHandler (const std::string& id_in)
 //  // sanity check(s)
 //  ACE_ASSERT (sessionState_);
 //
-//  nickname_out = sessionState_->nickname;
+//  nickname_out = sessionState_->nickName;
 //  // *TODO*: keep this information synchronized
 //  channel_out = sessionState_->channel;
 //}
@@ -1688,7 +1697,7 @@ IRC_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
   GtkWidget* widget_2 = NULL;
 
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.timestamp);
+    CBData_.GTKState->builders.find (CBData_.timeStamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {
@@ -1946,7 +1955,7 @@ IRC_Client_GUI_Connection::exists (const std::string& id_in,
       return result;
 
     Common_UI_GTKBuildersIterator_t iterator_2 =
-        CBData_.GTKState->builders.find (CBData_.timestamp);
+        CBData_.GTKState->builders.find (CBData_.timeStamp);
     // sanity check(s)
     if (iterator_2 == CBData_.GTKState->builders.end ())
     {
@@ -2031,7 +2040,7 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
   } // end IF
 
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.timestamp);
+    CBData_.GTKState->builders.find (CBData_.timeStamp);
   // sanity check(s)
   if (iterator == CBData_.GTKState->builders.end ())
   {
@@ -2049,7 +2058,7 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
                                                    CBData_.controller,
                                                    id_in,
                                                    UIFileDirectory_,
-                                                   CBData_.timestamp,
+                                                   CBData_.timeStamp,
                                                    gdkLockedAccess_in));
   if (!message_handler_p)
   {

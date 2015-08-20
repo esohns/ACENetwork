@@ -39,6 +39,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , outputStream_ ()
  , localSAP_ ()
  , remoteSAP_ ()
+ , writeHandle_ (ACE_INVALID_HANDLE)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::Net_AsynchTCPSocketHandler_T"));
 
@@ -49,6 +50,19 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::~Net_AsynchTCPSocketHandler_T (
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::~Net_AsynchTCPSocketHandler_T"));
 
+  int result = -1;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  if (writeHandle_ != ACE_INVALID_HANDLE)
+  {
+    result = ACE_OS::close (writeHandle_);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
+                  writeHandle_));
+  } // end IF
+#endif
 }
 
 template <typename ConfigurationType>
@@ -64,6 +78,21 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 
   // sanity checks
   ACE_ASSERT (inherited::configuration_.socketConfiguration);
+  ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  // step0: duplicate handle to support parallel i/o
+  ACE_ASSERT (writeHandle_ == ACE_INVALID_HANDLE);
+  writeHandle_ = ACE_OS::dup (handle_in);
+  if (writeHandle_ == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::dup(%d): \"%m\", aborting\n"),
+                handle_in));
+    goto close;
+  } // end IF
+#endif
 
   // step1: tweak socket
   // *TODO*: remove type inference
@@ -115,9 +144,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   } // end IF
 
   // step2: initialize i/o streams
-  proactor_p = ACE_Proactor::instance ();
-  ACE_ASSERT (proactor_p);
-  inherited2::proactor (proactor_p);
   result = inputStream_.open (*this,       // event handler
                               handle_in,   // handle
                               NULL,        // completion key
@@ -129,15 +155,25 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                 handle_in));
     goto close;
   } // end IF
-  result = outputStream_.open (*this,       // event handler
-                               handle_in,   // handle
-                               NULL,        // completion key
-                               proactor_p); // proactor
+  result = outputStream_.open (*this,        // event handler
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                               handle_in,    // handle
+#else
+                               writeHandle_, // handle
+#endif
+                               NULL,         // completion key
+                               proactor_p);  // proactor
   if (result == -1)
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Stream::open(%d): \"%m\", aborting\n"),
                 handle_in));
+#else
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Write_Stream::open(%d): \"%m\", aborting\n"),
+                writeHandle_));
+#endif
     goto close;
   } // end IF
 
@@ -327,9 +363,9 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
   {
     // connection closed/reset (by peer) ? --> not an error
     error = result_in.error ();
-    if ((error != ECONNRESET) &&
-        (error != EPIPE)      &&
-        (error != EBADF)) // 9 happens on Linux (local close())
+    if ((error != EBADF)      && // 9:   Linux: local close()
+        (error != ECONNRESET) && // 104:
+        (error != EPIPE))        // 32:  Linux: connection was closed by peer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
@@ -350,9 +386,9 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
     {
       // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();
-      if ((error != ECONNRESET) &&
-          (error != EPIPE)      &&
-          (error != EBADF)) // 9 happens on Linux (local close())
+      if ((error != EBADF)      && // 9:   Linux: local close()
+          (error != ECONNRESET) && // 104:
+          (error != EPIPE))        // 32:  Linux: connection was closed by peer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),

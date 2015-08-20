@@ -35,18 +35,13 @@
 
 #include "stream_common.h"
 
-//#include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnection.h"
 
 #include "FILE_Stream.h"
 #include "IOStream_alt_T.h"
-//#include "IRC_client_configuration.h"
-//#include "IRC_client_defines.h"
 
 // forward declarations
-//class IRC_Client_IIRCControl;
-//class IRC_Client_Stream;
 struct IRC_Client_Configuration;
 struct IRC_Client_CursesState;
 struct IRC_Client_ModuleHandlerConfiguration;
@@ -139,13 +134,13 @@ struct IRC_Client_ConnectionEntry
 {
   inline IRC_Client_ConnectionEntry ()
    : hostName ()
-   , listeningPorts ()
-   , network ()
+   , ports ()
+   , netWork ()
   {};
 
   std::string             hostName;
-  IRC_Client_PortRanges_t listeningPorts;
-  std::string             network;
+  IRC_Client_PortRanges_t ports;
+  std::string             netWork;
 };
 typedef std::vector<IRC_Client_ConnectionEntry> IRC_Client_Connections_t;
 typedef IRC_Client_Connections_t::const_iterator IRC_Client_ConnectionsIterator_t;
@@ -157,13 +152,13 @@ struct IRC_Client_PhoneBook
   inline IRC_Client_PhoneBook ()
    : networks ()
    , servers ()
-   , timestamp ()
+   , timeStamp ()
   {};
 
   // *NOTE*: this member is redundant (but still useful ?)...
   IRC_Client_Networks_t networks;
   IRC_Client_Servers_t  servers;
-  ACE_Date_Time         timestamp;
+  ACE_Date_Time         timeStamp;
 };
 
 typedef std::deque<std::string> IRC_Client_MessageQueue_t;

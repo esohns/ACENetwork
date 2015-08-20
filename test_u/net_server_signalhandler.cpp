@@ -33,6 +33,8 @@
 #include "common_timer_manager.h"
 #include "common_tools.h"
 
+#include "common_ui_gtk_manager.h"
+
 #include "net_connection_manager_common.h"
 #include "net_macros.h"
 
@@ -70,7 +72,7 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
 
   int result = -1;
 
-  bool stop_event_dispatching = false;
+  bool shutdown = false;
   bool report = false;
   switch (signal_in)
   {
@@ -87,7 +89,7 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
       //           ACE_TEXT("shutting down...\n")));
 
       // shutdown...
-      stop_event_dispatching = true;
+      shutdown = true;
 
       break;
     }
@@ -131,13 +133,20 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
   } // end IF
 
   // ...shutdown ?
-  if (stop_event_dispatching)
+  if (shutdown)
   {
     // stop everything, i.e.
-    // - leave reactor event loop handling signals, sockets, (maintenance) timers...
-    // --> (try to) terminate in a well-behaved manner
+    // - leave event loop(s) handling signals, sockets, (maintenance) timers,
+    //   exception handlers, ...
+    // - activation timers (connection attempts, ...)
+    // [- UI dispatch]
 
-    // step1: invoke controller (if any)
+    // step1: stop GTK event processing
+    // *NOTE*: triggering UI shutdown from a widget callback is more consistent,
+    //         compared to doing it here
+//    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
+
+    // step2: invoke controller (if any)
     if (configuration_.listener)
     {
       try
@@ -152,7 +161,7 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
       }
     } // end IF
 
-    // step2: stop timer
+    // step3: stop timer
     if (configuration_.statisticReportingTimerID >= 0)
     {
       const void* act_p = NULL;
@@ -173,17 +182,16 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
       configuration_.statisticReportingTimerID = -1;
     } // end IF
 
-    // step3: stop/abort/wait for connections
+    // step4: stop/abort(/wait) for connections
     NET_CONNECTIONMANAGER_SINGLETON::instance ()->stop ();
     NET_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
-    // *IMPORTANT NOTE*: as long as connections are inactive (i.e. events are
-    // dispatched by reactor thread(s), there is no real reason to wait here)
-    //RPG_NET_CONNECTIONMANAGER_SINGLETON::instance()->waitConnections();
 
-    // step4: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (true,         // stop reactor ?
+    // step5: stop reactor (&& proactor, if applicable)
+    Common_Tools::finalizeEventDispatch (useReactor_,  // stop reactor ?
                                          !useReactor_, // stop proactor ?
-                                         -1);          // group ID (--> don't block !)
+                                         -1);          // group ID (--> don't block)
+
+    // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF
 
   return true;

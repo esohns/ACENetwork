@@ -23,10 +23,9 @@
 
 #include "ace/Synch_Traits.h"
 
-#include "stream_common.h"
+//#include "stream_common.h"
 
 #include "net_macros.h"
-#include "net_message.h"
 
 #include "net_common.h"
 
@@ -63,6 +62,19 @@ Net_EventHandler::notify (const Net_Message& message_in)
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 
   CBData_->eventStack.push_back (NET_GTKEVENT_DATA);
+}
+void
+Net_EventHandler::notify (const Net_SessionMessage& sessionMessage_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
+
+  Net_GTK_Event event =
+    ((sessionMessage_in.type () == STREAM_SESSION_STATISTIC) ? NET_GTKEVENT_STATISTIC
+                                                             : NET_GKTEVENT_INVALID);
+
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
+
+  CBData_->eventStack.push_back (event);
 }
 
 void

@@ -135,6 +135,9 @@
 #define IRC_CLIENT_GUI_GTK_PROGRESSBAR_UPDATE_INTERVAL   27 // ms (?)
 #define IRC_CLIENT_GUI_GTK_STATUSBAR_CONTEXT_DESCRIPTION "IRC client::main"
 
+// GTK log refresh rate
+#define IRC_CLIENT_GUI_GTK_LOG_REFRESH_RATE 2 // 1/s
+
 #define IRC_CLIENT_GUI_GTK_LABEL_DEF_LOG_TEXT   "server log"
 #define IRC_CLIENT_GUI_GTK_LABEL_DEF_TOPIC_TEXT "no topic"
 
@@ -148,9 +151,9 @@
 #define IRC_CLIENT_GUI_DIALOG_ENTRY_TITLE_TOPIC          "set the channel topic..."
 
 // message dialog text
-#define IRC_CLIENT_GUI_MESSAGEDIALOG_TEXT_NICKNAMETAKEN  "the nickname you supplied is in use, please try again"
+#define IRC_CLIENT_GUI_MESSAGEDIALOG_TEXT_NICKNAMETAKEN "the nickname you supplied is in use, please try again"
 
-//#define IRC_CLIENT_GUI_DEF_SERVER_LABEL_TEXT           "no server"
-//#define IRC_CLIENT_GUI_DEF_CHANNEL_LABEL_TEXT          "no channel"
+//#define IRC_CLIENT_GUI_DEF_SERVER_LABEL_TEXT  "no server"
+//#define IRC_CLIENT_GUI_DEF_CHANNEL_LABEL_TEXT "no channel"
 
 #endif

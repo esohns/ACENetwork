@@ -26,6 +26,8 @@
 #include "common_timer_manager.h"
 #include "common_tools.h"
 
+#include "common_ui_gtk_manager.h"
+
 #include "net_common.h"
 #include "net_connection_manager_common.h"
 #include "net_macros.h"
@@ -164,7 +166,18 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
   // ...shutdown ?
   if (shutdown)
   {
-    // step1: stop action timer (if any)
+    // stop everything, i.e.
+    // - leave event loop(s) handling signals, sockets, (maintenance) timers,
+    //   exception handlers, ...
+    // - activation timers (connection attempts, ...)
+    // [- UI dispatch]
+
+    // step1: stop GTK event processing
+    // *NOTE*: triggering UI shutdown from a widget callback is more consistent,
+    //         compared to doing it here
+//    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
+
+    // step2: stop action timer (if any)
     if (configuration_.actionTimerId >= 0)
     {
       const void* act_p = NULL;
@@ -180,7 +193,7 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
       configuration_.actionTimerId = -1;
     } // end IF
 
-    // step2: cancel connection attempts (if any)
+    // step3: cancel connection attempts (if any)
     if (configuration_.connector)
     {
       try
@@ -196,10 +209,12 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
       }
     } // end IF
 
-    // step3: stop reactor (&& proactor, if applicable)
+    // step4: stop reactor (&& proactor, if applicable)
     Common_Tools::finalizeEventDispatch (true,         // stop reactor ?
                                          !useReactor_, // stop proactor ?
                                          -1);          // group ID (--> don't block !)
+
+    // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF
 
   return true;

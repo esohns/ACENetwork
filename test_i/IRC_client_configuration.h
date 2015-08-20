@@ -46,6 +46,7 @@ struct IRC_Client_ConnectionState;
 class IRC_Client_IIRCControl;
 class IRC_Client_IRCMessage;
 struct IRC_Client_ModuleHandlerConfiguration;
+class IRC_Client_SessionMessage;
 class IRC_Client_Stream;
 struct IRC_Client_StreamSessionData;
 struct IRC_Client_StreamUserData;
@@ -62,7 +63,8 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  ////////
                                  IRC_Client_StreamUserData> IRC_Client_IConnection_Manager_t;
 typedef Common_INotify_T<IRC_Client_StreamSessionData,
-                         IRC_Client_IRCMessage> IRC_Client_IStreamNotify_t;
+                         IRC_Client_IRCMessage,
+                         IRC_Client_SessionMessage> IRC_Client_IStreamNotify_t;
 
 struct IRC_Client_SocketHandlerConfiguration
  : public Net_SocketHandlerConfiguration
@@ -96,48 +98,47 @@ struct IRC_Client_SocketHandlerConfiguration
 struct IRC_Client_IRCLoginOptions
 {
   inline IRC_Client_IRCLoginOptions ()
-   : password ()
-   , nickname (IRC_CLIENT_DEF_IRC_NICKNAME)
+   : passWord ()
+   , nickName (IRC_CLIENT_DEF_IRC_NICKNAME)
    , user ()
    , channel ()
   {};
 
-  std::string password;
-  std::string nickname;
+  std::string passWord;
+  std::string nickName;
   struct User
   {
     inline User ()
-     : username ()
-     , hostname ()
-     , servername ()
-     , realname ()
+     : userName ()
+     , hostName ()
+     , serverName ()
+     , realName ()
     {};
 
-    std::string username;
+    std::string userName;
     struct Hostname
     {
       inline Hostname ()
-       : string (NULL)
-       , discriminator (INVALID)
+       : discriminator (INVALID)
+       , string (NULL)
       {};
 
+      enum
+      {
+        INVALID = -1,
+        MODE = 0,
+        STRING,
+      } discriminator;
       union
       {
-        // *NOTE*: "traditional" connects (see RFC1459 Section 4.1.3)
-        std::string*  string;
         // *NOTE*: "modern" connects (see RFC2812 Section 3.1.3)
         unsigned char mode;
+        // *NOTE*: "traditional" connects (see RFC1459 Section 4.1.3)
+        std::string*  string;
       };
-      enum discriminator_t
-      {
-        STRING = 0,
-        BITMASK,
-        INVALID
-      };
-      discriminator_t discriminator;
-    } hostname;
-    std::string servername;
-    std::string realname;
+    } hostName;
+    std::string serverName;
+    std::string realName;
   } user;
   std::string channel;
 };
@@ -241,7 +242,7 @@ struct IRC_Client_Configuration
    //////////////////////////////////////
    , cursesState (NULL)
    , encoding (IRC_CLIENT_DEF_ENCODING)
-   , groupID (COMMON_EVENT_DISPATCH_THREAD_GROUP_ID)
+   , groupID (COMMON_EVENT_THREAD_GROUP_ID)
    , logToFile (IRC_CLIENT_SESSION_DEF_LOG)
    , useReactor (NET_EVENT_USE_REACTOR)
   {};

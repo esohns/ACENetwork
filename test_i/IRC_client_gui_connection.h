@@ -70,6 +70,7 @@ class IRC_Client_GUI_Connection
   // implement IRC_Client_IStreamNotify_t
   virtual void start (const IRC_Client_StreamSessionData&);
   virtual void notify (const IRC_Client_IRCMessage&);
+  virtual void notify (const IRC_Client_SessionMessage&);
   virtual void end ();
 
   // implement Common_IGet_T

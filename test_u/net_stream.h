@@ -24,11 +24,11 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common.h"
-#include "common_istatistic.h"
+#include "common_time_common.h"
 
 #include "stream_base.h"
 #include "stream_common.h"
+#include "stream_statemachine_control.h"
 
 #include "net_common_modules.h"
 #include "net_configuration.h"
@@ -43,6 +43,7 @@ class Net_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////
+                        Stream_StateMachine_ControlState,
                         Net_StreamState,
                         /////////////////
                         Net_StreamConfiguration,
@@ -76,6 +77,7 @@ class Net_Stream
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////
+                        Stream_StateMachine_ControlState,
                         Net_StreamState,
                         /////////////////
                         Net_StreamConfiguration,
@@ -90,8 +92,8 @@ class Net_Stream
                         Net_SessionMessage,
                         Net_Message> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Stream (const Net_Stream&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Stream& operator= (const Net_Stream&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Stream (const Net_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Stream& operator= (const Net_Stream&))
 
   // finalize stream
   // *NOTE*: need this to clean up queued modules if something goes wrong during

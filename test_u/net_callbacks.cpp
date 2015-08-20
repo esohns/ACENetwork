@@ -830,7 +830,7 @@ idle_update_info_display_cb (gpointer userData_in)
 
           break;
         }
-        case NET_GTKEVENT_STATISTICS:
+        case NET_GTKEVENT_STATISTIC:
         {
           // *TODO*
           break;
@@ -1446,7 +1446,9 @@ button_quit_clicked_cb (GtkWidget* widget_in,
                 SIGINT));
 
   // step3: stop GTK event processing
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->close (1);
+  // *NOTE*: triggering UI shutdown here is more consistent, compared to doing
+  //         it from the signal handler
+  COMMON_UI_GTK_MANAGER_SINGLETON::instance()->stop (false, true);
 
   return FALSE;
 } // button_quit_clicked_cb

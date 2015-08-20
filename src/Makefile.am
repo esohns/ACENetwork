@@ -34,8 +34,6 @@ include_HEADERS = \
   net_ipconnection.h \
   net_itransportlayer.h \
   net_macros.h \
-  net_message_base.h \
-  net_message_base.inl \
   net_module_messagehandler.h \
   net_module_messagehandler.inl \
   net_module_runtimestatistic.h \
@@ -109,9 +107,6 @@ libACENetwork_la_SOURCES = \
   net_ipconnection.h \
   net_itransportlayer.h \
   net_macros.h \
-  net_message_base.cpp \
-  net_message_base.h \
-  net_message_base.inl \
   net_module_messagehandler.cpp \
   net_module_messagehandler.h \
   net_module_messagehandler.inl \

@@ -34,15 +34,15 @@
 #include "IRC_client_gui_defines.h"
 
 bool
-IRC_Client_UI_Tools::current (const std::string& timestamp_in,
+IRC_Client_UI_Tools::current (const std::string& timeStamp_in,
                               const IRC_Client_GUI_Connections_t& connections_in,
-                              std::string& nickname_out,
+                              std::string& nickName_out,
                               std::string& channel_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_UI_Tools::current"));
 
   // initialize return value(s)
-  nickname_out.clear ();
+  nickName_out.clear ();
   channel_out.clear ();
 
   // step1: retrieve connection handle
@@ -53,15 +53,15 @@ IRC_Client_UI_Tools::current (const std::string& timestamp_in,
   {
     const IRC_Client_GTK_ConnectionCBData& connection_data_r =
       (*iterator).second->get ();
-    if (connection_data_r.timestamp == timestamp_in)
+    if (connection_data_r.timeStamp == timeStamp_in)
     {
       connection_p = (*iterator).second;
       ACE_ASSERT (connection_p);
-      //connection_p->current (nickname_out,
+      //connection_p->current (nickName_out,
       //                       channel_out);
       const IRC_Client_ConnectionState& connection_state_r =
         connection_p->state ();
-      nickname_out = connection_state_r.nickname;
+      nickName_out = connection_state_r.nickName;
       channel_out = connection_state_r.channel;
       break;
     } // end IF
@@ -112,7 +112,7 @@ IRC_Client_UI_Tools::current (const Common_UI_GTKState& GTKState_in,
     const IRC_Client_GTK_ConnectionCBData& connection_data_r =
       (*iterator_2).second->get ();
     Common_UI_GTKBuildersConstIterator_t iterator_3 =
-      GTKState_in.builders.find (connection_data_r.timestamp);
+      GTKState_in.builders.find (connection_data_r.timeStamp);
     if (iterator_3 == GTKState_in.builders.end ())
     {
       ACE_DEBUG ((LM_ERROR,

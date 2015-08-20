@@ -24,7 +24,7 @@
 #include "net_macros.h"
 
 Net_TransportLayer_Netlink::Net_TransportLayer_Netlink ()
- : inherited (NET_TRANSPORTLAYER_NETLINK)
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Netlink::Net_TransportLayer_Netlink"));
 

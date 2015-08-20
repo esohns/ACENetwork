@@ -28,6 +28,7 @@
 
 #include "stream_base.h"
 #include "stream_common.h"
+#include "stream_statemachine_control.h"
 
 #include "IRC_client_common_modules.h"
 #include "IRC_client_configuration.h"
@@ -41,6 +42,7 @@ class IRC_Client_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////
+                        Stream_StateMachine_ControlState,
                         IRC_Client_StreamState,
                         /////////////////
                         IRC_Client_StreamConfiguration,
@@ -75,6 +77,7 @@ class IRC_Client_Stream
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////
+                        Stream_StateMachine_ControlState,
                         IRC_Client_StreamState,
                         /////////////////
                         IRC_Client_StreamConfiguration,

@@ -76,6 +76,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::~Net_StreamAsynchTCPSocketBase_T"));
 
+  int result = -1;
+
   // step1: remove enqueued module (if any)
   // *TODO*: remove type inferences
   if (inherited3::configuration_.streamConfiguration.module)
@@ -84,7 +86,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       stream_.find (inherited3::configuration_.streamConfiguration.module->name ());
     if (module_p)
     {
-      int result =
+      result =
         stream_.remove (inherited3::configuration_.streamConfiguration.module->name (),
                         ACE_Module_Base::M_DELETE_NONE);
       if (result == -1)
@@ -119,9 +121,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                                                        ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::open"));
-
-  //// sanity check(s)
-  //ACE_ASSERT (inherited3::configuration_.socketHandlerConfiguration);
 
   // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
@@ -338,7 +337,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 //  if (inherited::outputStream_.write (*buffer_,               // data
   result =
     inherited::outputStream_.write (*message_block_p,                     // data
-                                    message_block_p->size (),             // bytes to write
+                                    message_block_p->length (),           // bytes to write
                                     NULL,                                 // ACT
                                     0,                                    // priority
                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number

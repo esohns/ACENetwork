@@ -61,12 +61,12 @@ struct IRC_Client_ConnectionState
    , cursesState (NULL)
    , isFirstMessage (false)
    , lock ()
-   , nickname ()
+   , nickName ()
    , userModes ()
    //////////////////////////////////////
    , configuration ()
    , status (NET_CONNECTION_STATUS_INVALID)
-   , currentStatistics ()
+   , currentStatistic ()
    , lastCollectionTimestamp (ACE_Time_Value::zero)
    , userData (NULL)
   { };
@@ -79,7 +79,7 @@ struct IRC_Client_ConnectionState
   IRC_Client_CursesState*       cursesState;
   bool                          isFirstMessage;
   ACE_SYNCH_MUTEX               lock;
-  std::string                   nickname;
+  std::string                   nickName;
   IRC_Client_UserModes_t        userModes;
 
   ///////////////////////////////////////
@@ -89,7 +89,7 @@ struct IRC_Client_ConnectionState
 
   Net_Connection_Status         status;
 
-  IRC_Client_RuntimeStatistic_t currentStatistics;
+  IRC_Client_RuntimeStatistic_t currentStatistic;
   ACE_Time_Value                lastCollectionTimestamp;
 
   IRC_Client_StreamUserData*    userData;

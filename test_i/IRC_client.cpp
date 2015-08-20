@@ -33,8 +33,6 @@ using namespace std;
 //                       prevent ace/iosfwd.h from causing any harm
 #define ACE_IOSFWD_H
 
-#include "ace/Configuration.h"
-#include "ace/Configuration_Import_Export.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #include "ace/iosfwd.h"
@@ -67,7 +65,6 @@ using namespace std;
 #include "libacenetwork_config.h"
 #endif
 
-//#include "net_client_connector_common.h"
 #include "net_defines.h"
 
 #include "IRC_common.h"
@@ -79,6 +76,7 @@ using namespace std;
 #include "IRC_client_module_IRChandler.h"
 #include "IRC_client_session_common.h"
 #include "IRC_client_signalhandler.h"
+#include "IRC_client_tools.h"
 
 void
 do_printUsage (const std::string& programName_in)
@@ -129,7 +127,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::cout << ACE_TEXT ("-s [VALUE]: reporting interval (seconds: 0 --> OFF)")
             << ACE_TEXT (" [")
-            << IRC_CLIENT_DEF_STATSINTERVAL
+            << IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-t        : trace information")
@@ -180,7 +178,8 @@ do_processArguments (int argc_in,
   logToFile_out                  = false;
   useCursesLibrary_out           = IRC_CLIENT_SESSION_DEF_CURSES;
   useReactor_out                 = NET_EVENT_USE_REACTOR;
-  statisticReportingInterval_out = IRC_CLIENT_DEF_STATSINTERVAL;
+  statisticReportingInterval_out =
+      IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out           = false;
   printVersionAndExit_out        = false;
   numThreadPoolThreads_out       = IRC_CLIENT_DEF_NUM_TP_THREADS;
@@ -625,7 +624,8 @@ connection_setup_curses_function (void* arg_in)
     //  goto clean_up;
     //} // end IF
     //const IRC_Client_ConnectionState& connection_state_r = session_p->state ();
-    const IRC_Client_ConnectionState& connection_state_r = connection_p->state ();
+    const IRC_Client_ConnectionState& connection_state_r =
+        connection_p->state ();
     thread_data_p->cursesState->state =
       &const_cast<IRC_Client_ConnectionState&> (connection_state_r);
 
@@ -884,7 +884,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   } // end IF
   ACE_OS::memset (thread_name_p, 0, sizeof (thread_name_p));
   const char* thread_name_2 = thread_name_p;
-  int group_id_2 = (COMMON_EVENT_DISPATCH_THREAD_GROUP_ID + 1);
+  int group_id_2 = (COMMON_EVENT_THREAD_GROUP_ID + 1); // *TODO*
   ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
   result =
@@ -978,143 +978,6 @@ do_work (IRC_Client_Configuration& configuration_in,
 }
 
 void
-do_parseConfigurationFile (const std::string& configFilename_in,
-                           IRC_Client_IRCLoginOptions& loginOptions_out,
-                           std::string& serverHostname_out,
-                           unsigned short& serverPortNumber_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("::do_parseConfigurationFile"));
-
-  // initialize return value(s)
-  serverHostname_out   = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SERVER_HOSTNAME);
-  serverPortNumber_out = IRC_CLIENT_DEF_SERVER_PORT;
-
-  ACE_Configuration_Heap config_heap;
-  if (config_heap.open ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("ACE_Configuration_Heap::open failed, returning\n")));
-    return;
-  } // end IF
-
-  ACE_Ini_ImpExp import (config_heap);
-  if (import.import_config (configFilename_in.c_str ()))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("ACE_Ini_ImpExp::import_config(\"%s\") failed, returning\n"),
-                ACE_TEXT (configFilename_in.c_str ())));
-    return;
-  } // end IF
-
-  // find/open "login" section...
-  ACE_Configuration_Section_Key section_key;
-  if (config_heap.open_section (config_heap.root_section (),
-                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_LOGIN_SECTION_HEADER),
-                                0, // MUST exist !
-                                section_key) != 0)
-  {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(%s), returning\n"),
-                ACE_TEXT (IRC_CLIENT_CNF_LOGIN_SECTION_HEADER)));
-    return;
-  } // end IF
-
-  // import values...
-  int val_index = 0;
-  ACE_TString val_name, val_value;
-  ACE_Configuration::VALUETYPE val_type;
-  while (config_heap.enumerate_values (section_key,
-                                       val_index,
-                                       val_name,
-                                       val_type) == 0)
-  {
-    if (config_heap.get_string_value (section_key,
-                                      val_name.c_str (),
-                                      val_value))
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(%s), returning\n"),
-                  ACE_TEXT (val_name.c_str ())));
-      return;
-    } // end IF
-
-//     ACE_DEBUG ((LM_DEBUG,
-//                 ACE_TEXT ("enumerated %s, type %d\n"),
-//                 ACE_TEXT (val_name.c_str ()),
-//                 val_type));
-
-    // *TODO*: move these strings...
-    if (val_name == ACE_TEXT_ALWAYS_CHAR ("password"))
-      loginOptions_out.password = ACE_TEXT_ALWAYS_CHAR (val_value.c_str ());
-    else if (val_name == ACE_TEXT_ALWAYS_CHAR ("nick"))
-      loginOptions_out.nickname = ACE_TEXT_ALWAYS_CHAR (val_value.c_str ());
-    else if (val_name == ACE_TEXT_ALWAYS_CHAR ("user"))
-      loginOptions_out.user.username = ACE_TEXT_ALWAYS_CHAR (val_value.c_str ());
-    else if (val_name == ACE_TEXT_ALWAYS_CHAR ("realname"))
-      loginOptions_out.user.realname = ACE_TEXT_ALWAYS_CHAR (val_value.c_str ());
-    else if (val_name == ACE_TEXT_ALWAYS_CHAR ("channel"))
-      loginOptions_out.channel = ACE_TEXT_ALWAYS_CHAR (val_value.c_str ());
-    else
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("unexpected key \"%s\", continuing\n"),
-                  ACE_TEXT (val_name.c_str ())));
-
-    ++val_index;
-  } // end WHILE
-
-  // find/open "connection" section...
-  if (config_heap.open_section (config_heap.root_section(),
-                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_CONNECTION_SECTION_HEADER),
-                                0, // MUST exist !
-                                section_key) != 0)
-  {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(%s), returning\n"),
-                ACE_TEXT (IRC_CLIENT_CNF_CONNECTION_SECTION_HEADER)));
-    return;
-  } // end IF
-
-  // import values...
-  val_index = 0;
-  while (config_heap.enumerate_values (section_key,
-                                       val_index,
-                                       val_name,
-                                       val_type) == 0)
-  {
-    if (config_heap.get_string_value (section_key,
-                                      val_name.c_str (),
-                                      val_value))
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(%s), returning\n"),
-                  ACE_TEXT (val_name.c_str ())));
-      return;
-    } // end IF
-
-//     ACE_DEBUG ((LM_DEBUG,
-//                 ACE_TEXT ("enumerated %s, type %d\n"),
-//                 ACE_TEXT (val_name.c_str()),
-//                 val_type));
-
-    // *TODO*: move these strings...
-    if (val_name == ACE_TEXT_ALWAYS_CHAR ("server"))
-      serverHostname_out = ACE_TEXT_ALWAYS_CHAR (val_value.c_str ());
-    else if (val_name == ACE_TEXT_ALWAYS_CHAR ("port"))
-      serverPortNumber_out = ::atoi (val_value.c_str ());
-    else
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("unexpected key \"%s\", continuing\n"),
-                  ACE_TEXT (val_name.c_str ())));
-
-    ++val_index;
-  } // end WHILE
-
-//   ACE_DEBUG ((LM_DEBUG,
-//               ACE_TEXT ("imported \"%s\"...\n"),
-//               ACE_TEXT (configFilename_in.c_str ())));
-}
-
-void
 do_printVersion (const std::string& programName_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_printVersion"));
@@ -1200,21 +1063,23 @@ ACE_TMAIN (int argc_in,
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
 #endif // #ifdef DEBUG_DEBUGGER
 
-  std::string configuration_file = configuration_path;
-  configuration_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_file += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
+  std::string configuration_file_name        = configuration_path;
+  configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_file_name                   +=
+      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
 
-  bool debug_parser                         = false;
-  bool log_to_file                          = false;
-  bool use_curses_library                   = IRC_CLIENT_SESSION_DEF_CURSES;
-  bool use_reactor                          = NET_EVENT_USE_REACTOR;
-  unsigned int statistic_reporting_interval = IRC_CLIENT_DEF_STATSINTERVAL;
-  bool trace_information                    = false;
-  bool print_version_and_exit               = false;
-  unsigned int num_thread_pool_threads      = IRC_CLIENT_DEF_NUM_TP_THREADS;
+  bool debug_parser                          = false;
+  bool log_to_file                           = false;
+  bool use_curses_library                    = IRC_CLIENT_SESSION_DEF_CURSES;
+  bool use_reactor                           = NET_EVENT_USE_REACTOR;
+  unsigned int statistic_reporting_interval  =
+      IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+  bool trace_information                     = false;
+  bool print_version_and_exit                = false;
+  unsigned int number_of_thread_pool_threads = IRC_CLIENT_DEF_NUM_TP_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
-                            configuration_file,
+                            configuration_file_name,
                             debug_parser,
                             log_to_file,
                             use_curses_library,
@@ -1222,7 +1087,7 @@ ACE_TMAIN (int argc_in,
                             statistic_reporting_interval,
                             trace_information,
                             print_version_and_exit,
-                            num_thread_pool_threads))
+                            number_of_thread_pool_threads))
   {
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
@@ -1238,7 +1103,7 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step2b: validate argument(s)
-  if (!Common_File_Tools::isReadable (configuration_file))
+  if (!Common_File_Tools::isReadable (configuration_file_name))
   {
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
@@ -1254,11 +1119,13 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step3: initialize logging and/or tracing
-  std::string log_file;
+  std::string log_file_name;
   if (log_to_file)
-    log_file = Common_File_Tools::getLogFilename (ACE::basename (argv_in[0]));
+    log_file_name =
+        Common_File_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME),
+                                           ACE::basename (argv_in[0]));
   if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]), // program name
-                                        log_file,                   // logfile
+                                        log_file_name,              // log file name
                                         false,                      // log to syslog ?
                                         false,                      // trace messages ?
                                         trace_information,          // debug messages ?
@@ -1359,11 +1226,11 @@ ACE_TMAIN (int argc_in,
   configuration.streamConfiguration.statisticReportingInterval =
     statistic_reporting_interval;
   ///////////////////////////////////////
-  configuration.protocolConfiguration.loginOptions.nickname =
+  configuration.protocolConfiguration.loginOptions.nickName =
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_NICKNAME);
   //   userData.loginOptions.user.username = ;
-  std::string hostname;
-  if (!Net_Common_Tools::getHostname (hostname))
+  std::string host_name;
+  if (!Net_Common_Tools::getHostname (host_name))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::getHostname(), aborting\n")));
@@ -1384,36 +1251,44 @@ ACE_TMAIN (int argc_in,
   } // end IF
   if (IRC_CLIENT_CNF_IRC_USERMSG_TRADITIONAL)
   {
-    configuration.protocolConfiguration.loginOptions.user.hostname.discriminator =
+    configuration.protocolConfiguration.loginOptions.user.hostName.discriminator =
       IRC_Client_IRCLoginOptions::User::Hostname::STRING;
-    configuration.protocolConfiguration.loginOptions.user.hostname.string =
-      &hostname;
+    configuration.protocolConfiguration.loginOptions.user.hostName.string =
+      &host_name;
   } // end IF
   else
   {
-    configuration.protocolConfiguration.loginOptions.user.hostname.discriminator =
-      IRC_Client_IRCLoginOptions::User::Hostname::BITMASK;
+    configuration.protocolConfiguration.loginOptions.user.hostName.discriminator =
+      IRC_Client_IRCLoginOptions::User::Hostname::MODE;
     // *NOTE*: hybrid-7.2.3 seems to have a bug: 4 --> +i
-    configuration.protocolConfiguration.loginOptions.user.hostname.mode =
+    configuration.protocolConfiguration.loginOptions.user.hostName.mode =
       IRC_CLIENT_DEF_IRC_USERMODE;
   } // end ELSE
-  configuration.protocolConfiguration.loginOptions.user.servername =
+  configuration.protocolConfiguration.loginOptions.user.serverName =
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_SERVERNAME);
   configuration.protocolConfiguration.loginOptions.channel =
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_CHANNEL);
   // populate user/realname
-  Common_Tools::getCurrentUserName (configuration.protocolConfiguration.loginOptions.user.username,
-                                    configuration.protocolConfiguration.loginOptions.user.realname);
+  Common_Tools::getCurrentUserName (configuration.protocolConfiguration.loginOptions.user.userName,
+                                    configuration.protocolConfiguration.loginOptions.user.realName);
 
   // step7: parse configuration file(s) (if any)
-  std::string                server_hostname =
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SERVER_HOSTNAME);
-  unsigned short             server_port_number = IRC_CLIENT_DEF_SERVER_PORT;
-  if (!configuration_file.empty ())
-    do_parseConfigurationFile (configuration_file,
-                               configuration.protocolConfiguration.loginOptions,
-                               server_hostname,
-                               server_port_number);
+  host_name = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SERVER_HOSTNAME);
+  unsigned short port_number = IRC_CLIENT_DEF_SERVER_PORT;
+  if (!configuration_file_name.empty ())
+  {
+    IRC_Client_Connections_t connections;
+    IRC_Client_Tools::parseConfigurationFile (configuration_file_name,
+                                              configuration.protocolConfiguration.loginOptions,
+                                              connections);
+    if (!connections.empty ())
+    {
+      IRC_Client_ConnectionsIterator_t iterator = connections.begin ();
+      host_name = (*iterator).hostName;
+      IRC_Client_PortRangesIterator_t iterator_2 = (*iterator).ports.begin ();
+      port_number = (*iterator_2).first;
+    } // end IF
+  } // end IF
   ///////////////////////////////////////
   configuration.useReactor = use_reactor;
 
@@ -1422,13 +1297,13 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   do_work (configuration,
            use_curses_library,
-           server_hostname,
-           server_port_number,
+           host_name,
+           port_number,
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
            signal_handler,
-           num_thread_pool_threads);
+           number_of_thread_pool_threads);
 
   // debug info
   timer.stop ();

@@ -109,6 +109,7 @@ IRC_client_LDFLAGS = \
   -L$(abs_builddir)/../modules/libACEStream/src/.libs \
   -L$(abs_builddir)/../src/.libs
 IRC_client_LDADD = \
+  -lrt \
   -lACE \
   $(PKGCURSES_LIBS) \
   $(PKGSDL_LIBS) \
@@ -192,6 +193,7 @@ IRC_client_gui_LDFLAGS = \
   -L$(abs_builddir)/../modules/libACEStream/src/.libs \
   -L$(abs_builddir)/../src/.libs
 IRC_client_gui_LDADD = \
+  -lrt \
   -lACE \
   $(PKGSDL_LIBS) \
   $(PKGGTK_LIBS) \
@@ -204,4 +206,3 @@ SUBDIRS = \
   . \
   etc \
   scripts
-
