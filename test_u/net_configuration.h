@@ -51,7 +51,7 @@ struct Net_SocketHandlerConfiguration
    : bufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , messageAllocator (NULL)
    , socketConfiguration (NULL)
-   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTICS_REPORTING)
+   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING)
    //////////////////////////////////////
    , userData (NULL)
   {};

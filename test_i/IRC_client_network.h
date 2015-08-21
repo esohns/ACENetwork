@@ -31,12 +31,10 @@
 #include "stream_common.h"
 
 #include "net_asynch_tcpsockethandler.h"
-//#include "net_configuration.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
 #include "net_stream_asynch_tcpsocket_base.h"
-//#include "net_stream_common.h"
 #include "net_stream_tcpsocket_base.h"
 #include "net_tcpsockethandler.h"
 #include "net_tcpconnection_base.h"

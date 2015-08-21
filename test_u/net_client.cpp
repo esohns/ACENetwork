@@ -564,7 +564,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     return;
   } // end IF
 
-  // step0c: initialize client connector
+  // step0c: initialize connector
   Net_InetConnectionManager_t* connection_manager_p =
     NET_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
@@ -755,8 +755,12 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
       connector_p->connect (configuration.signalHandlerConfiguration.peerAddress);
     if (!useReactor_in)
     {
-      ACE_Time_Value delay (1, 0);
-      ACE_OS::sleep (delay);
+      ACE_Time_Value one_second (1, 0);
+      result = ACE_OS::sleep (one_second);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+                    &one_second));
       if (NET_CONNECTIONMANAGER_SINGLETON::instance ()->numConnections () != 1)
         result_2 = false;
     } // end IF

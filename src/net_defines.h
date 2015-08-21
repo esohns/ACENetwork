@@ -21,13 +21,13 @@
 #ifndef NET_DEFINES_H
 #define NET_DEFINES_H
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include "linux/netlink.h"
-#endif
+//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+//#include "linux/netlink.h"
+//#endif
 
-#include "ace/Default_Constants.h"
+//#include "ace/Default_Constants.h"
 
-#include "stream_defines.h"
+//#include "stream_defines.h"
 
 // interface
 // *PORTABILITY*: interface names are not portable, so let the user choose the
@@ -71,6 +71,6 @@
 // stream
 #define NET_STREAM_MAX_MESSAGES                  0  // 0 --> no limits
 #define NET_STREAM_MESSAGE_DATA_BUFFER_SIZE      STREAM_MESSAGE_DATA_BUFFER_SIZE
-#define NET_STREAM_DEFAULT_STATISTICS_REPORTING  0  // seconds [0 --> OFF]
+#define NET_STREAM_DEFAULT_STATISTIC_REPORTING   0  // seconds [0: off]
 
 #endif
