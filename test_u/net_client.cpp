@@ -1082,7 +1082,7 @@ ACE_TMAIN (int argc_in,
   Net_GTK_CBData gtk_cb_user_data;
   // step1d: initialize logging and/or tracing
   Common_Logger logger (&gtk_cb_user_data.logStack,
-                        &gtk_cb_user_data.stackLock);
+                        &gtk_cb_user_data.lock);
   std::string log_file_name;
   if (log_to_file)
     log_file_name =

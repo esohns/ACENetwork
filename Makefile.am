@@ -4,8 +4,10 @@ SUBDIRS = \
   scripts \
   modules \
   src \
-  test_u \
-  test_i
+  test_u
+if TEST_SUPPORT
+  SUBDIRS += test_i
+endif
 
 DIST_SUBDIRS = \
   3rd_party \

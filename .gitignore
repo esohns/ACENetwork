@@ -86,6 +86,8 @@ po/insert-header.sin
 po/quot.sed
 po/remove-potcdate.sin
 
+build/
+
 # kdevelop
 .kdev4/
 

@@ -31,7 +31,8 @@
 
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
-//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//#else
 //#include "net_netlinkconnection_base.h"
 //#endif
 #include "net_udpconnection_base.h"
@@ -67,7 +68,7 @@ class Net_Client_Connector_T
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  //virtual bool useReactor () const; // ? : uses proactor
+  virtual bool useReactor () const; // ? : uses proactor
 
   // *NOTE*: handlers retrieve the configuration object with get ()
   virtual bool initialize (const HandlerConfigurationType&);
@@ -160,7 +161,7 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  //virtual bool useReactor () const; // ? : uses proactor
+  virtual bool useReactor () const; // ? : uses proactor
 
   // *NOTE*: handlers retrieve the configuration object with get ()
   virtual bool initialize (const HandlerConfigurationType&);
@@ -254,7 +255,7 @@ class Net_Client_Connector_T<HandlerType,
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  //virtual bool useReactor () const; // ? : uses proactor
+  virtual bool useReactor () const; // ? : uses proactor
 
   // *NOTE*: handlers retrieve the configuration object with get ()
   virtual bool initialize (const HandlerConfigurationType&);

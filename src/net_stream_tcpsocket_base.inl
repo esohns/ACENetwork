@@ -239,7 +239,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
     // *TODO*: step1bb: initialize final module
   } // end IF
   // step1c: initialize stream
-  // *TODO*: this clearly is a design glitch
+  // *TODO*: remove type inferences
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   configuration_p->streamConfiguration.sessionID =
     reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
@@ -256,6 +256,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // *NOTE*: do not worry about the enqueued module (if any) beyond this point !
   handle_module = false;
   session_data_p = &stream_.sessionData ();
+  // *TODO*: remove type inferences
   const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
       &const_cast<StateType&> (inherited2::state ());
   //stream_.dump_state ();

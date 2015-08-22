@@ -36,7 +36,7 @@ class Net_IConnector_T
  public:
   virtual ~Net_IConnector_T () {};
 
-  //virtual bool useReactor () const = 0; // ? : uses proactor
+  virtual bool useReactor () const = 0; // ? : uses proactor
 
   virtual void abort () = 0; // shutdown
   virtual ACE_HANDLE connect (const AddressType&) = 0;

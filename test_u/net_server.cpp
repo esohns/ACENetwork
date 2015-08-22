@@ -1040,11 +1040,11 @@ ACE_TMAIN (int argc_in,
 
   // step1d: initialize logging and/or tracing
   Common_Logger logger (&gtk_cb_user_data.logStack,
-                        &gtk_cb_user_data.stackLock);
-  std::string log_file;
+                        &gtk_cb_user_data.lock);
+  std::string log_file_name;
   if (log_to_file &&
       !Net_Server_Common_Tools::getNextLogFilename (Common_File_Tools::getDumpDirectory (),
-                                                    log_file))
+                                                    log_file_name))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::getNextLogFilename(), aborting\n")));
@@ -1059,8 +1059,8 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]),     // program name
-                                        log_file,                      // logfile
+  if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]),    // program name
+                                        log_file_name,                 // log file name
                                         true,                          // log to syslog ?
                                         false,                         // trace messages ?
                                         trace_information,             // debug messages ?

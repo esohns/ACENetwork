@@ -47,6 +47,9 @@ class Net_IConnection_T
  , public Common_IDumpState
 {
  public:
+  // convenience types
+  typedef StreamType STREAM_T;
+
   inline virtual ~Net_IConnection_T () {};
 
   virtual void info (ACE_HANDLE&,             // return value: I/O handle

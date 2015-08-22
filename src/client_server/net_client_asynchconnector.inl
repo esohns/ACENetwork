@@ -20,7 +20,6 @@
 
 #include "ace/Log_Msg.h"
 
-//#include "net_connection_manager_common.h"
 #include "net_macros.h"
 
 template <typename HandlerType,

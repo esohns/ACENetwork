@@ -194,6 +194,24 @@ dnl                    modules/libACEStream])
 #AM_COND_IF([BUILD_MODULES],
 #           [AC_CONFIG_FILES([modules/Makefile])])
 
+# --> build (integration) tests ?
+AC_MSG_CHECKING([build (integration) tests])
+test_default="yes"
+AC_ARG_ENABLE([test],
+              [AS_HELP_STRING([--enable-test], [turn on (integration) test support [default="$test_default"]])],
+              [case "${enableval}" in
+                 yes) test=yes ;;
+                 no)  test=no  ;;
+                 *) AC_MSG_ERROR([bad value ${enableval} for --enable-test]) ;;
+               esac],
+              [test=$test_default])
+AM_CONDITIONAL([TEST_SUPPORT], [test x$test = xyes])
+if test x$test = xyes; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
 # pkgconfig directory (.pc file location)
 AC_ARG_WITH([pkgconfigdir],
   [AS_HELP_STRING([--with-pkgconfigdir=DIR], [pkgconfig files])],

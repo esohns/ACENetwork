@@ -79,8 +79,8 @@ class Net_Module_Statistic_ReaderTask_T
   typedef ProtocolMessageType Net_MessageType_t;
   typedef ProtocolCommandType Net_CommandType_t;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T (const Net_Module_Statistic_ReaderTask_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T& operator= (const Net_Module_Statistic_ReaderTask_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T (const Net_Module_Statistic_ReaderTask_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T& operator= (const Net_Module_Statistic_ReaderTask_T&))
 };
 
 template <typename TaskSynchType,
@@ -107,9 +107,9 @@ class Net_Module_Statistic_WriterTask_T
   virtual ~Net_Module_Statistic_WriterTask_T ();
 
   // initialization
-  bool initialize (unsigned int = NET_STREAM_DEFAULT_STATISTICS_REPORTING, // (local) reporting interval [seconds: 0 --> OFF]
-                   bool = false,                                           // print final report ?
-                   const Stream_IAllocator* = NULL);                       // report cache usage ?
+  bool initialize (unsigned int = NET_STREAM_DEFAULT_STATISTIC_REPORTING, // (local) reporting interval (seconds) [0: off]
+                   bool = false,                                          // print final report ?
+                   const Stream_IAllocator* = NULL);                      // report cache usage ?
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
@@ -141,8 +141,8 @@ class Net_Module_Statistic_WriterTask_T
                     unsigned int> Net_MessageStatisticRecord_t;
   typedef typename Net_MessageStatistic_t::const_iterator Net_MessageStatisticIterator_t;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_WriterTask_T (const Net_Module_Statistic_WriterTask_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_WriterTask_T& operator= (const Net_Module_Statistic_WriterTask_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_WriterTask_T (const Net_Module_Statistic_WriterTask_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_WriterTask_T& operator= (const Net_Module_Statistic_WriterTask_T&))
 
   // helper method(s)
   void final_report () const;

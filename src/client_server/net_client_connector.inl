@@ -121,28 +121,28 @@ Net_Client_Connector_T<HandlerType,
   return configuration_;
 }
 
-//template <typename AddressType,
-//          typename SocketConfigurationType,
-//          typename ConfigurationType,
-//          typename HandlerConfigurationType,
-//          typename UserDataType,
-//          typename StateType,
-//          typename StreamType,
-//          typename HandlerType>
-//bool
-//Net_Client_Connector_T<AddressType,
-//                       SocketConfigurationType,
-//                       ConfigurationType,
-//                       HandlerConfigurationType,
-//                       UserDataType,
-//                       StateType,
-//                       StreamType,
-//                       HandlerType>::useReactor () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
-//
-//  return true;
-//}
+template <typename AddressType,
+          typename SocketConfigurationType,
+          typename ConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerType>
+bool
+Net_Client_Connector_T<AddressType,
+                       SocketConfigurationType,
+                       ConfigurationType,
+                       HandlerConfigurationType,
+                       UserDataType,
+                       StateType,
+                       StreamType,
+                       HandlerType>::useReactor () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
+
+  return true;
+}
 
 template <typename HandlerType,
           typename AddressType,
@@ -423,29 +423,33 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   return configuration_;
 }
 
-//template <typename SocketConfigurationType,
-//          typename HandlerType,
-//          typename ConfigurationType,
-//          typename HandlerConfigurationType,
-//          typename UserDataType,
-//          typename StateType,
-//          typename StreamType>
-//bool
-//Net_Client_Connector_T<ACE_INET_Addr,
-//                       SocketConfigurationType,
-//                       ConfigurationType,
-//                       HandlerConfigurationType,
-//                       UserDataType,
-//                       StateType,
-//                       StreamType,
-//                       Net_UDPConnection_T<UserDataType,
-//                                           StateType,
-//                                           HandlerType> >::useReactor () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
-//
-//  return true;
-//}
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+bool
+Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
+                                               ConfigurationType,
+                                               StateType,
+                                               StatisticContainerType,
+                                               StreamType,
+                                               HandlerConfigurationType,
+                                               UserDataType>,
+                       ACE_INET_Addr,
+                       ConfigurationType,
+                       StateType,
+                       StatisticContainerType,
+                       StreamType,
+                       HandlerConfigurationType,
+                       UserDataType>::useReactor () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
+
+  return true;
+}
 
 template <typename HandlerType,
           typename ConfigurationType,
@@ -752,27 +756,27 @@ Net_Client_Connector_T<HandlerType,
   return configuration_;
 }
 
-//template <typename SocketConfigurationType,
-//          typename HandlerType,
-//          typename ConfigurationType,
-//          typename HandlerConfigurationType,
-//          typename UserDataType,
-//          typename StateType,
-//          typename StreamType>
-//bool
-//Net_Client_Connector_T<ACE_Netlink_Addr,
-//                       SocketConfigurationType,
-//                       ConfigurationType,
-//                       HandlerConfigurationType,
-//                       UserDataType,
-//                       StateType,
-//                       StreamType,
-//                       HandlerType>::useReactor () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
-//
-//  return true;
-//}
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+bool
+Net_Client_Connector_T<HandlerType,
+                       ACE_Netlink_Addr,
+                       ConfigurationType,
+                       StateType,
+                       StatisticContainerType,
+                       StreamType,
+                       HandlerConfigurationType,
+                       UserDataType>::useReactor () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
+
+  return true;
+}
 
 template <typename HandlerType,
           typename ConfigurationType,
