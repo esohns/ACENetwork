@@ -22,6 +22,7 @@
 #define NET_ICONNECTION_H
 
 #include "ace/config-macros.h"
+#include "ace/Message_Block.h"
 
 #include "common_idumpstate.h"
 #include "common_iget.h"
@@ -65,6 +66,7 @@ class Net_IConnection_T
   //         (and net_common.h / ACE_Svc_Handler.h for reason codes)
 //  virtual int close (u_long = 0) = 0; // reason
   virtual void close () = 0;
+  virtual bool send (const ACE_Message_Block&) = 0;
 };
 
 template <typename AddressType,

@@ -166,8 +166,8 @@ do_printUsage (const std::string& programName_in)
             << NET_EVENT_USE_REACTOR
             << ACE_TEXT ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-s [VALUE]   : statistics reporting interval (second(s)) [")
-            << NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL
+  std::cout << ACE_TEXT ("-s [VALUE]   : statistic reporting interval (second(s)) [")
+            << NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL
             << ACE_TEXT ("] {0 --> OFF})")
             << std::endl;
   std::cout << ACE_TEXT ("-t           : trace information") << std::endl;
@@ -193,7 +193,7 @@ do_processArguments (const int& argc_in,
                      bool& useLoopback_out,
                      unsigned short& listeningPortNumber_out,
                      bool& useReactor_out,
-                     unsigned int& statisticsReportingInterval_out,
+                     unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
                      bool& printVersionAndExit_out,
                      unsigned int& numDispatchThreads_out)
@@ -234,8 +234,8 @@ do_processArguments (const int& argc_in,
   useLoopback_out = false;
   listeningPortNumber_out = NET_SERVER_DEFAULT_LISTENING_PORT;
   useReactor_out = NET_EVENT_USE_REACTOR;
-  statisticsReportingInterval_out =
-      NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL;
+  statisticReportingInterval_out =
+      NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
   printVersionAndExit_out = false;
   numDispatchThreads_out =
@@ -947,7 +947,7 @@ ACE_TMAIN (int argc_in,
   std::string UI_file = path;
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
-  bool use_threadpool = NET_EVENT_USE_THREAD_POOL;
+  bool use_thread_pool = NET_EVENT_USE_THREAD_POOL;
   unsigned int ping_interval = NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
   bool log_to_file = false;
@@ -957,19 +957,19 @@ ACE_TMAIN (int argc_in,
   bool use_loopback = false;
   unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
   bool use_reactor = NET_EVENT_USE_REACTOR;
-  unsigned int statistics_reporting_interval =
-    NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL;
+  unsigned int statistic_reporting_interval =
+    NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information = false;
   bool print_version_and_exit = false;
-  unsigned int num_dispatch_threads =
+  unsigned int number_of_dispatch_threads =
     NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
   // step1b: parse/process/validate configuration
   if (!do_processArguments (argc_in,
                             argv_in,
-                            max_num_connections,
+                            maximum_number_of_connections,
                             UI_file,
-                            use_threadpool,
+                            use_thread_pool,
                             ping_interval,
                             //keep_alive_timeout,
                             log_to_file,
@@ -978,10 +978,10 @@ ACE_TMAIN (int argc_in,
                             use_loopback,
                             listening_port_number,
                             use_reactor,
-                            statistics_reporting_interval,
+                            statistic_reporting_interval,
                             trace_information,
                             print_version_and_exit,
-                            num_dispatch_threads))
+                            number_of_dispatch_threads))
   {
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));

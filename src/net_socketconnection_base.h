@@ -66,6 +66,7 @@ class Net_SocketConnectionBase_T
 //  virtual int svc (void);
 
   // implement (part of) Net_ISocketConnection_T
+  virtual bool send (const ACE_Message_Block&);
   //virtual const HandlerConfigurationType& get () const;
   virtual const HandlerConfigurationType& get ();
   virtual bool initialize (const HandlerConfigurationType&); // handler configuration
@@ -157,6 +158,7 @@ class Net_AsynchSocketConnectionBase_T
   virtual void act (const void*); // act
 
   // implement (part of) Net_ISocketConnection_T
+  virtual bool send (const ACE_Message_Block&);
   //virtual const HandlerConfigurationType& get () const;
   virtual const HandlerConfigurationType& get ();
   virtual bool initialize (const HandlerConfigurationType&); // handler configuration

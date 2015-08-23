@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "ace/Log_Msg.h"
+#include "ace/SOCK_Stream.h"
 #include "ace/Svc_Handler.h"
 
 #include "common.h"
@@ -86,6 +87,66 @@ Net_SocketConnectionBase_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Task_Base::wait(): \"%m\", continuing\n")));
   } // end IF
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+bool
+Net_SocketConnectionBase_T<HandlerType,
+                           AddressType,
+                           ConfigurationType,
+                           StateType,
+                           StatisticContainerType,
+                           StreamType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           //UserDataType>::get () const
+                           UserDataType>::send (const ACE_Message_Block& messageBlock_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::send"));
+
+  ssize_t bytes_written = -1;
+  size_t bytes_transferred = -1;
+  const ACE_SOCK_Stream& stream_r = inherited::peer ();
+  bytes_written = stream_r.send_n (&messageBlock_in,    // (chained) message
+                                   NULL,                // timeout
+                                   &bytes_transferred); // bytes transferred
+  switch (bytes_written)
+  {
+    case -1:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK_Stream::send_n(%d): \"%m\", aborting\n"),
+                  messageBlock_in.total_length ()));
+      return false;
+    }
+    default:
+    {
+      if (bytes_written != static_cast<ssize_t> (messageBlock_in.total_length ()))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_SOCK_Stream::send_n(): \"%m\" [wrote %d/%d bytes], aborting\n"),
+                    bytes_transferred,
+                    messageBlock_in.total_length ()));
+        return false;
+      } // end IF
+//      else
+//        ACE_DEBUG ((LM_DEBUG,
+//                    ACE_TEXT ("wrote %d bytes...\n"),
+//                    bytes_transferred));
+
+      break;
+    }
+  } // end SWITCH
+
+  return true;
 }
 
 template <typename HandlerType,
@@ -780,69 +841,6 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
                                  StreamType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
-                                 UserDataType>::set (Net_ClientServerRole role_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::set"));
-
-  // sanity check(s)
-  SocketConfigurationType socket_configuration;
-  //// *TODO*: remove type inference
-  //if (configuration_.socketConfiguration)
-  //  socket_configuration = *configuration_.socketConfiguration;
-
-  ITRANSPORTLAYER_T* itransportlayer_p = this;
-  ACE_ASSERT (itransportlayer_p);
-
-  if (!itransportlayer_p->initialize (this->dispatch (),
-                                      role_in,
-                                      *configuration_.socketConfiguration))
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(), continuing\n")));
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-void
-Net_AsynchSocketConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 StreamType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
-                                 UserDataType>::ping ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::ping"));
-
-  inherited::stream_.ping ();
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-void
-Net_AsynchSocketConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 StreamType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
                                  UserDataType>::open (ACE_HANDLE handle_in,
                                                       ACE_Message_Block& messageBlock_in)
 {
@@ -938,6 +936,54 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
                                  StreamType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
+                                 UserDataType>::send (const ACE_Message_Block& messageBlock_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::send"));
+
+  int result = -1;
+  const StreamType& stream_r = inherited::stream ();
+  Stream_Module_t* module_p = NULL;
+  result = stream_r.top (module_p);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Stream::top(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  ACE_ASSERT (module_p);
+  Stream_Task_t* task_p = module_p->reader ();
+  ACE_ASSERT (task_p);
+  result =
+      task_p->putq (&const_cast<ACE_Message_Block&> (messageBlock_in), NULL);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Task::putq(%d): \"%m\", aborting\n"),
+                messageBlock_in.total_length ()));
+    return false;
+  } // end IF
+
+  return true;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+bool
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
                                  UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::initialize"));
@@ -970,6 +1016,69 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::get"));
 
   return configuration_;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+void
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 UserDataType>::set (Net_ClientServerRole role_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::set"));
+
+  // sanity check(s)
+  SocketConfigurationType socket_configuration;
+  //// *TODO*: remove type inference
+  //if (configuration_.socketConfiguration)
+  //  socket_configuration = *configuration_.socketConfiguration;
+
+  ITRANSPORTLAYER_T* itransportlayer_p = this;
+  ACE_ASSERT (itransportlayer_p);
+
+  if (!itransportlayer_p->initialize (this->dispatch (),
+                                      role_in,
+                                      *configuration_.socketConfiguration))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(), continuing\n")));
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+void
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 UserDataType>::ping ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::ping"));
+
+  inherited::stream_.ping ();
 }
 
 template <typename HandlerType,
