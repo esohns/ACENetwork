@@ -36,7 +36,6 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           ///////////////////////////////
           typename UserDataType>
 class Net_Connection_Manager_T
@@ -44,7 +43,6 @@ class Net_Connection_Manager_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType>
  , public Common_IStatistic_T<StatisticContainerType>
@@ -55,7 +53,6 @@ class Net_Connection_Manager_T
                                                       ConfigurationType,
                                                       StateType,
                                                       StatisticContainerType,
-                                                      StreamType,
 
                                                       UserDataType>,
                              ACE_SYNCH_MUTEX>;
@@ -66,14 +63,12 @@ class Net_Connection_Manager_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> INTERFACE_T;
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
                             StateType,
-                            StatisticContainerType,
-                            StreamType> CONNECTION_T;
+                            StatisticContainerType> CONNECTION_T;
 
   // configuration / initialization
   void initialize (unsigned int); // maximum number of concurrent connections
@@ -127,7 +122,6 @@ class Net_Connection_Manager_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> OWN_TYPE_T;
 

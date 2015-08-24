@@ -1153,31 +1153,6 @@ template <typename HandlerType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
-const StreamType&
-Net_StreamTCPSocketBase_T<HandlerType,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::stream () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::stream"));
-
-  return stream_;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
 void
 Net_StreamTCPSocketBase_T<HandlerType,
                           AddressType,

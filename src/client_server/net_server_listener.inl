@@ -181,7 +181,7 @@ Net_Server_Listener_T<HandlerType,
   // not running --> start listening
   AddressType local_address;
   // *TODO*: remove type inferences
-  if (configuration_.useLoopbackDevice)
+  if (configuration_.useLoopBackDevice)
     result = local_address.set (configuration_.portNumber,            // port number
                                 // *PORTABILITY*: disambiguation needed under Win32
                                 ACE_TEXT_ALWAYS_CHAR (ACE_LOCALHOST), // hostname

@@ -39,7 +39,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , outputStream_ ()
  , localSAP_ ()
  , remoteSAP_ ()
- , writeHandle_ (ACE_INVALID_HANDLE)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::Net_AsynchTCPSocketHandler_T"));
 

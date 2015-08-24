@@ -121,7 +121,6 @@ class Net_StreamUDPSocketBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<ACE_MT_SYNCH,
@@ -246,7 +245,6 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
   typedef Net_ConnectionBase_T<AddressType,

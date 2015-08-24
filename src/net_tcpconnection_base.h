@@ -82,7 +82,6 @@ class Net_TCPConnectionBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
@@ -167,7 +166,6 @@ class Net_AsynchTCPConnectionBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 

@@ -118,12 +118,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\client_server\net_server_asynchlistener.h" />
-    <ClInclude Include="..\..\src\client_server\net_server_common.h" />
     <ClInclude Include="..\..\src\client_server\net_server_common_tools.h" />
     <ClInclude Include="..\..\src\client_server\net_server_defines.h" />
     <ClInclude Include="..\..\src\client_server\net_server_exports.h" />
     <ClInclude Include="..\..\src\client_server\net_server_listener.h" />
-    <ClInclude Include="..\..\src\client_server\net_server_listener_common.h" />
     <ClInclude Include="..\..\src\client_server\stdafx.h" />
   </ItemGroup>
   <ItemGroup>

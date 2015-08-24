@@ -68,6 +68,7 @@ class Net_SocketConnectionBase_T
   // implement (part of) Net_ISocketConnection_T
   virtual bool send (const ACE_Message_Block&);
   //virtual const HandlerConfigurationType& get () const;
+  virtual const StreamType& stream () const;
   virtual const HandlerConfigurationType& get ();
   virtual bool initialize (const HandlerConfigurationType&); // handler configuration
 
@@ -96,7 +97,6 @@ class Net_SocketConnectionBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
@@ -160,6 +160,7 @@ class Net_AsynchSocketConnectionBase_T
   // implement (part of) Net_ISocketConnection_T
   virtual bool send (const ACE_Message_Block&);
   //virtual const HandlerConfigurationType& get () const;
+  virtual const StreamType& stream () const;
   virtual const HandlerConfigurationType& get ();
   virtual bool initialize (const HandlerConfigurationType&); // handler configuration
 
@@ -179,7 +180,6 @@ class Net_AsynchSocketConnectionBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 

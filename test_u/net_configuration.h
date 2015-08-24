@@ -143,7 +143,7 @@ struct Net_ListenerConfiguration
    , portNumber (0)
    , socketHandlerConfiguration (NULL)
    , statisticReportingInterval (0)
-   , useLoopbackDevice (false)
+   , useLoopBackDevice (false)
   {};
 
   int                             addressFamily;
@@ -152,7 +152,7 @@ struct Net_ListenerConfiguration
   unsigned short                  portNumber;
   Net_SocketHandlerConfiguration* socketHandlerConfiguration;
   unsigned int                    statisticReportingInterval; // (second(s)) [0: off]
-  bool                            useLoopbackDevice;
+  bool                            useLoopBackDevice;
 };
 
 #endif

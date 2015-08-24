@@ -41,6 +41,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          ///////////////////////////////
           typename StreamType,
           ///////////////////////////////
           typename HandlerConfigurationType,
@@ -52,11 +53,20 @@ class Net_Client_AsynchConnector_T
                            HandlerConfigurationType>
 {
  public:
+  typedef StreamType STREAM_T;
+  typedef Net_ISocketConnection_T<AddressType,
+                                  ConfigurationType,
+                                  StateType,
+                                  StatisticContainerType,
+                                  StreamType,
+                                  ///////
+                                  Net_SocketConfiguration,
+                                  ///////
+                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
@@ -149,11 +159,20 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                            HandlerConfigurationType>
 {
  public:
+  typedef StreamType STREAM_T;
+  typedef Net_ISocketConnection_T<ACE_INET_Addr,
+                                  ConfigurationType,
+                                  StateType,
+                                  StatisticContainerType,
+                                  StreamType,
+                                  ///////
+                                  Net_SocketConfiguration,
+                                  ///////
+                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
   typedef Net_AsynchUDPConnectionBase_T<HandlerType,
@@ -255,11 +274,20 @@ class Net_Client_AsynchConnector_T<HandlerType,
                            HandlerConfigurationType>
 {
  public:
+  typedef StreamType STREAM_T;
+  typedef Net_ISocketConnection_T<AddressType,
+                                  ConfigurationType,
+                                  StateType,
+                                  StatisticContainerType,
+                                  StreamType,
+                                  ///////
+                                  Net_SocketConfiguration,
+                                  ///////
+                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
   typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 

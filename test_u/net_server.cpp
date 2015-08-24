@@ -328,7 +328,7 @@ do_processArguments (const int& argc_in,
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter << argumentParser.opt_arg ();
-        converter >> statisticsReportingInterval_out;
+        converter >> statisticReportingInterval_out;
         break;
       }
       case 't':
@@ -457,18 +457,18 @@ do_initializeSignals (bool useReactor_in,
 }
 
 void
-do_work (unsigned int maxNumConnections_in,
+do_work (unsigned int maximumNumberOfConnections_in,
          const std::string& UIDefinitionFile_in,
          bool useThreadPool_in,
          unsigned int pingInterval_in,
          //unsigned int keepAliveTimeout_in,
          bool useUDP_in,
          const std::string& networkInterface_in,
-         bool useLoopback_in,
+         bool useLoopBack_in,
          unsigned short listeningPortNumber_in,
          bool useReactor_in,
-         unsigned int statisticsReportingInterval_in,
-         unsigned int numDispatchThreads_in,
+         unsigned int statisticReportingInterval_in,
+         unsigned int numberOfDispatchThreads_in,
          Net_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -525,7 +525,7 @@ do_work (unsigned int maxNumConnections_in,
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.statisticReportingInterval =
-    statisticsReportingInterval_in;
+    statisticReportingInterval_in;
   configuration.streamConfiguration.userData = &configuration.streamUserData;
   configuration.streamUserData.configuration = &configuration;
   // ********************** socket configuration data **************************
@@ -549,7 +549,7 @@ do_work (unsigned int maxNumConnections_in,
   // step0b: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (useReactor_in,
                                               useThreadPool_in,
-                                              numDispatchThreads_in,
+                                              numberOfDispatchThreads_in,
                                               configuration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -568,10 +568,10 @@ do_work (unsigned int maxNumConnections_in,
                                                         NET_CONNECTIONMANAGER_SINGLETON::instance (),
                                                         false);
   long timer_id = -1;
-  if (statisticsReportingInterval_in)
+  if (statisticReportingInterval_in)
   {
     ACE_Event_Handler* handler_p = &statistics_handler;
-    ACE_Time_Value interval (statisticsReportingInterval_in,
+    ACE_Time_Value interval (statisticReportingInterval_in,
                              0);
     timer_id =
       timer_manager_p->schedule_timer (handler_p,                  // event handler
@@ -619,7 +619,7 @@ do_work (unsigned int maxNumConnections_in,
   } // end IF
 
   // step3: initialize connection manager
-  NET_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (maxNumConnections_in);
+  NET_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (maximumNumberOfConnections_in);
   Net_StreamUserData session_data;
   NET_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
                                                      &session_data);
@@ -689,7 +689,7 @@ do_work (unsigned int maxNumConnections_in,
   //         the worker(s) (if any)
   bool use_reactor = useReactor_in;
   if (!Common_Tools::startEventDispatch (use_reactor,
-                                         numDispatchThreads_in,
+                                         numberOfDispatchThreads_in,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -719,8 +719,8 @@ do_work (unsigned int maxNumConnections_in,
   configuration.listenerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
   configuration.listenerConfiguration.statisticReportingInterval =
-    statisticsReportingInterval_in;
-  configuration.listenerConfiguration.useLoopbackDevice = useLoopback_in;
+    statisticReportingInterval_in;
+  configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
 
   if (!CBData_in.serverConfiguration->listener->initialize (configuration.listenerConfiguration))
   {
@@ -939,7 +939,7 @@ ACE_TMAIN (int argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
-  unsigned int max_num_connections =
+  unsigned int maximum_number_of_connections =
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1011,7 +1011,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
   if ((!UI_file.empty () && !Common_File_Tools::isReadable (UI_file)) ||
-      (use_threadpool && !use_reactor))
+      (use_thread_pool && !use_reactor))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid argument, aborting\n")));
@@ -1029,14 +1029,13 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (num_dispatch_threads == 0)
-    num_dispatch_threads = 1;
+  if (number_of_dispatch_threads == 0) number_of_dispatch_threads = 1;
 
   Net_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.allowUserRuntimeStatistic =
-    (statistics_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
-                                          // iff regular reporting
-                                          // is off
+    (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
+                                         // iff regular reporting
+                                         // is off
 
   // step1d: initialize logging and/or tracing
   Common_Logger logger (&gtk_cb_user_data.logStack,
@@ -1155,7 +1154,8 @@ ACE_TMAIN (int argc_in,
   // *TODO*: the reasoning here is incomplete
   bool use_fd_based_reactor = use_reactor;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  use_fd_based_reactor = (use_reactor && !COMMON_EVENT_WINXX_USE_WFMO_REACTOR);
+  use_fd_based_reactor =
+    (use_reactor && !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));
 #endif
   bool stack_traces = true;
   bool use_signal_based_proactor = !use_reactor;
@@ -1195,9 +1195,9 @@ ACE_TMAIN (int argc_in,
   ACE_High_Res_Timer timer;
   timer.start ();
   // step2: do actual work
-  do_work (max_num_connections,
+  do_work (maximum_number_of_connections,
            UI_file,
-           use_threadpool,
+           use_thread_pool,
            ping_interval,
            //keep_alive_timeout,
            use_udp,
@@ -1205,8 +1205,8 @@ ACE_TMAIN (int argc_in,
            use_loopback,
            listening_port_number,
            use_reactor,
-           statistics_reporting_interval,
-           num_dispatch_threads,
+           statistic_reporting_interval,
+           number_of_dispatch_threads,
            gtk_cb_user_data,
            signal_set,
            ignored_signal_set,

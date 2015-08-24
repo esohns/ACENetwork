@@ -384,7 +384,7 @@ Net_Server_AsynchListener_T<HandlerType,
   int result = -1;
   ACE_INET_Addr local_address;
   // *TODO*: remove type inferences
-  if (configuration_.useLoopbackDevice)
+  if (configuration_.useLoopBackDevice)
     result = local_address.set (configuration_.portNumber, // port
                                 // *PORTABILITY*: needed to disambiguate this under Windows :-(
                                 // *TODO*: bind to specific interface/address ?

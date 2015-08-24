@@ -21,11 +21,9 @@
 #ifndef NET_SERVER_DEFINES_H
 #define NET_SERVER_DEFINES_H
 
-#include <limits>
+//#include <limits>
 
 //#include "ace/ACE.h"
-
-#include "net_common.h"
 
 // *** trace log ***
 #define NET_SERVER_LOG_FILENAME_PREFIX                   "net_server"
@@ -38,13 +36,13 @@
 #define NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS 10
 
 #define NET_SERVER_DEFAULT_TRANSPORT_LAYER               TRANSPORTLAYER_TCP
-#define NET_SERVER_DEFAULT_LISTENING_PORT                10101
+#define NET_SERVER_DEFAULT_LISTENING_PORT                10001
 //#define NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS    ACE::max_handles()
 #define NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS    std::numeric_limits<unsigned int>::max()
 
-#define NET_SERVER_DEFAULT_STATISTICS_REPORTING_INTERVAL 3600 // seconds [0 --> OFF]
+#define NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL  3600 // seconds [0: off]
 
-#define NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL          10000 // ms [0 --> OFF]
+#define NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL          10000 // ms [0: off]
 //#define NET_SERVER_DEFAULT_TCP_KEEPALIVE              0  // seconds [0 --> no timeout]
 
 // *** socket ***

@@ -38,8 +38,7 @@ enum Net_Connection_Status;
 template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StatisticContainerType,
-          typename StreamType>
+          typename StatisticContainerType>
 class Net_IConnection_T
  : public Common_IGet_T<ConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
@@ -48,9 +47,6 @@ class Net_IConnection_T
  , public Common_IDumpState
 {
  public:
-  // convenience types
-  typedef StreamType STREAM_T;
-
   inline virtual ~Net_IConnection_T () {};
 
   virtual void info (ACE_HANDLE&,             // return value: I/O handle
@@ -60,7 +56,6 @@ class Net_IConnection_T
 
   virtual const StateType& state () const = 0;
   virtual Net_Connection_Status status () const = 0;
-  virtual const StreamType& stream () const = 0;
 
   // *NOTE*: see ACE_Svc_Handler/ACE_Task_Base
   //         (and net_common.h / ACE_Svc_Handler.h for reason codes)
@@ -82,8 +77,7 @@ class Net_ISocketConnection_T
  : virtual public Net_IConnection_T<AddressType,
                                     ConfigurationType,
                                     StateType,
-                                    StatisticContainerType,
-                                    StreamType>
+                                    StatisticContainerType>
  , virtual public Net_ITransportLayer_T<SocketConfigurationType>
  // *NOTE*: this next line wouldn't compile (with MSVC)
  // *EXPLANATION*: apparently, on function signatures, the standard stipulates
@@ -105,7 +99,12 @@ class Net_ISocketConnection_T
  , public Common_IInitialize_T<HandlerConfigurationType>
 {
  public:
+  // convenience types
+  typedef StreamType STREAM_T;
+
   virtual ~Net_ISocketConnection_T () {};
+
+  virtual const StreamType& stream () const = 0;
 
   // *TODO*: see above
   virtual const HandlerConfigurationType& get () = 0;

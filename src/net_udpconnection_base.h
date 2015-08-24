@@ -74,7 +74,6 @@ class Net_UDPConnectionBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
@@ -169,7 +168,6 @@ class Net_AsynchUDPConnectionBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 

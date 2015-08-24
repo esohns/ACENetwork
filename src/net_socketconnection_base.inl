@@ -158,6 +158,32 @@ template <typename HandlerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
+const StreamType&
+Net_SocketConnectionBase_T<HandlerType,
+                           AddressType,
+                           ConfigurationType,
+                           StateType,
+                           StatisticContainerType,
+                           StreamType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           //UserDataType>::get () const
+                           UserDataType>::stream () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::stream"));
+
+  return inherited::stream_;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 const HandlerConfigurationType&
 Net_SocketConnectionBase_T<HandlerType,
                            AddressType,
@@ -941,9 +967,8 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::send"));
 
   int result = -1;
-  const StreamType& stream_r = inherited::stream ();
   Stream_Module_t* module_p = NULL;
-  result = stream_r.top (module_p);
+  result = inherited::stream_.top (module_p);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -991,6 +1016,31 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
   configuration_ = configuration_in;
 
   return true;
+}
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+const StreamType&
+Net_AsynchSocketConnectionBase_T<HandlerType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 StreamType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 //UserDataType>::get () const
+                                 UserDataType>::stream () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::stream"));
+
+  return inherited::stream_;
 }
 template <typename HandlerType,
           typename AddressType,

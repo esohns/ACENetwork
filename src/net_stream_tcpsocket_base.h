@@ -118,7 +118,6 @@ class Net_StreamTCPSocketBase_T
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
   virtual unsigned int id () const;
-  virtual const StreamType& stream () const;
   virtual void close ();
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
@@ -141,7 +140,6 @@ class Net_StreamTCPSocketBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<ACE_MT_SYNCH,

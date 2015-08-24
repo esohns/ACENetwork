@@ -30,7 +30,6 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           ///////////////////////////////
           typename UserDataType>
 class Net_IConnectionManager_T
@@ -42,8 +41,7 @@ class Net_IConnectionManager_T
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
                             StateType,
-                            StatisticContainerType,
-                            StreamType> CONNECTION_T;
+                            StatisticContainerType> CONNECTION_T;
 
   virtual ~Net_IConnectionManager_T () {};
 

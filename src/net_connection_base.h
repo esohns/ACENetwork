@@ -44,8 +44,7 @@ class Net_ConnectionBase_T
  , virtual public Net_IConnection_T<AddressType,
                                     ConfigurationType,
                                     StateType,
-                                    StatisticContainerType,
-                                    StreamType>
+                                    StatisticContainerType>
 {
  public:
   // implement (part of) Net_IConnection_T
@@ -62,7 +61,6 @@ class Net_ConnectionBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   StreamType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
@@ -85,8 +83,7 @@ class Net_ConnectionBase_T
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
                             StateType,
-                            StatisticContainerType,
-                            StreamType> inherited2;
+                            StatisticContainerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&))
