@@ -22,7 +22,9 @@
 #define NET_CONFIGURATION_H
 
 #include "ace/INET_Addr.h"
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "ace/Netlink_Addr.h"
+#endif
 
 #include "stream_common.h"
 #include "stream_iallocator.h"

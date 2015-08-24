@@ -261,7 +261,7 @@ class Net_Client_Connector_T<HandlerType,
 {
  public:
   typedef StreamType STREAM_T;
-  typedef Net_ISocketConnection_T<AddressType,
+  typedef Net_ISocketConnection_T<ACE_Netlink_Addr,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,

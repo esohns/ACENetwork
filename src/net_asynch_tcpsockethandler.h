@@ -32,7 +32,7 @@
 
 template <typename ConfigurationType>
 class Net_AsynchTCPSocketHandler_T
- : public Net_SocketHandlerBase<ConfigurationType>
+ : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Service_Handler
  , public ACE_Notification_Strategy
 {
@@ -73,7 +73,7 @@ class Net_AsynchTCPSocketHandler_T
 #endif
 
  private:
-  typedef Net_SocketHandlerBase<ConfigurationType> inherited;
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
   typedef ACE_Service_Handler inherited2;
   typedef ACE_Notification_Strategy inherited3;
 

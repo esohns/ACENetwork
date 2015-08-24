@@ -32,7 +32,7 @@
 
 template <typename ConfigurationType>
 class Net_TCPSocketHandler_T
- : public Net_SocketHandlerBase<ConfigurationType>
+ : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
 {
  public:
@@ -50,7 +50,7 @@ class Net_TCPSocketHandler_T
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef Net_SocketHandlerBase<ConfigurationType> inherited;
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
   typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T (const Net_TCPSocketHandler_T&))

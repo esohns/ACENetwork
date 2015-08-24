@@ -26,24 +26,24 @@
 #include "common_iinitialize.h"
 
 template <typename ConfigurationType>
-class Net_SocketHandlerBase
+class Net_SocketHandlerBase_T
  : public Common_IInitialize_T<ConfigurationType>
 {
  public:
-  virtual ~Net_SocketHandlerBase ();
+  virtual ~Net_SocketHandlerBase_T ();
 
   // implement Common_IInitialize_T
   virtual bool initialize (const ConfigurationType&); // handler configuration
 
  protected:
-  Net_SocketHandlerBase ();
+  Net_SocketHandlerBase_T ();
 
   ConfigurationType configuration_;
   bool              isInitialized_;
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase (const Net_SocketHandlerBase&));
-  ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase& operator= (const Net_SocketHandlerBase&));
+  ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase_T (const Net_SocketHandlerBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase_T& operator= (const Net_SocketHandlerBase_T&))
 };
 
 #include "net_sockethandler_base.inl"

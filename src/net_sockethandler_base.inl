@@ -23,27 +23,27 @@
 #include "net_macros.h"
 
 template <typename ConfigurationType>
-Net_SocketHandlerBase<ConfigurationType>::Net_SocketHandlerBase ()
+Net_SocketHandlerBase_T<ConfigurationType>::Net_SocketHandlerBase_T ()
  : configuration_ ()
  , isInitialized_ (false)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase::Net_SocketHandlerBase"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase_T::Net_SocketHandlerBase_T"));
 
 //  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
 template <typename ConfigurationType>
-Net_SocketHandlerBase<ConfigurationType>::~Net_SocketHandlerBase ()
+Net_SocketHandlerBase_T<ConfigurationType>::~Net_SocketHandlerBase_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase::~Net_SocketHandlerBase"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase_T::~Net_SocketHandlerBase_T"));
 
 }
 
 template <typename ConfigurationType>
 bool
-Net_SocketHandlerBase<ConfigurationType>::initialize (const ConfigurationType& configuration_in)
+Net_SocketHandlerBase_T<ConfigurationType>::initialize (const ConfigurationType& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase_T::initialize"));
 
   configuration_ = configuration_in;
   isInitialized_ = true;
