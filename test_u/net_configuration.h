@@ -38,12 +38,11 @@
 // forward declarations
 struct Net_Configuration;
 struct Net_ConnectionState;
-class Net_Stream;
+//class Net_Stream;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Net_Stream,
                                  ////////
                                  Net_StreamUserData> Net_IInetConnectionManager_t;
 
@@ -102,7 +101,6 @@ struct Net_StreamConfiguration
    , moduleConfiguration_2 ()
    , moduleHandlerConfiguration_2 ()
    , protocolConfiguration (NULL)
-   , sessionID (0)
    , userData (NULL)
   {
     bufferSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
@@ -111,7 +109,6 @@ struct Net_StreamConfiguration
   Stream_ModuleConfiguration     moduleConfiguration_2;        // module configuration
   Net_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
   Net_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
-  unsigned int                   sessionID;                    // session ID
 
   Net_StreamUserData*            userData;                     // user data
 };

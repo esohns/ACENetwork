@@ -32,7 +32,7 @@
 
 template <typename ConfigurationType>
 class Net_AsynchUDPSocketHandler_T
- : public Net_SocketHandlerBase<ConfigurationType>
+ : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Service_Handler
  , public ACE_Notification_Strategy
 {
@@ -68,12 +68,12 @@ class Net_AsynchUDPSocketHandler_T
 //  ACE_INET_Addr           remoteSAP_;
 
  private:
-  typedef Net_SocketHandlerBase<ConfigurationType> inherited;
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
   typedef ACE_Service_Handler inherited2;
   typedef ACE_Notification_Strategy inherited3;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T (const Net_AsynchUDPSocketHandler_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T& operator= (const Net_AsynchUDPSocketHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T (const Net_AsynchUDPSocketHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T& operator= (const Net_AsynchUDPSocketHandler_T&))
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size

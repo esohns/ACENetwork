@@ -493,3 +493,49 @@ Net_Server_Listener_T<HandlerType,
 
   return inherited::accept_svc_handler (handler_in);
 }
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+int
+Net_Server_Listener_T<HandlerType,
+                      AddressType,
+                      ConfigurationType,
+                      StateType,
+                      StreamType,
+                      HandlerConfigurationType,
+                      UserDataType>::activate_svc_handler (HandlerType* svc_handler)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::activate_svc_handler"));
+
+  // *IMPORTANT NOTE*: this bit is mostly copy/pasted from Acceptor.cpp:334
+
+  int result = 0;
+
+  // See if we should enable non-blocking I/O on the <svc_handler>'s
+  // peer.
+  if (ACE_BIT_ENABLED (this->flags_,
+    ACE_NONBLOCK))
+  {
+    if (svc_handler->peer ().enable (ACE_NONBLOCK) == -1)
+      result = -1;
+  }
+  // Otherwise, make sure it's disabled by default.
+  else if (svc_handler->peer ().disable (ACE_NONBLOCK) == -1)
+    result = -1;
+
+  ILISTENER_T* ilistener_p = this;
+  if (result == 0 && svc_handler->open (ilistener_p) == -1)
+    result = -1;
+
+  if (result == -1)
+    // The connection was already made; so this close is a "normal" close
+    // operation.
+    svc_handler->close (NORMAL_CLOSE_OPERATION);
+
+  return result;
+}

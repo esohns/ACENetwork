@@ -66,8 +66,8 @@ class Net_Module_SocketHandler_T
   virtual ~Net_Module_SocketHandler_T ();
 
 #if defined (__GNUG__) || defined (_MSC_VER)
-  // *PORTABILITY*: for some reason, this base class member is not exposed
-  //                (MSVC/gcc)
+  // *NOTE*: for some obscure reason, these base class members are not exposed
+  //         (MSVC/gcc)
   using Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
                                     Common_TimePolicy_t,
                                     SessionMessageType,
@@ -76,6 +76,7 @@ class Net_Module_SocketHandler_T
                                     StreamStateType,
                                     SessionDataType,
                                     SessionDataContainerType>::initialize;
+  using Stream_StateMachine_Control::initialize;
 #endif
 
   // override (part of) Stream_IModuleHandler_T

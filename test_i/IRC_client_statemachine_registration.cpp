@@ -27,11 +27,10 @@
 #include "net_macros.h"
 
 IRC_Client_StateMachine_Registration::IRC_Client_StateMachine_Registration ()
- : inherited ()
+ : inherited (REGISTRATION_STATE_PASS)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_StateMachine_Registration::IRC_Client_StateMachine_Registration"));
 
-  inherited::state_ = REGISTRATION_STATE_PASS;
 }
 
 IRC_Client_StateMachine_Registration::~IRC_Client_StateMachine_Registration ()
@@ -40,13 +39,31 @@ IRC_Client_StateMachine_Registration::~IRC_Client_StateMachine_Registration ()
 
 }
 
+void
+IRC_Client_StateMachine_Registration::initialize ()
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_StateMachine_Registration::initialize"));
+
+  if (!change (REGISTRATION_STATE_PASS))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_StateMachine_Registration::change(REGISTRATION_STATE_PASS), continuing\n")));
+}
+
+void
+IRC_Client_StateMachine_Registration::reset ()
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_StateMachine_Registration::reset"));
+
+  initialize ();
+}
+
 bool
 IRC_Client_StateMachine_Registration::change (IRC_Client_RegistrationState newState_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_StateMachine_Registration::change"));
 
   // synchronize access to state machine...
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (inherited::lock_);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (inherited::stateLock_);
 
   switch (inherited::state_)
   {

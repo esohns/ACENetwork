@@ -47,7 +47,7 @@ class IRC_Client_IIRCControl;
 class IRC_Client_IRCMessage;
 struct IRC_Client_ModuleHandlerConfiguration;
 class IRC_Client_SessionMessage;
-class IRC_Client_Stream;
+//class IRC_Client_Stream;
 struct IRC_Client_StreamSessionData;
 struct IRC_Client_StreamUserData;
 //typedef Net_IConnection_T<ACE_INET_Addr,
@@ -59,7 +59,6 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  IRC_Client_Configuration,
                                  IRC_Client_ConnectionState,
                                  IRC_Client_RuntimeStatistic_t,
-                                 IRC_Client_Stream,
                                  ////////
                                  IRC_Client_StreamUserData> IRC_Client_IConnection_Manager_t;
 typedef Common_INotify_T<IRC_Client_StreamSessionData,
@@ -204,7 +203,6 @@ struct IRC_Client_StreamConfiguration
    , moduleConfiguration_2 ()
    , moduleHandlerConfiguration_2 ()
    , protocolConfiguration (NULL)
-   , sessionID (0)
    , userData (NULL)
   {
     bufferSize = IRC_CLIENT_BUFFER_SIZE;
@@ -213,7 +211,6 @@ struct IRC_Client_StreamConfiguration
   Stream_ModuleConfiguration            moduleConfiguration_2;        // stream module configuration
   IRC_Client_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
   IRC_Client_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
-  unsigned int                          sessionID;                    // session ID
 
   IRC_Client_StreamUserData*            userData;
 };

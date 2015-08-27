@@ -410,6 +410,7 @@ connection_setup_curses_function (void* arg_in)
   ACE_Time_Value delay (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
 
   IRC_Client_IConnection_t* connection_p = NULL;
+  IRC_Client_ISocketConnection_t* socket_connection_p = NULL;
   bool result_2 = false;
   const Stream_Module_t* module_p = NULL;
   const IRC_Client_Stream* stream_p = NULL;
@@ -425,8 +426,9 @@ connection_setup_curses_function (void* arg_in)
   // step1: wait for connection ?
   if (!thread_data_p->useReactor)
   {
-    ACE_Time_Value deadline = COMMON_TIME_NOW +
-                              ACE_Time_Value (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT, 0);
+    ACE_Time_Value deadline =
+      (COMMON_TIME_NOW +
+       ACE_Time_Value (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT, 0));
 
     do
     {
@@ -450,12 +452,6 @@ connection_setup_curses_function (void* arg_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_IConnection_Manager_t::operator[0]: \"%m\", aborting\n")));
-
-    // clean up
-    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                         !thread_data_p->useReactor,
-                                         -1);
-
     goto clean_up;
   } // end IF
 
@@ -464,7 +460,16 @@ connection_setup_curses_function (void* arg_in)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registering IRC connection...\n")));
 
-  stream_p = &connection_p->stream ();
+  socket_connection_p =
+    dynamic_cast<IRC_Client_ISocketConnection_t*> (connection_p);
+  if (!socket_connection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<IRC_Client_ISocketConnection_t>(%@): \"%m\", aborting\n"),
+                connection_p));
+    goto clean_up;
+  } // end IF
+  stream_p = &socket_connection_p->stream ();
   for (Stream_Iterator_t iterator (*stream_p);
        (iterator.next (module_p) != 0);
        iterator.advance ())
@@ -476,13 +481,6 @@ connection_setup_curses_function (void* arg_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("module \"%s\" not found, aborting\n"),
                 ACE_TEXT (IRC_HANDLER_MODULE_NAME)));
-
-    // clean up
-    connection_p->decrease ();
-    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                         !thread_data_p->useReactor,
-                                         -1);
-
     goto clean_up;
   } // end IF
   IRCControl_p =
@@ -492,13 +490,6 @@ connection_setup_curses_function (void* arg_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<IRC_Client_IIRCControl*>(0x%@), aborting\n"),
                 connection_p));
-
-    // clean up
-    connection_p->decrease ();
-    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                         !thread_data_p->useReactor,
-                                         -1);
-
     goto clean_up;
   } // end IF
   try
@@ -515,13 +506,6 @@ connection_setup_curses_function (void* arg_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_IIRCControl::registerConnection(), aborting\n")));
-
-    // clean up
-    connection_p->decrease ();
-    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                         !thread_data_p->useReactor,
-                                         -1);
-
     goto clean_up;
   } // end IF
 
@@ -532,13 +516,6 @@ connection_setup_curses_function (void* arg_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<IRC_Client_IRegistration_t*>: \"%m\", aborting\n")));
-
-    // clean up
-    connection_p->decrease ();
-    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                         !thread_data_p->useReactor,
-                                         -1);
-
     goto clean_up;
   } // end ELSE
   // *NOTE*: this entails a little delay (waiting for connection registration...)
@@ -562,13 +539,6 @@ connection_setup_curses_function (void* arg_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_IRegistration_t::wait(%#T), aborting\n"),
                 &delay));
-
-    // clean up
-    connection_p->decrease ();
-    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                         !thread_data_p->useReactor,
-                                         -1);
-
     goto clean_up;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
@@ -594,13 +564,6 @@ connection_setup_curses_function (void* arg_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::join(\"%s\"), aborting\n"),
                 ACE_TEXT (channel_string.c_str ())));
-
-    // clean up
-    connection_p->decrease ();
-    Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                         !thread_data_p->useReactor,
-                                         -1);
-
     goto clean_up;
   }
 
@@ -625,27 +588,24 @@ connection_setup_curses_function (void* arg_in)
     //} // end IF
     //const IRC_Client_ConnectionState& connection_state_r = session_p->state ();
     const IRC_Client_ConnectionState& connection_state_r =
-        connection_p->state ();
+      connection_p->state ();
     thread_data_p->cursesState->state =
       &const_cast<IRC_Client_ConnectionState&> (connection_state_r);
 
     // step6: clean up
     connection_p->decrease ();
+    connection_p = NULL;
 
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("running curses dispatch loop...\n")));
 
     bool result_2 = curses_main (*thread_data_p->cursesState,
                                  IRCControl_p);
-
     if (!result_2)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ::curses_main(), shutting down\n")));
-
-      Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                           !thread_data_p->useReactor,
-                                           -1);
+                  ACE_TEXT ("failed to ::curses_main(), aborting\n")));
+      goto clean_up;
     } // end IF
     else
       ACE_DEBUG ((LM_DEBUG,
@@ -663,9 +623,17 @@ connection_setup_curses_function (void* arg_in)
   return_value = NULL;
 #endif
 
+  goto done;
+
 clean_up:
+  if (connection_p)
+    connection_p->decrease ();
 
+  Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
+                                       !thread_data_p->useReactor,
+                                       -1);
 
+done:
   return return_value;
 }
 

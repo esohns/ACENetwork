@@ -35,7 +35,7 @@
 #include "net_configuration.h"
 #include "net_connection_common.h"
 #include "net_socket_common.h"
-#include "net_stream.h"
+//#include "net_stream.h"
 
 class Net_TCPConnection
  : public Net_TCPConnectionBase_T<Net_TCPHandler_t,
@@ -57,7 +57,6 @@ class Net_TCPConnection
                                    Net_Configuration,
                                    Net_ConnectionState,
                                    Net_RuntimeStatistic_t,
-                                   Net_Stream,
                                    /////
                                    Net_StreamUserData> ICONNECTION_MANAGER_T;
 
@@ -107,7 +106,6 @@ class Net_AsynchTCPConnection
                                    Net_Configuration,
                                    Net_ConnectionState,
                                    Net_RuntimeStatistic_t,
-                                   Net_Stream,
                                    //////
                                    Net_StreamUserData> ICONNECTION_MANAGER_T;
 

@@ -46,6 +46,8 @@ class IRC_Client_StateMachine_Registration
   virtual ~IRC_Client_StateMachine_Registration ();
 
   // implement (part of) Common_IStateMachine_T
+  virtual void initialize ();
+  virtual void reset ();
   virtual std::string state2String (IRC_Client_RegistrationState) const;
 
  protected:

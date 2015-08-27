@@ -143,16 +143,16 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
   {
     // *TODO*: (at least part of) this procedure belongs in libACEStream
     //         --> remove type inferences
-    inherited::IMODULE_T* module_2 =
+    inherited::IMODULE_T* imodule_p =
       dynamic_cast<inherited::IMODULE_T*> (configuration_in.module);
-    if (!module_2)
+    if (!imodule_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    if (!module_2->initialize (configuration_in.moduleConfiguration_2))
+    if (!imodule_p->initialize (configuration_in.moduleConfiguration_2))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to initialize module, aborting\n"),
@@ -296,7 +296,7 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
                 socketHandler_.name ()));
     return false;
   } // end IF
-
+  socketHandler_impl_p->initialize ();
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)

@@ -82,7 +82,7 @@ IRC_Client_Module_IRCHandler::initialize (const IRC_Client_ModuleHandlerConfigur
     } // end lock scope
 
     { // synch access to state machine
-      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (inherited::lock_);
+      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (inherited::stateLock_);
 
       inherited::state_ = REGISTRATION_STATE_NICK;
     } // end lock scope

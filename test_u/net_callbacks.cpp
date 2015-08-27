@@ -130,7 +130,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("unknown/invalid mode (was: %d), aborting\n"),
                   action_mode));
-      return FALSE; // G_SOURCE_REMOVE
+      return G_SOURCE_REMOVE;
     }
   } // end SWITCH
   GtkToggleButton* togglebutton_p =
@@ -161,7 +161,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to pango_font_description_from_string(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION)));
-    return FALSE; // G_SOURCE_REMOVE
+    return G_SOURCE_REMOVE;
   } // end IF
   // apply font
   GtkRcStyle* rc_style_p = gtk_rc_style_new ();
@@ -169,7 +169,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to gtk_rc_style_new(): \"%m\", aborting\n")));
-    return FALSE; // G_SOURCE_REMOVE
+    return G_SOURCE_REMOVE;
   } // end IF
   rc_style_p->font_desc = font_description_p;
   GdkColor base_colour, text_colour;
@@ -221,7 +221,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
-      return FALSE; // G_SOURCE_REMOVE
+      return G_SOURCE_REMOVE;
     } // end ELSE
   } // end lock scope
 
@@ -386,7 +386,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   // step9: draw main dialog
   gtk_widget_show_all (dialog_p);
 
-  return FALSE; // G_SOURCE_REMOVE
+  return G_SOURCE_REMOVE;
 }
 
 G_MODULE_EXPORT gboolean
@@ -469,7 +469,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to pango_font_description_from_string(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION)));
-    return FALSE; // G_SOURCE_REMOVE
+    return G_SOURCE_REMOVE;
   } // end IF
   // apply font
   GtkRcStyle* rc_style_p = gtk_rc_style_new ();
@@ -477,7 +477,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to gtk_rc_style_new(): \"%m\", aborting\n")));
-    return FALSE; // G_SOURCE_REMOVE
+    return G_SOURCE_REMOVE;
   } // end IF
   rc_style_p->font_desc = font_description_p;
   GdkColor base_colour, text_colour;
@@ -508,7 +508,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_timeout_add_seconds(): \"%m\", aborting\n")));
-      return FALSE; // G_SOURCE_REMOVE
+      return G_SOURCE_REMOVE;
     } // end ELSE
     // schedule asynchronous updates of the info view
     event_source_id = g_timeout_add (NET_UI_GTKEVENT_RESOLUTION,
@@ -520,7 +520,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
-      return FALSE; // G_SOURCE_REMOVE
+      return G_SOURCE_REMOVE;
     } // end ELSE
   } // end lock scope
 
@@ -642,7 +642,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   // step8: draw main dialog
   gtk_widget_show_all (dialog_p);
 
-  return FALSE; // G_SOURCE_REMOVE
+  return G_SOURCE_REMOVE;
 }
 
 G_MODULE_EXPORT gboolean
@@ -653,7 +653,7 @@ idle_finalize_UI_cb (gpointer userData_in)
   // leave GTK
   gtk_main_quit ();
 
-  return FALSE; // G_SOURCE_REMOVE
+  return G_SOURCE_REMOVE;
 }
 
 G_MODULE_EXPORT gboolean
@@ -693,12 +693,12 @@ idle_update_log_display_cb (gpointer userData_in)
 
     // sanity check
     if (data_p->logStack.empty ())
-      return TRUE; // G_SOURCE_CONTINUE
+      return G_SOURCE_CONTINUE;
 
     // step1: convert text
     for (Common_MessageStackConstIterator_t iterator_2 = data_p->logStack.begin ();
          iterator_2 != data_p->logStack.end ();
-         iterator_2++)
+         ++iterator_2)
     {
       converted_text = Common_UI_Tools::Locale2UTF8 (*iterator_2);
       if (!converted_text)
@@ -706,7 +706,7 @@ idle_update_log_display_cb (gpointer userData_in)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to convert message text (was: \"%s\"), aborting\n"),
                     ACE_TEXT ((*iterator_2).c_str ())));
-        return FALSE; // G_SOURCE_REMOVE
+        return G_SOURCE_REMOVE;
       } // end IF
 
       // step2: display text
@@ -746,7 +746,7 @@ idle_update_log_display_cb (gpointer userData_in)
   gtk_adjustment_set_value (adjustment_p,
                             gtk_adjustment_get_upper (adjustment_p));
 
-  return TRUE; // G_SOURCE_CONTINUE
+  return G_SOURCE_CONTINUE;
 }
 
 G_MODULE_EXPORT gboolean
@@ -773,7 +773,7 @@ idle_update_info_display_cb (gpointer userData_in)
     ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->stackLock);
 
     if (data_p->eventStack.empty ())
-      return TRUE; // G_SOURCE_CONTINUE
+      return G_SOURCE_CONTINUE;
 
     for (Net_GTK_EventsIterator_t iterator_2 = data_p->eventStack.begin ();
          iterator_2 != data_p->eventStack.end ();
@@ -906,7 +906,7 @@ idle_update_info_display_cb (gpointer userData_in)
     } // end IF
   } // end IF
 
-  return TRUE; // G_SOURCE_CONTINUE
+  return G_SOURCE_CONTINUE;
 }
 
 // -----------------------------------------------------------------------------

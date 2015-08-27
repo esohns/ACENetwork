@@ -515,6 +515,33 @@ template <typename HandlerType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
+ACE_Notification_Strategy*
+Net_StreamAsynchTCPSocketBase_T<HandlerType,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::notification ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::notification"));
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (NULL);
+  ACE_NOTREACHED (return NULL;)
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 int
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,

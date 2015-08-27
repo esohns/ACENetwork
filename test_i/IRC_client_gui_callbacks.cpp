@@ -308,7 +308,21 @@ connection_failed:
     connection_2 = connection_manager_p->get (handle);
   if (!connection_2)
     goto connection_failed;
-  stream_p = &connection_2->stream ();
+  IRC_Client_ISocketConnection_t* socket_connection_p =
+    dynamic_cast<IRC_Client_ISocketConnection_t*> (connection_2);
+  if (!socket_connection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<IRC_Client_ISocketConnection_t>(%@): \"%m\", aborting\n"),
+                connection_2));
+
+    // clean up
+    connection_2->close ();
+    connection_2->decrease ();
+
+    goto remove_page;
+  } // end IF
+  stream_p = &socket_connection_p->stream ();
   for (Stream_Iterator_t iterator_2 (*stream_p);
        iterator_2.next (current_p) != 0;
        iterator_2.advance ())

@@ -108,45 +108,42 @@ Net_SocketConnectionBase_T<HandlerType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
                            //UserDataType>::get () const
-                           UserDataType>::send (const ACE_Message_Block& messageBlock_in)
+                           UserDataType>::send (ACE_Message_Block*& messageBlock_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::send"));
 
-  ssize_t bytes_written = -1;
-  size_t bytes_transferred = -1;
-  const ACE_SOCK_Stream& stream_r = inherited::peer ();
-  bytes_written = stream_r.send_n (&messageBlock_in,    // (chained) message
-                                   NULL,                // timeout
-                                   &bytes_transferred); // bytes transferred
-  switch (bytes_written)
+  int result = -1;
+
+  Stream_Module_t* module_p = NULL;
+  result = inherited::stream_.top (module_p);
+  if (result == -1)
   {
-    case -1:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Stream::send_n(%d): \"%m\", aborting\n"),
-                  messageBlock_in.total_length ()));
-      return false;
-    }
-    default:
-    {
-      if (bytes_written != static_cast<ssize_t> (messageBlock_in.total_length ()))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Stream::send_n(): \"%m\" [wrote %d/%d bytes], aborting\n"),
-                    bytes_transferred,
-                    messageBlock_in.total_length ()));
-        return false;
-      } // end IF
-//      else
-//        ACE_DEBUG ((LM_DEBUG,
-//                    ACE_TEXT ("wrote %d bytes...\n"),
-//                    bytes_transferred));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Stream::top(): \"%m\", aborting\n")));
 
-      break;
-    }
-  } // end SWITCH
+    // clean up
+    messageBlock_inout->release ();
+    messageBlock_inout = NULL;
 
-  return true;
+    return false;
+  } // end IF
+  ACE_ASSERT (module_p);
+  Stream_Task_t* task_p = module_p->writer ();
+  ACE_ASSERT (task_p);
+  result = task_p->reply (messageBlock_inout, NULL);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Task::reply(): \"%m\", aborting\n")));
+
+    // clean up
+    messageBlock_inout->release ();
+    messageBlock_inout = NULL;
+
+    return false;
+  } // end IF
+
+  return (result >= 0);
 }
 
 template <typename HandlerType,
@@ -443,14 +440,14 @@ Net_SocketConnectionBase_T<HandlerType,
     {
       ICONNECTOR_T* iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
       ACE_ASSERT (iconnector_p);
-      handler_configuration_p = &iconnector_p->get ();
+      handler_configuration_p = &(iconnector_p->get ());
       break;
     }
     case NET_ROLE_SERVER:
     {
       ILISTENER_T* ilistener_p = static_cast<ILISTENER_T*> (arg_in);
       ACE_ASSERT (ilistener_p);
-      handler_configuration_p = &ilistener_p->get ();
+      handler_configuration_p = &(ilistener_p->get ());
       break;
     }
     default:
@@ -962,33 +959,42 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
                                  StreamType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
-                                 UserDataType>::send (const ACE_Message_Block& messageBlock_in)
+                                 UserDataType>::send (ACE_Message_Block*& messageBlock_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::send"));
 
   int result = -1;
+
   Stream_Module_t* module_p = NULL;
   result = inherited::stream_.top (module_p);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::top(): \"%m\", aborting\n")));
+
+    // clean up
+    messageBlock_inout->release ();
+    messageBlock_inout = NULL;
+
     return false;
   } // end IF
   ACE_ASSERT (module_p);
-  Stream_Task_t* task_p = module_p->reader ();
+  Stream_Task_t* task_p = module_p->writer ();
   ACE_ASSERT (task_p);
-  result =
-      task_p->putq (&const_cast<ACE_Message_Block&> (messageBlock_in), NULL);
+  result = task_p->reply (messageBlock_inout, NULL);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Task::putq(%d): \"%m\", aborting\n"),
-                messageBlock_in.total_length ()));
+                ACE_TEXT ("failed to ACE_Task::reply(): \"%m\", aborting\n")));
+
+    // clean up
+    messageBlock_inout->release ();
+    messageBlock_inout = NULL;
+
     return false;
   } // end IF
 
-  return true;
+  return (result >= 0);
 }
 
 template <typename HandlerType,

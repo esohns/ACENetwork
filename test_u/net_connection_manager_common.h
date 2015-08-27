@@ -40,7 +40,7 @@
 //struct Net_Configuration;
 //struct Net_SocketConfiguration;
 //struct Net_StreamUserData;
-class Net_Stream;
+//class Net_Stream;
 
 //#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 //typedef Net_IConnection_T<ACE_Netlink_Addr,
@@ -58,7 +58,6 @@ typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Net_Stream,
                                  ////////
                                  Net_StreamUserData> Net_INetlinkConnectionManager_t;
 #endif
@@ -66,7 +65,6 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Net_Stream,
                                  ////////
                                  Net_StreamUserData> Net_IInetConnectionManager_t;
 
@@ -75,7 +73,6 @@ typedef Net_Connection_Manager_T<ACE_Netlink_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Net_Stream,
                                  ////////
                                  Net_StreamUserData> Net_NetlinkConnectionManager_t;
 #endif
@@ -83,7 +80,6 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Net_Stream,
                                  ////////
                                  Net_StreamUserData> Net_InetConnectionManager_t;
 

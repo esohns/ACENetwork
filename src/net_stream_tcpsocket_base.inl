@@ -693,9 +693,18 @@ Net_StreamTCPSocketBase_T<HandlerType,
   } // end IF
 
   // put some data into the socket...
+  // *TODO*: the iovec-based implementation kept blocking in
+  //         ACE::handle_write_ready(), i.e. obviously currently does not work
+  //         with multi-threaded (thread pool) reactors...
+  //         --> use 'traditional' method for now
+  //size_t bytes_transferred = 0;
+  //bytes_sent =
+  //    inherited::peer_.send_n (currentWriteBuffer_, // buffer
+  //                             NULL,                // timeout
+  //                             &bytes_transferred); // bytes transferred
   bytes_sent =
-      inherited::peer_.send (currentWriteBuffer_->rd_ptr (), // buffer
-                             currentWriteBuffer_->length (), // #bytes to send
+    inherited::peer_.send_n (currentWriteBuffer_->rd_ptr (), // buffer
+                             currentWriteBuffer_->length (), // bytes to send
                              0);                             // flags
   switch (bytes_sent)
   {
@@ -712,7 +721,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
           (error != ENOTSOCK)     &&
           (error != EBADF))          // <-- connection abort()ed locally
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Stream::send(): \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to ACE_SOCK_Stream::send_n(): \"%m\", aborting\n")));
 
       // clean up
       currentWriteBuffer_->release ();
@@ -735,15 +744,43 @@ Net_StreamTCPSocketBase_T<HandlerType,
     }
     default:
     {
-//       ACE_DEBUG ((LM_DEBUG,
-//                   ACE_TEXT ("[%u]: sent %u bytes...\n"),
-//                   handle_in,
-//                   bytes_sent));
-
       // finished with this buffer ?
-      currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
-      if (currentWriteBuffer_->length () > 0)
-        break; // there's more data
+      //if (bytes_sent != currentWriteBuffer_->total_length ())
+      if (bytes_sent != currentWriteBuffer_->length ())
+      {
+        //ACE_DEBUG ((LM_DEBUG,
+        //            ACE_TEXT ("[%u]: sent %u/%u bytes...\n"),
+        //            handle_in,
+        //            bytes_sent, currentWriteBuffer_->total_length ()));
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("[%u]: sent %u/%u bytes...\n"),
+                    handle_in,
+                    bytes_sent, currentWriteBuffer_->length ()));
+
+        //// adjust rd_ptr and release sent parts
+        //unsigned int remaining_offset = bytes_sent;
+        //unsigned int offset = 0;
+        //ACE_Message_Block* message_block_p = NULL;
+        //while (remaining_offset)
+        //{
+        //  offset =
+        //    (remaining_offset < currentWriteBuffer_->length () ? remaining_offset
+        //                                                       : currentWriteBuffer_->length ());
+        //  currentWriteBuffer_->rd_ptr (offset);
+        //  if (currentWriteBuffer_->length () == 0)
+        //  {
+        //    message_block_p = currentWriteBuffer_;
+        //    currentWriteBuffer_ = currentWriteBuffer_->cont ();
+        //    if (currentWriteBuffer_)
+        //      currentWriteBuffer_ = currentWriteBuffer_->duplicate ();
+        //    message_block_p->release ();
+        //  } // end IF
+        //  remaining_offset -= offset;
+        //} // end WHILE
+        currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
+        ACE_ASSERT (currentWriteBuffer_);
+        break; // --> there's more data
+      } // end IF
 
       // clean up
       currentWriteBuffer_->release ();
@@ -755,7 +792,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // immediately reschedule handler ?
   if (currentWriteBuffer_)
-    result = 1; // <-- reschedule
+    result = 1; // <-- reschedule immediately
 
 release:
   if (inherited2::configuration_.streamConfiguration.serializeOutput)
@@ -1142,6 +1179,31 @@ Net_StreamTCPSocketBase_T<HandlerType,
 #else
   return static_cast<unsigned int> (inherited::get_handle ());
 #endif
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+ACE_Notification_Strategy*
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
+                          ConfigurationType,
+                          StateType,
+                          StatisticContainerType,
+                          StreamType,
+                          UserDataType,
+                          ModuleConfigurationType,
+                          ModuleHandlerConfigurationType>::notification ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::notification"));
+
+  return &(inherited::notificationStrategy_);
 }
 
 template <typename HandlerType,

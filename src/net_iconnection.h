@@ -54,6 +54,7 @@ class Net_IConnection_T
                      AddressType&) const = 0; // return value: remote SAP
   virtual unsigned int id () const = 0;
 
+  virtual ACE_Notification_Strategy* notification () = 0;
   virtual const StateType& state () const = 0;
   virtual Net_Connection_Status status () const = 0;
 
@@ -61,7 +62,8 @@ class Net_IConnection_T
   //         (and net_common.h / ACE_Svc_Handler.h for reason codes)
 //  virtual int close (u_long = 0) = 0; // reason
   virtual void close () = 0;
-  virtual bool send (const ACE_Message_Block&) = 0;
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual bool send (ACE_Message_Block*&) = 0;
 };
 
 template <typename AddressType,

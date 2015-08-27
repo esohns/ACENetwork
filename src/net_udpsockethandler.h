@@ -47,7 +47,7 @@ class Net_SOCK_Dgram
 template <typename SocketType,
           typename ConfigurationType>
 class Net_UDPSocketHandler_T
- : public Net_SocketHandlerBase<ConfigurationType>
+ : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>
 {
  public:
@@ -77,11 +77,11 @@ class Net_UDPSocketHandler_T
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef Net_SocketHandlerBase<ConfigurationType> inherited;
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
   typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&));
-  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&));
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&))
 };
 
 // include template implementation

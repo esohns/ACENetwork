@@ -97,6 +97,8 @@ class Net_Server_Listener_T
   virtual int make_svc_handler (HandlerType*&);
   // override default accept strategy
   virtual int accept_svc_handler (HandlerType*);
+  // override default activation strategy
+  virtual int activate_svc_handler (HandlerType*);
 
  private:
   typedef ACE_Acceptor<HandlerType,

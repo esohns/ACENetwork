@@ -118,6 +118,7 @@ class Net_StreamTCPSocketBase_T
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
   virtual unsigned int id () const;
+  virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data

@@ -1077,12 +1077,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ::GetConsoleWindow(), aborting\n")));
     return EXIT_FAILURE;
   } // end IF
-  if (!ShowWindow (window_p, SW_HIDE))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::ShowWindow(), aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
+  BOOL was_visible_b = ShowWindow (window_p, SW_HIDE);
 
   result = ACE::init ();
   if (result == -1)

@@ -99,13 +99,6 @@ do_printUsage (const std::string& programName_in)
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
 #endif // #ifdef DEBUG_DEBUGGER
@@ -209,13 +202,6 @@ do_processArguments (int argc_in,
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
 #endif // #ifdef DEBUG_DEBUGGER
@@ -704,18 +690,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
       return;
     } // end IF
-    if (!ShowWindow (window_p, SW_HIDE))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ::ShowWindow(), returning\n")));
-
-      // clean up
-      timer_manager_p->stop ();
-      connector_p->abort ();
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
-
-      return;
-    } // end IF
+    BOOL was_visible_b = ShowWindow (window_p, SW_HIDE); 
 #endif
   } // end IF
 
@@ -953,13 +928,6 @@ ACE_TMAIN (int argc_in,
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
 #endif // #ifdef DEBUG_DEBUGGER

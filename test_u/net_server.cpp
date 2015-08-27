@@ -100,12 +100,6 @@ do_printUsage (const std::string& programName_in)
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
 #endif // #ifdef DEBUG_DEBUGGER
 
@@ -115,9 +109,9 @@ do_printUsage (const std::string& programName_in)
             << std::endl
             << std::endl;
   std::cout << ACE_TEXT ("currently available options:") << std::endl;
-  std::cout << ACE_TEXT ("-c [VALUE]   : max #connections ([")
+  std::cout << ACE_TEXT ("-c [VALUE]   : maximum number of (concurrent) connections [")
             << NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS
-            << ACE_TEXT ("])")
+            << ACE_TEXT ("]")
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -182,7 +176,7 @@ do_printUsage (const std::string& programName_in)
 bool
 do_processArguments (const int& argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
-                     unsigned int& maxNumConnections_out,
+                     unsigned int& maximumNumberOfConnections_out,
                      std::string& UIFile_out,
                      bool& useThreadPool_out,
                      unsigned int& clientPingInterval_out,
@@ -190,13 +184,13 @@ do_processArguments (const int& argc_in,
                      bool& logToFile_out,
                      bool& useUDP_out,
                      std::string& networkInterface_out,
-                     bool& useLoopback_out,
+                     bool& useLoopBack_out,
                      unsigned short& listeningPortNumber_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
                      bool& printVersionAndExit_out,
-                     unsigned int& numDispatchThreads_out)
+                     unsigned int& numberOfDispatchThreads_out)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
@@ -205,17 +199,11 @@ do_processArguments (const int& argc_in,
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory ();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
 #endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
-  maxNumConnections_out =
+  maximumNumberOfConnections_out =
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -231,14 +219,14 @@ do_processArguments (const int& argc_in,
   useUDP_out = false;
   networkInterface_out =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT);
-  useLoopback_out = false;
+  useLoopBack_out = false;
   listeningPortNumber_out = NET_SERVER_DEFAULT_LISTENING_PORT;
   useReactor_out = NET_EVENT_USE_REACTOR;
   statisticReportingInterval_out =
       NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
   printVersionAndExit_out = false;
-  numDispatchThreads_out =
+  numberOfDispatchThreads_out =
     NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
@@ -256,7 +244,7 @@ do_processArguments (const int& argc_in,
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter << argumentParser.opt_arg ();
-        converter >> maxNumConnections_out;
+        converter >> maximumNumberOfConnections_out;
         break;
       }
       case 'g':
@@ -307,7 +295,7 @@ do_processArguments (const int& argc_in,
       }
       case 'o':
       {
-        useLoopback_out = true;
+        useLoopBack_out = true;
         break;
       }
       case 'p':
@@ -346,7 +334,7 @@ do_processArguments (const int& argc_in,
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter << argumentParser.opt_arg ();
-        converter >> numDispatchThreads_out;
+        converter >> numberOfDispatchThreads_out;
         break;
       }
       // error handling
@@ -669,17 +657,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
       return;
     } // end IF
-    if (!ShowWindow (window_p, SW_HIDE))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ::ShowWindow(), returning\n")));
-
-      // clean up
-      timer_manager_p->stop ();
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
-
-      return;
-    } // end IF
+    BOOL was_visible_b = ShowWindow (window_p, SW_HIDE);
 #endif
   } // end IF
 
@@ -864,20 +842,6 @@ ACE_TMAIN (int argc_in,
   // step0: initialize
 // *PORTABILITY*: on Windows, initialize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  HWND window_p = GetConsoleWindow ();
-  if (!window_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::GetConsoleWindow(), aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-  if (!ShowWindow (window_p, SW_HIDE))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::ShowWindow(), aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-
   result = ACE::init ();
   if (result == -1)
   {
@@ -928,12 +892,6 @@ ACE_TMAIN (int argc_in,
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("src");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
 #endif // #ifdef DEBUG_DEBUGGER
@@ -1003,6 +961,9 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("using (privileged) port #: %d...\n"),
                 listening_port_number));
+  if (use_reactor && (number_of_dispatch_threads > 1))
+    use_thread_pool = true;
+
   // *IMPORTANT NOTE*: iff the number of message buffers is limited, the
   //                   reactor/proactor thread could (dead)lock on the
   //                   allocator lock, as it cannot dispatch events that would
@@ -1011,10 +972,11 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
   if ((!UI_file.empty () && !Common_File_Tools::isReadable (UI_file)) ||
-      (use_thread_pool && !use_reactor))
+      (use_thread_pool && !use_reactor) ||
+      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("invalid argument, aborting\n")));
+                ACE_TEXT ("invalid arguments, aborting\n")));
 
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
@@ -1300,6 +1262,7 @@ ACE_TMAIN (int argc_in,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Tools::finalizeLogging ();
+
   // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE::fini ();
