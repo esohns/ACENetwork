@@ -54,6 +54,10 @@ class Net_Client_AsynchConnector_T
 {
  public:
   typedef StreamType STREAM_T;
+  typedef Net_IConnection_T<AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StatisticContainerType> ICONNECTION_T;
   typedef Net_ISocketConnection_T<AddressType,
                                   ConfigurationType,
                                   StateType,
@@ -160,6 +164,10 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 {
  public:
   typedef StreamType STREAM_T;
+  typedef Net_IConnection_T<ACE_INET_Addr,
+                            ConfigurationType,
+                            StateType,
+                            StatisticContainerType> ICONNECTION_T;
   typedef Net_ISocketConnection_T<ACE_INET_Addr,
                                   ConfigurationType,
                                   StateType,
@@ -275,6 +283,10 @@ class Net_Client_AsynchConnector_T<HandlerType,
 {
  public:
   typedef StreamType STREAM_T;
+  typedef Net_IConnection_T<ACE_Netlink_Addr,
+                            ConfigurationType,
+                            StateType,
+                            StatisticContainerType> ICONNECTION_T;
   typedef Net_ISocketConnection_T<ACE_Netlink_Addr,
                                   ConfigurationType,
                                   StateType,

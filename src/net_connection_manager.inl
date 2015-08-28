@@ -207,7 +207,7 @@ Net_Connection_Manager_T<AddressType,
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
-  CONNECTION_T* connection_p = NULL;
+  ICONNECTION_T* connection_p = NULL;
   unsigned int index = 0;
   for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
        iterator.next (connection_p);
@@ -245,7 +245,7 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
-  CONNECTION_T* result = NULL;
+  ICONNECTION_T* result = NULL;
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
@@ -293,7 +293,7 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
-  CONNECTION_T* result = NULL;
+  ICONNECTION_T* result = NULL;
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   AddressType local_address, peer_address;
@@ -340,7 +340,7 @@ Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::registerc (CONNECTION_T* connection_in)
+                         UserDataType>::registerc (ICONNECTION_T* connection_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::registerc"));
 
@@ -350,13 +350,22 @@ Net_Connection_Manager_T<AddressType,
       (connections_.size () >= maxNumConnections_))
     return false;
 
+  try
+  {
+    connection_in->increase ();
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnection_T::increase(): \"%m\", aborting\n")));
+    return false;
+  }
   if (!connections_.insert_tail (connection_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_DLList::insert_tail(): \"%m\", aborting\n")));
     return false;
   } // end IF
-  connection_in->increase ();
 
   return true;
 }
@@ -371,12 +380,12 @@ Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::deregister (CONNECTION_T* connection_in)
+                         UserDataType>::deregister (ICONNECTION_T* connection_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::deregister"));
 
   bool found = false;
-  CONNECTION_T* connection_p = NULL;
+  ICONNECTION_T* connection_p = NULL;
   int result = -1;
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
@@ -406,7 +415,15 @@ Net_Connection_Manager_T<AddressType,
   ACE_ASSERT (connection_p);
 
   // clean up
-  connection_p->decrease ();
+  try
+  {
+    connection_in->decrease ();
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnection_T::decrease(): \"%m\", continuing\n")));
+  }
 
   // if there are no more connections, signal any waiters...
   if (connections_.is_empty () == 1)
@@ -538,7 +555,7 @@ Net_Connection_Manager_T<AddressType,
 
   int result = -1;
   unsigned int closed_connections = 0;
-  CONNECTION_T* connection_p = NULL;
+  ICONNECTION_T* connection_p = NULL;
 
   // *WARNING*: when using single-threaded reactors, close()ing connections
   //            inside the lock scope may lead to deadlock
@@ -568,7 +585,7 @@ begin:
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
+                ACE_TEXT ("caught exception in Net_IICONNECTION_T::close(), continuing\n")));
   }
   connection_p->decrease ();
   closed_connections++;
@@ -629,7 +646,7 @@ Net_Connection_Manager_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortLeastRecent"));
 
   int result = -1;
-  CONNECTION_T* connection_p = NULL;
+  ICONNECTION_T* connection_p = NULL;
 
   // *WARNING*: when using single-threaded reactors, close()ing the connection
   //            inside the lock scope may lead to deadlock
@@ -660,7 +677,7 @@ Net_Connection_Manager_T<AddressType,
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
+                ACE_TEXT ("caught exception in Net_IICONNECTION_T::close(), continuing\n")));
   }
   connection_p->decrease ();
 }
@@ -680,7 +697,7 @@ Net_Connection_Manager_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortMostRecent"));
 
   int result = -1;
-  CONNECTION_T* connection_p = NULL;
+  ICONNECTION_T* connection_p = NULL;
 
   // *WARNING*: when using single-threaded reactors, close()ing the connection
   //            inside the lock scope may lead to deadlock
@@ -712,7 +729,7 @@ Net_Connection_Manager_T<AddressType,
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
+                ACE_TEXT ("caught exception in Net_IICONNECTION_T::close(), continuing\n")));
   }
   connection_p->decrease ();
 }
@@ -740,7 +757,7 @@ Net_Connection_Manager_T<AddressType,
   StatisticContainerType temp;
   // aggregate statistical data
   // *WARNING*: this assumes we're holding our lock !
-  CONNECTION_T* connection_p = NULL;
+  ICONNECTION_T* connection_p = NULL;
   for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
        iterator.next (connection_p);
        iterator.advance ())
@@ -819,7 +836,7 @@ Net_Connection_Manager_T<AddressType,
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
-  CONNECTION_T* connection_p = NULL;
+  ICONNECTION_T* connection_p = NULL;
   for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
        iterator.next (connection_p);
        iterator.advance ())
@@ -831,7 +848,7 @@ Net_Connection_Manager_T<AddressType,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection_T::dump_state(), continuing\n")));
+                  ACE_TEXT ("caught exception in Net_IICONNECTION_T::dump_state(), continuing\n")));
     }
   } // end FOR
 }

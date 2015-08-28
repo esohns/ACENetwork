@@ -746,7 +746,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
     {
       // finished with this buffer ?
       //if (bytes_sent != currentWriteBuffer_->total_length ())
-      if (bytes_sent != currentWriteBuffer_->length ())
+      if (bytes_sent != static_cast<ssize_t> (currentWriteBuffer_->length ()))
       {
         //ACE_DEBUG ((LM_DEBUG,
         //            ACE_TEXT ("[%u]: sent %u/%u bytes...\n"),

@@ -68,7 +68,7 @@ class Net_Connection_Manager_T
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
                             StateType,
-                            StatisticContainerType> CONNECTION_T;
+                            StatisticContainerType> ICONNECTION_T;
 
   // configuration / initialization
   void initialize (unsigned int); // maximum number of concurrent connections
@@ -84,12 +84,12 @@ class Net_Connection_Manager_T
                                         // connection handler configuration
                     UserDataType*&);    // return value: (stream) user data
 
-  virtual CONNECTION_T* operator[] (unsigned int) const; // index
-  virtual CONNECTION_T* get (ACE_HANDLE) const; // socket handle
-  virtual CONNECTION_T* get (const AddressType&) const; // peer address
+  virtual ICONNECTION_T* operator[] (unsigned int) const; // index
+  virtual ICONNECTION_T* get (ACE_HANDLE) const; // socket handle
+  virtual ICONNECTION_T* get (const AddressType&) const; // peer address
 
-  virtual bool registerc (CONNECTION_T*); // connection handle
-  virtual void deregister (CONNECTION_T*); // connection handle
+  virtual bool registerc (ICONNECTION_T*); // connection handle
+  virtual void deregister (ICONNECTION_T*); // connection handle
 
   virtual void abort ();
   virtual unsigned int numConnections () const;
@@ -125,9 +125,9 @@ class Net_Connection_Manager_T
                                    //////
                                    UserDataType> OWN_TYPE_T;
 
-  typedef ACE_DLList<CONNECTION_T> CONNECTION_CONTAINER_T;
-  typedef ACE_DLList_Iterator<CONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;
-  typedef ACE_DLList_Reverse_Iterator<CONNECTION_T> CONNECTION_CONTAINER_REVERSEITERATOR_T;
+  typedef ACE_DLList<ICONNECTION_T> CONNECTION_CONTAINER_T;
+  typedef ACE_DLList_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;
+  typedef ACE_DLList_Reverse_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_REVERSEITERATOR_T;
 
   // implement (part of) Common_IStatistic_T
   // *WARNING*: this assumes lock_ is being held

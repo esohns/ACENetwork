@@ -151,7 +151,11 @@ Net_ConnectionBase_T<AddressType,
                      StateType,
                      StatisticContainerType,
                      StreamType,
+#if defined (__GNUG__)
+                     UserDataType>::registerc (ICONNECTION_T* connection_in)
+#else
                      UserDataType>::registerc ()
+#endif
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::registerc"));
 
@@ -165,7 +169,13 @@ Net_ConnectionBase_T<AddressType,
   {
     try
     {
+#if defined (__GNUG__)
+      // *WORKAROUND*: see header
+      isRegistered_ = manager_->registerc (connection_in ? connection_in
+                                                         : this);
+#else
       isRegistered_ = manager_->registerc (this);
+#endif
     }
     catch (...)
     {
@@ -175,7 +185,8 @@ Net_ConnectionBase_T<AddressType,
     }
     if (!isRegistered_)
     {
-      // *NOTE*: perhaps max# connections has been reached
+      // *NOTE*: most probable reason: maximum number of connections has been
+      //         reached
       //ACE_DEBUG ((LM_DEBUG,
       //            ACE_TEXT ("failed to Net_IConnectionManager_T::registerc(), aborting\n")));
       return false;
@@ -188,9 +199,19 @@ Net_ConnectionBase_T<AddressType,
     AddressType local_SAP, remote_SAP;
     try
     {
+#if defined (__GNUG__)
+      // *WORKAROUND*: see header
+      ICONNECTION_T* connection_p = (connection_in ? connection_in
+                                                   : this);
+      ACE_ASSERT (connection_p);
+      connection_p->info (handle,
+                          local_SAP,
+                          remote_SAP);
+#else
       this->info (handle,
                   local_SAP,
                   remote_SAP);
+#endif
     }
     catch (...)
     {

@@ -135,7 +135,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   inherited::open (handle_in, messageBlock_in);
 
   // step2: initialize/start stream
-  // step2a: connect stream head message queue with a notification pipe/queue ?
+  // step2a: connect the stream head message queue with this handler ?
   if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
     inherited3::configuration_.streamConfiguration.notificationStrategy = this;
 
@@ -271,7 +271,11 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   } // end ELSE
 
   // step4: register with the connection manager (if any)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (!inherited3::registerc ())
+#else
+  if (!inherited3::registerc (this))
+#endif
   {
     // *NOTE*: perhaps max# connections has been reached
     //ACE_DEBUG ((LM_ERROR,
@@ -404,12 +408,15 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     {
       ACE_ASSERT (module_p);
       Stream_Task_t* task_p =
-          const_cast<Stream_Module_t*> (module_p)->writer ();
+          const_cast<Stream_Module_t*> (module_p)->reader ();
       ACE_ASSERT (task_p);
       result = task_p->flush (ACE_Task_Flags::ACE_FLUSHALL);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Task_T::flush(): \"%m\", continuing\n")));
+      if (result)
+        ACE_DEBUG ((LM_WARNING,
+                    ACE_TEXT ("flushed %d messages...\n")));
     } // end IF
   } // end IF
 
@@ -528,9 +535,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::notification"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (NULL);
-  ACE_NOTREACHED (return NULL;)
+  return this;
 }
 
 template <typename HandlerType,

@@ -57,6 +57,10 @@ class Net_ConnectionBase_T
   typedef StreamType STREAM_T;
 
  protected:
+  typedef Net_IConnection_T<AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StatisticContainerType> ICONNECTION_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
@@ -69,7 +73,16 @@ class Net_ConnectionBase_T
   virtual ~Net_ConnectionBase_T ();
 
   // (de-)register with the connection manager (if any)
+#if defined (__GNUG__)
+  // *WORKAROUND*: the GNU linker (as of g++ 4.9.2) generates broken code ("pure
+  //               virtual method called" for Common_IRefCount::increase()) when
+  //               passing 'this' (i.e. the default) to the network managers'
+  //               registerc() method
+  //               --> pass in the 'correct' handle as a workaround
+  bool registerc (ICONNECTION_T* = NULL);
+#else
   bool registerc ();
+#endif
   void deregister ();
 
   ConfigurationType      configuration_;
@@ -80,10 +93,6 @@ class Net_ConnectionBase_T
 
  private:
   typedef Common_ReferenceCounterBase inherited;
-  typedef Net_IConnection_T<AddressType,
-                            ConfigurationType,
-                            StateType,
-                            StatisticContainerType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&))

@@ -39,6 +39,10 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , outputStream_ ()
  , localSAP_ ()
  , remoteSAP_ ()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+ , writeHandle_ (ACE_INVALID_HANDLE)
+#endif
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::Net_AsynchTCPSocketHandler_T"));
 
@@ -55,6 +59,9 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::~Net_AsynchTCPSocketHandler_T (
 #else
   if (writeHandle_ != ACE_INVALID_HANDLE)
   {
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("closing write handle (was: %d) in dtor --> check implementation !\n"),
+                writeHandle_));
     result = ACE_OS::close (writeHandle_);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
@@ -233,6 +240,19 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
                 ACE_TEXT ("failed to ACE_Asynch_Write_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),
                 result));
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  if (writeHandle_ != ACE_INVALID_HANDLE)
+  {
+    int result_3 = ACE_OS::close (writeHandle_);
+    if (result_3 == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
+                  writeHandle_));
+    writeHandle_ = ACE_INVALID_HANDLE;
+  } // end IF
+#endif
+
 //  return ((((result != 0) && (result != 1)) ||
 //           ((result_2 != 0) && (result_2 != 1))) ? -1
 //                                                 : 0);
@@ -362,9 +382,10 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
   {
     // connection closed/reset (by peer) ? --> not an error
     error = result_in.error ();
-    if ((error != EBADF)      && // 9:   Linux: local close()
-        (error != ECONNRESET) && // 104:
-        (error != EPIPE))        // 32:  Linux: connection was closed by peer
+    if ((error != EBADF)                   && // 9:   Linux: local close()
+        (error != ERROR_OPERATION_ABORTED) && // 995: Win32: local close()
+        (error != ECONNRESET)              && // 104:
+        (error != EPIPE))                     // 32:  Linux: connection was closed by peer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
@@ -385,9 +406,10 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
     {
       // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();
-      if ((error != EBADF)      && // 9:   Linux: local close()
-          (error != ECONNRESET) && // 104:
-          (error != EPIPE))        // 32:  Linux: connection was closed by peer
+      if ((error != EBADF)                   && // 9:   Linux: local close()
+          (error != ERROR_OPERATION_ABORTED) && // 995: Win32: local close()
+          (error != ECONNRESET)              && // 104:
+          (error != EPIPE))                     // 32:  Linux: connection was closed by peer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),

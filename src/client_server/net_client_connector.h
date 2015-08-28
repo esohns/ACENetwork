@@ -56,6 +56,10 @@ class Net_Client_Connector_T
 {
  public:
   typedef StreamType STREAM_T;
+  typedef Net_IConnection_T<AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StatisticContainerType> ICONNECTION_T;
   typedef Net_ISocketConnection_T<AddressType,
                                   ConfigurationType,
                                   StateType,
