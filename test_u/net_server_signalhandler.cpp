@@ -42,7 +42,6 @@ Net_Server_SignalHandler::Net_Server_SignalHandler (bool useReactor_in)
  : inherited (this,          // event handler handle
               useReactor_in) // use reactor ?
  , configuration_ ()
- , useReactor_ (useReactor_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::Net_Server_SignalHandler"));
 

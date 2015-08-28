@@ -57,7 +57,6 @@ class Net_Server_SignalHandler
   ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler& operator= (const Net_Server_SignalHandler&))
 
   Net_Server_SignalHandlerConfiguration configuration_;
-  bool                                  useReactor_;
 };
 
 #endif

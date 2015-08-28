@@ -24,6 +24,8 @@
 
 #include "common.h"
 
+#include "stream_common.h"
+
 #include "net_common.h"
 #include "net_defines.h"
 #include "net_macros.h"

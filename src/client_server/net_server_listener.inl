@@ -22,6 +22,7 @@
 #include "ace/OS.h"
 #include "ace/Reactor.h"
 
+#include "net_common.h"
 #include "net_macros.h"
 
 #include "net_server_defines.h"
@@ -179,32 +180,37 @@ Net_Server_Listener_T<HandlerType,
   } // end IF
 
   // not running --> start listening
-  AddressType local_address;
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
   // *TODO*: remove type inferences
   if (configuration_.useLoopBackDevice)
-    result = local_address.set (configuration_.portNumber,            // port number
-                                // *PORTABILITY*: disambiguation needed under Win32
-                                ACE_TEXT_ALWAYS_CHAR (ACE_LOCALHOST), // hostname
-                                1,                                    // encode ?
-                                configuration_.addressFamily);        // address family
-  else
-    result = local_address.set (configuration_.portNumber,            // port number
-                                // *TODO*: bind to specific interface/address ?
-                                static_cast<ACE_UINT32> (INADDR_ANY), // hostname
-                                1,                                    // encode ?
-                                0);                                   // map IPv6 to IPv4 ?
-  if (result == -1)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
-    return;
+    result =
+        configuration_.address.set (configuration_.address.get_port_number (), // port
+                                    // *PORTABILITY*: needed to disambiguate this under Windows :-(
+                                    // *TODO*: bind to specific interface/address ?
+                                    ACE_LOCALHOST,                             // hostname
+                                    1,                                         // encode ?
+                                    AF_INET);                                  // address family
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+      return;
+    } // end IF
   } // end IF
-  result = inherited::open (local_address,            // local address
-                            ACE_Reactor::instance (), // corresp. reactor
-                            ACE_NONBLOCK,             // flags (use non-blocking sockets !)
-                            //0,                        // flags (default is blocking sockets)
-                            1,                        // always accept ALL pending connections
-                            1);                       // try to re-use address
+  result =
+      configuration_.address.addr_to_string (buffer, sizeof (buffer));
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  result =
+      inherited::open (configuration_.address,   // local address
+                       ACE_Reactor::instance (), // corresp. reactor
+                       ACE_NONBLOCK,             // flags (use non-blocking sockets !)
+                       //0,                        // flags (default is blocking sockets)
+                       1,                        // always accept ALL pending connections
+                       1);                       // try to re-use address
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -212,17 +218,16 @@ Net_Server_Listener_T<HandlerType,
     return;
   } // end IF
   isOpen_ = true;
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("0x%@: started listening (port: %u)...\n"),
+              ACE_TEXT ("0x%@: started listening (\"%s\")...\n"),
               inherited::get_handle (),
-              configuration_.portNumber));
+              buffer));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%d: started listening (port: %u)...\n"),
+              ACE_TEXT ("%d: started listening (\"%s\")...\n"),
               inherited::get_handle (),
-              configuration_.portNumber));
+              buffer));
 #endif
 
   isListening_ = true;

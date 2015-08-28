@@ -36,6 +36,7 @@
 #define NET_INTERFACE_DEFAULT                    ""
 #else
 #define NET_INTERFACE_DEFAULT                    "eth0"
+#define NET_INTERFACE_LOOPBACK                   "lo"
 #endif
 #define NET_INTERFACE_DEFAULT_USE_LOOPBACK       false
 

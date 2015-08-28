@@ -1280,7 +1280,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in RPG_Net_Server_IListener::start(): \"%m\", continuing\n")));
+                  ACE_TEXT ("caught exception in Net_Server_IListener::start(): \"%m\", continuing\n")));
     } // end catch
   } // end IF
   else
@@ -1292,7 +1292,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in RPG_Net_Server_IListener::stop(): \"%m\", continuing\n")));
+                  ACE_TEXT ("caught exception in Net_Server_IListener::stop(): \"%m\", continuing\n")));
     } // end catch
   } // end IF
 

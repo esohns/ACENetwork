@@ -383,7 +383,9 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
     // connection closed/reset (by peer) ? --> not an error
     error = result_in.error ();
     if ((error != EBADF)                   && // 9:   Linux: local close()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         (error != ERROR_OPERATION_ABORTED) && // 995: Win32: local close()
+#endif
         (error != ECONNRESET)              && // 104:
         (error != EPIPE))                     // 32:  Linux: connection was closed by peer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -407,7 +409,9 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
       // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();
       if ((error != EBADF)                   && // 9:   Linux: local close()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
           (error != ERROR_OPERATION_ABORTED) && // 995: Win32: local close()
+#endif
           (error != ECONNRESET)              && // 104:
           (error != EPIPE))                     // 32:  Linux: connection was closed by peer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

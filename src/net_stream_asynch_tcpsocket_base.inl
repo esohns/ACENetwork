@@ -394,8 +394,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   int result = -1;
 
   // step1: wait for all workers within the stream (if any)
-  if (stream_.isRunning ())
-    stream_.stop (true); // <-- wait for completion
+  stream_.stop (true); // <-- wait for completion
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer

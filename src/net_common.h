@@ -87,7 +87,7 @@ struct Net_SocketConfiguration
     , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
  #endif
    , peerAddress (ACE_sap_any_cast (const ACE_INET_Addr&))
-   , useLoopbackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
+   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
   int              bufferSize; // socket buffer size (I/O)
@@ -98,7 +98,7 @@ struct Net_SocketConfiguration
   int              netlinkProtocol;
 #endif
   ACE_INET_Addr    peerAddress;
-  bool             useLoopbackDevice;
+  bool             useLoopBackDevice;
   // *TODO*: add network interface specifier (interface index on linux, (G)UID
   //         on windows)
 };

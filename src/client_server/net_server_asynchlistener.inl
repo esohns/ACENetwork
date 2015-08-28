@@ -30,6 +30,7 @@
 
 #include "common.h"
 
+#include "net_common.h"
 #include "net_macros.h"
 
 #include "net_server_defines.h"
@@ -381,51 +382,61 @@ Net_Server_AsynchListener_T<HandlerType,
   } // end IF
 
   // not running --> start listening
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
   int result = -1;
-  ACE_INET_Addr local_address;
   // *TODO*: remove type inferences
   if (configuration_.useLoopBackDevice)
-    result = local_address.set (configuration_.portNumber, // port
-                                // *PORTABILITY*: needed to disambiguate this under Windows :-(
-                                // *TODO*: bind to specific interface/address ?
-                                ACE_LOCALHOST,             // hostname
-                                1,                         // encode ?
-                                AF_INET);                  // address family
-  else
-    result = local_address.set (configuration_.portNumber,            // port
-                                // *PORTABILITY*: needed to disambiguate this under Windows :-(
-                                // *TODO*: bind to specific interface/address ?
-                                static_cast<ACE_UINT32> (INADDR_ANY), // hostname
-                                1,                                    // encode ?
-                                0);                                   // map ?
+  {
+    result =
+        configuration_.address.set (configuration_.address.get_port_number (), // port
+                                    // *PORTABILITY*: needed to disambiguate this under Windows :-(
+                                    // *TODO*: bind to specific interface/address ?
+                                    ACE_LOCALHOST,                             // hostname
+                                    1,                                         // encode ?
+                                    AF_INET);                                  // address family
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+      return;
+    } // end IF
+  } // end IF
+  result =
+      configuration_.address.addr_to_string (buffer, sizeof (buffer));
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  result =
+      inherited::open (configuration_.address,     // local SAP
+                       0,                          // bytes to read
+                       1,                          // pass_addresses ?
+                       ACE_DEFAULT_ASYNCH_BACKLOG, // backlog
+                       1,                          // reuse address ?
+                       NULL,                       // proactor (use default)
+                       true,                       // validate new connections ?
+                       1,                          // reissue_accept ?
+                       -1);                        // number of initial accepts
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to ACE_Asynch_Acceptor::open(\"%s\"): \"%m\", returning\n"),
+                buffer));
     return;
   } // end IF
-  result = inherited::open (local_address,              // local SAP
-                            0,                          // bytes_to_read
-                            1,                          // pass_addresses ?
-                            ACE_DEFAULT_ASYNCH_BACKLOG, // backlog
-                            1,                          // reuse address ?
-                            NULL,                       // proactor (use default)
-                            true,                       // validate new connections ?
-                            1,                          // reissue_accept ?
-                            -1);                        // number of initial accepts
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Acceptor::open(%u): \"%m\", returning\n"),
-                configuration_.portNumber));
-    return;
-  } // end IF
-
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("started listening (port: %u)...\n"),
-              configuration_.portNumber));
+              ACE_TEXT ("0x%@: started listening (\"%s\")...\n"),
+              inherited::get_handle (),
+              buffer));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%d: started listening (\"%s\")...\n"),
+              inherited::get_handle (),
+              buffer));
+#endif
 
-  // all is well...
+  // all is well
   isListening_ = true;
 }
 
@@ -499,8 +510,7 @@ Net_Server_AsynchListener_T<HandlerType,
 #endif
   else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("stopped listening (port was: %u)...\n"),
-                configuration_.portNumber));
+                ACE_TEXT ("stopped listening...\n")));
 
   isListening_ = false;
 }
