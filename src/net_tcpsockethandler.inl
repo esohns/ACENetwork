@@ -104,16 +104,28 @@ Net_TCPSocketHandler_T<ConfigurationType>::open (void* arg_in)
   ACE_HANDLE handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
   if (configuration_p->socketConfiguration->bufferSize)
+  {
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_RCVBUF,
                                             configuration_p->socketConfiguration->bufferSize))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_RCVBUF,%u) (handle was: %d), aborting\n"),
                   configuration_p->socketConfiguration->bufferSize,
                   handle));
       return -1;
     } // end IF
+    if (!Net_Common_Tools::setSocketBuffer (handle,
+                                            SO_SNDBUF,
+                                            configuration_p->socketConfiguration->bufferSize))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_SNDBUF,%u) (handle was: %d), aborting\n"),
+                  configuration_p->socketConfiguration->bufferSize,
+                  handle));
+      return -1;
+    } // end IF
+  } // end IF
   if (!Net_Common_Tools::setNoDelay (handle,
                                      NET_SOCKET_DEFAULT_TCP_NODELAY))
   {

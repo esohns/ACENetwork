@@ -27,7 +27,7 @@
 #include "common_idumpstate.h"
 #include "common_iget.h"
 #include "common_iinitialize.h"
-#include "common_irefcount.h"
+#include "common_ireferencecount.h"
 #include "common_istatistic.h"
 
 #include "net_itransportlayer.h"
@@ -43,7 +43,7 @@ class Net_IConnection_T
  : public Common_IGet_T<ConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
  , public Common_IStatistic_T<StatisticContainerType>
- , virtual public Common_IRefCount
+ , virtual public Common_IReferenceCount
  , public Common_IDumpState
 {
  public:
@@ -62,8 +62,24 @@ class Net_IConnection_T
   //         (and net_common.h / ACE_Svc_Handler.h for reason codes)
 //  virtual int close (u_long = 0) = 0; // reason
   virtual void close () = 0;
-  // *IMPORTANT NOTE*: fire-and-forget API
-  virtual bool send (ACE_Message_Block*&) = 0;
+  //// *IMPORTANT NOTE*: fire-and-forget API
+  //virtual bool send (ACE_Message_Block*&) = 0;
+  // *NOTE*: waits for any (queued) data to be accepted by the kernel.
+  //         This could also mean that it has been successfully transmitted,
+  //         YMMV. As the kernel(s) encapsulate most of the TCP/UDP protocol
+  //         functionality, this API represents the appropriate asynchronous
+  //         way to ensure that the forwarded data has in fact been transmitted
+  //         successfully.
+  // *WARNING*: (As far as I am aware) the Berkeley sockets API does not in any
+  //            way guarantee successful transmission of the data from (!) the
+  //            socket (this 'feature' may already be protocol-specific ?);
+  //            the send()-man pages do not clear things either, turning
+  //            (asynchronous) data transmission into somewhat of a mystery.
+  //            In this sense the more platform-specific, asynchronous APIs,
+  //            supported by the proactor framework, may offer more 'reliable',
+  //            protocol-agnostic results (again, YMMV).
+  //            For the reactor based, blocking (!) API, this could be a NOP.
+  virtual void waitForCompletion () = 0;
 };
 
 template <typename AddressType,

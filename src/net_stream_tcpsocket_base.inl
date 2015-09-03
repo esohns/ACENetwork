@@ -1050,74 +1050,6 @@ template <typename HandlerType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
-bool
-Net_StreamTCPSocketBase_T<HandlerType,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::collect (StatisticContainerType& data_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::collect"));
-
-  try
-  {
-    return stream_.collect (data_out);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), aborting\n")));
-  }
-
-  return false;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-void
-Net_StreamTCPSocketBase_T<HandlerType,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::report"));
-
-  try
-  {
-    return stream_.report ();
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
-  }
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
 void
 Net_StreamTCPSocketBase_T<HandlerType,
                           AddressType,
@@ -1234,6 +1166,111 @@ Net_StreamTCPSocketBase_T<HandlerType,
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamTCPSocketBase_T::close(NET_CONNECTION_CLOSE_REASON_USER_ABORT): \"%m\", continuing\n")));
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+void
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
+                          ConfigurationType,
+                          StateType,
+                          StatisticContainerType,
+                          StreamType,
+                          UserDataType,
+                          ModuleConfigurationType,
+                          ModuleHandlerConfigurationType>::waitForCompletion ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::waitForCompletion"));
+
+  // step1: wait for the stream to flush
+  //        --> all data has been dispatched (here: to the reactor/kernel)
+  stream_.flush ();
+
+  // *TODO*: different platforms may implement methods by which successful
+  //         placing of the data onto the wire can be established
+  //         (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
+#if defined (ACE_LINUX)
+  ACE_HANDLE handle = inherited::handle ();
+  bool no_delay = Net_Common_Tools::getNoDelay (handle);
+  Net_Common_Tools::setNoDelay (handle, true);
+  Net_Common_Tools::setNoDelay (handle, no_delay);
+#endif
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+bool
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
+                          ConfigurationType,
+                          StateType,
+                          StatisticContainerType,
+                          StreamType,
+                          UserDataType,
+                          ModuleConfigurationType,
+                          ModuleHandlerConfigurationType>::collect (StatisticContainerType& data_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::collect"));
+
+  try
+  {
+    return stream_.collect (data_out);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+      ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), aborting\n")));
+  }
+
+  return false;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+void
+Net_StreamTCPSocketBase_T<HandlerType,
+                          AddressType,
+                          ConfigurationType,
+                          StateType,
+                          StatisticContainerType,
+                          StreamType,
+                          UserDataType,
+                          ModuleConfigurationType,
+                          ModuleHandlerConfigurationType>::report () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::report"));
+
+  try
+  {
+    return stream_.report ();
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+      ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
+  }
 }
 
 template <typename HandlerType,

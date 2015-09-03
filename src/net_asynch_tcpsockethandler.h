@@ -28,6 +28,8 @@
 #include "ace/Message_Block.h"
 #include "ace/Notification_Strategy.h"
 
+#include "common_referencecounter_base.h"
+
 #include "net_sockethandler_base.h"
 
 template <typename ConfigurationType>
@@ -63,13 +65,15 @@ class Net_AsynchTCPSocketHandler_T
 
   virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 
-  ACE_Asynch_Read_Stream  inputStream_;
-  ACE_Asynch_Write_Stream outputStream_;
-  ACE_INET_Addr           localSAP_;
-  ACE_INET_Addr           remoteSAP_;
+  // this keeps the number of open write (i.e. send) requests
+  Common_ReferenceCounterBase counter_;
+  ACE_Asynch_Read_Stream      inputStream_;
+  ACE_Asynch_Write_Stream     outputStream_;
+  ACE_INET_Addr               localSAP_;
+  ACE_INET_Addr               remoteSAP_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  ACE_HANDLE              writeHandle_;
+  ACE_HANDLE                  writeHandle_;
 #endif
 
  private:

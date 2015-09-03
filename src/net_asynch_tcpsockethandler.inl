@@ -35,6 +35,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , inherited2 ()
  , inherited3 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
+ , counter_ (0)
  , inputStream_ ()
  , outputStream_ ()
  , localSAP_ ()
@@ -103,16 +104,28 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   // step1: tweak socket
   // *TODO*: remove type inference
   if (inherited::configuration_.socketConfiguration->bufferSize)
+  {
     if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                             SO_RCVBUF,
                                             inherited::configuration_.socketConfiguration->bufferSize))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_RCVBUF,%u) (handle was: %d), aborting\n"),
                   inherited::configuration_.socketConfiguration->bufferSize,
                   handle_in));
       goto close;
     } // end IF
+    if (!Net_Common_Tools::setSocketBuffer (handle_in,
+                                            SO_SNDBUF,
+                                            inherited::configuration_.socketConfiguration->bufferSize))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_SNDBUF,%u) (handle was: %d), aborting\n"),
+                  inherited::configuration_.socketConfiguration->bufferSize,
+                  handle_in));
+      goto close;
+    } // end IF
+  } // end IF
   if (!Net_Common_Tools::setNoDelay (handle_in,
                                      NET_SOCKET_DEFAULT_TCP_NODELAY))
   {
@@ -150,6 +163,8 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   } // end IF
 
   // step2: initialize i/o streams
+  //Common_IRefCount* iref_count_p = this;
+  //ACE_ASSERT (iref_count_p);
   result = inputStream_.open (*this,       // event handler
                               handle_in,   // handle
                               NULL,        // completion key
@@ -384,6 +399,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
     error = result_in.error ();
     if ((error != EBADF)                   && // 9:   Linux: local close()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+        (error != ERROR_NETNAME_DELETED)   && // 64:  Win32: local close()
         (error != ERROR_OPERATION_ABORTED) && // 995: Win32: local close()
 #endif
         (error != ECONNRESET)              && // 104:
@@ -410,6 +426,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
       error = result_in.error ();
       if ((error != EBADF)                   && // 9:   Linux: local close()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+          (error != ERROR_NETNAME_DELETED)   && // 64:  Win32: local close()
           (error != ERROR_OPERATION_ABORTED) && // 995: Win32: local close()
 #endif
           (error != ECONNRESET)              && // 104:
@@ -446,6 +463,8 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
 
   // clean up
   result_in.message_block ().release ();
+
+  counter_.decrease ();
 }
 
 template <typename ConfigurationType>

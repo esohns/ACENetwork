@@ -282,6 +282,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
     goto close;
   } // end IF
+  this->decrease (); // 'float' the connection
+  ACE_ASSERT (this->count () == 1);
 
   return;
 
@@ -335,8 +337,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   } // end IF
 
   // start (asynchronous) write
-  // *TODO*: let the ACE_Handler handle reference counting
-  inherited3::increase ();
+  inherited::counter_.increase ();
   // *NOTE*: this is a fire-and-forget API for message_block...
 //  if (inherited::outputStream_.write (*buffer_,               // data
   result =
@@ -358,7 +359,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
     // clean up
     message_block_p->release ();
-    inherited3::decrease ();
+    inherited::counter_.increase ();
 
     return -1;
   } // end IF
@@ -627,6 +628,46 @@ template <typename HandlerType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
+void
+Net_StreamAsynchTCPSocketBase_T<HandlerType,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::waitForCompletion ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::waitForCompletion"));
+
+  // step1: wait for the stream to flush
+  //        --> all data has been dispatched (here: to the proactor/kernel)
+  stream_.flush ();
+
+  // step2: wait for the asynchronous operations to complete
+  inherited::counter_.wait (0);
+
+  // *TODO*: different platforms may implement methods by which successful
+  //         placing of the data onto the wire can be established
+  //         (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
+#if defined (ACE_LINUX)
+  ACE_HANDLE handle = inherited::handle ();
+  bool no_delay = Net_Common_Tools::getNoDelay (handle);
+  Net_Common_Tools::setNoDelay (handle, true);
+  Net_Common_Tools::setNoDelay (handle, no_delay);
+#endif
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
 bool
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -866,32 +907,30 @@ close:
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
-
-  inherited3::decrease ();
 }
 
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-void
-Net_StreamAsynchTCPSocketBase_T<HandlerType,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::handle_write_stream (const ACE_Asynch_Write_Stream::Result& result_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::handle_write_stream"));
-
-  inherited::handle_write_stream (result_in);
-  inherited3::decrease ();
-}
+//template <typename HandlerType,
+//          typename AddressType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename StreamType,
+//          typename UserDataType,
+//          typename ModuleConfigurationType,
+//          typename ModuleHandlerConfigurationType>
+//void
+//Net_StreamAsynchTCPSocketBase_T<HandlerType,
+//                                AddressType,
+//                                ConfigurationType,
+//                                StateType,
+//                                StatisticContainerType,
+//                                StreamType,
+//                                UserDataType,
+//                                ModuleConfigurationType,
+//                                ModuleHandlerConfigurationType>::handle_write_stream (const ACE_Asynch_Write_Stream::Result& result_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::handle_write_stream"));
+//
+//  inherited::handle_write_stream (result_in);
+//  inherited::counter_.decrease ();
+//}

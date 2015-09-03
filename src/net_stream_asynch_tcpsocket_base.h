@@ -85,6 +85,8 @@ class Net_StreamAsynchTCPSocketBase_T
   virtual unsigned int id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
+  virtual void waitForCompletion ();
+
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;
@@ -106,7 +108,7 @@ class Net_StreamAsynchTCPSocketBase_T
                                    unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
 
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
-  virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
+  //virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 
 //  // *TODO*: handle short writes (more) gracefully...
 //  ACE_Message_Block* buffer_;

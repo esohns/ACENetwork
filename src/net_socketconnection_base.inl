@@ -84,7 +84,7 @@ Net_SocketConnectionBase_T<HandlerType,
   // *TODO*: remove type inference
   if (inherited::CONNECTION_BASE_T::configuration_.streamConfiguration.useThreadPerConnection)
   {
-    result = inherited::wait ();
+    result = ACE_Task_Base::wait ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Task_Base::wait(): \"%m\", continuing\n")));

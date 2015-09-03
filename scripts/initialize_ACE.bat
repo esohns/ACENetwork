@@ -87,7 +87,7 @@ if NOT exist "%OriginalMacrosFile%" (
  goto Failed
 )
 set MacrosFile=platform_macros.GNU
-@copy /Y %OriginalConfigFile% %SourceDirectory%\%MacrosFile% >NUL
+@copy /Y %OriginalMacrosFile% %SourceDirectory%\%MacrosFile% >NUL
 if %ERRORLEVEL% NEQ 0 (
  echo failed to copy %MacrosFile% file, exiting
  set RC=%ERRORLEVEL%
