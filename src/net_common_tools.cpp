@@ -199,7 +199,13 @@ Net_Common_Tools::MACAddress2String (const char* const addressDataPtr_in)
   // convert 6 bytes to ASCII
   // *IMPORTANT NOTE*: ether_ntoa_r is not portable...
   // *TODO*: ether_ntoa_r is not portable...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_UNUSED_ARG (addressDataPtr_in);
+  // *TODO*: implement this
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (result);
+  ACE_NOTREACHED (return result;)
+#else
   // *TODO*: make this thread-safe !
   static char address[(ETH_ALEN * 2) + ETH_ALEN + 1]; // "ab:cd:ef:gh:ij:kl\0"
   ACE_OS::memset (&address, 0, sizeof (address));
@@ -212,9 +218,6 @@ Net_Common_Tools::MACAddress2String (const char* const addressDataPtr_in)
   } // end IF
 
   result = address;
-#else
-  // *TODO*: implement this
-  ACE_ASSERT (false);
 #endif
 
   return result;
@@ -549,6 +552,8 @@ Net_Common_Tools::getIPAddress (const std::string& interfaceIdentifier_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getIPAddress"));
 
+  ACE_UNUSED_ARG (interfaceIdentifier_in);
+
   // initialize return value(s)
   IPaddress_out.clear ();
 
@@ -878,7 +883,7 @@ Net_Common_Tools::setKeepAlive (ACE_HANDLE handle_in,
 bool
 Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
                              bool on_in,
-                             int seconds_in)
+                             unsigned short seconds_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setLinger"));
 
@@ -907,7 +912,7 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
   } // end IF
 
   optval.l_onoff = (on_in ? 1 : 0);
-  if (seconds_in != -1)
+  if (seconds_in)
     optval.l_linger = seconds_in;
   result = ACE_OS::setsockopt (handle_in,
                                SOL_SOCKET,

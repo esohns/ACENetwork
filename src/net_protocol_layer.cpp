@@ -102,6 +102,7 @@ Net_Protocol_Layer::ProtocolLayer2String (const ProtocolLayer& protocolType_in,
 
       break;
     }
+    case INVALID:
     default:
     {
       ACE_DEBUG ((LM_ERROR,

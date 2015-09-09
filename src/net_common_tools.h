@@ -21,6 +21,7 @@
 #ifndef NET_COMMON_TOOLS_H
 #define NET_COMMON_TOOLS_H
 
+#include <limits>
 #include <string>
 
 #include "ace/Global_Macros.h"
@@ -52,10 +53,10 @@ class Net_Export Net_Common_Tools
                           bool);      // TCP_NODELAY ?
   static bool setKeepAlive (ACE_HANDLE, // socket handle
                             bool);      // SO_KEEPALIVE ?
-  static bool setLinger (ACE_HANDLE,  // socket handle
-                         bool,        // on ? : off
-                         int = -1);  // seconds {0  --> send RST on close,
-                                     //          -1 --> reuse current value}
+  static bool setLinger (ACE_HANDLE,                                                    // socket handle
+                         bool,                                                          // on ? : off
+                         unsigned short = std::numeric_limits<unsigned short>::max ()); // seconds {0     --> send RST on close,
+                                                                                        //          65535 --> reuse default/current value}
 
 //  static Net_IInetConnectionManager_t* getConnectionManager ();
 

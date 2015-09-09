@@ -29,11 +29,11 @@ class Net_Protocol_Layer
 {
  public:
   // define different protocol layers
-  // *NOTE*: code relies on the fact that higher-level protocols are assigned
-  // larger values !
+  // *IMPORTANT NOTE*: code relies on the fact that higher-level protocols are
+  //                   assigned larger values
   enum ProtocolLayer
   {
-    INVALID_PROTOCOL = 0,
+    INVALID = -1,
     // *** Link Layer Protocols
     ETHERNET,
     FDDI_LLC_SNAP, // this actually wraps several layers...

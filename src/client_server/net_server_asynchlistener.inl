@@ -108,6 +108,8 @@ Net_Server_AsynchListener_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::validate_connection"));
 
+  ACE_UNUSED_ARG (localSAP_in);
+
   int result = -1;
 
   // success ?
@@ -123,7 +125,7 @@ Net_Server_AsynchListener_T<HandlerType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Acceptor::accept(\"%s\"): \"%s\", aborting\n"),
                 buffer,
-                ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
+                ACE_TEXT (ACE_OS::strerror (static_cast<int> (result_in.error ())))));
   } // end IF
 
   return ((result == 1) ? 0 : -1);

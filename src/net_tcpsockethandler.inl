@@ -148,7 +148,7 @@ Net_TCPSocketHandler_T<ConfigurationType>::open (void* arg_in)
   } // end IF
   if (!Net_Common_Tools::setLinger (handle,
                                     configuration_p->socketConfiguration->linger,
-                                    -1))
+                                    std::numeric_limits<unsigned short>::max ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),

@@ -825,8 +825,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
                   result_in.handle (),
-                  //ACE_TEXT (ACE_OS::strerror (error))));
-                  ACE_TEXT (ACE::sock_error (error))));
+                  ACE::sock_error (static_cast<int> (error))));
   } // end IF
 
   switch (result_in.bytes_transferred ())
@@ -846,8 +845,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
                     result_in.handle (),
-                    //ACE_TEXT (ACE_OS::strerror (error))));
-                    ACE_TEXT (ACE::sock_error (error))));
+                    ACE::sock_error (static_cast<int> (error))));
 
       break;
     }

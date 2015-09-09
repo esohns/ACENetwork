@@ -525,7 +525,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   } // end IF
 
   // read some data from the socket...
-  size_t bytes_received =
+  ssize_t bytes_received =
       inherited::peer_.recv (currentReadBuffer_->wr_ptr (), // buffer
                              currentReadBuffer_->size (),   // #bytes to read
                              0);                            // flags

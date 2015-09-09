@@ -188,9 +188,6 @@
     <ClInclude Include="..\..\src\net_remote_comm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\net_socket_common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\net_socketconnection_base.h">
       <Filter>Header Files</Filter>
     </ClInclude>

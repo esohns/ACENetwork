@@ -54,10 +54,10 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::~Net_AsynchTCPSocketHandler_T (
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::~Net_AsynchTCPSocketHandler_T"));
 
-  int result = -1;
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+  int result = -1;
+
   if (writeHandle_ != ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_WARNING,
@@ -78,6 +78,8 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                                                        ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::open"));
+
+  ACE_UNUSED_ARG (messageBlock_in);
 
   int result = -1;
   int error = 0;
@@ -150,7 +152,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   } // end IF
   if (!Net_Common_Tools::setLinger (handle_in,
                                     inherited::configuration_.socketConfiguration->linger,
-                                    -1))
+                                    std::numeric_limits<unsigned short>::max ()))
   {
     int error = ACE_OS::last_error ();
     if (error != ENOTSOCK) // <-- socket has been closed asynchronously
@@ -408,7 +410,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
                   result_in.handle (),
-                  ACE_TEXT (ACE::sock_error (error))));
+                  ACE::sock_error (static_cast<int> (error))));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
@@ -435,7 +437,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
                     result_in.handle (),
-                    ACE_TEXT (ACE::sock_error (error))));
+                    ACE::sock_error (static_cast<int> (error))));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),

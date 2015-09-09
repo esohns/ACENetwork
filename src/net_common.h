@@ -86,7 +86,7 @@ struct Net_SocketConfiguration
     , netlinkAddress (ACE_sap_any_cast (const ACE_Netlink_Addr&))
     , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
  #endif
-   , peerAddress (ACE_sap_any_cast (const ACE_INET_Addr&))
+   , peerAddress (INADDR_NONE)
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 

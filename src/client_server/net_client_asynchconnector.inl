@@ -253,6 +253,8 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
+  ACE_UNUSED_ARG (localSAP_in);
+
   // *NOTE*: on error, the addresses are not passed through...
 
   int result = -1;
@@ -276,7 +278,7 @@ Net_Client_AsynchConnector_T<HandlerType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
                 buffer,
-                ACE::sock_error (error)));
+                ACE::sock_error (static_cast<int> (error))));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
