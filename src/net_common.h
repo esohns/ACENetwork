@@ -27,10 +27,13 @@
 #endif
 #include "ace/Svc_Handler.h"
 
+#include "stream_defines.h"
+
 #include "net_defines.h"
 //#include "net_itransportlayer.h"
 
 // forward declarations
+class Stream_IAllocator;
 template <typename ConfigurationType>
 class Net_ITransportLayer_T;
 
@@ -77,6 +80,17 @@ enum Net_Connection_Status
   NET_CONNECTION_STATUS_MAX
 };
 
+struct Net_UserData
+{
+  inline Net_UserData ()
+   : /*configuration (NULL)
+   ,*/ userData (NULL)
+  {};
+
+  //Net_Configuration* configuration;
+  void* userData;
+};
+
 struct Net_SocketConfiguration
 {
   inline Net_SocketConfiguration ()
@@ -117,6 +131,28 @@ struct Net_SocketConfiguration
   bool             writeOnly; // UDP ?
   // *TODO*: add network interface specifier (interface index on linux, (G)UID
   //         on windows)
+};
+
+struct Net_SocketHandlerConfiguration
+{
+  inline Net_SocketHandlerConfiguration ()
+   : messageAllocator (NULL)
+   , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
+   , socketConfiguration (NULL)
+   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING)
+   //////////////////////////////////////
+   , userData (NULL)
+  {};
+
+  Stream_IAllocator*       messageAllocator;
+  // *NOTE*: applies to the corresponding protocol datagram, if it has fixed
+  //         size; otherwise, this is the size of the individual (amorphuous)
+  //         stream buffers
+  unsigned int             PDUSize; // package data unit size
+  Net_SocketConfiguration* socketConfiguration;
+  unsigned int             statisticReportingInterval; // seconds [0: off]
+
+  Net_UserData*            userData;
 };
 
 typedef Net_ITransportLayer_T<Net_SocketConfiguration> Net_ITransportLayer_t;

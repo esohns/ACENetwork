@@ -44,26 +44,7 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_ConnectionState,
                                  Net_RuntimeStatistic_t,
                                  ////////
-                                 Net_StreamUserData> Net_IInetConnectionManager_t;
-
-struct Net_SocketHandlerConfiguration
-{
-  inline Net_SocketHandlerConfiguration ()
-   : bufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
-   , messageAllocator (NULL)
-   , socketConfiguration (NULL)
-   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING)
-   //////////////////////////////////////
-   , userData (NULL)
-  {};
-
-  int                      bufferSize; // pdu size (if fixed)
-  Stream_IAllocator*       messageAllocator;
-  Net_SocketConfiguration* socketConfiguration;
-  unsigned int             statisticReportingInterval; // seconds [0: off]
-
-  Net_StreamUserData*      userData;
-};
+                                 Net_UserData> Net_IInetConnectionManager_t;
 
 struct Net_ProtocolConfiguration
 {
@@ -110,7 +91,7 @@ struct Net_StreamConfiguration
   Net_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
   Net_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
 
-  Net_StreamUserData*            userData;                     // user data
+  Net_UserData*                  userData;                     // user data
 };
 
 struct Net_Configuration
@@ -119,8 +100,8 @@ struct Net_Configuration
    : socketConfiguration ()
    , socketHandlerConfiguration ()
    , streamConfiguration ()
-   , streamUserData ()
    , protocolConfiguration ()
+   , userData ()
   {};
 
   // **************************** socket data **********************************
@@ -128,9 +109,9 @@ struct Net_Configuration
   Net_SocketHandlerConfiguration socketHandlerConfiguration;
   // **************************** stream data **********************************
   Net_StreamConfiguration        streamConfiguration;
-  Net_StreamUserData             streamUserData;
   // *************************** protocol data *********************************
   Net_ProtocolConfiguration      protocolConfiguration;
+  Net_UserData                   userData;
 };
 
 struct Net_ListenerConfiguration
