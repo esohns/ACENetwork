@@ -100,8 +100,11 @@ class Net_StreamUDPSocketBase_T
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
   virtual unsigned int id () const;
+  virtual ACE_Notification_Strategy* notification ();
   virtual const StreamType& stream () const;
   virtual void close ();
+  virtual void waitForCompletion ();
+
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;
@@ -233,8 +236,11 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
   virtual unsigned int id () const;
+  virtual ACE_Notification_Strategy* notification ();
   virtual const StreamType& stream () const;
   virtual void close ();
+  virtual void waitForCompletion ();
+
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   virtual void report () const;

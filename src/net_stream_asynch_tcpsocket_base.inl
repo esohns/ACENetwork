@@ -24,6 +24,7 @@
 
 #include "stream_common.h"
 
+#include "net_common_tools.h"
 #include "net_macros.h"
 
 template <typename HandlerType,
@@ -338,20 +339,24 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // start (asynchronous) write
   inherited::counter_.increase ();
-  // *NOTE*: this is a fire-and-forget API for message_block...
-//  if (inherited::outputStream_.write (*buffer_,               // data
+  // *NOTE*: this is a fire-and-forget API for message_block
+  int error = 0;
+send:
+  //  if (inherited::outputStream_.write (*buffer_,               // data
   result =
-    inherited::outputStream_.write (*message_block_p,                     // data
-                                    message_block_p->length (),           // bytes to write
-                                    NULL,                                 // ACT
-                                    0,                                    // priority
-                                    COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
+      inherited::outputStream_.write (*message_block_p,                     // data
+                                      message_block_p->length (),           // bytes to write
+                                      NULL,                                 // ACT
+                                      0,                                    // priority
+                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
   if (result == -1)
   {
-    int error = ACE_OS::last_error ();
-    if ((error != ENOTSOCK)   && // 10038, happens on Win32
-        (error != ECONNRESET) && // 10054, happens on Win32
-        (error != ENOTCONN))     // 10057, happens on Win32
+    error = ACE_OS::last_error ();
+    // *WARNING*: this could fail on multi-threaded proactors
+    if (error == EAGAIN) goto send; // 11: happens on Linux
+    if ((error != ENOTSOCK)   && // 10038: happens on Win32
+        (error != ECONNRESET) && // 10054: happens on Win32
+        (error != ENOTCONN))     // 10057: happens on Win32
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Stream::write(%u): \"%m\", aborting\n"),
 //               buffer_->size ()));
@@ -359,7 +364,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
     // clean up
     message_block_p->release ();
-    inherited::counter_.increase ();
+    inherited::counter_.decrease ();
 
     return -1;
   } // end IF
@@ -414,7 +419,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Task_T::flush(): \"%m\", continuing\n")));
-      if (result)
+      if (result > 0)
         ACE_DEBUG ((LM_WARNING,
                     ACE_TEXT ("flushed %d messages...\n")));
     } // end IF

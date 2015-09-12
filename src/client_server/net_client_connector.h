@@ -152,6 +152,10 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 {
  public:
   typedef StreamType STREAM_T;
+  typedef Net_IConnection_T<ACE_INET_Addr,
+                            ConfigurationType,
+                            StateType,
+                            StatisticContainerType> ICONNECTION_T;
   typedef Net_ISocketConnection_T<ACE_INET_Addr,
                                   ConfigurationType,
                                   StateType,
@@ -200,6 +204,8 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   //typedef ACE_Connector<CONNECTION_T,
   //                      ACE_SOCK_CONNECTOR> ACE_CONNECTOR_T;
 
+  // override default activation strategy
+  virtual int activate_svc_handler (CONNECTION_T*);
   // override default instantiation strategy
   virtual int make_svc_handler (CONNECTION_T*&);
   //virtual int connect_svc_handler (CONNECTION_T*&,
@@ -265,6 +271,10 @@ class Net_Client_Connector_T<HandlerType,
 {
  public:
   typedef StreamType STREAM_T;
+  typedef Net_IConnection_T<ACE_Netlink_Addr,
+                            ConfigurationType,
+                            StateType,
+                            StatisticContainerType> ICONNECTION_T;
   typedef Net_ISocketConnection_T<ACE_Netlink_Addr,
                                   ConfigurationType,
                                   StateType,

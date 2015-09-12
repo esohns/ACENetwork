@@ -27,24 +27,22 @@
 #include "common_defines.h"
 #include "common_file_tools.h"
 
-//#include "net_common.h"
 #include "net_macros.h"
 
 #include "net_server_defines.h"
-//#include "net_server_listener_common.h"
 
 // initialize statics
 unsigned int
-Net_Server_Common_Tools::maxNumberOfLogFiles_ =
+Net_Server_Common_Tools::maximumNumberOfLogFiles_ =
   NET_SERVER_LOG_MAXIMUM_NUMBER_OF_FILES;
 
 int
 Net_Server_Common_Tools::selector (const dirent* dirEntry_in)
 {
-  //NETWORK_TRACE (ACE_TEXT ("RPG_Net_Server_Common_Tools::selector"));
+  //NETWORK_TRACE (ACE_TEXT ("Net_Server_Common_Tools::selector"));
 
   // *IMPORTANT NOTE*: select only files following the naming schema for
-  // logfiles: "<PREFIX>[_<NUMBER>]<SUFFIX>"
+  //                   log files: "<PREFIX>[_<NUMBER>]<SUFFIX>"
 
   // sanity check --> prefix ok ?
   if (ACE_OS::strncmp (dirEntry_in->d_name,
@@ -65,20 +63,20 @@ int
 Net_Server_Common_Tools::comparator (const dirent** d1,
                                      const dirent** d2)
 {
-  //NETWORK_TRACE (ACE_TEXT ("RPG_Net_Server_Common_Tools::comparator"));
+  //NETWORK_TRACE (ACE_TEXT ("Net_Server_Common_Tools::comparator"));
 
   return ACE_OS::strcmp ((*d1)->d_name,
                          (*d2)->d_name);
 }
 
 bool
-Net_Server_Common_Tools::getNextLogFilename (const std::string& directory_in,
-                                             std::string& FQLogFilename_out)
+Net_Server_Common_Tools::getNextLogFileName (const std::string& directory_in,
+                                             std::string& FQLogFileName_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_Common_Tools::getNextLogFilename"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_Common_Tools::getNextLogFileName"));
 
   // initialize return value(s)
-  FQLogFilename_out.resize (0);
+  FQLogFileName_out.resize (0);
 
   // sanity check(s): log directory exists ?
   // No ? --> try to create it then !
@@ -97,16 +95,16 @@ Net_Server_Common_Tools::getNextLogFilename (const std::string& directory_in,
   } // end IF
 
   // construct correct logfilename...
-  FQLogFilename_out = directory_in;
-  FQLogFilename_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  std::string log_filename =
+  FQLogFileName_out = directory_in;
+  FQLogFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  std::string log_file_name =
     ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX);
-  log_filename += ACE_TEXT_ALWAYS_CHAR (COMMON_LOG_FILENAME_SUFFIX);
-  FQLogFilename_out += log_filename;
+  log_file_name += ACE_TEXT_ALWAYS_CHAR (COMMON_LOG_FILENAME_SUFFIX);
+  FQLogFileName_out += log_file_name;
 
   // retrieve all existing logs and sort them alphabetically...
   ACE_Dirent_Selector entries;
-  int result = entries.open (directory_in.c_str (),
+  int result = entries.open (ACE_TEXT (directory_in.c_str ()),
                              &Net_Server_Common_Tools::selector,
                              &Net_Server_Common_Tools::comparator);
   if (result == -1)
@@ -124,26 +122,26 @@ Net_Server_Common_Tools::getNextLogFilename (const std::string& directory_in,
   // OK: iterate over the entries and perform some magic...
   // *NOTE*: entries have been sorted alphabetically:
   //         1 current 2 4 3 --> current 1 2 3 4
-  // *TODO*: some malicious user could inject "fake" logfiles which can
-  //         "confuse" this algorithm...
+  // *TODO*: someone/thing could generate "fake" log files which would "confuse"
+  //         this algorithm
   // skip handling of "<PREFIX><SUFFIX>" (if found)...
   // *NOTE*: <PREFIX><SUFFIX> will become <PREFIX>_1<SUFFIX>...
   bool found_current = false;
   // sscanf settings
-  int number = 0;
-  int return_val = -1;
-  std::string format_string ("%d");
+  unsigned int number = 0;
+  std::string format_string ("%u");
   format_string += ACE_TEXT_ALWAYS_CHAR (COMMON_LOG_FILENAME_SUFFIX);
   std::stringstream converter;
-  std::string old_FQ_filename, new_FQ_filename;
-  for (int i = entries.length () - 1, index = Net_Server_Common_Tools::maxNumberOfLogFiles_ - 1;
+  std::string old_FQ_file_name, new_FQ_file_name;
+  unsigned int index = Net_Server_Common_Tools::maximumNumberOfLogFiles_ - 1;
+  for (int i = entries.length () - 1;
        i >= 0;
        i--)
   {
     // perform "special treatment" if "<PREFIX><SUFFIX>" found...
     // *TODO*: do this in C++...
     if (ACE_OS::strcmp (entries[i]->d_name,
-                        log_filename.c_str ()) == 0)
+                        log_file_name.c_str ()) == static_cast<int> (0))
     {
       found_current = true;
 
@@ -155,14 +153,14 @@ Net_Server_Common_Tools::getNextLogFilename (const std::string& directory_in,
     try
     {
       // *TODO*: do this in C++...
-      return_val = ::sscanf (entries[i]->d_name +
-                             // skip some characters...
-                             (ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX)) + 1),
-                             format_string.c_str (),
-                             &number);
-      if (return_val != 1)
+      result = ::sscanf (ACE_TEXT_ALWAYS_CHAR (entries[i]->d_name) +
+                         // skip some characters...
+                         (ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX)) + 1),
+                         format_string.c_str (),
+                         &number);
+      if (result != 1)
       {
-        if (return_val != 0)
+        if (result)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("::sscanf() failed for \"%s\": \"%m\", continuing\n"),
                       ACE_TEXT (entries[i]->d_name)));
@@ -172,97 +170,96 @@ Net_Server_Common_Tools::getNextLogFilename (const std::string& directory_in,
     catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in ::sscanf() for \"%s\": \"%s\", continuing\n"),
+                  ACE_TEXT ("caught exception in ::sscanf() for \"%s\": \"%m\", aborting\n"),
                   ACE_TEXT (entries[i]->d_name)));
-      continue;
+      return false;
     }
 
     // adjust the index if the number is smaller than the maximum
-    if (number < index)
-      index = number + 1;
+    if (number < index) index = number + 1;
 
     // if the number is bigger than the maximum AND there are more than enough
-    // logfiles, delete it
+    // log files, delete it
     if ((static_cast<unsigned int> (number) >=
-         (Net_Server_Common_Tools::maxNumberOfLogFiles_ - 1)) &&
+         (Net_Server_Common_Tools::maximumNumberOfLogFiles_ - 1)) &&
         (static_cast<unsigned int> (entries.length ()) >=
-         Net_Server_Common_Tools::maxNumberOfLogFiles_))
+         Net_Server_Common_Tools::maximumNumberOfLogFiles_))
     {
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("removing surplus logfile \"%s\"...\n"),
+                  ACE_TEXT ("removing obsolete file \"%s\"...\n"),
                   ACE_TEXT (entries[i]->d_name)));
 
       // clean up
-      std::string FQFilename = directory_in;
-      FQFilename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-      FQFilename += entries[i]->d_name;
-      Common_File_Tools::deleteFile (FQFilename);
+      std::string FQFileName = directory_in;
+      FQFileName += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+      FQFileName += entries[i]->d_name;
+      Common_File_Tools::deleteFile (FQFileName);
 
       continue;
     } // end IF
 
     // logrotate file...
-    old_FQ_filename = directory_in;
-    old_FQ_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-    old_FQ_filename += entries[i]->d_name;
+    old_FQ_file_name = directory_in;
+    old_FQ_file_name += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    old_FQ_file_name += entries[i]->d_name;
 
-    new_FQ_filename = directory_in;
-    new_FQ_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-    new_FQ_filename += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX);
-    new_FQ_filename += ACE_TEXT_ALWAYS_CHAR ("_");
+    new_FQ_file_name = directory_in;
+    new_FQ_file_name += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    new_FQ_file_name += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX);
+    new_FQ_file_name += ACE_TEXT_ALWAYS_CHAR ("_");
 
     converter.clear ();
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
     converter << index;
 
-    new_FQ_filename += converter.str ();
-    new_FQ_filename += ACE_TEXT_ALWAYS_CHAR (COMMON_LOG_FILENAME_SUFFIX);
+    new_FQ_file_name += converter.str ();
+    new_FQ_file_name += ACE_TEXT_ALWAYS_CHAR (COMMON_LOG_FILENAME_SUFFIX);
     // *NOTE*: last parameter affects Win32 behaviour only,
     //         see ace/OS_NS_stdio.inl
-    result = ACE_OS::rename (old_FQ_filename.c_str (),
-                             new_FQ_filename.c_str (),
+    result = ACE_OS::rename (old_FQ_file_name.c_str (),
+                             new_FQ_file_name.c_str (),
                              -1);
     if (result)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::rename() \"%s\" to \"%s\": \"%m\", aborting\n"),
-                  ACE_TEXT (old_FQ_filename.c_str ()),
-                  ACE_TEXT (new_FQ_filename.c_str ())));
+                  ACE_TEXT (old_FQ_file_name.c_str ()),
+                  ACE_TEXT (new_FQ_file_name.c_str ())));
       return false;
     } // end IF
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("renamed file \"%s\" to \"%s\"...\n"),
-                ACE_TEXT (old_FQ_filename.c_str ()),
-                ACE_TEXT (new_FQ_filename.c_str ())));
+                ACE_TEXT (old_FQ_file_name.c_str ()),
+                ACE_TEXT (new_FQ_file_name.c_str ())));
 
     index--;
   } // end FOR
 
   if (found_current)
   {
-    new_FQ_filename = directory_in;
-    new_FQ_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-    new_FQ_filename += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX);
-    new_FQ_filename += ACE_TEXT_ALWAYS_CHAR ("_1");
-    new_FQ_filename += ACE_TEXT_ALWAYS_CHAR (COMMON_LOG_FILENAME_SUFFIX);
+    new_FQ_file_name = directory_in;
+    new_FQ_file_name += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    new_FQ_file_name += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX);
+    new_FQ_file_name += ACE_TEXT_ALWAYS_CHAR ("_1");
+    new_FQ_file_name += ACE_TEXT_ALWAYS_CHAR (COMMON_LOG_FILENAME_SUFFIX);
 
     // *NOTE*: last parameter affects Win32 behaviour only
     //         see ace/OS_NS_stdio.inl
-    result = ACE_OS::rename (FQLogFilename_out.c_str (),
-                             new_FQ_filename.c_str (),
+    result = ACE_OS::rename (FQLogFileName_out.c_str (),
+                             new_FQ_file_name.c_str (),
                              -1);
     if (result)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::rename() \"%s\" to \"%s\": \"%m\", aborting\n"),
-                  ACE_TEXT (FQLogFilename_out.c_str ()),
-                  ACE_TEXT (new_FQ_filename.c_str ())));
+                  ACE_TEXT (FQLogFileName_out.c_str ()),
+                  ACE_TEXT (new_FQ_file_name.c_str ())));
       return false;
     } // end IF
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("renamed file \"%s\" to \"%s\"...\n"),
-                ACE_TEXT (FQLogFilename_out.c_str ()),
-                ACE_TEXT (new_FQ_filename.c_str ())));
+                ACE_TEXT (FQLogFileName_out.c_str ()),
+                ACE_TEXT (new_FQ_file_name.c_str ())));
   } // end IF
 
   return true;

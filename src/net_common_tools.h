@@ -33,7 +33,8 @@ class Net_Export Net_Common_Tools
 {
  public:
   // --- general tools ---
-  // *NOTE*: if (the first argument == 0), the trailing ":0" will be cropped from the return value !
+  // *NOTE*: if (the first argument == 0), the trailing ":0" will be cropped
+  //         from the return value
   static std::string IPAddress2String (unsigned short, // port (network byte order !)
                                        unsigned int);  // IP address (network byte order !)
   static std::string IPProtocol2String (unsigned char); // protocol
@@ -48,7 +49,8 @@ class Net_Export Net_Common_Tools
   static bool setSocketBuffer (ACE_HANDLE, // socket handle
                                int,        // option (SO_RCVBUF || SO_SNDBUF)
                                int);       // size (bytes)
-  // *NOTE*: this should toggle Nagle's algorithm
+  // *NOTE*: toggle Nagle's algorithm
+  static bool getNoDelay (ACE_HANDLE); // socket handle
   static bool setNoDelay (ACE_HANDLE, // socket handle
                           bool);      // TCP_NODELAY ?
   static bool setKeepAlive (ACE_HANDLE, // socket handle

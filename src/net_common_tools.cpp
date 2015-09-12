@@ -763,6 +763,36 @@ Net_Common_Tools::setSocketBuffer (ACE_HANDLE handle_in,
 }
 
 bool
+Net_Common_Tools::getNoDelay (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getNoDelay"));
+
+  int optval = 0;
+  int optlen = sizeof (optval);
+  if (ACE_OS::getsockopt (handle_in,
+                          IPPROTO_TCP,
+                          TCP_NODELAY,
+                          reinterpret_cast<char*> (&optval),
+                          &optlen))
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%@, TCP_NODELAY): \"%m\", aborting\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, TCP_NODELAY): \"%m\", aborting\n"),
+                handle_in));
+#endif
+
+    return false;
+  } // end IF
+
+  return (optval == 1);
+}
+
+bool
 Net_Common_Tools::setNoDelay (ACE_HANDLE handle_in,
                               bool noDelay_in)
 {
@@ -911,7 +941,7 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
     return false;
   } // end IF
 
-  optval.l_onoff = (on_in ? 1 : 0);
+  optval.l_onoff = static_cast<unsigned short> (on_in ? 1 : 0);
   if (seconds_in)
     optval.l_linger = seconds_in;
   result = ACE_OS::setsockopt (handle_in,

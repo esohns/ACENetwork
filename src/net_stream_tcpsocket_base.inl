@@ -26,6 +26,7 @@
 #include "stream_common.h"
 
 #include "net_common.h"
+#include "net_common_tools.h"
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -573,7 +574,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
 //                   bytes_received));
 
       // adjust write pointer
-      currentReadBuffer_->wr_ptr (bytes_received);
+      currentReadBuffer_->wr_ptr (static_cast<size_t> (bytes_received));
 
       break;
     }
@@ -890,7 +891,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
       break;
   } // end SWITCH
 
-  // step3: invoke base-class maintenance
+  // step3: invoke base class maintenance
   bool deregister = inherited2::isRegistered_;
   // *IMPORTANT NOTE*: use get_handle() here to pass proper handle
   //                   otherwise, this fails for the usecase "accept failed"
@@ -938,7 +939,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   //  ACE_DEBUG ((LM_DEBUG,
   //              ACE_TEXT ("%@/%u: added, count: %d\n"), this, id (), count));
 
-  return count;
+  return static_cast<unsigned int> (count);
 }
 
 template <typename HandlerType,
@@ -975,7 +976,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   //    ACE_DEBUG ((LM_DEBUG,
   //                ACE_TEXT ("%@/%u: removed, count: %d --> deleted !\n"), this_ptr, session_id, count));
 
-  return count;
+  return static_cast<unsigned int> (count);
 }
 
 //template <typename AddressType,
@@ -1198,7 +1199,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   //         placing of the data onto the wire can be established
   //         (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
 #if defined (ACE_LINUX)
-  ACE_HANDLE handle = inherited::handle ();
+  ACE_HANDLE handle = inherited::get_handle ();
   bool no_delay = Net_Common_Tools::getNoDelay (handle);
   Net_Common_Tools::setNoDelay (handle, true);
   Net_Common_Tools::setNoDelay (handle, no_delay);

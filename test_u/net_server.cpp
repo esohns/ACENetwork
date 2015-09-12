@@ -690,10 +690,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 
   // step4c: start listening
+  configuration.listenerConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                               1);
   configuration.listenerConfiguration.connectionManager =
     NET_CONNECTIONMANAGER_SINGLETON::instance ();
   configuration.listenerConfiguration.messageAllocator = &message_allocator;
-  configuration.listenerConfiguration.portNumber = listeningPortNumber_in;
   configuration.listenerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
   configuration.listenerConfiguration.statisticReportingInterval =
@@ -1004,11 +1005,11 @@ ACE_TMAIN (int argc_in,
                         &gtk_cb_user_data.lock);
   std::string log_file_name;
   if (log_to_file &&
-      !Net_Server_Common_Tools::getNextLogFilename (Common_File_Tools::getDumpDirectory (),
+      !Net_Server_Common_Tools::getNextLogFileName (Common_File_Tools::getTempDirectory (),
                                                     log_file_name))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::getNextLogFilename(), aborting\n")));
+                ACE_TEXT ("failed to Net_Common_Tools::getNextLogFileName(), aborting\n")));
 
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

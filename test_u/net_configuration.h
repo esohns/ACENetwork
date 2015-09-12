@@ -136,19 +136,19 @@ struct Net_Configuration
 struct Net_ListenerConfiguration
 {
   inline Net_ListenerConfiguration ()
-   : addressFamily (ACE_ADDRESS_FAMILY_INET)
+   : address (static_cast<unsigned short> (0), INADDR_NONE)
+   , addressFamily (ACE_ADDRESS_FAMILY_INET)
    , connectionManager (NULL)
    , messageAllocator (NULL)
-   , portNumber (0)
    , socketHandlerConfiguration (NULL)
    , statisticReportingInterval (0)
    , useLoopBackDevice (false)
   {};
 
+  ACE_INET_Addr                   address;
   int                             addressFamily;
   Net_IInetConnectionManager_t*   connectionManager;
   Stream_IAllocator*              messageAllocator;
-  unsigned short                  portNumber;
   Net_SocketHandlerConfiguration* socketHandlerConfiguration;
   unsigned int                    statisticReportingInterval; // (second(s)) [0: off]
   bool                            useLoopBackDevice;

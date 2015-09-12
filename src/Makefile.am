@@ -1,7 +1,6 @@
 DEFS += \
   -DHAVE_CONFIG_H \
-  -DNET_BUILD_DLL=1 \
-  -DMETA_PACKAGE=\"@PACKAGE_NAME@\"
+  -DNET_BUILD_DLL=1
 
 #  -I/usr/include/c++/3.4.6/backward
 #  -I$(top_srcdir)/3rd_party/c++

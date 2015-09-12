@@ -28,6 +28,8 @@
 #include "ace/Message_Block.h"
 #include "ace/Notification_Strategy.h"
 
+#include "common_referencecounter_base.h"
+
 #include "net_sockethandler_base.h"
 
 template <typename ConfigurationType>
@@ -62,10 +64,12 @@ class Net_AsynchUDPSocketHandler_T
 
   virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
-  ACE_Asynch_Read_Dgram  inputStream_;
-  ACE_Asynch_Write_Dgram outputStream_;
-  ACE_INET_Addr          localSAP_;
-//  ACE_INET_Addr           remoteSAP_;
+  // this keeps the number of open write (i.e. send) requests
+  Common_ReferenceCounterBase counter_;
+  ACE_Asynch_Read_Dgram       inputStream_;
+  ACE_Asynch_Write_Dgram      outputStream_;
+//  ACE_INET_Addr               localSAP_;
+//  ACE_INET_Addr               remoteSAP_;
 
  private:
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;

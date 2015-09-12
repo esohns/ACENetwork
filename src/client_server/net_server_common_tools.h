@@ -36,7 +36,7 @@ class Net_Server_Export Net_Server_Common_Tools
 {
  public:
   // *NOTE*: implements log rotation
-  static bool getNextLogFilename (const std::string&, // directory
+  static bool getNextLogFileName (const std::string&, // directory
                                   std::string&);      // return value: log filename
 
 //  static Net_IListener_t* getListenerSingleton ();
@@ -54,7 +54,7 @@ class Net_Server_Export Net_Server_Common_Tools
   static int comparator (const dirent**,  // directory entry
                          const dirent**); // directory entry
 
-  static unsigned int maxNumberOfLogFiles_;
+  static unsigned int maximumNumberOfLogFiles_;
 };
 
 #endif

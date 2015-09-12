@@ -465,14 +465,21 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_UNUSED_ARG (lockedAccess_in);
 
   if (!isListening_)
-  {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("not listening --> nothing to do, returning\n")));
-    return;
-  } // end IF
+    return; // nothing to do
 
   int result = -1;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = inherited::cancel ();
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Acceptor::cancel(): \"%m\", continuing\n")));
+  result = ACE_OS::closesocket (inherited::handle ());
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::closesocket(): \"%m\", continuing\n")));
+  inherited::handle (ACE_INVALID_HANDLE);
+  if (false);
+#else
   const ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
   ACE_POSIX_Asynch_Accept* posix_asynch_accept_p = NULL;
   try
@@ -498,17 +505,6 @@ Net_Server_AsynchListener_T<HandlerType,
   if (result == -1)
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT("failed to ACE_POSIX_Asynch_Accept::close(): \"%m\", continuing\n")));
-#else
-  result = inherited::cancel ();
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Acceptor::cancel(): \"%m\", continuing\n")));
-  result = ACE_OS::closesocket (inherited::handle ());
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::closesocket(): \"%m\", continuing\n")));
-  inherited::handle (ACE_INVALID_HANDLE);
-  if (false);
 #endif
   else
     ACE_DEBUG ((LM_DEBUG,

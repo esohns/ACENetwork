@@ -128,39 +128,42 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::open"));
 
-  ACE_UNUSED_ARG (handle_in);
-
-  //// sanity check(s)
-  //ACE_ASSERT (inherited4::configuration_.socketHandlerConfiguration);
-
   int result = -1;
   // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
-  // step1: open socket
-  // *TODO*: do this somewhere else...
-  ACE_INET_Addr local_SAP (inherited4::configuration_.socketConfiguration.peerAddress.get_port_number (),
-                           (inherited4::configuration_.socketConfiguration.useLoopbackDevice ? INADDR_LOOPBACK
-                                                                                             : INADDR_ANY));
-  result = inherited2::open (local_SAP,                // local SAP
-                             ACE_PROTOCOL_FAMILY_INET, // protocol family
-                             0,                        // protocol
-                             1);                       // reuse_addr
+  // step1: open socket ?
+  // *NOTE*: even when this is a write-only connection
+  //         (inherited4::configuration_.socketConfiguration.writeOnly), the
+  //         base class still requires a valid handle to open the output stream
+  result =
+//    inherited2::open (inherited4::configuration_.socketConfiguration.peerAddress, // local SAP
+//                      ACE_PROTOCOL_FAMILY_INET,                                   // protocol family
+//                      0,                                                          // protocol
+//                      1);                                                         // reuse_addr
+      inherited2::open (inherited4::configuration_.socketConfiguration.peerAddress, // remote SAP
+                        inherited4::configuration_.socketConfiguration.peerAddress, // local SAP
+                        ACE_PROTOCOL_FAMILY_INET,                                   // protocol family
+                        0,                                                          // protocol
+                        1);                                                         // reuse_addr
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    std::string local_address;
-    if (local_SAP.addr_to_string (buffer,
-                                  sizeof (buffer)) == -1)
+    int result_2 =
+      inherited4::configuration_.socketConfiguration.peerAddress.addr_to_string (buffer,
+                                                                                 sizeof (buffer),
+                                                                                 1);
+    if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-    local_address = buffer;
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (local_address.c_str ())));
+                ACE_TEXT (buffer)));
     goto close;
   } // end IF
+  if (handle_in == ACE_INVALID_HANDLE)
+    inherited::handle (inherited2::get_handle ());
 
   // step2a: initialize base-class
   if (!inherited::initialize (inherited4::configuration_.socketHandlerConfiguration))
@@ -171,7 +174,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step2b: tweak socket, initialize I/O
-  inherited::open (inherited2::get_handle (), messageBlock_in);
+  inherited::open (handle_in, messageBlock_in);
 
   // step3: initialize/start stream
   // step3a: connect stream head message queue with a notification pipe/queue ?
@@ -214,10 +217,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                     ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
         goto close;
       }
-      inherited4::configuration_.streamConfiguration.module =
-        clone_p;
-      inherited4::configuration_.streamConfiguration.deleteModule =
-        true;
+      inherited4::configuration_.streamConfiguration.module = clone_p;
+      inherited4::configuration_.streamConfiguration.deleteModule = true;
     } // end IF
 
     // *TODO*: step3b: initialize final module
@@ -251,67 +252,78 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step4: start reading (need to pass any data ?)
-  if (messageBlock_in.length () == 0)
-    inherited::initiate_read_dgram ();
-  else
+  if (!inherited4::configuration_.socketConfiguration.writeOnly)
   {
-    ACE_Message_Block* message_block_p = messageBlock_in.duplicate ();
-    if (!message_block_p)
+    if (messageBlock_in.length () == 0)
+      inherited::initiate_read_dgram ();
+    else
     {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
-      goto close;
-    } // end IF
-    // fake a result to emulate regular behavior...
-    ACE_Proactor* proactor_p = inherited::proactor ();
-    ACE_ASSERT (proactor_p);
-    ACE_Asynch_Read_Dgram_Result_Impl* fake_result_p =
-      proactor_p->create_asynch_read_dgram_result (inherited::proxy (),                  // handler proxy
-                                                   handle_in,                            // socket handle
-                                                   message_block_p,                      // buffer
-                                                   message_block_p->size (),             // #bytes to read
-                                                   0,                                    // flags
-                                                   PF_INET,                              // protocol family
-                                                   NULL,                                 // ACT
-                                                   ACE_INVALID_HANDLE,                   // event
-                                                   0,                                    // priority
-                                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
-    if (!fake_result_p)
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Proactor::create_asynch_read_dgram_result: \"%m\", aborting\n")));
-      goto close;
-    } // end IF
-    size_t bytes_transferred = message_block_p->length ();
-    // <complete> for Accept would have already moved the <wr_ptr>
-    // forward; update it to the beginning position
-    message_block_p->wr_ptr (message_block_p->wr_ptr () - bytes_transferred);
-    // invoke ourselves (see handle_read_stream)
-    fake_result_p->complete (message_block_p->length (), // bytes read
-                             1,                          // success
-                             NULL,                       // ACT
-                             0);                         // error
+      ACE_Message_Block* message_block_p = messageBlock_in.duplicate ();
+      if (!message_block_p)
+      {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
+        goto close;
+      } // end IF
+      // fake a result to emulate regular behavior...
+      ACE_Proactor* proactor_p = inherited::proactor ();
+      ACE_ASSERT (proactor_p);
+      ACE_Asynch_Read_Dgram_Result_Impl* fake_result_p =
+        proactor_p->create_asynch_read_dgram_result (inherited::proxy (),                  // handler proxy
+                                                     handle_in,                            // socket handle
+                                                     message_block_p,                      // buffer
+                                                     message_block_p->size (),             // #bytes to read
+                                                     0,                                    // flags
+                                                     PF_INET,                              // protocol family
+                                                     NULL,                                 // ACT
+                                                     ACE_INVALID_HANDLE,                   // event
+                                                     0,                                    // priority
+                                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+      if (!fake_result_p)
+      {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Proactor::create_asynch_read_dgram_result: \"%m\", aborting\n")));
+        goto close;
+      } // end IF
+      size_t bytes_transferred = message_block_p->length ();
+      // <complete> for Accept would have already moved the <wr_ptr>
+      // forward; update it to the beginning position
+      message_block_p->wr_ptr (message_block_p->wr_ptr () - bytes_transferred);
+      // invoke ourselves (see handle_read_stream)
+      fake_result_p->complete (message_block_p->length (), // bytes read
+                               1,                          // success
+                               NULL,                       // ACT
+                               0);                         // error
 
-    // clean up
-    delete fake_result_p;
-  } // end ELSE
+      // clean up
+      delete fake_result_p;
+    } // end ELSE
+  } // end IF
 
   // step5: register with the connection manager (if any)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (!inherited4::registerc ())
+#else
+  if (!inherited4::registerc (this))
+#endif
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    // *NOTE*: perhaps max# connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
     goto close;
   } // end IF
+  if (inherited4::configuration_.socketConfiguration.writeOnly)
+    this->decrease (); // 'float' the connection
+  ACE_ASSERT (this->count () == (inherited4::configuration_.socketConfiguration.writeOnly ? 1 : 2)); // connection manager (and read operation)
 
   return;
 
 close:
-  result = handle_close (inherited2::get_handle (),
-                         ACE_Event_Handler::ALL_EVENTS_MASK);
-  if (result == -1)
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to Net_StreamAsynchUDPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+  close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
+
+  // *NOTE*: should 'delete this'
+  //  inherited4::decrease ();
+  this->decrease ();
 }
 
 template <typename HandlerType,
@@ -364,27 +376,35 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   ACE_ASSERT (message_block_p);
 
   // start (asynchronous) write
-//  bytes_to_send = buffer_->size ();
-  bytes_to_send = message_block_p->size ();
+  inherited::counter_.increase ();
+  //  bytes_to_send = buffer_->length ();
+  bytes_to_send = message_block_p->length ();
+  int error = 0;
+send:
   result_2 =
 //      inherited::outputStream_.send (buffer_,                                                    // data
       inherited::outputStream_.send (message_block_p,                                            // data
                                      bytes_to_send,                                              // #bytes to send
                                      0,                                                          // flags
-                                     inherited4::configuration_.socketConfiguration.peerAddress, // remote address
+                                     inherited4::configuration_.socketConfiguration.peerAddress, // remote address (ignored)
                                      NULL,                                                       // ACT
                                      0,                                                          // priority
                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                       // signal
   if (result_2 == -1)
   {
+    error = ACE_OS::last_error ();
+    // *WARNING*: this could fail on multi-threaded proactors
+    if (error == EAGAIN) goto send; // 11: happens on Linux
+
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
-                message_block_p->size ()));
+                bytes_to_send));
 
     // clean up
 //    buffer_->release ();
 //    buffer_ = NULL;
     message_block_p->release ();
+    inherited::counter_.decrease ();
 
     return -1;
   } // end IF
@@ -422,8 +442,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   int result = -1;
 
   // step1: wait for all workers within the stream (if any)
-  if (stream_.isRunning ())
-    stream_.stop (true); // <-- wait for completion
+  stream_.stop (true); // <-- wait for completion
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
@@ -438,10 +457,13 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       Stream_Task_t* task_p =
           const_cast<Stream_Module_t*> (module_p)->writer ();
       ACE_ASSERT (task_p);
-      result = task_p->msg_queue ()->flush ();
+      result = task_p->flush (ACE_Task_Flags::ACE_FLUSHALL);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_MessageQueue::flush(): \"%m\", continuing\n")));
+      if (result > 0)
+        ACE_DEBUG ((LM_WARNING,
+                    ACE_TEXT ("flushed %d messages...\n")));
     } // end IF
   } // end IF
 
@@ -453,14 +475,288 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                 ACE_TEXT ("failed to SocketHandlerType::handle_close(): \"%m\", continuing\n")));
 
   // step4: deregister with the connection manager (if any)
-  inherited4::deregister ();
-
-  // step5: release a reference
-  // *IMPORTANT NOTE*: may 'delete this'
-  //inherited4::decrease ();
-  this->decrease ();
+  if (inherited4::isRegistered_)
+    inherited4::deregister ();
 
   return result;
+}
+
+template <typename HandlerType,
+          typename SocketType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+void
+Net_StreamAsynchUDPSocketBase_T<HandlerType,
+                                SocketType,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::info (ACE_HANDLE& handle_out,
+                                                                       AddressType& localSAP_out,
+                                                                       AddressType& remoteSAP_out) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::info"));
+
+  int result = -1;
+
+  handle_out = inherited2::get_handle ();
+  result = localSAP_out.set (static_cast<u_short> (0),
+                             static_cast<ACE_UINT32> (INADDR_NONE));
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
+                INADDR_NONE));
+  if (!inherited4::configuration_.socketConfiguration.writeOnly)
+  {
+    result = inherited2::get_local_addr (localSAP_out);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+  } // end IF
+  remoteSAP_out =
+    inherited4::configuration_.socketConfiguration.peerAddress;
+}
+
+template <typename HandlerType,
+          typename SocketType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+unsigned int
+Net_StreamAsynchUDPSocketBase_T<HandlerType,
+                                SocketType,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::id () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return reinterpret_cast<unsigned int> (inherited::handle ());
+#else
+  return static_cast<unsigned int> (inherited::handle ());
+#endif
+}
+
+template <typename HandlerType,
+          typename SocketType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+ACE_Notification_Strategy*
+Net_StreamAsynchUDPSocketBase_T<HandlerType,
+                                SocketType,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::notification ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::notification"));
+
+  return this;
+}
+
+template <typename HandlerType,
+          typename SocketType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+int
+Net_StreamAsynchUDPSocketBase_T<HandlerType,
+                                SocketType,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::close (u_long arg_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::close"));
+
+  ACE_UNUSED_ARG (arg_in);
+
+  // *TODO*: find a better way to do this
+  inherited4* inherited_p = this;
+  inherited_p->close ();
+
+  return 0;
+}
+template <typename HandlerType,
+          typename SocketType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+void
+Net_StreamAsynchUDPSocketBase_T<HandlerType,
+                                SocketType,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+//                                ModuleConfigurationType>::close (u_long arg_in)
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::close ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::close"));
+
+//  ACE_UNUSED_ARG (arg_in);
+  int result = -1;
+
+  // step1: shutdown operations
+  ACE_HANDLE handle = inherited::handle ();
+  // *NOTE*: may 'delete this'
+  result = handle_close (handle,
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Net_StreamAsynchUDPSocketBase_T::handle_close(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to Net_StreamAsynchUDPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+
+  //  step2: release the socket handle
+  if (handle != ACE_INVALID_HANDLE)
+  {
+    int result_2 = ACE_OS::closesocket (handle);
+    if (result_2 == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                  handle));
+//    inherited::handle (ACE_INVALID_HANDLE);
+  } // end IF
+
+//  return result;
+}
+
+template <typename HandlerType,
+          typename SocketType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+void
+Net_StreamAsynchUDPSocketBase_T<HandlerType,
+                                SocketType,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::waitForCompletion ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::waitForCompletion"));
+
+  // step1: wait for the stream to flush
+  //        --> all data has been dispatched (here: to the proactor/kernel)
+  stream_.flush ();
+
+  // step2: wait for the asynchronous operations to complete
+  inherited::counter_.wait (0);
+}
+
+template <typename HandlerType,
+          typename SocketType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+void
+Net_StreamAsynchUDPSocketBase_T<HandlerType,
+                                SocketType,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::dump_state"));
+
+  int result = -1;
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  result = local_inet_address.addr_to_string (buffer,
+                                              sizeof (buffer));
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string peer_address;
+  result = peer_inet_address.addr_to_string (buffer,
+                                             sizeof (buffer));
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    peer_address = buffer;
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
+              id (), handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (peer_address.c_str ())));
 }
 
 template <typename HandlerType,
@@ -533,210 +829,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
   }
-}
-
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-void
-Net_StreamAsynchUDPSocketBase_T<HandlerType,
-                                SocketType,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::info (ACE_HANDLE& handle_out,
-                                                                       AddressType& localSAP_out,
-                                                                       AddressType& remoteSAP_out) const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::info"));
-
-  int result = -1;
-
-  handle_out = inherited2::get_handle ();
-  result = inherited2::get_local_addr (localSAP_out);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_DGram::get_local_addr(): \"%m\", continuing\n")));
-  remoteSAP_out = inherited4::configuration_.socketConfiguration.peerAddress;
-}
-
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-unsigned int
-Net_StreamAsynchUDPSocketBase_T<HandlerType,
-                                SocketType,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::id () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<unsigned int> (inherited::handle ());
-#else
-  return static_cast<unsigned int> (inherited::handle ());
-#endif
-}
-
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-void
-Net_StreamAsynchUDPSocketBase_T<HandlerType,
-                                SocketType,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::dump_state () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::dump_state"));
-
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
-  info (handle,
-        local_inet_address,
-        peer_inet_address);
-
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  if (local_inet_address.addr_to_string (buffer,
-                                         sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-  if (peer_inet_address.addr_to_string (buffer,
-                                        sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address = buffer;
-
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
-              id (), handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
-}
-
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-int
-Net_StreamAsynchUDPSocketBase_T<HandlerType,
-                                SocketType,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::close (u_long arg_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::close"));
-
-  ACE_UNUSED_ARG (arg_in);
-
-  this->close ();
-
-  return 0;
-}
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-void
-Net_StreamAsynchUDPSocketBase_T<HandlerType,
-                                SocketType,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                StreamType,
-                                UserDataType,
-//                                ModuleConfigurationType>::close (u_long arg_in)
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::close ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::close"));
-
-//  ACE_UNUSED_ARG (arg_in);
-  int result = -1;
-
-  // step1: shutdown operations
-  ACE_HANDLE handle = inherited::handle ();
-  // *NOTE*: may 'delete this'
-  result = handle_close (handle,
-                         ACE_Event_Handler::ALL_EVENTS_MASK);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Net_StreamAsynchUDPSocketBase_T::handle_close(): \"%m\", aborting\n")));
-                ACE_TEXT ("failed to Net_StreamAsynchUDPSocketBase_T::handle_close(): \"%m\", continuing\n")));
-
-  //  step2: release the socket handle
-  if (handle != ACE_INVALID_HANDLE)
-  {
-    int result_2 = ACE_OS::closesocket (handle);
-    if (result_2 == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  handle));
-//    inherited::handle (ACE_INVALID_HANDLE);
-  } // end IF
-
-//  return result;
 }
 
 template <typename HandlerType,
@@ -1279,76 +1371,6 @@ template <typename HandlerConfigurationType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
-bool
-Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::collect (StatisticContainerType& data_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::collect"));
-
-  try
-  {
-    return stream_.collect (data_out);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic::collect(), aborting\n")));
-  }
-
-  return false;
-}
-
-template <typename HandlerConfigurationType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-void
-Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::report"));
-
-  try
-  {
-    return stream_.report ();
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
-  }
-}
-
-template <typename HandlerConfigurationType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1367,12 +1389,22 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   int result = -1;
 
-  handle_out = inherited::handle ();
-  result = inherited2::get_local_addr (localSAP_out);
+  handle_out = inherited2::get_handle ();
+  result = localSAP_out.set (static_cast<u_short> (0),
+                             static_cast<ACE_UINT32> (INADDR_NONE));
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_DGram::get_local_addr(): \"%m\", continuing\n")));
-  remoteSAP_out = inherited4::configuration_->socketConfiguration.peerAddress;
+                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
+                INADDR_NONE));
+  if (!inherited4::configuration_.socketConfiguration.writeOnly)
+  {
+    result = inherited2::get_local_addr (localSAP_out);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+  } // end IF
+  remoteSAP_out =
+    inherited4::configuration_.socketConfiguration.peerAddress;
 }
 
 template <typename HandlerConfigurationType,
@@ -1414,7 +1446,7 @@ template <typename HandlerConfigurationType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
-void
+ACE_Notification_Strategy*
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
                                 AddressType,
@@ -1424,39 +1456,11 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::dump_state () const
+                                ModuleHandlerConfigurationType>::notification ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::notification"));
 
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
-  info (handle,
-        local_inet_address,
-        peer_inet_address);
-
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  if (local_inet_address.addr_to_string (buffer,
-                                         sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-  if (peer_inet_address.addr_to_string (buffer,
-                                        sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address = buffer;
-
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
-              id (), handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
+  return this;
 }
 
 template <typename HandlerConfigurationType,
@@ -1537,6 +1541,164 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   } // end IF
 
 //  return result;
+}
+
+template <typename HandlerConfigurationType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+void
+Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
+                                Net_SOCK_Netlink,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::waitForCompletion ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::waitForCompletion"));
+
+  // step1: wait for the stream to flush
+  //        --> all data has been dispatched (here: to the proactor/kernel)
+  stream_.flush ();
+
+  // step2: wait for the asynchronous operations to complete
+  inherited::counter_.wait (0);
+}
+
+template <typename HandlerConfigurationType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+bool
+Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
+                                Net_SOCK_Netlink,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::collect (StatisticContainerType& data_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::collect"));
+
+  try
+  {
+    return stream_.collect (data_out);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IStatistic::collect(), aborting\n")));
+  }
+
+  return false;
+}
+
+template <typename HandlerConfigurationType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+void
+Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
+                                Net_SOCK_Netlink,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::report () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::report"));
+
+  try
+  {
+    return stream_.report ();
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
+  }
+}
+
+template <typename HandlerConfigurationType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+void
+Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
+                                Net_SOCK_Netlink,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::dump_state"));
+
+  int result = -1;
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_INET_Addr local_inet_address, peer_inet_address;
+  info (handle,
+        local_inet_address,
+        peer_inet_address);
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address;
+  result = local_inet_address.addr_to_string (buffer,
+                                              sizeof (buffer));
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string peer_address;
+  result = peer_inet_address.addr_to_string (buffer,
+                                             sizeof (buffer));
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    peer_address = buffer;
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
+              id (), handle,
+              ACE_TEXT (local_address.c_str ()),
+              ACE_TEXT (peer_address.c_str ())));
 }
 
 template <typename HandlerConfigurationType,

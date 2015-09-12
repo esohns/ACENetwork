@@ -147,29 +147,36 @@ Net_UDPSocketHandler_T<SocketType,
       reinterpret_cast<Net_SocketConfiguration*> (arg_in);
   ACE_ASSERT (socket_configuration_p);
 
-  // step1: open socket
-  ACE_INET_Addr local_SAP (socket_configuration_p->peerAddress.get_port_number (),
-                           (socket_configuration_p->useLoopbackDevice ? INADDR_LOOPBACK
-                                                                      : INADDR_ANY));
-  result = inherited2::peer_.open (local_SAP,                // local SAP
-                                   ACE_PROTOCOL_FAMILY_INET, // protocol family
-                                   0,                        // protocol
-                                   1);                       // reuse_addr
-  if (result == -1)
-  {
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    std::string local_address;
-    if (local_SAP.addr_to_string (buffer,
-                                  sizeof (buffer)) == -1)
+  // step1: open socket ?
+//  if (!socket_configuration_p->writeOnly)
+//  {
+    result =
+//      inherited2::peer_.open (socket_configuration_p->peerAddress, // local SAP
+//                              ACE_PROTOCOL_FAMILY_INET,            // protocol family
+//                              0,                                   // protocol
+//                              1);                                  // reuse_addr
+        inherited2::peer_.open (socket_configuration_p->peerAddress, // remote SAP
+                                socket_configuration_p->peerAddress, // local SAP
+                                ACE_PROTOCOL_FAMILY_INET,            // protocol family
+                                0,                                   // protocol
+                                1);                                  // reuse_addr
+    if (result == -1)
+    {
+      ACE_TCHAR buffer[BUFSIZ];
+      ACE_OS::memset (buffer, 0, sizeof (buffer));
+      result =
+        socket_configuration_p->peerAddress.addr_to_string (buffer,
+                                                            sizeof (buffer),
+                                                            1);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-    local_address = buffer;
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (local_address.c_str ())));
-    return -1;
-  } // end IF
+                  ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT (buffer)));
+      return -1;
+    } // end IF
+//  } // end IF
 
   // step2: tweak socket
   if (socket_configuration_p->bufferSize)
@@ -204,7 +211,8 @@ Net_UDPSocketHandler_T<SocketType,
 //    return -1;
 //  } // end IF
 // *CHECK*
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   if (!Net_Common_Tools::setLinger (SVC_HANDLER_T::get_handle (),
                                     socket_configuration_p->linger,
                                     -1))
@@ -217,22 +225,6 @@ Net_UDPSocketHandler_T<SocketType,
     return -1;
   } // end IF
 #endif
-
-//  if (manager_)
-//  {
-//    // (try to) register with the connection manager...
-//    // *WARNING*: as we register BEFORE the connection has fully opened, there
-//    // is a small window for races...
-//    try
-//    {
-//      isRegistered_ = manager_->registerConnection (this);
-//    }
-//    catch (...)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("caught exception in Net_IConnectionManager::registerConnection(), continuing\n")));
-//    }
-//  } // end IF
 
   return 0;
 }
@@ -324,17 +316,17 @@ Net_UDPSocketHandler_T<SocketType,
                       ACE_TEXT ("failed to ACE_SOCK_IO::close (): %d, continuing\n")));
       } // end IF
 
-      ACE_Reactor* reactor_p = inherited2::reactor ();
-      ACE_ASSERT (reactor_p);
-      result =
-        reactor_p->remove_handler (handle_in,
-                                   (mask_in |
-                                    ACE_Event_Handler::DONT_CALL));
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d), continuing\n"),
-                    this,
-                    mask_in));
+//      ACE_Reactor* reactor_p = inherited2::reactor ();
+//      ACE_ASSERT (reactor_p);
+//      result =
+//        reactor_p->remove_handler (handle_in,
+//                                   (mask_in |
+//                                    ACE_Event_Handler::DONT_CALL));
+//      if (result == -1)
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@/%d, %d), continuing\n"),
+//                    this, handle_in,
+//                    mask_in));
       break;
     }
     default:

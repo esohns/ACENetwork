@@ -58,7 +58,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IntDir>$(SolutionDir)$(Configuration)_obj\$(ProjectName)\</IntDir>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -80,8 +80,10 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <BrowseInformation>false</BrowseInformation>
       <MinimalRebuild>false</MinimalRebuild>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalOptions>/vd0</AdditionalOptions>
+      <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -111,16 +113,19 @@
       <OmitFramePointers>true</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FloatingPointModel>Fast</FloatingPointModel>
+      <FloatingPointModel>Strict</FloatingPointModel>
       <FloatingPointExceptions>false</FloatingPointExceptions>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
-      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
       <OmitDefaultLibName />
       <ErrorReporting>
       </ErrorReporting>
-      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>4061;4820;4006</DisableSpecificWarnings>
+      <AdditionalOptions>/vd0</AdditionalOptions>
+      <DisableSpecificWarnings>4061;4820;4006;4172;4191;4350;4471;4503;4571;4711</DisableSpecificWarnings>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <DisableLanguageExtensions>
+      </DisableLanguageExtensions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

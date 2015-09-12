@@ -412,10 +412,10 @@ IRC_Client_Module_IRCSplitter::handleSessionMessage (IRC_Client_SessionMessage*&
       const IRC_Client_StreamSessionData* session_data_p =
           session_data_container_r.getData ();
       ACE_ASSERT (session_data_p);
-      ACE_ASSERT (inherited::state_);
-      ACE_ASSERT (inherited::state_->currentSessionData);
-      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (inherited::state_->currentSessionData->lock);
-      inherited::state_->currentSessionData->sessionID =
+      ACE_ASSERT (inherited::streamState_);
+      ACE_ASSERT (inherited::streamState_->currentSessionData);
+      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (inherited::streamState_->currentSessionData->lock);
+      inherited::streamState_->currentSessionData->sessionID =
           session_data_p->sessionID;
 
       // start profile timer...

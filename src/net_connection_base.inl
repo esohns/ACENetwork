@@ -192,6 +192,7 @@ Net_ConnectionBase_T<AddressType,
       return false;
     } // end IF
 
+    int result = -1;
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
@@ -219,14 +220,18 @@ Net_ConnectionBase_T<AddressType,
                   ACE_TEXT ("caught exception in Net_IConnection_T::info(), aborting\n")));
       return false;
     }
-    if (local_SAP.addr_to_string (buffer,
-                                  sizeof (buffer)) == -1)
+    result = local_SAP.addr_to_string (buffer,
+                                       sizeof (buffer),
+                                       1);
+    if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Addr::addr_to_string(): \"%m\", continuing\n")));
     local_address = buffer;
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    if (remote_SAP.addr_to_string (buffer,
-                                   sizeof (buffer)) == -1)
+    result = remote_SAP.addr_to_string (buffer,
+                                        sizeof (buffer),
+                                        1);
+    if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Addr::addr_to_string(): \"%m\", continuing\n")));
 

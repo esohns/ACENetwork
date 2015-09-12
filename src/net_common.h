@@ -82,13 +82,28 @@ struct Net_SocketConfiguration
   inline Net_SocketConfiguration ()
    : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
    , linger (NET_SOCKET_DEFAULT_LINGER)
- #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-    , netlinkAddress (ACE_sap_any_cast (const ACE_Netlink_Addr&))
-    , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
+ #if defined (ACE_WIN32) || defined (ACE_WIN64)
+ #else
+   , netlinkAddress (ACE_sap_any_cast (const ACE_Netlink_Addr&))
+   , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
  #endif
-   , peerAddress (INADDR_NONE)
+   , peerAddress (static_cast<u_short> (0), 
+                  static_cast<ACE_UINT32> (INADDR_ANY))
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
-  {};
+   , writeOnly (false)
+  {
+    int result = -1;
+    if (useLoopBackDevice)
+    {
+      result = peerAddress.set (static_cast<unsigned short> (0),
+                                INADDR_LOOPBACK,
+                                1,
+                                0);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+    } // end IF
+  };
 
   int              bufferSize; // socket buffer size (I/O)
   bool             linger;
@@ -99,6 +114,7 @@ struct Net_SocketConfiguration
 #endif
   ACE_INET_Addr    peerAddress;
   bool             useLoopBackDevice;
+  bool             writeOnly; // UDP ?
   // *TODO*: add network interface specifier (interface index on linux, (G)UID
   //         on windows)
 };

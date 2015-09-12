@@ -21,11 +21,11 @@
 
 #include "net_udpsockethandler.h"
 
-int
-Net_SOCK_Dgram::get_remote_addr (ACE_Addr& address_out) const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Dgram::get_remote_addr"));
-
-  //return inherited::get_remote_addr (address_out);
-  return ACE_SOCK::get_remote_addr (address_out);
-}
+//int
+//Net_SOCK_Dgram::get_remote_addr (ACE_Addr& address_out) const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Dgram::get_remote_addr"));
+//
+//  //return inherited::get_remote_addr (address_out);
+//  return ACE_SOCK::get_remote_addr (address_out);
+//}

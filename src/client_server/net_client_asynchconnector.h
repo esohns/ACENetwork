@@ -319,7 +319,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
   virtual const HandlerConfigurationType& get () const;
   virtual bool initialize (const HandlerConfigurationType&);
 
-  //virtual bool useReactor () const; // ? : uses proactor
+  virtual bool useReactor () const; // ? : uses proactor
 
   virtual void abort ();
   virtual ACE_HANDLE connect (const ACE_Netlink_Addr&);

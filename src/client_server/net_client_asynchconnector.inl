@@ -532,30 +532,6 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   return true;
 }
 
-//template <typename SocketConfigurationType,
-//          typename HandlerType,
-//          typename ConfigurationType,
-//          typename HandlerConfigurationType,
-//          typename UserDataType,
-//          typename StateType,
-//          typename StreamType>
-//bool
-//Net_Client_AsynchConnector_T<ACE_INET_Addr,
-//                             SocketConfigurationType,
-//                             ConfigurationType,
-//                             HandlerConfigurationType,
-//                             UserDataType,
-//                             StateType,
-//                             StreamType,
-//                             Net_AsynchUDPConnection_T<UserDataType,
-//                                                       StateType,
-//                                                       HandlerType> >::useReactor () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::useReactor"));
-//
-//  return false;
-//}
-
 template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
@@ -582,6 +558,34 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
 
   return configuration_;
+}
+
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+bool
+Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
+                                                           ConfigurationType,
+                                                           StateType,
+                                                           StatisticContainerType,
+                                                           StreamType,
+                                                           HandlerConfigurationType,
+                                                           UserDataType>,
+                             ACE_INET_Addr,
+                             ConfigurationType,
+                             StateType,
+                             StatisticContainerType,
+                             StreamType,
+                             HandlerConfigurationType,
+                             UserDataType>::useReactor () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::useReactor"));
+
+  return false;
 }
 
 template <typename HandlerType,
@@ -878,27 +882,27 @@ Net_Client_AsynchConnector_T<HandlerType,
   return configuration_;
 }
 
-//template <typename SocketConfigurationType,
-//          typename HandlerType,
-//          typename ConfigurationType,
-//          typename HandlerConfigurationType,
-//          typename UserDataType,
-//          typename StateType,
-//          typename StreamType>
-//bool
-//Net_Client_AsynchConnector_T<ACE_Netlink_Addr,
-//                             SocketConfigurationType,
-//                             ConfigurationType,
-//                             HandlerConfigurationType,
-//                             UserDataType,
-//                             StateType,
-//                             StreamType,
-//                             HandlerType>::useReactor () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::useReactor"));
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+bool
+Net_Client_AsynchConnector_T<HandlerType,
+                             ACE_Netlink_Addr,
+                             ConfigurationType,
+                             StateType,
+                             StatisticContainerType,
+                             StreamType,
+                             HandlerConfigurationType,
+                             UserDataType>::useReactor () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::useReactor"));
 
-//  return false;
-//}
+  return false;
+}
 
 template <typename HandlerType,
           typename ConfigurationType,

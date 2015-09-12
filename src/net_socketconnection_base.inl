@@ -475,7 +475,8 @@ Net_SocketConnectionBase_T<HandlerType,
 
   // step1: initialize/start stream, tweak socket, register reading data with
   //        reactor, ...
-  int result = inherited::open (configuration_p);
+  // *TODO*: remove type inference
+  int result = inherited::open (&configuration_p->socketConfiguration);
   if (result == -1)
   {
     // *NOTE*: this can happen when the connection handle is still registered
