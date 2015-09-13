@@ -404,9 +404,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
       ACE_HANDLE handle = inherited::get_handle ();
 
       // step1: release any connection resources
-      result =
-        handle_close (handle,
-                      ACE_Event_Handler::ALL_EVENTS_MASK);
+      result = handle_close (handle,
+                             ACE_Event_Handler::ALL_EVENTS_MASK);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
