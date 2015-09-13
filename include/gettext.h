@@ -1,1 +1,1 @@
-IntxLNK/
+/usr/share/gettext/gettext.h

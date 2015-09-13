@@ -103,3 +103,4 @@ ipch/
 *.vcxproj.user
 
 /prj/solstudio/libACENetwork/build/
+Makefile.am.user

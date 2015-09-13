@@ -61,11 +61,14 @@ class Net_TCPConnectionBase_T
  , public Net_TransportLayer_TCP
 {
  friend class ACE_Acceptor<Net_TCPConnectionBase_T<HandlerType,
+
                                                    ConfigurationType,
                                                    StateType,
                                                    StatisticContainerType,
                                                    StreamType,
+
                                                    HandlerConfigurationType,
+
                                                    UserDataType>,
                            ACE_SOCK_ACCEPTOR>;
  friend class ACE_Connector<Net_TCPConnectionBase_T<HandlerType,
@@ -126,7 +129,7 @@ template <typename HandlerType,
           typename UserDataType>
 class Net_AsynchTCPConnectionBase_T
  : public Net_AsynchSocketConnectionBase_T<HandlerType,
-                                           
+
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,
@@ -136,7 +139,7 @@ class Net_AsynchTCPConnectionBase_T
                                            Net_SocketConfiguration,
 
                                            HandlerConfigurationType,
-                                           
+
                                            UserDataType>
  , public Net_TransportLayer_TCP
 {
@@ -156,9 +159,9 @@ class Net_AsynchTCPConnectionBase_T
                                                                  StateType,
                                                                  StatisticContainerType,
                                                                  StreamType,
-                                                                 
+
                                                                  HandlerConfigurationType,
-                                                                 
+
                                                                  UserDataType> >;
 
  public:
@@ -175,7 +178,7 @@ class Net_AsynchTCPConnectionBase_T
 
  private:
   typedef Net_AsynchSocketConnectionBase_T<HandlerType,
-                                           
+
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,

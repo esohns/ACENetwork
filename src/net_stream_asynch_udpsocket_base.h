@@ -53,7 +53,9 @@ template <typename HandlerType,
           typename UserDataType,
           ///////////////////////////////
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          ///////////////////////////////
+          typename HandlerConfigurationType>
 class Net_StreamAsynchUDPSocketBase_T
  : public HandlerType
  , public SocketType
@@ -140,9 +142,11 @@ class Net_StreamAsynchUDPSocketBase_T
 
 /////////////////////////////////////////
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 // partial specialization (for Netlink)
-template <typename HandlerConfigurationType,
+template <typename HandlerType,
+          typename SocketType,
           ///////////////////////////////
           typename AddressType,
           typename ConfigurationType,
@@ -153,7 +157,9 @@ template <typename HandlerConfigurationType,
           typename UserDataType,
           ///////////////////////////////
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          ///////////////////////////////
+          typename HandlerConfigurationType>
 class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                       Net_SOCK_Netlink,
                                       ///
