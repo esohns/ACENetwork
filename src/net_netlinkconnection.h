@@ -62,7 +62,16 @@ class Net_NetlinkConnection_T
                                      UserDataType>
  , public Net_TransportLayer_Netlink
 {
-  friend class ACE_Connector<HandlerType,
+  friend class ACE_Connector<Net_NetlinkConnection_T<HandlerType,
+
+                                                     ConfigurationType,
+                                                     StateType,
+                                                     StatisticContainerType,
+                                                     StreamType,
+
+                                                     HandlerConfigurationType,
+
+                                                     UserDataType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
