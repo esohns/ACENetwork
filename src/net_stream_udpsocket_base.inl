@@ -124,59 +124,64 @@ Net_StreamUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::open"));
 
+  ConfigurationType* configuration_p =
+    static_cast<ConfigurationType*> (arg_in);
+  ACE_ASSERT (configuration_p);
+
   int result = -1;
+  bool handle_module = true;
+  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
   // step0: initialize this
+  // *IMPORTANT NOTE*: enable the reference counting policy, as this will
+  //                   be registered with the reactor several times
+  //                   (1x READ_MASK, nx WRITE_MASK); therefore several threads
+  //                   MAY be dispatching notifications (yes, even concurrently;
+  //                   lock_ enforces the proper sequence order, see
+  //                   handle_output()) on the SAME handler. When the socket
+  //                   closes, the event handler should thus not be destroyed()
+  //                   immediately, but simply purge any pending notifications
+  //                   (see handle_close()) and de-register; after the last
+  //                   active notification has been dispatched, it will be
+  //                   safely deleted
+  inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+  // *IMPORTANT NOTE*: due to reference counting, the
+  //                   ACE_Svc_Handle::shutdown() method will crash, as it
+  //                   references a connection recycler AFTER removing the
+  //                   connection from the reactor (which releases a reference).
+  //                   In the case that "this" is the final reference, this
+  //                   leads to a crash (see code)
+  //                   --> avoid invoking ACE_Svc_Handle::shutdown()
+  //                   --> this means that "manual" cleanup is necessary
+  //                       (see handle_close())
+  inherited::closing_ = true;
   // *TODO*: find a better way to do this
   serializeOutput_ =
-    inherited2::configuration_.streamConfiguration.serializeOutput;
+    configuration_p->streamConfiguration.serializeOutput;
 
-  // step1: open / tweak socket, ...
-  result = inherited::open (arg_in);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
-    return -1;
-  } // end IF
-  //// *NOTE*: as soon as this returns, data starts arriving at handle_input()
-
-  // step2: initialize/start stream
+  // step1: initialize/start stream
+  // step1a: connect stream head message queue with the reactor notification
+  //         pipe ?
   // *TODO*: remove type inferences
-  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
-  // step2a: connect stream head message queue with the reactor notification
-  // pipe ?
-  if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
+  if (!configuration_p->streamConfiguration.useThreadPerConnection)
+    configuration_p->streamConfiguration.notificationStrategy =
+    &(inherited::notificationStrategy_);
+  // step1b: initialize final module (if any)
+  if (configuration_p->streamConfiguration.module)
   {
-    // *IMPORTANT NOTE*: enable the reference counting policy, as this will
-    // be registered with the reactor several times (1x READ_MASK, nx
-    // WRITE_MASK); therefore several threads MAY be dispatching notifications
-    // (yes, even concurrently; myLock enforces the proper sequence order, see
-    // handle_output()) on the SAME handler. When the socket closes, the event
-    // handler should thus not be destroyed() immediately, but simply purge any
-    // pending notifications (see handle_close()) and de-register; after the
-    // last active notification has been dispatched, it will be safely deleted
-    inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-
-    // *NOTE*: must use 'this' (inherited2:: does not work here for some
-    //         strange reason)...
-    inherited2::configuration_.streamConfiguration.notificationStrategy =
-        &this->notificationStrategy_;
-  } // end IF
-  // step2b: clone/initialize final module (if any)
-  if (inherited2::configuration_.streamConfiguration.module)
-  {
-    // step2ba: clone final module ?
-    if (inherited2::configuration_.streamConfiguration.module)
+    // step1ba: clone final module ?
+    if (configuration_p->streamConfiguration.cloneModule)
     {
-      Stream_IModule_t* imodule_p =
-        dynamic_cast<Stream_IModule_t*> (inherited2::configuration_.streamConfiguration.module);
+      IMODULE_T* imodule_p = NULL;
+      // need a downcast...
+      imodule_p =
+        dynamic_cast<IMODULE_T*> (configuration_p->streamConfiguration.module);
       if (!imodule_p)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-        return -1;
+                    ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T*> failed, aborting\n"),
+                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+        goto error;
       } // end IF
       Stream_Module_t* clone_p = NULL;
       try
@@ -186,53 +191,78 @@ Net_StreamUDPSocketBase_T<HandlerType,
       catch (...)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), continuing\n"),
-                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
+                    ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), continuing\n"),
+                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+        clone_p = NULL;
       }
       if (!clone_p)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
-                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-        return -1;
-      }
-      inherited2::configuration_.streamConfiguration.module =
-        clone_p;
-      inherited2::configuration_.streamConfiguration.deleteModule =
-        true;
+                    ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
+                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+        goto error;
+      } // end IF
+      configuration_p->streamConfiguration.deleteModule = true;
+      configuration_p->streamConfiguration.module = clone_p;
     } // end IF
-    // *TODO*: step2bb: initialize final module
+    // *TODO*: step1bb: initialize final module
   } // end IF
-  // step2c: initialize stream
-  // *TODO*: this clearly is a design glitch
+  // step1c: initialize stream
+  // *TODO*: remove type inferences
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inherited2::configuration_.streamConfiguration.sessionID =
-    reinterpret_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+  configuration_p->streamConfiguration.sessionID =
+    reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #else
-  inherited2::configuration_.streamConfiguration.sessionID =
-    static_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+  configuration_p->streamConfiguration.sessionID =
+    static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (inherited2::configuration_.streamConfiguration))
+  if (!stream_.initialize (configuration_p->streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
-    return -1;
+    goto error;
   } // end IF
+  // *NOTE*: do not worry about the enqueued module (if any) beyond this point !
+  handle_module = false;
   session_data_p = &stream_.sessionData ();
+  // *TODO*: remove type inferences
   const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
-      &const_cast<StateType&> (inherited2::state ());
+    &const_cast<StateType&> (inherited2::state ());
   //stream_.dump_state ();
   // *NOTE*: as soon as this returns, data starts arriving at
-  // handle_output()/msg_queue()
+  //         handle_output()/msg_queue()
   stream_.start ();
   if (!stream_.isRunning ())
   {
+    // *NOTE*: most likely, this happened because the stream failed to
+    //         initialize
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
-    return -1;
+    goto error;
   } // end IF
 
-  // step3: register with the reactor ?
+  // step2: register with the connection manager (if any)
+  // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
+  //                   a race condition might occur when using multi-threaded
+  //                   proactors/reactors
+  if (!inherited2::registerc ())
+  {
+    // *NOTE*: perhaps max# connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    goto error;
+  } // end IF
+
+  // step3: open / tweak socket, ...
+  result = inherited::open (&configuration_p->socketHandlerConfiguration);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+
+  // step4: register with the reactor ?
   if (!inherited2::configuration_.socketConfiguration.writeOnly)
   {
     ACE_Reactor* reactor_p = inherited::reactor ();
@@ -258,20 +288,32 @@ Net_StreamUDPSocketBase_T<HandlerType,
 //     return -1;
 //   } // end IF
 
-  // step4: register with the connection manager (if any)
-  if (!inherited2::registerc ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-    return -1;
-  } // end IF
-
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
   if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
     inherited2::decrease ();
 
+  inherited2::initialize (*configuration_p);
+  inherited2::state_.status = NET_CONNECTION_STATUS_OK;
+
   return 0;
+
+error:
+  // clean up
+  if (handle_module                               &&
+      configuration_p->streamConfiguration.module &&
+      configuration_p->streamConfiguration.deleteModule)
+  {
+    delete configuration_p->streamConfiguration.module;
+    configuration_p->streamConfiguration.module = NULL;
+    configuration_p->streamConfiguration.deleteModule = false;
+  } // end IF
+  stream_.stop (true); // <-- wait for completion
+
+  // *TODO*: remove type inference
+  inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+
+  return -1;
 }
 
 template <typename HandlerType,

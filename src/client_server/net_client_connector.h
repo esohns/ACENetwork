@@ -75,6 +75,8 @@ class Net_Client_Connector_T
                                    StatisticContainerType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
+  typedef Net_IConnector_T<AddressType,
+                           HandlerConfigurationType> INTERFACE_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T*, // connection manager handle
                           unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
@@ -181,6 +183,8 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                   HandlerConfigurationType,
                                   ///////
                                   UserDataType> CONNECTION_T;
+  typedef Net_IConnector_T<ACE_INET_Addr,
+                           HandlerConfigurationType> INTERFACE_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T*, // connection manager handle
                           unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
@@ -290,6 +294,8 @@ class Net_Client_Connector_T<HandlerType,
                                    StatisticContainerType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
+  typedef Net_IConnector_T<ACE_Netlink_Addr,
+                           HandlerConfigurationType> INTERFACE_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T*, // connection manager handle
                           unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]

@@ -80,15 +80,17 @@ enum Net_Connection_Status
   NET_CONNECTION_STATUS_MAX
 };
 
+struct Net_Configuration;
 struct Net_UserData
 {
   inline Net_UserData ()
-   : /*configuration (NULL)
-   ,*/ userData (NULL)
+   : configuration (NULL)
+   , userData (NULL)
   {};
 
-  //Net_Configuration* configuration;
-  void* userData;
+  Net_Configuration* configuration;
+
+  void*              userData;
 };
 
 struct Net_SocketConfiguration
