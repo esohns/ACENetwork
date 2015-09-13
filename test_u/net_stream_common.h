@@ -35,7 +35,7 @@
 #include "stream_session_data_base.h"
 #include "stream_messageallocatorheap_base.h"
 
-//#include "net_common.h"
+#include "net_common.h"
 //#include "net_configuration.h"
 #include "net_message.h"
 //#include "net_sessionmessage.h"
@@ -68,15 +68,6 @@ struct Net_StreamSessionData
   ACE_Time_Value         startOfSession;
 };
 
-struct Net_StreamUserData
-{
-  inline Net_StreamUserData ()
-   : configuration (NULL)
-  {};
-
-  Net_Configuration* configuration;
-};
-
 struct Net_StreamState
 {
   inline Net_StreamState ()
@@ -85,7 +76,7 @@ struct Net_StreamState
   {};
 
   Net_StreamSessionData* currentSessionData;
-  Net_StreamUserData*    userData;
+  Net_UserData*          userData;
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<Net_Message,

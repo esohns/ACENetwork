@@ -46,11 +46,9 @@
 #define NET_ADDRESS_DEFAULT_IP_BROADCAST         "255.255.255.255"
 
 // protocol
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-// *IMPORTANT NOTE*: this must match with the kernel module implementation !
+// *IMPORTANT NOTE*: must match with the kernel module implementation !
 #define NET_PROTOCOL_DEFAULT_NETLINK             NETLINK_GENERIC
 #define NET_PROTOCOL_DEFAULT_NETLINK_GROUP       1
-#endif
 
 // socket
 #define NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE   ACE_DEFAULT_MAX_SOCKET_BUFSIZ

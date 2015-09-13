@@ -290,12 +290,12 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::initiate_read_dgram ()
 
   // step1: allocate a data buffer
   ACE_Message_Block* message_block_p =
-      allocateMessage (inherited::configuration_.bufferSize);
+      allocateMessage (inherited::configuration_.PDUSize);
   if (!message_block_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::allocateMessage(%u), aborting\n"),
-                inherited::configuration_.bufferSize));
+                inherited::configuration_.PDUSize));
     goto close;
   } // end IF
 
