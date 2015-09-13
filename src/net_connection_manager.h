@@ -59,6 +59,7 @@ class Net_Connection_Manager_T
 
  public:
   // convenience types
+  typedef ConfigurationType CONFIGURATION_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
