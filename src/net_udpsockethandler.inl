@@ -135,39 +135,41 @@ Net_UDPSocketHandler_T<SocketType,
   int result = -1;
 
   // sanity check(s)
-//  if (!manager_)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("invalid connection manager, aborting\n")));
-//    return -1;
-//  } // end IF
   ACE_ASSERT (arg_in);
 
-  Net_SocketConfiguration* socket_configuration_p =
-      reinterpret_cast<Net_SocketConfiguration*> (arg_in);
-  ACE_ASSERT (socket_configuration_p);
+  ConfigurationType* configuration_p =
+    reinterpret_cast<ConfigurationType*> (arg_in);
+  ACE_ASSERT (configuration_p);
+  ACE_ASSERT (configuration_p->socketConfiguration);
 
   // step1: open socket ?
-//  if (!socket_configuration_p->writeOnly)
+  //ACE_INET_Addr local_address, peer_address;
+  //local_address = ACE_Addr::sap_any;
+  //peer_address = configuration_p->socketConfiguration->peerAddress;
+  //if (!configuration_p->socketConfiguration->writeOnly)
+  //  local_address = configuration_p->socketConfiguration->peerAddress;
+
+//  if (!configuration_p->socketConfiguration.writeOnly)
 //  {
     result =
-//      inherited2::peer_.open (socket_configuration_p->peerAddress, // local SAP
-//                              ACE_PROTOCOL_FAMILY_INET,            // protocol family
-//                              0,                                   // protocol
-//                              1);                                  // reuse_addr
-        inherited2::peer_.open (socket_configuration_p->peerAddress, // remote SAP
-                                socket_configuration_p->peerAddress, // local SAP
-                                ACE_PROTOCOL_FAMILY_INET,            // protocol family
-                                0,                                   // protocol
-                                1);                                  // reuse_addr
+      inherited2::peer_.open (configuration_p->socketConfiguration->peerAddress, // local SAP
+                              ACE_PROTOCOL_FAMILY_INET,                          // protocol family
+                              0,                                                 // protocol
+                              1);                                                // reuse_addr
+      //inherited2::peer_.open (configuration_p->socketConfiguration->peerAddress, // remote SAP
+      //                        (configuration_p->inbound ? configuration_p->socketConfiguration->peerAddress
+      //                                                  : ACE_Addr::sap_any),    // local SAP
+      //                        ACE_PROTOCOL_FAMILY_INET,                          // protocol family
+      //                        0,                                                 // protocol
+      //                        1);                                                // reuse_addr
     if (result == -1)
     {
       ACE_TCHAR buffer[BUFSIZ];
       ACE_OS::memset (buffer, 0, sizeof (buffer));
       result =
-        socket_configuration_p->peerAddress.addr_to_string (buffer,
-                                                            sizeof (buffer),
-                                                            1);
+        configuration_p->socketConfiguration->peerAddress.addr_to_string (buffer,
+                                                                          sizeof (buffer),
+                                                                          1);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
@@ -179,17 +181,17 @@ Net_UDPSocketHandler_T<SocketType,
 //  } // end IF
 
   // step2: tweak socket
-  if (socket_configuration_p->bufferSize)
-    if (!Net_Common_Tools::setSocketBuffer (SVC_HANDLER_T::get_handle (),
-                                            SO_RCVBUF,
-                                            socket_configuration_p->bufferSize))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
-                  socket_configuration_p->bufferSize,
-                  SVC_HANDLER_T::get_handle ()));
-      return -1;
-    } // end IF
+    if (configuration_p->socketConfiguration->bufferSize)
+      if (!Net_Common_Tools::setSocketBuffer (SVC_HANDLER_T::get_handle (),
+                                              SO_RCVBUF,
+                                              configuration_p->socketConfiguration->bufferSize))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
+                    configuration_p->socketConfiguration->bufferSize,
+                    SVC_HANDLER_T::get_handle ()));
+        return -1;
+      } // end IF
 //  if (!Net_Common_Tools::setNoDelay (SVC_HANDLER_T::get_handle (),
 //                                     NET_DEFAULT_TCP_NODELAY))
 //  {
@@ -214,13 +216,13 @@ Net_UDPSocketHandler_T<SocketType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   if (!Net_Common_Tools::setLinger (SVC_HANDLER_T::get_handle (),
-                                    socket_configuration_p->linger,
+                                    configuration_p->socketConfiguration->linger,
                                     -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                (socket_configuration_p->linger ? ACE_TEXT ("true")
-                                                : ACE_TEXT ("false")),
+                (configuration_p->socketConfiguration->linger ? ACE_TEXT ("true")
+                                                              : ACE_TEXT ("false")),
                 SVC_HANDLER_T::get_handle ()));
     return -1;
   } // end IF
@@ -246,7 +248,7 @@ Net_UDPSocketHandler_T<SocketType,
   //    ACE_Event_Handler::Reference_Counting_Policy::DISABLED)
   //  return inherited::handle_close (handle_in, mask_in); // --> shortcut
 
-  // init return value
+  // initialize return value
   int result = 0;
 
   // *IMPORTANT NOTE*: due to reference counting, the

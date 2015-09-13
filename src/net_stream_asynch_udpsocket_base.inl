@@ -137,15 +137,15 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   //         (inherited4::configuration_.socketConfiguration.writeOnly), the
   //         base class still requires a valid handle to open the output stream
   result =
-//    inherited2::open (inherited4::configuration_.socketConfiguration.peerAddress, // local SAP
-//                      ACE_PROTOCOL_FAMILY_INET,                                   // protocol family
-//                      0,                                                          // protocol
-//                      1);                                                         // reuse_addr
-      inherited2::open (inherited4::configuration_.socketConfiguration.peerAddress, // remote SAP
-                        inherited4::configuration_.socketConfiguration.peerAddress, // local SAP
-                        ACE_PROTOCOL_FAMILY_INET,                                   // protocol family
-                        0,                                                          // protocol
-                        1);                                                         // reuse_addr
+    inherited2::open (inherited4::configuration_.socketConfiguration.peerAddress, // local SAP
+                      ACE_PROTOCOL_FAMILY_INET,                                   // protocol family
+                      0,                                                          // protocol
+                      1);                                                         // reuse_addr
+      //inherited2::open (inherited4::configuration_.socketConfiguration.peerAddress, // remote SAP
+      //                  inherited4::configuration_.socketConfiguration.peerAddress, // local SAP
+      //                  ACE_PROTOCOL_FAMILY_INET,                                   // protocol family
+      //                  0,                                                          // protocol
+      //                  1);                                                         // reuse_addr
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
