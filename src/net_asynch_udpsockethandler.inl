@@ -31,15 +31,13 @@
 
 template <typename ConfigurationType>
 Net_AsynchUDPSocketHandler_T<ConfigurationType>::Net_AsynchUDPSocketHandler_T ()
-//: inherited ()
- : /*inherited2 ()
-,*/ inherited3 (NULL,                          // event handler handle
-                ACE_Event_Handler::WRITE_MASK) // mask
+ : inherited ()
+ , inherited2 ()
+ , inherited3 (NULL,                          // event handler handle
+               ACE_Event_Handler::WRITE_MASK) // mask
  , counter_ (0)
  , inputStream_ ()
  , outputStream_ ()
-// , localSAP_ ()
-// , remoteSAP_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::Net_AsynchUDPSocketHandler_T"));
 

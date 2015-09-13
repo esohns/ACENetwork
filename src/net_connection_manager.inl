@@ -312,19 +312,20 @@ Net_Connection_Manager_T<AddressType,
     } // end FOR
     if (result)
       result->increase (); // increase reference count
-//    else
-//    {
-//      ACE_TCHAR buffer[BUFSIZ];
-//      ACE_OS::memset (buffer, 0, sizeof (buffer));
-//      // *TODO*: find a replacement for ACE_Netlink_Addr::addr_to_string
-//      int result_2 = peerAddress_in.addr_to_string (buffer, sizeof (buffer));
-//      if (result_2 == -1)
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("connection not found (address was: \"%s\"), aborting\n"),
-//                  ACE_TEXT (buffer)));
-//    } // end ELSE
+    else
+    {
+      ACE_TCHAR buffer[BUFSIZ];
+      ACE_OS::memset (buffer, 0, sizeof (buffer));
+      int result_2 = peerAddress_in.addr_to_string (buffer,
+                                                    sizeof (buffer),
+                                                    1);
+      if (result_2 == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("connection not found (address was: \"%s\"), aborting\n"),
+                  buffer));
+    } // end ELSE
   } // end lock scope
 
   return result;

@@ -22,15 +22,15 @@
 #define NET_COMMON_H
 
 #include "ace/INET_Addr.h"
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include "ace/Netlink_Addr.h"
-#endif
-#include "ace/Svc_Handler.h"
+//#include "ace/Svc_Handler.h"
 
 #include "stream_defines.h"
 
 #include "net_defines.h"
-//#include "net_itransportlayer.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include "net_netlinksockethandler.h"
+#endif
 
 // forward declarations
 class Stream_IAllocator;
@@ -61,9 +61,9 @@ enum Net_TransportLayerType
 // *NOTE*: this extends ACE_Svc_Handler_Close (see Svc_Handler.h)
 enum Net_Connection_CloseReason
 {
-  NET_CONNECTION_CLOSE_REASON_INVALID = CLOSE_DURING_NEW_CONNECTION,
+  NET_CONNECTION_CLOSE_REASON_INVALID = -1,
   ///////////////////////////////////////
-  NET_CONNECTION_CLOSE_REASON_INITIALIZATION,
+  NET_CONNECTION_CLOSE_REASON_INITIALIZATION = 0x02,
   NET_CONNECTION_CLOSE_REASON_USER_ABORT,
   ///////////////////////////////////////
   NET_CONNECTION_CLOSE_REASON_MAX
@@ -100,10 +100,10 @@ struct Net_SocketConfiguration
    , linger (NET_SOCKET_DEFAULT_LINGER)
  #if defined (ACE_WIN32) || defined (ACE_WIN64)
  #else
-   , netlinkAddress (ACE_sap_any_cast (const ACE_Netlink_Addr&))
+   , netlinkAddress ()
    , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
  #endif
-   , peerAddress (static_cast<u_short> (0), 
+   , peerAddress (static_cast<u_short> (0),
                   static_cast<ACE_UINT32> (INADDR_ANY))
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
    , writeOnly (false)
@@ -124,8 +124,9 @@ struct Net_SocketConfiguration
   int              bufferSize; // socket buffer size (I/O)
   bool             linger;
   // *TODO*: remove address information (pass as AddressType in open() instead)
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  ACE_Netlink_Addr netlinkAddress;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  Net_Netlink_Addr netlinkAddress;
   int              netlinkProtocol;
 #endif
   ACE_INET_Addr    peerAddress;

@@ -765,7 +765,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::make_handler"));
 
-  // init return value(s)
+  // initialize return value(s)
   CONNECTION_T* handler_p = NULL;
 
   // default behavior
@@ -782,7 +782,8 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
 /////////////////////////////////////////
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
@@ -791,7 +792,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_Client_AsynchConnector_T<HandlerType,
-                             ACE_Netlink_Addr,
+                             Net_Netlink_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
@@ -824,7 +825,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_Client_AsynchConnector_T<HandlerType,
-                             ACE_Netlink_Addr,
+                             Net_Netlink_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
@@ -845,7 +846,7 @@ template <typename HandlerType,
           typename UserDataType>
 bool
 Net_Client_AsynchConnector_T<HandlerType,
-                             ACE_Netlink_Addr,
+                             Net_Netlink_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
@@ -869,7 +870,7 @@ template <typename HandlerType,
           typename UserDataType>
 const HandlerConfigurationType&
 Net_Client_AsynchConnector_T<HandlerType,
-                             ACE_Netlink_Addr,
+                             Net_Netlink_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
@@ -891,7 +892,7 @@ template <typename HandlerType,
           typename UserDataType>
 bool
 Net_Client_AsynchConnector_T<HandlerType,
-                             ACE_Netlink_Addr,
+                             Net_Netlink_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
@@ -913,7 +914,7 @@ template <typename HandlerType,
           typename UserDataType>
 void
 Net_Client_AsynchConnector_T<HandlerType,
-                             ACE_Netlink_Addr,
+                             Net_Netlink_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
@@ -940,15 +941,15 @@ template <typename HandlerType,
           typename UserDataType>
 int
 Net_Client_AsynchConnector_T<HandlerType,
-                             ACE_Netlink_Addr,
+                             Net_Netlink_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
                              StreamType,
                              HandlerConfigurationType,
                              UserDataType>::validate_connection (const ACE_Asynch_Connect::Result& result_in,
-                                                                 const ACE_Netlink_Addr& remoteSAP_in,
-                                                                 const ACE_Netlink_Addr& localSAP_in)
+                                                                 const Net_Netlink_Addr& remoteSAP_in,
+                                                                 const Net_Netlink_Addr& localSAP_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
@@ -993,13 +994,13 @@ template <typename HandlerType,
           typename UserDataType>
 ACE_HANDLE
 Net_Client_AsynchConnector_T<HandlerType,
-                             ACE_Netlink_Addr,
+                             Net_Netlink_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
                              StreamType,
                              HandlerConfigurationType,
-                             UserDataType>::connect (const ACE_Netlink_Addr& address_in)
+                             UserDataType>::connect (const Net_Netlink_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
@@ -1039,7 +1040,7 @@ template <typename HandlerType,
           typename UserDataType>
 HandlerType*
 Net_Client_AsynchConnector_T<HandlerType,
-                             ACE_Netlink_Addr,
+                             Net_Netlink_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,

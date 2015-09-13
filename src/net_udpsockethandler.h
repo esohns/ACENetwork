@@ -21,7 +21,6 @@
 #ifndef NET_UDP_SOCKETHANDLER_T_H
 #define NET_UDP_SOCKETHANDLER_T_H
 
-#include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Reactor_Notification_Strategy.h"
 //#include "ace/SOCK_CODgram.h"

@@ -25,17 +25,16 @@
 #include "ace/Connector.h"
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
-#include "ace/Netlink_Addr.h"
 #include "ace/SOCK_Connector.h"
 
 #include "net_common.h"
 #include "net_iconnectionmanager.h"
-//#include "net_socket_common.h"
+#include "net_netlinksockethandler.h"
 #include "net_socketconnection_base.h"
-//#include "net_stream_common.h"
 #include "net_transportlayer_netlink.h"
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 template <typename HandlerType,
           ///////////////////////////////
           typename ConfigurationType,
@@ -49,7 +48,7 @@ template <typename HandlerType,
 class Net_NetlinkConnection_T
  : public Net_SocketConnectionBase_T<HandlerType,
                                      ////
-                                     ACE_Netlink_Addr,
+                                     Net_Netlink_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
@@ -75,7 +74,7 @@ class Net_NetlinkConnection_T
                              ACE_SOCK_CONNECTOR>;
 
  public:
-  typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
+  typedef Net_IConnectionManager_T<Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -98,19 +97,20 @@ class Net_NetlinkConnection_T
                              ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
    // override / implement (part of) Net_INetlinkTransportLayer
-   virtual bool initialize (Net_ClientServerRole,            // role
-                            const Net_SocketConfiguration&); // socket configuration
-   virtual void finalize ();
+//   virtual bool initialize (Common_DispatchType,             // dispatch
+//                            Net_ClientServerRole,            // role
+//                            const Net_SocketConfiguration&); // socket configuration
+//   virtual void finalize ();
    virtual void info (ACE_HANDLE&,              // return value: handle
-                      ACE_Netlink_Addr&,        // return value: local SAP
-                      ACE_Netlink_Addr&) const; // return value: remote SAP
+                      Net_Netlink_Addr&,        // return value: local SAP
+                      Net_Netlink_Addr&) const; // return value: remote SAP
    virtual unsigned int id () const;
    virtual void dump_state () const;
 
  private:
   typedef Net_SocketConnectionBase_T<HandlerType,
                                      ////
-                                     ACE_Netlink_Addr,
+                                     Net_Netlink_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
@@ -145,7 +145,7 @@ template <typename HandlerType,
 class Net_AsynchNetlinkConnection_T
  : public Net_AsynchSocketConnectionBase_T<HandlerType,
                                            ////
-                                           ACE_Netlink_Addr,
+                                           Net_Netlink_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
@@ -170,7 +170,7 @@ class Net_AsynchNetlinkConnection_T
                                                                   UserDataType> >;
 
  public:
-  typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
+  typedef Net_IConnectionManager_T<Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -182,12 +182,13 @@ class Net_AsynchNetlinkConnection_T
   virtual ~Net_AsynchNetlinkConnection_T ();
 
   // implement (part of) Net_INetlinkTransportLayer
-  virtual bool initialize (Net_ClientServerRole,            // role
-                           const Net_SocketConfiguration&); // configuration
-  virtual void finalize ();
-  virtual void info (ACE_HANDLE&,              // return value: handle
-                     ACE_Netlink_Addr&,        // return value: local SAP
-                     ACE_Netlink_Addr&) const; // return value: remote SAP
+//  virtual bool initialize (Common_DispatchType,             // dispatch
+//                           Net_ClientServerRole,            // role
+//                           const Net_SocketConfiguration&); // configuration
+//  virtual void finalize ();
+//  virtual void info (ACE_HANDLE&,              // return value: handle
+//                     Net_Netlink_Addr&,        // return value: local SAP
+//                     Net_Netlink_Addr&) const; // return value: remote SAP
   virtual unsigned int id () const;
   virtual void dump_state () const;
 
@@ -206,7 +207,7 @@ class Net_AsynchNetlinkConnection_T
  private:
   typedef Net_AsynchSocketConnectionBase_T<HandlerType,
                                            ////
-                                           ACE_Netlink_Addr,
+                                           Net_Netlink_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,

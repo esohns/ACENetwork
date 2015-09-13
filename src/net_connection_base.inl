@@ -275,7 +275,7 @@ Net_ConnectionBase_T<AddressType,
   if (manager_ && isRegistered_)
   {
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    ACE_INET_Addr local_SAP, remote_SAP;
+    AddressType local_SAP, remote_SAP;
     try
     {
       this->info (handle,

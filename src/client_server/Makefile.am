@@ -18,13 +18,11 @@ include_HEADERS = \
   net_client_connector.h \
   net_client_defines.h \
   net_client_exports.h \
-  net_client_iconnector.h \
   net_server_asynchlistener.h \
   net_server_asynchlistener.inl \
   net_server_common_tools.h \
   net_server_defines.h \
   net_server_exports.h \
-  net_server_ilistener.h \
   net_server_listener.h \
   net_server_listener.inl
 
@@ -41,7 +39,6 @@ libACENetwork_Client_la_SOURCES = \
   net_client_connector.inl \
   net_client_defines.h \
   net_client_exports.h \
-  net_client_iconnector.h \
   stdafx.cpp \
   stdafx.h
 libACENetwork_Client_la_CPPFLAGS = \
@@ -60,7 +57,6 @@ libACENetwork_Server_la_SOURCES = \
   net_server_common_tools.h \
   net_server_defines.h \
   net_server_exports.h \
-  net_server_ilistener.h \
   net_server_listener.cpp \
   net_server_listener.h \
   net_server_listener.inl \

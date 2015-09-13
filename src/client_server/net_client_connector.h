@@ -24,17 +24,14 @@
 #include "ace/Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include "ace/Netlink_Addr.h"
-#endif
 #include "ace/SOCK_Connector.h"
 
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//#else
-//#include "net_netlinkconnection_base.h"
-//#endif
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include "net_netlinksockethandler.h"
+#endif
 #include "net_udpconnection_base.h"
 
 template <typename HandlerType,
@@ -247,7 +244,8 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 
 /////////////////////////////////////////
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 // partial specialization (for Netlink)
 template <typename HandlerType,
           ///////////////////////////////
@@ -261,7 +259,7 @@ template <typename HandlerType,
           typename UserDataType>
 class Net_Client_Connector_T<HandlerType,
                              ////////////
-                             ACE_Netlink_Addr,
+                             Net_Netlink_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
@@ -270,16 +268,16 @@ class Net_Client_Connector_T<HandlerType,
                              HandlerConfigurationType,
                              ////////////
                              UserDataType>
- : public Net_IConnector_T<ACE_Netlink_Addr,
+ : public Net_IConnector_T<Net_Netlink_Addr,
                            HandlerConfigurationType>
 {
  public:
   typedef StreamType STREAM_T;
-  typedef Net_IConnection_T<ACE_Netlink_Addr,
+  typedef Net_IConnection_T<Net_Netlink_Addr,
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_ISocketConnection_T<ACE_Netlink_Addr,
+  typedef Net_ISocketConnection_T<Net_Netlink_Addr,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
@@ -288,13 +286,13 @@ class Net_Client_Connector_T<HandlerType,
                                   Net_SocketConfiguration,
                                   ///////
                                   HandlerConfigurationType> ISOCKET_CONNECTION_T;
-  typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
+  typedef Net_IConnectionManager_T<Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Net_IConnector_T<ACE_Netlink_Addr,
+  typedef Net_IConnector_T<Net_Netlink_Addr,
                            HandlerConfigurationType> INTERFACE_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T*, // connection manager handle
@@ -309,7 +307,7 @@ class Net_Client_Connector_T<HandlerType,
   virtual const HandlerConfigurationType& get () const;
   // *NOTE*: this is just a stub
   virtual void abort ();
-  virtual ACE_HANDLE connect (const ACE_Netlink_Addr&);
+  virtual ACE_HANDLE connect (const Net_Netlink_Addr&);
 
  protected:
   // override default instantiation strategy
@@ -317,7 +315,7 @@ class Net_Client_Connector_T<HandlerType,
 
  private:
   // convenient typedefs
-  typedef Net_IConnector_T<ACE_Netlink_Addr,
+  typedef Net_IConnector_T<Net_Netlink_Addr,
                            HandlerConfigurationType> ICONNECTOR_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())

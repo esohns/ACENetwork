@@ -725,7 +725,8 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 
 /////////////////////////////////////////
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
@@ -734,7 +735,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_Client_Connector_T<HandlerType,
-                       ACE_Netlink_Addr,
+                       Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
@@ -758,7 +759,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_Client_Connector_T<HandlerType,
-                       ACE_Netlink_Addr,
+                       Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
@@ -779,7 +780,7 @@ template <typename HandlerType,
           typename UserDataType>
 bool
 Net_Client_Connector_T<HandlerType,
-                       ACE_Netlink_Addr,
+                       Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
@@ -803,7 +804,7 @@ template <typename HandlerType,
           typename UserDataType>
 const HandlerConfigurationType&
 Net_Client_Connector_T<HandlerType,
-                       ACE_Netlink_Addr,
+                       Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
@@ -825,7 +826,7 @@ template <typename HandlerType,
           typename UserDataType>
 bool
 Net_Client_Connector_T<HandlerType,
-                       ACE_Netlink_Addr,
+                       Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
@@ -847,7 +848,7 @@ template <typename HandlerType,
           typename UserDataType>
 void
 Net_Client_Connector_T<HandlerType,
-                       ACE_Netlink_Addr,
+                       Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
@@ -872,13 +873,13 @@ template <typename HandlerType,
           typename UserDataType>
 ACE_HANDLE
 Net_Client_Connector_T<HandlerType,
-                       ACE_Netlink_Addr,
+                       Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
                        StreamType,
                        HandlerConfigurationType,
-                       UserDataType>::connect (const ACE_Netlink_Addr& address_in)
+                       UserDataType>::connect (const Net_Netlink_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
 
@@ -901,11 +902,10 @@ Net_Client_Connector_T<HandlerType,
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
-//    result = address_in.addr_to_string (buffer, sizeof (buffer));
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+    result = address_in.addr_to_string (buffer, sizeof (buffer));
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::open(\"%s\"): \"%m\", aborting\n"),
                 buffer));
@@ -924,7 +924,7 @@ template <typename HandlerType,
           typename UserDataType>
 int
 Net_Client_Connector_T<HandlerType,
-                       ACE_Netlink_Addr,
+                       Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,

@@ -46,7 +46,6 @@ include_HEADERS = \
   net_packet_headers.h \
   net_protocol_layer.h \
   net_remote_comm.h \
-  net_socket_common.h \
   net_socketconnection_base.h \
   net_socketconnection_base.inl \
   net_sockethandler_base.h \
@@ -125,7 +124,6 @@ libACENetwork_la_SOURCES = \
   net_protocol_layer.cpp \
   net_protocol_layer.h \
   net_remote_comm.h \
-  net_socket_common.h \
   net_socketconnection_base.cpp \
   net_socketconnection_base.h \
   net_socketconnection_base.inl \
@@ -168,7 +166,6 @@ libACENetwork_la_SOURCES = \
   net_udpsockethandler.inl
 #  stdafx.cpp \
 #  stdafx.h
-
 libACENetwork_la_CPPFLAGS = \
   $(AM_CPPFLAGS) \
   -I$(top_srcdir)/modules/libCommon/src \

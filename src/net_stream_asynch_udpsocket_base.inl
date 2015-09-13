@@ -1166,10 +1166,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   inherited4::configuration_.streamConfiguration.sessionID =
     static_cast<unsigned int> (inherited2::get_handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (inherited4::configuration_.streamConfiguration.sessionID,
-                           inherited4::configuration_.streamConfiguration,
-                           inherited4::configuration_.protocolConfiguration,
-                           inherited4::configuration_.streamSessionData))
+  if (!stream_.initialize (inherited4::configuration_.streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -1427,12 +1424,13 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   int result = -1;
 
   handle_out = inherited2::get_handle ();
-  result = localSAP_out.set (static_cast<u_short> (0),
-                             static_cast<ACE_UINT32> (INADDR_NONE));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
-                INADDR_NONE));
+//  result = localSAP_out.set (static_cast<u_short> (0),
+//                             static_cast<ACE_UINT32> (INADDR_NONE));
+//  if (result == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
+//                INADDR_NONE));
+  localSAP_out = ACE_Addr::sap_any;
   if (!inherited4::configuration_.socketConfiguration.writeOnly)
   {
     result = inherited2::get_local_addr (localSAP_out);
@@ -1714,36 +1712,35 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
+  AddressType local_address, peer_address;
   info (handle,
-        local_inet_address,
-        peer_inet_address);
+        local_address,
+        peer_address);
 
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  result = local_inet_address.addr_to_string (buffer,
-                                              sizeof (buffer));
+  std::string local_address_string;
+  result = local_address.addr_to_string (buffer,
+                                         sizeof (buffer),
+                                         1);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
   else
-    local_address = buffer;
+    local_address_string = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-  result = peer_inet_address.addr_to_string (buffer,
-                                             sizeof (buffer));
+  result = peer_address.addr_to_string (buffer,
+                                        sizeof (buffer),
+                                        1);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address = buffer;
+                ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
+              ACE_TEXT (local_address_string.c_str ()),
+              buffer));
 }
 
 template <typename AddressType,

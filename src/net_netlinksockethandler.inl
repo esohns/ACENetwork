@@ -128,126 +128,81 @@ Net_NetlinkSocketHandler_T<ConfigurationType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkSocketHandler_T::open"));
 
+  int result = -1;
+
   // sanity check(s)
   ACE_ASSERT (arg_in);
-//  if (!manager_)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("invalid connection manager, aborting\n")));
-//    return -1;
-//  } // end IF
 
-  int result = -1;
-  Net_SocketConfiguration* socket_configuration_p =
-      reinterpret_cast<Net_SocketConfiguration*> (arg_in);
-  ACE_ASSERT (socket_configuration_p);
+  ConfigurationType* configuration_p =
+    reinterpret_cast<ConfigurationType*> (arg_in);
+  ACE_ASSERT (configuration_p);
+  ACE_ASSERT (configuration_p->socketConfiguration);
 
-  // step1: open socket
+  // step1: open socket ?
   result =
-      inherited2::peer_.open (socket_configuration_p->netlinkAddress, // local SAP
-                              ACE_PROTOCOL_FAMILY_NETLINK,            // protocol family
-                              NETLINK_GENERIC);                       // protocol
+      inherited2::peer_.open (configuration_p->socketConfiguration->netlinkAddress, // local SAP
+                              ACE_PROTOCOL_FAMILY_NETLINK,                          // protocol family
+                              NETLINK_GENERIC);                                     // protocol
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    std::string local_address;
-    // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
-//    if (local_SAP.addr_to_string (buffer,
-//                                  sizeof (buffer)) == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
-    local_address = buffer;
+    result =
+        configuration_p->socketConfiguration->netlinkAddress.addr_to_string (buffer,
+                                                                             sizeof (buffer),
+                                                                             1);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (local_address.c_str ())));
+                buffer));
     return -1;
   } // end IF
 
   // step2: tweak socket
-  if (socket_configuration_p->bufferSize)
+  if (configuration_p->socketConfiguration->bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (get_handle (),
                                             SO_RCVBUF,
-                                            socket_configuration_p->bufferSize))
+                                            configuration_p->socketConfiguration->bufferSize))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
-                  socket_configuration_p->bufferSize,
-                  get_handle ()));
+                  configuration_p->socketConfiguration->bufferSize,
+                  SVC_HANDLER_T::get_handle ()));
       return -1;
     } // end IF
-  if (!Net_Common_Tools::setNoDelay (get_handle (),
+  if (!Net_Common_Tools::setNoDelay (SVC_HANDLER_T::get_handle (),
                                      NET_SOCKET_DEFAULT_TCP_NODELAY))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
                 (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
                                                 : ACE_TEXT ("false")),
-                get_handle ()));
+                SVC_HANDLER_T::get_handle ()));
     return -1;
   } // end IF
-  if (!Net_Common_Tools::setKeepAlive (get_handle (),
+  if (!Net_Common_Tools::setKeepAlive (SVC_HANDLER_T::get_handle (),
                                        NET_SOCKET_DEFAULT_TCP_KEEPALIVE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
                 (NET_SOCKET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true")
                                                   : ACE_TEXT ("false")),
-                get_handle ()));
+                SVC_HANDLER_T::get_handle ()));
     return -1;
   } // end IF
-  if (!Net_Common_Tools::setLinger (get_handle (),
-                                    socket_configuration_p->linger,
+  if (!Net_Common_Tools::setLinger (SVC_HANDLER_T::get_handle (),
+                                    configuration_p->socketConfiguration->linger,
                                     -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                (socket_configuration_p->linger ? ACE_TEXT ("true")
-                                                : ACE_TEXT ("false")),
-                get_handle ()));
+                (configuration_p->socketConfiguration->linger ? ACE_TEXT ("true")
+                                                              : ACE_TEXT ("false")),
+                SVC_HANDLER_T::get_handle ()));
     return -1;
   } // end IF
-
-  // register with the reactor
-  if (inherited2::open (arg_in) == -1)
-  {
-    // *IMPORTANT NOTE*: this can happen when the connection handle is still
-    // registered with the reactor (i.e. the reactor is still processing events
-    // on a file descriptor that has been closed an is now being reused by the
-    // system)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Svc_Handler::open(%@): \"%m\" (handle was: %d), aborting\n"),
-                arg_in,
-                get_handle ()));
-    return -1;
-  } // end IF
-
-  // *NOTE*: registered with the reactor (READ_MASK) at this point
-
-//   // ...register for writes (WRITE_MASK) as well
-//   if (reactor ()->register_handler (this,
-//                                     ACE_Event_Handler::WRITE_MASK) == -1)
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("failed to ACE_Reactor::register_handler(WRITE_MASK): \"%m\", aborting\n")));
-//     return -1;
-//   } // end IF
-
-//  if (manager_)
-//  {
-//    // (try to) register with the connection manager...
-//    // *WARNING*: as we register BEFORE the connection has fully opened, there
-//    // is a small window for races...
-//    try
-//    {
-//      isRegistered_ = manager_->registerConnection (this);
-//    }
-//    catch (...)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("caught exception in Net_IConnectionManager::registerConnection(), continuing\n")));
-//    }
-//  } // end IF
 
   return 0;
 }
@@ -263,11 +218,11 @@ Net_NetlinkSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle_i
   // *IMPORTANT NOTE*: handle failed connects (e.g. connection refused)
   // as well... (see below). This may change in the future, so keep the
   // alternate implementation
-  if (inherited2::reference_counting_policy ().value () ==
-      ACE_Event_Handler::Reference_Counting_Policy::DISABLED)
-    return inherited2::handle_close (); // --> shortcut
+//  if (inherited2::reference_counting_policy ().value () ==
+//      ACE_Event_Handler::Reference_Counting_Policy::DISABLED)
+//    return inherited2::handle_close (); // --> shortcut
 
-  // init return value
+  // initialize return value
   int result = 0;
 
   // *IMPORTANT NOTE*: due to reference counting, the
@@ -300,11 +255,6 @@ Net_NetlinkSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle_i
                                              // - asynch abort
                                              // - ... ?
     {
-      if (handle_in != ACE_INVALID_HANDLE)
-      {
-        // *TODO*: select case ?
-        break;
-      } // end IF
       // *TODO*: validate (failed) connect/accept case
 //      else if (!isRegistered_)
 //      {
@@ -332,18 +282,27 @@ Net_NetlinkSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle_i
 //        // - close the socket (--> done in dtor (see above))
 //      } // end ELSE IF
 
-      // (failed) accept / asynch abort case
+      // asynch abort case
 
-      ACE_ASSERT (inherited2::reactor ());
-      result = inherited2::reactor ()->remove_handler (this,
-                                                       (mask_in |
-                                                        ACE_Event_Handler::DONT_CALL));
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d), continuing\n"),
-                    this,
-                    mask_in));
+      if (handle_in != ACE_INVALID_HANDLE)
+      {
+        result = inherited2::peer_.close ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SOCK_IO::close (): %d, continuing\n")));
+      } // end IF
 
+      //      ACE_Reactor* reactor_p = inherited2::reactor ();
+      //      ACE_ASSERT (reactor_p);
+      //      result =
+      //        reactor_p->remove_handler (handle_in,
+      //                                   (mask_in |
+      //                                    ACE_Event_Handler::DONT_CALL));
+      //      if (result == -1)
+      //        ACE_DEBUG ((LM_ERROR,
+      //                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@/%d, %d), continuing\n"),
+      //                    this, handle_in,
+      //                    mask_in));
       break;
     }
     default:

@@ -33,6 +33,7 @@
 #include "net_itransportlayer.h"
 
 // forward declarations
+class ACE_Notification_Strategy;
 enum Net_Connection_Status;
 
 template <typename AddressType,

@@ -24,15 +24,13 @@
 #include "ace/Asynch_Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include "ace/Netlink_Addr.h"
-#endif
 
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
-//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-//#include "net_netlinkconnection_base.h"
-//#endif
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include "net_netlinksockethandler.h"
+#endif
 #include "net_udpconnection_base.h"
 
 template <typename HandlerType,
@@ -254,7 +252,8 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
 /////////////////////////////////////////
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 // partial specialization (for Netlink)
 template <typename HandlerType,
           ///////////////////////////////
@@ -268,7 +267,7 @@ template <typename HandlerType,
           typename UserDataType>
 class Net_Client_AsynchConnector_T<HandlerType,
                                    //////
-                                   ACE_Netlink_Addr,
+                                   Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -278,16 +277,16 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    //////
                                    UserDataType>
  : public ACE_Asynch_Connector<HandlerType>
- , public Net_IConnector_T<ACE_Netlink_Addr,
+ , public Net_IConnector_T<Net_Netlink_Addr,
                            HandlerConfigurationType>
 {
  public:
   typedef StreamType STREAM_T;
-  typedef Net_IConnection_T<ACE_Netlink_Addr,
+  typedef Net_IConnection_T<Net_Netlink_Addr,
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_ISocketConnection_T<ACE_Netlink_Addr,
+  typedef Net_ISocketConnection_T<Net_Netlink_Addr,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
@@ -296,7 +295,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                   Net_SocketConfiguration,
                                   ///////
                                   HandlerConfigurationType> ISOCKET_CONNECTION_T;
-  typedef Net_IConnectionManager_T<ACE_Netlink_Addr,
+  typedef Net_IConnectionManager_T<Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -309,8 +308,8 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
   // override default connect strategy
   virtual int validate_connection (const ACE_Asynch_Connect::Result&, // result
-                                   const ACE_Netlink_Addr&,           // remote address
-                                   const ACE_Netlink_Addr&);          // local address
+                                   const Net_Netlink_Addr&,           // remote address
+                                   const Net_Netlink_Addr&);          // local address
 
   // implement Net_Client_IConnector_T
 
@@ -322,7 +321,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
   virtual bool useReactor () const; // ? : uses proactor
 
   virtual void abort ();
-  virtual ACE_HANDLE connect (const ACE_Netlink_Addr&);
+  virtual ACE_HANDLE connect (const Net_Netlink_Addr&);
 
  protected:
   // override default creation strategy
@@ -331,7 +330,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
  private:
   typedef ACE_Asynch_Connector<HandlerType> inherited;
 
-  typedef Net_IConnector_T<ACE_Netlink_Addr,
+  typedef Net_IConnector_T<Net_Netlink_Addr,
                            HandlerConfigurationType> ICONNECTOR_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
