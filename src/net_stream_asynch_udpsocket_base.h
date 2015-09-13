@@ -32,14 +32,12 @@
 
 #include "stream_imodule.h"
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 #include "net_asynch_netlinksockethandler.h"
 #endif
 #include "net_connection_base.h"
 #include "net_iconnectionmanager.h"
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include "net_netlinksockethandler.h"
-#endif
 
 template <typename HandlerType,
           typename SocketType,
@@ -145,10 +143,7 @@ class Net_StreamAsynchUDPSocketBase_T
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 // partial specialization (for Netlink)
-template <typename HandlerType,
-          typename SocketType,
-          ///////////////////////////////
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -172,7 +167,9 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                       UserDataType,
                                       ///
                                       ModuleConfigurationType,
-                                      ModuleHandlerConfigurationType>
+                                      ModuleHandlerConfigurationType,
+                                      ///
+                                      HandlerConfigurationType>
  : public Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>
  , public Net_SOCK_Netlink
  , public ACE_Event_Handler

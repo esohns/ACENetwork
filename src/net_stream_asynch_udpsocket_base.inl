@@ -967,9 +967,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1000,9 +998,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1049,9 +1045,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 //    buffer_->release ();
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1258,9 +1252,7 @@ close:
                 ACE_TEXT ("failed to Net_StreamAsynchUDPSocketBase_T::handle_close(): \"%m\", continuing\n")));
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1336,9 +1328,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   return 0;
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1408,9 +1398,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   return result;
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1456,9 +1444,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
     inherited4::configuration_.socketConfiguration.peerAddress;
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1489,9 +1475,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 #endif
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1518,9 +1502,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   return this;
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1550,9 +1532,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   return 0;
 }
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1604,9 +1584,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 //  return result;
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1638,9 +1616,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   inherited::counter_.wait (0);
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1677,9 +1653,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   return false;
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1714,9 +1688,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   }
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1774,9 +1746,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
               ACE_TEXT (peer_address.c_str ())));
 }
 
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
