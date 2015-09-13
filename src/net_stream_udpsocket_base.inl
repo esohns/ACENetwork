@@ -176,14 +176,14 @@ Net_StreamUDPSocketBase_T<HandlerType,
   handle_socket = true;
 
   // step2: initialize/start stream
-  
+
   // step2a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
   if (!configuration_p->streamConfiguration.useThreadPerConnection)
     configuration_p->streamConfiguration.notificationStrategy =
     &(inherited::notificationStrategy_);
-  
+
   // step2b: initialize final module (if any)
   if (configuration_p->streamConfiguration.module)
   {
@@ -1435,9 +1435,9 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   //// *NOTE*: as soon as this returns, data starts arriving at handle_input()
 
   // step2: initialize/start stream
-  // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
+  // *TODO*: remove type inferences
   // step2a: connect stream head message queue with the reactor notification
   // pipe ?
   if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
@@ -1510,11 +1510,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   session_id =
       static_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ()); // (== socket handle)
 #endif
-  // *TODO*: this clearly is a design glitch
-  if (!stream_.initialize (session_id,
-                           inherited2::configuration_.streamConfiguration,
-                           inherited2::configuration_.protocolConfiguration,
-                           inherited2::configuration_.streamSessionData))
+  if (!stream_.initialize (inherited2::configuration_.streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
