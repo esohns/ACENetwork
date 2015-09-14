@@ -28,6 +28,7 @@
 #include "ace/Netlink_Addr.h"
 #include "ace/Notification_Strategy.h"
 
+#include "net_netlinksockethandler.h"
 #include "net_sockethandler_base.h"
 
 template <typename ConfigurationType>
@@ -62,8 +63,8 @@ class Net_AsynchNetlinkSocketHandler_T
 
   ACE_Asynch_Read_Dgram  inputStream_;
   ACE_Asynch_Write_Dgram outputStream_;
-  ACE_Netlink_Addr       localSAP_;
-  ACE_Netlink_Addr       remoteSAP_;
+  Net_Netlink_Addr       localSAP_;
+  Net_Netlink_Addr       remoteSAP_;
 
  private:
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
