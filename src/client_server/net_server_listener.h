@@ -77,7 +77,7 @@ class Net_Server_Listener_T
   // the return value will be returned from handle_input()."
   virtual int handle_accept_error (void);
 
-  // implement Net_IListener_T
+  // implement (part of) Net_IListener_T
   // *WARNING*: this API is NOT re-entrant !
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
@@ -111,6 +111,9 @@ class Net_Server_Listener_T
   ACE_UNIMPLEMENTED_FUNC (Net_Server_Listener_T (const Net_Server_Listener_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Server_Listener_T& operator= (const Net_Server_Listener_T&))
   virtual ~Net_Server_Listener_T ();
+
+  // implement (part of) Common_IControl_T
+  virtual void initialize ();
 
   ConfigurationType        configuration_;
   HandlerConfigurationType handlerConfiguration_;

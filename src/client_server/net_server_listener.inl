@@ -143,6 +143,29 @@ Net_Server_Listener_T<HandlerType,
                       StateType,
                       StreamType,
                       HandlerConfigurationType,
+                      UserDataType>::initialize ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::initialize"));
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+  ACE_NOTREACHED (return;)
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+void
+Net_Server_Listener_T<HandlerType,
+                      AddressType,
+                      ConfigurationType,
+                      StateType,
+                      StreamType,
+                      HandlerConfigurationType,
                       UserDataType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::start"));

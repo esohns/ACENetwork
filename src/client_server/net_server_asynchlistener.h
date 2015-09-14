@@ -116,6 +116,9 @@ class Net_Server_AsynchListener_T
   ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T& operator= (const Net_Server_AsynchListener_T&))
   virtual ~Net_Server_AsynchListener_T ();
 
+  // implement (part of) Common_IControl_T
+  virtual void initialize ();
+
 //  // override default accept strategy
 //  // *NOTE*: ACE doesn't properly handle cancellation (dangling bound port on listen socket) -->
 //  // fix this here... --> *TODO*: send patch to ACE maintainers
