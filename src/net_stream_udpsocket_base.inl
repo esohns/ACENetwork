@@ -704,11 +704,11 @@ Net_StreamUDPSocketBase_T<HandlerType,
       // - connection has been closed in the meantime
       // - queue has been deactivated
       int error = ACE_OS::last_error ();
-      if ((error != EAGAIN) ||  // <-- connection has been closed in the meantime
+      if ((error != EAGAIN) &&  // <-- connection has been closed in the meantime
           (error != ESHUTDOWN)) // <-- queue has been deactivated
         ACE_DEBUG ((LM_ERROR,
                     (inherited2::configuration_.streamConfiguration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
-                                                                                                               : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
+                                                                                           : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
 
       // clean up
       if (serializeOutput_)
