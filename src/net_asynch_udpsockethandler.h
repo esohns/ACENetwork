@@ -68,8 +68,6 @@ class Net_AsynchUDPSocketHandler_T
   Common_ReferenceCounterBase counter_;
   ACE_Asynch_Read_Dgram       inputStream_;
   ACE_Asynch_Write_Dgram      outputStream_;
-//  ACE_INET_Addr               localSAP_;
-//  ACE_INET_Addr               remoteSAP_;
 
  private:
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;

@@ -93,7 +93,7 @@ if ! test -x $PKGCONFIG; then
 fi
 echo $(basename $PKGCONFIG) $($(basename $PKGCONFIG) --version | head -1) found
 
-autoreconf$AC_POSTFIX --force --install --symlink --warnings=all
+autoreconf$AC_POSTFIX --force --install --symlink --no-recursive --warnings=all
 [ $? -ne 0 ] && echo 'failed to autoreconf, aborting' && exit 1
 #autoconf$AC_POSTFIX
 #autoheader$AC_POSTFIX

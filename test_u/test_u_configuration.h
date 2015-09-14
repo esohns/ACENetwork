@@ -29,16 +29,14 @@
 #include "stream_common.h"
 #include "stream_iallocator.h"
 
-//#include "net_common.h"
-//#include "net_connection_manager_common.h"
+#include "net_common.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
-#include "net_stream_common.h"
 
 // forward declarations
 struct Net_Configuration;
 struct Net_ConnectionState;
-//class Net_Stream;
+typedef Stream_Statistic Net_RuntimeStatistic_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,

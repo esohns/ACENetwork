@@ -26,13 +26,11 @@
 #include "net_iconnector.h"
 
 #include "net_client_asynchconnector.h"
-//#include "net_client_common.h"
 #include "net_client_connector.h"
 
-#include "net_configuration.h"
-#include "net_stream.h"
-#include "net_stream_common.h"
-#include "net_tcpconnection.h"
+#include "test_u_configuration.h"
+#include "test_u_stream.h"
+#include "test_u_tcpconnection.h"
 
 // forward declarations
 struct IRC_Client_ConnectionState;
@@ -54,7 +52,7 @@ typedef Net_Client_AsynchConnector_T<Net_AsynchTCPConnection,
                                      ////
                                      Net_SocketHandlerConfiguration,
                                      ////
-                                     Net_StreamUserData> Net_Client_AsynchConnector_t;
+                                     Net_UserData> Net_Client_AsynchConnector_t;
 typedef Net_Client_Connector_T<Net_TCPConnection,
                                //////////
                                ACE_INET_Addr,
@@ -65,6 +63,6 @@ typedef Net_Client_Connector_T<Net_TCPConnection,
                                //////////
                                Net_SocketHandlerConfiguration,
                                //////////
-                               Net_StreamUserData> Net_Client_Connector_t;
+                               Net_UserData> Net_Client_Connector_t;
 
 #endif

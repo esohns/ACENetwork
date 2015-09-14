@@ -58,7 +58,6 @@
 
 #include "stream_allocatorheap.h"
 
-#include "net_connection_manager_common.h"
 #include "net_iconnector.h"
 #include "net_macros.h"
 
@@ -70,11 +69,12 @@
 #include "libacenetwork_config.h"
 #endif
 
-#include "net_callbacks.h"
-#include "net_common.h"
-#include "net_defines.h"
-#include "net_eventhandler.h"
-#include "net_module_eventhandler.h"
+#include "test_u_callbacks.h"
+#include "test_u_common.h"
+#include "test_u_connection_manager_common.h"
+#include "test_u_defines.h"
+#include "test_u_eventhandler.h"
+#include "test_u_module_eventhandler.h"
 
 #include "net_client_signalhandler.h"
 #include "net_client_timeouthandler.h"
@@ -513,8 +513,8 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     &configuration.protocolConfiguration;
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
-  configuration.streamConfiguration.userData = &configuration.streamUserData;
-  configuration.streamUserData.configuration = &configuration;
+  configuration.streamConfiguration.userData = &configuration.userData;
+  configuration.userData.configuration = &configuration;
   // ********************** socket configuration data **************************
   // ****************** socket handler configuration data **********************
   configuration.socketHandlerConfiguration.messageAllocator =
@@ -524,7 +524,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   configuration.socketHandlerConfiguration.statisticReportingInterval =
     configuration.streamConfiguration.statisticReportingInterval;
   configuration.socketHandlerConfiguration.userData =
-    &configuration.streamUserData;
+    &configuration.userData;
 
   //  config.useThreadPerConnection = false;
   //  config.serializeOutput = false;
@@ -575,7 +575,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // step0d: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   connection_manager_p->set (configuration,
-                             &configuration.streamUserData);
+                             &configuration.userData);
 
   // step0e: initialize action timer
   configuration.signalHandlerConfiguration.connector = connector_p;
@@ -690,7 +690,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
       return;
     } // end IF
-    BOOL was_visible_b = ShowWindow (window_p, SW_HIDE); 
+    BOOL was_visible_b = ShowWindow (window_p, SW_HIDE);
 #endif
   } // end IF
 

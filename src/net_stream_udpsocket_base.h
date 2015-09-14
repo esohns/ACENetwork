@@ -54,7 +54,9 @@ template <typename HandlerType,
           typename UserDataType,
           ///////////////////////////////
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          ///////////////////////////////
+          typename HandlerConfigurationType>
 class Net_StreamUDPSocketBase_T
  : public HandlerType
  , public Net_ConnectionBase_T<AddressType,
@@ -76,7 +78,9 @@ class Net_StreamUDPSocketBase_T
                                                        UserDataType,
 
                                                        ModuleConfigurationType,
-                                                       ModuleHandlerConfigurationType>,
+                                                       ModuleHandlerConfigurationType,
+
+                                                       HandlerConfigurationType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
@@ -166,11 +170,10 @@ class Net_StreamUDPSocketBase_T
 
 /////////////////////////////////////////
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 // partial specialization (for Netlink)
-template <typename HandlerConfigurationType,
-          ///////////////////////////////
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -179,7 +182,9 @@ template <typename HandlerConfigurationType,
           typename UserDataType,
           ///////////////////////////////
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          ///////////////////////////////
+          typename HandlerConfigurationType>
 class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                                 /////////
                                 AddressType,
@@ -191,7 +196,9 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                 UserDataType,
                                 /////////
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>
+                                ModuleHandlerConfigurationType,
+                                /////////
+                                HandlerConfigurationType>
  : public Net_NetlinkSocketHandler_T<HandlerConfigurationType>
  , public Net_ConnectionBase_T<AddressType,
                                ConfigurationType,
@@ -201,7 +208,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                //////////
                                UserDataType>
 {
-  friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerConfigurationType,
+  friend class ACE_Connector<Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
                                                        AddressType,
                                                        ConfigurationType,
@@ -212,7 +219,9 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                                        UserDataType,
 
                                                        ModuleConfigurationType,
-                                                       ModuleHandlerConfigurationType>,
+                                                       ModuleHandlerConfigurationType,
+
+                                                       HandlerConfigurationType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
@@ -246,13 +255,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   virtual void report () const;
   virtual void dump_state () const;
 
- protected:
-  typedef Net_IConnectionManager_T<AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   //////
-                                   UserDataType> ICONNECTION_MANAGER_T;
+  // convenient types
   typedef Net_ConnectionBase_T<AddressType,
                                ConfigurationType,
                                StateType,
@@ -260,6 +263,18 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                StreamType,
                                //////////
                                UserDataType> CONNECTION_BASE_T;
+
+ protected:
+  typedef Net_IConnectionManager_T<AddressType,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
+  typedef Stream_IModule_T<ACE_MT_SYNCH,
+                           Common_TimePolicy_t,
+                           ModuleConfigurationType,
+                           ModuleHandlerConfigurationType> IMODULE_T;
 
   Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]

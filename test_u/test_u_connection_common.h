@@ -18,44 +18,34 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_SERVER_COMMON_H
-#define NET_SERVER_COMMON_H
+#ifndef NET_CONNECTION_COMMON_H
+#define NET_CONNECTION_COMMON_H
 
-#include "common_istatistic.h"
+#include "stream_common.h"
 
+#define TEST_U_NET_COMMON_H
 #include "net_common.h"
-#include "net_ilistener.h"
 
 #include "test_u_configuration.h"
-//#include "test_u_stream_common.h"
 
-typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Net_Server_StatisticReportingHandler_t;
-
-typedef Net_IListener_T<Net_ListenerConfiguration,
-                        Net_SocketHandlerConfiguration> Net_IListener_t;
-
-/////////////////////////////////////////
-
-struct Net_Server_SignalHandlerConfiguration
+struct Net_ConnectionState
 {
-  Net_IListener_t*                        listener;
-  Net_Server_StatisticReportingHandler_t* statisticReportingHandler;
-  long                                    statisticReportingTimerID;
-};
-
-struct Net_Server_Configuration
- : Net_Configuration
-{
-  inline Net_Server_Configuration ()
-   : Net_Configuration ()
-   , listener (NULL)
-   , listenerConfiguration ()
-   , signalHandlerConfiguration ()
+  inline Net_ConnectionState ()
+   : configuration ()
+   , status (NET_CONNECTION_STATUS_INVALID)
+   , currentStatistic ()
+   , userData (NULL)
   {};
 
-  Net_IListener_t*                      listener;
-  Net_ListenerConfiguration             listenerConfiguration;
-  Net_Server_SignalHandlerConfiguration signalHandlerConfiguration;
+  // *TODO*: consider making this a separate entity (i.e. a pointer)
+  Net_Configuration      configuration;
+
+  Net_Connection_Status  status;
+
+  Net_RuntimeStatistic_t currentStatistic;
+
+  Net_UserData*          userData;
 };
+
 
 #endif

@@ -21,7 +21,6 @@
 #ifndef NET_NETLINK_SOCKETHANDLER_H
 #define NET_NETLINK_SOCKETHANDLER_H
 
-#include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Netlink_Addr.h"
 #include "ace/Reactor_Notification_Strategy.h"
@@ -31,7 +30,20 @@
 
 #include "net_sockethandler_base.h"
 
-// *TODO*: subclass ACE_Netlink_Addr, implement addr_to_string()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+class Net_Netlink_Addr
+ : public ACE_Netlink_Addr
+{
+ public:
+  virtual int addr_to_string (ACE_TCHAR[],
+                              size_t,
+                              int = 1) const;
+  Net_Netlink_Addr& operator= (const ACE_Addr&);
+
+ private:
+  typedef ACE_Netlink_Addr inherited;
+};
 
 // *NOTE*: this should be added to ACE so Svc_Handler can be parametrized with
 //         ACE_SOCK_Netlink
@@ -40,7 +52,7 @@ class Net_SOCK_Netlink
 {
  public:
   // = Meta-type info
-  typedef ACE_Netlink_Addr PEER_ADDR;
+  typedef Net_Netlink_Addr PEER_ADDR;
 };
 
 template <typename ConfigurationType>
@@ -81,5 +93,6 @@ class Net_NetlinkSocketHandler_T
 
 // include template implementation
 #include "net_netlinksockethandler.inl"
+#endif
 
 #endif

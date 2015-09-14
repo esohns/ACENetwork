@@ -23,10 +23,12 @@
 
 #include "ace/Log_Msg.h"
 
-#include "net_connection_common.h"
-#include "net_connection_manager_common.h"
 #include "net_defines.h"
 #include "net_macros.h"
+
+#include "test_u_connection_common.h"
+#include "test_u_connection_manager_common.h"
+#include "test_u_defines.h"
 
 Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
                                                       unsigned int maxNumConnections_in,

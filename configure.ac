@@ -191,8 +191,8 @@ AM_COND_IF([BUILD_MODULES],
 dnl AC_CONFIG_SUBDIRS([modules/ATCD
 dnl                    modules/libCommon
 dnl                    modules/libACEStream])
-#AM_COND_IF([BUILD_MODULES],
-#           [AC_CONFIG_FILES([modules/Makefile])])
+AM_COND_IF([BUILD_MODULES],
+           [AC_CONFIG_FILES([modules/Makefile])])
 
 # --> build (integration) tests ?
 AC_MSG_CHECKING([build (integration) tests])
@@ -269,10 +269,7 @@ AC_CONFIG_FILES([Makefile
                  3rd_party/Makefile
                  3rd_party/bison/Makefile
                  m4/Makefile
-                 modules/Makefile
                  po/Makefile.in
-                 scripts/libACENetwork.pc
-                 scripts/libACENetwork.spec
                  scripts/Makefile
                  src/Makefile
                  src/client_server/Makefile
@@ -281,5 +278,8 @@ AC_CONFIG_FILES([Makefile
                  test_i/scripts/Makefile
                  test_u/Makefile
                  test_u/etc/Makefile])
+AC_CONFIG_FILES([scripts/libACENetwork.pc
+                 scripts/libACENetwork.spec])
+
 AC_OUTPUT
 

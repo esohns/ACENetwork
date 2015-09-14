@@ -85,134 +85,136 @@ Net_NetlinkConnection_T<HandlerType,
 
 }
 
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-bool
-Net_NetlinkConnection_T<HandlerType,
-                        ConfigurationType,
-                        StateType,
-                        StatisticContainerType,
-                        StreamType,
-                        HandlerConfigurationType,
-                        UserDataType>::initialize (Net_ClientServerRole role_in,
-                                                   const Net_SocketConfiguration& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::initialize"));
+//template <typename HandlerType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename StreamType,
+//          typename HandlerConfigurationType,
+//          typename UserDataType>
+//bool
+//Net_NetlinkConnection_T<HandlerType,
+//                        ConfigurationType,
+//                        StateType,
+//                        StatisticContainerType,
+//                        StreamType,
+//                        HandlerConfigurationType,
+//                        UserDataType>::initialize (Common_DispatchType dispatch_in,
+//                                                   Net_ClientServerRole role_in,
+//                                                   const Net_SocketConfiguration& configuration_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::initialize"));
 
-  if (!inherited::CONNECTION_BASE_T::initialize (role_in,
-                                                 configuration_in))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
-    return false;
-  } // end IF
-
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  ACE_Netlink_Addr local_SAP, remote_SAP;
-  try
-  {
-    info (handle,
-          local_SAP,
-          remote_SAP);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting")));
-
-    return false;
-  }
-  // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
-//  if (local_SAP.addr_to_string (buffer,
-//                                sizeof (buffer)) == -1)
+//  if (!inherited::CONNECTION_BASE_T::initialize (dispatch_in,
+//                                                 role_in,
+//                                                 configuration_in))
+//  {
 //    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
-  local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-//  if (remote_SAP.addr_to_string (buffer,
-//                                 sizeof (buffer)) == -1)
+//                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
+//    return false;
+//  } // end IF
+
+//  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+//  ACE_TCHAR buffer[BUFSIZ];
+//  ACE_OS::memset (buffer, 0, sizeof (buffer));
+//  std::string local_address;
+//  Net_Netlink_Addr local_SAP, remote_SAP;
+//  try
+//  {
+//    info (handle,
+//          local_SAP,
+//          remote_SAP);
+//  }
+//  catch (...)
+//  {
 //    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+//                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting")));
 
-  // *PORTABILITY*: this isn't entirely portable...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, reinterpret_cast<unsigned int> (handle),
-              ACE_TEXT (localAddress.c_str ()),
-              ACE_TEXT (buffer),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered netlink connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (buffer),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#endif
+//    return false;
+//  }
+//  // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
+////  if (local_SAP.addr_to_string (buffer,
+////                                sizeof (buffer)) == -1)
+////    ACE_DEBUG ((LM_ERROR,
+////                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+//  local_address = buffer;
+//  ACE_OS::memset (buffer, 0, sizeof (buffer));
+////  if (remote_SAP.addr_to_string (buffer,
+////                                 sizeof (buffer)) == -1)
+////    ACE_DEBUG ((LM_ERROR,
+////                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
 
-  return true;
-}
+//  // *PORTABILITY*: this isn't entirely portable...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+//              this, reinterpret_cast<unsigned int> (handle),
+//              ACE_TEXT (localAddress.c_str ()),
+//              ACE_TEXT (buffer),
+//              (inherited::manager_ ? inherited::manager_->numConnections ()
+//                                   : -1)));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("registered netlink connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+//              this, handle,
+//              ACE_TEXT (local_address.c_str ()),
+//              ACE_TEXT (buffer),
+//              (inherited::manager_ ? inherited::manager_->numConnections ()
+//                                   : -1)));
+//#endif
 
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-void
-Net_NetlinkConnection_T<HandlerType,
-                        ConfigurationType,
-                        StateType,
-                        StatisticContainerType,
-                        StreamType,
-                        HandlerConfigurationType,
-                        UserDataType>::finalize ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::finalize"));
+//  return true;
+//}
 
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_Netlink_Addr address1, address2;
-  try
-  {
-    info (handle,
-          address1,
-          address2);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
-  }
+//template <typename HandlerType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename StreamType,
+//          typename HandlerConfigurationType,
+//          typename UserDataType>
+//void
+//Net_NetlinkConnection_T<HandlerType,
+//                        ConfigurationType,
+//                        StateType,
+//                        StatisticContainerType,
+//                        StreamType,
+//                        HandlerConfigurationType,
+//                        UserDataType>::finalize ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::finalize"));
 
-  inherited::CONNECTION_BASE_T::finalize ();
+//  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+//  Net_Netlink_Addr address1, address2;
+//  try
+//  {
+//    info (handle,
+//          address1,
+//          address2);
+//  }
+//  catch (...)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
+//  }
 
-  // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
-              this, reinterpret_cast<unsigned int> (handle),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered netlink connection [%@/%d] (total: %u)\n"),
-              this, handle,
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#endif
-}
+//  inherited::CONNECTION_BASE_T::finalize ();
+
+//  // *PORTABILITY*
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
+//              this, reinterpret_cast<unsigned int> (handle),
+//              (inherited::manager_ ? inherited::manager_->numConnections ()
+//                                   : -1)));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("deregistered netlink connection [%@/%d] (total: %u)\n"),
+//              this, handle,
+//              (inherited::manager_ ? inherited::manager_->numConnections ()
+//                                   : -1)));
+//#endif
+//}
 
 template <typename HandlerType,
           typename ConfigurationType,
@@ -229,8 +231,8 @@ Net_NetlinkConnection_T<HandlerType,
                         StreamType,
                         HandlerConfigurationType,
                         UserDataType>::info (ACE_HANDLE& handle_out,
-                                             ACE_Netlink_Addr& localSAP_out,
-                                             ACE_Netlink_Addr& remoteSAP_out) const
+                                             Net_Netlink_Addr& localSAP_out,
+                                             Net_Netlink_Addr& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::info"));
 
@@ -262,10 +264,10 @@ Net_NetlinkConnection_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::id"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_Netlink_Addr local_inet_address, peer_inet_address;
+  Net_Netlink_Addr local_address, peer_address;
   info (handle,
-        local_inet_address,
-        peer_inet_address);
+        local_address,
+        peer_address);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   return *static_cast<unsigned int*> (handle);
@@ -292,8 +294,9 @@ Net_NetlinkConnection_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::dump_state"));
 
+  int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_Netlink_Addr local_netlink_address, peer_netlink_address;
+  Net_Netlink_Addr local_netlink_address, peer_netlink_address;
   info (handle,
         local_netlink_address,
         peer_netlink_address);
@@ -301,27 +304,27 @@ Net_NetlinkConnection_T<HandlerType,
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   std::string local_address;
-  // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
-//  if (local_netlink_address.addr_to_string (buffer,
-//                                            sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
-//  else
-//    local_address = buffer;
+  result = local_netlink_address.addr_to_string (buffer,
+                                                 sizeof (buffer),
+                                                 1);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-//  if (peer_netlink_address.addr_to_string (buffer,
-//                                           sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
-//  else
-//    peer_address = buffer;
+  result = peer_netlink_address.addr_to_string (buffer,
+                                                sizeof (buffer),
+                                                1);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
               ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
+              buffer));
 }
 
 //int
@@ -860,158 +863,164 @@ Net_AsynchNetlinkConnection_T<HandlerType,
 ////  return 0;
 ////}
 
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-bool
-Net_AsynchNetlinkConnection_T<HandlerType,
-                              ConfigurationType,
-                              StateType,
-                              StatisticContainerType,
-                              StreamType,
-                              HandlerConfigurationType,
-                              UserDataType>::initialize (Net_ClientServerRole role_in,
-                                                         const Net_SocketConfiguration& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::initialize"));
+//template <typename HandlerType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename StreamType,
+//          typename HandlerConfigurationType,
+//          typename UserDataType>
+//bool
+//Net_AsynchNetlinkConnection_T<HandlerType,
+//                              ConfigurationType,
+//                              StateType,
+//                              StatisticContainerType,
+//                              StreamType,
+//                              HandlerConfigurationType,
+//                              UserDataType>::initialize (Common_DispatchType dispatch_in,
+//                                                         Net_ClientServerRole role_in,
+//                                                         const Net_SocketConfiguration& configuration_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::initialize"));
 
-  if (!inherited::CONNECTION_BASE_T::initialize (role_in,
-                                                 configuration_in))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
-    return false;
-  } // end IF
-
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  ACE_Netlink_Addr local_SAP, remote_SAP;
-  try
-  {
-    info (handle,
-          local_SAP,
-          remote_SAP);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting")));
-    return false;
-  }
-  // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
-//  if (local_SAP.addr_to_string (buffer,
-//                                sizeof (buffer)) == -1)
+//  if (!inherited::CONNECTION_BASE_T::initialize (dispatch_in,
+//                                                 role_in,
+//                                                 configuration_in))
+//  {
 //    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
-  local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-//  if (remote_SAP.addr_to_string (buffer,
-//                                 sizeof (buffer)) == -1)
+//                ACE_TEXT ("failed to Net_ConnectionBase_T::initialize(), aborting")));
+//    return false;
+//  } // end IF
+
+//  int result = -1;
+//  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+//  ACE_TCHAR buffer[BUFSIZ];
+//  ACE_OS::memset (buffer, 0, sizeof (buffer));
+//  std::string local_address;
+//  Net_Netlink_Addr local_SAP, remote_SAP;
+//  try
+//  {
+//    this->info (handle,
+//                local_SAP,
+//                remote_SAP);
+//  }
+//  catch (...)
+//  {
 //    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+//                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), aborting")));
+//    return false;
+//  }
+//  result = local_SAP.addr_to_string (buffer,
+//                                     sizeof (buffer),
+//                                     1);
+//  if (result == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+//  local_address = buffer;
+//  ACE_OS::memset (buffer, 0, sizeof (buffer));
+//  result = remote_SAP.addr_to_string (buffer,
+//                                      sizeof (buffer),
+//                                      1);
+//  if (result == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
 
-  // *PORTABILITY*: this isn't entirely portable...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, reinterpret_cast<unsigned int> (handle),
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (buffer),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-              this, handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (buffer),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#endif
+//  // *PORTABILITY*: this isn't entirely portable...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+//              this, reinterpret_cast<unsigned int> (handle),
+//              ACE_TEXT (local_address.c_str ()),
+//              buffer,
+//              (inherited::manager_ ? inherited::manager_->numConnections ()
+//                                   : -1)));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+//              this, handle,
+//              ACE_TEXT (local_address.c_str ()),
+//              buffer,
+//              (inherited::manager_ ? inherited::manager_->numConnections ()
+//                                   : -1)));
+//#endif
 
-  return true;
-}
+//  return true;
+//}
 
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-void
-Net_AsynchNetlinkConnection_T<HandlerType,
-                              ConfigurationType,
-                              StateType,
-                              StatisticContainerType,
-                              StreamType,
-                              HandlerConfigurationType,
-                              UserDataType>::finalize ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::finalize"));
+//template <typename HandlerType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename StreamType,
+//          typename HandlerConfigurationType,
+//          typename UserDataType>
+//void
+//Net_AsynchNetlinkConnection_T<HandlerType,
+//                              ConfigurationType,
+//                              StateType,
+//                              StatisticContainerType,
+//                              StreamType,
+//                              HandlerConfigurationType,
+//                              UserDataType>::finalize ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::finalize"));
 
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_Netlink_Addr address1, address2;
-  try
-  {
-    info (handle,
-          address1,
-          address2);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
-  }
+//  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+//  Net_Netlink_Addr address1, address2;
+//  try
+//  {
+//    this->info (handle,
+//                address1,
+//                address2);
+//  }
+//  catch (...)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), continuing\n")));
+//  }
 
-  inherited::CONNECTION_BASE_T::finalize ();
+//  typename inherited::CONNECTION_BASE_T::finalize ();
 
-  // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered netlink connection [%@/%u] (total: %u)\n"),
-              this, reinterpret_cast<unsigned int> (handle),
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered netlink connection [%@/%d] (total: %d)\n"),
-              this, handle,
-              (inherited::manager_ ? inherited::manager_->numConnections ()
-                                   : -1)));
-#endif
-}
+//  // *PORTABILITY*
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("deregistered netlink connection [%@/%u] (total: %u)\n"),
+//              this, reinterpret_cast<unsigned int> (handle),
+//              (inherited::manager_ ? inherited::manager_->numConnections ()
+//                                   : -1)));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("deregistered netlink connection [%@/%d] (total: %d)\n"),
+//              this, handle,
+//              (inherited::manager_ ? inherited::manager_->numConnections ()
+//                                   : -1)));
+//#endif
+//}
 
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-void
-Net_AsynchNetlinkConnection_T<HandlerType,
-                              ConfigurationType,
-                              StateType,
-                              StatisticContainerType,
-                              StreamType,
-                              HandlerConfigurationType,
-                              UserDataType>::info (ACE_HANDLE& handle_out,
-                                                   ACE_Netlink_Addr& localSAP_out,
-                                                   ACE_Netlink_Addr& remoteSAP_out) const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::info"));
+//template <typename HandlerType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename StreamType,
+//          typename HandlerConfigurationType,
+//          typename UserDataType>
+//void
+//Net_AsynchNetlinkConnection_T<HandlerType,
+//                              ConfigurationType,
+//                              StateType,
+//                              StatisticContainerType,
+//                              StreamType,
+//                              HandlerConfigurationType,
+//                              UserDataType>::info (ACE_HANDLE& handle_out,
+//                                                   Net_Netlink_Addr& localSAP_out,
+//                                                   Net_Netlink_Addr& remoteSAP_out) const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::info"));
 
-  handle_out = ACE_IPC_SAP::get_handle ();
-  localSAP_out = inherited::localSAP_;
-  remoteSAP_out = inherited::remoteSAP_;
-}
+//  handle_out = ACE_IPC_SAP::get_handle ();
+//  localSAP_out = inherited::localSAP_;
+//  remoteSAP_out = inherited::remoteSAP_;
+//}
 
 template <typename HandlerType,
           typename ConfigurationType,
@@ -1032,10 +1041,10 @@ Net_AsynchNetlinkConnection_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::id"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_Netlink_Addr local_netlink_address, peer_netlink_address;
-  info (handle,
-        local_netlink_address,
-        peer_netlink_address);
+  Net_Netlink_Addr local_netlink_address, peer_netlink_address;
+  this->info (handle,
+              local_netlink_address,
+              peer_netlink_address);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   return *static_cast<unsigned int*> (handle);
@@ -1062,36 +1071,37 @@ Net_AsynchNetlinkConnection_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::dump_state"));
 
+  int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_Netlink_Addr local_netlink_address, peer_netlink_address;
-  info (handle,
-        local_netlink_address,
-        peer_netlink_address);
+  Net_Netlink_Addr local_netlink_address, peer_netlink_address;
+  this->info (handle,
+              local_netlink_address,
+              peer_netlink_address);
 
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   std::string local_address;
-  // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
-//  if (local_netlink_address.addr_to_string (buffer,
-//                                            sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
-//  else
-//    local_address = buffer;
+  result = local_netlink_address.addr_to_string (buffer,
+                                                 sizeof (buffer),
+                                                 1);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-//  if (peer_netlink_address.addr_to_string (buffer,
-//                                           sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
-//  else
-//    peer_address = buffer;
+  result = peer_netlink_address.addr_to_string (buffer,
+                                                sizeof (buffer),
+                                                1);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
               ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
+              buffer));
 }
 
 template <typename HandlerType,
@@ -1113,21 +1123,22 @@ Net_AsynchNetlinkConnection_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::open"));
 
-  // step1: init/start stream, tweak socket, register reading data with reactor
-  // , ...
+  // step1: initialize/start stream, tweak socket, register reading data with
+  //        reactor, ...
   inherited::open (handle_in,
                    messageBlock_in);
 
+  int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   std::string local_address;
-  ACE_Netlink_Addr local_SAP, remote_SAP;
+  Net_Netlink_Addr local_SAP, remote_SAP;
   try
   {
-    info (handle,
-          local_SAP,
-          remote_SAP);
+    this->info (handle,
+                local_SAP,
+                remote_SAP);
   }
   catch (...)
   {
@@ -1136,17 +1147,20 @@ Net_AsynchNetlinkConnection_T<HandlerType,
 
     return;
   }
-  // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
-//  if (local_SAP.addr_to_string (buffer,
-//                                sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+  result = local_SAP.addr_to_string (buffer,
+                                     sizeof (buffer),
+                                     1);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
   local_address = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-//  if (remote_SAP.addr_to_string (buffer,
-//                                 sizeof (buffer)) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+  result = remote_SAP.addr_to_string (buffer,
+                                      sizeof (buffer),
+                                      1);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
 
   // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1154,7 +1168,7 @@ Net_AsynchNetlinkConnection_T<HandlerType,
               ACE_TEXT ("registered netlink connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, reinterpret_cast<unsigned int> (handle),
               ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (buffer),
+              buffer,
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
 #else
@@ -1162,7 +1176,7 @@ Net_AsynchNetlinkConnection_T<HandlerType,
               ACE_TEXT ("registered netlink connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
               this, handle,
               ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (buffer),
+              buffer,
               (inherited::manager_ ? inherited::manager_->numConnections ()
                                    : -1)));
 #endif

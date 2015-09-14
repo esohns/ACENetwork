@@ -18,44 +18,42 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_SERVER_COMMON_H
-#define NET_SERVER_COMMON_H
+#ifndef NET_EVENTHANDLER_H
+#define NET_EVENTHANDLER_H
 
-#include "common_istatistic.h"
+#include "ace/Global_Macros.h"
 
-#include "net_common.h"
-#include "net_ilistener.h"
+#include "common_inotify.h"
 
-#include "test_u_configuration.h"
-//#include "test_u_stream_common.h"
+#include "test_u_message.h"
+#include "test_u_sessionmessage.h"
+#include "test_u_stream_common.h"
 
-typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Net_Server_StatisticReportingHandler_t;
+// forward declaration(s)
+struct Net_GTK_CBData;
+struct Net_StreamSessionData;
 
-typedef Net_IListener_T<Net_ListenerConfiguration,
-                        Net_SocketHandlerConfiguration> Net_IListener_t;
-
-/////////////////////////////////////////
-
-struct Net_Server_SignalHandlerConfiguration
+class Net_EventHandler
+ : public Common_INotify_T<Net_StreamSessionData,
+                           Net_Message,
+                           Net_SessionMessage>
 {
-  Net_IListener_t*                        listener;
-  Net_Server_StatisticReportingHandler_t* statisticReportingHandler;
-  long                                    statisticReportingTimerID;
-};
+ public:
+  Net_EventHandler (Net_GTK_CBData*); // GTK state
+  virtual ~Net_EventHandler ();
 
-struct Net_Server_Configuration
- : Net_Configuration
-{
-  inline Net_Server_Configuration ()
-   : Net_Configuration ()
-   , listener (NULL)
-   , listenerConfiguration ()
-   , signalHandlerConfiguration ()
-  {};
+  // implement Common_INotify_T
+  virtual void start (const Net_StreamSessionData&);
+  virtual void notify (const Net_Message&);
+  virtual void notify (const Net_SessionMessage&);
+  virtual void end ();
 
-  Net_IListener_t*                      listener;
-  Net_ListenerConfiguration             listenerConfiguration;
-  Net_Server_SignalHandlerConfiguration signalHandlerConfiguration;
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Net_EventHandler ())
+  ACE_UNIMPLEMENTED_FUNC (Net_EventHandler (const Net_EventHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Net_EventHandler& operator=(const Net_EventHandler&))
+
+  Net_GTK_CBData* CBData_;
 };
 
 #endif

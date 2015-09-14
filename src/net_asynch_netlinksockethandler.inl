@@ -31,14 +31,13 @@
 
 template <typename ConfigurationType>
 Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::Net_AsynchNetlinkSocketHandler_T ()
- //: inherited ()
- //, inherited2(0,    // initial count
- //             true) // delete on zero ?
- : /*inherited2 ()
- ,*/ inherited3 (NULL,                          // event handler handle
-                 ACE_Event_Handler::WRITE_MASK) // mask
-// , inputStream_ ()
-// , outputStream_ ()
+ : inherited ()
+ , inherited2 ()
+ , inherited3 (NULL,                          // event handler handle
+               ACE_Event_Handler::WRITE_MASK) // mask
+ , counter_ (0)
+ , inputStream_ ()
+ , outputStream_ ()
 // , localSAP_ ()
 // , remoteSAP_ ()
 {
@@ -89,14 +88,14 @@ Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 //  } // end IF
 
   // step1: tweak socket
-  if (inherited::configuration_.socketConfiguration.bufferSize)
+  if (inherited::configuration_.socketConfiguration->bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                             SO_RCVBUF,
-                                            inherited::configuration_.socketConfiguration.bufferSize))
+                                            inherited::configuration_.socketConfiguration->bufferSize))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
-                  inherited::configuration_.socketConfiguration.bufferSize,
+                  inherited::configuration_.socketConfiguration->bufferSize,
                   handle_in));
 
       // clean up
@@ -123,15 +122,15 @@ Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     return;
   } // end IF
   if (!Net_Common_Tools::setLinger (handle_in,
-                                    inherited::configuration_.socketConfiguration.linger,
+                                    inherited::configuration_.socketConfiguration->linger,
                                     -1))
   {
     int error = ACE_OS::last_error ();
     if (error != ENOTSOCK) // <-- socket has been closed asynchronously
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                  (inherited::configuration_.socketConfiguration.linger ? ACE_TEXT ("true")
-                                                                        : ACE_TEXT ("false")),
+                  (inherited::configuration_.socketConfiguration->linger ? ACE_TEXT ("true")
+                                                                         : ACE_TEXT ("false")),
                   handle_in));
 
     // clean up
@@ -372,6 +371,8 @@ Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::handle_write_dgram (const A
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_AsynchNetlinkSocketHandler_T::handle_close(): \"%m\", continuing\n")));
   } // end IF
+
+  counter_.decrease ();
 }
 
 template <typename ConfigurationType>
@@ -385,12 +386,12 @@ Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::initiate_read_dgram ()
 
   // step1: allocate a data buffer
   ACE_Message_Block* message_block_p =
-      allocateMessage (inherited::configuration_.bufferSize);
+      allocateMessage (inherited::configuration_.PDUSize);
   if (!message_block_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchNetlinkSocketHandler_T::allocateMessage(%u), aborting\n"),
-                inherited::configuration_.bufferSize));
+                inherited::configuration_.PDUSize));
     goto close;
   } // end IF
 

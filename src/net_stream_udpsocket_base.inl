@@ -32,7 +32,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
                           ConfigurationType,
@@ -41,8 +42,9 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                      unsigned int statisticCollectionInterval_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                unsigned int statisticCollectionInterval_in)
  : inherited ()
  , inherited2 (interfaceHandle_in,
                statisticCollectionInterval_in)
@@ -63,7 +65,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
                           ConfigurationType,
@@ -72,7 +75,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::~Net_StreamUDPSocketBase_T ()
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::~Net_StreamUDPSocketBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::~Net_StreamUDPSocketBase_T"));
 
@@ -110,7 +114,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 int
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -120,7 +125,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::open (void* arg_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::open"));
 
@@ -176,14 +182,14 @@ Net_StreamUDPSocketBase_T<HandlerType,
   handle_socket = true;
 
   // step2: initialize/start stream
-  
+
   // step2a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
   if (!configuration_p->streamConfiguration.useThreadPerConnection)
     configuration_p->streamConfiguration.notificationStrategy =
     &(inherited::notificationStrategy_);
-  
+
   // step2b: initialize final module (if any)
   if (configuration_p->streamConfiguration.module)
   {
@@ -351,7 +357,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 int
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -361,7 +368,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::close (u_long arg_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::close"));
 
@@ -483,7 +491,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 int
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -493,7 +502,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::handle_input (ACE_HANDLE handle_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::handle_input (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_input"));
 
@@ -649,7 +659,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 int
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -659,7 +670,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::handle_output (ACE_HANDLE handle_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::handle_output (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_output"));
 
@@ -726,14 +738,14 @@ Net_StreamUDPSocketBase_T<HandlerType,
   } // end IF
 
   bytes_sent =
-//      inherited::peer_.send (currentWriteBuffer_->rd_ptr (),                             // data
-//                             currentWriteBuffer_->length (),                             // bytes to send
-//                             inherited2::configuration_.socketConfiguration.peerAddress, // peer address
-//                             0);                                                         // flags
-      inherited::peer_.send (currentWriteBuffer_->rd_ptr (), // data
-                             currentWriteBuffer_->length (), // bytes to send
-                             0,                              // flags
-                             NULL);                          // timeout
+      inherited::peer_.send (currentWriteBuffer_->rd_ptr (),                             // data
+                             currentWriteBuffer_->length (),                             // bytes to send
+                             inherited2::configuration_.socketConfiguration.peerAddress, // peer address
+                             0);                                                         // flags
+//      inherited::peer_.send (currentWriteBuffer_->rd_ptr (), // data
+//                             currentWriteBuffer_->length (), // bytes to send
+//                             0,                              // flags
+//                             NULL);                          // timeout
   switch (bytes_sent)
   {
     case -1:
@@ -831,7 +843,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 int
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -841,8 +854,9 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::handle_close (ACE_HANDLE handle_in,
-                                                                         ACE_Reactor_Mask mask_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::handle_close (ACE_HANDLE handle_in,
+                                                                   ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_close"));
 
@@ -946,7 +960,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 void
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -956,9 +971,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::info (ACE_HANDLE& handle_out,
-                                                                 AddressType& localSAP_out,
-                                                                 AddressType& remoteSAP_out) const
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::info (ACE_HANDLE& handle_out,
+                                                           AddressType& localSAP_out,
+                                                           AddressType& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::info"));
 
@@ -990,7 +1006,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 unsigned int
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -1000,7 +1017,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::id () const
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
 
@@ -1019,7 +1037,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 ACE_Notification_Strategy*
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -1029,7 +1048,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::notification ()
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::notification ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::notification"));
 
@@ -1044,7 +1064,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 const StreamType&
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -1054,7 +1075,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::stream () const
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::stream () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::stream"));
 
@@ -1069,7 +1091,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 void
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -1079,7 +1102,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::close ()
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::close ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::close"));
 
@@ -1099,7 +1123,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 void
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -1109,7 +1134,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::waitForCompletion ()
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::waitForCompletion ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::waitForCompletion"));
 
@@ -1126,7 +1152,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 bool
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -1136,7 +1163,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::collect (StatisticContainerType& data_out)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::collect"));
 
@@ -1161,7 +1189,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 void
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -1171,7 +1200,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::report () const
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::report"));
 
@@ -1194,7 +1224,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 void
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -1204,7 +1235,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::dump_state () const
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::dump_state"));
 
@@ -1250,7 +1282,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 ACE_Message_Block*
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
@@ -1260,7 +1293,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::allocateMessage (unsigned int requestedSize_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::allocateMessage"));
 
@@ -1319,15 +1353,15 @@ allocate:
 /////////////////////////////////////////
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
                           ConfigurationType,
@@ -1336,8 +1370,9 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                      unsigned int statisticCollectionInterval_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                unsigned int statisticCollectionInterval_in)
  : inherited ()
  , inherited2 (interfaceHandle_in,
                statisticCollectionInterval_in)
@@ -1350,15 +1385,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
                           ConfigurationType,
@@ -1367,7 +1402,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::~Net_StreamUDPSocketBase_T ()
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::~Net_StreamUDPSocketBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::~Net_StreamUDPSocketBase_T"));
 
@@ -1395,15 +1431,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
     currentWriteBuffer_->release ();
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 int
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -1413,69 +1449,87 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::open (void* args_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::open"));
 
+  ConfigurationType* configuration_p =
+    static_cast<ConfigurationType*> (arg_in);
+  ACE_ASSERT (configuration_p);
+
   int result = -1;
+  bool handle_manager = false;
+  bool handle_module = true;
+  bool handle_reactor = false;
+  bool handle_socket = false;
+  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
+  ACE_Reactor* reactor_p = inherited::reactor ();
+  ACE_ASSERT (reactor_p);
 
   // step0: initialize this
+  // *IMPORTANT NOTE*: enable the reference counting policy, as this will
+  //                   be registered with the reactor several times
+  //                   (1x READ_MASK, nx WRITE_MASK); therefore several threads
+  //                   MAY be dispatching notifications (yes, even concurrently;
+  //                   lock_ enforces the proper sequence order, see
+  //                   handle_output()) on the SAME handler. When the socket
+  //                   closes, the event handler should thus not be destroyed()
+  //                   immediately, but simply purge any pending notifications
+  //                   (see handle_close()) and de-register; after the last
+  //                   active notification has been dispatched, it will be
+  //                   safely deleted
+  inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+  // *IMPORTANT NOTE*: due to reference counting, the
+  //                   ACE_Svc_Handle::shutdown() method will crash, as it
+  //                   references a connection recycler AFTER removing the
+  //                   connection from the reactor (which releases a reference).
+  //                   In the case that "this" is the final reference, this
+  //                   leads to a crash (see code)
+  //                   --> avoid invoking ACE_Svc_Handle::shutdown()
+  //                   --> this means that "manual" cleanup is necessary
+  //                       (see handle_close())
+  inherited::closing_ = true;
   // *TODO*: find a better way to do this
   serializeOutput_ =
-   inherited2::configuration_.streamConfiguration.serializeOutput;
+    configuration_p->streamConfiguration.serializeOutput;
 
   // step1: open / tweak socket, ...
-  result = inherited::open (args_in);
+  // *TODO*: remove type inferences
+  result = inherited::open (&configuration_p->socketHandlerConfiguration);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
-    return -1;
+    goto error;
   } // end IF
-  //// *NOTE*: as soon as this returns, data starts arriving at handle_input()
+  handle_socket = true;
 
   // step2: initialize/start stream
-  // *TODO*: remove type inferences
-  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
   // step2a: connect stream head message queue with the reactor notification
-  // pipe ?
-  if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
-  {
-    // *IMPORTANT NOTE*: enable the reference counting policy, as this will
-    // be registered with the reactor several times (1x READ_MASK, nx
-    // WRITE_MASK); therefore several threads MAY be dispatching notifications
-    // (yes, even concurrently; myLock enforces the proper sequence order, see
-    // handle_output()) on the SAME handler. When the socket closes, the event
-    // handler should thus not be destroyed() immediately, but simply purge any
-    // pending notifications (see handle_close()) and de-register; after the
-    // last active notification has been dispatched, it will be safely deleted
-    inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+  //         pipe ?
+  // *TODO*: remove type inferences
+  if (!configuration_p->streamConfiguration.useThreadPerConnection)
+    configuration_p->streamConfiguration.notificationStrategy =
+    &(inherited::notificationStrategy_);
 
-    // *NOTE*: must use 'this' for some strange reason (inherited:: does not
-    //         work here (GCC 4.9.2)...
-#if defined (__GNUC__)
-    inherited2::configuration_.streamConfiguration.notificationStrategy =
-        &this->notificationStrategy_;
-#else
-    inherited2::configuration_.streamConfiguration.notificationStrategy =
-        &inherited::notificationStrategy_;
-#endif
-  } // end IF
-  // step2b: clone/initialize final module (if any)
-  if (inherited2::configuration_.streamConfiguration.module)
+  // step2b: initialize final module (if any)
+  if (configuration_p->streamConfiguration.module)
   {
     // step2ba: clone final module ?
-    if (inherited2::configuration_.streamConfiguration.module)
+    if (configuration_p->streamConfiguration.cloneModule)
     {
-      Stream_IModule_t* imodule_p =
-        dynamic_cast<Stream_IModule_t*> (inherited2::configuration_.streamConfiguration.module);
+      IMODULE_T* imodule_p = NULL;
+      // need a downcast...
+      imodule_p =
+        dynamic_cast<IMODULE_T*> (configuration_p->streamConfiguration.module);
       if (!imodule_p)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-        return -1;
+                    ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T*> failed, aborting\n"),
+                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+        goto error;
       } // end IF
       Stream_Module_t* clone_p = NULL;
       try
@@ -1485,65 +1539,80 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
       catch (...)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
-                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-        return -1;
+                    ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), continuing\n"),
+                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+        clone_p = NULL;
       }
       if (!clone_p)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
-                    ACE_TEXT (inherited2::configuration_.streamConfiguration.module->name ())));
-        return -1;
-      }
-      inherited2::configuration_.streamConfiguration.module = clone_p;
-      inherited2::configuration_.streamConfiguration.deleteModule = true;
+                    ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
+                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+        goto error;
+      } // end IF
+      configuration_p->streamConfiguration.deleteModule = true;
+      configuration_p->streamConfiguration.module = clone_p;
     } // end IF
     // *TODO*: step2bb: initialize final module
   } // end IF
+
   // step2c: initialize stream
-  unsigned int session_id = 0;
+  // *TODO*: remove type inferences
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  session_id =
-      reinterpret_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+  configuration_p->streamConfiguration.sessionID =
+    reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #else
-  session_id =
-      static_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ()); // (== socket handle)
+  configuration_p->streamConfiguration.sessionID =
+    static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #endif
-  // *TODO*: this clearly is a design glitch
-  if (!stream_.initialize (session_id,
-                           inherited2::configuration_.streamConfiguration,
-                           inherited2::configuration_.protocolConfiguration,
-                           inherited2::configuration_.streamSessionData))
+  if (!stream_.initialize (configuration_p->streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
-    return -1;
+    goto error;
   } // end IF
+  // *NOTE*: do not worry about the enqueued module (if any) beyond this point !
+  handle_module = false;
   session_data_p = &stream_.sessionData ();
+  // *TODO*: remove type inferences
   const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
-      &const_cast<StateType&> (inherited2::state ());
+    &const_cast<StateType&> (inherited2::state ());
   //stream_.dump_state ();
-  // *NOTE*: as soon as this returns, data starts arriving at
-  // handle_output()/msg_queue()
+
+  // step2d: start stream
   stream_.start ();
   if (!stream_.isRunning ())
   {
+    // *NOTE*: most likely, this happened because the stream failed to
+    //         initialize
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
-    return -1;
+    goto error;
   } // end IF
 
-  // step3: register with the reactor
-  ACE_Reactor* reactor_p = inherited::reactor ();
-  ACE_ASSERT (reactor_p);
-  if (reactor_p->register_handler (this,
-                                   ACE_Event_Handler::READ_MASK) == -1)
+  // step3: register with the connection manager (if any)
+  // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
+  //                   a race condition might occur when using multi-threaded
+  //                   proactors/reactors
+  if (!inherited2::registerc ())
+  {
+    // *NOTE*: perhaps max# connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    goto error;
+  } // end IF
+  handle_manager = true;
+
+  // step4: register with the reactor ?
+  result = reactor_p->register_handler (this,
+                                        ACE_Event_Handler::READ_MASK);
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Reactor::register_handler(READ_MASK): \"%m\", aborting\n")));
-    return -1;
+    goto error;
   } // end IF
+  handle_reactor = true;
 
   // *NOTE*: registered with the reactor (READ_MASK) at this point
 
@@ -1556,31 +1625,60 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 //     return -1;
 //   } // end IF
 
-  // step4: register with the connection manager (if any)
-  if (!inherited2::registerc ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-    return -1;
-  } // end IF
-
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
   if (!inherited2::configuration_.streamConfiguration.useThreadPerConnection)
-    inherited::remove_reference ();
+    inherited2::decrease ();
+
+  inherited2::initialize (*configuration_p);
+  inherited2::state_.status = NET_CONNECTION_STATUS_OK;
 
   return 0;
+
+error:
+  // clean up
+  if (handle_reactor)
+  {
+    result = reactor_p->remove_handler (this,
+                                        (ACE_Event_Handler::READ_MASK |
+                                         ACE_Event_Handler::DONT_CALL));
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Reactor::remove_handler(): \"%m\", continuing\n")));
+  } // end IF
+
+  stream_.stop (true); // <-- wait for completion
+  if (handle_module                               &&
+      configuration_p->streamConfiguration.module &&
+      configuration_p->streamConfiguration.deleteModule)
+  {
+    delete configuration_p->streamConfiguration.module;
+    configuration_p->streamConfiguration.module = NULL;
+    configuration_p->streamConfiguration.deleteModule = false;
+  } // end IF
+
+  if (handle_socket)
+    result = inherited::handle_close (inherited::get_handle (),
+                                      ACE_Event_Handler::ALL_EVENTS_MASK);
+
+  if (handle_manager)
+    inherited2::deregister ();
+
+  // *TODO*: remove type inference
+  inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+
+  return -1;
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 int
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -1590,7 +1688,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::close (u_long arg_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::close"));
 
@@ -1689,15 +1788,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   return result;
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 int
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -1707,7 +1806,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::handle_input (ACE_HANDLE handle_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::handle_input (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_input"));
 
@@ -1812,8 +1912,9 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   else
   {
     typename StreamType::STATE_T* state_p =
-        const_cast<typename StreamType::STATE_T*> (stream_.getState ());
-    state_p->currentStatistics.numDroppedMessages++;
+        &const_cast<typename StreamType::STATE_T&> (stream_.state ());
+    ACE_ASSERT (state_p->currentSessionData);
+    state_p->currentSessionData->currentStatistic.droppedMessages++;
 
     // clean up
     buffer_p->release ();
@@ -1834,15 +1935,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   return 0;
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 int
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -1852,7 +1953,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::handle_output (ACE_HANDLE handle_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::handle_output (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_output"));
 
@@ -2001,15 +2103,15 @@ release:
   return result;
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 int
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -2019,8 +2121,9 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::handle_close (ACE_HANDLE handle_in,
-                                                                         ACE_Reactor_Mask mask_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::handle_close (ACE_HANDLE handle_in,
+                                                                   ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_close"));
 
@@ -2096,15 +2199,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   return result;
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 void
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -2114,21 +2217,23 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::info (ACE_HANDLE& handle_out,
-                                                                 AddressType& localSAP_out,
-                                                                 AddressType& remoteSAP_out) const
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::info (ACE_HANDLE& handle_out,
+                                                           AddressType& localSAP_out,
+                                                           AddressType& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::info"));
 
   int result = -1;
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
-  result = localSAP_out.set (static_cast<u_short> (0),
-                             static_cast<ACE_UINT32> (INADDR_NONE));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
-                INADDR_NONE));
+//  result = localSAP_out.set (static_cast<u_short> (0),
+//                             static_cast<ACE_UINT32> (INADDR_NONE));
+//  if (result == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
+//                INADDR_NONE));
+  localSAP_out = ACE_Addr::sap_any;
   if (!inherited2::configuration_.socketConfiguration.writeOnly)
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
@@ -2140,15 +2245,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
     inherited2::configuration_.socketConfiguration.peerAddress;
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 unsigned int
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -2158,7 +2263,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::id () const
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
 
@@ -2169,15 +2275,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 #endif
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 ACE_Notification_Strategy*
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -2187,22 +2293,23 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::notification ()
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::notification ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::notification"));
 
   return &(inherited::notificationStrategy_);
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 const StreamType&
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -2212,22 +2319,23 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::stream () const
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::stream () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::stream"));
 
   return stream_;
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 void
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -2237,7 +2345,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::close ()
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::close ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::close"));
 
@@ -2249,15 +2358,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                 ACE_TEXT ("failed to Net_StreamUDPSocketBase_T::close(NET_CONNECTION_CLOSE_REASON_USER_ABORT): \"%m\", continuing\n")));
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 void
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -2267,7 +2376,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::waitForCompletion ()
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::waitForCompletion ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::waitForCompletion"));
 
@@ -2276,15 +2386,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   stream_.flush ();
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 bool
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -2294,7 +2404,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::collect (StatisticContainerType& data_out)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::collect"));
 
@@ -2311,15 +2422,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   return false;
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 void
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -2329,7 +2440,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::report () const
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::report"));
 
@@ -2344,15 +2456,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   }
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 void
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -2362,53 +2474,53 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::dump_state () const
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::dump_state"));
 
   int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
+  AddressType local_address, peer_address;
   info (handle,
-        local_inet_address,
-        peer_inet_address);
+        local_address,
+        peer_address);
 
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  result = local_inet_address.addr_to_string (buffer,
-                                              sizeof (buffer));
+  std::string local_address_string;
+  result = local_address.addr_to_string (buffer,
+                                         sizeof (buffer),
+                                         1);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
   else
-    local_address = buffer;
+    local_address_string = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-  result = peer_inet_address.addr_to_string (buffer,
-                                             sizeof (buffer));
+  result = peer_address.addr_to_string (buffer,
+                                        sizeof (buffer),
+                                        1);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address = buffer;
+                ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
+              ACE_TEXT (local_address_string.c_str ()),
+              buffer));
 }
 
-template <typename HandlerConfigurationType,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
 ACE_Message_Block*
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
@@ -2418,7 +2530,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::allocateMessage (unsigned int requestedSize_in)
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::allocateMessage"));
 

@@ -21,10 +21,17 @@
 #ifndef NET_CLIENT_COMMON_H
 #define NET_CLIENT_COMMON_H
 
-#include "net_connection_manager_common.h"
+#include "ace/INET_Addr.h"
+
+#include "test_u_configuration.h"
+#include "test_u_connection_manager_common.h"
+
+#include "net_client_connector_common.h"
 
 // forward declarations
+class Stream_IAllocator;
 struct Net_SocketHandlerConfiguration;
+class Net_Client_TimeoutHandler;
 
 struct Net_Client_ConnectorConfiguration
 {
@@ -38,6 +45,38 @@ struct Net_Client_ConnectorConfiguration
   Net_SocketHandlerConfiguration* socketHandlerConfiguration;
   //unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s))
   //                                                             // 0 --> DON'T collect statistics
+};
+
+struct Net_Client_SignalHandlerConfiguration
+{
+  inline Net_Client_SignalHandlerConfiguration ()
+   : actionTimerId (-1)
+   , connector (NULL)
+   , messageAllocator (NULL)
+   , peerAddress ()
+   , socketHandlerConfiguration (NULL)
+   , statisticReportingInterval (0)
+  {};
+
+  long                            actionTimerId;
+  Net_IConnector_t*               connector;
+  Stream_IAllocator*              messageAllocator;
+  ACE_INET_Addr                   peerAddress;
+  Net_SocketHandlerConfiguration* socketHandlerConfiguration;
+  unsigned int                    statisticReportingInterval; // statistics collecting interval (second(s)) [0: off]
+};
+
+struct Net_Client_Configuration
+ : Net_Configuration
+{
+  inline Net_Client_Configuration ()
+   : Net_Configuration ()
+   , signalHandlerConfiguration ()
+   , timeoutHandler (NULL)
+  {};
+
+  Net_Client_SignalHandlerConfiguration signalHandlerConfiguration;
+  Net_Client_TimeoutHandler*            timeoutHandler;
 };
 
 #endif

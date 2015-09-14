@@ -25,12 +25,15 @@
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
-#include "ace/Netlink_Addr.h"
 #include "ace/Notification_Strategy.h"
 
-#include "net_netlinksockethandler.h"
+#include "common_referencecounter_base.h"
+
+//#include "net_netlinksockethandler.h"
 #include "net_sockethandler_base.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 template <typename ConfigurationType>
 class Net_AsynchNetlinkSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
@@ -61,10 +64,12 @@ class Net_AsynchNetlinkSocketHandler_T
 
   virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
-  ACE_Asynch_Read_Dgram  inputStream_;
-  ACE_Asynch_Write_Dgram outputStream_;
-  Net_Netlink_Addr       localSAP_;
-  Net_Netlink_Addr       remoteSAP_;
+  // this keeps the number of open write (i.e. send) requests
+  Common_ReferenceCounterBase counter_;
+  ACE_Asynch_Read_Dgram       inputStream_;
+  ACE_Asynch_Write_Dgram      outputStream_;
+//  Net_Netlink_Addr            localSAP_;
+//  Net_Netlink_Addr            remoteSAP_;
 
  private:
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
@@ -80,5 +85,6 @@ class Net_AsynchNetlinkSocketHandler_T
 
 // include template implementation
 #include "net_asynch_netlinksockethandler.inl"
+#endif
 
 #endif

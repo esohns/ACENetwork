@@ -25,7 +25,6 @@
 #include "common_defines.h"
 
 #include "net_common_tools.h"
-//#include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 #include "net_macros.h"
@@ -175,7 +174,7 @@ Net_UDPSocketHandler_T<SocketType,
                     ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
-                  ACE_TEXT (buffer)));
+                  buffer));
       return -1;
     } // end IF
 //  } // end IF
