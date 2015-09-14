@@ -101,7 +101,7 @@ class Net_Connection_Manager_T
   virtual void abortMostRecent ();
   // ---------------------------------------------------------------------------
 
-  // implement Common_IControl
+  // implement (part of) Common_IControl
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
@@ -129,6 +129,9 @@ class Net_Connection_Manager_T
   typedef ACE_DLList<ICONNECTION_T> CONNECTION_CONTAINER_T;
   typedef ACE_DLList_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;
   typedef ACE_DLList_Reverse_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_REVERSEITERATOR_T;
+
+  // implement (part of) Common_IControl
+  virtual void initialize ();
 
   // implement (part of) Common_IStatistic_T
   // *WARNING*: this assumes lock_ is being held

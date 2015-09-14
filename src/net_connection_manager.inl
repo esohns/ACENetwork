@@ -471,6 +471,25 @@ Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
+                         UserDataType>::initialize ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::initialize"));
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+  ACE_NOTREACHED (return;)
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+void
+Net_Connection_Manager_T<AddressType,
+                         ConfigurationType,
+                         StateType,
+                         StatisticContainerType,
                          UserDataType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
