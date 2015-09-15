@@ -163,19 +163,16 @@ Net_ConnectionBase_T<AddressType,
   ACE_ASSERT (!isRegistered_);
 
   // (try to) register with the connection manager...
-  // *WARNING*: as the connection has not fully open()ed yet, there is a small
-  //            window for races here...
+  ICONNECTION_T* iconnection_p = this;
+#if defined (__GNUG__)
+  // *WORKAROUND*: see header
+  iconnection_p = (connection_in ? connection_in : this);
+#endif
   if (manager_)
   {
     try
     {
-#if defined (__GNUG__)
-      // *WORKAROUND*: see header
-      isRegistered_ = manager_->registerc (connection_in ? connection_in
-                                                         : this);
-#else
-      isRegistered_ = manager_->registerc (this);
-#endif
+      isRegistered_ = manager_->registerc (iconnection_p);
     }
     catch (...)
     {

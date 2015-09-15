@@ -187,10 +187,10 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   inherited::open (handle_in, messageBlock_in);
 
   // step3: register with the connection manager (if any)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (!inherited4::registerc ())
-#else
+#if defined (__GNUG__)
   if (!inherited4::registerc (this))
+#else
+  if (!inherited4::registerc ())
 #endif
   {
     // *NOTE*: perhaps max# connections has been reached

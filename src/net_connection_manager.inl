@@ -358,7 +358,7 @@ Net_Connection_Manager_T<AddressType,
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::increase(): \"%m\", aborting\n")));
+                ACE_TEXT ("caught exception in Net_IConnection_T::increase(), aborting\n")));
     return false;
   }
   if (!connections_.insert_tail (connection_in))
