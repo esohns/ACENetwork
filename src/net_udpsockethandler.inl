@@ -180,17 +180,17 @@ Net_UDPSocketHandler_T<SocketType,
 //  } // end IF
 
   // step2: tweak socket
-    if (configuration_p->socketConfiguration->bufferSize)
-      if (!Net_Common_Tools::setSocketBuffer (SVC_HANDLER_T::get_handle (),
-                                              SO_RCVBUF,
-                                              configuration_p->socketConfiguration->bufferSize))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
-                    configuration_p->socketConfiguration->bufferSize,
-                    SVC_HANDLER_T::get_handle ()));
-        return -1;
-      } // end IF
+  if (configuration_p->socketConfiguration->bufferSize)
+    if (!Net_Common_Tools::setSocketBuffer (SVC_HANDLER_T::get_handle (),
+                                            SO_RCVBUF,
+                                            configuration_p->socketConfiguration->bufferSize))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
+                  configuration_p->socketConfiguration->bufferSize,
+                  SVC_HANDLER_T::get_handle ()));
+      return -1;
+    } // end IF
 //  if (!Net_Common_Tools::setNoDelay (SVC_HANDLER_T::get_handle (),
 //                                     NET_DEFAULT_TCP_NODELAY))
 //  {

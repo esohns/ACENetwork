@@ -135,6 +135,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::open"));
 
   int result = -1;
+  bool handle_manager = false;
+  bool handle_module = true;
+  bool handle_socket = false;
   // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
@@ -166,8 +169,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (buffer)));
-    goto close;
+    goto error;
   } // end IF
+  handle_socket = true;
   if (handle_in == ACE_INVALID_HANDLE)
     inherited::handle (inherited2::get_handle ());
 
@@ -176,21 +180,35 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SocketHandlerBase::initialize(): \"%m\", aborting\n")));
-    goto close;
+    goto error;
   } // end IF
 
   // step2b: tweak socket, initialize I/O
   inherited::open (handle_in, messageBlock_in);
 
-  // step3: initialize/start stream
-  // step3a: connect stream head message queue with a notification pipe/queue ?
+  // step3: register with the connection manager (if any)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  if (!inherited4::registerc ())
+#else
+  if (!inherited4::registerc (this))
+#endif
+  {
+    // *NOTE*: perhaps max# connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    goto error;
+  } // end IF
+  handle_manager = true;
+
+  // step4: initialize/start stream
+  // step4a: connect stream head message queue with a notification pipe/queue ?
   if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
     inherited4::configuration_.streamConfiguration.notificationStrategy =
       this;
 
   if (inherited4::configuration_.streamConfiguration.module)
   {
-    // step3b: initialize final module (if any)
+    // step4b: initialize final module (if any)
     if (inherited4::configuration_.streamConfiguration.cloneModule)
     {
       IMODULE_T* imodule_p = NULL;
@@ -202,7 +220,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
                     ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
-        goto close;
+        goto error;
       } // end IF
       Stream_Module_t* clone_p = NULL;
       try
@@ -214,21 +232,23 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), aborting\n"),
                     ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
-        goto close;
+        goto error;
       }
       if (!clone_p)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
                     ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
-        goto close;
+        goto error;
       }
       inherited4::configuration_.streamConfiguration.module = clone_p;
       inherited4::configuration_.streamConfiguration.deleteModule = true;
     } // end IF
 
-    // *TODO*: step3b: initialize final module
+    // *TODO*: step4b: initialize final module
   } // end IF
+
+  // step4c: initialize stream
   // *TODO*: this clearly is a design glitch
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inherited4::configuration_.streamConfiguration.sessionID =
@@ -241,20 +261,24 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
-    goto close;
+    goto error;
   } // end IF
+  // *NOTE*: do not worry about the enqueued module (if any) beyond this point !
+  handle_module = false;
   session_data_p = &stream_.sessionData ();
   const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
       &const_cast<StateType&> (inherited4::state ());
   //stream_.dump_state ();
-  // *NOTE*: as soon as this returns, data starts arriving at
-  //         handle_output()[/msg_queue()]
+
+  // step3d: start stream
   stream_.start ();
   if (!stream_.isRunning ())
   {
+    // *NOTE*: most likely, this happened because the stream failed to
+    //         initialize
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
-    goto close;
+    goto error;
   } // end IF
 
   // step4: start reading (need to pass any data ?)
@@ -269,7 +293,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
-        goto close;
+        goto error;
       } // end IF
       // fake a result to emulate regular behavior...
       ACE_Proactor* proactor_p = inherited::proactor ();
@@ -289,7 +313,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Proactor::create_asynch_read_dgram_result: \"%m\", aborting\n")));
-        goto close;
+        goto error;
       } // end IF
       size_t bytes_transferred = message_block_p->length ();
       // <complete> for Accept would have already moved the <wr_ptr>
@@ -304,28 +328,37 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       // clean up
       delete fake_result_p;
     } // end ELSE
+    // *NOTE*: registered with the proactor at this point
+    //         --> data may start arriving at handle_input ()
   } // end IF
 
-  // step5: register with the connection manager (if any)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (!inherited4::registerc ())
-#else
-  if (!inherited4::registerc (this))
-#endif
-  {
-    // *NOTE*: perhaps max# connections has been reached
-    //ACE_DEBUG ((LM_ERROR,
-    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-    goto close;
-  } // end IF
-  if (inherited4::configuration_.socketConfiguration.writeOnly)
-    this->decrease (); // 'float' the connection
+  this->decrease (); // 'float' the connection: connection manager
   ACE_ASSERT (this->count () == (inherited4::configuration_.socketConfiguration.writeOnly ? 1 : 2)); // connection manager (and read operation)
+
+  inherited4::state_.status = NET_CONNECTION_STATUS_OK;
 
   return;
 
-close:
-  close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
+error:
+  stream_.stop (true); // <-- wait for completion
+  if (handle_module                                         &&
+      inherited4::configuration_.streamConfiguration.module &&
+      inherited4::configuration_.streamConfiguration.deleteModule)
+  {
+    delete inherited4::configuration_.streamConfiguration.module;
+    inherited4::configuration_.streamConfiguration.module = NULL;
+    inherited4::configuration_.streamConfiguration.deleteModule = false;
+  } // end IF
+
+  if (handle_socket)
+    result = inherited::handle_close (inherited::handle (),
+                                      ACE_Event_Handler::ALL_EVENTS_MASK);
+
+  if (handle_manager)
+    inherited4::deregister ();
+
+  // *TODO*: remove type inference
+  inherited4::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
 
   // *NOTE*: should 'delete this'
   //  inherited4::decrease ();

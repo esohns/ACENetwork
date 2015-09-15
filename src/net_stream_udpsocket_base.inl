@@ -181,19 +181,32 @@ Net_StreamUDPSocketBase_T<HandlerType,
   } // end IF
   handle_socket = true;
 
-  // step2: initialize/start stream
+  // step2: register with the connection manager (if any)
+  // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
+  //                   a race condition might occur when using multi-threaded
+  //                   proactors/reactors
+  if (!inherited2::registerc ())
+  {
+    // *NOTE*: perhaps max# connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    goto error;
+  } // end IF
+  handle_manager = true;
 
-  // step2a: connect stream head message queue with the reactor notification
+  // step3: initialize/start stream
+
+  // step3a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
   if (!configuration_p->streamConfiguration.useThreadPerConnection)
     configuration_p->streamConfiguration.notificationStrategy =
     &(inherited::notificationStrategy_);
 
-  // step2b: initialize final module (if any)
+  // step3b: initialize final module (if any)
   if (configuration_p->streamConfiguration.module)
   {
-    // step2ba: clone final module ?
+    // step3ba: clone final module ?
     if (configuration_p->streamConfiguration.cloneModule)
     {
       IMODULE_T* imodule_p = NULL;
@@ -229,10 +242,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
       configuration_p->streamConfiguration.deleteModule = true;
       configuration_p->streamConfiguration.module = clone_p;
     } // end IF
-    // *TODO*: step2bb: initialize final module
+    // *TODO*: step3bb: initialize final module
   } // end IF
 
-  // step2c: initialize stream
+  // step3c: initialize stream
   // *TODO*: remove type inferences
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   configuration_p->streamConfiguration.sessionID =
@@ -255,7 +268,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
     &const_cast<StateType&> (inherited2::state ());
   //stream_.dump_state ();
 
-  // step2d: start stream
+  // step3d: start stream
   stream_.start ();
   if (!stream_.isRunning ())
   {
@@ -266,21 +279,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
     goto error;
   } // end IF
 
-  // step3: register with the connection manager (if any)
-  // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
-  //                   a race condition might occur when using multi-threaded
-  //                   proactors/reactors
-  if (!inherited2::registerc ())
-  {
-    // *NOTE*: perhaps max# connections has been reached
-    //ACE_DEBUG ((LM_ERROR,
-    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-    goto error;
-  } // end IF
-  handle_manager = true;
-
   // step4: register with the reactor ?
-  if (!inherited2::configuration_.socketConfiguration.writeOnly)
+  if (!configuration_p->socketConfiguration.writeOnly)
   {
     result = reactor_p->register_handler (this,
                                           ACE_Event_Handler::READ_MASK);
@@ -292,16 +292,16 @@ Net_StreamUDPSocketBase_T<HandlerType,
     } // end IF
     handle_reactor = true;
   } // end IF
-
   // *NOTE*: registered with the reactor (READ_MASK) at this point
+  //         --> data may start arriving at handle_input ()
 
 //   // ...register for writes (WRITE_MASK) as well
-//   if (reactor ()->register_handler (this,
-//                                     ACE_Event_Handler::WRITE_MASK) == -1)
+//   if (reactor_p->register_handler (this,
+//                                    ACE_Event_Handler::WRITE_MASK) == -1)
 //   {
 //     ACE_DEBUG ((LM_ERROR,
 //                 ACE_TEXT ("failed to ACE_Reactor::register_handler(WRITE_MASK): \"%m\", aborting\n")));
-//     return -1;
+//     goto error;
 //   } // end IF
 
   // *NOTE*: let the reactor manage this handler...
@@ -315,7 +315,6 @@ Net_StreamUDPSocketBase_T<HandlerType,
   return 0;
 
 error:
-  // clean up
   if (handle_reactor)
   {
     result = reactor_p->remove_handler (this,
