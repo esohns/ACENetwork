@@ -116,6 +116,7 @@ class Net_StreamAsynchUDPSocketBase_T
 
   // helper methods
   virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
+  virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
 //  // *TODO*: handle short writes (more) gracefully...
 //  ACE_Message_Block* buffer_;

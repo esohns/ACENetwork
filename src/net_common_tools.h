@@ -60,6 +60,9 @@ class Net_Export Net_Common_Tools
                          unsigned short = std::numeric_limits<unsigned short>::max ()); // seconds {0     --> send RST on close,
                                                                                         //          65535 --> reuse default/current value}
 
+  // *NOTE*: applies to UDP sockets (see also: SO_MAX_MSG_SIZE)
+  static unsigned int getMaxMsgSize (ACE_HANDLE); // socket handle
+
 //  static Net_IInetConnectionManager_t* getConnectionManager ();
 
  private:

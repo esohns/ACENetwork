@@ -972,6 +972,37 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
   return (result == 0);
 }
 
+unsigned int
+Net_Common_Tools::getMaxMsgSize (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getMaxMsgSize"));
+
+  int result = -1;
+  int optval = 0;
+  int optlen = sizeof (optval);
+  result = ACE_OS::getsockopt (handle_in,
+                               SOL_SOCKET,
+                               SO_MAX_MSG_SIZE,
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result == -1)
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%@, SO_MAX_MSG_SIZE): \"%m\", aborting\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, SO_MAX_MSG_SIZE): \"%m\", aborting\n"),
+                handle_in));
+#endif
+    return 0;
+  } // end IF
+
+  return static_cast<unsigned int> (optval);
+}
+
 //Net_IInetConnectionManager_t*
 //Net_Common_Tools::getConnectionManager ()
 //{

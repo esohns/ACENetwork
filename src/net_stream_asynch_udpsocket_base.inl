@@ -134,6 +134,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::open"));
 
+  ACE_UNUSED_ARG (handle_in);
+
   int result = -1;
   bool handle_manager = false;
   bool handle_module = true;
@@ -145,8 +147,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // *NOTE*: even when this is a write-only connection
   //         (inherited4::configuration_.socketConfiguration.writeOnly), the
   //         base class still requires a valid handle to open the output stream
+  ACE_INET_Addr local_SAP (static_cast<u_short> (0),
+                           static_cast<ACE_UINT32> (INADDR_ANY));
   result =
-    inherited2::open (inherited4::configuration_.socketConfiguration.peerAddress, // local SAP
+    inherited2::open ((inherited4::configuration_.socketConfiguration.writeOnly ? local_SAP
+                                                                                : inherited4::configuration_.socketConfiguration.peerAddress), // local SAP
                       ACE_PROTOCOL_FAMILY_INET,                                   // protocol family
                       0,                                                          // protocol
                       1);                                                         // reuse_addr
@@ -172,8 +177,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     goto error;
   } // end IF
   handle_socket = true;
-  if (handle_in == ACE_INVALID_HANDLE)
-    inherited::handle (inherited2::get_handle ());
+  inherited::handle (inherited2::get_handle ());
 
   // step2a: initialize base-class
   if (!inherited::initialize (inherited4::configuration_.socketHandlerConfiguration))
@@ -184,7 +188,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step2b: tweak socket, initialize I/O
-  inherited::open (handle_in, messageBlock_in);
+  inherited::open (inherited::handle (), messageBlock_in);
 
   // step3: register with the connection manager (if any)
 #if defined (__GNUG__)
@@ -252,10 +256,10 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // *TODO*: this clearly is a design glitch
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inherited4::configuration_.streamConfiguration.sessionID =
-    reinterpret_cast<unsigned int> (inherited2::get_handle ()); // (== socket handle)
+    reinterpret_cast<unsigned int> (inherited::handle ()); // (== socket handle)
 #else
   inherited4::configuration_.streamConfiguration.sessionID =
-    static_cast<unsigned int> (inherited2::get_handle ()); // (== socket handle)
+    static_cast<unsigned int> (inherited::handle ()); // (== socket handle)
 #endif
   if (!stream_.initialize (inherited4::configuration_.streamConfiguration))
   {
@@ -300,7 +304,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       ACE_ASSERT (proactor_p);
       ACE_Asynch_Read_Dgram_Result_Impl* fake_result_p =
         proactor_p->create_asynch_read_dgram_result (inherited::proxy (),                  // handler proxy
-                                                     handle_in,                            // socket handle
+                                                     inherited::handle (),                 // socket handle
                                                      message_block_p,                      // buffer
                                                      message_block_p->size (),             // #bytes to read
                                                      0,                                    // flags
@@ -331,9 +335,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     // *NOTE*: registered with the proactor at this point
     //         --> data may start arriving at handle_input ()
   } // end IF
-
-  this->decrease (); // 'float' the connection: connection manager
-  ACE_ASSERT (this->count () == (inherited4::configuration_.socketConfiguration.writeOnly ? 1 : 2)); // connection manager (and read operation)
+  if (inherited4::configuration_.socketConfiguration.writeOnly)
+    this->decrease (); // float the connection (connection manager)
+  //ACE_ASSERT (this->count () == 2); // connection manager & read operation
 
   inherited4::state_.status = NET_CONNECTION_STATUS_OK;
 
@@ -417,6 +421,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   ACE_ASSERT (message_block_p);
 
   // start (asynchronous) write
+  this->increase ();
   inherited::counter_.increase ();
   //  bytes_to_send = buffer_->length ();
   bytes_to_send = message_block_p->length ();
@@ -445,6 +450,7 @@ send:
 //    buffer_->release ();
 //    buffer_ = NULL;
     message_block_p->release ();
+    this->decrease ();
     inherited::counter_.decrease ();
 
     return -1;
@@ -700,26 +706,26 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // step1: shutdown operations
   ACE_HANDLE handle = inherited::handle ();
-  // *NOTE*: may 'delete this'
-  result = handle_close (handle,
-                         ACE_Event_Handler::ALL_EVENTS_MASK);
+
+  if (inherited4::configuration_.socketConfiguration.writeOnly)
+    result = handle_close (handle,
+                           ACE_Event_Handler::ALL_EVENTS_MASK);
+  else
+    result = inherited::handle_close (handle,
+                                      ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Net_StreamAsynchUDPSocketBase_T::handle_close(): \"%m\", aborting\n")));
                 ACE_TEXT ("failed to Net_StreamAsynchUDPSocketBase_T::handle_close(): \"%m\", continuing\n")));
 
   //  step2: release the socket handle
   if (handle != ACE_INVALID_HANDLE)
   {
-    int result_2 = ACE_OS::closesocket (handle);
-    if (result_2 == -1)
+    result = inherited2::close ();
+    if (result == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  handle));
-//    inherited::handle (ACE_INVALID_HANDLE);
+                  ACE_TEXT ("failed to SocketType::close(): \"%m\", continuing\n")));
+    inherited2::set_handle (handle); // debugging purposes only !
   } // end IF
-
-//  return result;
 }
 
 template <typename HandlerType,
@@ -927,10 +933,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   {
     // connection closed/reset ? --> not an error
     error = result_in.error ();
-    if ((error != ECONNRESET) &&
-        (error != EPIPE)      &&
-        (error != EBADF)      && // local close (), happens on Linux
-        (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+    if ((error != EBADF)                   && // 9    : local close (), happens on Linux
+        (error != EPIPE)                   && // 32
+        (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+        (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
+        (error != ECONNRESET))                // 10054: happens on Win32
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                   result_in.handle (),
@@ -943,15 +950,15 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     {
       // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();
-      if ((error != ECONNRESET) &&
-          (error != EPIPE)      &&
-          (error != EBADF)      && // local close (), happens on Linux
-          (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+      if ((error != EBADF)                   && // 9    : local close (), happens on Linux
+          (error != EPIPE)                   && // 32
+          (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+          (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
+          (error != ECONNRESET))                // 10054: happens on Win32
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                     result_in.handle (),
                     error, ACE_TEXT (ACE_OS::strerror (error))));
-
       break;
     }
     // *** GOOD CASES ***
@@ -960,7 +967,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 //       ACE_DEBUG ((LM_DEBUG,
 //                   ACE_TEXT ("[%u]: socket was closed by the peer...\n"),
 //                   handle_));
-
       break;
     }
     default:
@@ -994,6 +1000,38 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Svc_Handler::handle_close(): \"%m\", continuing\n")));
+
+  this->decrease ();
+}
+
+template <typename HandlerType,
+          typename SocketType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
+void
+Net_StreamAsynchUDPSocketBase_T<HandlerType,
+                                SocketType,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType,
+                                HandlerConfigurationType>::handle_write_dgram (const ACE_Asynch_Write_Dgram::Result& result_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_write_dgram"));
+
+  inherited::handle_write_dgram (result_in);
+  this->decrease ();
 }
 
 /////////////////////////////////////////
@@ -1809,10 +1847,11 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   {
     // connection closed/reset ? --> not an error
     error = result_in.error ();
-    if ((error != ECONNRESET) &&
-        (error != EPIPE)      &&
-        (error != EBADF)      && // local close (), happens on Linux
-        (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+    if ((error != EBADF)                   && // 9    : local close (), happens on Linux
+        (error != EPIPE)                   && // 32
+        (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+        (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
+        (error != ECONNRESET))                // 10054: happens on Win32
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                   result_in.handle (),
@@ -1825,15 +1864,15 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
     {
       // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();
-      if ((error != ECONNRESET) &&
-          (error != EPIPE)      &&
-          (error != EBADF)      && // local close (), happens on Linux
-          (error != 64)) // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+      if ((error != EBADF)                   && // 9    : local close (), happens on Linux
+          (error != EPIPE)                   && // 32
+          (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+          (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
+          (error != ECONNRESET))                // 10054: happens on Win32
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
                     result_in.handle (),
                     error, ACE_TEXT (ACE_OS::strerror (error))));
-
       break;
     }
     // *** GOOD CASES ***
@@ -1842,7 +1881,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 //       ACE_DEBUG ((LM_DEBUG,
 //                   ACE_TEXT ("[%u]: socket was closed by the peer...\n"),
 //                   handle_));
-
       break;
     }
     default:

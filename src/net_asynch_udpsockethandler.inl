@@ -24,6 +24,7 @@
 #include "ace/Proactor.h"
 
 #include "common_defines.h"
+#include "common_tools.h"
 
 #include "net_common_tools.h"
 #include "net_defines.h"
@@ -183,20 +184,37 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   if (!inherited::configuration_.socketConfiguration->writeOnly)
   {
     result = inputStream_.cancel ();
-  //  if ((result != 0) && (result != 1))
-    if (result == -1)
+    if (result)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      DWORD error = ::GetLastError ();
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
-                  result));
+                  ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%s\", continuing\n"),
+                  ACE_TEXT (Common_Tools::error2String (error).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+        ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
+        result_2));
+#endif
+    } // end IF
   } // end IF
   else
     result = 0;
   int result_2 = outputStream_.cancel ();
 //  if ((result_2 != 0) && (result_2 != 1))
-  if (result_2 == -1)
+  if (result_2)
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    DWORD error = ::GetLastError ();
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%s\", continuing\n"),
+                ACE_TEXT (Common_Tools::error2String (error).c_str ())));
+#else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
-                result));
+                result_2));
+#endif
+  } // end IF
 
 //  return ((((result != 0) && (result != 1)) ||
 //           ((result_2 != 0) && (result_2 != 1))) ? -1

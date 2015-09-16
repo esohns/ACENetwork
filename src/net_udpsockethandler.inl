@@ -142,79 +142,84 @@ Net_UDPSocketHandler_T<SocketType,
   ACE_ASSERT (configuration_p->socketConfiguration);
 
   // step1: open socket ?
-  //ACE_INET_Addr local_address, peer_address;
-  //local_address = ACE_Addr::sap_any;
-  //peer_address = configuration_p->socketConfiguration->peerAddress;
-  //if (!configuration_p->socketConfiguration->writeOnly)
-  //  local_address = configuration_p->socketConfiguration->peerAddress;
-
-//  if (!configuration_p->socketConfiguration.writeOnly)
-//  {
-    result =
-      inherited2::peer_.open (configuration_p->socketConfiguration->peerAddress, // local SAP
-                              ACE_PROTOCOL_FAMILY_INET,                          // protocol family
-                              0,                                                 // protocol
-                              1);                                                // reuse_addr
+  // *NOTE*: even when this is a write-only connection
+  //         (configuration_p->socketConfiguration->writeOnly), the
+  //         base class still requires a valid handle to open the output stream
+  ACE_INET_Addr local_SAP (static_cast<u_short> (0),
+                           static_cast<ACE_UINT32> (INADDR_ANY));
+  result =
+    inherited2::peer_.open ((configuration_p->socketConfiguration->writeOnly ? local_SAP
+                                                                             : configuration_p->socketConfiguration->peerAddress), // local SAP
+                            ACE_PROTOCOL_FAMILY_INET,                          // protocol family
+                            0,                                                 // protocol
+                            1);                                                // reuse_addr
       //inherited2::peer_.open (configuration_p->socketConfiguration->peerAddress, // remote SAP
       //                        (configuration_p->inbound ? configuration_p->socketConfiguration->peerAddress
       //                                                  : ACE_Addr::sap_any),    // local SAP
       //                        ACE_PROTOCOL_FAMILY_INET,                          // protocol family
       //                        0,                                                 // protocol
       //                        1);                                                // reuse_addr
+  if (result == -1)
+  {
+    ACE_TCHAR buffer[BUFSIZ];
+    ACE_OS::memset (buffer, 0, sizeof (buffer));
+    result =
+      configuration_p->socketConfiguration->peerAddress.addr_to_string (buffer,
+                                                                        sizeof (buffer),
+                                                                        1);
     if (result == -1)
-    {
-      ACE_TCHAR buffer[BUFSIZ];
-      ACE_OS::memset (buffer, 0, sizeof (buffer));
-      result =
-        configuration_p->socketConfiguration->peerAddress.addr_to_string (buffer,
-                                                                          sizeof (buffer),
-                                                                          1);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
-                  buffer));
-      return -1;
-    } // end IF
-//  } // end IF
+                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
+                buffer));
+    return -1;
+  } // end IF
 
   // step2: tweak socket
+  ACE_HANDLE handle = SVC_HANDLER_T::get_handle ();
+  ACE_ASSERT (handle != ACE_INVALID_HANDLE);
   if (configuration_p->socketConfiguration->bufferSize)
-    if (!Net_Common_Tools::setSocketBuffer (SVC_HANDLER_T::get_handle (),
+  {
+    if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_RCVBUF,
                                             configuration_p->socketConfiguration->bufferSize))
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_RCVBUF, %u) (handle was: %@), aborting\n"),
                   configuration_p->socketConfiguration->bufferSize,
-                  SVC_HANDLER_T::get_handle ()));
+                  handle));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_RCVBUF, %u) (handle was: %d), aborting\n"),
+                  configuration_p->socketConfiguration->bufferSize,
+                  handle));
+#endif
       return -1;
     } // end IF
-//  if (!Net_Common_Tools::setNoDelay (SVC_HANDLER_T::get_handle (),
-//                                     NET_DEFAULT_TCP_NODELAY))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
-//                (NET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
-//                                         : ACE_TEXT ("false")),
-//                SVC_HANDLER_T::get_handle ()));
-//    return -1;
-//  } // end IF
-//  if (!Net_Common_Tools::setKeepAlive (SVC_HANDLER_T::get_handle (),
-//                                       NET_DEFAULT_TCP_KEEPALIVE))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
-//                (NET_DEFAULT_TCP_LINGER ? ACE_TEXT ("true")
-//                                        : ACE_TEXT ("false")),
-//                SVC_HANDLER_T::get_handle ()));
-//    return -1;
-//  } // end IF
-// *CHECK*
+    if (!Net_Common_Tools::setSocketBuffer (handle,
+                                            SO_SNDBUF,
+                                            configuration_p->socketConfiguration->bufferSize))
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_RCVBUF, %u) (handle was: %@), aborting\n"),
+                  configuration_p->socketConfiguration->bufferSize,
+                  handle));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_SNDBUF, %u) (handle was: %d), aborting\n"),
+                  configuration_p->socketConfiguration->bufferSize,
+                  handle));
+#endif
+      return -1;
+    } // end IF
+  } // end IF
+// *PORTABILITY*: currently, MS Windows UDP sockets do not support SO_LINGER
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  if (!Net_Common_Tools::setLinger (SVC_HANDLER_T::get_handle (),
+  if (!Net_Common_Tools::setLinger (handle,
                                     configuration_p->socketConfiguration->linger,
                                     -1))
   {
@@ -222,9 +227,23 @@ Net_UDPSocketHandler_T<SocketType,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
                 (configuration_p->socketConfiguration->linger ? ACE_TEXT ("true")
                                                               : ACE_TEXT ("false")),
-                SVC_HANDLER_T::get_handle ()));
+                handle));
     return -1;
   } // end IF
+#endif
+
+  // debug info
+  unsigned int so_max_msg_size = Net_Common_Tools::getMaxMsgSize (handle);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("maximum message size for UDP socket 0x%@: %u byte(s)...\n"),
+              handle,
+              so_max_msg_size));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("maximum message size for UDP socket %d: %u byte(s)...\n"),
+              handle,
+              so_max_msg_size));
 #endif
 
   return 0;
