@@ -86,10 +86,6 @@ class Net_StreamUDPSocketBase_T
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
 
-  // override some task-based members
-  virtual int open (void* = NULL); // args
-  virtual int close (u_long = 0); // args (reason)
-
   // *NOTE*: enqueue any received data onto our stream for further processing
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: send any enqueued data back to the client...
@@ -138,6 +134,13 @@ class Net_StreamUDPSocketBase_T
   Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                              unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
 
+  // override some task-based members
+  virtual int open (void* = NULL); // args
+  virtual int close (u_long = 0); // args (reason)
+
+  // helper method(s)
+  ACE_Message_Block* allocateMessage (unsigned int); // requested size
+
   ACE_Message_Block* currentWriteBuffer_;
   ACE_SYNCH_MUTEX    sendLock_;
   // *IMPORTANT NOTE*: in a threaded environment, workers may (!) dispatch the
@@ -146,9 +149,6 @@ class Net_StreamUDPSocketBase_T
   bool               serializeOutput_;
 
   StreamType         stream_;
-
-  // helper method(s)
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
 
  private:
   typedef HandlerType inherited;

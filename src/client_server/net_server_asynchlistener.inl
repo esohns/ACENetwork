@@ -451,12 +451,12 @@ Net_Server_AsynchListener_T<HandlerType,
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("0x%@: started listening (\"%s\")...\n"),
+              ACE_TEXT ("0x%@: started listening (TCP) (\"%s\")...\n"),
               inherited::get_handle (),
               buffer));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%d: started listening (\"%s\")...\n"),
+              ACE_TEXT ("%d: started listening (TCP) (\"%s\")...\n"),
               inherited::get_handle (),
               buffer));
 #endif

@@ -683,7 +683,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // dispatching the reactor notification queue concurrently (most notably,
   // ACE_TP_Reactor) --> enforce proper serialization
   if (serializeOutput_)
-    sendLock_.acquire ();
+  {
+    result = sendLock_.acquire ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
+  } // end IF
 
   if (!currentWriteBuffer_)
   {
@@ -711,7 +716,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
       // clean up
       if (serializeOutput_)
-        sendLock_.release ();
+      {
+        result = sendLock_.release ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
+      } // end IF
 
       return -1;
     } // end IF
@@ -731,7 +741,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
     // clean up
     if (serializeOutput_)
-      sendLock_.release ();
+    {
+      result = sendLock_.release ();
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
+    } // end IF
 
     return -1;
   } // end IF
@@ -740,7 +755,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
       inherited::peer_.send (currentWriteBuffer_->rd_ptr (),                             // data
                              currentWriteBuffer_->length (),                             // bytes to send
                              inherited2::configuration_.socketConfiguration.peerAddress, // peer address
-                             0);                                                         // flags
+                             0);//,                                                          // flags
+                             //NULL);                                                      // timeout
 //      inherited::peer_.send (currentWriteBuffer_->rd_ptr (), // data
 //                             currentWriteBuffer_->length (), // bytes to send
 //                             0,                              // flags
@@ -766,7 +782,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
       currentWriteBuffer_->release ();
       currentWriteBuffer_ = NULL;
       if (serializeOutput_)
-        sendLock_.release ();
+      {
+        result = sendLock_.release ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
+      } // end IF
 
       return -1;
     }
@@ -781,7 +802,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
       currentWriteBuffer_->release ();
       currentWriteBuffer_ = NULL;
       if (serializeOutput_)
-        sendLock_.release ();
+      {
+        result = sendLock_.release ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
+      } // end IF
 
       return -1;
     }
@@ -818,7 +844,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
   {
     // clean up
     if (serializeOutput_)
-      sendLock_.release ();
+    {
+      result = sendLock_.release ();
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
+    } // end IF
 
     return 1;
   } // end IF
@@ -829,7 +860,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // clean up
   if (serializeOutput_)
-    sendLock_.release ();
+  {
+    result = sendLock_.release ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
+  } // end IF
 
   return 0;
 }
@@ -1112,6 +1148,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamUDPSocketBase_T::close(NET_CONNECTION_CLOSE_REASON_USER_ABORT): \"%m\", continuing\n")));
+
+  inherited2::state_.status = NET_CONNECTION_STATUS_CLOSED;
 }
 
 template <typename HandlerType,

@@ -516,12 +516,17 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     } // end IF
   } // end IF
 
-  // step3: invoke base-class maintenance
-  result = inherited::handle_close (inherited::handle (),
-                                    mask_in);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SocketHandlerType::handle_close(): \"%m\", continuing\n")));
+  // step3: invoke base-class maintenance ?
+  // *NOTE*: if the connection has been close()d locally, the socket is already
+  //         closed at this point
+  if (inherited4::state_.status != NET_CONNECTION_STATUS_CLOSED)
+  {
+    result = inherited::handle_close (inherited::handle (),
+                                      mask_in);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to SocketHandlerType::handle_close(): \"%m\", continuing\n")));
+  } // end IF
 
   // step4: deregister with the connection manager (if any)
   if (inherited4::isRegistered_)
@@ -726,6 +731,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                   ACE_TEXT ("failed to SocketType::close(): \"%m\", continuing\n")));
     inherited2::set_handle (handle); // debugging purposes only !
   } // end IF
+
+  // *TODO*: remove type inference
+  inherited4::state_.status = NET_CONNECTION_STATUS_CLOSED;
 }
 
 template <typename HandlerType,

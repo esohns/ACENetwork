@@ -290,7 +290,7 @@ Net_ConnectionBase_T<AddressType,
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
+                ACE_TEXT ("deregistered connection [0x%@/%u] (total: %u)\n"),
                 this_p, reinterpret_cast<unsigned int> (handle),
                 num_connections));
 #else

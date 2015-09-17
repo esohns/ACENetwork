@@ -232,19 +232,19 @@ Net_UDPSocketHandler_T<SocketType,
   } // end IF
 #endif
 
-  // debug info
-  unsigned int so_max_msg_size = Net_Common_Tools::getMaxMsgSize (handle);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("maximum message size for UDP socket 0x%@: %u byte(s)...\n"),
-              handle,
-              so_max_msg_size));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("maximum message size for UDP socket %d: %u byte(s)...\n"),
-              handle,
-              so_max_msg_size));
-#endif
+//  // debug info
+//  unsigned int so_max_msg_size = Net_Common_Tools::getMaxMsgSize (handle);
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("maximum message size for UDP socket 0x%@: %u byte(s)...\n"),
+//              handle,
+//              so_max_msg_size));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("maximum message size for UDP socket %d: %u byte(s)...\n"),
+//              handle,
+//              so_max_msg_size));
+//#endif
 
   return 0;
 }

@@ -77,6 +77,8 @@ enum Net_Connection_Status
   ///////////////////////////////////////
   NET_CONNECTION_STATUS_INITIALIZATION_FAILED,
   ///////////////////////////////////////
+  NET_CONNECTION_STATUS_CLOSED, // local close ()
+  ///////////////////////////////////////
   NET_CONNECTION_STATUS_MAX
 };
 
