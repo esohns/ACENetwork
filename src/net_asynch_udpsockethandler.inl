@@ -58,6 +58,8 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::open"));
 
+  ACE_UNUSED_ARG (messageBlock_in);
+
   int result = -1;
 
   // sanity check(s)
@@ -369,9 +371,9 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
         (error != EBADF)) // 9 happens on Linux (local close())
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
+                  ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", aborting\n"),
                   result_in.handle (),
-                  ACE_TEXT (ACE::sock_error (error))));
+                  ACE::sock_error (error)));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
@@ -394,9 +396,9 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
           (error != EBADF)) // 9 happens on Linux (local close())
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
+                    ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", aborting\n"),
                     result_in.handle (),
-                    ACE_TEXT (ACE::sock_error (error))));
+                    ACE::sock_error (error)));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),

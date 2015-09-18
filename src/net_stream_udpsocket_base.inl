@@ -599,7 +599,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 //                   bytes_received));
 
       // adjust write pointer
-      buffer_p->wr_ptr (bytes_received);
+      buffer_p->wr_ptr (static_cast<size_t> (bytes_received));
 
       break;
     }

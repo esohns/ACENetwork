@@ -946,10 +946,17 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
         (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
         (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
         (error != ECONNRESET))                // 10054: happens on Win32
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
+                  ACE_TEXT ("failed to read from input stream (0x%@): \"%s\", aborting\n"),
                   result_in.handle (),
-                  error, ACE_TEXT (ACE_OS::strerror (error))));
+                  ACE::sock_error (static_cast<int> (error))));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
+                  result_in.handle (),
+                  ACE::sock_error (static_cast<int> (error))));
+#endif
   } // end IF
 
   switch (result_in.bytes_transferred ())
@@ -963,10 +970,17 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
           (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
           (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
           (error != ECONNRESET))                // 10054: happens on Win32
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to read from input stream (0x%@): \"%s\", aborting\n"),
+                      result_in.handle (),
+                      ACE::sock_error (static_cast<int> (error))));
+#else
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
+                    ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
                     result_in.handle (),
-                    error, ACE_TEXT (ACE_OS::strerror (error))));
+                    ACE::sock_error (static_cast<int> (error))));
+#endif
       break;
     }
     // *** GOOD CASES ***

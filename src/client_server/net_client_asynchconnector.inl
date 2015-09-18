@@ -650,6 +650,8 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
   // *NOTE*: on error, the addresses are not passed through...
 
+  ACE_UNUSED_ARG (localSAP_in);
+
   int result = -1;
   unsigned long error = 0;
 
@@ -670,7 +672,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
                 buffer,
-                ACE::sock_error (error)));
+                ACE::sock_error (static_cast<int> (error))));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
@@ -706,6 +708,8 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                              UserDataType>::connect (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
+
+  ACE_UNUSED_ARG (address_in);
 
   CONNECTION_T* handler_p = NULL;
   handler_p = make_handler ();
