@@ -284,7 +284,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     goto close;
   } // end IF
   this->decrease (); // 'float' the connection
-  ACE_ASSERT (this->count () == 1);
 
   return;
 

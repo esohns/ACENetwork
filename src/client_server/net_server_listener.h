@@ -24,7 +24,7 @@
 #include "ace/Acceptor.h"
 #include "ace/Global_Macros.h"
 #include "ace/Singleton.h"
-#include "ace/SOCK_Acceptor.h"
+//#include "ace/SOCK_Acceptor.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_idumpstate.h"
@@ -32,6 +32,7 @@
 #include "net_ilistener.h"
 
 template <typename HandlerType,
+          typename AcceptorType,
           ///////////////////////////////
           typename AddressType,
           typename ConfigurationType,
@@ -43,13 +44,14 @@ template <typename HandlerType,
           typename UserDataType>
 class Net_Server_Listener_T
  : public ACE_Acceptor<HandlerType,
-                       ACE_SOCK_ACCEPTOR>
+                       AcceptorType>
  , public Net_IListener_T<ConfigurationType, 
                           HandlerConfigurationType>
  , public Common_IDumpState
 {
   // singleton needs access to the ctor/dtors
   friend class ACE_Singleton<Net_Server_Listener_T<HandlerType,
+                                                   AcceptorType,
 
                                                    AddressType,
                                                    ConfigurationType,
@@ -102,7 +104,7 @@ class Net_Server_Listener_T
 
  private:
   typedef ACE_Acceptor<HandlerType,
-                       ACE_SOCK_ACCEPTOR> inherited;
+                       AcceptorType> inherited;
 
   typedef Net_IListener_T<ConfigurationType,
                           HandlerConfigurationType> ILISTENER_T;

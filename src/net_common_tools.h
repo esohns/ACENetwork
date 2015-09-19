@@ -60,6 +60,13 @@ class Net_Export Net_Common_Tools
                          unsigned short = std::numeric_limits<unsigned short>::max ()); // seconds {0     --> send RST on close,
                                                                                         //          65535 --> reuse default/current value}
 
+  static int getProtocol (ACE_HANDLE); // socket handle
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // *NOTE*: applies to TCP sockets (see also: SO_MAX_MSG_SIZE)
+  static bool setLoopBackFastPath (ACE_HANDLE); // socket handle
+#endif
+
   // *NOTE*: applies to UDP sockets (see also: SO_MAX_MSG_SIZE)
   static unsigned int getMaxMsgSize (ACE_HANDLE); // socket handle
 

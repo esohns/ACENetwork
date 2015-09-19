@@ -23,13 +23,16 @@
 
 #include <sstream>
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include <mstcpip.h>
+#else
 #include <netinet/ether.h>
 #endif
 
 #include "ace/Dirent_Selector.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "common_defines.h"
 #include "common_file_tools.h"
@@ -971,6 +974,76 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
 
   return (result == 0);
 }
+
+int
+Net_Common_Tools::getProtocol (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getProtocol"));
+
+  int result = -1;
+  int optval = 0;
+  int optlen = sizeof (optval);
+  result = ACE_OS::getsockopt (handle_in,
+                               SOL_SOCKET,
+                               SO_TYPE, // SO_STYLE
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result == -1)
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%@, SO_TYPE): \"%m\", aborting\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, SO_TYPE): \"%m\", aborting\n"),
+                handle_in));
+#endif
+    return -1;
+  } // end IF
+
+  return optval;
+}
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+bool
+Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setLoopBackFastPath"));
+
+  // *NOTE*: works for TCP connections only (see:
+  // https://msdn.microsoft.com/en-us/library/windows/desktop/jj841212(v=vs.85).aspx)
+  // sanity check(s)
+  ACE_ASSERT (Net_Common_Tools::getProtocol (handle_in) == SOCK_STREAM);
+
+  int optval = 1; // --> enable
+  unsigned long number_of_bytes_returned = 0;
+  int result =
+    ACE_OS::ioctl (handle_in,                 // socket handle
+                   SIO_LOOPBACK_FAST_PATH,    // control code
+                   &optval,                   // input buffer
+                   sizeof (optval),           // size of input buffer
+                   NULL,                      // output buffer
+                   0,                         // size of output buffer
+                   &number_of_bytes_returned, // #bytes returned
+                   NULL, NULL);               // overlapped / function
+  if (result == SOCKET_ERROR)
+  {
+    DWORD error = ::GetLastError ();
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::ioctl(0x%@,SIO_LOOPBACK_FAST_PATH): \"%s\", aborting\n"),
+                handle_in,
+                ACE_TEXT (Common_Tools::error2String (error).c_str ())));
+    return false;
+  } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("enabled SIO_LOOPBACK_FAST_PATH on 0x%@...\n"),
+              handle_in));
+
+  return true;
+}
+#endif
 
 unsigned int
 Net_Common_Tools::getMaxMsgSize (ACE_HANDLE handle_in)

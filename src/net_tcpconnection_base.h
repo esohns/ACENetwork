@@ -31,6 +31,8 @@
 #include "ace/SOCK_Connector.h"
 
 #include "net_iconnectionmanager.h"
+#include "net_sock_acceptor.h"
+#include "net_sock_connector.h"
 #include "net_socketconnection_base.h"
 #include "net_transportlayer_tcp.h"
 
@@ -71,6 +73,17 @@ class Net_TCPConnectionBase_T
 
                                                    UserDataType>,
                            ACE_SOCK_ACCEPTOR>;
+ friend class ACE_Acceptor<Net_TCPConnectionBase_T<HandlerType,
+
+                                                   ConfigurationType,
+                                                   StateType,
+                                                   StatisticContainerType,
+                                                   StreamType,
+
+                                                   HandlerConfigurationType,
+
+                                                   UserDataType>,
+                            Net_SOCK_Acceptor>;
  friend class ACE_Connector<Net_TCPConnectionBase_T<HandlerType,
                                                     ConfigurationType,
                                                     StateType,
@@ -79,6 +92,14 @@ class Net_TCPConnectionBase_T
                                                     HandlerConfigurationType,
                                                     UserDataType>,
                             ACE_SOCK_CONNECTOR>;
+ friend class ACE_Connector<Net_TCPConnectionBase_T<HandlerType,
+                                                   ConfigurationType,
+                                                   StateType,
+                                                   StatisticContainerType,
+                                                   StreamType,
+                                                   HandlerConfigurationType,
+                                                   UserDataType>,
+                            Net_SOCK_Connector>;
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,

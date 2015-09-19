@@ -245,26 +245,26 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
-  ICONNECTION_T* result = NULL;
+  ICONNECTION_T* connection_p = NULL;
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
   for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
-       iterator.next (result);
+       iterator.next (connection_p);
        iterator.advance ())
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-       if (result->id () == reinterpret_cast<unsigned int> (handle_in))
+       if (connection_p->id () == reinterpret_cast<unsigned int> (handle_in))
 #else
-       if (result->id () == static_cast<unsigned int> (handle_in))
+       if (connection_p->id () == static_cast<unsigned int> (handle_in))
 #endif
          break;
-  if (result)
-    result->increase (); // increase reference count
+  if (connection_p)
+    connection_p->increase (); // increase reference count
 //  else
 //  {
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("connection not found (handle was: %@), aborting\n"),
+//                ACE_TEXT ("connection not found (handle was: 0x%@), aborting\n"),
 //                handle_in));
 //#else
 //    ACE_DEBUG ((LM_ERROR,
@@ -273,7 +273,7 @@ Net_Connection_Manager_T<AddressType,
 //#endif
 //  } // end ELSE
 
-  return result;
+  return connection_p;
 }
 
 template <typename AddressType,
@@ -293,7 +293,7 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
-  ICONNECTION_T* result = NULL;
+  ICONNECTION_T* connection_p = NULL;
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   AddressType local_address, peer_address;
@@ -301,34 +301,34 @@ Net_Connection_Manager_T<AddressType,
     ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
-         iterator.next (result);
+         iterator.next (connection_p);
          iterator.advance ())
     {
-      result->info (handle,
-                    local_address,
-                    peer_address);
+      connection_p->info (handle,
+                          local_address,
+                          peer_address);
       if (peer_address == peerAddress_in)
         break;
     } // end FOR
-    if (result)
-      result->increase (); // increase reference count
-    else
-    {
-      ACE_TCHAR buffer[BUFSIZ];
-      ACE_OS::memset (buffer, 0, sizeof (buffer));
-      int result_2 = peerAddress_in.addr_to_string (buffer,
-                                                    sizeof (buffer),
-                                                    1);
-      if (result_2 == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("connection not found (address was: \"%s\"), aborting\n"),
-                  buffer));
-    } // end ELSE
+    if (connection_p)
+      connection_p->increase (); // increase reference count
+    //else
+    //{
+    //  ACE_TCHAR buffer[BUFSIZ];
+    //  ACE_OS::memset (buffer, 0, sizeof (buffer));
+    //  int result_2 = peerAddress_in.addr_to_string (buffer,
+    //                                                sizeof (buffer),
+    //                                                1);
+    //  if (result_2 == -1)
+    //    ACE_DEBUG ((LM_ERROR,
+    //                ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("connection not found (address was: \"%s\"), aborting\n"),
+    //              buffer));
+    //} // end ELSE
   } // end lock scope
 
-  return result;
+  return connection_p;
 }
 
 template <typename AddressType,

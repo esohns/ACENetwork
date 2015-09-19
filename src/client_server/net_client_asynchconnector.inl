@@ -17,9 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "ace/Log_Msg.h"
 
+#include "net_common_tools.h"
 #include "net_macros.h"
 
 template <typename HandlerType,
@@ -40,6 +40,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                                           unsigned int statisticCollectionInterval_in)
  : configuration_ ()
+ , connectHandle_ (ACE_INVALID_HANDLE)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -172,26 +173,29 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   ICONNECTOR_T* iconnector_p = this;
   const void* act_p = iconnector_p;
+  connectHandle_ = ACE_INVALID_HANDLE;
   result =
-      inherited::connect (address_in,                            // remote SAP
-                          ACE_sap_any_cast (const AddressType&), // local SAP
-                          1,                                     // re-use address (SO_REUSEADDR) ?
-                          act_p);                                // asynchronous completion token
+      connect (address_in,                            // remote address
+               ACE_sap_any_cast (const AddressType&), // local address
+               1,                                     // SO_REUSEADDR ?
+               act_p);                                // asynchronous completion token
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = address_in.addr_to_string (buffer, sizeof (buffer));
+    result = address_in.addr_to_string (buffer,
+                                        sizeof (buffer),
+                                        1);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Connector::connect(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));
     return ACE_INVALID_HANDLE;
   } // end IF
+  ACE_ASSERT (connectHandle_ != ACE_INVALID_HANDLE);
 
-  // *TODO*: return the "wait" handle of the asynchronous connect object
   //ACE_HANDLE return_value = ACE_INVALID_HANDLE;
   //ACE_Asynch_Connect& asynch_connect_r =
   //    inherited::asynch_connect ();
@@ -200,7 +204,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   //ACE_ASSERT (asynch_operation_impl_p);
   //ACE_UNUSED_ARG (return_value);
 
-  return 0;
+  return connectHandle_;
 }
 
 template <typename HandlerType,
@@ -247,13 +251,133 @@ Net_Client_AsynchConnector_T<HandlerType,
                              StatisticContainerType,
                              StreamType,
                              HandlerConfigurationType,
+                             UserDataType>::connect (const ACE_INET_Addr& remoteAddress_in,
+                                                     const ACE_INET_Addr& localAddress_in,
+                                                     int reuseAddr_in,
+                                                     const void* act_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
+
+  int result = -1;
+
+  // *NOTE*: some socket options need to be set before connect()ing
+  //         --> set these here (this implements the shared_connect_start()
+  //             method of ACE_SOCK_Connector (see: SOCK_Connector.h:301) for
+  //             synchronous connects
+  int protocol_family = remoteAddress_in.get_type ();
+  connectHandle_ = ACE_OS::socket (protocol_family,
+                                   SOCK_STREAM, // TCP
+                                   0);
+  if (connectHandle_ == ACE_INVALID_HANDLE)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
+                protocol_family, SOCK_STREAM));
+    return -1;
+  } // end IF
+
+  // Reuse the address
+  int one = 1;
+  if (reuseAddr_in &&
+      (protocol_family != PF_UNIX))
+  {
+    result = ACE_OS::setsockopt (connectHandle_,
+                                 SOL_SOCKET,
+                                 SO_REUSEADDR,
+                                 reinterpret_cast<const char*> (&one),
+                                 sizeof (one));
+    if (result == -1)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_REUSEADDR): \"%m\", aborting\n"),
+                  connectHandle_));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::setsockopt(%d,SO_REUSEADDR): \"%m\", aborting\n"),
+                  connectHandle_));
+#endif
+      goto close;
+    } // end IF
+  } // end IF
+
+  ///////////////////////////////////////
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // enable SIO_LOOPBACK_FAST_PATH on Win32
+  if ((remoteAddress_in.get_type () == ACE_ADDRESS_FAMILY_INET) &&
+      remoteAddress_in.is_loopback ()                           &&
+      NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
+    if (!Net_Common_Tools::setLoopBackFastPath (connectHandle_))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setLoopBackFastPath(0x%@): \"%m\", aborting\n"),
+                  connectHandle_));
+      goto close;
+    } // end IF
+#endif
+
+  ACE_Asynch_Connect& connect_r = inherited::asynch_connect ();
+  result = connect_r.connect (connectHandle_,
+                              remoteAddress_in,
+                              localAddress_in,
+                              reuseAddr_in,
+                              act_in);
+  if (result == -1)
+  {
+    ACE_TCHAR buffer[BUFSIZ];
+    ACE_OS::memset (buffer, 0, sizeof (buffer));
+    result = remoteAddress_in.addr_to_string (buffer,
+                                              sizeof (buffer),
+                                              1);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Connect::connect(\"%s\"): \"%m\", aborting\n"),
+                buffer));
+    goto close;
+  } // end IF
+
+  return 0;
+
+close:
+  result = ACE_OS::closesocket (connectHandle_);
+  if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n")));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n")));
+#endif
+
+  return -1;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
+int
+Net_Client_AsynchConnector_T<HandlerType,
+                             AddressType,
+                             ConfigurationType,
+                             StateType,
+                             StatisticContainerType,
+                             StreamType,
+                             HandlerConfigurationType,
                              UserDataType>::validate_connection (const ACE_Asynch_Connect::Result& result_in,
-                                                                 const ACE_INET_Addr& remoteSAP_in,
-                                                                 const ACE_INET_Addr& localSAP_in)
+                                                                 const ACE_INET_Addr& remoteAddress_in,
+                                                                 const ACE_INET_Addr& localAddress_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
-  ACE_UNUSED_ARG (localSAP_in);
+  ACE_UNUSED_ARG (localAddress_in);
 
   // *NOTE*: on error, the addresses are not passed through...
 
@@ -269,7 +393,9 @@ Net_Client_AsynchConnector_T<HandlerType,
     // *TODO*: in case of errors, addresses are not supplied
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    int result_2 = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
+    int result_2 = remoteAddress_in.addr_to_string (buffer,
+                                                    sizeof (buffer),
+                                                    1);
     if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));

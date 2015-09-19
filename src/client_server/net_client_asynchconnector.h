@@ -51,6 +51,8 @@ class Net_Client_AsynchConnector_T
                            HandlerConfigurationType>
 {
  public:
+  typedef Net_IConnector_T<AddressType,
+                           HandlerConfigurationType> ICONNECTOR_T;
   typedef StreamType STREAM_T;
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
@@ -76,7 +78,7 @@ class Net_Client_AsynchConnector_T
                                 unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
   virtual ~Net_Client_AsynchConnector_T ();
 
-  // override default connect strategy
+  // override default validation strategy
   virtual int validate_connection (const ACE_Asynch_Connect::Result&, // result
                                    const ACE_INET_Addr&,              // remote address
                                    const ACE_INET_Addr&);             // local address
@@ -91,6 +93,8 @@ class Net_Client_AsynchConnector_T
   virtual bool useReactor () const; // ? : uses proactor
 
   virtual void abort ();
+  // *WARNING*: returns the 'connect' handle
+  //            --> currently, this API is not thread safe !
   virtual ACE_HANDLE connect (const AddressType&);
 
  protected:
@@ -102,13 +106,21 @@ class Net_Client_AsynchConnector_T
  private:
   typedef ACE_Asynch_Connector<HandlerType> inherited;
 
-  typedef Net_IConnector_T<AddressType,
-                           HandlerConfigurationType> ICONNECTOR_T;
-
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 
+  // override default connect strategy
+  // *TODO*: currently tailored for TCP only (see implementation)
+  virtual int connect (const ACE_INET_Addr&,                                           // remote address
+                       const ACE_INET_Addr& = (const ACE_INET_Addr&)ACE_Addr::sap_any, // local address
+                       int = 1,                                                        // SO_REUSEADDR ?
+                       const void* = 0);                                               // ACT
+
   HandlerConfigurationType configuration_;
+  // *NOTE*: due to the current ACE API, there is no way to pass a handle back
+  //         from ACE_Asynch_Connector::connect() to
+  //         Net_Client_IConnector_T::connect () (see above) --> store it here
+  ACE_HANDLE               connectHandle_;
 
   ICONNECTION_MANAGER_T*   connectionManager_;
   unsigned int             statisticCollectionInterval_;
@@ -161,6 +173,8 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                            HandlerConfigurationType>
 {
  public:
+  typedef Net_IConnector_T<ACE_INET_Addr,
+                           HandlerConfigurationType> ICONNECTOR_T;
   typedef StreamType STREAM_T;
   typedef Net_IConnection_T<ACE_INET_Addr,
                             ConfigurationType,
@@ -238,9 +252,6 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
                                                              UserDataType> > inherited;
 
-  typedef Net_IConnector_T<ACE_INET_Addr,
-                           HandlerConfigurationType> ICONNECTOR_T;
-
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 
@@ -281,6 +292,8 @@ class Net_Client_AsynchConnector_T<HandlerType,
                            HandlerConfigurationType>
 {
  public:
+  typedef Net_IConnector_T<Net_Netlink_Addr,
+                           HandlerConfigurationType> ICONNECTOR_T;
   typedef StreamType STREAM_T;
   typedef Net_IConnection_T<Net_Netlink_Addr,
                             ConfigurationType,
@@ -329,9 +342,6 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
  private:
   typedef ACE_Asynch_Connector<HandlerType> inherited;
-
-  typedef Net_IConnector_T<Net_Netlink_Addr,
-                           HandlerConfigurationType> ICONNECTOR_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))

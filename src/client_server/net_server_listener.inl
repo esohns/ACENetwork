@@ -28,6 +28,7 @@
 #include "net_server_defines.h"
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -35,6 +36,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -54,6 +56,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -61,6 +64,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -82,6 +86,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -90,6 +95,7 @@ template <typename HandlerType,
           typename UserDataType>
 bool
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -103,6 +109,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -111,6 +118,7 @@ template <typename HandlerType,
           typename UserDataType>
 int
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -130,6 +138,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -138,6 +147,7 @@ template <typename HandlerType,
           typename UserDataType>
 void
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -153,6 +163,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -161,6 +172,7 @@ template <typename HandlerType,
           typename UserDataType>
 void
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -222,18 +234,19 @@ Net_Server_Listener_T<HandlerType,
       return;
     } // end IF
   } // end IF
-  result =
-      configuration_.address.addr_to_string (buffer, sizeof (buffer));
+  result = configuration_.address.addr_to_string (buffer,
+                                                  sizeof (buffer),
+                                                  1);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
   result =
-      inherited::open (configuration_.address,   // local address
-                       ACE_Reactor::instance (), // corresp. reactor
-                       ACE_NONBLOCK,             // flags (use non-blocking sockets !)
-                       //0,                        // flags (default is blocking sockets)
-                       1,                        // always accept ALL pending connections
-                       1);                       // try to re-use address
+    inherited::open (configuration_.address,   // local address
+                     ACE_Reactor::instance (), // corresp. reactor
+                     ACE_NONBLOCK,             // flags (use non-blocking sockets !)
+                     //0,                        // flags (default is blocking sockets)
+                     1,                        // always accept ALL pending connections
+                     1);                       // try to re-use address
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -257,6 +270,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -265,6 +279,7 @@ template <typename HandlerType,
           typename UserDataType>
 void
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -311,6 +326,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -319,6 +335,7 @@ template <typename HandlerType,
           typename UserDataType>
 bool
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -332,6 +349,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -340,6 +358,7 @@ template <typename HandlerType,
           typename UserDataType>
 const HandlerConfigurationType&
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -376,6 +395,7 @@ Net_Server_Listener_T<HandlerType,
 //}
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -384,6 +404,7 @@ template <typename HandlerType,
           typename UserDataType>
 bool
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -397,6 +418,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -405,6 +427,7 @@ template <typename HandlerType,
           typename UserDataType>
 bool
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -425,6 +448,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -433,6 +457,7 @@ template <typename HandlerType,
           typename UserDataType>
 void
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -461,6 +486,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -469,6 +495,7 @@ template <typename HandlerType,
           typename UserDataType>
 int
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -498,6 +525,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -506,6 +534,7 @@ template <typename HandlerType,
           typename UserDataType>
 int
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,
@@ -523,6 +552,7 @@ Net_Server_Listener_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename AcceptorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -531,6 +561,7 @@ template <typename HandlerType,
           typename UserDataType>
 int
 Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
                       AddressType,
                       ConfigurationType,
                       StateType,

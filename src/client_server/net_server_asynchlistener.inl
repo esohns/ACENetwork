@@ -29,6 +29,7 @@
 #include "ace/POSIX_Asynch_IO.h"
 
 #include "common.h"
+#include "common_tools.h"
 
 #include "net_common.h"
 #include "net_macros.h"
@@ -103,12 +104,12 @@ Net_Server_AsynchListener_T<HandlerType,
                             StreamType,
                             HandlerConfigurationType,
                             UserDataType>::validate_connection (const ACE_Asynch_Accept::Result& result_in,
-                                                                const ACE_INET_Addr& remoteSAP_in,
-                                                                const ACE_INET_Addr& localSAP_in)
+                                                                const ACE_INET_Addr& remoteAddress_in,
+                                                                const ACE_INET_Addr& localAddress_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::validate_connection"));
 
-  ACE_UNUSED_ARG (localSAP_in);
+  ACE_UNUSED_ARG (localAddress_in);
 
   int result = -1;
 
@@ -118,7 +119,9 @@ Net_Server_AsynchListener_T<HandlerType,
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset(buffer, 0, sizeof (buffer));
-    int result_2 = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
+    int result_2 = remoteAddress_in.addr_to_string (buffer,
+                                                    sizeof (buffer),
+                                                    1);
     if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
@@ -193,6 +196,7 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
   ILISTENER_T* listener_p = this;
   const void* act_p = (act_in ? act_in : listener_p);
+  // *TODO*: remove type inference
   result = asynch_accept_r.accept (*message_block_p,
                                    bytesToRead_in,
                                    ACE_INVALID_HANDLE,
@@ -339,6 +343,243 @@ template <typename HandlerType,
           typename StreamType,
           typename HandlerConfigurationType,
           typename UserDataType>
+int
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            HandlerConfigurationType,
+                            UserDataType>::open (const ACE_INET_Addr& listenAddress_in,
+                                                 size_t numberOfBytesToRead_in,
+                                                 bool passAddresses_in,
+                                                 int backLog_in,
+                                                 int reuseAddr_in,
+                                                 ACE_Proactor* proactor_in,
+                                                 bool validateConnections_in,
+                                                 int reissueAccept_in,
+                                                 int numberOfInitialAccepts_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::open"));
+
+  int result = -1;
+  static ACE_INET_Addr sa (ACE_sap_any_cast (const ACE_INET_Addr &));
+  ACE_TCHAR buffer[BUFSIZ];
+
+  inherited::proactor (proactor_in);
+  inherited::pass_addresses (passAddresses_in);
+  inherited::bytes_to_read (numberOfBytesToRead_in);
+  inherited::validate_new_connection (validateConnections_in);
+  inherited::reissue_accept (reissueAccept_in);
+  // *WARNING*: cannot currently set this in the base class
+  //this->addr_family_ = address.get_type ();
+
+  // Create the listener socket
+  // *NOTE*: some socket options need to be set before accept()ing
+  //         --> set these here
+  ACE_HANDLE listen_handle = ACE_OS::socket (listenAddress_in.get_type (),
+                                             SOCK_STREAM,
+                                             0);
+  if (listen_handle == ACE_INVALID_HANDLE)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
+                listenAddress_in.get_type (), SOCK_STREAM));
+    return -1;
+  } // end IF
+  inherited::set_handle (listen_handle);
+
+//  // Initialize the ACE_Asynch_Accept
+//  bool close_accept = true;
+//  ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
+//  result = asynch_accept_r.open (*this,         // handler
+//                                 listen_handle, // socket handle
+//                                 NULL,          // completion key
+//                                 proactor_in);  // proactor handle
+//  if (result == -1)
+//  {
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Asynch_Accept::open(0x%@): \"%m\", aborting\n"),
+//                listen_handle));
+//#else
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Asynch_Accept::open(%d): \"%m\", aborting\n"),
+//                listen_handle));
+//#endif
+//
+//    close_accept = false;
+//
+//    goto close;
+//  } // end IF
+
+  if (reuseAddr_in)
+  {
+    // Reuse the address
+    int one = 1;
+    result = ACE_OS::setsockopt (listen_handle,
+                                 SOL_SOCKET,
+                                 SO_REUSEADDR,
+                                 reinterpret_cast<const char*> (&one),
+                                 sizeof one);
+    if (result == -1)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_REUSEADDR): \"%m\", aborting\n"),
+                  listen_handle));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_REUSEADDR): \"%m\", aborting\n"),
+                  listen_handle));
+#endif
+      goto close;
+    } // end IF
+  } // end IF
+
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  result = listenAddress_in.addr_to_string (buffer,
+                                            sizeof (buffer),
+                                            1);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+
+  // If port is not specified, bind to any port.
+  if (listenAddress_in == sa)
+  //if (listenAddress_in.is_any ())
+  {
+    result = ACE::bind_port (listen_handle,
+                             INADDR_ANY,
+                             listenAddress_in.get_type ());
+    if (result == -1)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::bind_port(0x%@): \"%m\", aborting\n"),
+                  listen_handle));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::bind_port(0x%@): \"%m\", aborting\n"),
+                  listen_handle));
+#endif
+      goto close;
+    } // end IF
+  } // end IF
+  else
+  {
+    // Bind to the specified port.
+    result = ACE_OS::bind (listen_handle,
+                           reinterpret_cast<sockaddr*> (listenAddress_in.get_addr ()),
+                           listenAddress_in.get_size ());
+    if (result == -1)
+    {
+  #if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::bind(0x%@,\"%s\"): \"%m\" (errno was: %d), aborting\n"),
+                  listen_handle,
+                  buffer,
+                  errno));
+  #else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::bind(0x%@,\"%s\"): \"%m\", aborting\n"),
+                  listen_handle,
+                  buffer));
+  #endif
+      goto close;
+    } // end IF
+  } // end ELSE
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // enable SIO_LOOPBACK_FAST_PATH on Win32
+  if ((listenAddress_in.get_type () == ACE_ADDRESS_FAMILY_INET) &&
+      listenAddress_in.is_loopback ()                           &&
+      NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
+    if (!Net_Common_Tools::setLoopBackFastPath (listen_handle))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setLoopBackFastPath(0x%@): \"%m\", aborting\n"),
+                  listen_handle));
+      goto close;
+    } // end IF
+#endif
+
+  // Start listening.
+  result = ACE_OS::listen (listen_handle, backLog_in);
+  if (result == -1)
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::listen(0x%@,\"%s\"): \"%m\", aborting\n"),
+                listen_handle,
+                buffer));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::listen(0x%@,\"%s\"): \"%m\", aborting\n"),
+                listen_handle,
+                buffer));
+#endif
+    goto close;
+  } // end IF
+
+  // For the number of <intial_accepts>.
+  if (numberOfInitialAccepts_in == -1)
+    numberOfInitialAccepts_in = backLog_in;
+  for (int i = 0; i < numberOfInitialAccepts_in; i++)
+  {
+    // Initiate accepts.
+    result = this->accept (numberOfBytesToRead_in, NULL);
+    if (result == -1)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Server_AsynchListener_T::accept(0x%@): \"%m\", aborting\n"),
+                  listen_handle));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Server_AsynchListener_T::accept(0x%@): \"%m\", aborting\n"),
+                  listen_handle));
+#endif
+      goto close;
+    } // end IF
+  } // end FOR
+
+  return 0;
+
+close:
+  ACE_Errno_Guard errno_guard (errno);
+
+  //if (close_accept)
+  //{
+  //  result = asynch_accept_r.cancel ();
+  //  if (result == -1)
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("failed to ACE_Asynch_Accept::cancel(): \"%m\", continuing\n")));
+  //} // end IF
+
+  result = ACE_OS::closesocket (listen_handle);
+  if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
+                listen_handle));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                listen_handle));
+#endif
+  inherited::handle (ACE_INVALID_HANDLE);
+
+  return -1;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename HandlerConfigurationType,
+          typename UserDataType>
 bool
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
@@ -427,25 +668,26 @@ Net_Server_AsynchListener_T<HandlerType,
       return;
     } // end IF
   } // end IF
-  result =
-      configuration_.address.addr_to_string (buffer, sizeof (buffer));
+  result = configuration_.address.addr_to_string (buffer,
+                                                  sizeof (buffer),
+                                                  1);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
   result =
-      inherited::open (configuration_.address,     // local SAP
-                       0,                          // bytes to read
-                       1,                          // pass_addresses ?
-                       ACE_DEFAULT_ASYNCH_BACKLOG, // backlog
-                       1,                          // reuse address ?
-                       NULL,                       // proactor (use default)
-                       true,                       // validate new connections ?
-                       1,                          // reissue_accept ?
-                       -1);                        // number of initial accepts
+      open (configuration_.address,     // local SAP
+            0,                          // bytes to read
+            1,                          // pass_addresses ?
+            ACE_DEFAULT_ASYNCH_BACKLOG, // backlog
+            1,                          // SO_REUSEADDR ?
+            NULL,                       // proactor (use default)
+            true,                       // validate new connections ?
+            1,                          // reissue_accept ?
+            -1);                        // number of initial accepts
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Acceptor::open(\"%s\"): \"%m\", returning\n"),
+                ACE_TEXT ("failed to Net_Server_AsynchListener_T::open(\"%s\"): \"%m\", returning\n"),
                 buffer));
     return;
   } // end IF

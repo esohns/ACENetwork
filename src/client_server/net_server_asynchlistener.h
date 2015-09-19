@@ -119,6 +119,17 @@ class Net_Server_AsynchListener_T
   // implement (part of) Common_IControl_T
   virtual void initialize ();
 
+  // override default listen strategy
+  // *TODO*: currently tailored for TCP only (see implementation)
+  virtual int open (const ACE_INET_Addr&,             // listen address
+                    size_t = 0,                       // #bytes to read
+                    bool = false,                     // pass addresses
+                    int = ACE_DEFAULT_ASYNCH_BACKLOG, // backlog
+                    int = 1,                          // SO_REUSEADDR ?
+                    ACE_Proactor* = 0,                // proactor handle
+                    bool = false,                     // validate_connection()s ?
+                    int = 1,                          // reissue accept()s ?
+                    int = -1);                        // #initial accept()s
 //  // override default accept strategy
 //  // *NOTE*: ACE doesn't properly handle cancellation (dangling bound port on listen socket) -->
 //  // fix this here... --> *TODO*: send patch to ACE maintainers

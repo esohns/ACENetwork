@@ -25,6 +25,7 @@
 #include "net_macros.h"
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -33,6 +34,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        AddressType,
                        ConfigurationType,
                        StateType,
@@ -42,6 +44,9 @@ Net_Client_Connector_T<HandlerType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                               unsigned int statisticCollectionInterval_in)
  : inherited (ACE_Reactor::instance (), // default reactor
+              // *IMPORTANT NOTE*: ACE_NONBLOCK is only set if timeout != NULL
+              //                   (see: SOCK_Connector.cpp:94), set via the
+              //                   "synch options" (see line 200 below)
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
  , configuration_ ()
@@ -53,6 +58,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -61,6 +67,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        AddressType,
                        ConfigurationType,
                        StateType,
@@ -74,6 +81,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -83,6 +91,7 @@ template <typename HandlerType,
           typename UserDataType>
 bool
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        AddressType,
                        ConfigurationType,
                        StateType,
@@ -99,6 +108,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -108,6 +118,7 @@ template <typename HandlerType,
           typename UserDataType>
 const HandlerConfigurationType&
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        AddressType,
                        ConfigurationType,
                        StateType,
@@ -121,23 +132,25 @@ Net_Client_Connector_T<HandlerType,
   return configuration_;
 }
 
-template <typename AddressType,
-          typename SocketConfigurationType,
+template <typename HandlerType,
+          typename ConnectorType,
+          typename AddressType,
           typename ConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType,
           typename StateType,
+          typename StatisticContainerType,
           typename StreamType,
-          typename HandlerType>
+          typename HandlerConfigurationType,
+          typename UserDataType>
 bool
-Net_Client_Connector_T<AddressType,
-                       SocketConfigurationType,
+Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
+                       AddressType,
                        ConfigurationType,
-                       HandlerConfigurationType,
-                       UserDataType,
                        StateType,
+                       StatisticContainerType,
                        StreamType,
-                       HandlerType>::useReactor () const
+                       HandlerConfigurationType,
+                       UserDataType>::useReactor () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
 
@@ -145,6 +158,7 @@ Net_Client_Connector_T<AddressType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -154,6 +168,7 @@ template <typename HandlerType,
           typename UserDataType>
 void
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        AddressType,
                        ConfigurationType,
                        StateType,
@@ -171,6 +186,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -180,6 +196,7 @@ template <typename HandlerType,
           typename UserDataType>
 ACE_HANDLE
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        AddressType,
                        ConfigurationType,
                        StateType,
@@ -193,11 +210,15 @@ Net_Client_Connector_T<HandlerType,
   int result = -1;
 
   HandlerType* handler_p = NULL;
+  // *NOTE*: to enforce ACE_NONBLOCK, set ACE_Synch_Options::USE_REACTOR or
+  //         ACE_Synch_Options::USE_TIMEOUT in the synch options (see:
+  //         Connector.cpp:409 and net_sock_connector.cpp:219 and/or
+  //         SOCK_Connector.cpp:94)
   result =
       inherited::connect (handler_p,                       // service handler
                           address_in,                      // remote SAP
                           ACE_Synch_Options::defaults,     // synch options
-                          ACE_sap_any_cast (AddressType&), // local SAP
+                          ACE_sap_any_cast (AddressType&), // local address
                           1,                               // re-use address (SO_REUSEADDR) ?
                           O_RDWR,                          // flags
                           0);                              // perms
@@ -205,7 +226,9 @@ Net_Client_Connector_T<HandlerType,
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = address_in.addr_to_string (buffer, sizeof (buffer));
+    result = address_in.addr_to_string (buffer,
+                                        sizeof (buffer),
+                                        1);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
@@ -220,6 +243,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -229,6 +253,7 @@ template <typename HandlerType,
           typename UserDataType>
 int
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        AddressType,
                        ConfigurationType,
                        StateType,
@@ -274,6 +299,7 @@ Net_Client_Connector_T<HandlerType,
     return 0;
 }
 template <typename HandlerType,
+          typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
@@ -283,6 +309,7 @@ template <typename HandlerType,
           typename UserDataType>
 int
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        AddressType,
                        ConfigurationType,
                        StateType,
@@ -310,6 +337,7 @@ Net_Client_Connector_T<HandlerType,
 /////////////////////////////////////////
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -323,6 +351,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                StreamType,
                                                HandlerConfigurationType,
                                                UserDataType>,
+                       ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
@@ -340,6 +369,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -353,6 +383,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                StreamType,
                                                HandlerConfigurationType,
                                                UserDataType>,
+                       ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
@@ -366,6 +397,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -380,6 +412,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                StreamType,
                                                HandlerConfigurationType,
                                                UserDataType>,
+                       ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
@@ -396,6 +429,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -410,6 +444,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                StreamType,
                                                HandlerConfigurationType,
                                                UserDataType>,
+                       ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
@@ -424,6 +459,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -438,6 +474,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                StreamType,
                                                HandlerConfigurationType,
                                                UserDataType>,
+                       ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
@@ -452,6 +489,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -466,6 +504,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                StreamType,
                                                HandlerConfigurationType,
                                                UserDataType>,
+                       ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
@@ -483,6 +522,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -497,6 +537,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                StreamType,
                                                HandlerConfigurationType,
                                                UserDataType>,
+                       ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
@@ -540,6 +581,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -554,6 +596,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                StreamType,
                                                HandlerConfigurationType,
                                                UserDataType>,
+                       ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
@@ -599,6 +642,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
     return 0;
 }
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -613,6 +657,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                StreamType,
                                                HandlerConfigurationType,
                                                UserDataType>,
+                       ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
@@ -728,6 +773,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -735,6 +781,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
@@ -752,6 +799,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -759,6 +807,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
@@ -772,6 +821,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -780,6 +830,7 @@ template <typename HandlerType,
           typename UserDataType>
 bool
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
@@ -796,6 +847,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -804,6 +856,7 @@ template <typename HandlerType,
           typename UserDataType>
 const HandlerConfigurationType&
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
@@ -818,6 +871,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -826,6 +880,7 @@ template <typename HandlerType,
           typename UserDataType>
 bool
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
@@ -840,6 +895,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -848,6 +904,7 @@ template <typename HandlerType,
           typename UserDataType>
 void
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
@@ -865,6 +922,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -873,6 +931,7 @@ template <typename HandlerType,
           typename UserDataType>
 ACE_HANDLE
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,
@@ -916,6 +975,7 @@ Net_Client_Connector_T<HandlerType,
 }
 
 template <typename HandlerType,
+          typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -924,6 +984,7 @@ template <typename HandlerType,
           typename UserDataType>
 int
 Net_Client_Connector_T<HandlerType,
+                       ConnectorType,
                        Net_Netlink_Addr,
                        ConfigurationType,
                        StateType,

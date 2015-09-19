@@ -181,6 +181,8 @@
     <ClCompile Include="..\..\src\net_protocol_layer.cpp" />
     <ClCompile Include="..\..\src\net_socketconnection_base.cpp" />
     <ClCompile Include="..\..\src\net_sockethandler_base.cpp" />
+    <ClCompile Include="..\..\src\net_sock_acceptor.cpp" />
+    <ClCompile Include="..\..\src\net_sock_connector.cpp" />
     <ClCompile Include="..\..\src\net_stream_asynch_tcpsocket_base.cpp" />
     <ClCompile Include="..\..\src\net_stream_asynch_udpsocket_base.cpp" />
     <ClCompile Include="..\..\src\net_stream_tcpsocket_base.cpp" />
@@ -231,6 +233,8 @@
     <ClInclude Include="..\..\src\net_remote_comm.h" />
     <ClInclude Include="..\..\src\net_socketconnection_base.h" />
     <ClInclude Include="..\..\src\net_sockethandler_base.h" />
+    <ClInclude Include="..\..\src\net_sock_acceptor.h" />
+    <ClInclude Include="..\..\src\net_sock_connector.h" />
     <ClInclude Include="..\..\src\net_stream_asynch_tcpsocket_base.h" />
     <ClInclude Include="..\..\src\net_stream_asynch_udpsocket_base.h" />
     <ClInclude Include="..\..\src\net_stream_tcpsocket_base.h" />

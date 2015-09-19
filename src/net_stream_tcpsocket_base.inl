@@ -356,19 +356,19 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // this method will be invoked:
   // - by any worker after returning from svc()
-  //    --> in this case, this is essentially a NOP
+  //    --> in this case, this should be a NOP (triggered from handle_close(),
+  //        which was invoked by the reactor) - override the default
+  //        behavior of a ACE_Svc_Handler, which would call handle_close() AGAIN
+  // - by the connector when connect() fails (e.g. connection refused)
   // - by the connector/acceptor when open() fails (e.g. too many connections !)
-  //    --> shutdown
-  //   *NOTE*: this gets invoked from handle_close(), in turn invoked by the
-  //           reactor) - override the default behavior of a ACE_Svc_Handler,
-  //           which would call handle_close() again erroneously
 
   switch (arg_in)
   {
     // called by:
     // - any worker from ACE_Task_Base on clean-up
-    // - acceptor/connector if there are too many connections (i.e. open()
-    //   returned -1)
+    // - connector when connect() fails (e.g. connection refused)
+    // - acceptor/connector when initialization fails (i.e. open() returned -1
+    //   due to e.g. too many connections)
     case NORMAL_CLOSE_OPERATION:
     {
       // check specifically for the first case...
@@ -376,6 +376,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                                   inherited::last_thread ());
       if (result)
       {
+        // --> worker thread --> NOP
 //       if (inherited::module ())
 //         ACE_DEBUG ((LM_DEBUG,
 //                     ACE_TEXT ("\"%s\" worker thread (ID: %t) leaving...\n"),
@@ -383,20 +384,18 @@ Net_StreamTCPSocketBase_T<HandlerType,
 //       else
 //         ACE_DEBUG ((LM_DEBUG,
 //                     ACE_TEXT ("worker thread (ID: %t) leaving...\n")));
-
         result = 0;
 
         break;
       } // end IF
 
-      // too many connections: invoke inherited default behavior
-      // --> simply fall through to the next case
+      // *WARNING*: falls through !
     }
     // called by external (e.g. reactor) thread wanting to close the connection
-    // (e.g. too many connections)
-    // *NOTE*: this eventually calls handle_close() (see below)
-    case CLOSE_DURING_NEW_CONNECTION:
-    case NET_CONNECTION_CLOSE_REASON_INITIALIZATION:
+    // (e.g. cannot connect, too many connections, ...)
+    // *NOTE*: this (eventually) calls handle_close() (see below)
+    case CLOSE_DURING_NEW_CONNECTION: // connection refused
+    case NET_CONNECTION_CLOSE_REASON_INITIALIZATION: // initialization (i.e. open()) failed
     {
       //ACE_HANDLE handle =
       //  ((arg_in == NET_CLOSE_REASON_INITIALIZATION) ? ACE_INVALID_HANDLE
@@ -434,6 +433,10 @@ Net_StreamTCPSocketBase_T<HandlerType,
           result = -1;
         } // end IF
       } // end IF
+
+      // step3: release a reference
+      // *NOTE*: should 'delete this'
+      inherited2::decrease ();
 
       break;
     }

@@ -561,24 +561,26 @@ Net_SocketConnectionBase_T<HandlerType,
   // *NOTE*: this method will be invoked
   // - by any worker after returning from svc()
   //    --> in this case, this should be a NOP (triggered from handle_close(),
-  //        which was invoked by the reactor) - we override the default
+  //        which was invoked by the reactor) - override the default
   //        behavior of a ACE_Svc_Handler, which would call handle_close() AGAIN
+  // - by the connector when connect() fails (e.g. connection refused)
   // - by the connector/acceptor when open() fails (e.g. too many connections !)
-  //    --> shutdown
 
   switch (arg_in)
   {
     // called by:
     // - any worker from ACE_Task_Base on clean-up
-    // - acceptor/connector if there are too many connections (i.e. open()
-    //   returned -1)
+    // - connector when connect() fails (e.g. connection refused)
+    // - acceptor/connector when initialization fails (i.e. open() returned -1
+    //   due to e.g. too many connections)
     case NORMAL_CLOSE_OPERATION:
     {
-      // check specifically for the first case...
+      // check specifically for the first case
       result = ACE_OS::thr_equal (ACE_Thread::self (),
                                   inherited::last_thread ());
       if (result)
       {
+        // --> worker thread --> NOP
 //       if (inherited::module ())
 //         ACE_DEBUG ((LM_DEBUG,
 //                     ACE_TEXT ("\"%s\" worker thread (ID: %t) leaving...\n"),
@@ -586,11 +588,12 @@ Net_SocketConnectionBase_T<HandlerType,
 //       else
 //         ACE_DEBUG ((LM_DEBUG,
 //                     ACE_TEXT ("worker thread (ID: %t) leaving...\n")));
+        result = 0;
+
         break;
       } // end IF
 
-      // too many connections: invoke inherited default behavior
-      // --> simply fall through to the next case
+      // *WARNING*: falls through !
     }
     // called by external (e.g. reactor) thread wanting to close the connection
     // (e.g. cannot connect, too many connections, ...)
@@ -599,19 +602,11 @@ Net_SocketConnectionBase_T<HandlerType,
     case NET_CONNECTION_CLOSE_REASON_INITIALIZATION:
     case NET_CONNECTION_CLOSE_REASON_USER_ABORT:
     {
-      // step1: release resources
       result = inherited::close (arg_in);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to HandlerType::close(%u): \"%m\", continuing\n"),
                     arg_in));
-
-      // step2: delete this ?
-      // *TODO*: remove type inference
-      if ((arg_in == NORMAL_CLOSE_OPERATION) &&
-          (inherited::state_.status == NET_CONNECTION_STATUS_INITIALIZATION_FAILED))
-        inherited::decrease ();
-
       break;
     } // end IF
     default:
