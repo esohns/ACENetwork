@@ -22,6 +22,7 @@ DIST_SUBDIRS = \
 
 EXTRA_DIST = \
   autogen.sh \
+  configure.gnu \
   LICENSE \
   README.md
 

@@ -944,7 +944,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     if ((error != EBADF)                   && // 9    : local close (), happens on Linux
         (error != EPIPE)                   && // 32
         (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
+#endif
         (error != ECONNRESET))                // 10054: happens on Win32
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -968,7 +970,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       if ((error != EBADF)                   && // 9    : local close (), happens on Linux
           (error != EPIPE)                   && // 32
           (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
           (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
+#endif
           (error != ECONNRESET))                // 10054: happens on Win32
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           ACE_DEBUG ((LM_ERROR,
@@ -1872,7 +1876,9 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
     if ((error != EBADF)                   && // 9    : local close (), happens on Linux
         (error != EPIPE)                   && // 32
         (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
+#endif
         (error != ECONNRESET))                // 10054: happens on Win32
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),
@@ -1889,7 +1895,9 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
       if ((error != EBADF)                   && // 9    : local close (), happens on Linux
           (error != EPIPE)                   && // 32
           (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
           (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
+#endif
           (error != ECONNRESET))                // 10054: happens on Win32
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to read from input stream (%d): %u --> \"%s\", aborting\n"),

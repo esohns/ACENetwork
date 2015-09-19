@@ -1053,6 +1053,7 @@ Net_Common_Tools::getMaxMsgSize (ACE_HANDLE handle_in)
   int result = -1;
   int optval = 0;
   int optlen = sizeof (optval);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE_OS::getsockopt (handle_in,
                                SOL_SOCKET,
                                SO_MAX_MSG_SIZE,
@@ -1060,18 +1061,33 @@ Net_Common_Tools::getMaxMsgSize (ACE_HANDLE handle_in)
                                &optlen);
   if (result == -1)
   {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,SO_MAX_MSG_SIZE): \"%m\", aborting\n"),
+                handle_in));
+    return 0;
+  } // end IF
+#else
+  // *NOTE*: IP_MTU works only on connect()ed sockets (see man 7 ip)
+  result = ACE_OS::getsockopt (handle_in,
+                               IPPROTO_IP,
+                               IP_MTU,
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result == -1)
+  {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%@, SO_MAX_MSG_SIZE): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,IP_MTU): \"%m\", aborting\n"),
                 handle_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, SO_MAX_MSG_SIZE): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,IP_MTU): \"%m\", aborting\n"),
                 handle_in));
 #endif
     return 0;
   } // end IF
+#endif
 
   return static_cast<unsigned int> (optval);
 }
