@@ -195,8 +195,8 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
                   ACE_TEXT (Common_Tools::error2String (error).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
-        ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
-        result_2));
+                  ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
+                  result));
 #endif
     } // end IF
   } // end IF

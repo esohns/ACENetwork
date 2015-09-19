@@ -259,6 +259,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
   int result = -1;
+  ACE_Asynch_Connect* asynch_connect_p = NULL;
 
   // *NOTE*: some socket options need to be set before connect()ing
   //         --> set these here (this implements the shared_connect_start()
@@ -317,12 +318,12 @@ Net_Client_AsynchConnector_T<HandlerType,
     } // end IF
 #endif
 
-  ACE_Asynch_Connect& connect_r = inherited::asynch_connect ();
-  result = connect_r.connect (connectHandle_,
-                              remoteAddress_in,
-                              localAddress_in,
-                              reuseAddr_in,
-                              act_in);
+  asynch_connect_p = &inherited::asynch_connect ();
+  result = asynch_connect_p->connect (connectHandle_,
+                                      remoteAddress_in,
+                                      localAddress_in,
+                                      reuseAddr_in,
+                                      act_in);
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
