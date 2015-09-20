@@ -57,7 +57,7 @@ class Net_AsynchUDPSocketHandler_T
   Net_AsynchUDPSocketHandler_T ();
 
   // helper method(s)
-  void initiate_read_dgram ();
+  bool initiate_read_dgram ();
   virtual int handle_close (ACE_HANDLE handle_in,                                           // (socket) handle
                             ACE_Reactor_Mask mask_in = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
   virtual int handle_output (ACE_HANDLE) = 0; // (socket) handle

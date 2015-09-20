@@ -108,7 +108,7 @@ class Net_StreamAsynchTCPSocketBase_T
                                    unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
 
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
-  //virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
+  virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 
 //  // *TODO*: handle short writes (more) gracefully...
 //  ACE_Message_Block* buffer_;

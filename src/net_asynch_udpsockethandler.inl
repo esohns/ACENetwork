@@ -298,7 +298,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::notify (ACE_Event_Handler* hand
 }
 
 template <typename ConfigurationType>
-void
+bool
 Net_AsynchUDPSocketHandler_T<ConfigurationType>::initiate_read_dgram ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::initiate_read_dgram"));
@@ -314,11 +314,13 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::initiate_read_dgram ()
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::allocateMessage(%u), aborting\n"),
                 inherited::configuration_.PDUSize));
-    goto close;
+    return false;
   } // end IF
 
   // step2: start (asynchronous) read...
   bytes_to_read = message_block_p->size ();
+  int error = 0;
+receive:
   result =
       inputStream_.recv (message_block_p,                      // buffer
                          bytes_to_read,                        // #bytes to read
@@ -329,6 +331,17 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::initiate_read_dgram ()
                          COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
   if (result == -1)
   {
+    error = ACE_OS::last_error ();
+    // *WARNING*: this could fail on multi-threaded proactors
+    if (error == EAGAIN) goto receive; // 11: happens on Linux
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if ((error != ENXIO)               && // happens on Win32
+        (error != EFAULT)              && // *TODO*: happens on Win32
+        (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
+        (error != ERROR_NETNAME_DELETED)) // happens on Win32
+#else
+    if (error)
+#endif
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::recv(%u): \"%m\", aborting\n"),
                 bytes_to_read));
@@ -336,17 +349,10 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::initiate_read_dgram ()
     // clean up
     message_block_p->release ();
 
-    goto close;
+    return false;
   } // end IF
 
-  return;
-
-close:
-  result = handle_close (inherited2::handle (),
-                         ACE_Event_Handler::ALL_EVENTS_MASK);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(): \"%m\", continuing\n")));
+  return true;
 }
 
 template <typename ConfigurationType>
@@ -421,7 +427,6 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
                     result_in.handle (),
                     bytes_transferred,
                     result_in.bytes_to_write ()));
-
         close = true;
       } // end IF
 
@@ -438,7 +443,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
                            ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
   } // end IF
 
   counter_.decrease ();

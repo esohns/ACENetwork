@@ -63,15 +63,15 @@ class Net_StreamTCPSocketBase_T
                                UserDataType>
 {
   friend class ACE_Acceptor<Net_StreamTCPSocketBase_T<HandlerType,
-                                                      
+
                                                       AddressType,
                                                       ConfigurationType,
                                                       StateType,
                                                       StatisticContainerType,
                                                       StreamType,
-                                                      
+
                                                       UserDataType,
-                                                      
+
                                                       ModuleConfigurationType,
                                                       ModuleHandlerConfigurationType>,
                             ACE_SOCK_ACCEPTOR>;
@@ -156,6 +156,10 @@ class Net_StreamTCPSocketBase_T
   ACE_Message_Block* currentReadBuffer_;
   ACE_Message_Block* currentWriteBuffer_;
   ACE_SYNCH_MUTEX    sendLock_;
+  // *IMPORTANT NOTE*: in a threaded environment, workers may (!) dispatch the
+  //                   reactor notification queue concurrently (most notably,
+  //                   ACE_TP_Reactor) --> enforce proper serialization
+  bool               serializeOutput_;
   StreamType         stream_;
 
   // helper method(s)

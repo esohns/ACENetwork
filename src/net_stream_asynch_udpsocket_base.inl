@@ -205,6 +205,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   handle_manager = true;
 
   // step4: initialize/start stream
+
   // step4a: connect stream head message queue with a notification pipe/queue ?
   if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
     inherited4::configuration_.streamConfiguration.notificationStrategy =
@@ -223,7 +224,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
-                    ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
+                    inherited4::configuration_.streamConfiguration.module->name ()));
         goto error;
       } // end IF
       Stream_Module_t* clone_p = NULL;
@@ -235,14 +236,14 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), aborting\n"),
-                    ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
+                    inherited4::configuration_.streamConfiguration.module->name ()));
         goto error;
       }
       if (!clone_p)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
-                    ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
+                    inherited4::configuration_.streamConfiguration.module->name ()));
         goto error;
       }
       inherited4::configuration_.streamConfiguration.module = clone_p;
@@ -338,6 +339,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   if (inherited4::configuration_.socketConfiguration.writeOnly)
     this->decrease (); // float the connection (connection manager)
   //ACE_ASSERT (this->count () == 2); // connection manager & read operation
+  //                                     (+ stream module(s))
 
   inherited4::state_.status = NET_CONNECTION_STATUS_OK;
 
@@ -355,18 +357,19 @@ error:
   } // end IF
 
   if (handle_socket)
+  {
     result = inherited::handle_close (inherited::handle (),
                                       ACE_Event_Handler::ALL_EVENTS_MASK);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
+  } // end IF
 
   if (handle_manager)
-    inherited4::deregister ();
+    inherited4::deregister (); // <-- should 'delete this'
 
-  // *TODO*: remove type inference
-  inherited4::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
-
-  // *NOTE*: should 'delete this'
-  //  inherited4::decrease ();
-  this->decrease ();
+//  // *TODO*: remove type inference
+//  inherited4::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
 }
 
 template <typename HandlerType,
@@ -1012,7 +1015,22 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       } // end IF
 
       // start next read
-      inherited::initiate_read_dgram ();
+      bool result_2 = inherited::initiate_read_dgram ();
+      if (!result_2)
+      {
+        int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        if ((error != ENXIO)               && // happens on Win32
+            (error != EFAULT)              && // *TODO*: happens on Win32
+            (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
+            (error != ERROR_NETNAME_DELETED)) // happens on Win32
+#else
+        if (error)
+#endif
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to HandlerType::initiate_read_dgram(): \"%m\", aborting\n")));
+        break;
+      } // end IF
 
       return;
     }

@@ -84,7 +84,7 @@ Net_SOCK_Connector::connect (ACE_SOCK_Stream& stream_in,
                 stream_in.get_handle ()));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_SOCK_Connector::shared_connect_start(0x%@): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to Net_SOCK_Connector::shared_connect_start(%d): \"%m\", aborting\n"),
                 stream_in.get_handle ()));
 #endif
     return -1;
@@ -102,7 +102,7 @@ Net_SOCK_Connector::connect (ACE_SOCK_Stream& stream_in,
                 stream_in.get_handle ()));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::connect(0x%@): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::connect(%d): \"%m\", aborting\n"),
                 stream_in.get_handle ()));
 #endif
     return -1;
@@ -115,11 +115,11 @@ Net_SOCK_Connector::connect (ACE_SOCK_Stream& stream_in,
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Connector::shared_open(0x%@): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_SOCK_Connector::shared_connect_finish(0x%@): \"%m\", aborting\n"),
                 stream_in.get_handle ()));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Connector::shared_open(%d): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_SOCK_Connector::shared_connect_finish(%d): \"%m\", aborting\n"),
                 stream_in.get_handle ()));
 #endif
     return -1;
@@ -174,7 +174,9 @@ Net_SOCK_Connector::shared_connect_start (ACE_SOCK_Stream& stream_in,
   NET_TRACE (ACE_TEXT ("Net_SOCK_Connector::shared_connect_start"));
 
   int result = -1;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   const ACE_INET_Addr* inet_addr_p = NULL;
+#endif
   ACE_HANDLE handle = stream_in.get_handle ();
 
   // sanity check(s)

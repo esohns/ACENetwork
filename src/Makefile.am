@@ -46,6 +46,8 @@ include_HEADERS = \
   net_packet_headers.h \
   net_protocol_layer.h \
   net_remote_comm.h \
+  net_sock_acceptor.h \
+  net_sock_connector.h \
   net_socketconnection_base.h \
   net_socketconnection_base.inl \
   net_sockethandler_base.h \
@@ -124,6 +126,10 @@ libACENetwork_la_SOURCES = \
   net_protocol_layer.cpp \
   net_protocol_layer.h \
   net_remote_comm.h \
+  net_sock_acceptor.cpp \
+  net_sock_acceptor.h \
+  net_sock_connector.cpp \
+  net_sock_connector.h \
   net_socketconnection_base.cpp \
   net_socketconnection_base.h \
   net_socketconnection_base.inl \

@@ -390,6 +390,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::handle_write_stream"));
 
   int result = -1;
+  bool close = false;
   size_t bytes_transferred = result_in.bytes_transferred ();
   unsigned long error = 0;
 
@@ -445,19 +446,23 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
                     ACE_TEXT (ACE_OS::strerror (error))));
 #endif
 
+      close = true;
+
       break;
     }
     // *** GOOD CASES ***
     default:
     {
-      // short write ?
       // *TODO*: handle short writes (more) gracefully
       if (result_in.bytes_to_write () != bytes_transferred)
+      {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("stream (%d): sent %u/%u byte(s) only, continuing\n"),
                     result_in.handle (),
                     bytes_transferred,
                     result_in.bytes_to_write ()));
+        close = true;
+      } // end IF
 
       break;
     }
@@ -465,6 +470,15 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
 
   // clean up
   result_in.message_block ().release ();
+
+  if (close)
+  {
+    result = handle_close (inherited2::handle (),
+                           ACE_Event_Handler::ALL_EVENTS_MASK);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
+  } // end IF
 
   counter_.decrease ();
 }
@@ -489,8 +503,8 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read_stream ()
   } // end IF
 
   // start (asynchronous) read...
-  //// *TODO*: let the ACE_Handler handle reference counting
-  //inherited3::increase ();
+  int error = 0;
+receive:
   result = inputStream_.read (*message_block_p,                     // buffer
                               message_block_p->size (),             // bytes to read
                               NULL,                                 // ACT
@@ -498,7 +512,9 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read_stream ()
                               COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
   if (result == -1)
   {
-    int error = ACE_OS::last_error ();
+    error = ACE_OS::last_error ();
+    // *WARNING*: this could fail on multi-threaded proactors
+    if (error == EAGAIN) goto receive; // 11: happens on Linux
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != ENXIO)               && // happens on Win32
         (error != EFAULT)              && // *TODO*: happens on Win32

@@ -233,15 +233,18 @@ Net_TCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle_in,
                                              // - user abort
                                              // - ... ?
     {
-      // *NOTE*: handle_in == ACE_INVALID_HANDLE
-      //         --> client side: connection failed, no need to deregister from the reactor
+      // *NOTE*: --> client side: connection failed, no need to deregister from
+      //                          the reactor
       //         --> server side: too many open connections
       int error = ACE_OS::last_error ();
       if ((mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) &&
-          (error == ETIMEDOUT)) // <-- failed to connect: timed out
+          ((error == ETIMEDOUT) ||   // 110: failed to connect: timed out
+           (error == ECONNREFUSED))) // 111: failed to connect: connection refused
       {
         // *IMPORTANT NOTE*: the connection hasn't been open()ed / registered
         //                   --> remove the (final) reference manually
+        // *NOTE*: the dtor (deregisters from the reactor and) close()s the
+        //         stream handle
         inherited2::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
         result = inherited2::remove_reference ();
         ACE_ASSERT (result == 0);

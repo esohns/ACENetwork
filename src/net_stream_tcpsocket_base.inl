@@ -55,6 +55,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
  , currentReadBuffer_ (NULL)
  , currentWriteBuffer_ (NULL)
  , sendLock_ ()
+ , serializeOutput_ (false)
  , stream_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::Net_StreamTCPSocketBase_T"));
@@ -84,6 +85,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
  , currentReadBuffer_ (NULL)
  , currentWriteBuffer_ (NULL)
  , sendLock_ ()
+ , serializeOutput_ (false)
  , stream_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::Net_StreamTCPSocketBase_T"));
@@ -164,7 +166,9 @@ Net_StreamTCPSocketBase_T<HandlerType,
   ACE_ASSERT (configuration_p);
 
   int result = -1;
+  bool handle_manager = false;
   bool handle_module = true;
+  bool handle_socket = false;
   const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
   // step0: initialize this
@@ -190,18 +194,36 @@ Net_StreamTCPSocketBase_T<HandlerType,
   //                   --> this means that "manual" cleanup is necessary
   //                       (see handle_close())
   inherited::closing_ = true;
+  // *TODO*: find a better way to do this
+  serializeOutput_ =
+    configuration_p->streamConfiguration.serializeOutput;
 
-  // step1: initialize/start stream
-  // step1a: connect stream head message queue with the reactor notification
+  // step1: register with the connection manager (if any)
+  // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
+  //                   a race condition might occur when using multi-threaded
+  //                   proactors/reactors
+  if (!inherited2::registerc ())
+  {
+    // *NOTE*: perhaps max# connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    goto error;
+  } // end IF
+  handle_manager = true;
+
+  // step2: initialize/start stream
+
+  // step2a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
   if (!configuration_p->streamConfiguration.useThreadPerConnection)
     configuration_p->streamConfiguration.notificationStrategy =
       &(inherited::notificationStrategy_);
-  // step1b: initialize final module (if any)
+
+  // step2b: initialize final module (if any)
   if (configuration_p->streamConfiguration.module)
   {
-    // step1ba: clone final module ?
+    // step2ba: clone final module ?
     if (configuration_p->streamConfiguration.cloneModule)
     {
       IMODULE_T* imodule_p = NULL;
@@ -212,7 +234,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T*> failed, aborting\n"),
-                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+                    configuration_p->streamConfiguration.module->name ()));
         goto error;
       } // end IF
       Stream_Module_t* clone_p = NULL;
@@ -224,22 +246,23 @@ Net_StreamTCPSocketBase_T<HandlerType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), continuing\n"),
-                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+                    configuration_p->streamConfiguration.module->name ()));
         clone_p = NULL;
       }
       if (!clone_p)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
-                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+                    configuration_p->streamConfiguration.module->name ()));
         goto error;
       } // end IF
       configuration_p->streamConfiguration.deleteModule = true;
       configuration_p->streamConfiguration.module = clone_p;
     } // end IF
-    // *TODO*: step1bb: initialize final module
+    // *TODO*: step2bb: initialize final module
   } // end IF
-  // step1c: initialize stream
+
+  // step2c: initialize stream
   // *TODO*: remove type inferences
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   configuration_p->streamConfiguration.sessionID =
@@ -261,8 +284,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
   const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
       &const_cast<StateType&> (inherited2::state ());
   //stream_.dump_state ();
-  // *NOTE*: as soon as this returns, data starts arriving at
-  //         handle_output()/msg_queue()
+
+  // step2d: start stream
   stream_.start ();
   if (!stream_.isRunning ())
   {
@@ -270,18 +293,6 @@ Net_StreamTCPSocketBase_T<HandlerType,
     //         initialize
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
-    goto error;
-  } // end IF
-
-  // step2: register with the connection manager (if any)
-  // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
-  //                   a race condition might occur when using multi-threaded
-  //                   proactors/reactors
-  if (!inherited2::registerc ())
-  {
-    // *NOTE*: perhaps max# connections has been reached
-    //ACE_DEBUG ((LM_ERROR,
-    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
     goto error;
   } // end IF
 
@@ -303,6 +314,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                 ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
     goto error;
   } // end IF
+  handle_socket = true;
 
   inherited2::initialize (*configuration_p);
   inherited2::state_.status = NET_CONNECTION_STATUS_OK;
@@ -310,7 +322,11 @@ Net_StreamTCPSocketBase_T<HandlerType,
   return 0;
 
 error:
-  // clean up
+  if (handle_socket)
+    result = inherited::handle_close (inherited::get_handle (),
+                                      ACE_Event_Handler::ALL_EVENTS_MASK);
+
+  stream_.stop (true); // <-- wait for completion
   if (handle_module                               &&
       configuration_p->streamConfiguration.module &&
       configuration_p->streamConfiguration.deleteModule)
@@ -319,7 +335,9 @@ error:
     configuration_p->streamConfiguration.module = NULL;
     configuration_p->streamConfiguration.deleteModule = false;
   } // end IF
-  stream_.stop (true); // <-- wait for completion
+
+  if (handle_manager)
+    inherited2::deregister ();
 
   // *TODO*: remove type inference
   inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
@@ -394,7 +412,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
     // called by external (e.g. reactor) thread wanting to close the connection
     // (e.g. cannot connect, too many connections, ...)
     // *NOTE*: this (eventually) calls handle_close() (see below)
-    case CLOSE_DURING_NEW_CONNECTION: // connection refused
+    case CLOSE_DURING_NEW_CONNECTION: // e.g. connect()ion refused
     case NET_CONNECTION_CLOSE_REASON_INITIALIZATION: // initialization (i.e. open()) failed
     {
       //ACE_HANDLE handle =
@@ -410,11 +428,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
                     ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
                     handle, ACE_Event_Handler::ALL_EVENTS_MASK));
 
-      //  step2: release the socket handle
-      // *IMPORTANT NOTE*: this wakes up any reactor threads that may still be
-      //                   using the handle. Makes sure this connection is
-      //                   delete(d) ASAP
-      if (arg_in != CLOSE_DURING_NEW_CONNECTION) // <-- failed to connect ?
+      //  step2: release the socket handle ?
+      if (arg_in != CLOSE_DURING_NEW_CONNECTION) // <-- already done via dtor
       {
         ACE_ASSERT (handle != ACE_INVALID_HANDLE);
         int result_2 = ACE_OS::closesocket (handle);
@@ -422,21 +437,14 @@ Net_StreamTCPSocketBase_T<HandlerType,
         {
           int error = ACE_OS::last_error ();
           ACE_UNUSED_ARG (error);
-//          // *TODO*: on Win32, ACE_OS::close (--> ::CloseHandle) throws an
-//          //         exception, so this looks like a resource leak...
-//          if ((error != ENOTSOCK) && // Win32 (failed to connect: timed out)
-//              (error != EBADF))      // Linux (failed to connect: timed out)
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
-                        handle));
-
+          //          if ((error != ENOTSOCK) && // Win32 (failed to connect: timed out)
+          //              (error != EBADF))      // Linux (failed to connect: timed out)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
+                      handle));
           result = -1;
         } // end IF
       } // end IF
-
-      // step3: release a reference
-      // *NOTE*: should 'delete this'
-      inherited2::decrease ();
 
       break;
     }
@@ -452,25 +460,19 @@ Net_StreamTCPSocketBase_T<HandlerType,
                     ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
                     handle, ACE_Event_Handler::ALL_EVENTS_MASK));
 
-      //  step2: release the socket handle
-      // *IMPORTANT NOTE*: wakes up any reactor thread(s) that may be working on
-      //                   the handle
+      //  step2: release the socket handle ?
       if (handle != ACE_INVALID_HANDLE)
       {
         int result_2 = ACE_OS::closesocket (handle);
         if (result_2 == -1)
         {
           int error = ACE_OS::last_error ();
-          // *TODO*: on Win32, ACE_OS::close (--> ::CloseHandle) throws an
-          //         exception, so this looks like a resource leak...
           if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
                         handle));
-
           result = -1;
         } // end IF
-        //    inherited::handle (ACE_INVALID_HANDLE);
       } // end IF
 
       break;
@@ -639,7 +641,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   //                   reactor implementation, AND the specific dispatch
   //                   mechanism of (piped) reactor notifications)
   // *TODO*: remove type inferences
-  if (inherited2::configuration_.streamConfiguration.serializeOutput)
+  if (serializeOutput_)
   {
     result = sendLock_.acquire ();
     if (result == -1)
@@ -798,7 +800,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
     result = 1; // <-- reschedule immediately
 
 release:
-  if (inherited2::configuration_.streamConfiguration.serializeOutput)
+  if (serializeOutput_)
   {
     int result_2 = sendLock_.release ();
     if (result_2 == -1)

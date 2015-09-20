@@ -217,7 +217,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T*> failed, aborting\n"),
-                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+                    configuration_p->streamConfiguration.module->name ()));
         goto error;
       } // end IF
       Stream_Module_t* clone_p = NULL;
@@ -229,14 +229,14 @@ Net_StreamUDPSocketBase_T<HandlerType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), continuing\n"),
-                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+                    configuration_p->streamConfiguration.module->name ()));
         clone_p = NULL;
       }
       if (!clone_p)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
-                    ACE_TEXT (configuration_p->streamConfiguration.module->name ())));
+                    configuration_p->streamConfiguration.module->name ()));
         goto error;
       } // end IF
       configuration_p->streamConfiguration.deleteModule = true;
