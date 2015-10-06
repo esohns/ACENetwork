@@ -761,13 +761,14 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 UserDataType,
                                 ModuleConfigurationType,
                                 ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::waitForCompletion ()
+                                HandlerConfigurationType>::waitForCompletion (bool waitForThreads_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::waitForCompletion"));
 
   // step1: wait for the stream to flush
   //        --> all data has been dispatched (here: to the proactor/kernel)
-  stream_.flush ();
+  stream_.waitForCompletion (waitForThreads_in,
+                             true);
 
   // step2: wait for the asynchronous operations to complete
   inherited::counter_.wait (0);
@@ -1717,13 +1718,14 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 UserDataType,
                                 ModuleConfigurationType,
                                 ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::waitForCompletion ()
+                                HandlerConfigurationType>::waitForCompletion (bool waitForThreads_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::waitForCompletion"));
 
   // step1: wait for the stream to flush
   //        --> all data has been dispatched (here: to the proactor/kernel)
-  stream_.flush ();
+  stream_.waitForCompletion (waitForThreads_in,
+                             true);
 
   // step2: wait for the asynchronous operations to complete
   inherited::counter_.wait (0);

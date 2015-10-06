@@ -21,15 +21,13 @@
 #ifndef NET_STREAM_UDPSOCKET_BASE_H
 #define NET_STREAM_UDPSOCKET_BASE_H
 
-#include "ace/Acceptor.h"
-#include "ace/Asynch_Acceptor.h"
-#include "ace/Asynch_Connector.h"
-#include "ace/Connector.h"
+//#include "ace/Acceptor.h"
 #include "ace/config-lite.h"
+#include "ace/Connector.h"
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
-#include "ace/SOCK_Acceptor.h"
+//#include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Connector.h"
 #include "ace/Synch_Traits.h"
 
@@ -39,7 +37,8 @@
 
 #include "net_connection_base.h"
 #include "net_iconnectionmanager.h"
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 #include "net_netlinksockethandler.h"
 #endif
 
@@ -67,21 +66,21 @@ class Net_StreamUDPSocketBase_T
                                //////////
                                UserDataType>
 {
-  friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerType,
+  //friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerType,
 
-                                                       AddressType,
-                                                       ConfigurationType,
-                                                       StateType,
-                                                       StatisticContainerType,
-                                                       StreamType,
+  //                                                     AddressType,
+  //                                                     ConfigurationType,
+  //                                                     StateType,
+  //                                                     StatisticContainerType,
+  //                                                     StreamType,
 
-                                                       UserDataType,
+  //                                                     UserDataType,
 
-                                                       ModuleConfigurationType,
-                                                       ModuleHandlerConfigurationType,
+  //                                                     ModuleConfigurationType,
+  //                                                     ModuleHandlerConfigurationType,
 
-                                                       HandlerConfigurationType>,
-                             ACE_SOCK_CONNECTOR>;
+  //                                                     HandlerConfigurationType>,
+  //                           ACE_SOCK_CONNECTOR>;
 
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
@@ -103,7 +102,8 @@ class Net_StreamUDPSocketBase_T
   virtual ACE_Notification_Strategy* notification ();
   virtual const StreamType& stream () const;
   virtual void close ();
-  virtual void waitForCompletion ();
+  virtual void waitForCompletion (bool = true); // wait for any worker
+                                                // thread(s) ?
 
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
@@ -248,7 +248,8 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   virtual ACE_Notification_Strategy* notification ();
   virtual const StreamType& stream () const;
   virtual void close ();
-  virtual void waitForCompletion ();
+  virtual void waitForCompletion (bool = true); // wait for any worker
+                                                // thread(s) ?
 
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data

@@ -92,7 +92,8 @@ class Net_StreamAsynchUDPSocketBase_T
   virtual unsigned int id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
-  virtual void waitForCompletion ();
+  virtual void waitForCompletion (bool = true); // wait for any worker
+                                                // thread(s) ?
 
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
@@ -208,7 +209,8 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
   virtual unsigned int id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
-  virtual void waitForCompletion ();
+  virtual void waitForCompletion (bool = true); // wait for any worker
+                                                // thread(s) ?
 
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data

@@ -65,22 +65,26 @@ class Net_IConnection_T
   virtual void close () = 0;
   //// *IMPORTANT NOTE*: fire-and-forget API
   //virtual bool send (ACE_Message_Block*&) = 0;
-  // *NOTE*: waits for any (queued) data to be accepted by the kernel.
-  //         This could also mean that it has been successfully transmitted,
-  //         YMMV. As the kernel(s) encapsulate most of the TCP/UDP protocol
-  //         functionality, this API represents the appropriate asynchronous
-  //         way to ensure that the forwarded data has in fact been transmitted
-  //         successfully.
-  // *WARNING*: (As far as I am aware) the Berkeley sockets API does not in any
-  //            way guarantee successful transmission of the data from (!) the
-  //            socket (this 'feature' may already be protocol-specific ?);
-  //            the send()-man pages do not clear things either, turning
-  //            (asynchronous) data transmission into somewhat of a mystery.
-  //            In this sense the more platform-specific, asynchronous APIs,
-  //            supported by the proactor framework, may offer more 'reliable',
-  //            protocol-agnostic results (again, YMMV).
-  //            For the reactor based, blocking (!) API, this could be a NOP.
-  virtual void waitForCompletion () = 0;
+  // *NOTE*: waits for any (queued) data to be dispatched to the kernel.
+  //         Depending on OS (and protocol) specifics, this could mean that it
+  //         has been successfully transmitted (YMMV). As current OS kernel(s)
+  //         encapsulate most of the TCP/UDP protocol functionality, this API
+  //         represents the appropriate asynchronous means to ensure that the
+  //         forwarded data has in fact been transmitted successfully
+  // *IMPORTANT NOTE*: (As far as yours truly (???) is aware) the Berkeley
+  //                   sockets API does not in any way guarantee successful
+  //                   transmission of the data from (!) the socket buffers
+  //                   (this 'feature' may already be protocol-specific ?); the
+  //                   send()-man pages do not clear things either, leaving
+  //                   network data delivery shrouded in mystery.
+  //                   In this sense the more platform-specific, asynchronous
+  //                   APIs, supported by the 'proactive' framework(s), may
+  //                   offer more 'reliable', protocol-agnostic results (again,
+  //                   YMMV).
+  //                   For the reactor based, blocking (!) API, this could be a
+  //                   NOP
+  virtual void waitForCompletion (bool = true) = 0; // wait for any worker
+                                                    // thread(s) ?
 };
 
 template <typename AddressType,

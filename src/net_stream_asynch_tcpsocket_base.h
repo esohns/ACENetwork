@@ -69,14 +69,16 @@ class Net_StreamAsynchTCPSocketBase_T
 
   virtual ~Net_StreamAsynchTCPSocketBase_T ();
 
-  // override some service methods
+  // implement some task methods
+  int close (u_long = 0); // reason
+  // override some service handler methods
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
-  int close (u_long = 0); // reason
-  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE); // (socket) handle
+  //virtual void act (const void*); // (user) data handle
+  // implement some event handler methods
   virtual int handle_close (ACE_HANDLE,        // (socket) handle
                             ACE_Reactor_Mask); // (select) mask
-  //virtual void act (const void*); // (user) data handle
+  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE); // (socket) handle
 
   // implement (part of) Net_IConnection_T
   virtual void info (ACE_HANDLE&,         // return value: handle
@@ -85,7 +87,8 @@ class Net_StreamAsynchTCPSocketBase_T
   virtual unsigned int id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
-  virtual void waitForCompletion ();
+  virtual void waitForCompletion (bool = true); // wait for any worker
+                                                // thread(s) ?
 
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data
@@ -107,6 +110,7 @@ class Net_StreamAsynchTCPSocketBase_T
   Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                    unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
 
+  // implement some handler methods
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
   virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 

@@ -1172,13 +1172,14 @@ Net_StreamUDPSocketBase_T<HandlerType,
                           UserDataType,
                           ModuleConfigurationType,
                           ModuleHandlerConfigurationType,
-                          HandlerConfigurationType>::waitForCompletion ()
+                          HandlerConfigurationType>::waitForCompletion (bool waitForThreads_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::waitForCompletion"));
 
-  // step1: wait for the stream to flush
-  //        --> all data has been dispatched (here: to the reactor/kernel)
-  stream_.flush ();
+  // wait for the stream to flush
+  // --> all data has been dispatched (here: to the reactor/kernel)
+  stream_.waitForCompletion (waitForThreads_in,
+                             true);
 }
 
 template <typename HandlerType,
@@ -2414,7 +2415,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           UserDataType,
                           ModuleConfigurationType,
                           ModuleHandlerConfigurationType,
-                          HandlerConfigurationType>::waitForCompletion ()
+                          HandlerConfigurationType>::waitForCompletion (bool waitForThreads_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::waitForCompletion"));
 

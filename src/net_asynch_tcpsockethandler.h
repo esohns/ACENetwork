@@ -41,7 +41,7 @@ class Net_AsynchTCPSocketHandler_T
  public:
   virtual ~Net_AsynchTCPSocketHandler_T ();
 
-  // override some ACE_Service_Handler methods
+  // override some service handler methods
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
   virtual void addresses (const ACE_INET_Addr&,  // remote address

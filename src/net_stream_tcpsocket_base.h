@@ -21,16 +21,14 @@
 #ifndef NET_STREAM_TCPSOCKET_BASE_H
 #define NET_STREAM_TCPSOCKET_BASE_H
 
-#include "ace/Acceptor.h"
-#include "ace/Asynch_Acceptor.h"
-#include "ace/Asynch_Connector.h"
-#include "ace/Connector.h"
+//#include "ace/Acceptor.h"
+//#include "ace/Connector.h"
 #include "ace/config-macros.h"
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
-#include "ace/SOCK_Acceptor.h"
-#include "ace/SOCK_Connector.h"
+//#include "ace/SOCK_Acceptor.h"
+//#include "ace/SOCK_Connector.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
@@ -62,37 +60,37 @@ class Net_StreamTCPSocketBase_T
                                //////////
                                UserDataType>
 {
-  friend class ACE_Acceptor<Net_StreamTCPSocketBase_T<HandlerType,
+  //friend class ACE_Acceptor<Net_StreamTCPSocketBase_T<HandlerType,
 
-                                                      AddressType,
-                                                      ConfigurationType,
-                                                      StateType,
-                                                      StatisticContainerType,
-                                                      StreamType,
+  //                                                    AddressType,
+  //                                                    ConfigurationType,
+  //                                                    StateType,
+  //                                                    StatisticContainerType,
+  //                                                    StreamType,
 
-                                                      UserDataType,
+  //                                                    UserDataType,
 
-                                                      ModuleConfigurationType,
-                                                      ModuleHandlerConfigurationType>,
-                            ACE_SOCK_ACCEPTOR>;
-  friend class ACE_Connector<Net_StreamTCPSocketBase_T<HandlerType,
+  //                                                    ModuleConfigurationType,
+  //                                                    ModuleHandlerConfigurationType>,
+  //                          ACE_SOCK_ACCEPTOR>;
+  //friend class ACE_Connector<Net_StreamTCPSocketBase_T<HandlerType,
 
-                                                       AddressType,
-                                                       ConfigurationType,
-                                                       StateType,
-                                                       StatisticContainerType,
-                                                       StreamType,
+  //                                                     AddressType,
+  //                                                     ConfigurationType,
+  //                                                     StateType,
+  //                                                     StatisticContainerType,
+  //                                                     StreamType,
 
-                                                       UserDataType,
+  //                                                     UserDataType,
 
-                                                       ModuleConfigurationType,
-                                                       ModuleHandlerConfigurationType>,
-                             ACE_SOCK_CONNECTOR>;
+  //                                                     ModuleConfigurationType,
+  //                                                     ModuleHandlerConfigurationType>,
+  //                           ACE_SOCK_CONNECTOR>;
 
  public:
   virtual ~Net_StreamTCPSocketBase_T ();
 
-  // override some task-based members
+  // override some task members
   virtual int open (void* = NULL); // args
   virtual int close (u_long = 0); // args (reason)
 
@@ -106,7 +104,7 @@ class Net_StreamTCPSocketBase_T
   virtual int handle_close (ACE_HANDLE,
                             ACE_Reactor_Mask);
 
-  // (partially) override Common_IRefCount
+  // (partially) override Common_IReferenceCount
   // --> use ACE_Event_Handler reference counting
   virtual unsigned int increase ();
   virtual unsigned int decrease ();
@@ -120,7 +118,8 @@ class Net_StreamTCPSocketBase_T
   virtual unsigned int id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
-  virtual void waitForCompletion ();
+  virtual void waitForCompletion (bool = true); // wait for any worker
+                                                // thread(s) ?
 
   // *NOTE*: delegate these to the stream
   virtual bool collect (StatisticContainerType&); // return value: statistic data

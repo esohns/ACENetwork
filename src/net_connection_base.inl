@@ -193,8 +193,8 @@ Net_ConnectionBase_T<AddressType,
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    std::string local_address;
-    AddressType local_SAP, remote_SAP;
+    std::string local_address_string;
+    AddressType local_address, remote_address;
     try
     {
 #if defined (__GNUG__)
@@ -203,12 +203,12 @@ Net_ConnectionBase_T<AddressType,
                                                    : this);
       ACE_ASSERT (connection_p);
       connection_p->info (handle,
-                          local_SAP,
-                          remote_SAP);
+                          local_address,
+                          remote_address);
 #else
       this->info (handle,
-                  local_SAP,
-                  remote_SAP);
+                  local_address,
+                  remote_address);
 #endif
     }
     catch (...)
@@ -217,17 +217,17 @@ Net_ConnectionBase_T<AddressType,
                   ACE_TEXT ("caught exception in Net_IConnection_T::info(), aborting\n")));
       return false;
     }
-    result = local_SAP.addr_to_string (buffer,
-                                       sizeof (buffer),
-                                       1);
+    result = local_address.addr_to_string (buffer,
+                                           sizeof (buffer),
+                                           1);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Addr::addr_to_string(): \"%m\", continuing\n")));
-    local_address = buffer;
+    local_address_string = buffer;
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = remote_SAP.addr_to_string (buffer,
-                                        sizeof (buffer),
-                                        1);
+    result = remote_address.addr_to_string (buffer,
+                                            sizeof (buffer),
+                                            1);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Addr::addr_to_string(): \"%m\", continuing\n")));
@@ -237,15 +237,15 @@ Net_ConnectionBase_T<AddressType,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("registered connection [0x%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
                 this, reinterpret_cast<unsigned int> (handle),
-                ACE_TEXT (local_address.c_str ()),
-                ACE_TEXT (buffer),
+                ACE_TEXT (local_address_string.c_str ()),
+                buffer,
                 manager_->numConnections ()));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("registered connection [0x%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
                 this, handle,
-                ACE_TEXT (local_address.c_str ()),
-                ACE_TEXT (buffer),
+                ACE_TEXT (local_address_string.c_str ()),
+                buffer,
                 manager_->numConnections ()));
 #endif
   } // end IF
@@ -272,12 +272,12 @@ Net_ConnectionBase_T<AddressType,
   if (manager_ && isRegistered_)
   {
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    AddressType local_SAP, remote_SAP;
+    AddressType local_address, remote_address;
     try
     {
       this->info (handle,
-                  local_SAP,
-                  remote_SAP);
+                  local_address,
+                  remote_address);
     }
     catch (...)
     {
@@ -286,18 +286,18 @@ Net_ConnectionBase_T<AddressType,
     }
 
     OWN_TYPE_T* this_p = this;
-    unsigned int num_connections = manager_->numConnections () - 1;
+    unsigned int number_of_connections = manager_->numConnections () - 1;
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("deregistered connection [0x%@/%u] (total: %u)\n"),
                 this_p, reinterpret_cast<unsigned int> (handle),
-                num_connections));
+                number_of_connections));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
                 this_p, handle,
-                num_connections));
+                number_of_connections));
 #endif
 
     // (try to) de-register with the connection manager...

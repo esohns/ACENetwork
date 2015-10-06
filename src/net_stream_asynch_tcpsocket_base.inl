@@ -172,7 +172,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       if (!imodule_p)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
+                    ACE_TEXT ("\"%s\": dynamic_cast<Stream_IModule_T> failed, aborting\n"),
                     inherited3::configuration_.streamConfiguration.module->name ()));
         goto error;
       } // end IF
@@ -184,19 +184,22 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       catch (...)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), aborting\n"),
+                    ACE_TEXT ("\"%s\": caught exception in Stream_IModule_T::clone(), aborting\n"),
                     inherited3::configuration_.streamConfiguration.module->name ()));
         goto error;
       }
       if (!clone_p)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
+                    ACE_TEXT ("\"%s\": failed to Stream_IModule_T::clone(), aborting\n"),
                     inherited3::configuration_.streamConfiguration.module->name ()));
         goto error;
       }
       inherited3::configuration_.streamConfiguration.module = clone_p;
       inherited3::configuration_.streamConfiguration.deleteModule = true;
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("cloned final module \"%s\"...\n"),
+                  inherited3::configuration_.streamConfiguration.module->name ()));
     } // end IF
 
     // *TODO*: step3b: initialize final module (if any)
@@ -434,27 +437,23 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   // step1: wait for all workers within the stream (if any)
   stream_.stop (true); // <-- wait for completion
 
-  // step2: purge any pending notifications ?
-  // *WARNING: do this here, while still holding on to the current write buffer
-  if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
+  // step2: purge any pending writes ?
+  Stream_Iterator_t iterator (stream_);
+  const Stream_Module_t* module_p = NULL;
+  result = iterator.next (module_p);
+  if (result == 1)
   {
-    Stream_Iterator_t iterator (stream_);
-    const Stream_Module_t* module_p = NULL;
-    result = iterator.next (module_p);
-    if (result == 1)
-    {
-      ACE_ASSERT (module_p);
-      Stream_Task_t* task_p =
-          const_cast<Stream_Module_t*> (module_p)->reader ();
-      ACE_ASSERT (task_p);
-      result = task_p->flush (ACE_Task_Flags::ACE_FLUSHALL);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Task_T::flush(): \"%m\", continuing\n")));
-      if (result > 0)
-        ACE_DEBUG ((LM_WARNING,
-                    ACE_TEXT ("flushed %d messages...\n")));
-    } // end IF
+    ACE_ASSERT (module_p);
+    Stream_Task_t* task_p =
+        const_cast<Stream_Module_t*> (module_p)->reader ();
+    ACE_ASSERT (task_p);
+    result = task_p->flush (ACE_Task_Flags::ACE_FLUSHALL);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Task_T::flush(): \"%m\", continuing\n")));
+    if (result > 0)
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("flushed %d messages...\n")));
   } // end IF
 
   // step3: invoke base-class maintenance
@@ -675,16 +674,18 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::waitForCompletion ()
+                                ModuleHandlerConfigurationType>::waitForCompletion (bool waitForThreads_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::waitForCompletion"));
 
   // step1: wait for the stream to flush
-  //        --> all data has been dispatched (here: to the proactor/kernel)
-  stream_.flush ();
+  stream_.waitForCompletion (waitForThreads_in,
+                             false); // don't wait for upstream modules
+  //        --> stream data has been processed
 
   // step2: wait for the asynchronous operations to complete
   inherited::counter_.wait (0);
+  //        --> all data has been dispatched to the kernel (socket)
 
   // *TODO*: different platforms may implement methods by which successful
   //         placing of the data onto the wire can be established
@@ -856,9 +857,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
         (error != ERROR_OPERATION_ABORTED) &&  // local close(), happens in Win32
         (error != ERROR_CONNECTION_ABORTED))   // local close(), happens on Win32
 #else
-    if ((error != ECONNRESET) &&
+    if ((error != ECONNRESET) && // 104, happens on Linux
         (error != EPIPE)      &&
-        (error != EBADF)) // local close(), happens on Linux
+        (error != EBADF))        // local close(), happens on Linux
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
@@ -876,9 +877,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       if ((error != ERROR_NETNAME_DELETED) &&  // happens on Win32
           (error != ERROR_CONNECTION_ABORTED)) // local close(), happens on Win32
 #else
-      if ((error != ECONNRESET) &&
+      if ((error != ECONNRESET) && // 104, happens on Linux
           (error != EPIPE)      &&
-          (error != EBADF)) // local close(), happens on Linux
+          (error != EBADF))        // local close(), happens on Linux
 #endif
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),

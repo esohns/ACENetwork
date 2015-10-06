@@ -245,14 +245,20 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 
   int result = -1;
   result = inputStream_.cancel ();
-//  if ((result != 0) && (result != 1))
-  if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  if (result == -1) // *TODO*
+#else
+  if ((result != 0) && (result != 1)) // 2: --> error
+#endif
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),
                 result));
   int result_2 = outputStream_.cancel ();
-//  if ((result_2 != 0) && (result_2 != 1))
-  if (result_2 == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  if (result == -1) // *TODO*
+#else
+  if ((result != 0) && (result != 1)) // 2: --> error
+#endif
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),
                 result));
