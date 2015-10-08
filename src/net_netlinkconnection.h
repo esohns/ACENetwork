@@ -104,7 +104,7 @@ class Net_NetlinkConnection_T
    virtual void info (ACE_HANDLE&,              // return value: handle
                       Net_Netlink_Addr&,        // return value: local SAP
                       Net_Netlink_Addr&) const; // return value: remote SAP
-   virtual unsigned int id () const;
+   virtual size_t id () const;
    virtual void dump_state () const;
 
  private:
@@ -189,7 +189,7 @@ class Net_AsynchNetlinkConnection_T
 //  virtual void info (ACE_HANDLE&,              // return value: handle
 //                     Net_Netlink_Addr&,        // return value: local SAP
 //                     Net_Netlink_Addr&) const; // return value: remote SAP
-  virtual unsigned int id () const;
+  virtual size_t id () const;
   virtual void dump_state () const;
 
   // override some ACE_Service_Handler members

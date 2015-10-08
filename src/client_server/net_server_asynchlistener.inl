@@ -559,15 +559,9 @@ close:
 
   result = ACE_OS::closesocket (listen_handle);
   if (result == -1)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
-                listen_handle));
-#else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                listen_handle));
-#endif
+                ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
+                reinterpret_cast<size_t> (listen_handle)));
   inherited::handle (ACE_INVALID_HANDLE);
 
   return -1;
@@ -741,7 +735,8 @@ Net_Server_AsynchListener_T<HandlerType,
   result = ACE_OS::closesocket (inherited::handle ());
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::closesocket(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
+                reinterpret_cast<size_t> (inherited::handle ())));
   inherited::handle (ACE_INVALID_HANDLE);
   if (false);
 #else

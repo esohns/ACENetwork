@@ -22,6 +22,7 @@
     <ProjectGuid>{4BA6E9EA-9F26-462E-B799-8ED2B7B5BA3D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>libACENetwork_Server</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -39,9 +40,14 @@
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformToolset>v140</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PlatformToolset>v140</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -54,18 +60,43 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="VS_ProjectPropertySheet_ACE.props" />
   </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="VS_ProjectPropertySheet_ACEd.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="VS_ProjectPropertySheet_ACE.props" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>$(SolutionDir)$(Configuration)_obj\$(ProjectName)\</IntDir>
+    <IntDir>$(SolutionDir)$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
     <RunCodeAnalysis>false</RunCodeAnalysis>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <GenerateManifest>false</GenerateManifest>
+    <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>$(SolutionDir)$(Configuration)_obj\$(ProjectName)\</IntDir>
+    <IntDir>$(SolutionDir)$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <GenerateManifest>false</GenerateManifest>
+    <EmbedManifest>true</EmbedManifest>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <TargetExt>.dll</TargetExt>
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateManifest>false</GenerateManifest>
     <EmbedManifest>false</EmbedManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <TargetExt>.dll</TargetExt>
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -74,7 +105,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NET_SERVER_BUILD_DLL;WIN32;_DEBUG;_WINDOWS;_USRDLL;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;D:\projects\yarp\modules\libACENetwork\3rd_party\msvc;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libACEStream\src;$(ProjectDir)..\..\..\libACENetwork\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libACEStream\src;$(ProjectDir)..\..\..\libACENetwork\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>true</MinimalRebuild>
       <EnablePREfast>false</EnablePREfast>
@@ -82,12 +113,24 @@
       <AdditionalOptions>/vd0</AdditionalOptions>
       <ExceptionHandling>Async</ExceptionHandling>
       <BrowseInformation>true</BrowseInformation>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
+      <OpenMPSupport>false</OpenMPSupport>
+      <DisableLanguageExtensions />
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <ShowIncludes />
+      <ErrorReporting>Send</ErrorReporting>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <RandomizedBaseAddress />
+      <DataExecutionPrevention />
+      <TurnOffAssemblyGeneration />
+      <Profile>true</Profile>
+      <LinkErrorReporting>SendErrorReport</LinkErrorReporting>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -97,7 +140,7 @@
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NET_SERVER_BUILD_DLL;WIN32;NDEBUG;_WINDOWS;_USRDLL;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NET_SERVER_BUILD_DLL;WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libACEStream\src;$(ProjectDir)..\..\..\libACENetwork\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -108,18 +151,18 @@
       <StringPooling>true</StringPooling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FloatingPointModel>Strict</FloatingPointModel>
-      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
-      <OmitDefaultLibName />
-      <ErrorReporting>
-      </ErrorReporting>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
+      <ErrorReporting>Send</ErrorReporting>
       <AdditionalOptions>/vd0</AdditionalOptions>
       <DisableSpecificWarnings>4061;4820;4006;4172;4191;4350;4471;4503;4571;4711</DisableSpecificWarnings>
       <ExceptionHandling>Async</ExceptionHandling>
       <DisableLanguageExtensions>
       </DisableLanguageExtensions>
+      <ShowIncludes />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,12 +175,91 @@
       </AllowIsolation>
       <EnableUAC>false</EnableUAC>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
-      <SetChecksum>
-      </SetChecksum>
+      <SetChecksum>true</SetChecksum>
+      <RandomizedBaseAddress />
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <TurnOffAssemblyGeneration>
+      </TurnOffAssemblyGeneration>
+      <LinkErrorReporting>SendErrorReport</LinkErrorReporting>
+    </Link>
+    <Manifest>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+    </Manifest>
+    <Bscmake>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>NET_SERVER_BUILD_DLL;WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libACEStream\src;$(ProjectDir)..\..\..\libACENetwork\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <StringPooling>true</StringPooling>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <FloatingPointModel>Strict</FloatingPointModel>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
+      <CreateHotpatchableImage>false</CreateHotpatchableImage>
+      <OpenMPSupport>false</OpenMPSupport>
+      <DisableLanguageExtensions />
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <ShowIncludes />
+      <OmitDefaultLibName>true</OmitDefaultLibName>
+      <ErrorReporting>Send</ErrorReporting>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>ucrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+      <SetChecksum>true</SetChecksum>
+      <RandomizedBaseAddress />
+      <TurnOffAssemblyGeneration>
+      </TurnOffAssemblyGeneration>
+      <LinkErrorReporting>SendErrorReport</LinkErrorReporting>
+    </Link>
+    <Manifest>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+    </Manifest>
+    <Bscmake>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>NET_SERVER_BUILD_DLL;WIN32;_DEBUG;_WINDOWS;_USRDLL;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\3rd_party\msvc;$(ProjectDir)..\..\..\libCommon\src;$(ProjectDir)..\..\..\libACEStream\src;$(ProjectDir)..\..\..\libACENetwork\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <Optimization>Disabled</Optimization>
+      <OmitFramePointers>false</OmitFramePointers>
+      <MinimalRebuild>true</MinimalRebuild>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
+      <OpenMPSupport>false</OpenMPSupport>
+      <DisableLanguageExtensions />
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <BrowseInformation>true</BrowseInformation>
+      <ShowIncludes />
+      <ErrorReporting>Send</ErrorReporting>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>ucrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <RandomizedBaseAddress />
       <DataExecutionPrevention />
-      <TurnOffAssemblyGeneration>true</TurnOffAssemblyGeneration>
-      <LinkErrorReporting>NoErrorReport</LinkErrorReporting>
+      <TurnOffAssemblyGeneration />
+      <Profile>true</Profile>
+      <LinkErrorReporting>SendErrorReport</LinkErrorReporting>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -30,8 +30,7 @@
 
 #include "net_sockethandler_base.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (ACE_HAS_NETLINK)
 class Net_Netlink_Addr
  : public ACE_Netlink_Addr
 {

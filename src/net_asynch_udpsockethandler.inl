@@ -188,16 +188,13 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
     result = inputStream_.cancel ();
     if (result)
     {
+      int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      DWORD error = ::GetLastError ();
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%s\", continuing\n"),
-                  ACE_TEXT (Common_Tools::error2String (error).c_str ())));
-#else
-      ACE_DEBUG ((LM_ERROR,
-        ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
-        result));
+      if (error != ERROR_IO_PENDING) // 997: happens on Win32
 #endif
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\" (errno was: %d), continuing\n"),
+                    error));
     } // end IF
   } // end IF
   else
@@ -206,16 +203,13 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 //  if ((result_2 != 0) && (result_2 != 1))
   if (result_2)
   {
+    int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    DWORD error = ::GetLastError ();
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%s\", continuing\n"),
-                ACE_TEXT (Common_Tools::error2String (error).c_str ())));
-#else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%m\" (result was: %d), continuing\n"),
-                result_2));
+    if (error != ERROR_IO_PENDING) // 997: happens on Win32
 #endif
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%m\" (errno was: %d), continuing\n"),
+                  error));
   } // end IF
 
 //  return ((((result != 0) && (result != 1)) ||
@@ -303,7 +297,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::initiate_read_dgram ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::initiate_read_dgram"));
 
-  int result = -1;
+  ssize_t result = -1;
   size_t bytes_to_read = 0;
 
   // step1: allocate a data buffer

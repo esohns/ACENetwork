@@ -247,13 +247,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // step3c: initialize stream
   // *TODO*: remove type inferences
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
   configuration_p->streamConfiguration.sessionID =
-    reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
-#else
-  configuration_p->streamConfiguration.sessionID =
-    static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
-#endif
+    reinterpret_cast<size_t> (inherited::get_handle ()); // (== socket handle)
   if (!stream_.initialize (configuration_p->streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -461,7 +456,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
       //    if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
       //      ACE_DEBUG ((LM_ERROR,
       //                  ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
-      //                  handle));
+      //                  reinterpret_cast<size_t> (handle)));
 
       //    result = -1;
       //  } // end IF
@@ -1043,7 +1038,7 @@ template <typename HandlerType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType,
           typename HandlerConfigurationType>
-unsigned int
+size_t
 Net_StreamUDPSocketBase_T<HandlerType,
                           AddressType,
                           ConfigurationType,
@@ -1057,11 +1052,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ());
-#else
-  return static_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ());
-#endif
+  return reinterpret_cast<size_t> (inherited::SVC_HANDLER_T::get_handle ());
 }
 
 template <typename HandlerType,
@@ -1808,8 +1799,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 //        int result_2 = ACE_OS::closesocket (handle);
 //        if (result_2 == -1)
 //          ACE_DEBUG ((LM_ERROR,
-//                      ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-//                      handle));
+//                      ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
+//                      reinterpret_cast<size_t> (handle)));
 //      } // end IF
 
       break;
@@ -2292,7 +2283,7 @@ template <typename AddressType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType,
           typename HandlerConfigurationType>
-unsigned int
+size_t
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           AddressType,
                           ConfigurationType,
@@ -2306,11 +2297,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ());
-#else
-  return static_cast<unsigned int> (inherited::SVC_HANDLER_T::get_handle ());
-#endif
+  return static_cast<size_t> (inherited::SVC_HANDLER_T::get_handle ());
 }
 
 template <typename AddressType,

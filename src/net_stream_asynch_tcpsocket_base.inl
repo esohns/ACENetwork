@@ -206,13 +206,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   } // end IF
 
   // *TODO*: remove type inferences
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
   inherited3::configuration_.streamConfiguration.sessionID =
-    reinterpret_cast<unsigned int> (handle_in); // (== socket handle)
-#else
-  inherited3::configuration_.streamConfiguration.sessionID =
-    static_cast<unsigned int> (handle_in); // (== socket handle)
-#endif
+    reinterpret_cast<size_t> (handle_in); // (== socket handle)
   if (!stream_.initialize (inherited3::configuration_.streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -243,10 +238,10 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     {
       int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if ((error != ENXIO)               && // happens on Win32
-          (error != EFAULT)              && // *TODO*: happens on Win32
-          (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
-          (error != ERROR_NETNAME_DELETED)) // happens on Win32
+      if ((error != ENXIO)                && // 6 : happens on Win32
+          (error != EFAULT)               && // 14: *TODO*: happens on Win32
+          (error != ERROR_UNEXP_NET_ERR)  && // 59: *TODO*: happens on Win32
+          (error != ERROR_NETNAME_DELETED))  // 64: happens on Win32
 #else
       if (error)
 #endif
@@ -268,14 +263,14 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     ACE_Proactor* proactor_p = inherited::proactor ();
     ACE_ASSERT (proactor_p);
     ACE_Asynch_Read_Stream_Result_Impl* fake_result_p =
-        proactor_p->create_asynch_read_stream_result (inherited::proxy (),                  // handler proxy
-                                                      handle_in,                            // socket handle
-                                                      *duplicate_p,                         // buffer
-                                                      duplicate_p->size (),                 // (max) bytes to read
-                                                      NULL,                                 // ACT
-                                                      ACE_INVALID_HANDLE,                   // event
-                                                      0,                                    // priority
-                                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
+        proactor_p->create_asynch_read_stream_result (inherited::proxy (),                            // handler proxy
+                                                      handle_in,                                      // socket handle
+                                                      *duplicate_p,                                   // buffer
+                                                      static_cast<u_long> (duplicate_p->capacity ()), // (maximum) #bytes to read
+                                                      NULL,                                           // ACT
+                                                      ACE_INVALID_HANDLE,                             // event
+                                                      0,                                              // priority
+                                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);           // signal number
     if (!fake_result_p)
     {
       ACE_ERROR ((LM_ERROR,
@@ -317,7 +312,7 @@ error:
     inherited3::deregister ();
 
   if (handle_socket)
-  { // should 'delete this'
+  {
     result = inherited::handle_close (inherited::handle (),
                                       ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result == -1)
@@ -325,8 +320,7 @@ error:
                   ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
   } // end IF
 
-//  // *TODO*: remove type inference
-//  inherited3::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+  this->decrease ();
 }
 
 template <typename HandlerType,
@@ -430,8 +424,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::handle_close"));
 
-  ACE_UNUSED_ARG (handle_in);
-
   int result = -1;
 
   // step1: wait for all workers within the stream (if any)
@@ -466,6 +458,24 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   // step4: deregister with the connection manager (if any)
   if (inherited3::isRegistered_)
     inherited3::deregister ();
+
+  // *IMPORTANT NOTE*: the basic user-close idea is to simply cancel the open
+  //                   read operation, which would release all resources and
+  //                   close the socket asynchronously. Unfortunately (on Win32
+  //                   systems), CancelIO() does not wake up the read operation
+  //                   reliably
+  //                   --> close the socket early in close (see above)
+  //// step5: close socket handle
+  //result = ACE_OS::closesocket (handle_in);
+  //if (result == -1)
+  //{
+  //  int error = ACE_OS::last_error ();
+  //  //if (error != ENOTSOCK) // 10038: happens on Win32
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
+  //              reinterpret_cast<size_t> (handle_in)));
+  //} // end IF
+  //inherited::handle (handle_in); // debugging purposes only !
 
   return result;
 }
@@ -529,7 +539,7 @@ template <typename HandlerType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
-unsigned int
+size_t
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
                                 ConfigurationType,
@@ -542,11 +552,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::id"));
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<unsigned int> (inherited::handle ());
-#else
-  return static_cast<unsigned int> (inherited::handle ());
-#endif
+  return reinterpret_cast<size_t> (inherited::handle ());
 }
 
 template <typename HandlerType,
@@ -631,25 +637,28 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 //  ACE_UNUSED_ARG (arg_in);
   int result = -1;
 
-  // step1: shutdown operations
+  // step1: shutdown i/o streams (cancel operations), close (write) socket handle
   ACE_HANDLE handle = inherited::handle ();
-  // *NOTE*: may 'delete this'
-  result = handle_close (handle,
-                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  result = inherited::handle_close (handle,
+                                    ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", aborting\n")));
-                ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+//                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(): \"%m\", continuing\n")));
 
+  // *IMPORTANT NOTE*: wake up the open read operation; it will shutdown the
+  //                   connection
+  // *TODO*: simple cancellation should be enough (see below, line 462)
+  //         --> try with CancelIoEx() ?
   //  step2: release the socket handle
   if (handle != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (handle);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  handle));
-    inherited::handle (handle); // debugging purposes only !
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
+                  reinterpret_cast<size_t> (handle)));
+    //inherited::handle (handle); // debugging purposes only !
   } // end IF
 
   // *TODO*: remove type inference
@@ -853,9 +862,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     // connection closed/reset (by peer) ? --> not an error
     error = result_in.error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ERROR_NETNAME_DELETED)   &&  // happens on Win32
-        (error != ERROR_OPERATION_ABORTED) &&  // local close(), happens in Win32
-        (error != ERROR_CONNECTION_ABORTED))   // local close(), happens on Win32
+    if ((error != ERROR_NETNAME_DELETED)   && // 64  : peer close(), happens on Win32
+        (error != ERROR_OPERATION_ABORTED) && // 995 : local close(), happens in Win32
+        (error != ERROR_CONNECTION_ABORTED))  // 1236: local close(), happens on Win32
 #else
     if ((error != ECONNRESET) && // 104, happens on Linux
         (error != EPIPE)      &&
@@ -874,8 +883,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if ((error != ERROR_NETNAME_DELETED) &&  // happens on Win32
-          (error != ERROR_CONNECTION_ABORTED)) // local close(), happens on Win32
+      if ((error != ERROR_NETNAME_DELETED)   && // 64  : peer close(), happens on Win32
+          (error != ERROR_OPERATION_ABORTED) && // 995 : local close(), happens in Win32
+          (error != ERROR_CONNECTION_ABORTED))  // 1236: local close(), happens on Win32
 #else
       if ((error != ECONNRESET) && // 104, happens on Linux
           (error != EPIPE)      &&
@@ -885,16 +895,14 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                     ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
                     result_in.handle (),
                     ACE::sock_error (static_cast<int> (error))));
-
       break;
     }
     // *** GOOD CASES ***
     case 0:
     {
 //       ACE_DEBUG ((LM_DEBUG,
-//                   ACE_TEXT ("[%u]: socket was closed by the peer...\n"),
+//                   ACE_TEXT ("[%u]: socket was closed...\n"),
 //                   handle_));
-
       break;
     }
     default:
@@ -919,10 +927,10 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       {
         int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        if ((error != ENXIO)               && // happens on Win32
-            (error != EFAULT)              && // *TODO*: happens on Win32
-            (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
-            (error != ERROR_NETNAME_DELETED)) // happens on Win32
+        if ((error != ENXIO)               && // 6 : happens on Win32
+            (error != EFAULT)              && // 14: *TODO*: happens on Win32
+            (error != ERROR_UNEXP_NET_ERR) && // 59: *TODO*: happens on Win32
+            (error != ERROR_NETNAME_DELETED)) // 64: happens on Win32
 #else
         if (error)
 #endif

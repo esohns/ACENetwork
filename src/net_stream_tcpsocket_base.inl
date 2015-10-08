@@ -265,13 +265,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // step2c: initialize stream
   // *TODO*: remove type inferences
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
   inherited2::configuration_.streamConfiguration.sessionID =
-    reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
-#else
-  inherited2::configuration_.streamConfiguration.sessionID =
-    static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
-#endif
+    reinterpret_cast<size_t> (inherited::get_handle ()); // (== socket handle)
   if (!stream_.initialize (inherited2::configuration_.streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -442,7 +437,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
           //              (error != EBADF))      // Linux (failed to connect: timed out)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
-                      handle));
+                      reinterpret_cast<size_t> (handle)));
           result = -1;
         } // end IF
       } // end IF
@@ -471,7 +466,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
           if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
-                        handle));
+                        reinterpret_cast<size_t> (handle)));
           result = -1;
         } // end IF
       } // end IF
@@ -1099,7 +1094,7 @@ template <typename HandlerType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
-unsigned int
+size_t
 Net_StreamTCPSocketBase_T<HandlerType,
                           AddressType,
                           ConfigurationType,
@@ -1112,11 +1107,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::id"));
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<unsigned int> (inherited::get_handle ());
-#else
-  return static_cast<unsigned int> (inherited::get_handle ());
-#endif
+  return reinterpret_cast<size_t> (inherited::get_handle ());
 }
 
 template <typename HandlerType,

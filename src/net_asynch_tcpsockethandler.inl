@@ -240,7 +240,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::handle_close"));
 
-  ACE_UNUSED_ARG (handle_in);
   ACE_UNUSED_ARG (mask_in);
 
   int result = -1;
@@ -267,7 +266,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 #else
   if (writeHandle_ != ACE_INVALID_HANDLE)
   {
-    int result_3 = ACE_OS::close (writeHandle_);
+    result_3 = ACE_OS::close (writeHandle_);
     if (result_3 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
@@ -512,7 +511,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read_stream ()
   int error = 0;
 receive:
   result = inputStream_.read (*message_block_p,                     // buffer
-                              message_block_p->size (),             // bytes to read
+                              message_block_p->capacity (),         // bytes to read
                               NULL,                                 // ACT
                               0,                                    // priority
                               COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
@@ -522,10 +521,10 @@ receive:
     // *WARNING*: this could fail on multi-threaded proactors
     if (error == EAGAIN) goto receive; // 11: happens on Linux
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENXIO)               && // happens on Win32
-        (error != EFAULT)              && // *TODO*: happens on Win32
-        (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
-        (error != ERROR_NETNAME_DELETED)) // happens on Win32
+    if ((error != ENXIO)               && // 6 : happens on Win32
+        (error != EFAULT)              && // 14: *TODO*: happens on Win32
+        (error != ERROR_UNEXP_NET_ERR) && // 59: *TODO*: happens on Win32
+        (error != ERROR_NETNAME_DELETED)) // 64: happens on Win32
 #else
     if (error)
 #endif

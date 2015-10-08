@@ -85,7 +85,8 @@ class Net_Client_TimeoutHandler
   ActionMode_t                       mode_;
   ACE_INET_Addr                      peerAddress_;
   unsigned int                       randomSeed_;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   char                               randomStateInitializationBuffer_[BUFSIZ];
   struct random_data                 randomState_;
 #endif

@@ -43,7 +43,8 @@ Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
  , mode_ (mode_in)
  , peerAddress_ (remoteSAP_in)
  , randomSeed_ (0)
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
  , randomStateInitializationBuffer_ ()
  , randomState_ ()
 #endif
@@ -54,11 +55,15 @@ Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::Net_Client_TimeoutHandler"));
 
   randomSeed_ = COMMON_TIME_NOW.usec ();
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  ACE_OS::memset (randomStateInitializationBuffer_, 0, sizeof (randomStateInitializationBuffer_));
-  int result = ::initstate_r (randomSeed_,
-                              randomStateInitializationBuffer_, sizeof (randomStateInitializationBuffer_),
-                              &randomState_);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  ACE_OS::memset (randomStateInitializationBuffer_,
+                  0,
+                  sizeof (randomStateInitializationBuffer_));
+  int result =
+    ::initstate_r (randomSeed_,
+                   randomStateInitializationBuffer_, sizeof (randomStateInitializationBuffer_),
+                   &randomState_);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::initstate_r(): \"%m\", continuing\n")));
@@ -149,7 +154,9 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         // grab a (random) connection handler
         // *PORTABILITY*: outside glibc, this is not very portable...
         // *TODO*: use STL funcionality instead
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
+#else
         result = ::random_r (&randomState_, &index);
         if (result == -1)
         {
@@ -162,8 +169,6 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
           return -1;
         } // end IF
         index = (index % num_connections);
-#else
-        index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
 #endif
         ping_connection_p = connection_manager_p->operator[] (index);
         if (!ping_connection_p)
@@ -207,7 +212,9 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
             // grab a (random) connection handler
             // *PORTABILITY*: outside glibc, this is not very portable...
             // *TODO*: use STL funcionality instead
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+            index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
+#else
             result = ::random_r (&randomState_, &index);
             if (result == -1)
             {
@@ -220,8 +227,6 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
               return -1;
             } // end IF
             index = (index % num_connections);
-#else
-            index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
 #endif
             abort_connection_p = connection_manager_p->operator[] (index);
             if (!abort_connection_p)
@@ -288,7 +293,9 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         // *TODO*: use STL funcionality instead
         //        std::uniform_int_distribution<int> distribution (0, num_connections - 1);
         //        index = distribution (randomGenerator_);
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
+#else
         result = ::random_r (&randomState_, &index);
         if (result == -1)
         {
@@ -301,8 +308,6 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
           return -1;
         } // end IF
         index = (index % num_connections);
-#else
-        index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
 #endif
         ping_connection_p = connection_manager_p->operator[] (index);
         if (!ping_connection_p)

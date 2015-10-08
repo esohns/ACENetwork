@@ -252,12 +252,8 @@ Net_Connection_Manager_T<AddressType,
   for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
        iterator.next (connection_p);
        iterator.advance ())
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-       if (connection_p->id () == reinterpret_cast<unsigned int> (handle_in))
-#else
-       if (connection_p->id () == static_cast<unsigned int> (handle_in))
-#endif
-         break;
+    if (connection_p->id () == reinterpret_cast<size_t> (handle_in))
+      break;
   if (connection_p)
     connection_p->increase (); // increase reference count
 //  else
@@ -577,6 +573,12 @@ Net_Connection_Manager_T<AddressType,
   unsigned int closed_connections = 0;
   ICONNECTION_T* connection_p = NULL;
 
+  {
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
+
+    closed_connections = connections_.size ();
+  } // end lock scope
+
   // *WARNING*: when using single-threaded reactors, close()ing connections
   //            inside the lock scope may lead to deadlock
 begin:
@@ -605,10 +607,9 @@ begin:
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IICONNECTION_T::close(), continuing\n")));
+                ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
   }
   connection_p->decrease ();
-  closed_connections++;
   goto begin;
 
 done:

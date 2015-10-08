@@ -21,6 +21,7 @@
 
 #include "net_netlinksockethandler.h"
 
+#if defined (ACE_HAS_NETLINK)
 #include <cmath>
 
 #include "ace/OS.h"
@@ -70,3 +71,4 @@ Net_Netlink_Addr::operator= (const ACE_Addr& rhs)
 
   return *this;
 }
+#endif

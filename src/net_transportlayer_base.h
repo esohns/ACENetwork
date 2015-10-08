@@ -59,7 +59,6 @@ class Net_Export Net_InetTransportLayer_Base
   ACE_UNIMPLEMENTED_FUNC (Net_InetTransportLayer_Base& operator= (const Net_InetTransportLayer_Base&))
 };
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 class Net_Export Net_NetlinkTransportLayer_Base
  : virtual public Net_ITransportLayer_T<Net_SocketConfiguration>
 {
@@ -88,6 +87,5 @@ class Net_Export Net_NetlinkTransportLayer_Base
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base (const Net_NetlinkTransportLayer_Base&))
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base& operator= (const Net_NetlinkTransportLayer_Base&))
 };
-#endif
 
 #endif

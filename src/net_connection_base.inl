@@ -236,7 +236,7 @@ Net_ConnectionBase_T<AddressType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("registered connection [0x%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
-                this, reinterpret_cast<unsigned int> (handle),
+                this, reinterpret_cast<size_t> (handle),
                 ACE_TEXT (local_address_string.c_str ()),
                 buffer,
                 manager_->numConnections ()));
@@ -291,7 +291,7 @@ Net_ConnectionBase_T<AddressType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("deregistered connection [0x%@/%u] (total: %u)\n"),
-                this_p, reinterpret_cast<unsigned int> (handle),
+                this_p, reinterpret_cast<size_t> (handle),
                 number_of_connections));
 #else
     ACE_DEBUG ((LM_DEBUG,
@@ -300,7 +300,7 @@ Net_ConnectionBase_T<AddressType,
                 number_of_connections));
 #endif
 
-    // (try to) de-register with the connection manager...
+    // (try to) de-register with the connection manager
     isRegistered_ = false;
     // *IMPORTANT NOTE*: may delete 'this'
     try

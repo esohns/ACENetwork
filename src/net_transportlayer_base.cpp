@@ -86,9 +86,9 @@ Net_InetTransportLayer_Base::finalize ()
 
 /////////////////////////////////////////
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
- : role_ (NET_ROLE_INVALID)
+ : dispatch_(COMMON_DISPATCH_INVALID)
+ , role_(NET_ROLE_INVALID)
  , transportLayer_ (NET_TRANSPORTLAYER_NETLINK)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base"));
@@ -147,5 +147,3 @@ Net_NetlinkTransportLayer_Base::finalize ()
 
   ACE_ASSERT (false);
 }
-
-#endif

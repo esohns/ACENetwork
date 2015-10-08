@@ -53,7 +53,7 @@ class Net_IConnection_T
   virtual void info (ACE_HANDLE&,             // return value: I/O handle
                      AddressType&,            // return value: local SAP
                      AddressType&) const = 0; // return value: remote SAP
-  virtual unsigned int id () const = 0;
+  virtual size_t id () const = 0;
 
   virtual ACE_Notification_Strategy* notification () = 0;
   virtual const StateType& state () const = 0;

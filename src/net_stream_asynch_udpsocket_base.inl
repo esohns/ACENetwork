@@ -255,13 +255,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // step4c: initialize stream
   // *TODO*: this clearly is a design glitch
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
   inherited4::configuration_.streamConfiguration.sessionID =
-    reinterpret_cast<unsigned int> (inherited::handle ()); // (== socket handle)
-#else
-  inherited4::configuration_.streamConfiguration.sessionID =
-    static_cast<unsigned int> (inherited::handle ()); // (== socket handle)
-#endif
+    reinterpret_cast<size_t> (inherited::handle ()); // (== socket handle)
   if (!stream_.initialize (inherited4::configuration_.streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -597,7 +592,7 @@ template <typename HandlerType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType,
           typename HandlerConfigurationType>
-unsigned int
+size_t
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
                                 AddressType,
@@ -612,11 +607,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<unsigned int> (inherited::handle ());
-#else
-  return static_cast<unsigned int> (inherited::handle ());
-#endif
+  return reinterpret_cast<size_t> (inherited::handle ());
 }
 
 template <typename HandlerType,
@@ -731,8 +722,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     result = inherited2::close ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to SocketType::close(): \"%m\", continuing\n")));
-    inherited2::set_handle (handle); // debugging purposes only !
+                  ACE_TEXT ("failed to SocketType::close(%u): \"%m\", continuing\n"),
+                  reinterpret_cast<size_t> (handle)));
+    //inherited2::set_handle (handle); // debugging purposes only !
   } // end IF
 
   // *TODO*: remove type inference
@@ -1567,7 +1559,7 @@ template <typename AddressType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType,
           typename HandlerConfigurationType>
-unsigned int
+size_t
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
                                 AddressType,
@@ -1582,11 +1574,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<unsigned int> (inherited::handle ());
-#else
-  return static_cast<unsigned int> (inherited::handle ());
-#endif
+  return static_cast<size_t> (inherited::handle ());
 }
 
 template <typename AddressType,
@@ -1690,8 +1678,8 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
     int result_2 = ACE_OS::closesocket (handle);
     if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  handle));
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
+                  reinterpret_cast<size_t> (handle)));
 //    inherited::handle (ACE_INVALID_HANDLE);
   } // end IF
 

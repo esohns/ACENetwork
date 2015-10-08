@@ -252,7 +252,7 @@ template <typename HandlerType,
           typename StreamType,
           typename HandlerConfigurationType,
           typename UserDataType>
-unsigned int
+size_t
 Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
@@ -269,11 +269,7 @@ Net_NetlinkConnection_T<HandlerType,
         local_address,
         peer_address);
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return *static_cast<unsigned int*> (handle);
-#else
-  return static_cast<unsigned int> (handle);
-#endif
+  return static_cast<size_t> (handle);
 }
 
 template <typename HandlerType,
@@ -1029,7 +1025,7 @@ template <typename HandlerType,
           typename StreamType,
           typename HandlerConfigurationType,
           typename UserDataType>
-unsigned int
+size_t
 Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
@@ -1046,11 +1042,7 @@ Net_AsynchNetlinkConnection_T<HandlerType,
               local_netlink_address,
               peer_netlink_address);
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return *static_cast<unsigned int*> (handle);
-#else
-  return static_cast<unsigned int> (handle);
-#endif
+  return static_cast<size_t> (handle);
 }
 
 template <typename HandlerType,

@@ -5,11 +5,11 @@
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\projects\ATCD\ACE</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\ATCD\ACE</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>D:\projects\ATCD\ACE\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\ATCD\ACE\lib;$(ProjectDir)..\..\..\ATCD\ACE\lib\$(Configuration)\$(Platform)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ACE.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

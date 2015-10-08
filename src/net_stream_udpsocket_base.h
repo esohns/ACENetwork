@@ -98,7 +98,7 @@ class Net_StreamUDPSocketBase_T
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
-  virtual unsigned int id () const;
+  virtual size_t id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual const StreamType& stream () const;
   virtual void close ();
@@ -244,7 +244,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
-  virtual unsigned int id () const;
+  virtual size_t id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual const StreamType& stream () const;
   virtual void close ();

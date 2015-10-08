@@ -89,7 +89,7 @@ class Net_StreamAsynchUDPSocketBase_T
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
-  virtual unsigned int id () const;
+  virtual size_t id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
@@ -206,7 +206,7 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
-  virtual unsigned int id () const;
+  virtual size_t id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
