@@ -244,29 +244,39 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 
   int result = -1;
   result = inputStream_.cancel ();
+  if ((result != 0) && (result != 1)) // 2: --> error ?
+  {
+    int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (result == -1) // *TODO*
+    if (error) // *TODO*
 #else
-  if ((result != 0) && (result != 1)) // 2: --> error
+    if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
+    if (error != EINPROGRESS) // 115: happens on Linux
 #endif
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),
-                result));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),
+                  result));
+  } // end IF
   int result_2 = outputStream_.cancel ();
+  if ((result_2 != 0) && (result_2 != 1)) // 2: --> error ?
+  {
+    int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (result == -1) // *TODO*
+    if (error) // *TODO*
 #else
-  if ((result != 0) && (result != 1)) // 2: --> error
+    if (error == EINPROGRESS) result_2 = 0; // --> AIO_CANCELED
+    if (error != EINPROGRESS) // 115: happens on Linux
 #endif
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Write_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),
-                result));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Asynch_Write_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),
+                  result_2));
+  } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   if (writeHandle_ != ACE_INVALID_HANDLE)
   {
-    result_3 = ACE_OS::close (writeHandle_);
+    int result_3 = ACE_OS::close (writeHandle_);
     if (result_3 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
@@ -275,11 +285,9 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   } // end IF
 #endif
 
-//  return ((((result != 0) && (result != 1)) ||
-//           ((result_2 != 0) && (result_2 != 1))) ? -1
-//                                                 : 0);
-  return ((result == -1) || (result_2 == -1) ? -1
-                                             : 0);
+  return ((((result   != 0) && (result   != 1)) ||
+           ((result_2 != 0) && (result_2 != 1))) ? -1
+                                                 : 0);
 }
 
 template <typename ConfigurationType>

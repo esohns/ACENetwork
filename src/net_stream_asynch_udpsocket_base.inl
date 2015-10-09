@@ -256,7 +256,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // step4c: initialize stream
   // *TODO*: this clearly is a design glitch
   inherited4::configuration_.streamConfiguration.sessionID =
-    reinterpret_cast<size_t> (inherited::handle ()); // (== socket handle)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      reinterpret_cast<size_t> (inherited::handle ()); // (== socket handle)
+#else
+      static_cast<size_t> (inherited::handle ()); // (== socket handle)
+#endif
   if (!stream_.initialize (inherited4::configuration_.streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -607,7 +611,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   return reinterpret_cast<size_t> (inherited::handle ());
+#else
+  return static_cast<size_t> (inherited::handle ());
+#endif
 }
 
 template <typename HandlerType,
@@ -721,9 +729,15 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   {
     result = inherited2::close ();
     if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to SocketType::close(%u): \"%m\", continuing\n"),
                   reinterpret_cast<size_t> (handle)));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to SocketType::close(%d): \"%m\", continuing\n"),
+                  handle));
+#endif
     //inherited2::set_handle (handle); // debugging purposes only !
   } // end IF
 

@@ -345,9 +345,15 @@ Net_Client_AsynchConnector_T<HandlerType,
 close:
   result = ACE_OS::closesocket (connectHandle_);
   if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
                 reinterpret_cast<size_t> (connectHandle_)));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                connectHandle_));
+#endif
 
   return -1;
 }

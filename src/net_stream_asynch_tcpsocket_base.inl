@@ -207,7 +207,11 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // *TODO*: remove type inferences
   inherited3::configuration_.streamConfiguration.sessionID =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     reinterpret_cast<size_t> (handle_in); // (== socket handle)
+#else
+    static_cast<size_t> (handle_in); // (== socket handle)
+#endif
   if (!stream_.initialize (inherited3::configuration_.streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -552,7 +556,11 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::id"));
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   return reinterpret_cast<size_t> (inherited::handle ());
+#else
+  return static_cast<size_t> (inherited::handle ());
+#endif
 }
 
 template <typename HandlerType,
@@ -655,10 +663,16 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   {
     result = ACE_OS::closesocket (handle);
     if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
                   reinterpret_cast<size_t> (handle)));
-    //inherited::handle (handle); // debugging purposes only !
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                  handle));
+#endif
+    inherited::handle (ACE_INVALID_HANDLE);
   } // end IF
 
   // *TODO*: remove type inference
@@ -866,9 +880,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
         (error != ERROR_OPERATION_ABORTED) && // 995 : local close(), happens in Win32
         (error != ERROR_CONNECTION_ABORTED))  // 1236: local close(), happens on Win32
 #else
-    if ((error != ECONNRESET) && // 104, happens on Linux
-        (error != EPIPE)      &&
-        (error != EBADF))        // local close(), happens on Linux
+    if ((error != EBADF)     && // 9  : local close(), happens on Linux
+        (error != EPIPE)     && // 32 : happens on Linux
+        (error != ECONNRESET))  // 104: happens on Linux
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),
@@ -887,9 +901,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
           (error != ERROR_OPERATION_ABORTED) && // 995 : local close(), happens in Win32
           (error != ERROR_CONNECTION_ABORTED))  // 1236: local close(), happens on Win32
 #else
-      if ((error != ECONNRESET) && // 104, happens on Linux
-          (error != EPIPE)      &&
-          (error != EBADF))        // local close(), happens on Linux
+      if ((error != EBADF)     && // 9  : local close(), happens on Linux
+          (error != EPIPE)     && // 32 : happens on Linux
+          (error != ECONNRESET))  // 104: happens on Linux
 #endif
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to read from input stream (%d): \"%s\", aborting\n"),

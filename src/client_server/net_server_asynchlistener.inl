@@ -559,9 +559,15 @@ close:
 
   result = ACE_OS::closesocket (listen_handle);
   if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
                 reinterpret_cast<size_t> (listen_handle)));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                listen_handle));
+#endif
   inherited::handle (ACE_INVALID_HANDLE);
 
   return -1;

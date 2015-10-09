@@ -266,7 +266,11 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // step2c: initialize stream
   // *TODO*: remove type inferences
   inherited2::configuration_.streamConfiguration.sessionID =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     reinterpret_cast<size_t> (inherited::get_handle ()); // (== socket handle)
+#else
+    static_cast<size_t> (inherited::get_handle ()); // (== socket handle)
+#endif
   if (!stream_.initialize (inherited2::configuration_.streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -435,9 +439,15 @@ Net_StreamTCPSocketBase_T<HandlerType,
           ACE_UNUSED_ARG (error);
           //          if ((error != ENOTSOCK) && // Win32 (failed to connect: timed out)
           //              (error != EBADF))      // Linux (failed to connect: timed out)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
                       reinterpret_cast<size_t> (handle)));
+#else
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                      handle));
+#endif
           result = -1;
         } // end IF
       } // end IF
@@ -464,9 +474,15 @@ Net_StreamTCPSocketBase_T<HandlerType,
         {
           int error = ACE_OS::last_error ();
           if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
                         reinterpret_cast<size_t> (handle)));
+#else
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                        handle));
+#endif
           result = -1;
         } // end IF
       } // end IF
@@ -1107,7 +1123,11 @@ Net_StreamTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::id"));
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   return reinterpret_cast<size_t> (inherited::get_handle ());
+#else
+  return static_cast<size_t> (inherited::get_handle ());
+#endif
 }
 
 template <typename HandlerType,

@@ -248,7 +248,11 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // step3c: initialize stream
   // *TODO*: remove type inferences
   configuration_p->streamConfiguration.sessionID =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     reinterpret_cast<size_t> (inherited::get_handle ()); // (== socket handle)
+#else
+    static_cast<size_t> (inherited::get_handle ()); // (== socket handle)
+#endif
   if (!stream_.initialize (configuration_p->streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1052,7 +1056,11 @@ Net_StreamUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   return reinterpret_cast<size_t> (inherited::SVC_HANDLER_T::get_handle ());
+#else
+  return static_cast<size_t> (inherited::SVC_HANDLER_T::get_handle ());
+#endif
 }
 
 template <typename HandlerType,
