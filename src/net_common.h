@@ -77,7 +77,8 @@ enum Net_Connection_Status
   ///////////////////////////////////////
   NET_CONNECTION_STATUS_INITIALIZATION_FAILED,
   ///////////////////////////////////////
-  NET_CONNECTION_STATUS_CLOSED, // local close ()
+  NET_CONNECTION_STATUS_CLOSED,      // (local) close ()
+  NET_CONNECTION_STATUS_PEER_CLOSED, // connection closed by the peer
   ///////////////////////////////////////
   NET_CONNECTION_STATUS_MAX
 };

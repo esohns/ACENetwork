@@ -158,7 +158,7 @@
 //  // *PORTABILITY*: this isn't entirely portable...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+//              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
 //              this, reinterpret_cast<unsigned int> (handle),
 //              ACE_TEXT (localAddress.c_str ()),
 //              ACE_TEXT (buffer),
@@ -166,7 +166,7 @@
 //                                   : -1)));
 //#else
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+//              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
 //              this, handle,
 //              ACE_TEXT (local_address.c_str ()),
 //              ACE_TEXT (buffer),
@@ -636,7 +636,7 @@
 //  // *PORTABILITY*: this isn't entirely portable...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+//              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
 //              this, reinterpret_cast<unsigned int> (handle),
 //              ACE_TEXT (localAddress.c_str ()),
 //              ACE_TEXT (buffer),
@@ -644,7 +644,7 @@
 //                                   : -1)));
 //#else
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)...\n"),
+//              ACE_TEXT ("registered connection [%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
 //              this, handle,
 //              ACE_TEXT (local_address.c_str ()),
 //              ACE_TEXT (buffer),

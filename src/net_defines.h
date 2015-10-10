@@ -40,7 +40,7 @@
 #endif
 #define NET_INTERFACE_DEFAULT_USE_LOOPBACK       false
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#define NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH   false // SIO_LOOPBACK_FAST_PATH
+#define NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH   true // SIO_LOOPBACK_FAST_PATH
 #endif
 
 // addresses

@@ -93,7 +93,7 @@ class Net_Connection_Manager_T
   virtual void deregister (ICONNECTION_T*); // connection handle
 
   virtual void abort ();
-  virtual unsigned int numConnections () const;
+  virtual unsigned int count () const;
   virtual void wait () const;
 
   // ---------------------------------------------------------------------------

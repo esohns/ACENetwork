@@ -1038,7 +1038,7 @@ Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
     return false;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("enabled SIO_LOOPBACK_FAST_PATH on 0x%@...\n"),
+              ACE_TEXT ("enabled SIO_LOOPBACK_FAST_PATH on 0x%@\n"),
               handle_in));
 
   return true;

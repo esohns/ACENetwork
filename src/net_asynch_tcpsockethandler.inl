@@ -248,10 +248,14 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (error) // *TODO*
+    if ((error != ENOENT)                  && // 2   :
+        (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
+        (error != ERROR_IO_PENDING)        && // 997 :
+        (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
 #else
     if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
-    if (error != EINPROGRESS) // 115: happens on Linux
+    if ((error != ENOENT)     && // 2  :
+        (error != EINPROGRESS))  // 115: happens on Linux
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),
@@ -262,10 +266,14 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (error) // *TODO*
+    if ((error != ENOENT)                  && // 2   :
+        (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
+        (error != ERROR_IO_PENDING)        && // 997 :
+        (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
 #else
     if (error == EINPROGRESS) result_2 = 0; // --> AIO_CANCELED
-    if (error != EINPROGRESS) // 115: happens on Linux
+    if ((error != ENOENT)     && // 2  :
+        (error != EINPROGRESS))  // 115: happens on Linux
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),

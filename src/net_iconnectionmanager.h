@@ -62,7 +62,7 @@ class Net_IConnectionManager_T
   virtual void deregister (CONNECTION_T*) = 0; // connection handle
 
   virtual void abort () = 0;
-  virtual unsigned int numConnections () const = 0; // return value: (current) number of connections
+  virtual unsigned int count () const = 0; // return value: (current) number of connections
   virtual void wait () const = 0;
 
   // debugging

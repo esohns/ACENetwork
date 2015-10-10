@@ -430,8 +430,12 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   int result = -1;
 
-  // step1: wait for all workers within the stream (if any)
-  stream_.stop (true); // <-- wait for completion
+  // step1: stop, flush and wait for all workers within the stream (if any)
+  stream_.stop (false, // wait for completion
+                true); // lock ?
+  stream_.flush (true); // flush upstream (if any)
+  stream_.waitForCompletion (true, // wait for worker(s) (if any)
+                             true); // wait for upstream (if any)
 
   // step2: purge any pending writes ?
   Stream_Iterator_t iterator (stream_);
@@ -456,8 +460,21 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   result = inherited::handle_close (handle_in,
                                     mask_in);
   if (result == -1)
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
+  {
+    int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if ((error != ENOENT)                  && // 2   :
+        (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
+        (error != ERROR_IO_PENDING)        && // 997 :
+        (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
+#else
+    if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
+    if ((error != ENOENT)     && // 2  :
+        (error != EINPROGRESS))  // 115: happens on Linux
+#endif
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
+  } // end IF
 
   // step4: deregister with the connection manager (if any)
   if (inherited3::isRegistered_)
@@ -480,6 +497,10 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   //              reinterpret_cast<size_t> (handle_in)));
   //} // end IF
   //inherited::handle (handle_in); // debugging purposes only !
+
+  // *TODO*: remove type inference
+  if (inherited3::state_.status != NET_CONNECTION_STATUS_CLOSED)
+    inherited3::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
   return result;
 }
@@ -645,14 +666,25 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 //  ACE_UNUSED_ARG (arg_in);
   int result = -1;
 
-  // step1: shutdown i/o streams (cancel operations), close (write) socket handle
+  // step1: shutdown i/o streams (cancel operations), release (write) socket handle
   ACE_HANDLE handle = inherited::handle ();
   result = inherited::handle_close (handle,
                                     ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(): \"%m\", aborting\n")));
-                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(): \"%m\", continuing\n")));
+  {
+    int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if ((error != ENOENT)          && // 2
+        (error != ENOMEM)          && // 12 [server: local close()] *TODO*: ?
+        (error != ERROR_IO_PENDING))  // 997
+#else
+    if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
+    if ((error != ENOENT)     && // 2  :
+        (error != EINPROGRESS))  // 115: happens on Linux
+#endif
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(): \"%m\", continuing\n")));
+  } // end IF
 
   // *IMPORTANT NOTE*: wake up the open read operation; it will shutdown the
   //                   connection
@@ -876,9 +908,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     // connection closed/reset (by peer) ? --> not an error
     error = result_in.error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ERROR_NETNAME_DELETED)   && // 64  : peer close(), happens on Win32
-        (error != ERROR_OPERATION_ABORTED) && // 995 : local close(), happens in Win32
-        (error != ERROR_CONNECTION_ABORTED))  // 1236: local close(), happens on Win32
+    if ((error != ERROR_NETNAME_DELETED)   && // 64  : peer close()
+        (error != ERROR_OPERATION_ABORTED) && // 995 : local close()
+        (error != ERROR_CONNECTION_ABORTED))  // 1236: local close()
 #else
     if ((error != EBADF)     && // 9  : local close(), happens on Linux
         (error != EPIPE)     && // 32 : happens on Linux
@@ -897,9 +929,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if ((error != ERROR_NETNAME_DELETED)   && // 64  : peer close(), happens on Win32
-          (error != ERROR_OPERATION_ABORTED) && // 995 : local close(), happens in Win32
-          (error != ERROR_CONNECTION_ABORTED))  // 1236: local close(), happens on Win32
+      if ((error != ERROR_NETNAME_DELETED)   && // 64  : peer close()
+          (error != ERROR_OPERATION_ABORTED) && // 995 : local close()
+          (error != ERROR_CONNECTION_ABORTED))  // 1236: local close()
 #else
       if ((error != EBADF)     && // 9  : local close(), happens on Linux
           (error != EPIPE)     && // 32 : happens on Linux
@@ -964,8 +996,21 @@ close:
   result = handle_close (inherited::handle (),
                          ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
+  {
+    int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if ((error != ENOENT)                  && // 2   :
+        (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
+        (error != ERROR_IO_PENDING)        && // 997 :
+        (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
+#else
+    if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
+    if ((error != ENOENT)     && // 2  :
+        (error != EINPROGRESS))  // 115: happens on Linux
+#endif
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
+  } // end IF
 
   this->decrease ();
 }

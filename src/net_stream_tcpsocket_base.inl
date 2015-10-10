@@ -554,14 +554,21 @@ Net_StreamTCPSocketBase_T<HandlerType,
       // - connection reset by peer
       // - connection abort()ed locally
       int error = ACE_OS::last_error ();
-      if ((error != ECONNRESET) &&
-          (error != EPIPE)      && // <-- connection reset by peer
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (//(error != EPIPE)        && // 9    : write() on a close()d socket *TODO*
+          (error != ECONNABORTED) && // 10053: local close()
+          (error != ECONNRESET))     // 10054: peer closed the connection
+#else
+      if ((error != EPIPE)        && // <-- connection reset by peer
           // -------------------------------------------------------------------
-          (error != EBADF)      &&
-          (error != ENOTSOCK)   &&
-          (error != ECONNABORTED)) // <-- connection abort()ed locally
+          (error != EBADF)        &&
+          (error != ENOTSOCK)     &&
+          (error != ECONNABORTED) && // <-- connection abort()ed locally
+          (error != ECONNRESET)
+#endif
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Stream::recv(): \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to ACE_SOCK_Stream::recv(%d): \"%m\", aborting\n"),
+                    handle_in));
 
       // clean up
       currentReadBuffer_->release ();
@@ -573,7 +580,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
     case 0:
     {
 //       ACE_DEBUG ((LM_DEBUG,
-//                   ACE_TEXT ("[%u]: socket was closed by the peer...\n"),
+//                   ACE_TEXT ("[%d]: socket was closed by the peer...\n"),
 //                   handle_in));
 
       // clean up
@@ -585,7 +592,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
     default:
     {
 //       ACE_DEBUG ((LM_DEBUG,
-//                   ACE_TEXT ("[%u]: received %u bytes...\n"),
+//                   ACE_TEXT ("[%d]: received %u bytes...\n"),
 //                   handle_in,
 //                   bytes_received));
 
@@ -692,6 +699,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
     } // end IF
   } // end IF
   ACE_ASSERT (currentWriteBuffer_);
+  result = 0;
 
   // finished ?
   if (inherited2::configuration_.streamConfiguration.useThreadPerConnection &&
@@ -704,7 +712,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
     // clean up
     currentWriteBuffer_->release ();
     currentWriteBuffer_ = NULL;
-    result = -1; // <-- deregister
+
+    result = -1;
 
     goto release;
   } // end IF
@@ -731,18 +740,26 @@ Net_StreamTCPSocketBase_T<HandlerType,
       //         - connection reset by peer
       //         - connection abort()ed locally
       int error = ACE_OS::last_error ();
-      if ((error != ECONNRESET)   &&
-          (error != ECONNABORTED) &&
-          (error != EPIPE)        && // <-- connection reset by peer
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (//(error != EPIPE)        && // 9    : write() on a close()d socket *TODO*
+          (error != ECONNABORTED) && // 10053: local close()
+          (error != ECONNRESET))     // 10054: peer closed the connection
+#else
+      if ((error != EPIPE) && // <-- connection reset by peer
           // -------------------------------------------------------------------
-          (error != ENOTSOCK)     &&
-          (error != EBADF))          // <-- connection abort()ed locally
+          (error != EBADF) &&
+          (error != ENOTSOCK) &&
+          (error != ECONNABORTED) && // <-- connection abort()ed locally
+          (error != ECONNRESET)
+#endif
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SOCK_Stream::send_n(): \"%m\", aborting\n")));
 
       // clean up
       currentWriteBuffer_->release ();
       currentWriteBuffer_ = NULL;
+
+      result = -1;
 
       break;
     }
@@ -756,6 +773,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
       // clean up
       currentWriteBuffer_->release ();
       currentWriteBuffer_ = NULL;
+
+      result = -1;
 
       break;
     }
@@ -859,8 +878,12 @@ Net_StreamTCPSocketBase_T<HandlerType,
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
     {
-      // step1: wait for all workers within the stream (if any)
-      stream_.stop (true); // <-- wait for completion
+      // step1: stop, flush and wait for all workers within the stream (if any)
+      stream_.stop (false, // wait for completion
+                    true); // lock ?
+      stream_.flush (true); // flush upstream (if any)
+      stream_.waitForCompletion (true, // wait for worker(s) (if any)
+                                 true); // wait for upstream (if any)
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference

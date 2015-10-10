@@ -446,9 +446,9 @@ Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::numConnections () const
+                         UserDataType>::count () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::numConnections"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::count"));
 
   unsigned int result = 0;
 
