@@ -90,7 +90,7 @@ class Net_Connection_Manager_T
   virtual ICONNECTION_T* get (const AddressType&) const; // peer address
 
   virtual bool registerc (ICONNECTION_T*); // connection handle
-  virtual void deregister (ICONNECTION_T*); // connection handle
+  virtual bool deregister (ICONNECTION_T*); // connection handle
 
   virtual void abort ();
   virtual unsigned int count () const;

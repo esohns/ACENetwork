@@ -379,6 +379,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   //        behavior of a ACE_Svc_Handler, which would call handle_close() AGAIN
   // - by the connector when connect() fails (e.g. connection refused)
   // - by the connector/acceptor when open() fails (e.g. too many connections !)
+  inherited2::state_.status = NET_CONNECTION_STATUS_CLOSED;
 
   switch (arg_in)
   {
@@ -564,7 +565,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
           (error != EBADF)        &&
           (error != ENOTSOCK)     &&
           (error != ECONNABORTED) && // <-- connection abort()ed locally
-          (error != ECONNRESET)
+          (error != ECONNRESET))
 #endif
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SOCK_Stream::recv(%d): \"%m\", aborting\n"),
@@ -573,6 +574,10 @@ Net_StreamTCPSocketBase_T<HandlerType,
       // clean up
       currentReadBuffer_->release ();
       currentReadBuffer_ = NULL;
+
+      // *TODO*: remove type inference
+      if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+        inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
       return -1;
     }
@@ -586,6 +591,10 @@ Net_StreamTCPSocketBase_T<HandlerType,
       // clean up
       currentReadBuffer_->release ();
       currentReadBuffer_ = NULL;
+
+      // *TODO*: remove type inference
+      if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+        inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
       return -1;
     }
@@ -745,12 +754,12 @@ Net_StreamTCPSocketBase_T<HandlerType,
           (error != ECONNABORTED) && // 10053: local close()
           (error != ECONNRESET))     // 10054: peer closed the connection
 #else
-      if ((error != EPIPE) && // <-- connection reset by peer
+      if ((error != EPIPE)        && // <-- connection reset by peer
           // -------------------------------------------------------------------
-          (error != EBADF) &&
-          (error != ENOTSOCK) &&
+          (error != EBADF)        &&
+          (error != ENOTSOCK)     &&
           (error != ECONNABORTED) && // <-- connection abort()ed locally
-          (error != ECONNRESET)
+          (error != ECONNRESET))
 #endif
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SOCK_Stream::send_n(): \"%m\", aborting\n")));
@@ -758,6 +767,10 @@ Net_StreamTCPSocketBase_T<HandlerType,
       // clean up
       currentWriteBuffer_->release ();
       currentWriteBuffer_ = NULL;
+
+      // *TODO*: remove type inference
+      if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+        inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
       result = -1;
 
@@ -773,6 +786,10 @@ Net_StreamTCPSocketBase_T<HandlerType,
       // clean up
       currentWriteBuffer_->release ();
       currentWriteBuffer_ = NULL;
+
+      // *TODO*: remove type inference
+      if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+        inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
       result = -1;
 

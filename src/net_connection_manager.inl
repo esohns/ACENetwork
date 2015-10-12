@@ -376,7 +376,7 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
-void
+bool
 Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
@@ -405,13 +405,13 @@ Net_Connection_Manager_T<AddressType,
     } // end IF
   if (!found)
   {
-    // *IMPORTANT NOTE*: when a connection attempt fails, the reactor close()s
-    // the connection although it was never open()ed
+    // *NOTE*: most probably cause: handle already deregistered (--> check
+    //         implementation !)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection handle %@ not found (id was: %u), returning\n"),
-                connection_in,
-                connection_in->id ()));
-    return;
+                ACE_TEXT ("connection (id was: %u) handle (was: 0x%@) not found, aborting\n"),
+                connection_in->id (),
+                connection_in));
+    return false;
   } // end IF
   ACE_ASSERT (connection_p);
 
@@ -434,6 +434,8 @@ Net_Connection_Manager_T<AddressType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
   } // end IF
+
+  return true;
 }
 
 template <typename AddressType,

@@ -59,7 +59,7 @@ class Net_IConnectionManager_T
 
   // *NOTE*: 'register' is a reserved keyword
   virtual bool registerc (CONNECTION_T*) = 0; // connection handle
-  virtual void deregister (CONNECTION_T*) = 0; // connection handle
+  virtual bool deregister (CONNECTION_T*) = 0; // connection handle
 
   virtual void abort () = 0;
   virtual unsigned int count () const = 0; // return value: (current) number of connections
