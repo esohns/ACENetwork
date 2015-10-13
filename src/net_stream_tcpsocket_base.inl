@@ -617,11 +617,13 @@ Net_StreamTCPSocketBase_T<HandlerType,
   result = stream_.put (currentReadBuffer_);
   if (result == -1)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
+    int error = ACE_OS::last_error ();
+    if (error != ESHUTDOWN) // 10058: queue has been deactivate()d
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
 
     // clean up
-    currentReadBuffer_->release ();
+    //currentReadBuffer_->release ();
     currentReadBuffer_ = NULL;
 
     return -1;
@@ -699,8 +701,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
       //         - connection has been closed in the meantime
       //         - queue has been deactivated
       int error = ACE_OS::last_error ();
-      if ((error != EAGAIN) ||  // <-- connection has been closed
-          (error != ESHUTDOWN)) // <-- queue has been deactivated
+      if ((error != EAGAIN)   && // 11   : connection has been closed
+          (error != ESHUTDOWN))  // 10058: queue has been deactivated
         ACE_DEBUG ((LM_ERROR,
                     (inherited2::configuration_.streamConfiguration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
                                                                                            : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
@@ -896,10 +898,11 @@ Net_StreamTCPSocketBase_T<HandlerType,
                                              //     user abort
     {
       // step1: stop, flush and wait for all workers within the stream (if any)
-      stream_.stop (false, // wait for completion
-                    true); // lock ?
+      stream_.finished ();
+      //stream_.stop (false, // wait for completion
+      //              true); // lock ?
       stream_.flush (true); // flush upstream (if any)
-      stream_.waitForCompletion (true, // wait for worker(s) (if any)
+      stream_.waitForCompletion (true,  // wait for worker(s) (if any)
                                  true); // wait for upstream (if any)
 
       // step2: purge any pending (!) notifications ?
@@ -1250,7 +1253,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // step1: wait for the stream to flush
   //        --> all data has been dispatched (here: to the reactor/kernel)
   stream_.waitForCompletion (waitForThreads_in,
-                             true);
+                             true);             // wait for upstream ?
 
   // *TODO*: different platforms may implement methods by which successful
   //         placing of the data onto the wire can be established
