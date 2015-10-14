@@ -237,8 +237,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   // step3: start reading (need to pass any data ?)
   if (messageBlock_in.length () == 0)
   {
-    bool result = inherited::initiate_read_stream ();
-    if (!result)
+    if (!inherited::initiate_read_stream ())
     {
       int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -968,10 +967,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       } // end IF
 
       // start next read
-      bool result_2 = inherited::initiate_read_stream ();
-      if (!result_2)
+      if (!inherited::initiate_read_stream ())
       {
-        int error = ACE_OS::last_error ();
+        error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         if ((error != ENXIO)               && // 6 : happens on Win32
             (error != EFAULT)              && // 14: *TODO*: happens on Win32
@@ -997,7 +995,7 @@ close:
                          ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
   {
-    int error = ACE_OS::last_error ();
+    error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != ENOENT)                  && // 2   :
         (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?

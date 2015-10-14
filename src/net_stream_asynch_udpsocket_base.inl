@@ -1022,10 +1022,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       } // end IF
 
       // start next read
-      bool result_2 = inherited::initiate_read_dgram ();
-      if (!result_2)
+      if (!inherited::initiate_read_dgram ())
       {
-        int error = ACE_OS::last_error ();
+        error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         if ((error != ENXIO)               && // happens on Win32
             (error != EFAULT)              && // *TODO*: happens on Win32

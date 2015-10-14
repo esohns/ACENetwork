@@ -263,7 +263,7 @@ Net_TCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle_in,
                                              ACE_Event_Handler::DONT_CALL));
         if (result == -1)
         {
-          int error = ACE_OS::last_error ();
+          error = ACE_OS::last_error ();
           if ((mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) &&
               (error == ENOENT)) // <-- user abort during initialization
                                  //     (prior to registration)

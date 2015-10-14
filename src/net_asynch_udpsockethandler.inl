@@ -373,7 +373,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", aborting\n"),
                   result_in.handle (),
-                  ACE::sock_error (error)));
+                  ACE::sock_error (static_cast<int> (error))));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
@@ -398,7 +398,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", aborting\n"),
                     result_in.handle (),
-                    ACE::sock_error (error)));
+                    ACE::sock_error (static_cast<int> (error))));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),

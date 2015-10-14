@@ -154,7 +154,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                                     inherited::configuration_.socketConfiguration->linger,
                                     std::numeric_limits<unsigned short>::max ()))
   {
-    int error = ACE_OS::last_error ();
+    error = ACE_OS::last_error ();
     if (error != ENOTSOCK) // <-- socket has been closed asynchronously
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
@@ -240,6 +240,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::handle_close"));
 
+  ACE_UNUSED_ARG (handle_in);
   ACE_UNUSED_ARG (mask_in);
 
   int result = -1;
