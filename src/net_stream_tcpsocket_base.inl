@@ -898,7 +898,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                                              //     user abort
     {
       // step1: stop, flush and wait for all workers within the stream (if any)
-      stream_.finished ();
+      stream_.finished (true);
       //stream_.stop (false, // wait for completion
       //              true); // lock ?
       stream_.flush (true); // flush upstream (if any)
