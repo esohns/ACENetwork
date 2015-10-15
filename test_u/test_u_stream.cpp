@@ -29,17 +29,17 @@
 #include "net_macros.h"
 
 Net_Stream::Net_Stream ()
- : inherited ()
- , socketHandler_ (std::string("SocketHandler"),
+ : inherited (ACE_TEXT_ALWAYS_CHAR ("NetStream"))
+ , socketHandler_ (ACE_TEXT_ALWAYS_CHAR ("SocketHandler"),
                    NULL,
                    false)
- , headerParser_ (std::string("HeaderParser"),
+ , headerParser_ (ACE_TEXT_ALWAYS_CHAR ("HeaderParser"),
                   NULL,
                   false)
- , protocolHandler_ (std::string("ProtocolHandler"),
+ , protocolHandler_ (ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler"),
                      NULL,
                      false)
- , runtimeStatistic_ (std::string("RuntimeStatistic"),
+ , runtimeStatistic_ (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
                       NULL,
                       false)
 {
@@ -89,12 +89,7 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
   ACE_ASSERT (!inherited::isInitialized_);
 
   // allocate a new session state, reset stream
-  if (!inherited::initialize ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_Base_T::initialize(), aborting\n")));
-    return false;
-  } // end IF
+  inherited::initialize ();
 
   // things to be done here:
   // [- initialize base class]

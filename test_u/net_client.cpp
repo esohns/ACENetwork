@@ -169,7 +169,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-x [VALUE]   : #dispatch threads [")
-            << NET_CLIENT_DEF_NUM_DISPATCH_THREADS
+            << NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-y           : run stress-test [")
@@ -182,7 +182,7 @@ bool
 do_processArguments (int argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
                      bool& alternatingMode_out,
-                     unsigned int& maxNumConnections_out,
+                     unsigned int& maximumNumberOfConnections_out,
                      std::string& UIFile_out,
                      bool& useThreadPool_out,
                      unsigned int& connectionInterval_out,
@@ -208,7 +208,7 @@ do_processArguments (int argc_in,
 
   // initialize results
   alternatingMode_out = false;
-  maxNumConnections_out = NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS;
+  maximumNumberOfConnections_out = NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_UI_FILE_DIRECTORY);
@@ -225,7 +225,7 @@ do_processArguments (int argc_in,
   traceInformation_out = false;
   useUDP_out = false;
   printVersionAndExit_out = false;
-  numDispatchThreads_out = NET_CLIENT_DEF_NUM_DISPATCH_THREADS;
+  numDispatchThreads_out = NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS;
   runStressTest_out = false;
 
   ACE_Get_Opt argumentParser (argc_in,
@@ -252,7 +252,7 @@ do_processArguments (int argc_in,
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter << argumentParser.opt_arg ();
-        converter >> maxNumConnections_out;
+        converter >> maximumNumberOfConnections_out;
         break;
       }
       case 'g':
@@ -699,7 +699,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // *NOTE*: this variable needs to stay on the working stack, it's passed to
   //         the worker(s) (if any)
   bool use_reactor = useReactor_in;
-  if (!Common_Tools::startEventDispatch (use_reactor,
+  if (!Common_Tools::startEventDispatch (&use_reactor,
                                          numDispatchThreads_in,
                                          group_id))
   {
@@ -736,7 +736,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
                     &one_second));
-      if (NET_CONNECTIONMANAGER_SINGLETON::instance ()->numConnections () != 1)
+      if (NET_CONNECTIONMANAGER_SINGLETON::instance ()->count () != 1)
         result_2 = false;
     } // end IF
 
@@ -959,7 +959,7 @@ ACE_TMAIN (int argc_in,
   bool use_UDP = false;
   bool print_version_and_exit = false;
   unsigned int num_dispatch_threads =
-   NET_CLIENT_DEF_NUM_DISPATCH_THREADS;
+   NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS;
   bool run_stress_test = false;
 
   // step1b: parse/process/validate configuration

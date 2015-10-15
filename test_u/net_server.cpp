@@ -59,8 +59,6 @@
 #include "stream_allocatorheap.h"
 
 #include "net_common_tools.h"
-#include "net_configuration.h"
-#include "net_connection_manager_common.h"
 #include "net_macros.h"
 
 #include "net_server_common.h"
@@ -71,14 +69,15 @@
 #include "libacenetwork_config.h"
 #endif
 
-#include "net_callbacks.h"
-#include "net_common.h"
-#include "net_defines.h"
-#include "net_eventhandler.h"
-#include "net_module_eventhandler.h"
-
 #include "net_server_defines.h"
 #include "net_server_signalhandler.h"
+
+#include "test_u_callbacks.h"
+#include "test_u_common.h"
+#include "test_u_connection_manager_common.h"
+#include "test_u_defines.h"
+#include "test_u_eventhandler.h"
+#include "test_u_module_eventhandler.h"
 
 // globals
 unsigned int random_seed;
@@ -514,8 +513,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
-  configuration.streamConfiguration.userData = &configuration.streamUserData;
-  configuration.streamUserData.configuration = &configuration;
+  configuration.streamConfiguration.userData = &configuration.userData;
+  configuration.userData.configuration = &configuration;
   // ********************** socket configuration data **************************
   // ****************** socket handler configuration data **********************
   configuration.socketHandlerConfiguration.messageAllocator =
@@ -523,7 +522,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   configuration.socketHandlerConfiguration.socketConfiguration =
     &configuration.socketConfiguration;
   configuration.socketHandlerConfiguration.userData =
-    &configuration.streamUserData;
+    &configuration.userData;
 
   //  config.delete_module = false;
   // *WARNING*: set at runtime, by the appropriate connection handler
@@ -608,9 +607,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // step3: initialize connection manager
   NET_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (maximumNumberOfConnections_in);
-  Net_StreamUserData session_data;
+  Net_UserData user_data;
   NET_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
-                                                     &session_data);
+                                                     &user_data);
 
   // step4: handle events (signals, incoming connections/data, timers, ...)
   // reactor/proactor event loop:
@@ -666,7 +665,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // *NOTE*: this variable needs to stay on the working stack, it's passed to
   //         the worker(s) (if any)
   bool use_reactor = useReactor_in;
-  if (!Common_Tools::startEventDispatch (use_reactor,
+  if (!Common_Tools::startEventDispatch (&use_reactor,
                                          numberOfDispatchThreads_in,
                                          group_id))
   {

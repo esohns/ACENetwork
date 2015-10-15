@@ -51,7 +51,7 @@ struct IRC_Client_StreamSessionData
    : aborted (false)
    , connectionState (NULL)
    , currentStatistic ()
-   , lock ()
+   , lock (NULL)
    , sessionID (0)
    , startOfSession (ACE_Time_Value::zero)
   {};
@@ -61,7 +61,7 @@ struct IRC_Client_StreamSessionData
   IRC_Client_ConnectionState*   connectionState;
 
   IRC_Client_RuntimeStatistic_t currentStatistic;
-  ACE_SYNCH_MUTEX               lock;
+  ACE_SYNCH_MUTEX*              lock;
 
   unsigned int                  sessionID; // (== socket handle !)
   ACE_Time_Value                startOfSession;

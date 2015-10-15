@@ -23,6 +23,7 @@
 
 #include "ace/config-macros.h"
 #include "ace/OS_Memory.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_timer_manager_common.h"
 
@@ -414,7 +415,7 @@ IRC_Client_Module_IRCSplitter::handleSessionMessage (IRC_Client_SessionMessage*&
       ACE_ASSERT (session_data_p);
       ACE_ASSERT (inherited::streamState_);
       ACE_ASSERT (inherited::streamState_->currentSessionData);
-      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (inherited::streamState_->currentSessionData->lock);
+      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (*(inherited::streamState_->currentSessionData->lock));
       inherited::streamState_->currentSessionData->sessionID =
           session_data_p->sessionID;
 

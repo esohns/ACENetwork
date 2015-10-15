@@ -34,7 +34,7 @@
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 
-#include "net_configuration.h"
+//#include "net_configuration.h"
 
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
@@ -73,7 +73,7 @@ struct IRC_Client_SocketHandlerConfiguration
    //////////////////////////////////////
    , userData (NULL)
   {
-    bufferSize = IRC_CLIENT_BUFFER_SIZE;
+    PDUSize = IRC_CLIENT_BUFFER_SIZE;
   };
 
   IRC_Client_StreamUserData* userData;

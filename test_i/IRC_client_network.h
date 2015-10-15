@@ -167,6 +167,7 @@ typedef Net_IConnector_T<ACE_INET_Addr,
 //typedef Net_IConnector_T<ACE_INET_Addr,
 //                         IRC_Client_ConnectorConfiguration> IRC_Client_IConnector_t;
 typedef Net_Client_Connector_T<IRC_Client_TCPConnection_t,
+                               ACE_SOCK_CONNECTOR,
                                //////////
                                ACE_INET_Addr,
                                IRC_Client_Configuration,

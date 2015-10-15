@@ -31,7 +31,7 @@
 #include "test_u_defines.h"
 
 Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
-                                                      unsigned int maxNumConnections_in,
+                                                      unsigned int maximumNumberOfConnections_in,
                                                       const ACE_INET_Addr& remoteSAP_in,
                                                       Net_IConnector_t* connector_in)
  : inherited (NULL,                           // default reactor
@@ -39,7 +39,7 @@ Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
  , alternatingModeState_ (ALTERNATING_STATE_CONNECT)
  , connector_ (connector_in)
  , lock_ ()
- , maxNumConnections_ (maxNumConnections_in)
+ , maximumNumberOfConnections_ (maximumNumberOfConnections_in)
  , mode_ (mode_in)
  , peerAddress_ (remoteSAP_in)
  , randomSeed_ (0)
@@ -135,8 +135,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
     NET_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->lock ();
-  unsigned int num_connections =
-    connection_manager_p->numConnections ();
+  unsigned int number_of_connections = connection_manager_p->count ();
 
   {
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
@@ -145,7 +144,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
     {
       case ACTION_NORMAL:
       {
-        if (num_connections == 0)
+        if (number_of_connections == 0)
         {
           connection_manager_p->unlock ();
           return 0;
@@ -155,7 +154,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         // *PORTABILITY*: outside glibc, this is not very portable...
         // *TODO*: use STL funcionality instead
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
+        index = (ACE_OS::rand_r (&randomSeed_) % number_of_connections);
 #else
         result = ::random_r (&randomState_, &index);
         if (result == -1)
@@ -168,14 +167,14 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
 
           return -1;
         } // end IF
-        index = (index % num_connections);
+        index = (index % number_of_connections);
 #endif
         ping_connection_p = connection_manager_p->operator[] (index);
         if (!ping_connection_p)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
-                      index, num_connections));
+                      index, number_of_connections));
 
           // clean up
           connection_manager_p->unlock ();
@@ -195,8 +194,8 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
           {
             // sanity check: max num connections already reached ?
             // --> abort the oldest one first
-            if (maxNumConnections_ &&
-                (num_connections >= maxNumConnections_))
+            if (maximumNumberOfConnections_ &&
+                (number_of_connections >= maximumNumberOfConnections_))
               do_abort_oldest = true;
 
             do_connect = true;
@@ -206,14 +205,14 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
           case ALTERNATING_STATE_ABORT:
           {
             // sanity check
-            if (num_connections == 0)
+            if (number_of_connections == 0)
               break; // nothing to do...
 
             // grab a (random) connection handler
             // *PORTABILITY*: outside glibc, this is not very portable...
             // *TODO*: use STL funcionality instead
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-            index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
+            index = (ACE_OS::rand_r (&randomSeed_) % number_of_connections);
 #else
             result = ::random_r (&randomState_, &index);
             if (result == -1)
@@ -226,14 +225,14 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
 
               return -1;
             } // end IF
-            index = (index % num_connections);
+            index = (index % number_of_connections);
 #endif
             abort_connection_p = connection_manager_p->operator[] (index);
             if (!abort_connection_p)
             {
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
-                          index, num_connections));
+                          index, number_of_connections));
 
               // clean up
               connection_manager_p->unlock ();
@@ -272,7 +271,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         // allow some probability for closing connections in between
         float probability = static_cast<float> (randomGenerator_ ()) / 100.0F;
 
-        if ((num_connections > 0) &&
+        if ((number_of_connections > 0) &&
             (probability <= NET_CLIENT_U_TEST_ABORT_PROBABILITY))
           do_abort_youngest = true;
 
@@ -284,17 +283,17 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         // ping the server
 
         // sanity check
-        if ((num_connections == 0) ||
-            ((num_connections == 1) && do_abort_youngest))
+        if ((number_of_connections == 0) ||
+            ((number_of_connections == 1) && do_abort_youngest))
           break;
 
         // grab a (random) connection handler
         // *PORTABILITY*: outside glibc, this is not very portable...
         // *TODO*: use STL funcionality instead
-        //        std::uniform_int_distribution<int> distribution (0, num_connections - 1);
+        //        std::uniform_int_distribution<int> distribution (0, number_of_connections - 1);
         //        index = distribution (randomGenerator_);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        index = (ACE_OS::rand_r (&randomSeed_) % num_connections);
+        index = (ACE_OS::rand_r (&randomSeed_) % number_of_connections);
 #else
         result = ::random_r (&randomState_, &index);
         if (result == -1)
@@ -307,14 +306,14 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
 
           return -1;
         } // end IF
-        index = (index % num_connections);
+        index = (index % number_of_connections);
 #endif
         ping_connection_p = connection_manager_p->operator[] (index);
         if (!ping_connection_p)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
-                      index, num_connections));
+                      index, number_of_connections));
 
           // clean up
           connection_manager_p->unlock ();

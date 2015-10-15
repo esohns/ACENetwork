@@ -438,7 +438,7 @@ connection_setup_curses_function (void* arg_in)
                     ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
                     &delay));
 
-      if (connection_manager_p->numConnections () >= 1)
+      if (connection_manager_p->count () >= 1)
         break; // done
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
@@ -784,7 +784,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5a: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (configuration_in.useReactor,
+  if (!Common_Tools::startEventDispatch (&configuration_in.useReactor,
                                          numDispatchThreads_in,
                                          configuration_in.groupID))
   {
@@ -883,7 +883,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   Common_Tools::dispatchEvents (configuration_in.useReactor,
                                 configuration_in.groupID);
   // *NOTE*: awoken by the worker thread (see above)...
-  if (connection_manager_p->numConnections () < 1)
+  if (connection_manager_p->count () < 1)
   {
     // debug info
     ACE_TCHAR buffer[BUFSIZ];
@@ -911,7 +911,7 @@ do_work (IRC_Client_Configuration& configuration_in,
               ACE_TEXT ("connected...\n")));
 
   // step6b: dispatch events
-  if (!Common_Tools::startEventDispatch (configuration_in.useReactor,
+  if (!Common_Tools::startEventDispatch (&configuration_in.useReactor,
                                          numDispatchThreads_in,
                                          configuration_in.groupID))
   {

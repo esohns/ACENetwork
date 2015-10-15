@@ -22,7 +22,7 @@
 #include "IRC_client_gui_tools.h"
 
 #include "ace/Log_Msg.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_ui_defines.h"
 

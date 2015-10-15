@@ -23,7 +23,6 @@
 
 #include "stream_common.h"
 
-#define TEST_U_NET_COMMON_H
 #include "net_common.h"
 
 #include "test_u_configuration.h"

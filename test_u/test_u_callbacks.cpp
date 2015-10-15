@@ -1015,21 +1015,21 @@ button_ping_clicked_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (userData_in);
 
   // sanity check
-  unsigned int num_connections =
-    NET_CONNECTIONMANAGER_SINGLETON::instance ()->numConnections ();
-  if (num_connections == 0)
+  unsigned int number_of_connections =
+    NET_CONNECTIONMANAGER_SINGLETON::instance ()->count ();
+  if (number_of_connections == 0)
     return FALSE;
 
   // grab a (random) connection handler
   int index = 0;
   // *PORTABILITY*: outside glibc, this is not very portable...
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  index = ((::random () % num_connections) + 1);
+  index = ((::random () % number_of_connections) + 1);
 #else
   // *NOTE*: use ACE_OS::rand_r() for improved thread safety !
   //results_out.push_back((ACE_OS::rand() % range_in) + 1);
   unsigned int usecs = static_cast<unsigned int> (COMMON_TIME_NOW.usec ());
-  index = ((ACE_OS::rand_r (&usecs) % num_connections) + 1);
+  index = ((ACE_OS::rand_r (&usecs) % number_of_connections) + 1);
 #endif
 
   Net_InetConnectionManager_t::CONNECTION_T* connection_base_p =

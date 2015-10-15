@@ -441,7 +441,7 @@ do_initializeSignals (bool useReactor_in,
 
 void
 do_work (bool useThreadPool_in,
-         unsigned int numDispatchThreads_in,
+         unsigned int numberOfDispatchThreads_in,
          IRC_Client_GTK_CBData& userData_in,
          const std::string& UIDefinitionFile_in,
          const ACE_Sig_Set& signalSet_in,
@@ -488,8 +488,8 @@ do_work (bool useThreadPool_in,
 
   // step2: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (userData_in.configuration->useReactor,
-                                              (numDispatchThreads_in > 1),
-                                              numDispatchThreads_in,
+                                              (numberOfDispatchThreads_in > 1),
+                                              numberOfDispatchThreads_in,
                                               userData_in.configuration->streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -569,11 +569,8 @@ do_work (bool useThreadPool_in,
 
   // step6: initialize worker(s)
   int group_id = -1;
-  // *NOTE*: this variable needs to stay on the working stack, it's passed to
-  //         the worker(s) (if any)
-  bool use_reactor = userData_in.configuration->useReactor;
-  if (!Common_Tools::startEventDispatch (use_reactor,
-                                         numDispatchThreads_in,
+  if (!Common_Tools::startEventDispatch (&(userData_in.configuration->useReactor),
+                                         numberOfDispatchThreads_in,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,

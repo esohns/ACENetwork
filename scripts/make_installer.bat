@@ -29,12 +29,12 @@ if NOT "%1"=="Debug" if NOT "%1"=="Release" (
 )
 
 set NSISEXE="C:\Program Files (x86)\NSIS\makensis.exe"
-rem if NOT exist "%NSISEXE%" (
-rem echo invalid file ^(was: "%NSISEXE%"^)^, exiting
-rem  goto Failed
-rem )
+if NOT exist %NSISEXE% (
+echo invalid file ^(was: %NSISEXE%^)^, exiting
+goto Failed
+)
 
-set SOURCE_FILE="%~dp0\IRC_client.nsi"
+set SOURCE_FILE="%~dp0..\test_i\scripts\IRC_client.nsi"
 if NOT exist "%SOURCE_FILE%" (
  echo invalid file ^(was: "%SOURCE_FILE%"^)^, exiting
  goto Failed
@@ -50,12 +50,12 @@ if %ERRORLEVEL% NEQ 0 (
 echo generating installer...DONE
 
 @rem move generated file into the releases directory
-set TARGET_DIRECTORY="%~dp0..\..\releases"
+set TARGET_DIRECTORY="%~dp0..\releases"
 if NOT exist "%TARGET_DIRECTORY%" (
  echo invalid directory ^(was: "%TARGET_DIRECTORY%"^)^, exiting
  goto Failed
 )
-for /R "%~dp0" %%f in (*.exe) do (
+for /R "%~dp0..\test_i\scripts" %%f in (*.exe) do (
   move /Y "%%f" %TARGET_DIRECTORY% >NUL
   if %ERRORLEVEL% NEQ 0 (
     echo failed to move file^(s^)^, exiting
@@ -81,3 +81,4 @@ exit /b %1
 
 :Error_Level
 call :Exit_Code %RC%
+

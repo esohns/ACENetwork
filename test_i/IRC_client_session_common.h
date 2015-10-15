@@ -46,6 +46,7 @@
 #include "IRC_client_IRCsession.h"
 
 typedef Net_Client_Connector_T<IRC_Client_TCPConnection_t,
+                               ACE_SOCK_CONNECTOR,
                                //////////
                                ACE_INET_Addr,
                                IRC_Client_Configuration,
@@ -72,6 +73,7 @@ typedef IRC_Client_IRCSession_T<IRC_Client_TCPConnection_t> IRC_Client_IRCSessio
 typedef IRC_Client_IRCSession_T<IRC_Client_AsynchTCPConnection_t> IRC_Client_AsynchIRCSession_t;
 
 typedef Net_Client_Connector_T<IRC_Client_IRCSession_t,
+                               ACE_SOCK_CONNECTOR,
                                //////////
                                ACE_INET_Addr,
                                IRC_Client_Configuration,

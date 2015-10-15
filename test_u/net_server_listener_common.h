@@ -26,13 +26,13 @@
 #include "ace/Synch_Traits.h"
 
 #include "net_common.h"
-#include "net_configuration.h"
-#include "net_stream_common.h"
-#include "net_tcpconnection.h"
 
 #include "net_server_asynchlistener.h"
 //#include "net_server_common.h"
 #include "net_server_listener.h"
+
+#include "test_u_stream_common.h"
+#include "test_u_tcpconnection.h"
 
 // foward declarations
 class Net_Stream;
@@ -46,8 +46,9 @@ typedef Net_Server_AsynchListener_T<Net_AsynchTCPConnection,
                                     /////
                                     Net_SocketHandlerConfiguration,
                                     /////
-                                    Net_StreamUserData> Net_Server_AsynchListener_t;
+                                    Net_UserData> Net_Server_AsynchListener_t;
 typedef Net_Server_Listener_T<Net_TCPConnection,
+                              ACE_SOCK_ACCEPTOR,
                               ///////////
                               ACE_INET_Addr,
                               Net_ListenerConfiguration,
@@ -56,7 +57,7 @@ typedef Net_Server_Listener_T<Net_TCPConnection,
                               ///////////
                               Net_SocketHandlerConfiguration,
                               ///////////
-                              Net_StreamUserData> Net_Server_Listener_t;
+                              Net_UserData> Net_Server_Listener_t;
 
 typedef ACE_Singleton<Net_Server_AsynchListener_t,
                       ACE_Recursive_Thread_Mutex> NET_SERVER_ASYNCHLISTENER_SINGLETON;

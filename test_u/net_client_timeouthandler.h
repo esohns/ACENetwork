@@ -81,7 +81,7 @@ class Net_Client_TimeoutHandler
   AlternatingModeState_t             alternatingModeState_;
   Net_IConnector_t*                  connector_;
   mutable ACE_SYNCH_MUTEX            lock_;
-  unsigned int                       maxNumConnections_;
+  unsigned int                       maximumNumberOfConnections_;
   ActionMode_t                       mode_;
   ACE_INET_Addr                      peerAddress_;
   unsigned int                       randomSeed_;

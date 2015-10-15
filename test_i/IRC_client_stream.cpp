@@ -24,7 +24,7 @@
 #include <string>
 
 IRC_Client_Stream::IRC_Client_Stream ()
- : inherited ()
+ : inherited (ACE_TEXT_ALWAYS_CHAR ("IRCClientStream"))
  , IRCMarshal_ (ACE_TEXT_ALWAYS_CHAR ("IRCMarshal"),
                 NULL,
                 false)
@@ -79,12 +79,7 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   ACE_ASSERT (!isRunning ());
 
   // allocate a new session state, reset stream
-  if (!inherited::initialize ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_Base_T::initialize(), aborting\n")));
-    return false;
-  } // end IF
+  inherited::initialize ();
 
   // things to be done here:
   // - create modules (done for the ones "owned" by the stream itself)

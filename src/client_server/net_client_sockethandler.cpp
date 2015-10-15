@@ -144,7 +144,7 @@ Net_Client_SocketHandler::handle_input (ACE_HANDLE handle_in)
 
   switch (data.messageHeader.messageType)
   {
-    case Net_Remote_Comm::NET_PING:
+    case Net_Remote_Comm::NET_MESSAGE_PING:
     {
       // reply with a "PONG"
       Net_Remote_Comm::PongMessage reply;
@@ -152,7 +152,7 @@ Net_Client_SocketHandler::handle_input (ACE_HANDLE handle_in)
                       0,
                       sizeof (Net_Remote_Comm::PongMessage));
       reply.messageHeader.messageLength = sizeof (Net_Remote_Comm::PongMessage) - sizeof(unsigned long);
-      reply.messageHeader.messageType = Net_Remote_Comm::NET_PONG;
+      reply.messageHeader.messageType = Net_Remote_Comm::NET_MESSAGE_PONG;
 
       // step2: send it over the net...
       size_t bytes_sent = -1;
@@ -198,7 +198,7 @@ Net_Client_SocketHandler::handle_input (ACE_HANDLE handle_in)
 
       break;
     }
-    case Net_Remote_Comm::NET_PONG:
+    case Net_Remote_Comm::NET_MESSAGE_PONG:
     default:
     {
       ACE_DEBUG ((LM_ERROR,

@@ -24,9 +24,8 @@
 #include "ace/Global_Macros.h"
 #include "ace/Event_Handler.h"
 
-#include "stream_common.h"
+#include "net_common.h"
 
-#include "net_configuration.h"
 #include "net_tcpsockethandler.h"
 
 #include "net_client_exports.h"
@@ -48,8 +47,8 @@ class Net_Client_Export Net_Client_SocketHandler
  private:
   typedef Net_TCPSocketHandler_T<Net_SocketHandlerConfiguration> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_SocketHandler (const Net_Client_SocketHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_SocketHandler& operator= (const Net_Client_SocketHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_SocketHandler (const Net_Client_SocketHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_SocketHandler& operator= (const Net_Client_SocketHandler&))
 };
 
 #endif

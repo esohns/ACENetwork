@@ -9,8 +9,9 @@
 !searchparse /file "..\IRC_client_gui_defines.h" `#define IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY  "` CONFIGURATION_SUBDIR `"`
 !searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MAJOR], [` VER_MAJOR `])`
 !searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MINOR], [` VER_MINOR `])`
-!searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MACRO], [` VER_MICRO `])`
+!searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MICRO], [` VER_MICRO `])`
 !searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_DEVEL], [` DEVEL `])`
+!define PLATFORM "Win32"
 !define PROGRAM "IRC_client"
 !define SCRIPTS_SUBDIR "scripts"
 
@@ -21,9 +22,6 @@ LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
 Name ${PROGRAM}
 
 ; The file to write
-!searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MAJOR], [` VER_MAJOR `])`
-!searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MINOR], [` VER_MINOR `])`
-!searchparse /file "..\..\configure.ac" `m4_define([M4_LIBACENETWORK_VERSION_MICRO], [` VER_MICRO `])`
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" ${PROGRAM}
 VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "a IRC client"
 ;VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" ""
@@ -108,13 +106,17 @@ SetOutPath $INSTDIR
 !if ${release} == "Debug"
 ; *TODO*: remove this ASAP, it violates Microsoft's EULA (debug version only)
 ;File "D:\software\Develop\msvcr100d.dll"
-File "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\Debug_NonRedist\x86\Microsoft.VC120.DebugCRT\msvcr120d.dll"
-File "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\Debug_NonRedist\x86\Microsoft.VC120.DebugCRT\msvcp120d.dll"
-File "D:\projects\ATCD\ACE\lib\ACEd.dll"
+;File "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\Debug_NonRedist\x86\Microsoft.VC120.DebugCRT\msvcr120d.dll"
+;File "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\Debug_NonRedist\x86\Microsoft.VC120.DebugCRT\msvcp120d.dll"
+File "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\debug_nonredist\x86\Microsoft.VC140.DebugCRT\vcruntime140d.dll"
+File "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\debug_nonredist\x86\Microsoft.VC140.DebugCRT\msvcp140d.dll"
+File "D:\projects\ATCD\ACE\lib\${release}\${PLATFORM}\ACEd.dll"
 !else
-File "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\x86\Microsoft.VC120.CRT\msvcr120.dll"
-File "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\x86\Microsoft.VC120.CRT\msvcp120.dll"
-File "D:\projects\ATCD\ACE\lib\ACE.dll"
+;File "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\x86\Microsoft.VC120.CRT\msvcr120.dll"
+;File "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\x86\Microsoft.VC120.CRT\msvcp120.dll"
+File "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\vcruntime140.dll"
+File "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\msvcp140.dll"
+File "D:\projects\ATCD\ACE\lib\${release}\${PLATFORM}\ACE.dll"
 !endif
 
 ;File "D:\projects\SDL-1.2.15\VisualC\SDL\${release}\SDL.dll"
@@ -151,33 +153,33 @@ File "D:\projects\gtk\bin\zlib1.dll"
 
 File "D:\projects\libglade\bin\libglade-2.0-0.dll"
 
-File "G:\software\Development\libiconv-2.dll"
-File "G:\software\Development\libxml2-2.dll"
+File "F:\software\Development\libiconv-2.dll"
+File "F:\software\Development\libxml2-2.dll"
 
-File "..\..\prj\msvc\${release}\libCommon.dll"
-File "..\..\prj\msvc\${release}\libCommon_UI.dll"
-File "..\..\prj\msvc\${release}\libACEStream.dll"
-File "..\..\prj\msvc\${release}\libACENetwork.dll"
+File "..\..\prj\msvc\${release}\${PLATFORM}\libCommon.dll"
+File "..\..\prj\msvc\${release}\${PLATFORM}\libCommon_UI.dll"
+File "..\..\prj\msvc\${release}\${PLATFORM}\libACEStream.dll"
+File "..\..\prj\msvc\${release}\${PLATFORM}\libACENetwork.dll"
 ;File "..\..\prj\msvc\${release}\libACENetwork_Client.dll"
 
-File "..\..\prj\msvc\${release}\test_i_IRC_client_UI.exe"
+File "..\..\prj\msvc\${release}\${PLATFORM}\test_i_IRC_client_UI.exe"
 
 ; Config
 ; set output path to the configuration directory
 SetOutPath "$INSTDIR\${CONFIGURATION_SUBDIR}"
 
 ; Config - glade
-File "..\..\test_i\etc\IRC_client_channel.glade"
-File "..\..\test_i\etc\IRC_client_connection.glade"
-File "..\..\test_i\etc\IRC_client_main.glade"
+File "..\..\test_i\${CONFIGURATION_SUBDIR}\IRC_client_channel.glade"
+File "..\..\test_i\${CONFIGURATION_SUBDIR}\IRC_client_connection.glade"
+File "..\..\test_i\${CONFIGURATION_SUBDIR}\IRC_client_main.glade"
 
 ; Config - ini/rc
 ; set output path to the scripts directory
 ;SetOutPath "$APPDATA\${PROGRAM}"
 ;SetOutPath "$INSTDIR\${SCRIPTS_SUBDIR}"
-File "..\..\test_i\etc\IRC_client.ini"
-File "..\..\test_i\etc\IRC_client_phonebook.ini"
-File "..\..\test_i\etc\IRC_client.rc"
+File "..\..\test_i\${CONFIGURATION_SUBDIR}\IRC_client.ini"
+File "..\..\test_i\${CONFIGURATION_SUBDIR}\IRC_client_phonebook.ini"
+File "..\..\test_i\${CONFIGURATION_SUBDIR}\IRC_client.rc"
 
 ; Write the installation path into the registry
 WriteRegStr HKLM "SOFTWARE\${PROGRAM}" "Install_Dir" "$INSTDIR"

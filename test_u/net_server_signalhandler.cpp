@@ -35,8 +35,9 @@
 
 #include "common_ui_gtk_manager.h"
 
-#include "net_connection_manager_common.h"
 #include "net_macros.h"
+
+#include "test_u_connection_manager_common.h"
 
 Net_Server_SignalHandler::Net_Server_SignalHandler (bool useReactor_in)
  : inherited (this,          // event handler handle

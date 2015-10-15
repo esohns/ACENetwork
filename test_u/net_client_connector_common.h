@@ -54,6 +54,7 @@ typedef Net_Client_AsynchConnector_T<Net_AsynchTCPConnection,
                                      ////
                                      Net_UserData> Net_Client_AsynchConnector_t;
 typedef Net_Client_Connector_T<Net_TCPConnection,
+                               ACE_SOCK_CONNECTOR,
                                //////////
                                ACE_INET_Addr,
                                Net_Configuration,

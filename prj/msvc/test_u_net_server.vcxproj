@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,26 +22,29 @@
     <ProjectGuid>{B8422D9F-1595-4C6E-B6C4-F5A96E35AA80}</ProjectGuid>
     <RootNamespace>test_u_net_server</RootNamespace>
     <ProjectName>test_u_server</ProjectName>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -63,11 +66,21 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>$(SolutionDir)$(Configuration)_obj\$(ProjectName)\</IntDir>
+    <IntDir>$(SolutionDir)$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>$(SolutionDir)$(Configuration)_obj\$(ProjectName)\</IntDir>
+    <IntDir>$(SolutionDir)$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -126,10 +139,16 @@
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>E:\Yarp\Yarp</AdditionalIncludeDirectories>
     </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\libACEStream\prj\msvc\libACEStream.vcxproj">
@@ -152,45 +171,81 @@
     <None Include="..\..\test_u\etc\net_server.glade" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test_u\net_callbacks.cpp" />
     <ClCompile Include="..\..\test_u\net_client_timeouthandler.cpp" />
-    <ClCompile Include="..\..\test_u\net_eventhandler.cpp" />
-    <ClCompile Include="..\..\test_u\net_message.cpp" />
-    <ClCompile Include="..\..\test_u\net_module_eventhandler.cpp" />
-    <ClCompile Include="..\..\test_u\net_module_headerparser.cpp" />
-    <ClCompile Include="..\..\test_u\net_module_protocolhandler.cpp" />
-    <ClCompile Include="..\..\test_u\net_server.cpp" />
-    <ClCompile Include="..\..\test_u\net_server_signalhandler.cpp" />
-    <ClCompile Include="..\..\test_u\net_sessionmessage.cpp" />
-    <ClCompile Include="..\..\test_u\net_stream.cpp" />
-    <ClCompile Include="..\..\test_u\net_tcpconnection.cpp" />
+    <ClCompile Include="..\..\test_u\net_server.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\net_server_signalhandler.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\test_u\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\test_u\test_u_callbacks.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\test_u_eventhandler.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\test_u_message.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\test_u_module_eventhandler.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\test_u_module_headerparser.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\test_u_module_protocolhandler.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\test_u_sessionmessage.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\test_u_stream.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\test_u\test_u_tcpconnection.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\test_u\net_callbacks.h" />
     <ClInclude Include="..\..\test_u\net_client_timeouthandler.h" />
-    <ClInclude Include="..\..\test_u\net_common.h" />
-    <ClInclude Include="..\..\test_u\net_common_modules.h" />
-    <ClInclude Include="..\..\test_u\net_configuration.h" />
-    <ClInclude Include="..\..\test_u\net_connection_common.h" />
-    <ClInclude Include="..\..\test_u\net_connection_manager_common.h" />
-    <ClInclude Include="..\..\test_u\net_defines.h" />
-    <ClInclude Include="..\..\test_u\net_eventhandler.h" />
-    <ClInclude Include="..\..\test_u\net_message.h" />
-    <ClInclude Include="..\..\test_u\net_module_eventhandler.h" />
-    <ClInclude Include="..\..\test_u\net_module_headerparser.h" />
-    <ClInclude Include="..\..\test_u\net_module_protocolhandler.h" />
     <ClInclude Include="..\..\test_u\net_server_common.h" />
     <ClInclude Include="..\..\test_u\net_server_listener_common.h" />
     <ClInclude Include="..\..\test_u\net_server_signalhandler.h" />
-    <ClInclude Include="..\..\test_u\net_sessionmessage.h" />
-    <ClInclude Include="..\..\test_u\net_stream.h" />
-    <ClInclude Include="..\..\test_u\net_stream_common.h" />
-    <ClInclude Include="..\..\test_u\net_tcpconnection.h" />
     <ClInclude Include="..\..\test_u\stdafx.h" />
+    <ClInclude Include="..\..\test_u\test_u_callbacks.h" />
+    <ClInclude Include="..\..\test_u\test_u_common.h" />
+    <ClInclude Include="..\..\test_u\test_u_common_modules.h" />
+    <ClInclude Include="..\..\test_u\test_u_configuration.h" />
+    <ClInclude Include="..\..\test_u\test_u_connection_common.h" />
+    <ClInclude Include="..\..\test_u\test_u_connection_manager_common.h" />
+    <ClInclude Include="..\..\test_u\test_u_defines.h" />
+    <ClInclude Include="..\..\test_u\test_u_eventhandler.h" />
+    <ClInclude Include="..\..\test_u\test_u_message.h" />
+    <ClInclude Include="..\..\test_u\test_u_module_eventhandler.h" />
+    <ClInclude Include="..\..\test_u\test_u_module_headerparser.h" />
+    <ClInclude Include="..\..\test_u\test_u_module_protocolhandler.h" />
+    <ClInclude Include="..\..\test_u\test_u_sessionmessage.h" />
+    <ClInclude Include="..\..\test_u\test_u_socket_common.h" />
+    <ClInclude Include="..\..\test_u\test_u_stream.h" />
+    <ClInclude Include="..\..\test_u\test_u_stream_common.h" />
+    <ClInclude Include="..\..\test_u\test_u_tcpconnection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
