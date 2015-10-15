@@ -844,34 +844,34 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
 
 }
 
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-void
-Net_AsynchSocketConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 StreamType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
-                                 UserDataType>::open (ACE_HANDLE handle_in,
-                                                      ACE_Message_Block& messageBlock_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::open"));
-
-  // initialize/start stream, tweak socket, register reading data with the
-  // reactor, ...
-  inherited::open (handle_in,
-                   messageBlock_in);
-}
+//template <typename HandlerType,
+//          typename AddressType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename StreamType,
+//          typename SocketConfigurationType,
+//          typename HandlerConfigurationType,
+//          typename UserDataType>
+//void
+//Net_AsynchSocketConnectionBase_T<HandlerType,
+//                                 AddressType,
+//                                 ConfigurationType,
+//                                 StateType,
+//                                 StatisticContainerType,
+//                                 StreamType,
+//                                 SocketConfigurationType,
+//                                 HandlerConfigurationType,
+//                                 UserDataType>::open (ACE_HANDLE handle_in,
+//                                                      ACE_Message_Block& messageBlock_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::open"));
+//
+//  // initialize/start stream, tweak socket, register reading data with the
+//  // reactor, ...
+//  inherited::open (handle_in,
+//                   messageBlock_in);
+//}
 
 template <typename HandlerType,
           typename AddressType,

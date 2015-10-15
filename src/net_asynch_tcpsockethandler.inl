@@ -164,6 +164,21 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     goto close;
   } // end IF
 
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  COMMTIMEOUTS timeouts;
+//  ACE_OS::memset (&timeouts, 0, sizeof (COMMTIMEOUTS));
+//  if (!::GetCommTimeouts (handle_in,
+//                          &timeouts))
+//  {
+//    DWORD error = ::GetLastError ();
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to GetCommTimeouts(0x%@): \"%s\", aborting\n"),
+//                handle_in,
+//                ACE_TEXT (Common_Tools::error2String (error).c_str ())));
+//    goto close;
+//  } // end IF
+//#endif
+
   // step2: initialize i/o streams
   //Common_IRefCount* iref_count_p = this;
   //ACE_ASSERT (iref_count_p);
@@ -527,11 +542,12 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read_stream ()
   // start (asynchronous) read...
   int error = 0;
 receive:
-  result = inputStream_.read (*message_block_p,                     // buffer
-                              message_block_p->capacity (),         // bytes to read
-                              NULL,                                 // ACT
-                              0,                                    // priority
-                              COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+  result =
+    inputStream_.readv (*message_block_p,                     // buffer
+                        message_block_p->capacity (),         // bytes to read
+                        NULL,                                 // ACT
+                        0,                                    // priority
+                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
   if (result == -1)
   {
     error = ACE_OS::last_error ();
@@ -546,8 +562,8 @@ receive:
     if (error)
 #endif
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Asynch_Read_Stream::read(%u): \"%m\", aborting\n"),
-                  message_block_p->size ()));
+                  ACE_TEXT ("failed to ACE_Asynch_Read_Stream::readv(%u): \"%m\", aborting\n"),
+                  message_block_p->capacity ()));
 
     // clean up
     message_block_p->release ();

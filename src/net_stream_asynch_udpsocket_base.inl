@@ -186,11 +186,10 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                 ACE_TEXT ("failed to Net_SocketHandlerBase::initialize(): \"%m\", aborting\n")));
     goto error;
   } // end IF
-
   // step2b: tweak socket, initialize I/O
   inherited::open (inherited::handle (), messageBlock_in);
 
-  // step3: register with the connection manager (if any)
+  // step5: register with the connection manager (if any)
 #if defined (__GNUG__)
   if (!inherited4::registerc (this))
 #else
@@ -204,21 +203,19 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
   handle_manager = true;
 
-  // step4: initialize/start stream
+  // step3: initialize/start stream
 
-  // step4a: connect stream head message queue with a notification pipe/queue ?
+  // step3a: connect stream head message queue with a notification pipe/queue ?
   if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
     inherited4::configuration_.streamConfiguration.notificationStrategy =
       this;
 
   if (inherited4::configuration_.streamConfiguration.module)
   {
-    // step4b: initialize final module (if any)
+    // step3b: initialize final module (if any)
     if (inherited4::configuration_.streamConfiguration.cloneModule)
     {
-      IMODULE_T* imodule_p = NULL;
-      // need a downcast...
-      imodule_p =
+      IMODULE_T* imodule_p =
         dynamic_cast<IMODULE_T*> (inherited4::configuration_.streamConfiguration.module);
       if (!imodule_p)
       {
@@ -250,10 +247,10 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       inherited4::configuration_.streamConfiguration.deleteModule = true;
     } // end IF
 
-    // *TODO*: step4b: initialize final module
+    // *TODO*: step3c: initialize final module
   } // end IF
 
-  // step4c: initialize stream
+  // step3d: initialize stream
   // *TODO*: this clearly is a design glitch
   inherited4::configuration_.streamConfiguration.sessionID =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -274,7 +271,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       &const_cast<StateType&> (inherited4::state ());
   //stream_.dump_state ();
 
-  // step3d: start stream
+  // step3e: start stream
   stream_.start ();
   if (!stream_.isRunning ())
   {
@@ -337,8 +334,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
   if (inherited4::configuration_.socketConfiguration.writeOnly)
     this->decrease (); // float the connection (connection manager)
-  //ACE_ASSERT (this->count () == 2); // connection manager & read operation
-  //                                     (+ stream module(s))
+                       //ACE_ASSERT (this->count () == 2); // connection manager & read operation
+                       //                                     (+ stream module(s))
 
   inherited4::state_.status = NET_CONNECTION_STATUS_OK;
 
@@ -346,8 +343,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
 error:
   stream_.stop (true); // <-- wait for completion
-  if (handle_module                                         &&
-      inherited4::configuration_.streamConfiguration.module &&
+  if (handle_module                                              &&
+      inherited4::configuration_.streamConfiguration.module      &&
       inherited4::configuration_.streamConfiguration.deleteModule)
   {
     delete inherited4::configuration_.streamConfiguration.module;
@@ -367,8 +364,7 @@ error:
   if (handle_manager)
     inherited4::deregister (); // <-- should 'delete this'
 
-//  // *TODO*: remove type inference
-//  inherited4::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+  this->decrease ();
 }
 
 template <typename HandlerType,
@@ -431,13 +427,13 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 send:
   result_2 =
 //      inherited::outputStream_.send (buffer_,                                                    // data
-      inherited::outputStream_.send (message_block_p,                                            // data
-                                     bytes_to_send,                                              // #bytes to send
-                                     0,                                                          // flags
-                                     inherited4::configuration_.socketConfiguration.peerAddress, // remote address (ignored)
-                                     NULL,                                                       // ACT
-                                     0,                                                          // priority
-                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                       // signal
+    inherited::outputStream_.send (message_block_p,                                            // data
+                                   bytes_to_send,                                              // #bytes to send
+                                   0,                                                          // flags
+                                   inherited4::configuration_.socketConfiguration.peerAddress, // remote address (ignored)
+                                   NULL,                                                       // ACT
+                                   0,                                                          // priority
+                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                       // signal
   if (result_2 == -1)
   {
     error = ACE_OS::last_error ();

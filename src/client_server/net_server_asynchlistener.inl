@@ -26,7 +26,11 @@
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "ace/WIN32_Proactor.h"
+#else
 #include "ace/POSIX_Asynch_IO.h"
+#endif
 
 #include "common.h"
 #include "common_tools.h"
@@ -192,26 +196,82 @@ Net_Server_AsynchListener_T<HandlerType,
     return -1;
   } // end IF
 
-  // initiate asynchronous accepts
+//  // Create a new socket for the connection
+//  ACE_HANDLE accept_handle = ACE_INVALID_HANDLE;
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  accept_handle = ACE_OS::socket (configuration_.addressFamily, // domain
+//                                  SOCK_STREAM,                  // type
+//                                  0,                            // protocol
+//                                  NULL,                         // protocol info
+//                                  0,                            // group
+//                                  WSA_FLAG_OVERLAPPED);         // flags
+//  //if (accept_handle != ACE_INVALID_HANDLE)
+//  //{
+//  //  ACE_Proactor* proactor_p = ACE_Proactor::instance ();
+//  //  ACE_ASSERT (proactor_p);
+//  //  result = proactor_p->register_handle (accept_handle, NULL);
+//  //  if (result == -1)
+//  //  {
+//  //    ACE_DEBUG ((LM_ERROR,
+//  //                ACE_TEXT ("failed to ACE_Proactor::register_handle(0x%@): \"%m\", aborting\n"),
+//  //                accept_handle));
+//  //                  
+//  //    // clean up
+//  //    message_block_p->release ();
+//
+//  //    return -1;
+//  //  } // end IF
+//  //} // end IF
+//#else
+//  accept_handle = ACE_OS::socket (configuration_.addressFamily, // domain
+//                                  SOCK_STREAM,                  // type
+//                                  0);                           // protocol
+//#endif
+//  if (accept_handle == ACE_INVALID_HANDLE)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
+//                configuration_.addressFamily,
+//                SOCK_STREAM));
+//
+//    // clean up
+//    message_block_p->release ();
+//
+//    return -1;
+//  } // end IF
+
+  // Initiate asynchronous accept(s)
   ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
   ILISTENER_T* listener_p = this;
   const void* act_p = (act_in ? act_in : listener_p);
   // *TODO*: remove type inference
-  result = asynch_accept_r.accept (*message_block_p,
-                                   bytesToRead_in,
+  result = asynch_accept_r.accept (*message_block_p,                    // message block
+                                   bytesToRead_in,                      // bytes to read initially
+                                   //accept_handle,                       // new connection handle
                                    ACE_INVALID_HANDLE,
-                                   act_p,
-                                   0,
-                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL,
-                                   //this->addr_family_,
+                                   act_p,                               // ACT
+                                   0,                                   // priority
+                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL, // (real-time) signal
+                                   //this->addr_family_,                // address family
                                    configuration_.addressFamily);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Accept::accept(): \"%m\", aborting\n")));
 
-    // Cleanup on error
+    // clean up
     message_block_p->release ();
+//    result = ACE_OS::closesocket (accept_handle);
+//    if (result == -1)
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
+//                  accept_handle));
+//#else
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+//                  accept_handle));
+//#endif
 
     return -1;
   } // end IF
@@ -377,51 +437,50 @@ Net_Server_AsynchListener_T<HandlerType,
   // Create the listener socket
   // *NOTE*: some socket options need to be set before accept()ing
   //         --> set these here
-  ACE_HANDLE listen_handle = ACE_OS::socket (listenAddress_in.get_type (),
-                                             SOCK_STREAM,
-                                             0);
+  int address_type = listenAddress_in.get_type ();
+  ACE_HANDLE listen_handle = ACE_OS::socket (address_type, // domain
+                                             SOCK_STREAM,  // type
+                                             0);           // protocol
   if (listen_handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
-                listenAddress_in.get_type (), SOCK_STREAM));
+                address_type, SOCK_STREAM));
     return -1;
   } // end IF
   inherited::set_handle (listen_handle);
 
-//  // Initialize the ACE_Asynch_Accept
-//  bool close_accept = true;
-//  ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
-//  result = asynch_accept_r.open (*this,         // handler
-//                                 listen_handle, // socket handle
-//                                 NULL,          // completion key
-//                                 proactor_in);  // proactor handle
-//  if (result == -1)
-//  {
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Asynch_Accept::open(0x%@): \"%m\", aborting\n"),
-//                listen_handle));
-//#else
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Asynch_Accept::open(%d): \"%m\", aborting\n"),
-//                listen_handle));
-//#endif
-//
-//    close_accept = false;
-//
-//    goto close;
-//  } // end IF
+  // Initialize the ACE_Asynch_Accept
+  bool close_accept = false;
+  ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
+  result = asynch_accept_r.open (*this,         // handler
+                                 listen_handle, // socket handle
+                                 NULL,          // completion key
+                                 proactor_in);  // proactor handle
+  if (result == -1)
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Accept::open(0x%@): \"%m\", aborting\n"),
+                listen_handle));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Accept::open(%d): \"%m\", aborting\n"),
+                listen_handle));
+#endif
+    goto close;
+  } // end IF
+  close_accept = true;
 
   if (reuseAddr_in)
   {
     // Reuse the address
-    int one = 1;
+    int optval = 1;
     result = ACE_OS::setsockopt (listen_handle,
                                  SOL_SOCKET,
                                  SO_REUSEADDR,
-                                 reinterpret_cast<const char*> (&one),
-                                 sizeof one);
+                                 reinterpret_cast<const char*> (&optval),
+                                 sizeof (int));
     if (result == -1)
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -436,6 +495,20 @@ Net_Server_AsynchListener_T<HandlerType,
       goto close;
     } // end IF
   } // end IF
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // enable SIO_LOOPBACK_FAST_PATH on Win32
+  if ((address_type == ACE_ADDRESS_FAMILY_INET) &&
+      listenAddress_in.is_loopback ()           &&
+      NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
+    if (!Net_Common_Tools::setLoopBackFastPath (listen_handle))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setLoopBackFastPath(0x%@): \"%m\", aborting\n"),
+                  listen_handle));
+      goto close;
+    } // end IF
+#endif
 
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   result = listenAddress_in.addr_to_string (buffer,
@@ -449,60 +522,47 @@ Net_Server_AsynchListener_T<HandlerType,
   if (listenAddress_in == sa)
   //if (listenAddress_in.is_any ())
   {
-    result = ACE::bind_port (listen_handle,
-                             INADDR_ANY,
-                             listenAddress_in.get_type ());
+    result = ACE::bind_port (listen_handle, // handle
+                             INADDR_ANY,    // address
+                             address_type); // family
     if (result == -1)
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::bind_port(0x%@): \"%m\", aborting\n"),
-                  listen_handle));
+                  ACE_TEXT ("failed to ACE::bind_port(0x%@,%u,%d): \"%m\", aborting\n"),
+                  listen_handle,
+                  INADDR_ANY,
+                  address_type));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::bind_port(0x%@): \"%m\", aborting\n"),
-                  listen_handle));
+                  ACE_TEXT ("failed to ACE::bind_port(%d,%u,%d): \"%m\", aborting\n"),
+                  listen_handle,
+                  INADDR_ANY,
+                  address_type));
 #endif
       goto close;
     } // end IF
   } // end IF
-  else
-  {
-    // Bind to the specified port.
-    result = ACE_OS::bind (listen_handle,
-                           reinterpret_cast<sockaddr*> (listenAddress_in.get_addr ()),
-                           listenAddress_in.get_size ());
-    if (result == -1)
-    {
-  #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::bind(0x%@,\"%s\"): \"%m\" (errno was: %d), aborting\n"),
-                  listen_handle,
-                  buffer,
-                  errno));
-  #else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::bind(0x%@,\"%s\"): \"%m\", aborting\n"),
-                  listen_handle,
-                  buffer));
-  #endif
-      goto close;
-    } // end IF
-  } // end ELSE
 
+  // Bind to the specified port.
+  result =
+    ACE_OS::bind (listen_handle,                                              // handle
+                  reinterpret_cast<sockaddr*> (listenAddress_in.get_addr ()), // address (handle)
+                  listenAddress_in.get_size ());                              // address length
+  if (result == -1)
+  {
+    //int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  // enable SIO_LOOPBACK_FAST_PATH on Win32
-  if ((listenAddress_in.get_type () == ACE_ADDRESS_FAMILY_INET) &&
-      listenAddress_in.is_loopback ()                           &&
-      NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
-    if (!Net_Common_Tools::setLoopBackFastPath (listen_handle))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setLoopBackFastPath(0x%@): \"%m\", aborting\n"),
-                  listen_handle));
-      goto close;
-    } // end IF
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::bind(0x%@[\"%s\"]): \"%m\", aborting\n"),
+                listen_handle, buffer));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::bind(%d[\"%s\"]): \"%m\", aborting\n"),
+                listen_handle, buffer));
 #endif
+    goto close;
+  } // end IF
 
   // Start listening.
   result = ACE_OS::listen (listen_handle, backLog_in);
@@ -510,22 +570,23 @@ Net_Server_AsynchListener_T<HandlerType,
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::listen(0x%@,\"%s\"): \"%m\", aborting\n"),
-                listen_handle,
-                buffer));
+                ACE_TEXT ("failed to ACE_OS::listen(0x%@[\"%s\"],%d): \"%m\", aborting\n"),
+                listen_handle, buffer,
+                backLog_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::listen(0x%@,\"%s\"): \"%m\", aborting\n"),
-                listen_handle,
-                buffer));
+                ACE_TEXT ("failed to ACE_OS::listen(%d[\"%s\"],%d): \"%m\", aborting\n"),
+                listen_handle, buffer,
+                backLog_in));
 #endif
     goto close;
   } // end IF
 
   // For the number of <intial_accepts>.
-  if (numberOfInitialAccepts_in == -1)
-    numberOfInitialAccepts_in = backLog_in;
-  for (int i = 0; i < numberOfInitialAccepts_in; i++)
+  int nunber_of_initial_accepts = numberOfInitialAccepts_in;
+  if (nunber_of_initial_accepts == -1)
+    nunber_of_initial_accepts = backLog_in;
+  for (int i = 0; i < nunber_of_initial_accepts; i++)
   {
     // Initiate accepts.
     result = this->accept (numberOfBytesToRead_in, NULL);
@@ -537,7 +598,7 @@ Net_Server_AsynchListener_T<HandlerType,
                   listen_handle));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Server_AsynchListener_T::accept(0x%@): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to Net_Server_AsynchListener_T::accept(%d): \"%m\", aborting\n"),
                   listen_handle));
 #endif
       goto close;
@@ -549,20 +610,20 @@ Net_Server_AsynchListener_T<HandlerType,
 close:
   ACE_Errno_Guard errno_guard (errno);
 
-  //if (close_accept)
-  //{
-  //  result = asynch_accept_r.cancel ();
-  //  if (result == -1)
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to ACE_Asynch_Accept::cancel(): \"%m\", continuing\n")));
-  //} // end IF
+  if (close_accept)
+  {
+    result = asynch_accept_r.cancel ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Asynch_Accept::cancel(): \"%m\", continuing\n")));
+  } // end IF
 
   result = ACE_OS::closesocket (listen_handle);
   if (result == -1)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
-                reinterpret_cast<size_t> (listen_handle)));
+                ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
+                listen_handle));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
@@ -651,16 +712,15 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   int result = -1;
+
   // *TODO*: remove type inferences
   if (configuration_.useLoopBackDevice)
   {
     result =
         configuration_.address.set (configuration_.address.get_port_number (), // port
-                                    // *PORTABILITY*: needed to disambiguate this under Windows :-(
-                                    // *TODO*: bind to specific interface/address ?
-                                    ACE_LOCALHOST,                             // hostname
+                                    INADDR_LOOPBACK,                           // IP address
                                     1,                                         // encode ?
-                                    AF_INET);                                  // address family
+                                    0);                                        // map ?
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -703,7 +763,6 @@ Net_Server_AsynchListener_T<HandlerType,
               buffer));
 #endif
 
-  // all is well
   isListening_ = true;
 }
 

@@ -153,8 +153,9 @@ class Net_AsynchSocketConnectionBase_T
   virtual ~Net_AsynchSocketConnectionBase_T ();
 
   // override some ACE_Service_Handler members
-  virtual void open (ACE_HANDLE,          // handle
-                     ACE_Message_Block&); // (initial) data (if any)
+  using HandlerType::open;
+  //virtual void open (ACE_HANDLE,          // handle
+  //                   ACE_Message_Block&); // (initial) data (if any)
   virtual void act (const void*); // act
 
   // implement (part of) Net_ISocketConnection_T

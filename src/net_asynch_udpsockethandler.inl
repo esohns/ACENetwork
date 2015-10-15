@@ -316,23 +316,23 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::initiate_read_dgram ()
   int error = 0;
 receive:
   result =
-      inputStream_.recv (message_block_p,                      // buffer
-                         bytes_to_read,                        // #bytes to read
-                         0,                                    // flags
-                         ACE_PROTOCOL_FAMILY_INET,             // protocol family
-                         NULL,                                 // ACT
-                         0,                                    // priority
-                         COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+    inputStream_.recv (message_block_p,                      // buffer
+                       bytes_to_read,                        // #bytes to read
+                       0,                                    // flags
+                       ACE_PROTOCOL_FAMILY_INET,             // protocol family
+                       NULL,                                 // ACT
+                       0,                                    // priority
+                       COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
   if (result == -1)
   {
     error = ACE_OS::last_error ();
     // *WARNING*: this could fail on multi-threaded proactors
     if (error == EAGAIN) goto receive; // 11: happens on Linux
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENXIO)               && // happens on Win32
-        (error != EFAULT)              && // *TODO*: happens on Win32
-        (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
-        (error != ERROR_NETNAME_DELETED)) // happens on Win32
+    if ((error != ENXIO)                && // happens on Win32
+        (error != EFAULT)               && // *TODO*: happens on Win32
+        (error != ERROR_UNEXP_NET_ERR)  && // *TODO*: happens on Win32
+        (error != ERROR_NETNAME_DELETED))  // happens on Win32
 #else
     if (error)
 #endif

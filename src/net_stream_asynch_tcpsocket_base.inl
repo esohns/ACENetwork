@@ -83,18 +83,24 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   // *TODO*: remove type inferences
   if (inherited3::configuration_.streamConfiguration.module)
   {
-    Stream_Module_t* module_p =
-      stream_.find (inherited3::configuration_.streamConfiguration.module->name ());
-    if (module_p)
-    {
-      result =
-        stream_.remove (inherited3::configuration_.streamConfiguration.module->name (),
-                        ACE_Module_Base::M_DELETE_NONE);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    inherited3::configuration_.streamConfiguration.module->name ()));
-    } // end IF
+    //Stream_Module_t* module_p =
+    //  stream_.find (inherited3::configuration_.streamConfiguration.module->name ());
+    //if (!module_p)
+    //{
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to ACE_Stream::find(\"%s\"): \"%m\", continuing\n"),
+    //              inherited3::configuration_.streamConfiguration.module->name ()));
+    //  goto _continue;
+    //} // end IF
+    result =
+      stream_.remove (inherited3::configuration_.streamConfiguration.module->name (),
+                      ACE_Module_Base::M_DELETE_NONE);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
+                  inherited3::configuration_.streamConfiguration.module->name ()));
+
+//_continue:
     if (inherited3::configuration_.streamConfiguration.deleteModule)
       delete inherited3::configuration_.streamConfiguration.module;
   } // end IF
@@ -140,7 +146,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   inherited::open (handle_in, messageBlock_in);
   handle_socket = true;
 
-  // step2: register with the connection manager (if any)
+  // step4: register with the connection manager (if any)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (!inherited3::registerc ())
 #else
@@ -154,15 +160,15 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   } // end IF
   handle_manager = true;
 
-  // step3: initialize/start stream
+  // step2: initialize/start stream
 
-  // step3a: connect the stream head message queue with this handler ?
+  // step2a: connect the stream head message queue with this handler ?
   if (!inherited3::configuration_.streamConfiguration.useThreadPerConnection)
     inherited3::configuration_.streamConfiguration.notificationStrategy = this;
 
   if (inherited3::configuration_.streamConfiguration.module)
   {
-    // step3b: clone final module (if any) ?
+    // step2b: clone final module (if any) ?
     if (inherited3::configuration_.streamConfiguration.cloneModule)
     {
       IMODULE_T* imodule_p = NULL;
@@ -202,7 +208,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                   inherited3::configuration_.streamConfiguration.module->name ()));
     } // end IF
 
-    // *TODO*: step3b: initialize final module (if any)
+    // *TODO*: step2c: initialize final module (if any)
   } // end IF
 
   // *TODO*: remove type inferences
@@ -302,17 +308,14 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
 error:
   stream_.stop (true); // <-- wait for completion
-  if (handle_module                                         &&
-      inherited3::configuration_.streamConfiguration.module &&
+  if (handle_module                                              &&
+      inherited3::configuration_.streamConfiguration.module      &&
       inherited3::configuration_.streamConfiguration.deleteModule)
   {
     delete inherited3::configuration_.streamConfiguration.module;
     inherited3::configuration_.streamConfiguration.module = NULL;
     inherited3::configuration_.streamConfiguration.deleteModule = false;
   } // end IF
-
-  if (handle_manager)
-    inherited3::deregister ();
 
   if (handle_socket)
   {
@@ -322,6 +325,9 @@ error:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
   } // end IF
+
+  if (handle_manager)
+    inherited3::deregister ();
 
   this->decrease ();
 }
@@ -375,11 +381,11 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 send:
   //  if (inherited::outputStream_.write (*buffer_,               // data
   result =
-      inherited::outputStream_.write (*message_block_p,                     // data
-                                      message_block_p->length (),           // bytes to write
-                                      NULL,                                 // ACT
-                                      0,                                    // priority
-                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
+    inherited::outputStream_.writev (*message_block_p,                     // data
+                                     message_block_p->length (),           // bytes to write
+                                     NULL,                                 // ACT
+                                     0,                                    // priority
+                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
   if (result == -1)
   {
     error = ACE_OS::last_error ();
@@ -389,9 +395,9 @@ send:
         (error != ECONNRESET) && // 10054: happens on Win32
         (error != ENOTCONN))     // 10057: happens on Win32
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Asynch_Write_Stream::write(%u): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to ACE_Asynch_Write_Stream::writev(%u): \"%m\", aborting\n"),
 //               buffer_->size ()));
-                  message_block_p->size ()));
+                  message_block_p->length ()));
 
     // clean up
     message_block_p->release ();
