@@ -379,13 +379,21 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   // *NOTE*: this is a fire-and-forget API for message_block
   int error = 0;
 send:
-  //  if (inherited::outputStream_.write (*buffer_,               // data
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   result =
     inherited::outputStream_.writev (*message_block_p,                     // data
                                      message_block_p->length (),           // bytes to write
                                      NULL,                                 // ACT
                                      0,                                    // priority
                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
+#else
+  result =
+    inherited::outputStream_.write (*message_block_p,                     // data
+                                    message_block_p->length (),           // bytes to write
+                                    NULL,                                 // ACT
+                                    0,                                    // priority
+                                    COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
+#endif
   if (result == -1)
   {
     error = ACE_OS::last_error ();

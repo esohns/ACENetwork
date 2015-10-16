@@ -542,12 +542,21 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read_stream ()
   // start (asynchronous) read...
   int error = 0;
 receive:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   result =
     inputStream_.readv (*message_block_p,                     // buffer
                         message_block_p->capacity (),         // bytes to read
                         NULL,                                 // ACT
                         0,                                    // priority
                         COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+#else
+  result =
+    inputStream_.read (*message_block_p,                     // buffer
+                       message_block_p->capacity (),         // bytes to read
+                       NULL,                                 // ACT
+                       0,                                    // priority
+                       COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+#endif
   if (result == -1)
   {
     error = ACE_OS::last_error ();

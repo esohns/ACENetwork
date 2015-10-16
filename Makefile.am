@@ -4,7 +4,7 @@ SUBDIRS = \
   scripts \
   src
 if BUILD_MODULES
- SUBDIRS += modules
+  SUBDIRS += modules
 endif
 if TEST_SUPPORT
   SUBDIRS += test_u test_i
@@ -15,10 +15,12 @@ DIST_SUBDIRS = \
   m4 \
   po \
   scripts \
-  modules \
   src \
   test_u \
   test_i
+if BUILD_MODULES
+  DIST_SUBDIRS += modules
+endif
 
 EXTRA_DIST = \
   autogen.sh \

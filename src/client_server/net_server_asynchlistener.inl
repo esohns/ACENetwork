@@ -215,7 +215,7 @@ Net_Server_AsynchListener_T<HandlerType,
 //  //    ACE_DEBUG ((LM_ERROR,
 //  //                ACE_TEXT ("failed to ACE_Proactor::register_handle(0x%@): \"%m\", aborting\n"),
 //  //                accept_handle));
-//  //                  
+//  //
 //  //    // clean up
 //  //    message_block_p->release ();
 //
@@ -425,6 +425,8 @@ Net_Server_AsynchListener_T<HandlerType,
   int result = -1;
   static ACE_INET_Addr sa (ACE_sap_any_cast (const ACE_INET_Addr &));
   ACE_TCHAR buffer[BUFSIZ];
+  bool close_accept = false;
+  int nunber_of_initial_accepts = numberOfInitialAccepts_in;
 
   inherited::proactor (proactor_in);
   inherited::pass_addresses (passAddresses_in);
@@ -448,11 +450,15 @@ Net_Server_AsynchListener_T<HandlerType,
                 address_type, SOCK_STREAM));
     return -1;
   } // end IF
+  // *NOTE*: implicitly calls ACE_Asynch_Accept::open(),
+  //         see Asynch_Acceptor.cpp:183
   inherited::set_handle (listen_handle);
 
   // Initialize the ACE_Asynch_Accept
-  bool close_accept = false;
   ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
+  close_accept = true;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // *TODO*: is this really necessary  (see above) ?
   result = asynch_accept_r.open (*this,         // handler
                                  listen_handle, // socket handle
                                  NULL,          // completion key
@@ -470,7 +476,7 @@ Net_Server_AsynchListener_T<HandlerType,
 #endif
     goto close;
   } // end IF
-  close_accept = true;
+#endif
 
   if (reuseAddr_in)
   {
@@ -583,7 +589,6 @@ Net_Server_AsynchListener_T<HandlerType,
   } // end IF
 
   // For the number of <intial_accepts>.
-  int nunber_of_initial_accepts = numberOfInitialAccepts_in;
   if (nunber_of_initial_accepts == -1)
     nunber_of_initial_accepts = backLog_in;
   for (int i = 0; i < nunber_of_initial_accepts; i++)

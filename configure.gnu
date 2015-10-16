@@ -10,5 +10,6 @@ CONFIGURE=configure
 # sanity check(s)
 [ ! -x ${PWD}/${CONFIGURE} ] && echo "ERROR: executable configure script not found (was: \"${PWD}/${CONFIGURE}\"), aborting" && exit 1
 
+echo "invoking configure from configure.gnu..."
 ${PWD}/${CONFIGURE} $@ --disable-module-support
 

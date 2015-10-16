@@ -71,7 +71,7 @@ AM_PROG_AR
 LT_INIT
 
 # initialize other tools
-AM_INIT_AUTOMAKE([tar-ustar -Wall -Werror foreign])
+AM_INIT_AUTOMAKE([tar-ustar -Wall -Werror foreign subdir-objects])
 # build time sanity check...
 AM_SANITY_CHECK
 AM_XGETTEXT_OPTION([--language=C++])
