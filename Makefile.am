@@ -1,7 +1,5 @@
 SUBDIRS = \
-  3rd_party \
   po \
-  scripts \
   src
 if BUILD_MODULES
   SUBDIRS += modules
@@ -15,11 +13,12 @@ DIST_SUBDIRS = \
   m4 \
   po \
   scripts \
-  src \
-  test_u \
-  test_i
+  src
 if BUILD_MODULES
   DIST_SUBDIRS += modules
+endif
+if TEST_SUPPORT
+  DIST_SUBDIRS += test_u test_i
 endif
 
 EXTRA_DIST = \

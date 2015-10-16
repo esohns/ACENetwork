@@ -5,6 +5,7 @@
 m4_define([M4_LIBACENETWORK_VERSION_MAJOR], [0])
 m4_define([M4_LIBACENETWORK_VERSION_MINOR], [0])
 m4_define([M4_LIBACENETWORK_VERSION_MICRO], [1])
+dnl *TODO*: rpmbuild complains about the .spec file version string if it contains '-'
 #m4_define([M4_LIBACENETWORK_VERSION_DEVEL], [devel])
 m4_define([M4_LIBACENETWORK_VERSION],
           [M4_LIBACENETWORK_VERSION_MAJOR.M4_LIBACENETWORK_VERSION_MINOR.M4_LIBACENETWORK_VERSION_MICRO[]m4_ifset([M4_LIBACENETWORK_VERSION_DEVEL],-[M4_LIBACENETWORK_VERSION_DEVEL])])
@@ -231,6 +232,8 @@ AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 
 # checks for header files
+AM_COND_IF([VALGRIND_SUPPORT],
+           [AC_CHECK_HEADER([valgrind/valgrind.h])])
 AC_HEADER_STDBOOL
 #AC_CHECK_HEADERS([libintl.h])
 AC_CHECK_HEADERS([netinet/in.h])
@@ -267,6 +270,10 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_CONFIG_FILES([Makefile
                  3rd_party/Makefile
+                 3rd_party/ACE_wrappers/Makefile
+                 3rd_party/ACE_wrappers/ace/Makefile
+                 3rd_party/ACE_wrappers/include/Makefile
+                 3rd_party/ACE_wrappers/include/makeinclude/Makefile
                  3rd_party/bison/Makefile
                  m4/Makefile
                  po/Makefile.in
