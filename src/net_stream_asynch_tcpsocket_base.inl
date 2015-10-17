@@ -444,8 +444,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   int result = -1;
 
   // step1: stop, flush and wait for all workers within the stream (if any)
-  stream_.stop (false, // wait for completion
-                true); // lock ?
+  stream_.finished (true);
+//  stream_.stop (false, // wait for completion
+//                true); // lock ?
   stream_.flush (true); // flush upstream (if any)
   stream_.waitForCompletion (true, // wait for worker(s) (if any)
                              true); // wait for upstream (if any)
@@ -476,13 +477,14 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENOENT)                  && // 2   :
+    if ((error != ENOENT)                  && // 2   : *TODO*
         (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
         (error != ERROR_IO_PENDING)        && // 997 :
         (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
 #else
     if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
-    if ((error != ENOENT)     && // 2  :
+    if ((error != ENOENT)     && // 2  : *TODO*
+        (error != EBADF)      && // 9  : Linux [client: local close()]
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif
       ACE_ERROR ((LM_ERROR,
@@ -687,12 +689,13 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENOENT)          && // 2
-        (error != ENOMEM)          && // 12 [server: local close()] *TODO*: ?
-        (error != ERROR_IO_PENDING))  // 997
+    if ((error != ENOENT)          && // 2  : *TODO*
+        (error != ENOMEM)          && // 12 : [server: local close()] *TODO*: ?
+        (error != ERROR_IO_PENDING))  // 997:
 #else
     if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
-    if ((error != ENOENT)     && // 2  :
+    if ((error != ENOENT)     && // 2  : *TODO*
+        (error != EBADF)      && // 9  : Linux [client: local close()]
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif
       ACE_DEBUG ((LM_ERROR,
@@ -752,7 +755,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   //        --> stream data has been processed
 
   // step2: wait for the asynchronous operations to complete
-  inherited::counter_.wait (0);
+  if (inherited3::state_.status == NET_CONNECTION_STATUS_OK)
+    inherited::counter_.wait (0);
   //        --> all data has been dispatched to the kernel (socket)
 
   // *TODO*: different platforms may implement methods by which successful
@@ -760,9 +764,12 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   //         (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
 #if defined (ACE_LINUX)
   ACE_HANDLE handle = inherited::handle ();
-  bool no_delay = Net_Common_Tools::getNoDelay (handle);
-  Net_Common_Tools::setNoDelay (handle, true);
-  Net_Common_Tools::setNoDelay (handle, no_delay);
+  if (handle != ACE_INVALID_HANDLE)
+  {
+    bool no_delay = Net_Common_Tools::getNoDelay (handle);
+    Net_Common_Tools::setNoDelay (handle, true);
+    Net_Common_Tools::setNoDelay (handle, no_delay);
+  } // end IF
 #endif
 }
 

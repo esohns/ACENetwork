@@ -264,13 +264,13 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENOENT)                  && // 2   :
+    if ((error != ENOENT)                  && // 2   : *TODO*
         (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
         (error != ERROR_IO_PENDING)        && // 997 :
         (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
 #else
     if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
-    if ((error != ENOENT)     && // 2  :
+    if ((error != ENOENT)     && // 2  : *TODO*
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif
       ACE_DEBUG ((LM_ERROR,
@@ -282,13 +282,14 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENOENT)                  && // 2   :
+    if ((error != ENOENT)                  && // 2   : *TODO*
         (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
         (error != ERROR_IO_PENDING)        && // 997 :
         (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
 #else
     if (error == EINPROGRESS) result_2 = 0; // --> AIO_CANCELED
-    if ((error != ENOENT)     && // 2  :
+    if ((error != ENOENT)     && // 2  : *TODO*
+        (error != EBADF)      && // 9  : Linux [client: local close()]
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif
       ACE_DEBUG ((LM_ERROR,
@@ -513,8 +514,21 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
     result = handle_close (inherited2::handle (),
                            ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
+    {
+      int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if ((error != ENOENT)          && // 2  : *TODO*
+          (error != ENOMEM)          && // 12 : [server: local close()] *TODO*: ?
+          (error != ERROR_IO_PENDING))  // 997:
+#else
+      if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
+      if ((error != ENOENT)     && // 2  : *TODO*
+          (error != EBADF)      && // 9  : Linux [client: local close()]
+          (error != EINPROGRESS))  // 115: happens on Linux
+#endif
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
+    } // end IF
   } // end IF
 
   counter_.decrease ();
