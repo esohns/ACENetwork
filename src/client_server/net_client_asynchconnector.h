@@ -25,6 +25,8 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
+#include "stream_statemachine_control.h"
+
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -63,6 +65,7 @@ class Net_Client_AsynchConnector_T
                                   StateType,
                                   StatisticContainerType,
                                   StreamType,
+                                  Stream_StateMachine_ControlState,
                                   ///////
                                   Net_SocketConfiguration,
                                   ///////
@@ -73,6 +76,8 @@ class Net_Client_AsynchConnector_T
                                    StatisticContainerType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
+  typedef Net_IConnector_T<AddressType,
+                           HandlerConfigurationType> INTERFACE_T;
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                 unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
@@ -185,6 +190,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                   StateType,
                                   StatisticContainerType,
                                   StreamType,
+                                  Stream_StateMachine_ControlState,
                                   ///////
                                   Net_SocketConfiguration,
                                   ///////
@@ -205,6 +211,8 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                         HandlerConfigurationType,
 
                                         UserDataType> CONNECTION_T;
+  typedef Net_IConnector_T<ACE_INET_Addr,
+                           HandlerConfigurationType> INTERFACE_T;
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                 unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
@@ -304,6 +312,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                   StateType,
                                   StatisticContainerType,
                                   StreamType,
+                                  Stream_StateMachine_ControlState,
                                   ///////
                                   Net_SocketConfiguration,
                                   ///////
@@ -314,6 +323,8 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    StatisticContainerType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
+  typedef Net_IConnector_T<Net_Netlink_Addr,
+                           HandlerConfigurationType> INTERFACE_T;
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*, // connection manager handle
                                 unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]

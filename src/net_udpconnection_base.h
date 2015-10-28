@@ -27,6 +27,8 @@
 #include "ace/INET_Addr.h"
 #include "ace/SOCK_Connector.h"
 
+#include "stream_statemachine_control.h"
+
 #include "net_iconnectionmanager.h"
 #include "net_socketconnection_base.h"
 #include "net_transportlayer_udp.h"
@@ -49,6 +51,7 @@ class Net_UDPConnectionBase_T
                                      StateType,
                                      StatisticContainerType,
                                      StreamType,
+                                     Stream_StateMachine_ControlState,
                                      ////
                                      Net_SocketConfiguration,
                                      ////
@@ -109,6 +112,7 @@ class Net_UDPConnectionBase_T
                                      StateType,
                                      StatisticContainerType,
                                      StreamType,
+                                     Stream_StateMachine_ControlState,
                                      ////
                                      Net_SocketConfiguration,
                                      HandlerConfigurationType,
@@ -144,6 +148,7 @@ class Net_AsynchUDPConnectionBase_T
                                            StateType,
                                            StatisticContainerType,
                                            StreamType,
+                                           Stream_StateMachine_ControlState,
 
                                            Net_SocketConfiguration,
 
@@ -191,6 +196,7 @@ class Net_AsynchUDPConnectionBase_T
                                            StateType,
                                            StatisticContainerType,
                                            StreamType,
+                                           Stream_StateMachine_ControlState,
 
                                            Net_SocketConfiguration,
 

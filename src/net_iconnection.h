@@ -71,14 +71,14 @@ class Net_IConnection_T
   //         encapsulate most of the TCP/UDP protocol functionality, this API
   //         represents the appropriate asynchronous means to ensure that the
   //         forwarded data has in fact been transmitted successfully
-  // *IMPORTANT NOTE*: (As far as yours truly (???) is aware) the Berkeley
+  // *IMPORTANT NOTE*: (As far as yours truly (???) is aware) the (Berkeley)
   //                   sockets API does not in any way guarantee successful
   //                   transmission of the data from (!) the socket buffers
-  //                   (this 'feature' may already be protocol-specific ?); the
+  //                   (this feature may already be protocol-specific ?); the
   //                   send()-man pages do not clear things either, leaving
   //                   network data delivery shrouded in mystery.
   //                   In this sense the more platform-specific, asynchronous
-  //                   APIs, supported by the 'proactive' framework(s), may
+  //                   APIs, as supported by the 'proactive' framework(s), may
   //                   offer more 'reliable', protocol-agnostic results (again,
   //                   YMMV).
   //                   For the reactor based, blocking (!) API, this could be a
@@ -92,6 +92,7 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
+          typename StreamStatusType,
           ///////////////////////////////
           typename SocketConfigurationType,
           ///////////////////////////////
@@ -128,6 +129,9 @@ class Net_ISocketConnection_T
   virtual ~Net_ISocketConnection_T () {};
 
   virtual const StreamType& stream () const = 0;
+
+  virtual bool wait (StreamStatusType,
+                     const ACE_Time_Value* = NULL) = 0; // timeout (absolute) ? : block
 
   // *TODO*: see above
   virtual const HandlerConfigurationType& get () = 0;

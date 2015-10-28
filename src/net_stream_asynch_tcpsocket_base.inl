@@ -153,7 +153,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   if (!inherited3::registerc (this))
 #endif
   {
-    // *NOTE*: perhaps max# connections has been reached
+    // *NOTE*: (most probably) maximum number of connections has been reached
     //ACE_DEBUG ((LM_ERROR,
     //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
     goto error;
@@ -358,14 +358,16 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   int result = -1;
   ACE_Message_Block* message_block_p = NULL;
+  Stream_Base_t* stream_p = (stream_.upStream () ? stream_.upStream ()
+                                                 : &stream_);
 //  if (buffer_ == NULL)
 //  {
   // send next data chunk from the stream...
   // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
   // been notified
 //  result = stream_.get (buffer_, &ACE_Time_Value::zero);
-  result = stream_.get (message_block_p,
-                        &const_cast<ACE_Time_Value&> (ACE_Time_Value::zero));
+  result = stream_p->get (message_block_p,
+                          &const_cast<ACE_Time_Value&> (ACE_Time_Value::zero));
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -485,6 +487,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
     if ((error != ENOENT)     && // 2  : *TODO*
         (error != EBADF)      && // 9  : Linux [client: local close()]
+        (error != EPIPE)      && // 32 : Linux [client: remote close()]
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif
       ACE_ERROR ((LM_ERROR,
@@ -696,6 +699,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
     if ((error != ENOENT)     && // 2  : *TODO*
         (error != EBADF)      && // 9  : Linux [client: local close()]
+        (error != EPIPE)      && // 32 : Linux [client: remote close()]
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif
       ACE_DEBUG ((LM_ERROR,
@@ -1025,6 +1029,7 @@ close:
 #else
     if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
     if ((error != ENOENT)     && // 2  :
+        (error != EPIPE)      && // 32 : Linux [client: remote close()]
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif
     ACE_DEBUG ((LM_ERROR,

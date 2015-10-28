@@ -235,14 +235,14 @@ Net_ConnectionBase_T<AddressType,
     // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("registered connection [0x%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
+                ACE_TEXT ("registered connection [0x%@/%u]: %s <--> %s (total: %d)\n"),
                 this, reinterpret_cast<size_t> (handle),
                 ACE_TEXT (local_address_string.c_str ()),
                 buffer,
                 manager_->count ()));
 #else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("registered connection [0x%@/%d]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
+                ACE_TEXT ("registered connection [0x%@/%d]: %s <--> %s (total: %d)\n"),
                 this, handle,
                 ACE_TEXT (local_address_string.c_str ()),
                 buffer,

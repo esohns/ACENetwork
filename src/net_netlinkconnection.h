@@ -27,6 +27,8 @@
 #include "ace/Global_Macros.h"
 #include "ace/SOCK_Connector.h"
 
+#include "stream_statemachine_control.h"
+
 #include "net_common.h"
 #include "net_iconnectionmanager.h"
 #include "net_netlinksockethandler.h"
@@ -53,6 +55,7 @@ class Net_NetlinkConnection_T
                                      StateType,
                                      StatisticContainerType,
                                      StreamType,
+                                     Stream_StateMachine_ControlState,
                                      ////
                                      Net_SocketConfiguration,
                                      ////
@@ -115,6 +118,7 @@ class Net_NetlinkConnection_T
                                      StateType,
                                      StatisticContainerType,
                                      StreamType,
+                                     Stream_StateMachine_ControlState,
                                      ////
                                      Net_SocketConfiguration,
                                      ////
@@ -150,6 +154,7 @@ class Net_AsynchNetlinkConnection_T
                                            StateType,
                                            StatisticContainerType,
                                            StreamType,
+                                           Stream_StateMachine_ControlState,
                                            ////
                                            Net_SocketConfiguration,
                                            ////
@@ -212,6 +217,7 @@ class Net_AsynchNetlinkConnection_T
                                            StateType,
                                            StatisticContainerType,
                                            StreamType,
+                                           Stream_StateMachine_ControlState,
                                            ////
                                            Net_SocketConfiguration,
                                            ////

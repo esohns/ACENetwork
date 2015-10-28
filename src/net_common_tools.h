@@ -43,8 +43,10 @@ class Net_Export Net_Common_Tools
 
 //   static const bool selectNetworkInterface(const std::string&, // default interface identifier
 //                                            std::string&);      // return value: interface identifier
-  static bool getIPAddress (const std::string&, // interface identifier
-                            std::string&);      // return value: IP address (dotted-decimal)
+  static bool getInterfaceIPAddress (const std::string&, // interface identifier
+                                     std::string&);      // return value: IP address (dotted-decimal)
+  static bool getAddress (std::string&,  // host name
+                          std::string&); // dotted-decimal
   static bool getHostname (std::string&); // return value: hostname
   static bool setSocketBuffer (ACE_HANDLE, // socket handle
                                int,        // option (SO_RCVBUF || SO_SNDBUF)

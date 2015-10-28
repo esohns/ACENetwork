@@ -24,7 +24,8 @@
 #include "ace/Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
-//#include "ace/SOCK_Connector.h"
+
+#include "stream_statemachine_control.h"
 
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
@@ -65,6 +66,7 @@ class Net_Client_Connector_T
                                   StateType,
                                   StatisticContainerType,
                                   StreamType,
+                                  Stream_StateMachine_ControlState,
                                   ///////
                                   Net_SocketConfiguration,
                                   ///////
@@ -163,6 +165,7 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                   StateType,
                                   StatisticContainerType,
                                   StreamType,
+                                  Stream_StateMachine_ControlState,
                                   ///////
                                   Net_SocketConfiguration,
                                   ///////
@@ -285,6 +288,7 @@ class Net_Client_Connector_T<HandlerType,
                                   StateType,
                                   StatisticContainerType,
                                   StreamType,
+                                  Stream_StateMachine_ControlState,
                                   ///////
                                   Net_SocketConfiguration,
                                   ///////

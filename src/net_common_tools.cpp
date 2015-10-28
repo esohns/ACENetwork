@@ -550,10 +550,10 @@ Net_Common_Tools::EthernetProtocolTypeID2String (unsigned short frameType_in)
 // }
 
 bool
-Net_Common_Tools::getIPAddress (const std::string& interfaceIdentifier_in,
-                                std::string& IPaddress_out)
+Net_Common_Tools::getInterfaceIPAddress (const std::string& interfaceIdentifier_in,
+                                         std::string& IPaddress_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getIPAddress"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getInterfaceIPAddress"));
 
   ACE_UNUSED_ARG (interfaceIdentifier_in);
 
@@ -644,6 +644,86 @@ Net_Common_Tools::getIPAddress (const std::string& interfaceIdentifier_in,
 
   // clean up
   delete [] addr_array;
+
+  return true;
+}
+
+bool
+Net_Common_Tools::getAddress (std::string& hostName_inout,
+                              std::string& dottedDecimal_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getAddress"));
+
+//  struct hostent host, *result_p;
+//  ACE_OS::memset (&host, 0, sizeof (struct hostent));
+//  ACE_HOSTENT_DATA buffer;
+//  ACE_OS::memset (buffer, 0, sizeof (ACE_HOSTENT_DATA));
+//  int error = 0;
+
+  int result = -1;
+  ACE_INET_Addr inet_address;
+  ACE_TCHAR buffer[MAXHOSTNAMELEN];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+
+  if (hostName_inout.empty ())
+  {
+    // sanity check
+    if (dottedDecimal_inout.empty ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid arguments (hostname/address empty), aborting\n")));
+      return false;
+    } // end IF
+
+    result = inet_address.set (dottedDecimal_inout.c_str (), AF_INET);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT (dottedDecimal_inout.c_str ())));
+      return false;
+    } // end IF
+
+    result = inet_address.get_host_name (buffer, sizeof (buffer));
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::get_host_name(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT (dottedDecimal_inout.c_str ())));
+      return false;
+    } // end IF
+
+    dottedDecimal_inout = buffer;
+  } // end IF
+  else
+  {
+    result = inet_address.set (0,
+                               hostName_inout.c_str (),
+                               1,
+                               AF_INET);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT (hostName_inout.c_str ())));
+      return false;
+    } // end IF
+
+    const char* result_p = inet_address.get_host_addr (buffer, sizeof (buffer));
+    if (!result_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::get_host_addr(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT (hostName_inout.c_str ())));
+      return false;
+    } // end IF
+
+    dottedDecimal_inout = buffer;
+  } // end ELSE
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("\"%s\" <--> %s\n"),
+  //            ACE_TEXT (hostName_inout.c_str ()),
+  //            ACE_TEXT (dottedDecimal_inout.c_str ())));
 
   return true;
 }

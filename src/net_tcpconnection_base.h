@@ -30,6 +30,8 @@
 #include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Connector.h"
 
+#include "stream_statemachine_control.h"
+
 #include "net_iconnectionmanager.h"
 #include "net_sock_acceptor.h"
 #include "net_sock_connector.h"
@@ -54,6 +56,7 @@ class Net_TCPConnectionBase_T
                                      StateType,
                                      StatisticContainerType,
                                      StreamType,
+                                     Stream_StateMachine_ControlState,
                                      ////
                                      Net_SocketConfiguration,
                                      ////
@@ -121,6 +124,7 @@ class Net_TCPConnectionBase_T
                                      StateType,
                                      StatisticContainerType,
                                      StreamType,
+                                     Stream_StateMachine_ControlState,
                                      ////
                                      Net_SocketConfiguration,
                                      HandlerConfigurationType,
@@ -156,6 +160,7 @@ class Net_AsynchTCPConnectionBase_T
                                            StateType,
                                            StatisticContainerType,
                                            StreamType,
+                                           Stream_StateMachine_ControlState,
 
                                            Net_SocketConfiguration,
 
@@ -205,6 +210,7 @@ class Net_AsynchTCPConnectionBase_T
                                            StateType,
                                            StatisticContainerType,
                                            StreamType,
+                                           Stream_StateMachine_ControlState,
 
                                            Net_SocketConfiguration,
 

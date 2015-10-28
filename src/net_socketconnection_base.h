@@ -39,6 +39,7 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
+          typename StreamStatusType,
           ///////////////////////////////
           typename SocketConfigurationType,
           ///////////////////////////////
@@ -52,6 +53,7 @@ class Net_SocketConnectionBase_T
                                   StateType,
                                   StatisticContainerType,
                                   StreamType,
+                                  StreamStatusType,
                                   ///////
                                   SocketConfigurationType,
                                   ///////
@@ -69,6 +71,8 @@ class Net_SocketConnectionBase_T
   virtual bool send (ACE_Message_Block*&);
   //virtual const HandlerConfigurationType& get () const;
   virtual const StreamType& stream () const;
+  virtual bool wait (StreamStatusType,
+                     const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
   virtual const HandlerConfigurationType& get ();
   virtual bool initialize (const HandlerConfigurationType&); // handler configuration
 
@@ -131,6 +135,7 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
+          typename StreamStatusType,
           ///////////////////////////////
           typename SocketConfigurationType,
           ///////////////////////////////
@@ -144,6 +149,7 @@ class Net_AsynchSocketConnectionBase_T
                                   StateType,
                                   StatisticContainerType,
                                   StreamType,
+                                  StreamStatusType,
                                   ///////
                                   SocketConfigurationType,
                                   ///////
@@ -162,6 +168,8 @@ class Net_AsynchSocketConnectionBase_T
   virtual bool send (ACE_Message_Block*&);
   //virtual const HandlerConfigurationType& get () const;
   virtual const StreamType& stream () const;
+  virtual bool wait (StreamStatusType,
+                     const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
   virtual const HandlerConfigurationType& get ();
   virtual bool initialize (const HandlerConfigurationType&); // handler configuration
 
