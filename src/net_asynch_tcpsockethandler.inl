@@ -439,13 +439,14 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
   {
     // connection closed/reset (by peer) ? --> not an error
     error = result_in.error ();
-    if ((error != EBADF)                   && // 9:   Linux: local close()
+    if ((error != EBADF)                   && // 9  : Linux: local close()
+        (error != EPIPE)                   && // 32 : Linux: remote close()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        (error != ERROR_NETNAME_DELETED)   && // 64:  Win32: local close()
+        (error != ERROR_NETNAME_DELETED)   && // 64 : Win32: local close()
         (error != ERROR_OPERATION_ABORTED) && // 995: Win32: local close()
 #endif
-        (error != ECONNRESET)              && // 104:
-        (error != EPIPE))                     // 32:  Linux: connection was closed by peer
+        (error != ECONNRESET))                // 104:
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),

@@ -134,6 +134,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   bool handle_module = true;
   bool handle_socket = false;
   // *TODO*: remove type inferences
+  const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p = NULL;
   const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
   // step1: initialize base-class, tweak socket, initialize I/O, ...
@@ -226,7 +227,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   } // end IF
   // *NOTE*: do not worry about the enqueued module (if any) beyond this point !
   handle_module = false;
-  session_data_p = &stream_.sessionData ();
+  session_data_container_p = stream_.get ();
+  ACE_ASSERT (session_data_container_p);
+  session_data_p = &session_data_container_p->get ();
   const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
       &const_cast<StateType&> (inherited3::state ());
   //stream_.dump_state ();

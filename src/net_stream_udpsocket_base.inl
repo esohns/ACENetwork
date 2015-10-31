@@ -139,6 +139,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   bool handle_module = true;
   bool handle_reactor = false;
   bool handle_socket = false;
+  const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p = NULL;
   const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   ACE_Reactor* reactor_p = inherited::reactor ();
   ACE_ASSERT (reactor_p);
@@ -261,7 +262,9 @@ Net_StreamUDPSocketBase_T<HandlerType,
   } // end IF
   // *NOTE*: do not worry about the enqueued module (if any) beyond this point !
   handle_module = false;
-  session_data_p = &stream_.sessionData ();
+  session_data_container_p = stream_.get ();
+  ACE_ASSERT (session_data_container_p);
+  session_data_p = &session_data_container_p->get ();
   // *TODO*: remove type inferences
   const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
     &const_cast<StateType&> (inherited2::state ());
@@ -612,8 +615,11 @@ Net_StreamUDPSocketBase_T<HandlerType,
   else
   {
     // *TODO*: remove type inferences
-    const typename StreamType::SESSION_DATA_T& session_data_r =
-        stream_.sessionData ();
+    const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
+        stream_.get ();
+    ACE_ASSERT (session_data_container_p);
+    typename StreamType::SESSION_DATA_T& session_data_r =
+        const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());
     if (session_data_r.lock)
     {
       result = session_data_r.lock->acquire ();
@@ -621,7 +627,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
     } // end IF
-    const_cast<typename StreamType::SESSION_DATA_T&> (session_data_r).currentStatistic.droppedMessages++;
+    session_data_r.currentStatistic.droppedMessages++;
     if (session_data_r.lock)
     {
       result = session_data_r.lock->release ();

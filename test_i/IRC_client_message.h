@@ -94,8 +94,8 @@ class IRC_Client_Message
   typedef Stream_DataMessageBase_T<IRC_Client_IRCMessage,
                                    IRC_Client_CommandType_t> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Message ());
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Message& operator= (const IRC_Client_Message&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Message ())
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Message& operator= (const IRC_Client_Message&))
 };
 
 #endif
