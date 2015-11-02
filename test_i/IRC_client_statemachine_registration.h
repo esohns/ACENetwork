@@ -24,6 +24,8 @@
 #include <string>
 
 #include "ace/Global_Macros.h"
+//#include "ace/Synch_Traits.h"
+#include "ace/Null_Mutex.h"
 
 #include "common_statemachine_base.h"
 
@@ -39,7 +41,8 @@ enum IRC_Client_RegistrationState
 };
 
 class IRC_Client_StateMachine_Registration
- : public Common_StateMachine_Base_T<IRC_Client_RegistrationState>
+ : public Common_StateMachine_Base_T<ACE_SYNCH_NULL_MUTEX,
+                                     IRC_Client_RegistrationState>
 {
  public:
   IRC_Client_StateMachine_Registration ();
@@ -52,14 +55,17 @@ class IRC_Client_StateMachine_Registration
 
  protected:
   // implement (part of) Common_IStateMachine_T
-  // *NOTE*: only children can change state
+  // *NOTE*: only derived classes can change state
   virtual bool change (IRC_Client_RegistrationState); // new state
 
  private:
-  typedef Common_StateMachine_Base_T<IRC_Client_RegistrationState> inherited;
+  typedef Common_StateMachine_Base_T<ACE_SYNCH_NULL_MUTEX,
+                                     IRC_Client_RegistrationState> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_StateMachine_Registration (const IRC_Client_StateMachine_Registration&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_StateMachine_Registration& operator= (const IRC_Client_StateMachine_Registration&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_StateMachine_Registration (const IRC_Client_StateMachine_Registration&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_StateMachine_Registration& operator= (const IRC_Client_StateMachine_Registration&))
+
+  ACE_SYNCH_NULL_MUTEX lock_;
 };
 
 // convenient typedef

@@ -57,7 +57,7 @@ Net_Message::~Net_Message ()
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
-const Net_MessageType_t&
+Net_MessageType_t
 Net_Message::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Message::command"));

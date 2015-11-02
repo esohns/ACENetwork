@@ -62,7 +62,7 @@ using namespace std;
 #include "stream_cachedallocatorheap.h"
 
 #ifdef HAVE_CONFIG_H
-#include "libacenetwork_config.h"
+#include "libACENetwork_config.h"
 #endif
 
 #include "net_defines.h"
@@ -525,13 +525,15 @@ connection_setup_curses_function (void* arg_in)
   deadline = ACE_OS::gettimeofday () + delay;
   try
   {
-    result_2 = registration_p->wait (&deadline);
+    result_2 = registration_p->wait (REGISTRATION_STATE_FINISHED,
+                                     &deadline);
   }
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IRegistration_t::wait(%#T), continuing\n"),
                 &delay));
+    result_2 = false;
   }
   if (!result_2 ||
       (registration_p->current () != REGISTRATION_STATE_FINISHED))

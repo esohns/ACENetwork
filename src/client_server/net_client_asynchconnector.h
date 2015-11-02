@@ -25,8 +25,9 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
-#include "stream_statemachine_control.h"
+#include "stream_statemachine_common.h"
 
+#include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

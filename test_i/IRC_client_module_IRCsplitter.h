@@ -45,7 +45,9 @@ class Stream_IAllocator;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 
 class IRC_Client_Module_IRCSplitter
- : public Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
+ : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_MUTEX,
+                                      ///
+                                      ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       IRC_Client_SessionMessage,
                                       IRC_Client_Message,
@@ -87,7 +89,9 @@ class IRC_Client_Module_IRCSplitter
   virtual void report () const;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_MUTEX,
+                                      ///
+                                      ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       IRC_Client_SessionMessage,
                                       IRC_Client_Message,

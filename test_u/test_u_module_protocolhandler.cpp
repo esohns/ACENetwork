@@ -239,10 +239,9 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
       // retain session ID for reporting...
       const Net_StreamSessionData_t& session_data_container_r =
           message_inout->get ();
-      const Net_StreamSessionData* session_data_p =
-          session_data_container_r.getData ();
-      ACE_ASSERT (session_data_p);
-      sessionID_ = session_data_p->sessionID;
+      const Net_StreamSessionData& session_data_r =
+          session_data_container_r.get ();
+      sessionID_ = session_data_r.sessionID;
 
       if (pingInterval_)
       {

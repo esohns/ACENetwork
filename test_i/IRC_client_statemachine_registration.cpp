@@ -27,7 +27,9 @@
 #include "net_macros.h"
 
 IRC_Client_StateMachine_Registration::IRC_Client_StateMachine_Registration ()
- : inherited (REGISTRATION_STATE_PASS)
+ : inherited (&lock_,                  // lock handle
+              REGISTRATION_STATE_PASS) // (initial) state
+ , lock_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_StateMachine_Registration::IRC_Client_StateMachine_Registration"));
 
@@ -62,8 +64,11 @@ IRC_Client_StateMachine_Registration::change (IRC_Client_RegistrationState newSt
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_StateMachine_Registration::change"));
 
+  // sanity check(s)
+  ACE_ASSERT (inherited::stateLock_);
+
   // synchronize access to state machine...
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (inherited::stateLock_);
+  ACE_Guard<ACE_SYNCH_NULL_MUTEX> aGuard (*inherited::stateLock_);
 
   switch (inherited::state_)
   {
@@ -171,7 +176,7 @@ IRC_Client_StateMachine_Registration::change (IRC_Client_RegistrationState newSt
   } // end SWITCH
   ACE_DEBUG ((LM_ERROR,
               ACE_TEXT ("unknown/invalid state switch: \"%s\" --> \"%s\" --> check implementation !, aborting\n"),
-              ACE_TEXT (state2String (state_).c_str ()),
+              ACE_TEXT (state2String (inherited::state_).c_str ()),
               ACE_TEXT (state2String (newState_in).c_str ())));
 
   return false;

@@ -79,14 +79,21 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   ACE_ASSERT (!isRunning ());
 
   // allocate a new session state, reset stream
-  inherited::initialize ();
+  if (!inherited::initialize (configuration_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Stream_Base_T::initialize(), aborting\n")));
+    return false;
+  } // end IF
+  ACE_ASSERT (inherited::sessionData_);
 
   // things to be done here:
   // - create modules (done for the ones "owned" by the stream itself)
   // - initialize modules
   // - push them onto the stream (tail-first) !
-
-  inherited::sessionData_->sessionID = configuration_in.sessionID;
+  IRC_Client_StreamSessionData& session_data_r =
+      const_cast<IRC_Client_StreamSessionData&> (inherited::sessionData_->get ());
+  session_data_r.sessionID = configuration_in.sessionID;
 
   int result = -1;
   inherited::MODULE_T* module_p = NULL;

@@ -27,7 +27,8 @@
 
 #include "net_macros.h"
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -35,7 +36,8 @@ template <typename SessionMessageType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
-Net_Module_SocketHandler_T<SessionMessageType,
+Net_Module_SocketHandler_T<LockType,
+                           SessionMessageType,
                            ProtocolMessageType,
                            ConfigurationType,
                            StreamStateType,
@@ -43,7 +45,8 @@ Net_Module_SocketHandler_T<SessionMessageType,
                            SessionDataContainerType,
                            StatisticContainerType,
                            ProtocolHeaderType>::Net_Module_SocketHandler_T ()
- : inherited (false, // inactive by default
+ : inherited (NULL,  // lock handle
+              false, // inactive by default
               false, // DON'T auto-start !
               false) // do not run svc()
  , currentBuffer_ (NULL)
@@ -59,7 +62,8 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -67,7 +71,8 @@ template <typename SessionMessageType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
-Net_Module_SocketHandler_T<SessionMessageType,
+Net_Module_SocketHandler_T<LockType,
+                           SessionMessageType,
                            ProtocolMessageType,
                            ConfigurationType,
                            StreamStateType,
@@ -100,7 +105,8 @@ Net_Module_SocketHandler_T<SessionMessageType,
     currentMessage_->release ();
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -109,7 +115,8 @@ template <typename SessionMessageType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<SessionMessageType,
+Net_Module_SocketHandler_T<LockType,
+                           SessionMessageType,
                            ProtocolMessageType,
                            ConfigurationType,
                            StreamStateType,
@@ -156,7 +163,8 @@ Net_Module_SocketHandler_T<SessionMessageType,
   return isInitialized_;
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -165,7 +173,8 @@ template <typename SessionMessageType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 void
-Net_Module_SocketHandler_T<SessionMessageType,
+Net_Module_SocketHandler_T<LockType,
+                           SessionMessageType,
                            ProtocolMessageType,
                            ConfigurationType,
                            StreamStateType,
@@ -215,7 +224,8 @@ Net_Module_SocketHandler_T<SessionMessageType,
   } // end WHILE
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -224,7 +234,8 @@ template <typename SessionMessageType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 void
-Net_Module_SocketHandler_T<SessionMessageType,
+Net_Module_SocketHandler_T<LockType,
+                           SessionMessageType,
                            ProtocolMessageType,
                            ConfigurationType,
                            StreamStateType,
@@ -301,7 +312,8 @@ Net_Module_SocketHandler_T<SessionMessageType,
   } // end SWITCH
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -310,7 +322,8 @@ template <typename SessionMessageType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<SessionMessageType,
+Net_Module_SocketHandler_T<LockType,
+                           SessionMessageType,
                            ProtocolMessageType,
                            ConfigurationType,
                            StreamStateType,
@@ -344,7 +357,8 @@ Net_Module_SocketHandler_T<SessionMessageType,
   return true;
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -353,7 +367,8 @@ template <typename SessionMessageType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 void
-Net_Module_SocketHandler_T<SessionMessageType,
+Net_Module_SocketHandler_T<LockType,
+                           SessionMessageType,
                            ProtocolMessageType,
                            ConfigurationType,
                            StreamStateType,
@@ -370,7 +385,8 @@ Net_Module_SocketHandler_T<SessionMessageType,
   ACE_NOTREACHED (return;)
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -379,7 +395,8 @@ template <typename SessionMessageType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<SessionMessageType,
+Net_Module_SocketHandler_T<LockType,
+                           SessionMessageType,
                            ProtocolMessageType,
                            ConfigurationType,
                            StreamStateType,
@@ -544,7 +561,8 @@ Net_Module_SocketHandler_T<SessionMessageType,
 //   return message_out;
 // }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -553,7 +571,8 @@ template <typename SessionMessageType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<SessionMessageType,
+Net_Module_SocketHandler_T<LockType,
+                           SessionMessageType,
                            ProtocolMessageType,
                            ConfigurationType,
                            StreamStateType,
@@ -571,40 +590,44 @@ Net_Module_SocketHandler_T<SessionMessageType,
 
   // step1: update session state
   // *TODO*: remove type inferences
-  inherited::sessionData_->currentStatistic = statisticData_in;
+  SessionDataType& session_data_r =
+      const_cast<SessionDataType&> (inherited::sessionData_->get ());
+  session_data_r.currentStatistic = statisticData_in;
 
   // *TODO*: attach stream state information to the session data
 
-  // step2: create session data object container
-  SessionDataContainerType* session_data_p = NULL;
-  ACE_NEW_NORETURN (session_data_p,
-                    SessionDataContainerType (inherited::sessionData_,
-                                              false));
-  if (!session_data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate SessionDataContainerType: \"%m\", aborting\n")));
-    return false;
-  } // end IF
+//  // step2: create session data object container
+//  SessionDataContainerType* session_data_p = NULL;
+//  ACE_NEW_NORETURN (session_data_p,
+//                    SessionDataContainerType (inherited::sessionData_,
+//                                              false));
+//  if (!session_data_p)
+//  {
+//    ACE_DEBUG ((LM_CRITICAL,
+//                ACE_TEXT ("failed to allocate SessionDataContainerType: \"%m\", aborting\n")));
+//    return false;
+//  } // end IF
 
   // step3: send the statistic data downstream
   // *NOTE*: fire-and-forget session_data_p here
   // *TODO*: remove type inference
   return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
-                                       session_data_p,
+                                       *inherited::sessionData_,
                                        inherited::configuration_.streamConfiguration->messageAllocator);
 }
 
 /////////////////////////////////////////
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-Net_Module_UDPSocketHandler_T<SessionMessageType,
+Net_Module_UDPSocketHandler_T<LockType,
+                              SessionMessageType,
                               ProtocolMessageType,
                               ConfigurationType,
                               StreamStateType,
@@ -623,14 +646,16 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-Net_Module_UDPSocketHandler_T<SessionMessageType,
+Net_Module_UDPSocketHandler_T<LockType,
+                              SessionMessageType,
                               ProtocolMessageType,
                               ConfigurationType,
                               StreamStateType,
@@ -659,7 +684,8 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
   } // end IF
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -667,7 +693,8 @@ template <typename SessionMessageType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-Net_Module_UDPSocketHandler_T<SessionMessageType,
+Net_Module_UDPSocketHandler_T<LockType,
+                              SessionMessageType,
                               ProtocolMessageType,
                               ConfigurationType,
                               StreamStateType,
@@ -720,7 +747,8 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 //  return inherited::sessionID_;
 //}
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -728,7 +756,8 @@ template <typename SessionMessageType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-Net_Module_UDPSocketHandler_T<SessionMessageType,
+Net_Module_UDPSocketHandler_T<LockType,
+                              SessionMessageType,
                               ProtocolMessageType,
                               ConfigurationType,
                               StreamStateType,
@@ -758,7 +787,8 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 //  } // end IF
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -766,7 +796,8 @@ template <typename SessionMessageType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-Net_Module_UDPSocketHandler_T<SessionMessageType,
+Net_Module_UDPSocketHandler_T<LockType,
+                              SessionMessageType,
                               ProtocolMessageType,
                               ConfigurationType,
                               StreamStateType,
@@ -840,7 +871,8 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
   } // end SWITCH
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -848,7 +880,8 @@ template <typename SessionMessageType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-Net_Module_UDPSocketHandler_T<SessionMessageType,
+Net_Module_UDPSocketHandler_T<LockType,
+                              SessionMessageType,
                               ProtocolMessageType,
                               ConfigurationType,
                               StreamStateType,
@@ -879,7 +912,8 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
   return true;
 }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -887,7 +921,8 @@ template <typename SessionMessageType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-Net_Module_UDPSocketHandler_T<SessionMessageType,
+Net_Module_UDPSocketHandler_T<LockType,
+                              SessionMessageType,
                               ProtocolMessageType,
                               ConfigurationType,
                               StreamStateType,
@@ -936,7 +971,8 @@ Net_Module_UDPSocketHandler_T<SessionMessageType,
 //   return message_out;
 // }
 
-template <typename SessionMessageType,
+template <typename LockType,
+          typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamStateType,
@@ -944,7 +980,8 @@ template <typename SessionMessageType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-Net_Module_UDPSocketHandler_T<SessionMessageType,
+Net_Module_UDPSocketHandler_T<LockType,
+                              SessionMessageType,
                               ProtocolMessageType,
                               ConfigurationType,
                               StreamStateType,

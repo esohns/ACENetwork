@@ -245,7 +245,6 @@ AC_FUNC_MALLOC
 AC_CHECK_FUNCS([memset])
 AC_CHECK_FUNCS([socket])
 AC_CHECK_FUNCS([strerror])
-#AC_CHECK_FUNCS([memset])
 
 # checks for libraries
 AM_COND_IF([VALGRIND_SUPPORT],

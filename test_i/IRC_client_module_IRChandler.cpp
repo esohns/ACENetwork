@@ -67,6 +67,7 @@ IRC_Client_Module_IRCHandler::initialize (const IRC_Client_ModuleHandlerConfigur
   configuration_ = configuration_in;
 
   // sanity check(s)
+  ACE_ASSERT (inherited::stateLock_);
   ACE_ASSERT (configuration_.streamConfiguration);
   ACE_ASSERT (configuration_.streamConfiguration->messageAllocator);
 
@@ -82,7 +83,7 @@ IRC_Client_Module_IRCHandler::initialize (const IRC_Client_ModuleHandlerConfigur
     } // end lock scope
 
     { // synch access to state machine
-      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (inherited::stateLock_);
+      ACE_Guard<ACE_SYNCH_NULL_MUTEX> aGuard (*inherited::stateLock_);
 
       inherited::state_ = REGISTRATION_STATE_NICK;
     } // end lock scope
@@ -521,12 +522,12 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       ACE_ASSERT (module_handler_configuration_r.protocolConfiguration);
       const IRC_Client_StreamSessionData_t& session_data_container_r =
           message_inout->get ();
-      const IRC_Client_StreamSessionData* session_data_p =
-          session_data_container_r.getData ();
-      ACE_ASSERT (session_data_p->connectionState);
+      const IRC_Client_StreamSessionData& session_data_r =
+          session_data_container_r.get ();
+      ACE_ASSERT (session_data_r.connectionState);
       {
-        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (session_data_p->connectionState->lock);
-        session_data_p->connectionState->nickName =
+        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (session_data_r.connectionState->lock);
+        session_data_r.connectionState->nickName =
             module_handler_configuration_r.protocolConfiguration->loginOptions.nickName;
       } // end lock scope
 
@@ -571,7 +572,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
         {
           try
           {
-            (*iterator++)->start (*session_data_p);
+            (*iterator++)->start (session_data_r);
           }
           catch (...)
           {

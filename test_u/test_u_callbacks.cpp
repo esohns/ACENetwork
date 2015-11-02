@@ -197,7 +197,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 
   // step5: initialize updates
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->lock);
 
     // schedule asynchronous updates of the log view
     guint event_source_id = g_timeout_add_seconds (1,
@@ -496,7 +496,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 
   // step4: initialize updates
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->lock);
 
     // schedule asynchronous updates of the log view
     guint event_source_id = g_timeout_add_seconds (1,

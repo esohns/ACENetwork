@@ -29,12 +29,13 @@
 
 #include "stream_common.h"
 #include "stream_headmoduletask_base.h"
-//#include "stream_iallocator.h"
 
 // forward declarations
 class Stream_IAllocator;
 
-template <typename SessionMessageType,
+template <typename LockType,                 // connection stream state machine lock
+          ///////////////////////////////
+          typename SessionMessageType,
           typename ProtocolMessageType,
           ///////////////////////////////
           typename ConfigurationType,
@@ -48,7 +49,9 @@ template <typename SessionMessageType,
           ///////////////////////////////
           typename ProtocolHeaderType>
 class Net_Module_SocketHandler_T
- : public Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
+ : public Stream_HeadModuleTaskBase_T<LockType,
+                                      ///
+                                      ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       SessionMessageType,
                                       ProtocolMessageType,
@@ -68,7 +71,8 @@ class Net_Module_SocketHandler_T
 #if defined (__GNUG__) || defined (_MSC_VER)
   // *NOTE*: for some obscure reason, these base class members are not exposed
   //         (MSVC/gcc)
-  using Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
+  using Stream_HeadModuleTaskBase_T<LockType,
+                                    ACE_MT_SYNCH,
                                     Common_TimePolicy_t,
                                     SessionMessageType,
                                     ProtocolMessageType,
@@ -76,7 +80,7 @@ class Net_Module_SocketHandler_T
                                     StreamStateType,
                                     SessionDataType,
                                     SessionDataContainerType>::initialize;
-  using Stream_StateMachine_Control::initialize;
+  using Stream_StateMachine_Control_T<LockType>::initialize;
 #endif
 
   // override (part of) Stream_IModuleHandler_T
@@ -98,7 +102,9 @@ class Net_Module_SocketHandler_T
   virtual void report () const;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
+  typedef Stream_HeadModuleTaskBase_T<LockType,
+                                      ///
+                                      ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       SessionMessageType,
                                       ProtocolMessageType,
@@ -132,7 +138,9 @@ class Net_Module_SocketHandler_T
 
 /////////////////////////////////////////
 
-template <typename SessionMessageType,
+template <typename LockType,
+          ///////////////////////////////
+          typename SessionMessageType,
           typename ProtocolMessageType,
           ///////////////////////////////
           typename ConfigurationType,
@@ -144,7 +152,9 @@ template <typename SessionMessageType,
           ///////////////////////////////
           typename StatisticContainerType>
 class Net_Module_UDPSocketHandler_T
- : public Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
+ : public Stream_HeadModuleTaskBase_T<LockType,
+                                      ///
+                                      ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       SessionMessageType,
                                       ProtocolMessageType,
@@ -180,7 +190,9 @@ class Net_Module_UDPSocketHandler_T
   virtual void report () const;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<ACE_MT_SYNCH,
+  typedef Stream_HeadModuleTaskBase_T<LockType,
+                                      ///
+                                      ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       SessionMessageType,
                                       ProtocolMessageType,

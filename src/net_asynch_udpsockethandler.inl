@@ -36,7 +36,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::Net_AsynchUDPSocketHandler_T ()
  , inherited2 ()
  , inherited3 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
- , counter_ (0)
+ , counter_ (0) // initial count
  , inputStream_ ()
  , outputStream_ ()
 {

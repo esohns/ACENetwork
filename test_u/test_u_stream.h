@@ -38,7 +38,9 @@
 #include "test_u_sessionmessage.h"
 
 class Net_Stream
- : public Stream_Base_T<ACE_MT_SYNCH,
+ : public Stream_Base_T<ACE_SYNCH_MUTEX,
+                        /////////////////
+                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////
                         Stream_StateMachine_ControlState,
@@ -72,7 +74,9 @@ class Net_Stream
   virtual void report () const;
 
  private:
-  typedef Stream_Base_T<ACE_MT_SYNCH,
+  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
+                        /////////////////
+                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////
                         Stream_StateMachine_ControlState,

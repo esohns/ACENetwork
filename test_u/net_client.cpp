@@ -66,7 +66,7 @@
 #include "net_client_defines.h"
 
 #ifdef HAVE_CONFIG_H
-#include "libacenetwork_config.h"
+#include "libACENetwork_config.h"
 #endif
 
 #include "test_u_callbacks.h"

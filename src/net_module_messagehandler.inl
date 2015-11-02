@@ -209,11 +209,10 @@ Net_Module_MessageHandler_T<SessionMessageType,
     {
       // refer the session data back to any subscriber(s)
       // *TODO*: remove type inferences
-      const typename SessionMessageType::SESSION_DATA_TYPE& session_data_container_r =
+      const typename SessionMessageType::SESSION_DATA_T& session_data_container_r =
           message_inout->get ();
-      const typename SessionMessageType::SESSION_DATA_TYPE::SESSION_DATA_TYPE* session_data_p =
-          session_data_container_r.getData ();
-      ACE_ASSERT (session_data_p);
+      const typename SessionMessageType::SESSION_DATA_T::SESSION_DATA_T& session_data_r =
+          session_data_container_r.get ();
 
       // synch access
       {
@@ -230,7 +229,7 @@ Net_Module_MessageHandler_T<SessionMessageType,
         {
           try
           {
-            (*iterator++)->start (*session_data_p);
+            (*iterator++)->start (session_data_r);
           }
           catch (...)
           {

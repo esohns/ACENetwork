@@ -39,7 +39,9 @@
 #include "IRC_client_sessionmessage.h"
 
 class IRC_Client_Stream
- : public Stream_Base_T<ACE_MT_SYNCH,
+ : public Stream_Base_T<ACE_SYNCH_MUTEX,
+                        /////////////////
+                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////
                         Stream_StateMachine_ControlState,
@@ -74,7 +76,9 @@ class IRC_Client_Stream
   void ping ();
 
  private:
-  typedef Stream_Base_T<ACE_MT_SYNCH,
+  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
+                        /////////////////
+                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////
                         Stream_StateMachine_ControlState,

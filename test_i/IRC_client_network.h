@@ -151,7 +151,10 @@ typedef Net_ISocketConnection_T<ACE_INET_Addr,
                                 IRC_Client_ConnectionState,
                                 IRC_Client_RuntimeStatistic_t,
                                 IRC_Client_Stream,
+                                Stream_StateMachine_ControlState,
+                                /////////
                                 Net_SocketConfiguration,
+                                /////////
                                 IRC_Client_SocketHandlerConfiguration> IRC_Client_ISocketConnection_t;
 //typedef Net_ISession_T<ACE_INET_Addr,
 //                       Net_SocketConfiguration,

@@ -76,6 +76,10 @@ m4/wchar_t.m4
 m4/wint_t.m4
 m4/xsize.m4
 
+# qtcreator
+Makefile.am.user
+CMakeLists.txt.user
+
 Makefile.in.in
 po/Makevars.template
 po/Rules-quot
@@ -87,6 +91,7 @@ po/quot.sed
 po/remove-potcdate.sin
 
 build/
+cmake/
 
 # kdevelop
 .kdev4/
@@ -101,6 +106,3 @@ ipch/
 *.suo
 *.opensdf
 *.vcxproj.user
-
-/prj/solstudio/libACENetwork/build/
-Makefile.am.user

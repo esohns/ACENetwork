@@ -468,7 +468,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
                                     FALSE);
 
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
 
     CBData_.GTKState->builders[CBData_.timeStamp] =
         std::make_pair (ui_definition_filename, builder_p);
@@ -487,7 +487,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
 
     // clean up
     g_object_unref (G_OBJECT (builder_p));
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
     CBData_.GTKState->builders.erase (CBData_.timeStamp);
 
     return;
@@ -511,7 +511,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
       // clean up
       delete message_handler_p;
       g_object_unref (G_OBJECT (builder_p));
-      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
+      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
       CBData_.GTKState->builders.erase (CBData_.timeStamp);
 
       return;
@@ -519,7 +519,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
   } // end lock scope
 
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
 
     CBData_.eventSourceID =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -642,7 +642,7 @@ IRC_Client_GUI_Connection::start (const IRC_Client_StreamSessionData& sessionDat
 
   ACE_UNUSED_ARG (sessionData_in);
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     CBData_.GTKState->builders.find (CBData_.timeStamp);
@@ -677,7 +677,7 @@ IRC_Client_GUI_Connection::notify (const IRC_Client_IRCMessage& message_in)
   ACE_ASSERT (CBData_.GTKState);
 //  ACE_ASSERT (sessionState_);
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
       CBData_.GTKState->builders.find (CBData_.timeStamp);
@@ -1941,7 +1941,7 @@ IRC_Client_GUI_Connection::exists (const std::string& id_in,
   // sanity check(s)
   ACE_ASSERT (CBData_.GTKState);
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
 
   { // synch access
     ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);

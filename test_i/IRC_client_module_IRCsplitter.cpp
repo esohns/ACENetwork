@@ -34,7 +34,8 @@
 #include "IRC_client_defines.h"
 
 IRC_Client_Module_IRCSplitter::IRC_Client_Module_IRCSplitter ()
- : inherited (false, // inactive by default
+ : inherited (NULL,  // lock handle
+              false, // inactive by default
               false, // DON'T auto-start !
               false) // do not run the svc() routine on start
  , statisticCollectHandler_ (ACTION_COLLECT,
@@ -410,14 +411,13 @@ IRC_Client_Module_IRCSplitter::handleSessionMessage (IRC_Client_SessionMessage*&
       // retain session ID for reporting...
       const IRC_Client_StreamSessionData_t& session_data_container_r =
           message_inout->get ();
-      const IRC_Client_StreamSessionData* session_data_p =
-          session_data_container_r.getData ();
-      ACE_ASSERT (session_data_p);
+      const IRC_Client_StreamSessionData& session_data_r =
+          session_data_container_r.get ();
       ACE_ASSERT (inherited::streamState_);
       ACE_ASSERT (inherited::streamState_->currentSessionData);
       ACE_Guard<ACE_SYNCH_MUTEX> aGuard (*(inherited::streamState_->currentSessionData->lock));
       inherited::streamState_->currentSessionData->sessionID =
-          session_data_p->sessionID;
+          session_data_r.sessionID;
 
       // start profile timer...
       //profile_.start ();
@@ -483,40 +483,42 @@ IRC_Client_Module_IRCSplitter::putStatisticMessage (const IRC_Client_RuntimeStat
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_.streamConfiguration);
 
-  // step1: initialize session data
-  IRC_Client_StreamSessionData* stream_session_data_p = NULL;
-  ACE_NEW_NORETURN (stream_session_data_p,
-                    IRC_Client_StreamSessionData ());
-  if (!stream_session_data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-    return false;
-  } // end IF
-  //ACE_OS::memset (data_p, 0, sizeof (IRC_Client_SessionData));
-  stream_session_data_p->currentStatistic = statisticData_in;
+//  // step1: initialize session data
+//  IRC_Client_StreamSessionData* session_data_p = NULL;
+//  ACE_NEW_NORETURN (session_data_p,
+//                    IRC_Client_StreamSessionData ());
+//  if (!session_data_p)
+//  {
+//    ACE_DEBUG ((LM_CRITICAL,
+//                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+//    return false;
+//  } // end IF
+//  //ACE_OS::memset (data_p, 0, sizeof (IRC_Client_SessionData));
+  IRC_Client_StreamSessionData& session_data_r =
+      const_cast<IRC_Client_StreamSessionData&> (inherited::sessionData_->get ());
+  session_data_r.currentStatistic = statisticData_in;
 
-  // step2: allocate session data container
-  IRC_Client_StreamSessionData_t* session_data_container_p = NULL;
-  // *NOTE*: fire-and-forget stream_session_data_p
-  ACE_NEW_NORETURN (session_data_container_p,
-                    IRC_Client_StreamSessionData_t (stream_session_data_p,
-                                                    true));
-  if (!session_data_container_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+//  // step2: allocate session data container
+//  IRC_Client_StreamSessionData_t* session_data_container_p = NULL;
+//  // *NOTE*: fire-and-forget stream_session_data_p
+//  ACE_NEW_NORETURN (session_data_container_p,
+//                    IRC_Client_StreamSessionData_t (stream_session_data_p,
+//                                                    true));
+//  if (!session_data_container_p)
+//  {
+//    ACE_DEBUG ((LM_CRITICAL,
+//                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
-    // clean up
-    delete stream_session_data_p;
+//    // clean up
+//    delete stream_session_data_p;
 
-    return false;
-  } // end IF
+//    return false;
+//  } // end IF
 
   // step3: send the data downstream...
   // *NOTE*: fire-and-forget session_data_container_p
   return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
-                                       session_data_container_p,
+                                       *inherited::sessionData_,
                                        inherited::configuration_.streamConfiguration->messageAllocator);
 }
 

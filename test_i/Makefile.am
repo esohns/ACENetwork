@@ -120,7 +120,6 @@ IRC_client_LDADD = \
   -lACENetwork
 
 IRC_client_gui_SOURCES = \
-  IRC_client_defines.h \
   IRC_client_common.h \
   IRC_client_common_modules.h \
   IRC_client_configuration.h \

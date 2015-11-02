@@ -36,7 +36,9 @@
 #include "test_u_sessionmessage.h"
 
 // declare module(s)
-typedef Net_Module_SocketHandler_T<Net_SessionMessage,
+typedef Net_Module_SocketHandler_T<ACE_SYNCH_MUTEX,
+                                   //////
+                                   Net_SessionMessage,
                                    Net_Message,
                                    //////
                                    Net_ModuleHandlerConfiguration,

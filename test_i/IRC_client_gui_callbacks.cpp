@@ -131,7 +131,7 @@ connection_setup_function (void* arg_in)
 
     // clean up
 //    gdk_threads_leave ();
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->CBData->GTKState.lock);
     data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
     delete data_p;
 
@@ -351,7 +351,7 @@ connection_failed:
   connection_p->initialize (&const_cast<IRC_Client_ConnectionState&> (connection_2->state ()),
                             IRCControl_p);
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->CBData->GTKState.lock);
     // *TODO*: who deletes the module ? (the stream won't do it !)
     data_p->CBData->connections.insert (std::make_pair (connection_p->get ().timeStamp,
                                                         connection_p));
@@ -380,7 +380,7 @@ connection_failed:
     // clean up
     connection_2->close ();
     connection_2->decrease ();
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->CBData->GTKState.lock);
     data_p->CBData->connections.erase (connection_p->get ().timeStamp);
 
     goto remove_page;
@@ -405,7 +405,7 @@ remove_page:
 
 done:
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->CBData->GTKState.lock);
     data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
   } // end lock scope
 
@@ -458,7 +458,7 @@ idle_add_channel_cb (gpointer userData_in)
   GtkNotebook* notebook_p = NULL;
   gint page_number = -1;
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (data_p->builderLabel);
@@ -578,8 +578,8 @@ idle_add_channel_cb (gpointer userData_in)
   if (IRC_Client_Tools::isValidIRCChannelName (data_p->id))
   {
     // *IMPORTANT NOTE*: release lock while switching pages
-    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
-    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_MUTEX> > aGuard_2 (reverse_lock);
+    ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> reverse_lock (data_p->GTKState->lock);
+    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> > aGuard_2 (reverse_lock);
 
     gtk_notebook_set_current_page (notebook_p,
                                    page_number);
@@ -614,7 +614,7 @@ idle_add_connection_cb (gpointer userData_in)
   GtkNotebook* notebook_p = NULL;
   gint page_number = -1;
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -744,7 +744,7 @@ idle_finalize_UI_cb (gpointer userData_in)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("removed %u queued event(s)...\n"),
                 removed_events));
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
   //ACE_ASSERT (removed_events == data_p->GTKState.eventSourceIds.size ());
   data_p->GTKState.eventSourceIds.clear ();
 
@@ -964,7 +964,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 //              ACE_TEXT ("idle_update_display_cb: %d\n"),
 //              event_source_id));
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
   data_p->GTKState.eventSourceIds.clear ();
   data_p->GTKState.eventSourceIds.insert (event_source_id);
 
@@ -992,7 +992,7 @@ idle_remove_channel_cb (gpointer userData_in)
   gint page_number = -1;
   gint number_of_pages = 0;
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (data_p->timeStamp);
@@ -1034,8 +1034,8 @@ idle_remove_channel_cb (gpointer userData_in)
   if (gtk_notebook_get_current_page (notebook_p) == page_number)
   { // flip away from "this" page ?
     // *IMPORTANT NOTE*: release lock while switching pages
-    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
-    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_MUTEX> > aGuard_2 (reverse_lock);
+    ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> reverse_lock (data_p->GTKState->lock);
+    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> > aGuard_2 (reverse_lock);
 
     gtk_notebook_prev_page (notebook_p);
   } // end IF
@@ -1087,7 +1087,7 @@ idle_remove_connection_cb (gpointer userData_in)
   GtkWindow* window_p = NULL;
   Common_UI_GTKBuildersIterator_t iterator, iterator_2;
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
   IRC_Client_GUI_ConnectionsConstIterator_t iterator_3 =
       data_p->connections->end ();
@@ -1126,8 +1126,8 @@ idle_remove_connection_cb (gpointer userData_in)
   if (gtk_notebook_get_current_page (notebook_p) == page_number)
   {
     // *IMPORTANT NOTE*: release lock while switching pages
-    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
-    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_MUTEX> > aGuard_2 (reverse_lock);
+    ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> reverse_lock (data_p->GTKState->lock);
+    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> > aGuard_2 (reverse_lock);
 
     gtk_notebook_prev_page (notebook_p);
   } // end IF
@@ -1173,7 +1173,7 @@ idle_update_channel_modes_cb (gpointer userData_in)
   GtkToggleButton* toggle_button_p = NULL;
   GtkHBox* hbox_p = NULL;
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (data_p->builderLabel);
@@ -1282,7 +1282,7 @@ idle_update_display_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
   if (data_p->connections.empty ())
     return G_SOURCE_CONTINUE;
 
@@ -1341,7 +1341,7 @@ idle_update_progress_cb (gpointer userData_in)
   ACE_ASSERT (thread_manager_p);
   // synch access
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
     for (IRC_Client_GUI_CompletedActionsIterator_t iterator_2 = data_p->completedActions.begin ();
          iterator_2 != data_p->completedActions.end ();
@@ -1425,7 +1425,7 @@ idle_update_user_modes_cb (gpointer userData_in)
   IRC_Client_GUI_ConnectionsConstIterator_t iterator_2;
   const IRC_Client_ConnectionState* connection_state_p = NULL;
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
   iterator = data_p->GTKState->builders.find (data_p->timeStamp);
   // sanity check(s)
@@ -1715,7 +1715,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
     // sanity check: nickname already in use ?
     nick_name_taken = false;
     { // synch access
-      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
 
       for (IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 = data_p->connections.begin ();
            iterator_2 != data_p->connections.end ();
@@ -1865,7 +1865,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   gtk_progress_bar_set_pulse_step (progress_bar_p,
                                    1.0 / static_cast<double> (width));
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
 
     gtk_widget_show (GTK_WIDGET (progress_bar_p));
 
@@ -1977,7 +1977,7 @@ button_send_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -2183,7 +2183,7 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
   }
 
   // update widgets
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
   // *NOTE*: the server should close the connection after this...
   //         --> the connection notebook page cleans itself (see end ())
@@ -2379,7 +2379,7 @@ usersbox_changed_cb (GtkWidget* widget_in,
 
   // *TODO*: if a conversation exists, simply activate the corresponding page
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
     IRC_Client_GUI_ConnectionsConstIterator_t iterator =
       data_p->connections->find (data_p->timeStamp);
@@ -2764,7 +2764,7 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   ACE_ASSERT (data_p->controller);
   ACE_ASSERT (data_p->GTKState);
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
   IRC_Client_GUI_ConnectionsConstIterator_t iterator =
     data_p->connections->find (data_p->timeStamp);
@@ -2819,7 +2819,7 @@ switch_channel_cb (GtkNotebook* notebook_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->GTKState);
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -2849,7 +2849,7 @@ action_away_cb (GtkAction* action_in,
   ACE_ASSERT (data_p->controller);
   ACE_ASSERT (data_p->GTKState);
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -3390,7 +3390,7 @@ members_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p->connection);
   ACE_ASSERT (data_p->GTKState);
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (data_p->builderLabel);

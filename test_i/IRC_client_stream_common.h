@@ -46,25 +46,17 @@ typedef Stream_IModule_T<ACE_MT_SYNCH,
                          IRC_Client_ModuleHandlerConfiguration> IRC_Client_IModule_t;
 
 struct IRC_Client_StreamSessionData
+ : Stream_SessionData
 {
   inline IRC_Client_StreamSessionData ()
-   : aborted (false)
+   : Stream_SessionData ()
    , connectionState (NULL)
    , currentStatistic ()
-   , lock (NULL)
-   , sessionID (0)
-   , startOfSession (ACE_Time_Value::zero)
   {};
-
-  bool                          aborted;
 
   IRC_Client_ConnectionState*   connectionState;
 
   IRC_Client_RuntimeStatistic_t currentStatistic;
-  ACE_SYNCH_MUTEX*              lock;
-
-  unsigned int                  sessionID; // (== socket handle !)
-  ACE_Time_Value                startOfSession;
 };
 
 struct IRC_Client_StreamUserData
@@ -83,9 +75,11 @@ struct IRC_Client_StreamUserData
 };
 
 struct IRC_Client_StreamState
+ : Stream_State
 {
   inline IRC_Client_StreamState ()
-   : currentSessionData (NULL)
+   : Stream_State ()
+   , currentSessionData (NULL)
    , userData (NULL)
   {};
 

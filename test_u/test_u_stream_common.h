@@ -45,31 +45,25 @@ class Net_SessionMessage;
 struct Net_UserData;
 
 struct Net_StreamSessionData
+ : Stream_SessionData
 {
   inline Net_StreamSessionData ()
-   : aborted (false)
+   : Stream_SessionData ()
    , connectionState (NULL)
    , currentStatistic ()
-   , lock (NULL)
-   , sessionID (0)
-   , startOfSession (ACE_Time_Value::zero)
   {};
-
-  bool                   aborted;
 
   Net_ConnectionState*   connectionState;
 
   Net_RuntimeStatistic_t currentStatistic;
-  ACE_SYNCH_MUTEX*       lock;
-
-  unsigned int           sessionID; // (== socket handle !)
-  ACE_Time_Value         startOfSession;
 };
 
 struct Net_StreamState
+ : Stream_State
 {
   inline Net_StreamState ()
-   : currentSessionData (NULL)
+   : Stream_State ()
+   , currentSessionData (NULL)
    , userData (NULL)
   {};
 
