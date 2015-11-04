@@ -74,6 +74,10 @@ class Net_Export Net_Common_Tools
 
 //  static Net_IInetConnectionManager_t* getConnectionManager ();
 
+  static std::string URL2HostName (const std::string&, // URL
+                                   bool = true,        // return protocol (if any) ?
+                                   bool = true);       // return port (if any) ?
+
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools ())
   ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Common_Tools ())

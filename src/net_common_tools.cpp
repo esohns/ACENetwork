@@ -21,6 +21,7 @@
 
 #include "net_common_tools.h"
 
+#include <regex>
 #include <sstream>
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1179,3 +1180,46 @@ Net_Common_Tools::getMaxMsgSize (ACE_HANDLE handle_in)
 
 //  return NET_CONNECTIONMANAGER_SINGLETON::instance ();
 //}
+
+std::string
+Net_Common_Tools::URL2HostName (const std::string& URL_in,
+                                bool returnProtocol_in,
+                                bool returnPort_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::URL2HostName"));
+
+  std::string result;
+
+  std::string regex_string =
+      ACE_TEXT_ALWAYS_CHAR ("^([[:alpha:]]+://)?([^\\/\\:]+)(\\:[[:digit:]]{1,5})?(.+)?$");
+  std::regex regex (regex_string);
+  std::smatch match_results;
+  if (!std::regex_match (URL_in,
+                         match_results,
+                         regex,
+                         std::regex_constants::match_default))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid URL string (was: \"%s\"), aborting\n"),
+                ACE_TEXT (URL_in.c_str ())));
+    return result;
+  } // end IF
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+  if (!match_results[2].matched)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid URL string (was: \"%s\"), aborting\n"),
+                ACE_TEXT (URL_in.c_str ())));
+    return result;
+  } // end IF
+
+  if (returnProtocol_in &&
+      match_results[1].matched)
+    result = match_results[1];
+  result += match_results[2];
+  if (returnPort_in &&
+      match_results[3].matched)
+    result += match_results[3];
+
+  return result;
+}
