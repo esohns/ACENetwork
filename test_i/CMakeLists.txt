@@ -38,7 +38,9 @@ endif ()
 
 include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
-pkg_check_modules (PKG_NCURSES REQUIRED ncurses panel)
+if (UNIX)
+ pkg_check_modules (PKG_NCURSES REQUIRED ncurses panel)
+endif ()
 pkg_check_modules (PKG_GTK_GLADE REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
 
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}

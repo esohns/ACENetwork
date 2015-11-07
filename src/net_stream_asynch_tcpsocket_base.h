@@ -39,7 +39,7 @@ template <typename HandlerType,
           ///////////////////////////////
           typename AddressType,
           typename ConfigurationType,
-          typename StateType,
+          typename StateType, // (connection) state
           typename StatisticContainerType,
           typename StreamType,
           ///////////////////////////////

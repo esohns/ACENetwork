@@ -7,8 +7,9 @@ check_function_exists (socket HAVE_FUNC_SOCKET)
 check_function_exists (strerror HAVE_FUNC_STRERROR)
 
 if (UNIX)
-include (CheckLibraryExists)
-check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
+# include (CheckLibraryExists)
+# check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
+ find_package (Threads REQUIRED)
 endif ()
 
 set (ACE_LIB_FILE libACE.so)
@@ -37,12 +38,15 @@ endif ()
 if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
 endif ()
+add_definitions (-DACE_HAS_DLL)
 
 #include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 
-if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+#if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
  # stand-alone build
+# message ("stand-alone build")
+#if (WIN32)
  find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
                REQUIRED
                CONFIG
@@ -52,6 +56,7 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
  if (NOT EXISTS ${Common_DIR})
   message (FATAL_ERROR "could not find package \"Common\", aborting")
  endif ()
+ add_definitions (-DCOMMON_HAS_DLL)
 
  find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
                REQUIRED
@@ -62,7 +67,8 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
  if (NOT EXISTS ${ACEStream_DIR})
   message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
  endif ()
-endif ()
+ add_definitions (-DSTREAM_HAS_DLL)
+#endif ()
 
 add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
@@ -179,13 +185,20 @@ set (${PROJECT_NAME}_LIB_SRCS
 add_library (${PROJECT_NAME} SHARED ${ACENetwork_LIB_SRCS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
-#add_dependencies (${PROJECT_NAME} Common)
-#add_dependencies (${PROJECT_NAME} ACEStream)
+add_dependencies (${PROJECT_NAME} Common)
+add_dependencies (${PROJECT_NAME} ACEStream)
 
 set_target_properties (${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL NET_BUILD_DLL)
 set_target_properties (${PROJECT_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-#target_link_libraries (${PROJECT_NAME} ${ACE_LIBRARY})
+if (WIN32)
+ target_link_libraries (${PROJECT_NAME} ${ACE_LIBRARY})
+ target_link_libraries (${PROJECT_NAME} Common)
+endif ()
+
+# add all targets to the build-tree export set
+export (TARGETS ${PROJECT_NAME}
+        FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
 
 ############### install files ################
 install (FILES

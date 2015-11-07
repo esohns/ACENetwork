@@ -44,8 +44,10 @@ add_library (${PROJECT_NAME}_Client SHARED ${ACENetwork_Client_LIB_SRCS})
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES DEFINE_SYMBOL NET_CLIENT_BUILD_DLL)
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-#target_link_libraries (${PROJECT_NAME}_Client ${ACE_LIBRARY})
-#target_link_libraries (${PROJECT_NAME}_Client libCommon)
+#if (WIN32)
+# target_link_libraries (${PROJECT_NAME}_Client ${ACE_LIBRARY})
+#endif ()
+#target_link_libraries (${PROJECT_NAME}_Client Common)
 #target_link_libraries (${PROJECT_NAME}_Client ${PROJECT_NAME})
 
 ############## next target ################
@@ -70,8 +72,10 @@ add_library (${PROJECT_NAME}_Server SHARED ${ACENetwork_Server_LIB_SRCS})
 #add_dependencies (${PROJECT_NAME}_Server ACEStream)
 #add_dependencies (${PROJECT_NAME}_Server ACENetwork)
 
-#target_link_libraries (${PROJECT_NAME}_Server ${ACE_LIBRARY})
-#target_link_libraries (${PROJECT_NAME}_Server libCommon)
+if (WIN32)
+ target_link_libraries (${PROJECT_NAME}_Server ${ACE_LIBRARY})
+ target_link_libraries (${PROJECT_NAME}_Server Common)
+endif ()
 #target_link_libraries (${PROJECT_NAME}_Server ${PROJECT_NAME})
 
 set_target_properties (${PROJECT_NAME}_Server PROPERTIES DEFINE_SYMBOL NET_SERVER_BUILD_DLL)

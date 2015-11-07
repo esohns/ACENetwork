@@ -1,16 +1,15 @@
-# libACENetworkConfig.cmake.in
-#  LIBACENETWORK_INCLUDE_DIRS - include directories for FooBar
-#  LIBACENETWORK_LIBRARIES    - libraries to link against
+# ACENetworkConfig.cmake.in
+#  ACENetwork_INCLUDE_DIRS - include directories for FooBar
+#  ACENetwork_LIBRARIES    - libraries to link against
 
 # Compute paths
-get_filename_component (LIBACENETWORK_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-set (LIBACENETWORK_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+get_filename_component (ACENetwork_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set (ACENetwork_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
 
 # library dependencies (contains definitions for IMPORTED targets)
-if (NOT TARGET libACENetwork AND NOT LIBACENETWORK_BINARY_DIR)
-include ("${LIBACENETWORK_CMAKE_DIR}/ACENetworkTargets.cmake")
+if (NOT TARGET ACENetwork AND NOT ACENetwork_BINARY_DIR)
+include ("${ACENetwork_CMAKE_DIR}/ACENetworkTargets.cmake")
 endif ()
 
-# These are IMPORTED targets created by libACENetworkTargets.cmake
-set (LIBACENETWORK_LIBRARIES libACENetwork)
-
+# These are IMPORTED targets created by ACENetworkTargets.cmake
+set (ACENetwork_LIBRARIES libACENetwork)

@@ -153,11 +153,12 @@ Net_Server_Common_Tools::getNextLogFileName (const std::string& directory_in,
     try
     {
       // *TODO*: do this in C++...
-      result = ::sscanf (ACE_TEXT_ALWAYS_CHAR (entries[i]->d_name) +
-                         // skip some characters...
-                         (ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX)) + 1),
-                         format_string.c_str (),
-                         &number);
+      result =
+        ::sscanf (ACE_TEXT_ALWAYS_CHAR (entries[i]->d_name) +
+                  // skip some characters...
+                  (ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX)) + 1),
+                  format_string.c_str (),
+                  &number);
       if (result != 1)
       {
         if (result)
