@@ -270,3 +270,4 @@ install (TARGETS ${PROJECT_NAME}
          COMPONENT dev)
 
 add_subdirectory (client_server)
+add_subdirectory (protocol)

@@ -181,4 +181,5 @@ libACENetwork_la_LDFLAGS = \
 
 SUBDIRS = \
   . \
-  client_server
+  client_server \
+  protocol

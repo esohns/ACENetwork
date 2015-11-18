@@ -279,13 +279,18 @@ AC_CONFIG_FILES([Makefile
                  scripts/Makefile
                  src/Makefile
                  src/client_server/Makefile
+                 src/protocol/Makefile
+                 src/protocol/http/Makefile
+                 src/protocol/irc/Makefile
                  test_i/Makefile
-                 test_i/etc/Makefile
-                 test_i/scripts/Makefile
+                 test_i/IRC_client/Makefile
+                 test_i/IRC_client/etc/Makefile
+                 test_i/IRC_client/scripts/Makefile
                  test_u/Makefile
-                 test_u/etc/Makefile])
+                 test_u/client_server/Makefile
+                 test_u/client_server/etc/Makefile
+                 test_u/protocol/Makefile])
 AC_CONFIG_FILES([scripts/libACENetwork.pc
                  scripts/libACENetwork.spec])
 
 AC_OUTPUT
-

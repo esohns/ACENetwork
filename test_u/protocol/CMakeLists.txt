@@ -1,0 +1,128 @@
+cmake_minimum_required (VERSION 2.8)
+
+if (UNIX)
+# include (CheckLibraryExists)
+# check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
+ find_package (Threads REQUIRED)
+endif ()
+
+set (ACE_LIB_FILE libACE.so)
+if (UNIX)
+ if (DEFINED ENV{ACE_ROOT})
+  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
+                PATHS ENV ACE_ROOT
+                PATH_SUFFIXES build/linux/lib
+                DOC "searching for ${ACE_LIB_FILE}")
+ else ()
+  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
+                DOC "searching for ${ACE_LIB_FILE} (system paths)")
+ endif ()
+elseif (WIN32)
+ if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  set (LIB_FILE_SUFFIX d)
+ endif ()
+ unset (ACE_LIB_FILE)
+ set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
+ find_library (ACE_LIBRARY ${ACE_LIB_FILE}
+               PATHS ENV ACE_ROOT
+               PATH_SUFFIXES lib\\${CMAKE_BUILD_TYPE}\\Win32
+               DOC "searching for ${ACE_LIB_FILE}"
+               NO_DEFAULT_PATH)
+endif ()
+#if (NOT EXISTS ACE_LIBRARY)
+if (NOT ACE_LIBRARY)
+ message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
+endif ()
+
+find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+              REQUIRED
+              CONFIG
+              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
+              PATH_SUFFIXES libCommon/cmake
+              NO_DEFAULT_PATH)
+if (NOT EXISTS ${Common_DIR})
+ message (FATAL_ERROR "could not find package \"Common\", aborting")
+endif ()
+add_definitions (-DCommon_HAS_DLL)
+
+find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+              REQUIRED
+              CONFIG
+              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
+              PATH_SUFFIXES libACEStream/cmake
+              NO_DEFAULT_PATH)
+if (NOT EXISTS ${ACEStream_DIR})
+ message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
+endif ()
+add_definitions (-DSTREAM_HAS_DLL)
+
+find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+              REQUIRED
+              CONFIG
+              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
+              PATH_SUFFIXES cmake
+              NO_DEFAULT_PATH)
+if (NOT EXISTS ${ACENetwork_DIR})
+ message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
+endif ()
+
+add_definitions (-DHAVE_CONFIG_H)
+#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
+
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ATCD/ACE)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/misc)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
+include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
+
+############## next target ################
+set (${PROJECT_NAME}_Protocol_EXE_SRCS
+     test_u_common.h
+     test_u_common_modules.h
+     test_u_connection_common.h
+     test_u_connection_manager_common.h
+     test_u_defines.h
+     test_u_message.cpp
+     test_u_message.h
+     test_u_module_parser.cpp
+     test_u_module_parser.h
+     test_u_module_bissector.cpp
+     test_u_module_bissector.h
+     test_u_module_streamer.cpp
+     test_u_module_streamer.h
+     test_u_session_message.cpp
+     test_u_session_message.h
+     test_u_protocol.cpp
+     test_u_protocol_common.h
+     test_u_protocol_signalhandler.cpp
+     test_u_protocol_signalhandler.h
+     test_u_protocol_stream.cpp
+     test_u_protocol_stream.h
+     test_u_protocol_stream.inl
+#  test_u_template_instantiations.cpp
+     stdafx.cpp
+     stdafx.h)
+
+#string (TOLOWER "${PROJECT_NAME}_Protocol" EXECUTABLE)
+set (EXECUTABLE protocol)
+add_executable (${EXECUTABLE} ${ACENetwork_Protocol_EXE_SRCS})
+
+#add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
+#add_dependencies (${PROJECT_NAME} Common)
+
+target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
+## *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
+#set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
+target_link_libraries (${EXECUTABLE} Common)
+target_link_libraries (${EXECUTABLE} ACEStream)
+target_link_libraries (${EXECUTABLE} ACENetwork)
+#target_link_libraries (${EXECUTABLE} ACENetwork_Client)
+
+install (TARGETS ${EXECUTABLE}
+         EXPORT ${PROJECT_NAME}Targets
+         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
+         COMPONENT dev)
+

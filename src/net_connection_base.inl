@@ -151,11 +151,11 @@ Net_ConnectionBase_T<AddressType,
                      StateType,
                      StatisticContainerType,
                      StreamType,
-#if defined (__GNUG__)
+//#if defined (__GNUG__)
                      UserDataType>::registerc (ICONNECTION_T* connection_in)
-#else
-                     UserDataType>::registerc ()
-#endif
+//#else
+//                     UserDataType>::registerc ()
+//#endif
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::registerc"));
 
@@ -163,11 +163,11 @@ Net_ConnectionBase_T<AddressType,
   ACE_ASSERT (!isRegistered_);
 
   // (try to) register with the connection manager...
-  ICONNECTION_T* iconnection_p = this;
-#if defined (__GNUG__)
+  //ICONNECTION_T* iconnection_p = this;
+//#if defined (__GNUG__)
   // *WORKAROUND*: see header
-  iconnection_p = (connection_in ? connection_in : this);
-#endif
+  ICONNECTION_T* iconnection_p = (connection_in ? connection_in : this);
+//#endif
   if (manager_)
   {
     try
@@ -197,7 +197,7 @@ Net_ConnectionBase_T<AddressType,
     AddressType local_address, remote_address;
     try
     {
-#if defined (__GNUG__)
+//#if defined (__GNUG__)
       // *WORKAROUND*: see header
       ICONNECTION_T* connection_p = (connection_in ? connection_in
                                                    : this);
@@ -205,11 +205,11 @@ Net_ConnectionBase_T<AddressType,
       connection_p->info (handle,
                           local_address,
                           remote_address);
-#else
-      this->info (handle,
-                  local_address,
-                  remote_address);
-#endif
+//#else
+//      this->info (handle,
+//                  local_address,
+//                  remote_address);
+//#endif
     }
     catch (...)
     {

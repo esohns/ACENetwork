@@ -135,7 +135,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   bool handle_socket = false;
   // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p = NULL;
-  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
+  typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
   // step1: initialize base-class, tweak socket, initialize I/O, ...
   if (!inherited::initialize (inherited3::configuration_.socketHandlerConfiguration))
@@ -148,11 +148,11 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   handle_socket = true;
 
   // step4: register with the connection manager (if any)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (!inherited3::registerc ())
-#else
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  if (!inherited3::registerc ())
+//#else
   if (!inherited3::registerc (this))
-#endif
+//#endif
   {
     // *NOTE*: (most probably) maximum number of connections has been reached
     //ACE_DEBUG ((LM_ERROR,
@@ -229,9 +229,10 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   handle_module = false;
   session_data_container_p = stream_.get ();
   ACE_ASSERT (session_data_container_p);
-  session_data_p = &session_data_container_p->get ();
-  const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
-      &const_cast<StateType&> (inherited3::state ());
+  session_data_p =
+    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());
+  session_data_p->connectionState =
+    &const_cast<StateType&> (inherited3::state ());
   //stream_.dump_state ();
 
   // step2d: start stream
