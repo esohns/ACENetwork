@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ace/config-macros.h"
+#include "ace/Log_Msg.h"
 #include "ace/OS_Memory.h"
 #include "ace/Synch_Traits.h"
 
@@ -27,8 +28,8 @@
 
 #include "net_macros.h"
 
-#include "irc_bisector.h"
-#include "irc_defines.h"
+#include "http_bisector.h"
+#include "http_defines.h"
 
 template <typename LockType,
           typename TaskSynchType,
@@ -40,7 +41,7 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-IRC_Module_Bisector_T<LockType,
+HTTP_Module_Bisector_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
                       SessionMessageType,
@@ -49,7 +50,7 @@ IRC_Module_Bisector_T<LockType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::IRC_Module_Bisector_T ()
+                      StatisticContainerType>::HTTP_Module_Bisector_T ()
  : inherited (NULL,  // lock handle
               false, // inactive by default
               false, // DON'T auto-start !
@@ -65,15 +66,15 @@ IRC_Module_Bisector_T<LockType,
  , messageLength_ (0)
  , isInitialized_ (false)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::IRC_Module_Bisector_T"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::HTTP_Module_Bisector_T"));
 
-  if (IRC_Bisector_lex_init (&context_))
+  if (HTTP_Bisector_lex_init (&context_))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to yylex_init(): \"%m\", continuing\n")));
 
   // trace ?
-  IRC_Bisector_set_debug ((IRC_DEF_LEX_TRACE ? 1 : 0),
-                          context_);
+  HTTP_Bisector_set_debug ((HTTP_DEFAULT_LEX_TRACE ? 1 : 0),
+                           context_);
 }
 
 template <typename LockType,
@@ -86,7 +87,7 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-IRC_Module_Bisector_T<LockType,
+HTTP_Module_Bisector_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
                       SessionMessageType,
@@ -95,9 +96,9 @@ IRC_Module_Bisector_T<LockType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::~IRC_Module_Bisector_T ()
+                      StatisticContainerType>::~HTTP_Module_Bisector_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::~IRC_Module_Bisector_T"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::~HTTP_Module_Bisector_T"));
 
   // clean up timer if necessary
   if (statisticCollectHandlerID_ != -1)
@@ -112,7 +113,7 @@ IRC_Module_Bisector_T<LockType,
 
   // fini scanner context
   if (context_)
-    IRC_Bisector_lex_destroy (context_);
+    HTTP_Bisector_lex_destroy (context_);
 
   // clean up any unprocessed (chained) buffer(s)
   if (buffer_)
@@ -130,7 +131,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-IRC_Module_Bisector_T<LockType,
+HTTP_Module_Bisector_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
                       SessionMessageType,
@@ -141,7 +142,7 @@ IRC_Module_Bisector_T<LockType,
                       SessionDataContainerType,
                       StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.streamConfiguration);
@@ -165,8 +166,8 @@ IRC_Module_Bisector_T<LockType,
     numberOfFrames_ = 0;
     if (bufferState_)
     {
-      IRC_Bisector__delete_buffer (bufferState_,
-                                   context_);
+      HTTP_Bisector__delete_buffer (bufferState_,
+                                    context_);
       bufferState_ = NULL;
     } // end IF
     if (buffer_)
@@ -215,8 +216,8 @@ IRC_Module_Bisector_T<LockType,
 
   //  return false;
   //} // end IF
-  IRC_Bisector_set_debug ((configuration_in.traceScanning ? 1 : 0),
-                          context_);
+  HTTP_Bisector_set_debug ((configuration_in.traceScanning ? 1 : 0),
+                           context_);
 
   isInitialized_ = inherited::initialize (configuration_in);
   if (!isInitialized_)
@@ -240,7 +241,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-IRC_Module_Bisector_T<LockType,
+HTTP_Module_Bisector_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
                       SessionMessageType,
@@ -252,7 +253,7 @@ IRC_Module_Bisector_T<LockType,
                       StatisticContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
                                                                   bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::handleDataMessage"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::handleDataMessage"));
 
   int result = -1;
   ACE_Message_Block* message_block_p = NULL;
@@ -286,8 +287,8 @@ IRC_Module_Bisector_T<LockType,
   // *NOTE*: the scanner splits sequences of >= 2 bytes (.*\r\n)
   //         --> make sure a minimum amount of data has been received
   //         --> more sanity check(s)
-  if (buffer_->total_length () < IRC_FRAME_BOUNDARY_SIZE)
-    return; // don't have enough data, cannot proceed
+  //if (buffer_->total_length () < HTTP_FRAME_BOUNDARY_SIZE)
+  //  return; // don't have enough data, cannot proceed
 
   // OK, initialize scanner...
 
@@ -341,7 +342,7 @@ IRC_Module_Bisector_T<LockType,
 //   while (messageLength_ = scanner_.yylex ())
   do
   {
-    scanned_chunk = IRC_Bisector_lex (context_);
+    scanned_chunk = HTTP_Bisector_lex (context_);
 //    scanned_chunk = IRC_Bisectlex (context_);
     switch (scanned_chunk)
     {
@@ -370,11 +371,11 @@ IRC_Module_Bisector_T<LockType,
             (*message_block_p->rd_ptr () == '\n'))
         {
           scanned_bytes = 1;
-          messageLength_ += IRC_FRAME_BOUNDARY_SIZE;
+          //messageLength_ += HTTP_FRAME_BOUNDARY_SIZE;
         } // end IF
         else
         {
-          scanned_bytes += IRC_FRAME_BOUNDARY_SIZE;
+          //scanned_bytes += HTTP_FRAME_BOUNDARY_SIZE;
           messageLength_ += scanned_bytes;
         } // end IF
 
@@ -475,7 +476,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-IRC_Module_Bisector_T<LockType,
+HTTP_Module_Bisector_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
                       SessionMessageType,
@@ -487,7 +488,7 @@ IRC_Module_Bisector_T<LockType,
                       StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                      bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::handleSessionMessage"));
 
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -535,7 +536,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-IRC_Module_Bisector_T<LockType,
+HTTP_Module_Bisector_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
                       SessionMessageType,
@@ -546,7 +547,7 @@ IRC_Module_Bisector_T<LockType,
                       SessionDataContainerType,
                       StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::collect"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::collect"));
 
   // sanity check(s)
   ACE_ASSERT (isInitialized_);
@@ -581,7 +582,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-IRC_Module_Bisector_T<LockType,
+HTTP_Module_Bisector_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
                       SessionMessageType,
@@ -592,7 +593,7 @@ IRC_Module_Bisector_T<LockType,
                       SessionDataContainerType,
                       StatisticContainerType>::report () const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::report"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::report"));
 
   // sanity check(s)
   ACE_ASSERT (isInitialized_);
@@ -616,7 +617,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-IRC_Module_Bisector_T<LockType,
+HTTP_Module_Bisector_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
                       SessionMessageType,
@@ -627,7 +628,7 @@ IRC_Module_Bisector_T<LockType,
                       SessionDataContainerType,
                       StatisticContainerType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::putStatisticMessage"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::putStatisticMessage"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_.streamConfiguration);
@@ -682,7 +683,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-IRC_Module_Bisector_T<LockType,
+HTTP_Module_Bisector_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
                       SessionMessageType,
@@ -694,7 +695,7 @@ IRC_Module_Bisector_T<LockType,
                       StatisticContainerType>::scan_begin (char* data_in,
                                                            size_t length_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::scan_begin"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::scan_begin"));
 
   // sanity check(s)
   ACE_ASSERT (!bufferState_);
@@ -706,9 +707,9 @@ IRC_Module_Bisector_T<LockType,
   //                                                         length_in,
   //                                                         context_);
   bufferState_ =
-      IRC_Bisector__scan_bytes (data_in,
-                                length_in,
-                                context_);
+      HTTP_Bisector__scan_bytes (data_in,
+                                 length_in,
+                                 context_);
   if (!bufferState_)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -722,8 +723,8 @@ IRC_Module_Bisector_T<LockType,
   // *NOTE*: contrary (!) to the documentation
   // (e.g. http://flex.sourceforge.net/manual/Multiple-Input-Buffers.html),
   //         one still needs to yy_switch_to_buffer()
-  IRC_Bisector__switch_to_buffer (bufferState_,
-                                  context_);
+  HTTP_Bisector__switch_to_buffer (bufferState_,
+                                   context_);
 
   return true;
 }
@@ -739,7 +740,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-IRC_Module_Bisector_T<LockType,
+HTTP_Module_Bisector_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
                       SessionMessageType,
@@ -750,13 +751,13 @@ IRC_Module_Bisector_T<LockType,
                       SessionDataContainerType,
                       StatisticContainerType>::scan_end ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::scan_end"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::scan_end"));
 
   // sanity check(s)
   ACE_ASSERT (bufferState_);
 
   // clean state
-  IRC_Bisector__delete_buffer (bufferState_,
-                               context_);
+  HTTP_Bisector__delete_buffer (bufferState_,
+                                context_);
   bufferState_ = NULL;
 }

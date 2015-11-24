@@ -21,30 +21,4 @@
 #ifndef NET_CONNECTION_COMMON_H
 #define NET_CONNECTION_COMMON_H
 
-#include "stream_common.h"
-
-#include "net_common.h"
-
-#include "test_u_configuration.h"
-
-struct Net_ConnectionState
-{
-  inline Net_ConnectionState ()
-   : configuration ()
-   , status (NET_CONNECTION_STATUS_INVALID)
-   , currentStatistic ()
-   , userData (NULL)
-  {};
-
-  // *TODO*: consider making this a separate entity (i.e. a pointer)
-  Net_Configuration      configuration;
-
-  Net_Connection_Status  status;
-
-  Net_RuntimeStatistic_t currentStatistic;
-
-  Net_UserData*          userData;
-};
-
-
 #endif

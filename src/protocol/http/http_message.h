@@ -21,6 +21,8 @@
 #ifndef HTTP_MESSAGE_H
 #define HTTP_MESSAGE_H
 
+#include <string>
+
 #include "ace/Global_Macros.h"
 
 #include "stream_data_message_base.h"
@@ -33,26 +35,33 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 class HTTP_SessionMessage;
-template <typename MessageType,
+template <typename AllocatorConfigurationType,
+          typename MessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
-template <typename MessageType,
+template <typename AllocatorConfigurationType,
+          typename MessageType,
           typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
-class HTTP_Export HTTP_Message
- : public Stream_DataMessageBase_T<IRC_Record,
-                                   IRC_CommandType_t>
+template <typename AllocatorConfigurationType>
+class HTTP_Message_T
+ : public Stream_DataMessageBase_T<AllocatorConfigurationType,
+                                   HTTP_Record,
+                                   HTTP_Method_t>
 {
   // enable access to specific private ctors...
-  friend class Stream_MessageAllocatorHeapBase_T<HTTP_Message,
+  friend class Stream_MessageAllocatorHeapBase_T<AllocatorConfigurationType,
+                                                 HTTP_Message_T<AllocatorConfigurationType>,
                                                  HTTP_SessionMessage>;
-  friend class Stream_CachedMessageAllocator_T<HTTP_Message,
+  friend class Stream_CachedMessageAllocator_T<AllocatorConfigurationType,
+                                               HTTP_Message_T<AllocatorConfigurationType>,
                                                HTTP_SessionMessage>;
 
  public:
-  HTTP_Message (unsigned int); // size
-  virtual ~HTTP_Message ();
+  HTTP_Message_T (unsigned int); // size
+  virtual ~HTTP_Message_T ();
 
-  virtual HTTP_CommandType_t command () const; // return value: message type
+  virtual HTTP_Method_t command () const; // return value: message type
+  static std::string Command2String (HTTP_Method_t);
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -79,24 +88,27 @@ class HTTP_Export HTTP_Message
   // *NOTE*: this uses our allocator (if any) to create a new message
   virtual ACE_Message_Block* duplicate (void) const;
 
-  static std::string CommandType2String (const HTTP_CommandType_t&);
-
  protected:
    // *NOTE*: to be used by allocators...
-   HTTP_Message (ACE_Data_Block*, // data block to use
-                 ACE_Allocator*); // message allocator
-   //   IRC_Client_Message(ACE_Allocator*); // message allocator
+   HTTP_Message_T (ACE_Data_Block*, // data block to use
+                   ACE_Allocator*,  // message allocator
+                   bool = true);    // increment running message counter ?
+   //   HTTP_Message_T (ACE_Allocator*); // message allocator
 
   // copy ctor to be used by duplicate() and child classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")
-  HTTP_Message (const HTTP_Message&);
+  HTTP_Message_T (const HTTP_Message_T&);
 
  private:
-  typedef Stream_DataMessageBase_T<HTTP_Record,
-                                   HTTP_CommandType_t> inherited;
+  typedef Stream_DataMessageBase_T<AllocatorConfigurationType,
+                                   HTTP_Record,
+                                   HTTP_Method_t> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (HTTP_Message ())
-  ACE_UNIMPLEMENTED_FUNC (HTTP_Message& operator= (const HTTP_Message&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Message_T ())
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Message_T& operator= (const HTTP_Message_T&))
 };
+
+// include template implementation
+#include "http_message.inl"
 
 #endif

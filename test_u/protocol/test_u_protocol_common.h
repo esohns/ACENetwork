@@ -18,9 +18,9 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef TEST_I_SOURCE_COMMON_H
-#define TEST_I_SOURCE_COMMON_H
+#ifndef TEST_U_PROTOCOL_COMMON_H
+#define TEST_U_PROTOCOL_COMMON_H
 
-#include "test_i_common.h"
+//#include "test_u_common.h"
 
 #endif

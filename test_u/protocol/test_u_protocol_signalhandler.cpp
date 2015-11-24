@@ -20,36 +20,36 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
-#include "test_i_http_get_signalhandler.h"
+#include "test_u_protocol_signalhandler.h"
 
 #include "ace/Log_Msg.h"
 
 //#include "common_timer_manager.h"
 #include "common_tools.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
-#include "test_i_connection_manager_common.h"
+#include "test_u_connection_manager_common.h"
 
-Stream_Source_SignalHandler::Stream_Source_SignalHandler (bool useReactor_in)
+Test_U_Protocol_SignalHandler::Test_U_Protocol_SignalHandler (bool useReactor_in)
  : inherited (this,          // event handler handle
               useReactor_in) // use reactor ?
  , configuration_ ()
 {
-  STREAM_TRACE (ACE_TEXT ("Stream_Source_SignalHandler::Stream_Source_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Protocol_SignalHandler::Test_U_Protocol_SignalHandler"));
 
 }
 
-Stream_Source_SignalHandler::~Stream_Source_SignalHandler ()
+Test_U_Protocol_SignalHandler::~Test_U_Protocol_SignalHandler ()
 {
-  STREAM_TRACE (ACE_TEXT ("Stream_Source_SignalHandler::~Stream_Source_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Protocol_SignalHandler::~Test_U_Protocol_SignalHandler"));
 
 }
 
 bool
-Stream_Source_SignalHandler::initialize (const Stream_SignalHandlerConfiguration& configuration_in)
+Test_U_Protocol_SignalHandler::initialize (const Test_U_SignalHandlerConfiguration& configuration_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Stream_Source_SignalHandler::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Protocol_SignalHandler::initialize"));
 
   configuration_ = configuration_in;
 
@@ -57,9 +57,9 @@ Stream_Source_SignalHandler::initialize (const Stream_SignalHandlerConfiguration
 }
 
 bool
-Stream_Source_SignalHandler::handleSignal (int signal_in)
+Test_U_Protocol_SignalHandler::handleSignal (int signal_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Stream_Source_SignalHandler::handleSignal"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Protocol_SignalHandler::handleSignal"));
 
 //  int result = -1;
 
@@ -162,11 +162,11 @@ Stream_Source_SignalHandler::handleSignal (int signal_in)
     //} // end IF
 
     // step2: stop/abort(/wait) for connections
-    Test_I_Stream_IInetConnectionManager_t* connection_manager_p =
-        TEST_I_STREAM_CONNECTIONMANAGER_SINGLETON::instance ();
-    ACE_ASSERT (connection_manager_p);
-    connection_manager_p->stop ();
-    connection_manager_p->abort ();
+    Test_U_IConnectionManager_t* iconnection_manager_p =
+        TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+    ACE_ASSERT (iconnection_manager_p);
+    iconnection_manager_p->stop ();
+    iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
     Common_Tools::finalizeEventDispatch (inherited::useReactor_,  // stop reactor ?

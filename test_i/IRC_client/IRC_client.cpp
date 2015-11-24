@@ -1185,8 +1185,8 @@ ACE_TMAIN (int argc_in,
   // step6: initialize configuration objects
 
   // initialize protocol configuration
-  Stream_CachedAllocatorHeap heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                             IRC_BUFFER_SIZE);
+  Stream_CachedAllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                              IRC_BUFFER_SIZE);
   IRC_Client_MessageAllocator message_allocator (NET_STREAM_MAX_MESSAGES,
                                                  &heap_allocator);
 

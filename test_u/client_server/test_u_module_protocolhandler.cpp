@@ -212,7 +212,7 @@ Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: unknown/invalid message type (was: \"%s\"), returning\n"),
                   message_inout->getID (),
-                  ACE_TEXT (Net_Message::CommandType2String (message_header.messageType).c_str ())));
+                  ACE_TEXT (Net_Message::Command2String (message_header.messageType).c_str ())));
       return;
     }
   } // end SWITCH

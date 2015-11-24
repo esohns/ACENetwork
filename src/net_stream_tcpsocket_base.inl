@@ -56,7 +56,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
  , currentWriteBuffer_ (NULL)
  , sendLock_ ()
  , serializeOutput_ (false)
- , stream_ ()
+ , stream_ (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::Net_StreamTCPSocketBase_T"));
 

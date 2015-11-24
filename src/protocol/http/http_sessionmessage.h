@@ -18,24 +18,25 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_SESSIONMESSAGE_H
-#define IRC_SESSIONMESSAGE_H
+#ifndef HTTP_SessionMessage_H
+#define HTTP_SessionMessage_H
 
 #include "ace/Global_Macros.h"
 
 #include "stream_session_message_base.h"
 
-#include "irc_exports.h"
-#include "irc_stream_common.h"
+#include "http_exports.h"
+#include "http_stream_common.h"
 
 // forward declarations
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 
-class IRC_Export IRC_SessionMessage
- : public Stream_SessionMessageBase_T<IRC_Stream_SessionData_t,
-                                      IRC_Stream_UserData>
+class HTTP_SessionMessage
+ : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
+                                      HTTP_Stream_SessionData_t,
+                                      HTTP_Stream_UserData>
 {
 //  // enable access to private ctor(s)...
 //  friend class Net_StreamMessageAllocator;
@@ -43,27 +44,28 @@ class IRC_Export IRC_SessionMessage
 
  public:
   // *NOTE*: assume lifetime responsibility for the second argument !
-  IRC_SessionMessage (Stream_SessionMessageType,  // session message type
-                      IRC_Stream_SessionData_t*&, // session data container handle
-                      IRC_Stream_UserData*);      // user data handle
+  HTTP_SessionMessage (Stream_SessionMessageType,  // session message type
+                       HTTP_Stream_SessionData_t*&, // session data container handle
+                       HTTP_Stream_UserData*);      // user data handle
     // *NOTE*: to be used by message allocators...
-  IRC_SessionMessage (ACE_Allocator*); // message allocator
-  IRC_SessionMessage (ACE_Data_Block*, // data block
-                      ACE_Allocator*); // message allocator
-  virtual ~IRC_SessionMessage ();
+  HTTP_SessionMessage (ACE_Allocator*); // message allocator
+  HTTP_SessionMessage (ACE_Data_Block*, // data block
+                       ACE_Allocator*); // message allocator
+  virtual ~HTTP_SessionMessage ();
 
   // override from ACE_Message_Block
   // *WARNING*: any children need to override this as well
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<IRC_Stream_SessionData_t,
-                                      IRC_Stream_UserData> inherited;
+  typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
+                                      HTTP_Stream_SessionData_t,
+                                      HTTP_Stream_UserData> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_SessionMessage ())
+  ACE_UNIMPLEMENTED_FUNC (HTTP_SessionMessage ())
   // copy ctor (to be used by duplicate())
-  IRC_SessionMessage (const IRC_SessionMessage&);
-  ACE_UNIMPLEMENTED_FUNC (IRC_SessionMessage& operator= (const IRC_SessionMessage&))
+  HTTP_SessionMessage (const HTTP_SessionMessage&);
+  ACE_UNIMPLEMENTED_FUNC (HTTP_SessionMessage& operator= (const HTTP_SessionMessage&))
 };
 
 #endif

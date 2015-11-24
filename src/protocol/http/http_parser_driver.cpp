@@ -19,68 +19,66 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "irc_parser_driver.h"
-
-#include <sstream>
+#include "http_parser_driver.h"
 
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
 
 #include "net_macros.h"
 
-#include "irc_defines.h"
-#include "irc_record.h"
-#include "irc_parser.h"
-#include "irc_scanner.h"
-#include "irc_message.h"
+#include "http_defines.h"
+#include "http_record.h"
+#include "http_parser.h"
+#include "http_scanner.h"
+#include "http_message.h"
 
-IRC_ParserDriver::IRC_ParserDriver (bool traceScanning_in,
-                                    bool traceParsing_in)
- : trace_ (traceParsing_in)
- , numberOfMessages_ (0)
+HTTP_ParserDriver::HTTP_ParserDriver (bool traceScanning_in,
+                                      bool traceParsing_in)
+ : record_ (NULL)
+ , trace_ (traceParsing_in)
  , scannerState_ (NULL)
  , bufferState_ (NULL)
  , fragment_ (NULL)
  , fragmentIsResized_ (false)
- , parser_ (this,               // driver
-            &numberOfMessages_, // counter
-            scannerState_)      // scanner
- , record_ (NULL)
+ //, parser_ (this,               // driver
+ //           &numberOfMessages_, // counter
+ //           scannerState_)      // scanner
  , isInitialized_ (false)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::IRC_ParserDriver"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::HTTP_ParserDriver"));
 
-  if (IRC_Scanner_lex_init_extra (this, &scannerState_))
+  if (HTTP_Scanner_lex_init_extra (this, &scannerState_))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to yylex_init_extra: \"%m\", continuing\n")));
   ACE_ASSERT (scannerState_);
-  parser_.set (scannerState_);
+  //parser_.set (scannerState_);
 
   // trace ?
-  IRC_Scanner_set_debug ((traceScanning_in ? 1 : 0),
-                         scannerState_);
+  HTTP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
+                          scannerState_);
 #if YYDEBUG
-  parser_.set_debug_level (traceParsing_in ? 1
-                                           : 0); // binary (see bison manual)
+  //parser_.set_debug_level (traceParsing_in ? 1
+  //                                         : 0); // binary (see bison manual)
+  yydebug = (traceParsing_in ? 1 : 0);
 #endif
 }
 
-IRC_ParserDriver::~IRC_ParserDriver ()
+HTTP_ParserDriver::~HTTP_ParserDriver ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::~IRC_ParserDriver"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::~HTTP_ParserDriver"));
 
   // finalize lex scanner
-  if (IRC_Scanner_lex_destroy (scannerState_))
+  if (HTTP_Scanner_lex_destroy (scannerState_))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to yylex_destroy: \"%m\", continuing\n")));
 }
 
 void
-IRC_ParserDriver::initialize (IRC_Record& record_in,
-                              bool traceScanning_in,
-                              bool traceParsing_in)
+HTTP_ParserDriver::initialize (HTTP_Record& record_in,
+                               bool traceScanning_in,
+                               bool traceParsing_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!isInitialized_);
@@ -89,11 +87,12 @@ IRC_ParserDriver::initialize (IRC_Record& record_in,
   record_ = &record_in;
 
   // trace ?
-  IRC_Scanner_set_debug ((traceScanning_in ? 1 : 0),
-                         scannerState_);
+  HTTP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
+                          scannerState_);
 #if YYDEBUG
-  parser_.set_debug_level (traceParsing_in ? 1 
-                                           : 0); // binary (see bison manual)
+  //parser_.set_debug_level (traceParsing_in ? 1 
+  //                                         : 0); // binary (see bison manual)
+  yydebug = (traceParsing_in ? 1 : 0);
 #endif
 
   // OK
@@ -101,10 +100,10 @@ IRC_ParserDriver::initialize (IRC_Record& record_in,
 }
 
 bool
-IRC_ParserDriver::parse (ACE_Message_Block* data_in,
-                         bool useYYScanBuffer_in)
+HTTP_ParserDriver::parse (ACE_Message_Block* data_in,
+                          bool useYYScanBuffer_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::parse"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::parse"));
 
   // sanity check(s)
   ACE_ASSERT (isInitialized_);
@@ -113,7 +112,7 @@ IRC_ParserDriver::parse (ACE_Message_Block* data_in,
   // start with the first fragment...
   fragment_ = data_in;
 
-  // *NOTE*: we parse ALL available message fragments
+  // *NOTE*: parse ALL available message fragments
   // *TODO*: yyrestart(), yy_create_buffer/yy_switch_to_buffer, YY_INPUT...
   int result = -1;
 //   do
@@ -121,7 +120,7 @@ IRC_ParserDriver::parse (ACE_Message_Block* data_in,
     if (!scan_begin (useYYScanBuffer_in))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to IRC_ParserDriver::scan_begin(), aborting\n")));
+                  ACE_TEXT ("failed to HTTP_ParserDriver::scan_begin(), aborting\n")));
 
       // clean up
       fragment_ = NULL;
@@ -131,17 +130,27 @@ IRC_ParserDriver::parse (ACE_Message_Block* data_in,
     } // end IF
 
     // parse our data
-    result = parser_.parse ();
+    try
+    {
+      //result = parser_.parse ();
+      result = yyparse (this, scannerState_);
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
+    }
     if (result)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to parse IRC message fragment, aborting\n")));
+                  ACE_TEXT ("failed to parse message fragment, aborting\n")));
 
     // finalize buffer/scanner
     scan_end ();
 
     int debug_level = 0;
 #if YYDEBUG
-    debug_level = parser_.debug_level ();
+    //debug_level = parser_.debug_level ();
+    debug_level = yydebug;
 #endif
     // debug info
     if (debug_level)
@@ -158,16 +167,13 @@ IRC_ParserDriver::parse (ACE_Message_Block* data_in,
     } // end IF
 //   } while (fragment_);
 
-  // reset state
-  isInitialized_ = false;
-
   return (result == 0);
 }
 
 bool
-IRC_ParserDriver::switchBuffer ()
+HTTP_ParserDriver::switchBuffer ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::switchBuffer"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::switchBuffer"));
 
   // sanity check(s)
   ACE_ASSERT (scannerState_);
@@ -179,8 +185,8 @@ IRC_ParserDriver::switchBuffer ()
 
   // clean state
   ACE_ASSERT (bufferState_);
-  IRC_Scanner__delete_buffer (bufferState_,
-                              scannerState_);
+  HTTP_Scanner__delete_buffer (bufferState_,
+                               scannerState_);
   bufferState_ = NULL;
 
   // initialize next buffer
@@ -197,8 +203,8 @@ IRC_ParserDriver::switchBuffer ()
 //   } // end IF
 
 //  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
-  IRC_Scanner__switch_to_buffer (bufferState_,
-                                 scannerState_);
+  HTTP_Scanner__switch_to_buffer (bufferState_,
+                                  scannerState_);
 
 //   ACE_DEBUG((LM_DEBUG,
 //              ACE_TEXT("switched to next buffer...\n")));
@@ -207,26 +213,26 @@ IRC_ParserDriver::switchBuffer ()
 }
 
 bool
-IRC_ParserDriver::moreData ()
+HTTP_ParserDriver::moreData ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::moreData"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::moreData"));
 
   return (fragment_->cont () != NULL);
 }
 
 bool
-IRC_ParserDriver::getDebugScanner () const
+HTTP_ParserDriver::getDebugScanner () const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::getDebugScanner"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::getDebugScanner"));
 
-  return (IRC_Scanner_get_debug (scannerState_) != 0);
+  return (HTTP_Scanner_get_debug (scannerState_) != 0);
 }
 
 void
-IRC_ParserDriver::error (const yy::location& location_in,
-                         const std::string& message_in)
+HTTP_ParserDriver::error (const yy::location& location_in,
+                          const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::error"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::error"));
 
   std::ostringstream converter;
   converter << location_in;
@@ -246,12 +252,11 @@ IRC_ParserDriver::error (const yy::location& location_in,
   while (head->prev ())
     head = head->prev ();
   ACE_ASSERT (head);
-  IRC_Message* message = NULL;
-  message = dynamic_cast<IRC_Message*> (head);
-  ACE_ASSERT (message);
+  Common_IDumpState* idump_state_p = dynamic_cast<Common_IDumpState*> (head);
+  ACE_ASSERT (idump_state_p);
   try
   {
-    message->dump_state ();
+    idump_state_p->dump_state ();
   }
   catch (...)
   {
@@ -263,9 +268,9 @@ IRC_ParserDriver::error (const yy::location& location_in,
 }
 
 void
-IRC_ParserDriver::error (const std::string& message_in)
+HTTP_ParserDriver::error (const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::error"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::error"));
 
   // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
   ACE_DEBUG ((LM_ERROR,
@@ -279,50 +284,87 @@ IRC_ParserDriver::error (const std::string& message_in)
 //   std::clog << message_in << std::endl;
 }
 
-bool
-IRC_ParserDriver::scan_begin (bool useYYScanBuffer_in)
+void
+HTTP_ParserDriver::error (const YYLTYPE& location_in,
+                          const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::scan_begin"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::error"));
+
+  // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
+  ACE_DEBUG ((LM_ERROR,
+              ACE_TEXT ("(@%d.%d-%d.%d): %s\n"),
+              location_in.first_line, location_in.first_column, location_in.last_line, location_in.last_column,
+              ACE_TEXT (message_in.c_str ())));
+  //   ACE_DEBUG((LM_ERROR,
+  //              ACE_TEXT("failed to parse \"%s\" (@%s): \"%s\"\n"),
+  //              std::string(fragment_->rd_ptr(), fragment_->length()).c_str(),
+  //              converter.str().c_str(),
+  //              message_in.c_str()));
+
+  // dump message
+  ACE_Message_Block* head = fragment_;
+  while (head->prev ())
+    head = head->prev ();
+  ACE_ASSERT (head);
+  Common_IDumpState* idump_state_p = dynamic_cast<Common_IDumpState*> (head);
+  ACE_ASSERT (idump_state_p);
+  try
+  {
+    idump_state_p->dump_state ();
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
+  }
+
+  //   std::clog << location_in << ": " << message_in << std::endl;
+}
+
+bool
+HTTP_ParserDriver::scan_begin (bool useYYScanBuffer_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::scan_begin"));
 
   // sanity check(s)
   ACE_ASSERT (bufferState_ == NULL);
   ACE_ASSERT (fragment_);
 
-  // create/init a new buffer state
+  // create/initialize a new buffer state
   if (useYYScanBuffer_in)
   {
     bufferState_ =
-      IRC_Scanner__scan_buffer (fragment_->rd_ptr (),
-                                (fragment_->length () + IRC_FLEX_BUFFER_BOUNDARY_SIZE),
+      HTTP_Scanner__scan_buffer (fragment_->rd_ptr (),
+                                fragment_->length () + HTTP_FLEX_BUFFER_BOUNDARY_SIZE,
                                 scannerState_);
   } // end IF
   else
   {
     bufferState_ =
-      IRC_Scanner__scan_bytes (fragment_->rd_ptr (),
-                               fragment_->length (),
-                               scannerState_);
+      HTTP_Scanner__scan_bytes (fragment_->rd_ptr (),
+                                fragment_->length (),
+                                scannerState_);
   } // end ELSE
   if (!bufferState_)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to yy_scan_buffer/bytes(%@, %d), aborting\n"),
+                ACE_TEXT ("failed to yy_scan_buffer/bytes(0x%@, %d), aborting\n"),
                 fragment_->rd_ptr (),
                 fragment_->length ()));
     return false;
   } // end IF
 
   // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
-  IRC_Scanner__switch_to_buffer (bufferState_,
-                                 scannerState_);
+  HTTP_Scanner__switch_to_buffer (bufferState_,
+                                  scannerState_);
 
   return true;
 }
 
 void
-IRC_ParserDriver::scan_end ()
+HTTP_ParserDriver::scan_end ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::scan_end"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::scan_end"));
 
   // sanity check(s)
   ACE_ASSERT (bufferState_);
@@ -338,8 +380,8 @@ IRC_ParserDriver::scan_end ()
 //   } // end IF
 
   // clean state
-  IRC_Scanner__delete_buffer (bufferState_,
-                              scannerState_);
+  HTTP_Scanner__delete_buffer (bufferState_,
+                               scannerState_);
   bufferState_ = NULL;
 
 //   // switch to the next fragment (if any)

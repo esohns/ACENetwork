@@ -134,7 +134,7 @@ IRC_ParserDriver::parse (ACE_Message_Block* data_in,
     result = parser_.parse ();
     if (result)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to parse IRC message fragment, aborting\n")));
+                  ACE_TEXT ("failed to parse message fragment, aborting\n")));
 
     // finalize buffer/scanner
     scan_end ();

@@ -484,7 +484,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                                &CBData_in.subscribersLock);
   event_handler_p->subscribe (&ui_event_handler);
 
-  Stream_AllocatorHeap heap_allocator;
+  Stream_AllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator;
   Net_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                   &heap_allocator,         // heap allocator handle
                                                   true);                   // block ?

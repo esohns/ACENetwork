@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_CONFIGURATION_H
-#define NET_CONFIGURATION_H
+#ifndef TEST_U_CONFIGURATION_H
+#define TEST_U_CONFIGURATION_H
 
 #include "ace/INET_Addr.h"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -30,13 +30,12 @@
 #include "stream_iallocator.h"
 
 #include "net_common.h"
+#include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 
 // forward declarations
 struct Net_Configuration;
-struct Net_ConnectionState;
-typedef Stream_Statistic Net_RuntimeStatistic_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,

@@ -37,16 +37,8 @@
 //#include "ace/Synch.h"
 //#include "ace/Task.h"
 
-#if defined (_MSC_VER)
-#define uint unsigned int
-#define ulong unsigned long
-#include <mysql.h>
-#else
-#include <mysql/mysql.h>
-#endif
-
 // Local Header Files
-#include "stream_macros.h"
+#include "net_macros.h"
 
 #if defined _MSC_VER
 #include "targetver.h"

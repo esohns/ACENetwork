@@ -18,37 +18,38 @@ echo invalid file ^(was: "%BisonEXE%"^)^, exiting
 goto Failed
 
 :Next
-@rem set SOURCE_FILE=parser.y
-@rem if NOT exist "%SOURCE_FILE%" (
-@rem  echo invalid file ^(was: "%SOURCE_FILE%"^)^, exiting
-@rem  goto Failed
-@rem )
-%BisonEXE% --verbose --graph=parser_graph.txt --xml=parser_graph.xml parser.y --report=all --report-file=parser_report.txt --warnings=all
+set YACC_FILE=parser.y
+if NOT exist "%YACC_FILE%" (
+ echo invalid yacc file ^(was: "%YACC_FILE%"^)^, exiting
+ goto Failed
+)
+%BisonEXE% --feature=caret --graph --report=all --report-file=parser_report.txt --xml --warnings=all %YACC_FILE%
 if %ERRORLEVEL% NEQ 0 (
- echo failed to generate parser from parser.y^, exiting
+ echo failed to generate parser from %YACC_FILE%^, exiting
  set RC=%ERRORLEVEL%
  goto Failed
 )
 
 @rem move generated files into the project directory
-@rem @move /Y irc_parser.h ..
+@rem @move /Y http_parser.h ..
 @rem *NOTE*: need to add specific method declarations to the parser class
 @rem         --> copy a patched version back into the project directory
 @rem *IMPORTANT NOTE*: needs to be updated after every change
-@copy /A /V /Y irc_parser_patched.h .\..\irc_parser.h >NUL
-@del /F /Q irc_parser.h >NUL
+@rem @copy /A /V /Y http_parser_patched.h .\..\http_parser.h >NUL
+@rem @del /F /Q http_parser.h >NUL
 if %ERRORLEVEL% NEQ 0 (
  echo failed to copy parser file^(s^)^, exiting
  set RC=%ERRORLEVEL%
  goto Failed
 )
 
-@move /Y irc_parser.cpp .\.. >NUL
-@rem @move /Y location.hh .\.. >NUL
-@rem @move /Y position.hh .\.. >NUL
-@rem @move /Y stack.hh .\.. >NUL
+@move /Y http_parser.cpp .\.. >NUL
+@move /Y http_parser.h .\.. >NUL
+@rem @del /F /Q location.hh >NUL
+@rem @del /F /Q position.hh >NUL
+@rem @del /F /Q stack.hh >NUL
 if %ERRORLEVEL% NEQ 0 (
- echo failed to move parser file^(s^)^, exiting
+ echo failed to delete parser file^(s^)^, exiting
  set RC=%ERRORLEVEL%
  goto Failed
 )
@@ -70,4 +71,3 @@ exit /b %1
 
 :Error_Level
 call :Exit_Code %RC%
-

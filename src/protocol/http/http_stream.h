@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_Stream_T_H
-#define IRC_Stream_T_H
+#ifndef HTTP_STREAM_H
+#define HTTP_STREAM_H
 
 #include <string>
 
@@ -35,12 +35,12 @@
 
 #include "net_module_runtimestatistic.h"
 
-#include "irc_common.h"
-#include "irc_module_bisector.h"
-#include "irc_module_parser.h"
-#include "irc_module_streamer.h"
-#include "irc_record.h"
-#include "irc_stream_common.h"
+#include "http_common.h"
+//#include "http_module_bisector.h"
+#include "http_module_parser.h"
+#include "http_module_streamer.h"
+#include "http_record.h"
+#include "http_stream_common.h"
 
 template <typename StreamStateType,
           ///////////////////////////////
@@ -54,7 +54,7 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename SessionMessageType,
           typename ProtocolMessageType>
-class IRC_Stream_T
+class HTTP_Stream_T
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
                         /////////////////
                         ACE_MT_SYNCH,
@@ -76,8 +76,8 @@ class IRC_Stream_T
                         ProtocolMessageType>
 {
  public:
-  IRC_Stream_T (const std::string&); // name
-  virtual ~IRC_Stream_T ();
+  HTTP_Stream_T (const std::string&); // name
+  virtual ~HTTP_Stream_T ();
 
   // implement Common_IInitialize_T
   virtual bool initialize (const ConfigurationType&); // configuration
@@ -112,54 +112,75 @@ class IRC_Stream_T
                         SessionMessageType,
                         ProtocolMessageType> inherited;
 
-  typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
-                                Common_TimePolicy_t,
-                                SessionMessageType,
-                                ProtocolMessageType> STREAMER_T;
-  typedef IRC_Module_Bisector_T<ACE_SYNCH_MUTEX,
-                                ///////////
-                                ACE_MT_SYNCH,
-                                Common_TimePolicy_t,
-                                SessionMessageType,
-                                ProtocolMessageType,
-                                ///////////
-                                ModuleHandlerConfigurationType,
-                                ///////////
-                                StreamStateType,
-                                ///////////
-                                SessionDataType,
-                                SessionDataContainerType,
-                                ///////////
-                                StatisticContainerType> BISECTOR_T;
+  typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 SessionMessageType,
+                                 ProtocolMessageType> STREAMER_T;
+  //typedef HTTP_Module_Bisector_T<ACE_SYNCH_MUTEX,
+  //                               ///////////
+  //                               ACE_MT_SYNCH,
+  //                               Common_TimePolicy_t,
+  //                               SessionMessageType,
+  //                               ProtocolMessageType,
+  //                               ///////////
+  //                               ModuleHandlerConfigurationType,
+  //                               ///////////
+  //                               StreamStateType,
+  //                               ///////////
+  //                               SessionDataType,
+  //                               SessionDataContainerType,
+  //                               ///////////
+  //                               StatisticContainerType> BISECTOR_T;
+  typedef HTTP_Module_Parser_T<ACE_SYNCH_MUTEX,
+                               //////////
+                               ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               SessionMessageType,
+                               ProtocolMessageType,
+                               //////////
+                               ModuleHandlerConfigurationType,
+                               //////////
+                               StreamStateType,
+                               //////////
+                               SessionDataType,
+                               SessionDataContainerType,
+                               //////////
+                               StatisticContainerType> PARSER_T;
+  //typedef Stream_StreamModule_T<ACE_MT_SYNCH,
+  //                              Common_TimePolicy_t,
+  //                              Stream_ModuleConfiguration,
+  //                              ModuleHandlerConfigurationType,
+  //                              STREAMER_T,
+  //                              BISECTOR_T> MODULE_MARSHAL_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
                                 STREAMER_T,
-                                BISECTOR_T> MODULE_MARSHAL_T;
+                                PARSER_T> MODULE_MARSHAL_T;
 
-  typedef IRC_Module_Parser_T<ACE_MT_SYNCH,
-                              Common_TimePolicy_t,
-                              SessionMessageType,
-                              ProtocolMessageType> PARSER_T;
-  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
-                                         Common_TimePolicy_t,
-                                         Stream_ModuleConfiguration,
-                                         ModuleHandlerConfigurationType,
-                                         PARSER_T> MODULE_PARSER_T;
+  //typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
+  //                             Common_TimePolicy_t,
+  //                             SessionMessageType,
+  //                             ProtocolMessageType> PARSER_T;
+  //typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
+  //                                       Common_TimePolicy_t,
+  //                                       Stream_ModuleConfiguration,
+  //                                       ModuleHandlerConfigurationType,
+  //                                       PARSER_T> MODULE_PARSER_T;
 
   typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                             Common_TimePolicy_t,
                                             SessionMessageType,
                                             ProtocolMessageType,
-                                            IRC_CommandType_t,
-                                            IRC_RuntimeStatistic_t> STATISTIC_READER_T;
+                                            HTTP_Method_t,
+                                            HTTP_RuntimeStatistic_t> STATISTIC_READER_T;
   typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                             Common_TimePolicy_t,
                                             SessionMessageType,
                                             ProtocolMessageType,
-                                            IRC_CommandType_t,
-                                            IRC_RuntimeStatistic_t> STATISTIC_WRITER_T;
+                                            HTTP_Method_t,
+                                            HTTP_RuntimeStatistic_t> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_ModuleConfiguration,
@@ -167,21 +188,21 @@ class IRC_Stream_T
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T ())
-  ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T (const IRC_Stream_T&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T& operator= (const IRC_Stream_T&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T ())
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T (const HTTP_Stream_T&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T& operator= (const HTTP_Stream_T&))
 
   // modules
   MODULE_MARSHAL_T   marshal_;
-  MODULE_PARSER_T    parser_;
+  //MODULE_PARSER_T    parser_;
   MODULE_STATISTIC_T runtimeStatistic_;
   // *NOTE*: the final module needs to be supplied to the stream from outside,
   //         otherwise data might be lost if event dispatch runs in (a) separate
   //         thread(s)
-  //   IRC_Module_Handler_Module handler_;
+  //   HTTP_Module_Handler_Module handler_;
 };
 
 // include template implementation
-#include "irc_stream.inl"
+#include "http_stream.inl"
 
 #endif

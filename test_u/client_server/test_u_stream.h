@@ -21,6 +21,8 @@
 #ifndef NET_STREAM_H
 #define NET_STREAM_H
 
+#include <string>
+
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
@@ -59,7 +61,7 @@ class Net_Stream
                         Net_Message>
 {
  public:
-  Net_Stream ();
+  Net_Stream (const std::string&); // name
   virtual ~Net_Stream ();
 
   // implement Common_IInitialize_T
@@ -94,6 +96,7 @@ class Net_Stream
                         Net_SessionMessage,
                         Net_Message> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (Net_Stream ())
   ACE_UNIMPLEMENTED_FUNC (Net_Stream (const Net_Stream&))
   ACE_UNIMPLEMENTED_FUNC (Net_Stream& operator= (const Net_Stream&))
 

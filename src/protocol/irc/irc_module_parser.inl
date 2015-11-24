@@ -213,7 +213,7 @@ IRC_Module_Parser_T<TaskSynchType,
                       crunchMessages_)) // has data been crunched ?
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_IRCParserDriver::parse(ID: %u), returning\n"),
+                ACE_TEXT ("failed to IRC_ParserDriver::parse(ID: %u), returning\n"),
                 message_p->getID ()));
     goto error;
   } // end IF

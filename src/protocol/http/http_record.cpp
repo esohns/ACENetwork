@@ -19,48 +19,38 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "irc_record.h"
+#include "http_record.h"
 
 #include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 
-#include "irc_tools.h"
+#include "http_tools.h"
 
-IRC_Record::IRC_Record ()
+HTTP_Record::HTTP_Record ()
  : inherited (1,
               true)
+ , method_ (HTTP_Codes::HTTP_METHOD_INVALID)
+ , URI_ ()
+ , version_ (HTTP_Codes::HTTP_VERSION_INVALID)
+ , status_ (HTTP_Codes::HTTP_STATUS_INVALID)
+ , headers_ ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Record::IRC_Record"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Record::HTTP_Record"));
 
-  command.string = NULL;
-  command.discriminator = Command::INVALID;
 }
 
-IRC_Record::~IRC_Record ()
+HTTP_Record::~HTTP_Record ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Record::~IRC_Record"));
 
-  switch (command.discriminator)
-  {
-    case IRC_Record::Command::STRING:
-    {
-      if (command.string)
-        delete command.string;
-
-      break;
-    }
-    default:
-      break;
-  } // end SWITCH
 }
 
 void
-IRC_Record::dump_state () const
+HTTP_Record::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Record::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Record::dump_state"));
 
   ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("%s"),
-              ACE_TEXT (IRC_Tools::dump (*this).c_str ())));
+              ACE_TEXT (HTTP_Tools::dump (*this).c_str ())));
 }

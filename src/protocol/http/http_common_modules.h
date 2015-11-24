@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_COMMON_MODULES_H
-#define IRC_COMMON_MODULES_H
+#ifndef HTTP_COMMON_MODULES_H
+#define HTTP_COMMON_MODULES_H
 
 #include "ace/Synch_Traits.h"
 
@@ -30,78 +30,79 @@
 
 #include "net_module_runtimestatistic.h"
 
-#include "irc_common.h"
-#include "irc_configuration.h"
-//#include "irc_module_bisector.h"
-#include "irc_module_parser.h"
-//#include "irc_module_streamer.h"
-//#include "irc_stream_common.h"
+#include "http_codes.h"
+#include "http_common.h"
+#include "http_configuration.h"
+//#include "http_module_bisector.h"
+#include "http_module_parser.h"
+//#include "http_module_streamer.h"
+//#include "http_stream_common.h"
 
 // forward declarations
-class IRC_SessionMessage;
-class IRC_Message;
-//struct IRC_Stream_SessionData;
-//struct IRC_StreamState;
+class HTTP_SessionMessage;
+class HTTP_Message_T<>;
+//struct HTTP_Stream_SessionData;
+//struct HTTP_StreamState;
 
-typedef IRC_Module_Parser_T<ACE_MT_SYNCH,
-                            Common_TimePolicy_t,
-                            IRC_SessionMessage,
-                            IRC_Message> IRC_Module_Parser;
+typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
+                             Common_TimePolicy_t,
+                             HTTP_SessionMessage,
+                             HTTP_Message> HTTP_Module_Parser;
 
 typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          IRC_SessionMessage,
-                                          IRC_Message,
-                                          IRC_CommandType_t,
-                                          IRC_RuntimeStatistic_t> IRC_Module_Statistic_ReaderTask_t;
+                                          HTTP_SessionMessage,
+                                          HTTP_Message,
+                                          HTTP_MethodType_t,
+                                          HTTP_RuntimeStatistic_t> HTTP_Module_Statistic_ReaderTask_t;
 typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          IRC_SessionMessage,
-                                          IRC_Message,
-                                          IRC_CommandType_t,
-                                          IRC_RuntimeStatistic_t> IRC_Module_Statistic_WriterTask_t;
+                                          HTTP_SessionMessage,
+                                          HTTP_Message,
+                                          HTTP_MethodType_t,
+                                          HTTP_RuntimeStatistic_t> HTTP_Module_Statistic_WriterTask_t;
 
-//typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
+//typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
 //                              Common_TimePolicy_t,
-//                              IRC_SessionMessage,
-//                              IRC_Message> IRC_Module_Streamer_t;
-//typedef IRC_Module_Bisector_T<ACE_SYNCH_MUTEX,
+//                              HTTP_SessionMessage,
+//                              HTTP_Message> HTTP_Module_Streamer_t;
+//typedef HTTP_Module_Bisector_T<ACE_SYNCH_MUTEX,
 //                              ///////////
 //                              ACE_MT_SYNCH,
 //                              Common_TimePolicy_t,
-//                              IRC_SessionMessage,
-//                              IRC_Message,
+//                              HTTP_SessionMessage,
+//                              HTTP_Message,
 //                              ///////////
-//                              IRC_ModuleHandlerConfiguration,
+//                              HTTP_ModuleHandlerConfiguration,
 //                              ///////////
-//                              IRC_StreamState,
+//                              HTTP_StreamState,
 //                              ///////////
-//                              IRC_Stream_SessionData,
-//                              IRC_Stream_SessionData_t,
+//                              HTTP_Stream_SessionData,
+//                              HTTP_Stream_SessionData_t,
 //                              ///////////
-//                              IRC_RuntimeStatistic_t> IRC_Module_Bisector_t;
+//                              HTTP_RuntimeStatistic_t> HTTP_Module_Bisector_t;
 
 // declare module(s)
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                   // task synch type
-                              Common_TimePolicy_t,            // time policy
-                              Stream_ModuleConfiguration,     // module configuration type
-                              IRC_ModuleHandlerConfiguration, // module handler configuration type
-                              IRC_Module_Parser);             // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                    // task synch type
+                              Common_TimePolicy_t,             // time policy
+                              Stream_ModuleConfiguration,      // module configuration type
+                              HTTP_ModuleHandlerConfiguration, // module handler configuration type
+                              HTTP_Module_Parser);             // writer type
 
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                      // task synch type
                           Common_TimePolicy_t,               // time policy type
                           Stream_ModuleConfiguration,        // module configuration type
-                          IRC_ModuleHandlerConfiguration,    // module handler configuration type
-                          IRC_Module_Statistic_ReaderTask_t, // reader type
-                          IRC_Module_Statistic_WriterTask_t, // writer type
-                          IRC_Module_RuntimeStatistic);      // name
+                          HTTP_ModuleHandlerConfiguration,    // module handler configuration type
+                          HTTP_Module_Statistic_ReaderTask_t, // reader type
+                          HTTP_Module_Statistic_WriterTask_t, // writer type
+                          HTTP_Module_RuntimeStatistic);      // name
 
 //DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                   // task synch type
 //                          Common_TimePolicy_t,            // time policy
 //                          Stream_ModuleConfiguration,     // module configuration type
-//                          IRC_ModuleHandlerConfiguration, // module handler configuration type
-//                          IRC_Module_Streamer,            // reader type
-//                          IRC_Module_Bisector_t,          // writer type
-//                          IRC_Module_Marshal);            // name
+//                          HTTP_ModuleHandlerConfiguration, // module handler configuration type
+//                          HTTP_Module_Streamer,            // reader type
+//                          HTTP_Module_Bisector_t,          // writer type
+//                          HTTP_Module_Marshal);            // name
 
 #endif

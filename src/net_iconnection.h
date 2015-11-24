@@ -91,6 +91,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          ///////////////////////////////
           typename StreamType,
           typename StreamStatusType,
           ///////////////////////////////
@@ -130,6 +131,9 @@ class Net_ISocketConnection_T
 
   virtual const StreamType& stream () const = 0;
 
+  // *TODO*: remove type inference
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual void send (typename StreamType::PROTOCOL_DATA_T*&) = 0;
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL) = 0; // timeout (absolute) ? : block
 

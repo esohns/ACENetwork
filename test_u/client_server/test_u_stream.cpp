@@ -21,15 +21,13 @@
 
 #include "test_u_stream.h"
 
-#include <string>
-
 #include "ace/Log_Msg.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
 
-Net_Stream::Net_Stream ()
- : inherited (ACE_TEXT_ALWAYS_CHAR ("NetStream"))
+Net_Stream::Net_Stream (const std::string& name_in)
+ : inherited (name_in)
  , socketHandler_ (ACE_TEXT_ALWAYS_CHAR ("SocketHandler"),
                    NULL,
                    false)

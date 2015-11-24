@@ -18,24 +18,34 @@ echo invalid file ^(was: "%FlexEXE%"^)^, exiting
 goto Failed
 
 :Next
-%FlexEXE% bisector.l 2>scanner_report_bisector.txt
+@rem set LEX_FILE=bisector.l
+@rem if NOT exist "%LEX_FILE%" (
+@rem  echo invalid lex file ^(was: "%LEX_FILE%"^)^, exiting
+@rem  goto Failed
+@rem )
+@rem %FlexEXE% %LEX_FILE% 2>scanner_report_bisector.txt
+@rem if %ERRORLEVEL% NEQ 0 (
+@rem  echo failed to generate scanner from %LEX_FILE%^, exiting
+@rem  set RC=%ERRORLEVEL%
+@rem  goto Failed
+@rem )
+
+set LEX_FILE=scanner.l
+if NOT exist "%LEX_FILE%" (
+ echo invalid lex file ^(was: "%LEX_FILE%"^)^, exiting
+ goto Failed
+)
+%FlexEXE% %LEX_FILE% 2>scanner_report_scanner.txt
 if %ERRORLEVEL% NEQ 0 (
- echo failed to generate scanner from bisector.l^, exiting
+ echo failed to generate scanner from %LEX_FILE%^, exiting
  set RC=%ERRORLEVEL%
  goto Failed
 )
 
-%FlexEXE% scanner.l 2>scanner_report_scanner.txt
-if %ERRORLEVEL% NEQ 0 (
- echo failed to generate scanner from scanner.l^, exiting
- set RC=%ERRORLEVEL%
- goto Failed
-)
-
-@move /Y irc_bisector.cpp .. >NUL
-@move /Y irc_bisector.h .. >NUL
-@move /Y irc_scanner.cpp .. >NUL
-@move /Y irc_scanner.h .. >NUL
+@rem @move /Y http_bisector.cpp .. >NUL
+@rem @move /Y http_bisector.h .. >NUL
+@move /Y http_scanner.cpp .. >NUL
+@move /Y http_scanner.h .. >NUL
 if %ERRORLEVEL% NEQ 0 (
  echo failed to move scanner file^(s^)^, exiting
  set RC=%ERRORLEVEL%
@@ -59,4 +69,3 @@ exit /b %1
 
 :Error_Level
 call :Exit_Code %RC%
-

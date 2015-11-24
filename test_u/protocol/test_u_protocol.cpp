@@ -46,22 +46,21 @@
 #include "stream_allocatorheap.h"
 #include "stream_macros.h"
 
-#ifdef HAVE_CONFIG_H
-#include "libACEStream_config.h"
-#endif
-
 #include "stream_module_filewriter.h"
+
+#ifdef HAVE_CONFIG_H
+#include "libACENetwork_config.h"
+#endif
 
 #include "net_common_tools.h"
 
-#include "test_i_common.h"
-#include "test_i_defines.h"
+#include "http_defines.h"
 
-#include "test_i_module_databasewriter.h"
-
-#include "test_i_http_get_common.h"
-#include "test_i_http_get_signalhandler.h"
-#include "test_i_http_get_stream.h"
+#include "test_u_common.h"
+#include "test_u_common_modules.h"
+#include "test_u_defines.h"
+#include "test_u_protocol_common.h"
+#include "test_u_protocol_signalhandler.h"
 
 void
 do_printUsage (const std::string& programName_in)
@@ -79,7 +78,9 @@ do_printUsage (const std::string& programName_in)
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR ("..");
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("test_i");
+  path += ACE_TEXT_ALWAYS_CHAR ("test_u");
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT_ALWAYS_CHAR ("protocol");
 #endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
@@ -90,35 +91,16 @@ do_printUsage (const std::string& programName_in)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-b [VALUE]  : buffer size (byte(s)) [")
-            << TEST_I_DEFAULT_BUFFER_SIZE
+            << TEST_U_DEFAULT_BUFFER_SIZE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
-  std::string database_options_file = path;
-#if defined (DEBUG_DEBUGGER)
-  database_options_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  database_options_file += ACE_TEXT_ALWAYS_CHAR ("http_get");
-#endif
-  database_options_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  database_options_file +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
-  database_options_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  database_options_file +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_DB_OPTIONS_FILE);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [PATH]   : database options file [")
-            << database_options_file
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-d [STRING] : write to database [")
-            << ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_DB)
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-e [STRING] : write to database table [")
-            << ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_DB_TABLE)
-            << ACE_TEXT_ALWAYS_CHAR ("]")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-d          : debug parser [")
+            << HTTP_DEFAULT_YACC_TRACE
+            << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
   std::string output_file = path;
   output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  output_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_FILE);
+  output_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-f [STRING] : (output) file name [")
             << output_file
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -132,7 +114,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-p [VALUE]  : port number [")
-            << TEST_I_DEFAULT_PORT
+            << HTTP_DEFAULT_SERVER_PORT
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r          : use reactor [")
@@ -154,12 +136,8 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]  : #dispatch threads [")
-            << TEST_I_DEFAULT_NUMBER_OF_DISPATCHING_THREADS
+            << TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS
             << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-z [VALUE]  : loop [")
-            << 0
-            << ACE_TEXT_ALWAYS_CHAR ("] {-1: forever}")
             << std::endl;
 }
 
@@ -167,9 +145,7 @@ bool
 do_processArguments (int argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
                      unsigned int& bufferSize_out,
-                     std::string& dataBaseOptionsFileName_out,
-                     std::string& outputDataBase_out,
-                     std::string& outputDataBaseTable_out,
+                     bool& debugParser_out,
                      std::string& outputFileName_out,
                      std::string& hostName_out,
                      bool& logToFile_out,
@@ -180,8 +156,7 @@ do_processArguments (int argc_in,
                      bool& traceInformation_out,
                      std::string& URI_out,
                      bool& printVersionAndExit_out,
-                     unsigned int& numberOfDispatchThreads_out,
-                     size_t& loop_out)
+                     unsigned int& numberOfDispatchThreads_out)
 {
   STREAM_TRACE (ACE_TEXT ("::do_processArguments"));
 
@@ -193,44 +168,32 @@ do_processArguments (int argc_in,
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR ("..");
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("test_i");
+  path += ACE_TEXT_ALWAYS_CHAR ("test_u");
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT_ALWAYS_CHAR ("protocol");
 #endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
-  bufferSize_out = TEST_I_DEFAULT_BUFFER_SIZE;
-  dataBaseOptionsFileName_out = path;
-#if defined (DEBUG_DEBUGGER)
-  dataBaseOptionsFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  dataBaseOptionsFileName_out += ACE_TEXT_ALWAYS_CHAR ("http_get");
-#endif
-  dataBaseOptionsFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  dataBaseOptionsFileName_out +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
-  dataBaseOptionsFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  dataBaseOptionsFileName_out +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_DB_OPTIONS_FILE);
-  outputDataBase_out = ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_DB);
-  outputDataBaseTable_out =
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_DB_TABLE);
+  bufferSize_out = TEST_U_DEFAULT_BUFFER_SIZE;
+  debugParser_out = HTTP_DEFAULT_YACC_TRACE;
   outputFileName_out = path;
   outputFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  outputFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_FILE);
+  outputFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
   hostName_out.clear ();
   logToFile_out = false;
   useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
-  port_out = TEST_I_DEFAULT_PORT;
+  port_out = HTTP_DEFAULT_SERVER_PORT;
   useReactor_out = NET_EVENT_USE_REACTOR;
   statisticReportingInterval_out = STREAM_DEFAULT_STATISTIC_REPORTING;
   traceInformation_out = false;
   URI_out.clear ();
   printVersionAndExit_out = false;
   numberOfDispatchThreads_out =
-    TEST_I_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
-  loop_out = 0;
+    TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("b:c:d:e:f:lors:tu:vx:z:"),
+                              ACE_TEXT ("b:df:lors:tu:vx:"),
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -250,21 +213,9 @@ do_processArguments (int argc_in,
         converter >> bufferSize_out;
         break;
       }
-      case 'c':
-      {
-        dataBaseOptionsFileName_out =
-          ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
-        break;
-      }
       case 'd':
       {
-        outputDataBase_out = ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
-        break;
-      }
-      case 'e':
-      {
-        outputDataBaseTable_out =
-          ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
+        debugParser_out = true;
         break;
       }
       case 'f':
@@ -380,9 +331,9 @@ do_processArguments (int argc_in,
         ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
 
         if (!match_results_3[2].matched)
-          URI_out += ACE_TEXT_ALWAYS_CHAR (STREAM_MODULE_NET_SOURCE_HTTP_GET_DEFAULT_URL);
+          URI_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_URL);
         else if (!match_results_3[3].matched)
-          URI_out += ACE_TEXT_ALWAYS_CHAR (HTML_DEFAULT_SUFFIX);
+          URI_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_SUFFIX);
 
         break;
       }
@@ -397,14 +348,6 @@ do_processArguments (int argc_in,
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter << argumentParser.opt_arg ();
         converter >> numberOfDispatchThreads_out;
-        break;
-      }
-      case 'z':
-      {
-        converter.clear ();
-        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
-        converter >> loop_out;
         break;
       }
       // error handling
@@ -515,9 +458,7 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
 
 void
 do_work (unsigned int bufferSize_in,
-         const std::string& dataBaseOptionsFileName_in,
-         const std::string& dataBase_in,
-         const std::string& dataBaseTable_in,
+         bool debugParser_in,
          const std::string& fileName_in,
          const std::string& hostName_in,
          bool useThreadPool_in,
@@ -529,62 +470,40 @@ do_work (unsigned int bufferSize_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
-         Stream_Source_SignalHandler& signalHandler_in)
+         Test_U_Protocol_SignalHandler& signalHandler_in)
 {
   STREAM_TRACE (ACE_TEXT ("::do_work"));
 
   // step0a: initialize configuration and stream
-  Test_I_Configuration configuration;
-  Test_I_StreamBase_t* stream_p = NULL;
-  if (useReactor_in)
-    ACE_NEW_NORETURN (stream_p,
-                      Test_I_HTTPGet_Stream_t ());
-  else
-    ACE_NEW_NORETURN (stream_p,
-                      Test_I_HTTPGet_AsynchStream_t ());
-  if (!stream_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, returning\n")));
-    return;
-  } // end IF
+  Test_U_Configuration configuration;
   configuration.userData.configuration = &configuration;
   configuration.userData.streamConfiguration =
       &configuration.streamConfiguration;
   configuration.useReactor = useReactor_in;
 
   Stream_Module_t* module_p = NULL;
-  Test_I_Stream_Module_DataBaseWriter_Module database_writer (ACE_TEXT_ALWAYS_CHAR ("DataBaseWriter"),
-                                                              NULL,
-                                                              true);
-  Test_I_Stream_Module_FileWriter_Module file_writer (ACE_TEXT_ALWAYS_CHAR ("FileWriter"),
-                                                      NULL,
-                                                      true);
+  Test_U_Module_FileWriter_Module file_writer (ACE_TEXT_ALWAYS_CHAR ("FileWriter"),
+                                               NULL,
+                                               true);
   module_p = &file_writer;
-  if (!dataBase_in.empty ())
-    module_p = &database_writer;
-  Test_I_IModuleHandler_t* module_handler_p =
-    dynamic_cast<Test_I_IModuleHandler_t*> (module_p->writer ());
+  Test_U_IModuleHandler_t* module_handler_p =
+    dynamic_cast<Test_U_IModuleHandler_t*> (module_p->writer ());
   if (!module_handler_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Test_I_IModuleHandler_t>(0x%@) failed, returning\n"),
+                ACE_TEXT ("%s: dynamic_cast<Test_U_IModuleHandler_t>(0x%@) failed, returning\n"),
                 module_p->name (),
                 module_p->writer ()));
-
-    // clean up
-    delete stream_p;
-
     return;
   } // end IF
 
-  Stream_AllocatorHeap heap_allocator;
-  Test_I_MessageAllocator_t message_allocator (TEST_I_MAX_MESSAGES, // maximum #buffers
+  Stream_AllocatorHeap_T<Test_U_AllocatorConfiguration> heap_allocator;
+  Test_U_MessageAllocator_t message_allocator (TEST_U_MAX_MESSAGES, // maximum #buffers
                                                &heap_allocator,     // heap allocator handle
                                                true);               // block ?
 
-  Test_I_Stream_InetConnectionManager_t* connection_manager_p =
-    TEST_I_STREAM_CONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_ConnectionManager_t* connection_manager_p =
+    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
 
   // *********************** socket configuration data ************************
@@ -599,10 +518,6 @@ do_work (unsigned int bufferSize_in,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s:%u\"): \"%m\", returning\n"),
                 ACE_TEXT (hostName_in.c_str ()),
                 port_in));
-
-    // clean up
-    delete stream_p;
-
     return;
   } // end IF
   configuration.socketConfiguration.useLoopBackDevice =
@@ -630,20 +545,16 @@ do_work (unsigned int bufferSize_in,
   configuration.moduleHandlerConfiguration.configuration = &configuration;
   configuration.moduleHandlerConfiguration.connectionManager =
     connection_manager_p;
-  configuration.moduleHandlerConfiguration.dataBaseOptionsFileName =
-    dataBaseOptionsFileName_in;
-  configuration.moduleHandlerConfiguration.dataBaseTable = dataBaseTable_in;
+  configuration.moduleHandlerConfiguration.traceParsing = debugParser_in;
+  if (debugParser_in)
+    configuration.moduleHandlerConfiguration.traceScanning = true;
   configuration.moduleHandlerConfiguration.targetFileName = fileName_in;
   configuration.moduleHandlerConfiguration.hostName = hostName_in;
-  configuration.moduleHandlerConfiguration.loginOptions.database = dataBase_in;
-  //configuration.moduleHandlerConfiguration.loginOptions.password =;
-  //configuration.moduleHandlerConfiguration.loginOptions.user = ;
   configuration.moduleHandlerConfiguration.URL = URL_in;
   configuration.moduleHandlerConfiguration.socketConfiguration =
     &configuration.socketConfiguration;
   configuration.moduleHandlerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
-  configuration.moduleHandlerConfiguration.stream = stream_p;
   // ******************** (sub-)stream configuration data *********************
   if (bufferSize_in)
     configuration.streamConfiguration.bufferSize = bufferSize_in;
@@ -657,8 +568,6 @@ do_work (unsigned int bufferSize_in,
   configuration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
 
-  module_handler_p->initialize (configuration.moduleHandlerConfiguration);
-
   // step0b: initialize event dispatch
   if (!Common_Tools::initializeEventDispatch (useReactor_in,
                                               useThreadPool_in,
@@ -667,17 +576,13 @@ do_work (unsigned int bufferSize_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
-
-    // clean up
-    delete stream_p;
-
     return;
   } // end IF
 
   // step0c: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   connection_manager_p->set (configuration,
-                             &configuration.userData);
+                              &configuration.userData);
 
   // step0d: initialize regular (global) statistic reporting
   Common_Timer_Manager_t* timer_manager_p =
@@ -709,7 +614,6 @@ do_work (unsigned int bufferSize_in,
 
       // clean up
       timer_manager_p->stop ();
-      delete stream_p;
 
       return;
     } // end IF
@@ -730,7 +634,6 @@ do_work (unsigned int bufferSize_in,
 
     // clean up
     timer_manager_p->stop ();
-    delete stream_p;
 
     return;
   } // end IF
@@ -761,62 +664,180 @@ do_work (unsigned int bufferSize_in,
     //				g_source_remove(*iterator);
     //		} // end lock scope
     timer_manager_p->stop ();
-    delete stream_p;
 
     return;
   } // end IF
 
-  unsigned int counter = 0;
-loop:
-  if (!stream_p->initialize (configuration.streamConfiguration))
+  // step1: connect
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  result =
+    configuration.socketConfiguration.peerAddress.addr_to_string (buffer,
+                                                                  sizeof (buffer),
+                                                                  1);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string: \"%m\", continuing\n")));
+
+  Test_U_IConnector_t* iconnector_p = NULL;
+  Test_U_IConnection_t* connection_p = NULL;
+  Test_U_ISocketConnection_t* isocket_connection_p = NULL;
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
+  ACE_Time_Value deadline;
+  Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
+  if (useReactor_in)
+    ACE_NEW_NORETURN (iconnector_p,
+                      Test_U_TCPConnector_t (connection_manager_p,
+                                             configuration.socketHandlerConfiguration.statisticReportingInterval));
+  else
+    ACE_NEW_NORETURN (iconnector_p,
+                      Test_U_TCPAsynchConnector_t (connection_manager_p,
+                                                   configuration.socketHandlerConfiguration.statisticReportingInterval));
+  if (!iconnector_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, aborting\n")));
+    goto clean_up;
+  } // end IF
+  if (!iconnector_p->initialize (configuration.socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize stream, aborting\n")));
+                ACE_TEXT ("failed to initialize connector, aborting\n")));
+    goto clean_up;
+  } // end IF
+  handle =
+    iconnector_p->connect (configuration.socketConfiguration.peerAddress);
+  if (handle == ACE_INVALID_HANDLE)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to connect to \"%s\", aborting\n"),
+                buffer));
+    goto clean_up;
+  } // end IF
+  if (iconnector_p->useReactor ())
+    connection_p = connection_manager_p->get (handle);
+  else
+  {
+    // step1: wait for the connection to register with the manager
+    // *TODO*: avoid tight loop here
+    deadline = (COMMON_TIME_NOW +
+                ACE_Time_Value (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT,
+                                0));
+    //result = ACE_OS::sleep (timeout);
+    //if (result == -1)
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+    //              &timeout));
+    do
+    {
+      connection_p =
+        connection_manager_p->get (configuration.socketConfiguration.peerAddress);
+      if (connection_p) break;
+    } while (COMMON_TIME_NOW < deadline);
+  } // end IF
+  if (!connection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to connect to \"%s\", returning\n"),
+                buffer));
+    goto clean_up;
+  } // end IF
+  // step1b: wait for the connection to finish initializing
+  // *TODO*: avoid tight loop here
+  deadline = COMMON_TIME_NOW + timeout;
+  do
+  {
+    status = connection_p->status ();
+    if (status == NET_CONNECTION_STATUS_OK) break;
+  } while (COMMON_TIME_NOW < deadline);
+  if (status != NET_CONNECTION_STATUS_OK)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize connection to \"%s\" (status was: %d), returning\n"),
+                buffer,
+                status));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         group_id);
-    timer_manager_p->stop ();
-    delete stream_p;
+    connection_p->close ();
+    connection_p->decrease ();
 
-    return;
+    goto clean_up;
   } // end IF
-
-  // *NOTE*: this call blocks until the file has been sent (or an error
-  //         occurs)
-  stream_p->start ();
-  //    if (!stream_p->isRunning ())
-  //    {
-  //      ACE_DEBUG ((LM_ERROR,
-  //                  ACE_TEXT ("failed to start stream, aborting\n")));
-
-  //      // clean up
-  //      //timer_manager_p->stop ();
-
-  //      return;
-  //    } // end IF
-  stream_p->waitForCompletion ();
-  if (false)
+  // step1c: wait for the connection stream to finish initializing
+  isocket_connection_p =
+    dynamic_cast<Test_U_ISocketConnection_t*> (connection_p);
+  if (!isocket_connection_p)
   {
-    ++counter;
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("iteration #%u complete...\n"),
-                counter));
-    if ((static_cast<int> (false) == -1) ||
-        (counter != false))
-      goto loop;
-  } // end IF
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<Test_U_ISocketConnection_t>(0x%@), returning\n"),
+                connection_p));
 
-  // clean up
+    // clean up
+    connection_p->close ();
+    connection_p->decrease ();
+
+    goto clean_up;
+  } // end IF
+  isocket_connection_p->wait (STREAM_STATE_RUNNING,
+                              NULL); // <-- block
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connected to \"%s\"...\n"),
+              buffer));
+
+  // step2: send HTTP request
+  HTTP_Record* record_p = NULL;
+  ACE_NEW_NORETURN (record_p,
+                    HTTP_Record ());
+  if (!record_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+
+    // clean up
+    connection_p->close ();
+    connection_p->decrease ();
+
+    goto clean_up;
+  } // end IF
+  Test_U_Message* message_p = NULL;
+allocate:
+  message_p =
+    static_cast<Test_U_Message*> (message_allocator.malloc (configuration.socketHandlerConfiguration.PDUSize));
+  // keep retrying ?
+  if (!message_p && !message_allocator.block ())
+    goto allocate;
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
+
+    // clean up
+    connection_p->close ();
+    connection_p->decrease ();
+    delete record_p;
+
+    goto clean_up;
+  } // end IF
+  record_p->method_ = HTTP_Codes::HTTP_METHOD_GET;
+  record_p->URI_ = URL_in;
+  record_p->version_ = HTTP_Codes::HTTP_VERSION_1_1;
+  message_p->initialize (record_p, NULL);
+  isocket_connection_p->send (message_p);
+
+  connection_manager_p->wait ();
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("finished working...\n")));
+
+clean_up:
+  timer_manager_p->stop ();
   connection_manager_p->stop ();
   Common_Tools::finalizeEventDispatch (useReactor_in,
                                        !useReactor_in,
                                        group_id);
-  connection_manager_p->wait ();
 
-  // step3: clean up
-  timer_manager_p->stop ();
+  delete iconnector_p;
 
   //		{ // synch access
   //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
@@ -837,15 +858,11 @@ loop:
   //			g_source_remove(*iterator);
   //	} // end lock scope
 
-  //result = event_handler.close (ACE_Module_Base::M_DELETE_NONE);
-  //if (result == -1)
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("%s: failed to ACE_Module::close (): \"%m\", continuing\n"),
-  //              event_handler.name ()));
-  delete stream_p;
-
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("finished working...\n")));
+  result = file_writer.close (ACE_Module_Base::M_DELETE_NONE);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to ACE_Module::close (): \"%m\", continuing\n"),
+                file_writer.name ()));
 }
 
 void
@@ -872,9 +889,9 @@ do_printVersion (const std::string& programName_in)
   std::cout << ACE_TEXT ("libraries: ")
             << std::endl
 #ifdef HAVE_CONFIG_H
-            << ACE_TEXT (LIBACESTREAM_PACKAGE)
+            << ACE_TEXT (LIBACENETWORK_PACKAGE)
             << ACE_TEXT (": ")
-            << ACE_TEXT (LIBACESTREAM_PACKAGE_VERSION)
+            << ACE_TEXT (LIBACENETWORK_PACKAGE_VERSION)
             << std::endl
 #endif
             ;
@@ -930,33 +947,19 @@ ACE_TMAIN (int argc_in,
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("protocol");
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
-  unsigned int buffer_size = TEST_I_DEFAULT_BUFFER_SIZE;
-  std::string database_options_file = configuration_path;
-#if defined (DEBUG_DEBUGGER)
-  database_options_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  database_options_file += ACE_TEXT_ALWAYS_CHAR ("http_get");
-#endif
-  database_options_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  database_options_file +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
-  database_options_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  database_options_file +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_DB_OPTIONS_FILE);
-  std::string output_database = ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_DB);
-  std::string output_database_table =
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_DB_TABLE);
-  std::string path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
-  std::string output_file = ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_OUTPUT_FILE);
+  unsigned int buffer_size = TEST_U_DEFAULT_BUFFER_SIZE;
+  bool debug_parser = HTTP_DEFAULT_YACC_TRACE;
+  std::string output_file = ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
   std::string host_name;
   bool log_to_file = false;
   bool use_thread_pool = NET_EVENT_USE_THREAD_POOL;
-  unsigned short port = TEST_I_DEFAULT_PORT;
+  unsigned short port = HTTP_DEFAULT_SERVER_PORT;
   bool use_reactor = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval =
     STREAM_DEFAULT_STATISTIC_REPORTING;
@@ -964,16 +967,13 @@ ACE_TMAIN (int argc_in,
   std::string URL;
   bool print_version_and_exit = false;
   unsigned int number_of_dispatch_threads =
-    TEST_I_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
-  size_t loop = 0;
+    TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
   // step1b: parse/process/validate configuration
   if (!do_processArguments (argc_in,
                             argv_in,
                             buffer_size,
-                            database_options_file,
-                            output_database,
-                            output_database_table,
+                            debug_parser,
                             output_file,
                             host_name,
                             log_to_file,
@@ -984,8 +984,7 @@ ACE_TMAIN (int argc_in,
                             trace_information,
                             URL,
                             print_version_and_exit,
-                            number_of_dispatch_threads,
-                            loop))
+                            number_of_dispatch_threads))
   {
     // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
@@ -1006,7 +1005,7 @@ ACE_TMAIN (int argc_in,
   //                   reactor/proactor thread could (dead)lock on the
   //                   allocator lock, as it cannot dispatch events that would
   //                   free slots
-  if (TEST_I_MAX_MESSAGES)
+  if (TEST_U_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could (!) lead to deadlocks --> make sure you know what you are doing...\n")));
   if (use_reactor                      &&
@@ -1018,9 +1017,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("the select()-based reactor is not reentrant, using the thread-pool reactor instead...\n")));
     use_thread_pool = true;
   } // end IF
-  if ((!database_options_file.empty () &&
-       !Common_File_Tools::isReadable (database_options_file))              ||
-      host_name.empty ()                                                    ||
+  if (host_name.empty ()                                                    ||
       (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool) ||
       URL.empty ())
   {
@@ -1045,7 +1042,7 @@ ACE_TMAIN (int argc_in,
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
-      Common_File_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (LIBACESTREAM_PACKAGE_NAME),
+      Common_File_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME),
                                          ACE::basename (argv_in[0]));
   if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]),           // program name
                                         log_file_name,                        // log file name
@@ -1112,7 +1109,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  Stream_Source_SignalHandler signal_handler (use_reactor);
+  Test_U_Protocol_SignalHandler signal_handler (use_reactor);
 
   // step1f: handle specific program modes
   if (print_version_and_exit)
@@ -1162,9 +1159,7 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   // step2: do actual work
   do_work (buffer_size,
-           database_options_file,
-           output_database,
-           output_database_table,
+           debug_parser,
            output_file,
            host_name,
            use_thread_pool,

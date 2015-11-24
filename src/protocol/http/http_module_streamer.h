@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_MODULE_STREAMER_H
-#define IRC_MODULE_STREAMER_H
+#ifndef HTTP_MODULE_STREAMER_H
+#define HTTP_MODULE_STREAMER_H
 
 #include "ace/Global_Macros.h"
 
@@ -29,14 +29,14 @@ template <typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType>
-class IRC_Module_Streamer_T
+class HTTP_Module_Streamer_T
  : public Stream_TaskBaseSynch_T<TimePolicyType,
                                  SessionMessageType,
                                  ProtocolMessageType>
 {
  public:
-  IRC_Module_Streamer_T ();
-  virtual ~IRC_Module_Streamer_T ();
+  HTTP_Module_Streamer_T ();
+  virtual ~HTTP_Module_Streamer_T ();
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
@@ -47,11 +47,11 @@ class IRC_Module_Streamer_T
                                  SessionMessageType,
                                  ProtocolMessageType> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T (const IRC_Module_Streamer_T&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T& operator= (const IRC_Module_Streamer_T&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T (const HTTP_Module_Streamer_T&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T& operator= (const HTTP_Module_Streamer_T&))
 };
 
 // include template implementation
-#include "irc_module_streamer.inl"
+#include "http_module_streamer.inl"
 
 #endif

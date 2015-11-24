@@ -18,86 +18,122 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_MODULE_PARSER_H
-#define IRC_MODULE_PARSER_H
+#ifndef HTTP_MODULE_PARSER_H
+#define HTTP_MODULE_PARSER_H
 
 #include "ace/Global_Macros.h"
 
-#include "stream_task_base_synch.h"
+#include "common_istatistic.h"
 
-#include "irc_defines.h"
-#include "irc_parser_driver.h"
+#include "stream_headmoduletask_base.h"
 
- // tell flex of the lexer's prototype ...
-extern yy::IRC_Parser::token_type
-IRC_Scanner_lex (yy::IRC_Parser::semantic_type*, // token
-                 yy::IRC_Parser::location_type*, // location
-                 IRC_ParserDriver*,              // driver
-                 unsigned int*,                  // return value: message count
-                 yyscan_t);                      // scanner state
-#define YY_DECL                                         \
-yy::IRC_Parser::token_type                              \
-IRC_Scanner_lex (yy::IRC_Parser::semantic_type* yylval, \
-                 yy::IRC_Parser::location_type* yylloc, \
-                 IRC_ParserDriver* driver,              \
-                 unsigned int* messageCounter,          \
-                 yyscan_t yyscanner)
-// ... and declare it for the parser's sake
-YY_DECL;
-
-//void
-//yy::IRC_Client_IRCParser::set(yyscan_t);
+#include "HTTP_defines.h"
+#include "HTTP_parser_driver.h"
 
 // forward declaration(s)
 class Stream_IAllocator;
 
-template <typename TaskSynchType,
+template <typename LockType,
+          ///////////////////////////////
+          typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
-          typename ProtocolMessageType>
-class IRC_Module_Parser_T
- : public Stream_TaskBaseSynch_T<TimePolicyType,
-                                 SessionMessageType,
-                                 ProtocolMessageType>
+          typename ProtocolMessageType,
+          ///////////////////////////////
+          typename ConfigurationType,
+          ///////////////////////////////
+          typename StreamStateType,
+          ///////////////////////////////
+          typename SessionDataType,          // session data
+          typename SessionDataContainerType, // session message payload (reference counted)
+          ///////////////////////////////
+          typename StatisticContainerType>
+class HTTP_Module_Parser_T
+ : public Stream_HeadModuleTaskBase_T<LockType,
+                                      ///
+                                      TaskSynchType,
+                                      TimePolicyType,
+                                      SessionMessageType,
+                                      ProtocolMessageType,
+                                      ///
+                                      ConfigurationType,
+                                      ///
+                                      StreamStateType,
+                                      ///
+                                      SessionDataType,
+                                      SessionDataContainerType>
+ // implement this to have a generic (timed) event handler to trigger
+ // periodic statistic collection
+ , public Common_IStatistic_T<StatisticContainerType>
 {
  public:
-  IRC_Module_Parser_T ();
-  virtual ~IRC_Module_Parser_T ();
+  HTTP_Module_Parser_T ();
+  virtual ~HTTP_Module_Parser_T ();
 
-  // configuration / initialization
-  bool initialize (Stream_IAllocator*,             // message allocator
-                   bool = IRC_DEF_CRUNCH_MESSAGES, // crunch messages ?
-                   bool = IRC_DEF_LEX_TRACE,       // debug scanner ?
-                   bool = IRC_DEF_YACC_TRACE);     // debug parser ?
+  //#if defined (__GNUG__) || defined (_MSC_VER)
+#if defined (_MSC_VER)
+  // *PORTABILITY*: for some reason, this base class member is not exposed
+  //                (MSVC/gcc)
+  using Stream_HeadModuleTaskBase_T::initialize;
+#endif
+
+  // override (part of) Stream_IModuleHandler_T
+  virtual bool initialize (const ConfigurationType&);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
                                   bool&);                // return value: pass message downstream ?
 
- private:
-  typedef Stream_TaskBaseSynch_T<TimePolicyType,
-                                 SessionMessageType,
-                                 ProtocolMessageType> inherited;
+  // catch the session ID...
+  virtual void handleSessionMessage (SessionMessageType*&, // session message handle
+                                     bool&);               // return value: pass message downstream ?
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T (const IRC_Module_Parser_T&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T& operator= (const IRC_Module_Parser_T&))
+  // implement Common_IStatistic
+  // *NOTE*: this reuses the interface to implement timer-based data collection
+  virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
+  virtual void report () const;
+
+ private:
+  typedef Stream_HeadModuleTaskBase_T<LockType,
+                                      ///
+                                      TaskSynchType,
+                                      TimePolicyType,
+                                      SessionMessageType,
+                                      ProtocolMessageType,
+                                      ///
+                                      ConfigurationType,
+                                      ///
+                                      StreamStateType,
+                                      ///
+                                      SessionDataType,
+                                      SessionDataContainerType> inherited;
+
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T (const HTTP_Module_Parser_T&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T& operator= (const HTTP_Module_Parser_T&))
+
+  // convenience types
+  typedef Stream_StatisticHandler_Reactor_T<StatisticContainerType> STATISTICHANDLER_T;
+  //typedef IRC_Client_SessionData SESSIONDATA_T;
 
   // helper methods
+  bool putStatisticMessage (const StatisticContainerType&) const;
   ProtocolMessageType* allocateMessage (unsigned int); // requested size
 
-  // message allocator
-  Stream_IAllocator* allocator_;
+  // timer
+  STATISTICHANDLER_T statisticCollectHandler_;
+  long               statisticCollectHandlerID_;
 
   // driver
   bool               debugScanner_;
   bool               debugParser_;
-  IRC_ParserDriver   driver_;
+  HTTP_ParserDriver  driver_;
+  bool               isDriverInitialized_;
 
   bool               crunchMessages_;
   bool               isInitialized_;
 };
 
 // include template implementation
-#include "irc_module_parser.inl"
+#include "HTTP_module_parser.inl"
 
 #endif

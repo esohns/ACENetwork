@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_CONFIGURATION_H
-#define IRC_CONFIGURATION_H
+#ifndef HTTP_CONFIGURATION_H
+#define HTTP_CONFIGURATION_H
 
 #include <string>
 
@@ -31,133 +31,128 @@
 
 #include "stream_common.h"
 
-#include "net_common.h"
+#include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 
-#include "irc_common.h"
-#include "irc_defines.h"
-#include "irc_icontrol.h"
-#include "irc_stream_common.h"
+#include "http_common.h"
+#include "http_defines.h"
+#include "http_stream_common.h"
 
 // forward declarations
-struct IRC_ConnectionState;
-class IRC_Record;
-struct IRC_ModuleHandlerConfiguration;
-class IRC_SessionMessage;
-struct IRC_Stream_SessionData;
-struct IRC_Stream_UserData;
+struct HTTP_ConnectionState;
+class HTTP_Record;
+struct HTTP_ModuleHandlerConfiguration;
+class HTTP_SessionMessage;
+struct HTTP_Stream_SessionData;
+struct HTTP_Stream_UserData;
 
 //typedef Net_IConnection_T<ACE_INET_Addr,
-//                          IRC_Configuration,
-//                          IRC_ConnectionState,
-//                          IRC_RuntimeStatistic_t,
-//                          IRC_Stream> IRC_IConnection_t;
+//                          HTTP_Configuration,
+//                          HTTP_ConnectionState,
+//                          HTTP_RuntimeStatistic_t,
+//                          HTTP_Stream> HTTP_IConnection_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 IRC_Configuration,
-                                 IRC_ConnectionState,
-                                 IRC_RuntimeStatistic_t,
+                                 HTTP_Configuration,
+                                 HTTP_ConnectionState,
+                                 HTTP_RuntimeStatistic_t,
                                  ////////
-                                 IRC_Stream_UserData> IRC_IConnection_Manager_t;
+                                 HTTP_Stream_UserData> HTTP_IConnection_Manager_t;
 
-typedef Common_INotify_T<IRC_Stream_SessionData,
-                         IRC_Record,
-                         IRC_SessionMessage> IRC_IStreamNotify_t;
-typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
+typedef Common_INotify_T<HTTP_Stream_SessionData,
+                         HTTP_Record,
+                         HTTP_SessionMessage> HTTP_IStreamNotify_t;
 
-struct IRC_SocketHandlerConfiguration
+struct HTTP_SocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
 {
-  inline IRC_SocketHandlerConfiguration ()
+  inline HTTP_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
    //////////////////////////////////////
    , userData (NULL)
   {
-    PDUSize = IRC_BUFFER_SIZE;
+    PDUSize = HTTP_BUFFER_SIZE;
   };
 
-  IRC_Stream_UserData* userData;
+  HTTP_Stream_UserData* userData;
 };
 
-//struct IRC_ConnectorConfiguration
+//struct HTTP_ConnectorConfiguration
 //{
-//  inline IRC_ConnectorConfiguration ()
+//  inline HTTP_ConnectorConfiguration ()
 //   : /*configuration (NULL)
 //   ,*/ connectionManager (NULL)
 //   , socketHandlerConfiguration (NULL)
 //   //, statisticCollectionInterval (0)
 //  {};
 //
-//  //IRC_Configuration*              configuration;
-//  IRC_IConnection_Manager_t*      connectionManager;
-//  IRC_SocketHandlerConfiguration* socketHandlerConfiguration;
+//  //HTTP_Configuration*              configuration;
+//  HTTP_IConnection_Manager_t*      connectionManager;
+//  HTTP_SocketHandlerConfiguration* socketHandlerConfiguration;
 //  unsigned int                    statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
 //};
 
-struct IRC_ProtocolConfiguration
+struct HTTP_ProtocolConfiguration
 {
-  inline IRC_ProtocolConfiguration ()
-   : automaticPong (IRC_STREAM_DEF_AUTOPONG)
-   , loginOptions ()
-   , printPingDot (IRC_DEF_PRINT_PINGDOT)
+  inline HTTP_ProtocolConfiguration ()
+   : printProgressDot (HTTP_DEFAULT_PRINT_PROGRESSDOT)
   {};
 
-  bool             automaticPong; // automatically answer "ping" messages
-  IRC_LoginOptions loginOptions;
-  bool             printPingDot;  // print dot '.' (stdlog) for answered PINGs
+  bool printProgressDot;  // print dot '.' (stdlog) for received messages
 };
 
-struct IRC_ModuleHandlerConfiguration
+struct HTTP_StreamConfiguration;
+struct HTTP_ModuleHandlerConfiguration
  : public Stream_ModuleHandlerConfiguration
 {
-  inline IRC_ModuleHandlerConfiguration ()
+  inline HTTP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    //////////////////////////////////////
    , active (false)
    //////////////////////////////////////
-   , crunchMessages (IRC_DEF_CRUNCH_MESSAGES)
-   , traceParsing (IRC_DEF_YACC_TRACE)
-   , traceScanning (IRC_DEF_LEX_TRACE)
+   , crunchMessages (HTTP_DEFAULT_CRUNCH_MESSAGES)
+   , traceParsing (HTTP_DEFAULT_YACC_TRACE)
+   , traceScanning (HTTP_DEFAULT_LEX_TRACE)
    //////////////////////////////////////
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)
   {};
 
   /* socket handler */
-  bool                       active;
+  bool                        active;
 
   /* splitter */
   // *NOTE*: this option may be useful for (downstream) parsers that only work
   //         on CONTIGUOUS buffers (i.e. cannot parse chained message blocks)
   // *WARNING*: currently, this does NOT work with multithreaded streams
   //            --> USE WITH CAUTION !
-  bool                       crunchMessages;
-  bool                       traceParsing;       // debug yacc (bison) ?
-  bool                       traceScanning;      // debug (f)lex ?
+  bool                        crunchMessages;
+  bool                        traceParsing;       // debug yacc (bison) ?
+  bool                        traceScanning;      // debug (f)lex ?
 
-  IRC_ProtocolConfiguration* protocolConfiguration;
+  HTTP_ProtocolConfiguration* protocolConfiguration;
 
-  Stream_Configuration*      streamConfiguration;
+  HTTP_StreamConfiguration*   streamConfiguration;
 };
 
-struct IRC_StreamConfiguration
+struct HTTP_StreamConfiguration
  : Stream_Configuration
 {
-  inline IRC_StreamConfiguration ()
+  inline HTTP_StreamConfiguration ()
    : Stream_Configuration ()
-   , moduleConfiguration_2 ()
-   , moduleHandlerConfiguration_2 ()
+   , moduleConfiguration ()
+   , moduleHandlerConfiguration ()
    , protocolConfiguration (NULL)
    //, userData (NULL)
   {
-    bufferSize = IRC_BUFFER_SIZE;
+    bufferSize = HTTP_BUFFER_SIZE;
   };
 
-  Stream_ModuleConfiguration     moduleConfiguration_2;        // stream module configuration
-  IRC_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
-  IRC_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
+  Stream_ModuleConfiguration*      moduleConfiguration;        // stream module configuration
+  HTTP_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
+  HTTP_ProtocolConfiguration*      protocolConfiguration;      // protocol configuration
 
-  //IRC_Stream_UserData*           userData;
+  //HTTP_Stream_UserData*           userData;
 };
 
 #endif

@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_I_SOURCE_SIGNALHANDLER_H
-#define TEST_I_SOURCE_SIGNALHANDLER_H
+#ifndef TEST_U_PROTOCOL_SIGNALHANDLER_H
+#define TEST_U_PROTOCOL_SIGNALHANDLER_H
 
 #include "ace/Global_Macros.h"
 
@@ -27,19 +27,19 @@
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
-#include "test_i_common.h"
+#include "test_u_common.h"
 
-class Stream_Source_SignalHandler
+class Test_U_Protocol_SignalHandler
  : public Common_SignalHandler
- , public Common_IInitialize_T<Stream_SignalHandlerConfiguration>
+ , public Common_IInitialize_T<Test_U_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
-  Stream_Source_SignalHandler (bool = true); // use reactor ?
-  virtual ~Stream_Source_SignalHandler ();
+  Test_U_Protocol_SignalHandler (bool = true); // use reactor ?
+  virtual ~Test_U_Protocol_SignalHandler ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Stream_SignalHandlerConfiguration&); // configuration
+  virtual bool initialize (const Test_U_SignalHandlerConfiguration&); // configuration
 
   // implement Common_ISignal
   virtual bool handleSignal (int); // signal
@@ -47,11 +47,11 @@ class Stream_Source_SignalHandler
  private:
   typedef Common_SignalHandler inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Stream_Source_SignalHandler ())
-  ACE_UNIMPLEMENTED_FUNC (Stream_Source_SignalHandler (const Stream_Source_SignalHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Stream_Source_SignalHandler& operator= (const Stream_Source_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler ())
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler (const Test_U_Protocol_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler& operator= (const Test_U_Protocol_SignalHandler&))
 
-  Stream_SignalHandlerConfiguration configuration_;
+  Test_U_SignalHandlerConfiguration configuration_;
 };
 
 #endif

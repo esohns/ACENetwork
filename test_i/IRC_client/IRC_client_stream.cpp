@@ -21,10 +21,8 @@
 
 #include "IRC_client_stream.h"
 
-#include <string>
-
-IRC_Client_Stream::IRC_Client_Stream ()
- : inherited (ACE_TEXT_ALWAYS_CHAR ("IRC_Client_Stream"))
+IRC_Client_Stream::IRC_Client_Stream (const std::string& name_in)
+ : inherited (name_in)
  //, marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
  //            NULL,
  //            false)

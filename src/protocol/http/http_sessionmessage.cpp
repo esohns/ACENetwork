@@ -19,68 +19,68 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "irc_sessionmessage.h"
+#include "http_sessionmessage.h"
 
 #include "ace/Log_Msg.h"
 #include "ace/Malloc_Base.h"
 
 #include "net_macros.h"
 
-IRC_SessionMessage::IRC_SessionMessage (Stream_SessionMessageType messageType_in,
-                                        IRC_Stream_SessionData_t*& sessionData_inout,
-                                        IRC_Stream_UserData* userData_in)
+HTTP_SessionMessage::HTTP_SessionMessage (Stream_SessionMessageType messageType_in,
+                                          HTTP_Stream_SessionData_t*& sessionData_inout,
+                                          HTTP_Stream_UserData* userData_in)
  : inherited (messageType_in,
               sessionData_inout,
               userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_SessionMessage::IRC_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_SessionMessage::HTTP_SessionMessage"));
 
 }
 
-IRC_SessionMessage::IRC_SessionMessage (const IRC_SessionMessage& message_in)
+HTTP_SessionMessage::HTTP_SessionMessage (const HTTP_SessionMessage& message_in)
  : inherited (message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_SessionMessage::IRC_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_SessionMessage::HTTP_SessionMessage"));
 
 }
 
-IRC_SessionMessage::IRC_SessionMessage (ACE_Allocator* messageAllocator_in)
+HTTP_SessionMessage::HTTP_SessionMessage (ACE_Allocator* messageAllocator_in)
  : inherited (messageAllocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_SessionMessage::IRC_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_SessionMessage::HTTP_SessionMessage"));
 
 }
 
-IRC_SessionMessage::IRC_SessionMessage (ACE_Data_Block* dataBlock_in,
-                                        ACE_Allocator* messageAllocator_in)
+HTTP_SessionMessage::HTTP_SessionMessage (ACE_Data_Block* dataBlock_in,
+                                          ACE_Allocator* messageAllocator_in)
  : inherited (dataBlock_in,
               messageAllocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_SessionMessage::IRC_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_SessionMessage::HTTP_SessionMessage"));
 
 }
 
-IRC_SessionMessage::~IRC_SessionMessage ()
+HTTP_SessionMessage::~HTTP_SessionMessage ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_SessionMessage::~IRC_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_SessionMessage::~HTTP_SessionMessage"));
 
 }
 
 ACE_Message_Block*
-IRC_SessionMessage::duplicate (void) const
+HTTP_SessionMessage::duplicate (void) const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_SessionMessage::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_SessionMessage::duplicate"));
 
-  IRC_SessionMessage* message_p = NULL;
+  HTTP_SessionMessage* message_p = NULL;
 
-  // *NOTE*: create a new IRC_SessionMessage that contains unique copies of
+  // *NOTE*: create a new HTTP_SessionMessage that contains unique copies of
   // the message block fields, but a reference counted duplicate of
   // the ACE_Data_Block
 
   // if there is no allocator, use the standard new and delete calls.
   if (!inherited::message_block_allocator_)
     ACE_NEW_NORETURN (message_p,
-                      IRC_SessionMessage (*this));
+                      HTTP_SessionMessage (*this));
   else
   {
     Stream_IAllocator* allocator_p =
@@ -96,8 +96,8 @@ allocate:
       // *TODO*: (depending on the allocator implementation) this senselessly
       // allocates a datablock anyway, only to immediately release it again...
       ACE_NEW_MALLOC_NORETURN (message_p,
-                               static_cast<IRC_SessionMessage*> (inherited::message_block_allocator_->calloc (0)),
-                               IRC_SessionMessage (*this));
+                               static_cast<HTTP_SessionMessage*> (inherited::message_block_allocator_->calloc (0)),
+                               HTTP_SessionMessage (*this));
     }
     catch (...)
     {
@@ -121,11 +121,11 @@ allocate:
 
       if (allocator_p->block ())
         ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate IRC_SessionMessage: \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to allocate HTTP_SessionMessage: \"%m\", aborting\n")));
     } // end IF
     else
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate IRC_SessionMessage: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to allocate HTTP_SessionMessage: \"%m\", aborting\n")));
     return NULL;
   } // end IF
 

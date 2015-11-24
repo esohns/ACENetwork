@@ -18,21 +18,20 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_MODULE_BISECTOR_H
-#define IRC_MODULE_BISECTOR_H
+#ifndef HTTP_MODULE_BISECTOR_H
+#define HTTP_MODULE_BISECTOR_H
 
 #include "ace/Global_Macros.h"
 
 #include "common_istatistic.h"
 
 #include "stream_headmoduletask_base.h"
-#include "stream_streammodule_base.h"
 
-//// define/declare the lexer's prototype (see irc_bisector.h)
+//// define/declare the lexer's prototype (see HTTP_bisector.h)
 typedef void* yyscan_t;
-extern int IRC_Bisector_lex (yyscan_t);
-//// *TODO*: this should be part of irc_bisector.h
-//#define YY_DECL extern int IRC_Bisector_lex (yyscan_t)
+extern int HTTP_Bisector_lex (yyscan_t);
+//// *TODO*: this should be part of HTTP_bisector.h
+//#define YY_DECL extern int HTTP_Bisector_lex (yyscan_t)
 //YY_DECL;
 
 // forward declaration(s)
@@ -55,7 +54,7 @@ template <typename LockType,
           typename SessionDataContainerType, // session message payload (reference counted)
           ///////////////////////////////
           typename StatisticContainerType>
-class IRC_Module_Bisector_T
+class HTTP_Module_Bisector_T
  : public Stream_HeadModuleTaskBase_T<LockType,
                                       ///
                                       TaskSynchType,
@@ -74,8 +73,8 @@ class IRC_Module_Bisector_T
  , public Common_IStatistic_T<StatisticContainerType>
 {
  public:
-  IRC_Module_Bisector_T ();
-  virtual ~IRC_Module_Bisector_T ();
+  HTTP_Module_Bisector_T ();
+  virtual ~HTTP_Module_Bisector_T ();
 
 //#if defined (__GNUG__) || defined (_MSC_VER)
 #if defined (_MSC_VER)
@@ -115,12 +114,12 @@ class IRC_Module_Bisector_T
                                       SessionDataType,
                                       SessionDataContainerType> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Bisector_T (const IRC_Module_Bisector_T&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Bisector_T& operator= (const IRC_Module_Bisector_T&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T (const HTTP_Module_Bisector_T&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T& operator= (const HTTP_Module_Bisector_T&))
 
   // convenience types
   typedef Stream_StatisticHandler_Reactor_T<StatisticContainerType> STATISTICHANDLER_T;
-  //typedef IRC_Client_SessionData SESSIONDATA_T;
+  //typedef HTTP_Client_SessionData SESSIONDATA_T;
 
   // helper methods
   bool putStatisticMessage (const StatisticContainerType&) const;
@@ -147,6 +146,6 @@ class IRC_Module_Bisector_T
 };
 
 // include template implementation
-#include "irc_module_bisector.inl"
+#include "http_module_bisector.inl"
 
 #endif

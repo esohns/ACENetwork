@@ -98,6 +98,7 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_common_tools.cpp
      net_common_tools.h
      net_common.h
+     net_configuration.h
      net_connection_base.cpp
      net_connection_base.h
      net_connection_base.inl
@@ -209,6 +210,8 @@ install (FILES
          net_asynch_udpsockethandler.h
          net_asynch_udpsockethandler.inl
          net_common_tools.h
+         net_common.h
+         net_configuration.h
          net_connection_base.h
          net_connection_manager.h
          net_controller_base.h

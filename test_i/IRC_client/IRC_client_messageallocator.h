@@ -30,7 +30,9 @@
 class ACE_Allocator;
 
 class IRC_Client_MessageAllocator
- : public Stream_CachedMessageAllocator_T<IRC_Message,
+ : public Stream_CachedMessageAllocator_T<Stream_AllocatorConfiguration,
+                                          
+                                          IRC_Message,
                                           IRC_SessionMessage>
 {
  public:
@@ -39,7 +41,9 @@ class IRC_Client_MessageAllocator
   virtual ~IRC_Client_MessageAllocator ();
 
  private:
-  typedef Stream_CachedMessageAllocator_T<IRC_Message,
+  typedef Stream_CachedMessageAllocator_T<Stream_AllocatorConfiguration,
+                                          
+                                          IRC_Message,
                                           IRC_SessionMessage> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_MessageAllocator (const IRC_Client_MessageAllocator&));

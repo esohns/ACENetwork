@@ -445,7 +445,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
         (error != ERROR_NETNAME_DELETED)   && // 64 : Win32: local close()
         (error != ERROR_OPERATION_ABORTED) && // 995: Win32: local close()
 #endif
-        (error != ECONNRESET))                // 104:
+        (error != ECONNRESET))                // 104/10054: reset by peer
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -473,7 +473,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
           (error != ERROR_NETNAME_DELETED)   && // 64:  Win32: local close()
           (error != ERROR_OPERATION_ABORTED) && // 995: Win32: local close()
 #endif
-          (error != ECONNRESET))                // 104:
+          (error != ECONNRESET))                // 104/10054: reset by peer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
@@ -562,14 +562,14 @@ receive:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result =
     inputStream_.readv (*message_block_p,                     // buffer
-                        message_block_p->capacity (),         // bytes to read
+                        inherited::configuration_.PDUSize,    // bytes to read
                         NULL,                                 // ACT
                         0,                                    // priority
                         COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
 #else
   result =
     inputStream_.read (*message_block_p,                     // buffer
-                       message_block_p->capacity (),         // bytes to read
+                       inherited::configuration_.PDUSize,    // bytes to read
                        NULL,                                 // ACT
                        0,                                    // priority
                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
@@ -580,16 +580,18 @@ receive:
     // *WARNING*: this could fail on multi-threaded proactors
     if (error == EAGAIN) goto receive; // 11: happens on Linux
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENXIO)               && // 6 : happens on Win32
-        (error != EFAULT)              && // 14: *TODO*: happens on Win32
-        (error != ERROR_UNEXP_NET_ERR) && // 59: *TODO*: happens on Win32
-        (error != ERROR_NETNAME_DELETED)) // 64: happens on Win32
+    if ((error != ENXIO)                 && // 6    : happens on Win32
+        (error != EFAULT)                && // 14   : *TODO*: happens on Win32
+        (error != ERROR_UNEXP_NET_ERR)   && // 59   : *TODO*: happens on Win32
+        (error != ERROR_NETNAME_DELETED) && // 64   : happens on Win32
+        (error != ENOTSOCK)              && // 10038: local close()
+        (error != ECONNRESET))              // 10054: reset by peer
 #else
-    if (error)
+    if (error != ECONNRESET) // 104: reset by peer
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Read_Stream::readv(%u): \"%m\", aborting\n"),
-                  message_block_p->capacity ()));
+                  inherited::configuration_.PDUSize));
 
     // clean up
     message_block_p->release ();

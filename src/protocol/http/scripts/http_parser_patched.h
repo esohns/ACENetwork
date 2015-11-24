@@ -31,19 +31,19 @@
 // version 2.2 of Bison.
 
 /**
- ** \file irc_parser.h
+ ** \file http_parser.h
  ** Define the yy::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-#ifndef YY_YY_IRC_PARSER_H_INCLUDED
-# define YY_YY_IRC_PARSER_H_INCLUDED
+#ifndef YY_YY_HTTP_PARSER_H_INCLUDED
+# define YY_YY_HTTP_PARSER_H_INCLUDED
 // //                    "%code requires" blocks.
 
 
-class IRC_ParserDriver;
-class IRC_Scanner;
+class HTTP_ParserDriver;
+class HTTP_Scanner;
 
 typedef void* yyscan_t;
 
@@ -126,7 +126,7 @@ namespace yy {
 
 
   /// A Bison parser.
-  class IRC_Parser
+  class HTTP_Parser
   {
   public:
 #ifndef YYSTYPE
@@ -159,13 +159,13 @@ namespace yy {
       enum yytokentype
       {
         END = 0,
-        SPACE = 258,
-        ORIGIN = 259,
-        USER = 260,
-        HOST = 261,
-        CMD_STRING = 262,
-        CMD_NUMERIC = 263,
-        PARAM = 264
+        METHOD = 258,
+        VERSION = 259,
+        REQUEST = 260,
+        RESPONSE = 261,
+        HEADER = 262,
+        ENTITY = 263,
+        BODY = 264
       };
     };
 
@@ -270,8 +270,8 @@ namespace yy {
 
 
     /// Build a parser object.
-    IRC_Parser (IRC_ParserDriver* driver_yyarg, unsigned int* messageCount_yyarg, yyscan_t yyscanner_yyarg);
-    virtual ~IRC_Parser ();
+    HTTP_Parser (HTTP_ParserDriver* driver_yyarg, yyscan_t yyscanner_yyarg);
+    virtual ~HTTP_Parser ();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
@@ -304,8 +304,8 @@ namespace yy {
 
   private:
     /// This class is not copyable.
-    IRC_Parser (const IRC_Parser&);
-    IRC_Parser& operator= (const IRC_Parser&);
+    HTTP_Parser (const HTTP_Parser&);
+    HTTP_Parser& operator= (const HTTP_Parser&);
 
     /// State numbers.
     typedef int state_type;
@@ -356,7 +356,7 @@ namespace yy {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const signed char yycheck_[];
+  static const unsigned char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -476,18 +476,17 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 23,     ///< Last index in yytable_.
+      yylast_ = 11,     ///< Last index in yytable_.
       yynnts_ = 8,  ///< Number of nonterminal symbols.
-      yyfinal_ = 10, ///< Termination state number.
+      yyfinal_ = 8, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 13  ///< Number of tokens.
+      yyntokens_ = 10  ///< Number of tokens.
     };
 
 
     // User arguments.
-    IRC_ParserDriver* driver;
-    unsigned int* messageCount;
+    HTTP_ParserDriver* driver;
     yyscan_t yyscanner;
   };
 
@@ -499,4 +498,4 @@ namespace yy {
 
 
 
-#endif // !YY_YY_IRC_PARSER_H_INCLUDED
+#endif // !YY_YY_HTTP_PARSER_H_INCLUDED

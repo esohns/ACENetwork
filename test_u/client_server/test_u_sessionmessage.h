@@ -36,7 +36,9 @@ class ACE_Message_Block;
 //          typename SessionMessageType> class Stream_MessageAllocatorHeapBase;
 
 class Net_SessionMessage
- : public Stream_SessionMessageBase_T<Net_StreamSessionData_t,
+ : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
+                                      ///
+                                      Net_StreamSessionData_t,
                                       Net_UserData>
 {
 //  // enable access to private ctor(s)...
@@ -59,7 +61,9 @@ class Net_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<Net_StreamSessionData_t,
+  typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
+                                      ///
+                                      Net_StreamSessionData_t,
                                       Net_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage ())

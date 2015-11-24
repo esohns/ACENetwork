@@ -286,9 +286,9 @@ allocate:
 }
 
 std::string
-IRC_Message::CommandType2String(const IRC_CommandType_t& commandType_in)
+IRC_Message::Command2String(const IRC_CommandType_t& commandType_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Message::CommandType2String"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Message::Command2String"));
 
   std::string result = ACE_TEXT ("INVALID/UNKNOWN");
 

@@ -33,19 +33,27 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 class IRC_SessionMessage;
-template <typename MessageType,
+template <typename AllocatorConfigurationType,
+          typename MessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
-template <typename MessageType,
+template <typename AllocatorConfigurationType,
+          typename MessageType,
           typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
 class IRC_Export IRC_Message
- : public Stream_DataMessageBase_T<IRC_Record,
+ : public Stream_DataMessageBase_T<Stream_AllocatorConfiguration,
+                                   //////
+                                   IRC_Record,
                                    IRC_CommandType_t>
 {
   // enable access to specific private ctors...
-  friend class Stream_MessageAllocatorHeapBase_T<IRC_Message,
+  friend class Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
+                                                 
+                                                 IRC_Message,
                                                  IRC_SessionMessage>;
-  friend class Stream_CachedMessageAllocator_T<IRC_Message,
+  friend class Stream_CachedMessageAllocator_T<Stream_AllocatorConfiguration,
+                                                 
+                                               IRC_Message,
                                                IRC_SessionMessage>;
 
  public:
@@ -79,7 +87,7 @@ class IRC_Export IRC_Message
   // *NOTE*: this uses our allocator (if any) to create a new message
   virtual ACE_Message_Block* duplicate (void) const;
 
-  static std::string CommandType2String (const IRC_CommandType_t&);
+  static std::string Command2String (const IRC_CommandType_t&);
 
  protected:
    // *NOTE*: to be used by allocators...
@@ -92,7 +100,9 @@ class IRC_Export IRC_Message
   IRC_Message (const IRC_Message&);
 
  private:
-  typedef Stream_DataMessageBase_T<IRC_Record,
+  typedef Stream_DataMessageBase_T<Stream_AllocatorConfiguration,
+                                   //////
+                                   IRC_Record,
                                    IRC_CommandType_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Message ())

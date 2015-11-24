@@ -1,10 +1,34 @@
-#ifndef IRC_Scanner_HEADER_H
-#define IRC_Scanner_HEADER_H 1
-#define IRC_Scanner_IN_HEADER 1
+#ifndef HTTP_Scanner_HEADER_H
+#define HTTP_Scanner_HEADER_H 1
+#define HTTP_Scanner_IN_HEADER 1
 
-#line 6 "irc_scanner.h"
+#line 6 "http_scanner.h"
+#line 2 "scanner.l"
+#include "http_parser.h"
 
-#line 8 "irc_scanner.h"
+/* 
+#define YY_DECL                                                 \
+yy::HTTP_Parser::token_type                                     \
+HTTP_Scanner_lex (yy::HTTP_Parser::semantic_type* yylval_param, \
+                  yy::HTTP_Parser::location_type* yylloc_param, \
+                  HTTP_ParserDriver* driver,                    \
+                  yyscan_t yyscanner) */
+#define YY_DECL                              \
+yytokentype                                  \
+HTTP_Scanner_lex (YYSTYPE* yylval_param,     \
+                  YYLTYPE* yylloc_param,     \
+                  HTTP_ParserDriver* driver, \
+                  yyscan_t yyscanner)
+// ... and declare it for the parser's sake
+YY_DECL;
+
+//using namespace yy;
+//#define YYLTYPE HTTP_Parser::location_type
+//#define YYSTYPE HTTP_Parser::semantic_type
+
+
+
+#line 32 "http_scanner.h"
 
 #define  YY_INT_ALIGNED long int
 
@@ -255,28 +279,28 @@ struct yy_buffer_state
 
 /* %endif */
 
-void IRC_Scanner_restart (FILE *input_file ,yyscan_t yyscanner );
-void IRC_Scanner__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Scanner__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void IRC_Scanner__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Scanner__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Scanner_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void IRC_Scanner_pop_buffer_state (yyscan_t yyscanner );
+void HTTP_Scanner_restart (FILE *input_file ,yyscan_t yyscanner );
+void HTTP_Scanner__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void HTTP_Scanner__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Scanner__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Scanner_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void HTTP_Scanner_pop_buffer_state (yyscan_t yyscanner );
 
-YY_BUFFER_STATE IRC_Scanner__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Scanner__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Scanner__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
 
 /* %endif */
 
-void *IRC_Scanner_alloc (yy_size_t ,yyscan_t yyscanner );
-void *IRC_Scanner_realloc (void *,yy_size_t ,yyscan_t yyscanner );
-void IRC_Scanner_free (void * ,yyscan_t yyscanner );
+void *HTTP_Scanner_alloc (yy_size_t ,yyscan_t yyscanner );
+void *HTTP_Scanner_realloc (void *,yy_size_t ,yyscan_t yyscanner );
+void HTTP_Scanner_free (void * ,yyscan_t yyscanner );
 
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
 
-#define IRC_Scanner_wrap(yyscanner) 1
+#define HTTP_Scanner_wrap(yyscanner) 1
 #define YY_SKIP_YYWRAP
 
 #define FLEX_DEBUG
@@ -289,12 +313,12 @@ void IRC_Scanner_free (void * ,yyscan_t yyscanner );
 
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
-#define prefix 1
-#define user 2
-#define host 3
-#define command 4
-#define params 5
-#define trailing 6
+#define request 1
+#define request_headers 2
+#define response 3
+#define response_headers 4
+#define crlf 5
+#define body 6
 #define end_of_frame 7
 
 #endif
@@ -311,7 +335,7 @@ void IRC_Scanner_free (void * ,yyscan_t yyscanner );
 /* %endif */
 #endif
 
-#define YY_EXTRA_TYPE IRC_ParserDriver*
+#define YY_EXTRA_TYPE HTTP_ParserDriver*
 
 /* %if-c-only Reentrant structure and macros (non-C++). */
 /* %if-reentrant */
@@ -322,9 +346,9 @@ void IRC_Scanner_free (void * ,yyscan_t yyscanner );
 
 /* %if-reentrant */
 
-int IRC_Scanner_lex_init (yyscan_t* scanner);
+int HTTP_Scanner_lex_init (yyscan_t* scanner);
 
-int IRC_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int HTTP_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
 /* %endif */
 
@@ -333,37 +357,46 @@ int IRC_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int IRC_Scanner_lex_destroy (yyscan_t yyscanner );
+int HTTP_Scanner_lex_destroy (yyscan_t yyscanner );
 
-int IRC_Scanner_get_debug (yyscan_t yyscanner );
+int HTTP_Scanner_get_debug (yyscan_t yyscanner );
 
-void IRC_Scanner_set_debug (int debug_flag ,yyscan_t yyscanner );
+void HTTP_Scanner_set_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE IRC_Scanner_get_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE HTTP_Scanner_get_extra (yyscan_t yyscanner );
 
-void IRC_Scanner_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void HTTP_Scanner_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
-FILE *IRC_Scanner_get_in (yyscan_t yyscanner );
+FILE *HTTP_Scanner_get_in (yyscan_t yyscanner );
 
-void IRC_Scanner_set_in  (FILE * in_str ,yyscan_t yyscanner );
+void HTTP_Scanner_set_in  (FILE * in_str ,yyscan_t yyscanner );
 
-FILE *IRC_Scanner_get_out (yyscan_t yyscanner );
+FILE *HTTP_Scanner_get_out (yyscan_t yyscanner );
 
-void IRC_Scanner_set_out  (FILE * out_str ,yyscan_t yyscanner );
+void HTTP_Scanner_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-yy_size_t IRC_Scanner_get_leng (yyscan_t yyscanner );
+yy_size_t HTTP_Scanner_get_leng (yyscan_t yyscanner );
 
-char *IRC_Scanner_get_text (yyscan_t yyscanner );
+char *HTTP_Scanner_get_text (yyscan_t yyscanner );
 
-int IRC_Scanner_get_lineno (yyscan_t yyscanner );
+int HTTP_Scanner_get_lineno (yyscan_t yyscanner );
 
-void IRC_Scanner_set_lineno (int line_number ,yyscan_t yyscanner );
+void HTTP_Scanner_set_lineno (int line_number ,yyscan_t yyscanner );
 
-int IRC_Scanner_get_column  (yyscan_t yyscanner );
+int HTTP_Scanner_get_column  (yyscan_t yyscanner );
 
-void IRC_Scanner_set_column (int column_no ,yyscan_t yyscanner );
+void HTTP_Scanner_set_column (int column_no ,yyscan_t yyscanner );
 
 /* %if-bison-bridge */
+
+YYSTYPE * HTTP_Scanner_get_lval (yyscan_t yyscanner );
+
+void HTTP_Scanner_set_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
+
+       YYLTYPE *HTTP_Scanner_get_lloc (yyscan_t yyscanner );
+    
+        void HTTP_Scanner_set_lloc (YYLTYPE * yylloc_param ,yyscan_t yyscanner );
+    
 /* %endif */
 
 /* Macros after this point can all be overridden by user definitions in
@@ -372,9 +405,9 @@ void IRC_Scanner_set_column (int column_no ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int IRC_Scanner_wrap (yyscan_t yyscanner );
+extern "C" int HTTP_Scanner_wrap (yyscan_t yyscanner );
 #else
-extern int IRC_Scanner_wrap (yyscan_t yyscanner );
+extern int HTTP_Scanner_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -423,9 +456,11 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #define YY_DECL_IS_OURS 1
 /* %if-c-only Standard (non-C++) definition */
 
-extern int IRC_Scanner_lex (yyscan_t yyscanner);
+extern int HTTP_Scanner_lex \
+               (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
 
-#define YY_DECL int IRC_Scanner_lex (yyscan_t yyscanner)
+#define YY_DECL int HTTP_Scanner_lex \
+               (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only C++ definition */
 /* %endif */
@@ -455,9 +490,9 @@ extern int IRC_Scanner_lex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 249 "scanner.l"
+#line 419 "scanner.l"
 
 
-#line 462 "irc_scanner.h"
-#undef IRC_Scanner_IN_HEADER
-#endif /* IRC_Scanner_HEADER_H */
+#line 497 "http_scanner.h"
+#undef HTTP_Scanner_IN_HEADER
+#endif /* HTTP_Scanner_HEADER_H */

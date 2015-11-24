@@ -71,7 +71,9 @@ struct Net_StreamState
   Net_UserData*          userData;
 };
 
-typedef Stream_MessageAllocatorHeapBase_T<Net_Message,
+typedef Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
+                                          
+                                          Net_Message,
                                           Net_SessionMessage> Net_StreamMessageAllocator_t;
 
 typedef Stream_SessionDataBase_T<Net_StreamSessionData> Net_StreamSessionData_t;

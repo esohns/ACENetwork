@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_NETWORK_H
-#define IRC_NETWORK_H
+#ifndef HTTP_NETWORK_H
+#define HTTP_NETWORK_H
 
 #include <string>
 
@@ -42,127 +42,127 @@
 #include "net_client_asynchconnector.h"
 #include "net_client_connector.h"
 
-#include "irc_common.h"
-#include "irc_configuration.h"
-//#include "irc_stream.h"
-#include "irc_stream_common.h"
+#include "http_common.h"
+#include "http_configuration.h"
+//#include "http_stream.h"
+#include "http_stream_common.h"
 
 /////////////////////////////////////////
 
-typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<IRC_SocketHandlerConfiguration>,
+typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<HTTP_SocketHandlerConfiguration>,
                                   ///////
                                   ACE_INET_Addr,
-                                  IRC_Configuration,
-                                  IRC_ConnectionState,
-                                  IRC_RuntimeStatistic_t,
-                                  IRC_Stream_t,
+                                  HTTP_Configuration,
+                                  HTTP_ConnectionState,
+                                  HTTP_RuntimeStatistic_t,
+                                  HTTP_Stream_t,
                                   ///////
-                                  IRC_Stream_UserData,
+                                  HTTP_Stream_UserData,
                                   ///////
                                   Stream_ModuleConfiguration,
-                                  IRC_ModuleHandlerConfiguration> IRC_TCPHandler_t;
-typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<IRC_SocketHandlerConfiguration>,
+                                  HTTP_ModuleHandlerConfiguration> HTTP_TCPHandler_t;
+typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<HTTP_SocketHandlerConfiguration>,
 
                                         ACE_INET_Addr,
-                                        IRC_Configuration,
-                                        IRC_ConnectionState,
-                                        IRC_RuntimeStatistic_t,
-                                        IRC_Stream_t,
+                                        HTTP_Configuration,
+                                        HTTP_ConnectionState,
+                                        HTTP_RuntimeStatistic_t,
+                                        HTTP_Stream_t,
 
-                                        IRC_Stream_UserData,
+                                        HTTP_Stream_UserData,
 
                                         Stream_ModuleConfiguration,
-                                        IRC_ModuleHandlerConfiguration> IRC_AsynchTCPHandler_t;
-typedef Net_TCPConnectionBase_T<IRC_TCPHandler_t,
+                                        HTTP_ModuleHandlerConfiguration> HTTP_AsynchTCPHandler_t;
+typedef Net_TCPConnectionBase_T<HTTP_TCPHandler_t,
                                 /////////
-                                IRC_Configuration,
-                                IRC_ConnectionState,
-                                IRC_RuntimeStatistic_t,
-                                IRC_Stream_t,
+                                HTTP_Configuration,
+                                HTTP_ConnectionState,
+                                HTTP_RuntimeStatistic_t,
+                                HTTP_Stream_t,
                                 /////////
-                                IRC_SocketHandlerConfiguration,
+                                HTTP_SocketHandlerConfiguration,
                                 /////////
-                                IRC_Stream_UserData> IRC_TCPConnection_t;
-typedef Net_AsynchTCPConnectionBase_T<IRC_AsynchTCPHandler_t,
+                                HTTP_Stream_UserData> HTTP_TCPConnection_t;
+typedef Net_AsynchTCPConnectionBase_T<HTTP_AsynchTCPHandler_t,
                                       ///
-                                      IRC_Configuration,
-                                      IRC_ConnectionState,
-                                      IRC_RuntimeStatistic_t,
-                                      IRC_Stream_t,
+                                      HTTP_Configuration,
+                                      HTTP_ConnectionState,
+                                      HTTP_RuntimeStatistic_t,
+                                      HTTP_Stream_t,
                                       ///
-                                      IRC_SocketHandlerConfiguration,
+                                      HTTP_SocketHandlerConfiguration,
                                       ///
-                                      IRC_Stream_UserData> IRC_AsynchTCPConnection_t;
+                                      HTTP_Stream_UserData> HTTP_AsynchTCPConnection_t;
 
 /////////////////////////////////////////
 
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          IRC_Configuration,
-                          IRC_ConnectionState,
-                          IRC_RuntimeStatistic_t> IRC_IConnection_t;
+                          HTTP_Configuration,
+                          HTTP_ConnectionState,
+                          HTTP_RuntimeStatistic_t> HTTP_IConnection_t;
 typedef Net_ISocketConnection_T<ACE_INET_Addr,
-                                IRC_Configuration,
-                                IRC_ConnectionState,
-                                IRC_RuntimeStatistic_t,
-                                IRC_Stream_t,
+                                HTTP_Configuration,
+                                HTTP_ConnectionState,
+                                HTTP_RuntimeStatistic_t,
+                                HTTP_Stream_t,
                                 Stream_StateMachine_ControlState,
                                 /////////
                                 Net_SocketConfiguration,
                                 /////////
-                                IRC_SocketHandlerConfiguration> IRC_ISocketConnection_t;
+                                HTTP_SocketHandlerConfiguration> HTTP_ISocketConnection_t;
 //typedef Net_ISession_T<ACE_INET_Addr,
 //                       Net_SocketConfiguration,
-//                       IRC_Configuration,
-//                       IRC_ConnectionState,
-//                       IRC_RuntimeStatistic_t,
-//                       IRC_Stream> IRC_ISession_t;
+//                       HTTP_Configuration,
+//                       HTTP_ConnectionState,
+//                       HTTP_RuntimeStatistic_t,
+//                       HTTP_Stream> HTTP_ISession_t;
 
 /////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         IRC_SocketHandlerConfiguration> IRC_IConnector_t;
+                         HTTP_SocketHandlerConfiguration> HTTP_IConnector_t;
 //typedef Net_IConnector_T<ACE_INET_Addr,
-//                         IRC_ConnectorConfiguration> IRC_IConnector_t;
-typedef Net_Client_Connector_T<IRC_TCPConnection_t,
+//                         HTTP_ConnectorConfiguration> HTTP_IConnector_t;
+typedef Net_Client_Connector_T<HTTP_TCPConnection_t,
                                ACE_SOCK_CONNECTOR,
                                //////////
                                ACE_INET_Addr,
-                               IRC_Configuration,
-                               IRC_ConnectionState,
-                               IRC_RuntimeStatistic_t,
-                               IRC_Stream_t,
+                               HTTP_Configuration,
+                               HTTP_ConnectionState,
+                               HTTP_RuntimeStatistic_t,
+                               HTTP_Stream_t,
                                //////////
-                               IRC_SocketHandlerConfiguration,
+                               HTTP_SocketHandlerConfiguration,
                                //////////
-                               IRC_Stream_UserData> IRC__Connector_t;
-typedef Net_Client_AsynchConnector_T<IRC_AsynchTCPConnection_t,
+                               HTTP_Stream_UserData> HTTP__Connector_t;
+typedef Net_Client_AsynchConnector_T<HTTP_AsynchTCPConnection_t,
                                      ////
                                      ACE_INET_Addr,
-                                     IRC_Configuration,
-                                     IRC_ConnectionState,
-                                     IRC_RuntimeStatistic_t,
-                                     IRC_Stream_t,
+                                     HTTP_Configuration,
+                                     HTTP_ConnectionState,
+                                     HTTP_RuntimeStatistic_t,
+                                     HTTP_Stream_t,
                                      ////
-                                     IRC_SocketHandlerConfiguration,
+                                     HTTP_SocketHandlerConfiguration,
                                      ////
-                                     IRC_Stream_UserData> IRC_AsynchConnector_t;
+                                     HTTP_Stream_UserData> HTTP_AsynchConnector_t;
 
 /////////////////////////////////////////
 
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 IRC_Configuration,
-                                 IRC_ConnectionState,
-                                 IRC_RuntimeStatistic_t,
+                                 HTTP_Configuration,
+                                 HTTP_ConnectionState,
+                                 HTTP_RuntimeStatistic_t,
                                  ////////
-                                 IRC_Stream_UserData> IRC_IConnection_Manager_t;
+                                 HTTP_Stream_UserData> HTTP_IConnection_Manager_t;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
-                                 IRC_Configuration,
-                                 IRC_ConnectionState,
-                                 IRC_RuntimeStatistic_t,
+                                 HTTP_Configuration,
+                                 HTTP_ConnectionState,
+                                 HTTP_RuntimeStatistic_t,
                                  ////////
-                                 IRC_Stream_UserData> IRC_Connection_Manager_t;
+                                 HTTP_Stream_UserData> HTTP_Connection_Manager_t;
 
-typedef ACE_Singleton<IRC_Connection_Manager_t,
-                      ACE_SYNCH_MUTEX> IRC_CONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<HTTP_Connection_Manager_t,
+                      ACE_SYNCH_MUTEX> HTTP_CONNECTIONMANAGER_SINGLETON;
 
 #endif

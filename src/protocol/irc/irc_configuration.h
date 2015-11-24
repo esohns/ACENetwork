@@ -31,7 +31,7 @@
 
 #include "stream_common.h"
 
-#include "net_common.h"
+#include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 

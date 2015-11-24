@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_PARSER_DRIVER_H
-#define IRC_PARSER_DRIVER_H
+#ifndef HTTP_PARSER_DRIVER_H
+#define HTTP_PARSER_DRIVER_H
 
 #include <string>
 
@@ -27,29 +27,25 @@
 
 #include "location.hh"
 
-#include "irc_exports.h"
-#include "irc_parser.h"
+#include "http_exports.h"
+//#include "http_parser.h"
 
 // forward declaration(s)
+class ACE_Message_Block;
+class HTTP_Record;
 typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
-class ACE_Message_Block;
-class IRC_Record;
+struct YYLTYPE;
 
-class IRC_Export IRC_ParserDriver
+class HTTP_Export HTTP_ParserDriver
 {
-  // allow access to our internals (i.e. the current message)
-  friend class yy::IRC_Parser;
-  // allow access to our internals (i.e. error reporting)
-//   friend class IRC_Scanner;
-
  public:
-  IRC_ParserDriver (bool,  // debug scanning ?
-                    bool); // debug parsing ?
-  virtual ~IRC_ParserDriver ();
+  HTTP_ParserDriver (bool,  // debug scanning ?
+                     bool); // debug parsing ?
+  virtual ~HTTP_ParserDriver ();
 
   // target data, needs to be set PRIOR to invoking parse() !
-  void initialize (IRC_Record&,   // target data
+  void initialize (HTTP_Record&,  // target data
                    bool = false,  // debug scanner ?
                    bool = false); // debug parser ?
   // *WARNING*: in order to use the faster yy_scan_buffer(), the argument needs
@@ -65,18 +61,23 @@ class IRC_Export IRC_ParserDriver
   bool moreData ();
   bool getDebugScanner () const;
 
-  // error-handling
+  // error handling
   void error (const yy::location&, // location
               const std::string&); // message
   void error (const std::string&); // message
+  void error (const YYLTYPE&,      // location
+              const std::string&); // message
+
+  // target
+  HTTP_Record*       record_;
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (IRC_ParserDriver ())
-  ACE_UNIMPLEMENTED_FUNC (IRC_ParserDriver (const IRC_ParserDriver&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_ParserDriver& operator= (const IRC_ParserDriver&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver ())
+  ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver (const HTTP_ParserDriver&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver& operator= (const HTTP_ParserDriver&))
 
-//   // clear current message
-//   void reset();
+  //// convenient typedefs
+  //typedef HTTP_Message_T<AllocatorConfigurationType> MESSAGE_T;
 
   // helper methods
   bool scan_begin (bool); // use yy_scan_buffer : yy_scan_bytes
@@ -84,7 +85,9 @@ class IRC_Export IRC_ParserDriver
 
   // context
   bool               trace_;
-  unsigned int       numberOfMessages_;
+
+  //// parser
+  //yy::HTTP_Parser    parser_;
 
   // scanner
   yyscan_t           scannerState_;
@@ -94,11 +97,6 @@ class IRC_Export IRC_ParserDriver
   ACE_Message_Block* fragment_;
   bool               fragmentIsResized_;
 
-  // parser
-  yy::IRC_Parser     parser_;
-
-  // target
-  IRC_Record*        record_;
   bool               isInitialized_;
 };
 

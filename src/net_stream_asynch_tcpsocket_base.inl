@@ -25,6 +25,7 @@
 #include "stream_common.h"
 
 #include "net_common_tools.h"
+#include "net_defines.h"
 #include "net_macros.h"
 
 template <typename HandlerType,
@@ -50,7 +51,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
  , inherited2 ()
  , inherited3 (interfaceHandle_in,
                statisticCollectionInterval_in)
- , stream_ ()
+ , stream_ (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::Net_StreamAsynchTCPSocketBase_T"));
 
@@ -251,12 +252,14 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     {
       int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if ((error != ENXIO)                && // 6 : happens on Win32
-          (error != EFAULT)               && // 14: *TODO*: happens on Win32
-          (error != ERROR_UNEXP_NET_ERR)  && // 59: *TODO*: happens on Win32
-          (error != ERROR_NETNAME_DELETED))  // 64: happens on Win32
+      if ((error != ENXIO)                 && // 6    : happens on Win32
+          (error != EFAULT)                && // 14   : *TODO*: happens on Win32
+          (error != ERROR_UNEXP_NET_ERR)   && // 59   : *TODO*: happens on Win32
+          (error != ERROR_NETNAME_DELETED) && // 64   : happens on Win32
+          (error != ENOTSOCK)              && // 10038: local close()
+          (error != ECONNRESET))              // 10054: reset by peer
 #else
-      if (error)
+      if (error != ECONNRESET) // 104: reset by peer
 #endif
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_AsynchTCPSocketHandler::initiate_read_stream(): \"%m\", aborting\n")));
@@ -1000,12 +1003,13 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
       {
         error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        if ((error != ENXIO)               && // 6 : happens on Win32
-            (error != EFAULT)              && // 14: *TODO*: happens on Win32
-            (error != ERROR_UNEXP_NET_ERR) && // 59: *TODO*: happens on Win32
-            (error != ERROR_NETNAME_DELETED)) // 64: happens on Win32
+        if ((error != ENXIO)                 && // 6    : happens on Win32
+            (error != EFAULT)                && // 14   : *TODO*: happens on Win32
+            (error != ERROR_UNEXP_NET_ERR)   && // 59   : *TODO*: happens on Win32
+            (error != ERROR_NETNAME_DELETED) && // 64   : happens on Win32
+            (error != ECONNRESET))              // 10054: reset by peer
 #else
-        if (error)
+        if (error != ECONNRESET) // 104: reset by peer
 #endif
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to HandlerType::initiate_read_stream(): \"%m\", aborting\n")));

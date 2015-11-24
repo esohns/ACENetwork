@@ -107,19 +107,19 @@ message:      prefix body                                     /* default */
               | body                                          /* default */
               | "end_of_message"                              /* default */
 prefix:       ':' "origin" ext_prefix                         { driver->record_->prefix.origin = *$2;
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                           ACE_TEXT("set origin: \"%s\"\n"),
-                                                                                                                                             driver->myCurrentMessage->prefix.origin.c_str())); */
+/*                                                              ACE_DEBUG ((LM_DEBUG,
+                                                                            ACE_TEXT ("set origin: \"%s\"\n"),
+                                                                driver->myCurrentMessage->prefix.origin.c_str ())); */
                                                               };
 ext_prefix:   '!' "user" ext_prefix                           { driver->record_->prefix.user = *$2;
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                           ACE_TEXT("set user: \"%s\"\n"),
-                                                                                                                                                      driver->myCurrentMessage->prefix.user.c_str())); */
+/*                                                              ACE_DEBUG ((LM_DEBUG,
+                                                                            ACE_TEXT ("set user: \"%s\"\n"),
+                                                                driver->myCurrentMessage->prefix.user.c_str ())); */
                                                               };
               | '@' "host" ext_prefix                         { driver->record_->prefix.host = *$2;
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                           ACE_TEXT("set host: \"%s\"\n"),
-                                                                           driver.record_->prefix.host.c_str())); */
+/*                                                              ACE_DEBUG ((LM_DEBUG,
+                                                                            ACE_TEXT ("set host: \"%s\"\n"),
+                                                                driver.record_->prefix.host.c_str ())); */
                                                               };
               | "space"                                       /* default */
 body:         command params "end_of_message"                 /* default */
@@ -128,28 +128,28 @@ command:      "cmd_string"                                    { ACE_ASSERT (driv
                                                                                   std::string (*$1));
                                                                 ACE_ASSERT (driver->record_->command.string);
                                                                 driver->record_->command.discriminator = IRC_Record::Command::STRING;
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                             ACE_TEXT("set command: \"%s\"\n"),
-                                                                             driver->record_->command.string->c_str())); */
+/*                                                              ACE_DEBUG ((LM_DEBUG,
+                                                                            ACE_TEXT ("set command: \"%s\"\n"),
+                                                                            driver->record_->command.string->c_str ())); */
                                                               };
               | "cmd_numeric"                                 { driver->record_->command.numeric = static_cast<IRC_NumericCommand_t> ($1);
                                                                 driver->record_->command.discriminator = IRC_Record::Command::NUMERIC;
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                             ACE_TEXT("set command (numeric): %d\n"),
-                                                                             $1)); */
+/*                                                              ACE_DEBUG ((LM_DEBUG,
+                                                                            ACE_TEXT ("set command (numeric): %d\n"),
+                                                                            $1)); */
                                                               };
 params:       "space" params                                  /* default */
               | ':' trailing                                  /* default */
               | "param" params                                { driver->record_->params.push_front (*$1);
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                             ACE_TEXT("set param: \"%s\"\n"),
-                                                                             driver->record_->params.front().c_str())); */
+/*                                                              ACE_DEBUG ((LM_DEBUG,
+                                                                            ACE_TEXT ("set param: \"%s\"\n"),
+                                                                            driver->record_->params.front ().c_str ())); */
                                                               };
               | %empty                                        /* empty */
 trailing:     "param"                                         { driver->record_->params.push_front (*$1);
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                             ACE_TEXT("set final param: \"%s\"\n"),
-                                                                             driver->record_->params.front().c_str())); */
+/*                                                              ACE_DEBUG ((LM_DEBUG,
+                                                                            ACE_TEXT ("set final param: \"%s\"\n"),
+                                                                            driver->record_->params.front ().c_str ())); */
                                                               };
               | %empty                                        /* empty */
 %%

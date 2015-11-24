@@ -21,21 +21,15 @@
 #ifndef NET_COMMON_H
 #define NET_COMMON_H
 
-#include "ace/INET_Addr.h"
-//#include "ace/Svc_Handler.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
-#include "stream_defines.h"
-
-#include "net_defines.h"
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#include "net_netlinksockethandler.h"
-#endif
+#include "stream_common.h"
 
 // forward declarations
-class Stream_IAllocator;
 template <typename ConfigurationType>
 class Net_ITransportLayer_T;
+struct Net_SocketConfiguration;
 
 enum Net_ClientServerRole
 {
@@ -83,6 +77,9 @@ enum Net_Connection_Status
   NET_CONNECTION_STATUS_MAX
 };
 
+typedef Stream_Statistic Net_RuntimeStatistic_t;
+typedef Net_ITransportLayer_T<Net_SocketConfiguration> Net_ITransportLayer_t;
+
 struct Net_Configuration;
 struct Net_UserData
 {
@@ -96,71 +93,27 @@ struct Net_UserData
   void*              userData;
 };
 
-struct Net_SocketConfiguration
+struct Net_ConnectionState
 {
-  inline Net_SocketConfiguration ()
-   : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
-   , linger (NET_SOCKET_DEFAULT_LINGER)
- #if defined (ACE_WIN32) || defined (ACE_WIN64)
- #else
-   , netlinkAddress ()
-   , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
- #endif
-   , peerAddress (static_cast<u_short> (0),
-                  static_cast<ACE_UINT32> (INADDR_ANY))
-   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
-   , writeOnly (false)
-  {
-    int result = -1;
-    if (useLoopBackDevice)
-    {
-      result = peerAddress.set (static_cast<unsigned short> (0),
-                                INADDR_LOOPBACK,
-                                1,
-                                0);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-    } // end IF
-  };
-
-  int              bufferSize; // socket buffer size (I/O)
-  bool             linger;
-  // *TODO*: remove address information (pass as AddressType in open() instead)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  Net_Netlink_Addr netlinkAddress;
-  int              netlinkProtocol;
-#endif
-  ACE_INET_Addr    peerAddress;
-  bool             useLoopBackDevice;
-  bool             writeOnly; // UDP ?
-  // *TODO*: add network interface specifier (interface index on linux, (G)UID
-  //         on windows)
-};
-
-struct Net_SocketHandlerConfiguration
-{
-  inline Net_SocketHandlerConfiguration ()
-   : messageAllocator (NULL)
-   , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
-   , socketConfiguration (NULL)
-   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING)
-   //////////////////////////////////////
+  inline Net_ConnectionState ()
+   : configuration (NULL)
+   , status (NET_CONNECTION_STATUS_INVALID)
+   , currentStatistic ()
+   , lastCollectionTimestamp (ACE_Time_Value::zero)
+   , lock ()
    , userData (NULL)
   {};
 
-  Stream_IAllocator*       messageAllocator;
-  // *NOTE*: applies to the corresponding protocol datagram, if it has fixed
-  //         size; otherwise, this is the size of the individual (amorphuous)
-  //         stream buffers
-  unsigned int             PDUSize; // package data unit size
-  Net_SocketConfiguration* socketConfiguration;
-  unsigned int             statisticReportingInterval; // seconds [0: off]
+  // *TODO*: consider making this a separate entity (i.e. a pointer)
+  Net_Configuration*     configuration;
 
-  Net_UserData*            userData;
+  Net_Connection_Status  status;
+
+  Net_RuntimeStatistic_t currentStatistic;
+  ACE_Time_Value         lastCollectionTimestamp;
+  ACE_SYNCH_MUTEX        lock;
+
+  Net_UserData*          userData;
 };
-
-typedef Net_ITransportLayer_T<Net_SocketConfiguration> Net_ITransportLayer_t;
 
 #endif

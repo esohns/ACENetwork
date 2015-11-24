@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_STREAM_COMMON_H
-#define IRC_STREAM_COMMON_H
+#ifndef HTTP_STREAM_COMMON_H
+#define HTTP_STREAM_COMMON_H
 
 #include "ace/Synch_Traits.h"
 
@@ -30,15 +30,16 @@
 #include "stream_imodule.h"
 #include "stream_session_data_base.h"
 
-#include "irc_common.h"
-#include "irc_record.h"
+#include "http_common.h"
+#include "http_record.h"
 
 // forward declarations
-struct IRC_ConnectionState;
-struct IRC_ModuleHandlerConfiguration;
-//struct IRC_State;
-class IRC_Message;
-class IRC_SessionMessage;
+struct HTTP_ConnectionState;
+struct HTTP_ModuleHandlerConfiguration;
+//struct HTTP_State;
+template <typename AllocatorConfigurationType>
+class HTTP_Message_T;
+class HTTP_SessionMessage;
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
@@ -47,33 +48,34 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename SessionMessageType,
           typename ProtocolMessageType>
-class IRC_Stream_T;
-struct IRC_StreamConfiguration;
+class HTTP_Stream_T;
+struct HTTP_StreamConfiguration;
 
-typedef Stream_IModuleHandler_T<IRC_ModuleHandlerConfiguration> IRC_IModuleHandler_t;
+typedef Stream_IModuleHandler_T<HTTP_ModuleHandlerConfiguration> HTTP_IModuleHandler_t;
 typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Common_TimePolicy_t,
                          Stream_ModuleConfiguration,
-                         IRC_ModuleHandlerConfiguration> IRC_IModule_t;
+                         HTTP_ModuleHandlerConfiguration> HTTP_IModule_t;
+typedef HTTP_Message_T<Stream_AllocatorConfiguration> HTTP_Message_t;
 
-struct IRC_Stream_SessionData
+struct HTTP_Stream_SessionData
  : Stream_SessionData
 {
-  inline IRC_Stream_SessionData ()
+  inline HTTP_Stream_SessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
    //, currentStatistic ()
   {};
 
-  IRC_ConnectionState*   connectionState;
+  HTTP_ConnectionState*   connectionState;
 
-  //IRC_RuntimeStatistic_t currentStatistic;
+  //HTTP_RuntimeStatistic_t currentStatistic;
 };
 
-struct IRC_Stream_UserData
+struct HTTP_Stream_UserData
  : Stream_UserData
 {
-  inline IRC_Stream_UserData ()
+  inline HTTP_Stream_UserData ()
    : Stream_UserData ()
    , moduleConfiguration (NULL)
    , moduleHandlerConfiguration (NULL)
@@ -81,37 +83,35 @@ struct IRC_Stream_UserData
 
   // *TODO*: remove these ASAP
   Stream_ModuleConfiguration*     moduleConfiguration;
-  IRC_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+  HTTP_ModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
-struct IRC_StreamState
+struct HTTP_StreamState
  : Stream_State
 {
-  inline IRC_StreamState ()
+  inline HTTP_StreamState ()
    : Stream_State ()
    , currentSessionData (NULL)
    , userData (NULL)
   {};
 
-  IRC_Stream_SessionData* currentSessionData;
-  IRC_Stream_UserData*    userData;
+  HTTP_Stream_SessionData* currentSessionData;
+  HTTP_Stream_UserData*    userData;
 };
 
-typedef Stream_SessionDataBase_T<IRC_Stream_SessionData> IRC_Stream_SessionData_t;
+typedef Stream_SessionDataBase_T<HTTP_Stream_SessionData> HTTP_Stream_SessionData_t;
 
-typedef Common_INotify_T<IRC_Stream_SessionData,
-                         IRC_Record,
-                         IRC_SessionMessage> IRC_IStreamNotify_t;
+typedef Common_INotify_T<HTTP_Stream_SessionData,
+                         HTTP_Record,
+                         HTTP_SessionMessage> HTTP_IStreamNotify_t;
 
-typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
-
-typedef IRC_Stream_T<IRC_StreamState,
-                     IRC_StreamConfiguration,
-                     IRC_RuntimeStatistic_t,
-                     IRC_ModuleHandlerConfiguration,
-                     IRC_Stream_SessionData,
-                     IRC_Stream_SessionData_t,
-                     IRC_SessionMessage,
-                     IRC_Message> IRC_Stream_t;
+typedef HTTP_Stream_T<HTTP_StreamState,
+                      HTTP_StreamConfiguration,
+                      HTTP_RuntimeStatistic_t,
+                      HTTP_ModuleHandlerConfiguration,
+                      HTTP_Stream_SessionData,
+                      HTTP_Stream_SessionData_t,
+                      HTTP_SessionMessage,
+                      HTTP_Message_t> HTTP_Stream_t;
 
 #endif

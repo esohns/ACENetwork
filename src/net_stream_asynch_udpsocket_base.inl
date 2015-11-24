@@ -52,7 +52,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
  : inherited4 (interfaceHandle_in,
                statisticCollectionInterval_in)
 // , buffer_ (NULL)
- , stream_ ()
+ , stream_ (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
 

@@ -1,49 +1,84 @@
-%require                  "2.4.1"
-/* *NOTE*: enabling debugging functionality implies inclusion of <iostream> (see
- *         below). This interferes with ACE (version 6.2.3), when compiled with
- *         support for traditional iostreams */
-/* %debug */
-%language                 "c++"
+%defines                          "http_parser.h"
+/* %file-prefix                      "" */
+/* %language                         "c++" */
+%language                         "C"
 %locations
-%name-prefix              "yy"
-%no-lines
-%skeleton                 "lalr1.cc"
-/* %skeleton         "glr.c" */
+/* %no-lines */
+%output                           "http_parser.cpp"
+%require                          "2.4.1"
+%skeleton                         "glr.c"
+/* %skeleton                         "lalr1.cc" */
 %token-table
+%verbose
+/* %yacc */
+
 %code top {
 #include "stdafx.h"
 }
-%defines                  "irc_parser.h"
-%output                   "irc_parser.cpp"
-/* %define           api.pure */
-/* %define           api.push_pull */
-/* %define           parse.lac full */
-%define api.namespace     {yy}
-%error-verbose
-%define parser_class_name {IRC_Parser}
+
+/* %define location_type */
+/* %define api.location.type         {} */
+/* %define namespace                 {yy} */
+/* %define api.namespace             {yy} */
+/* %name-prefix                      "yy" */
+%define api.prefix                {yy}
+/* %pure-parser */
+%define api.pure                  true
+/* %define api.push-pull             {pull} */
+/* %define api.token.constructor */
+%define api.token.prefix          {}
+/* %define api.value.type            variant */
+/* %define api.value.union.name      YYSTYPE */
+%define lr.default-reduction      most
+%define lr.keep-unreachable-state false
+%define lr.type                   lalr
+
+/* %define parse.assert              {true} */
+/* %error-verbose */
+%define parse.error               verbose
+/* %define parse.lac                 {full} */
+/* %define parse.lac                 {none} */
+/* %define parser_class_name         {HTTP_Parser} */
+/* *NOTE*: enabling debugging functionality implies inclusion of <iostream> (see
+           below). This interferes with ACE (version 6.2.3), when compiled with
+           support for traditional iostreams */
+/* %debug */
+%define parse.trace               {true}
 
 %code requires {
-class IRC_ParserDriver;
-class IRC_Scanner;
+#include <cstdio>
+#include <string>
+
+enum yytokentype;
+class HTTP_ParserDriver;
+//class HTTP_Scanner;
+struct YYLTYPE;
+union YYSTYPE;
 
 typedef void* yyscan_t;
+
+//#define YYERROR_VERBOSE
+void yyerror (YYLTYPE*, HTTP_ParserDriver*, yyscan_t, const char*);
+void yyprint (FILE*, yytokentype, YYSTYPE);
 }
 
 // calling conventions / parameter passing
-%parse-param              { IRC_ParserDriver* driver }
-%parse-param              { unsigned int* messageCount }
+/* %parse-param              { HTTP_ParserDriver* driver }
 %parse-param              { yyscan_t yyscanner }
-%lex-param                { IRC_ParserDriver* driver }
-%lex-param                { unsigned int* messageCount }
-%lex-param                { yyscan_t yyscanner }
+%lex-param                { YYSTYPE* yylval }
+%lex-param                { YYLTYPE* yylloc } */
+%param                    { HTTP_ParserDriver* driver }
+%param                    { yyscan_t yyscanner }
 
 %initial-action
 {
-  // Initialize the initial location
+  // initialize the location
+  //@$.initialize (YY_NULLPTR, 1, 1);
   //@$.begin.filename = @$.end.filename = &driver->file;
+  ACE_OS::memset (&@$, 0, sizeof (YYLTYPE));
 
   // initialize the token value container
-  // $$.ival = 0;
+  $$.ival = 0;
   $$.sval = NULL;
 };
 
@@ -53,12 +88,16 @@ typedef void* yyscan_t;
   int          ival;
   std::string* sval;
 };
+/* %token <int>         INTEGER;
+%token <std::string> STRING; */
 
 %code {
-// *NOTE*: necessary only if %debug is set in the definition file (see: IRCparser.y)
+// *NOTE*: necessary only if %debug is set in the definition file (see: parser.y)
 #if defined (YYDEBUG)
 #include <iostream>
 #endif
+#include <regex>
+#include <sstream>
 #include <string>
 
 // *WORKAROUND*
@@ -71,102 +110,243 @@ using namespace std;
 #define ACE_IOSFWD_H
 
 #include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "net_macros.h"
 
-#include "irc_message.h"
-#include "irc_module_parser.h"
-#include "irc_parser_driver.h"
+#include "http_parser_driver.h"
+#include "http_record.h"
+#include "http_scanner.h"
+#include "http_tools.h"
 
 // *TODO*: this shouldn't be necessary
-#define yylex IRC_Scanner_lex
+#define yylex HTTP_Scanner_lex
+
+#define YYPRINT(file, type, value) yyprint (file, type, value)
 }
 
-%token <ival> SPACE       "space"
-%token <sval> ORIGIN      "origin"
-%token <sval> USER        "user"
-%token <sval> HOST        "host"
-%token <sval> CMD_STRING  "cmd_string"
-%token <ival> CMD_NUMERIC "cmd_numeric"
-%token <sval> PARAM       "param"
-%token        END 0       "end_of_message"
-/* %type  <sval> message prefix ext_prefix command params trailing */
+%token <sval> METHOD      "method"
+%token <sval> VERSION     "version"
+%token <sval> REQUEST     "request_line"
+%token <sval> RESPONSE    "status_line"
+%token <sval> HEADER      "header"
+%token <ival> DELIMITER   "delimiter"
+%token <ival> BODY        "body"
+/* %type  <sval> METHOD VERSION REQUEST RESPONSE HEADER
+%type  <ival> DELIMITER BODY */
+/* %token <std::string> METHOD      "method"
+%token <std::string> VERSION     "version"
+%token <std::string> REQUEST     "request_line"
+%token <std::string> RESPONSE    "status_line"
+%token <std::string> HEADER      "header"
+%token <std::string> DELIMITER   "delimiter"
+%token <int>         BODY        "body" */
+%token               END 0       "end_of_message"
 
-%printer                  { debug_stream () << *$$; } <sval>
+/* %printer                  { yyoutput << $$; } <*>; */
+/* %printer                  { yyoutput << *$$; } <sval>
+%printer                  { debug_stream () << $$; }  <ival> */
+%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*$$).c_str ()); } <sval>
+%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); }  <ival>
 %destructor               { delete $$; $$ = NULL; }   <sval>
-%printer                  { debug_stream () << $$; }  <ival>
 %destructor               { $$ = 0; }                 <ival>
-/*%destructor { ACE_DEBUG ((LM_DEBUG,
-                            ACE_TEXT ("discarding tagless symbol...\n"))); } <>*/
+%destructor               { ACE_DEBUG ((LM_DEBUG,
+                                        ACE_TEXT ("discarding tagless symbol...\n"))); } <>
 
 %%
-%start                    message;
+%start        message;
 /* %nonassoc                 ':' '!' '@'; */
 
-message:      prefix body                                     /* default */
-              | body                                          /* default */
-              | "end_of_message"                              /* default */
-prefix:       ':' "origin" ext_prefix                         { driver->record_->prefix.origin = *$2;
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                           ACE_TEXT("set origin: \"%s\"\n"),
-                                                                                                                                             driver->myCurrentMessage->prefix.origin.c_str())); */
-                                                              };
-ext_prefix:   '!' "user" ext_prefix                           { driver->record_->prefix.user = *$2;
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                           ACE_TEXT("set user: \"%s\"\n"),
-                                                                                                                                                      driver->myCurrentMessage->prefix.user.c_str())); */
-                                                              };
-              | '@' "host" ext_prefix                         { driver->record_->prefix.host = *$2;
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                           ACE_TEXT("set host: \"%s\"\n"),
-                                                                           driver.record_->prefix.host.c_str())); */
-                                                              };
-              | "space"                                       /* default */
-body:         command params "end_of_message"                 /* default */
-command:      "cmd_string"                                    { ACE_ASSERT (driver->record_->command.string == NULL);
-                                                                ACE_NEW_NORETURN (driver->record_->command.string,
-                                                                                  std::string (*$1));
-                                                                ACE_ASSERT (driver->record_->command.string);
-                                                                driver->record_->command.discriminator = IRC_Record::Command::STRING;
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                             ACE_TEXT("set command: \"%s\"\n"),
-                                                                             driver->record_->command.string->c_str())); */
-                                                              };
-              | "cmd_numeric"                                 { driver->record_->command.numeric = static_cast<IRC_NumericCommand_t> ($1);
-                                                                driver->record_->command.discriminator = IRC_Record::Command::NUMERIC;
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                             ACE_TEXT("set command (numeric): %d\n"),
-                                                                             $1)); */
-                                                              };
-params:       "space" params                                  /* default */
-              | ':' trailing                                  /* default */
-              | "param" params                                { driver->record_->params.push_front (*$1);
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                             ACE_TEXT("set param: \"%s\"\n"),
-                                                                             driver->record_->params.front().c_str())); */
-                                                              };
-              | %empty                                        /* empty */
-trailing:     "param"                                         { driver->record_->params.push_front (*$1);
-/*                                                                ACE_DEBUG((LM_DEBUG,
-                                                                             ACE_TEXT("set final param: \"%s\"\n"),
-                                                                             driver->record_->params.front().c_str())); */
-                                                              };
-              | %empty                                        /* empty */
+message:      head "delimiter" body "end_of_message" /* default */
+head:         "method" request                       {
+                                                       driver->record_->method_ =
+                                                         HTTP_Tools::Method2Type (*$1);
+                                                       ACE_DEBUG ((LM_DEBUG,
+                                                                   ACE_TEXT ("set method: \"%s\"\n"),
+                                                                   ACE_TEXT ((*$1).c_str ()))); };
+              | "version" response                   { driver->record_->version_ =
+                                                         HTTP_Tools::Version2Type (*$1);
+                                                       ACE_DEBUG ((LM_DEBUG,
+                                                                   ACE_TEXT ("set version: \"%s\"\n"),
+                                                                   ACE_TEXT ((*$1).c_str ()))); };
+request:      "request_line" headers                 { /* *TODO*: modify the scanner so it emits the proper fields itself */
+                                                       std::string regex_string =
+                                                         ACE_TEXT_ALWAYS_CHAR ("^([[^\\s]+)\\s([[^\\s]+)\\sHTTP/([[:digit:]]+)\\.([[:digit:]]+)$");
+                                                       std::regex regex (regex_string);
+                                                       std::smatch match_results;
+                                                       if (!std::regex_match (*$1,
+                                                                              match_results,
+                                                                              regex,
+                                                                              std::regex_constants::match_default))
+                                                       {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("invalid HTTP request-line (was: \"%s\"), continuing\n"),
+                                                                     ACE_TEXT ((*$1).c_str ())));
+                                                       } // end IF
+                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+                                                       ACE_ASSERT (match_results[1].matched);
+                                                       driver->record_->method_ =
+                                                         HTTP_Tools::Method2Type (match_results[1]);
+                                                       ACE_DEBUG ((LM_DEBUG,
+                                                                   ACE_TEXT ("set method: \"%s\"\n"),
+                                                                   ACE_TEXT (match_results[1].str ().c_str ())));
+                                                       ACE_ASSERT (match_results[2].matched);
+                                                       driver->record_->URI_ = match_results[2];
+                                                       ACE_DEBUG ((LM_DEBUG,
+                                                                   ACE_TEXT ("set URI: \"%s\"\n"),
+                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
+                                                       ACE_ASSERT (match_results[3].matched);
+                                                       driver->record_->version_ =
+                                                         HTTP_Tools::Version2Type (match_results[3]);
+                                                       ACE_DEBUG ((LM_DEBUG,
+                                                                   ACE_TEXT ("set version: \"%s\"\n"),
+                                                                   ACE_TEXT (match_results[3].str ().c_str ()))); };
+response:     "status_line" headers                  { /* *TODO*: modify the scanner so it emits the proper fields itself */
+                                                       std::string regex_string =
+                                                         ACE_TEXT_ALWAYS_CHAR ("^([[^\\s]+)\\s([[:digit:]{3})\\s(.+)$");
+                                                       std::regex regex (regex_string);
+                                                       std::smatch match_results;
+                                                       if (!std::regex_match (*$1,
+                                                                              match_results,
+                                                                              regex,
+                                                                              std::regex_constants::match_default))
+                                                       {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("invalid HTTP status-line (was: \"%s\"), continuing\n"),
+                                                                     ACE_TEXT ((*$1).c_str ())));
+                                                       } // end IF
+                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+                                                       ACE_ASSERT (match_results[1].matched);
+                                                       driver->record_->version_ =
+                                                         HTTP_Tools::Version2Type (match_results[1]);
+                                                       ACE_DEBUG ((LM_DEBUG,
+                                                                   ACE_TEXT ("set version: \"%s\"\n"),
+                                                                   ACE_TEXT (match_results[1].str ().c_str ())));
+                                                       ACE_ASSERT (match_results[2].matched);
+                                                       std::stringstream converter;
+                                                       converter.str (match_results[2].str ().c_str ());
+                                                       int status;
+                                                       converter >> status;
+                                                       driver->record_->status_ =
+                                                         static_cast<HTTP_Status_t> (status);
+                                                       ACE_DEBUG ((LM_DEBUG,
+                                                                   ACE_TEXT ("set status: \"%s\"\n"),
+                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
+                                                       ACE_ASSERT (match_results[3].matched);
+                                                       /* driver->record_->reason_ = match_results[3];
+                                                       ACE_DEBUG ((LM_DEBUG,
+                                                                   ACE_TEXT ("set reason: \"%s\"\n"),
+                                                                   ACE_TEXT (match_results[3].str ().c_str ()))); */ };
+headers:      "header" headers                       { /* *TODO*: modify the scanner so it emits the proper fields itself */
+                                                       std::string regex_string =
+                                                         ACE_TEXT_ALWAYS_CHAR ("^([^:]+):\\s(.+)$");
+                                                       std::regex regex (regex_string);
+                                                       std::smatch match_results;
+                                                       if (!std::regex_match (*$1,
+                                                                              match_results,
+                                                                              regex,
+                                                                              std::regex_constants::match_default))
+                                                       {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("invalid HTTP header (was: \"%s\"), continuing\n"),
+                                                                     ACE_TEXT ((*$1).c_str ())));
+                                                       } // end IF
+                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+                                                       ACE_ASSERT (match_results[1].matched);
+                                                       HTTP_HeadersIterator_t iterator =
+                                                         driver->record_->headers_.find (match_results[1]);
+                                                       ACE_ASSERT (iterator == driver->record_->headers_.end ());
+                                                       ACE_ASSERT (match_results[2].matched);
+                                                       ACE_ASSERT (!match_results[2].str ().empty ());
+                                                       driver->record_->headers_[match_results[1]] =
+                                                         match_results[2];
+                                                       ACE_DEBUG ((LM_DEBUG,
+                                                                   ACE_TEXT ("set header: \"%s\" to \"%s\"\n"),
+                                                                   ACE_TEXT (match_results[1].str ().c_str ()),
+                                                                   ACE_TEXT (match_results[2].str ().c_str ()))); };
+              | %empty                               /* empty */ /* *TODO*: enforce the standard here */
+body:         "body"                                 /* default */
+              | %empty                               /* empty */
 %%
 
-void
-yy::IRC_Parser::error (const location_type& location_in,
-                       const std::string& message_in)
+/* void
+yy::HTTP_Parser::error (const location_type& location_in,
+                        const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Parser::error"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Parser::error"));
 
   driver->error (location_in, message_in);
 }
 
 void
-yy::IRC_Parser::set (yyscan_t context_in)
+yy::HTTP_Parser::set (yyscan_t context_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Parser::set"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Parser::set"));
 
   yyscanner = context_in;
+} */
+
+void
+yyerror (YYLTYPE* location_in,
+         HTTP_ParserDriver* driver_in,
+         yyscan_t context_in,
+         const char* message_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::yyerror"));
+
+  ACE_UNUSED_ARG (context_in);
+
+  // sanity check(s)
+  ACE_ASSERT (location_in);
+  ACE_ASSERT (driver_in);
+
+  driver_in->error (*location_in, std::string (message_in));
+}
+
+void
+yyprint (FILE* file_in,
+         yytokentype type_in,
+         YYSTYPE value_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::yyprint"));
+
+  int result = -1;
+
+  std::string format_string;
+  switch (type_in)
+  {
+    case METHOD:
+    case VERSION:
+    case REQUEST:
+    case RESPONSE:
+    case HEADER:
+    {
+      format_string = ACE_TEXT_ALWAYS_CHAR (" %s");
+      break;
+    }
+    case BODY:
+    case DELIMITER:
+    case END:
+    {
+      format_string = ACE_TEXT_ALWAYS_CHAR (" %d");
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown token type (was: %d), returning\n"),
+                  type_in));
+      return;
+    }
+  } // end SWITCH
+  
+  result = ACE_OS::fprintf (file_in,
+                            ACE_TEXT (format_string.c_str ()),
+                            value_in);
+  if (result < 0)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
 }

@@ -105,7 +105,7 @@ template <typename HandlerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
-bool
+void
 Net_SocketConnectionBase_T<HandlerType,
                            AddressType,
                            ConfigurationType,
@@ -115,43 +115,37 @@ Net_SocketConnectionBase_T<HandlerType,
                            StreamStatusType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
-                           //UserDataType>::get () const
-                           UserDataType>::send (ACE_Message_Block*& messageBlock_inout)
+                           UserDataType>::send (typename StreamType::PROTOCOL_DATA_T*& message_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::send"));
 
   int result = -1;
 
   Stream_Module_t* module_p = NULL;
+  Stream_Task_t* task_p = NULL;
   result = inherited::stream_.top (module_p);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::top(): \"%m\", aborting\n")));
-
-    // clean up
-    messageBlock_inout->release ();
-    messageBlock_inout = NULL;
-
-    return false;
+                ACE_TEXT ("failed to ACE_Stream::top(): \"%m\", returning\n")));
+    goto clean_up;
   } // end IF
   ACE_ASSERT (module_p);
-  Stream_Task_t* task_p = module_p->writer ();
+  task_p = module_p->writer ();
   ACE_ASSERT (task_p);
-  result = task_p->reply (messageBlock_inout, NULL);
+  result = task_p->reply (message_inout, NULL);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Task::reply(): \"%m\", aborting\n")));
-
-    // clean up
-    messageBlock_inout->release ();
-    messageBlock_inout = NULL;
-
-    return false;
+                ACE_TEXT ("failed to ACE_Task::reply(): \"%m\", returning\n")));
+    goto clean_up;
   } // end IF
 
-  return (result >= 0);
+  return;
+
+clean_up:
+  message_inout->release ();
+  message_inout = NULL;
 }
 
 template <typename HandlerType,
@@ -1044,7 +1038,7 @@ template <typename HandlerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
-bool
+void
 Net_AsynchSocketConnectionBase_T<HandlerType,
                                  AddressType,
                                  ConfigurationType,
@@ -1054,42 +1048,39 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
                                  StreamStatusType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
-                                 UserDataType>::send (ACE_Message_Block*& messageBlock_inout)
+                                 UserDataType>::send (typename StreamType::PROTOCOL_DATA_T*& message_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::send"));
 
   int result = -1;
 
   Stream_Module_t* module_p = NULL;
+  Stream_Task_t* task_p = NULL;
   result = inherited::stream_.top (module_p);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::top(): \"%m\", aborting\n")));
-
-    // clean up
-    messageBlock_inout->release ();
-    messageBlock_inout = NULL;
-
-    return false;
+                ACE_TEXT ("failed to ACE_Stream::top(): \"%m\", returning\n")));
+    goto clean_up;
   } // end IF
   ACE_ASSERT (module_p);
-  Stream_Task_t* task_p = module_p->writer ();
+  //Stream_Task_t* task_p = module_p->writer ();
+  task_p = module_p->reader ();
   ACE_ASSERT (task_p);
-  result = task_p->reply (messageBlock_inout, NULL);
+  //result = task_p->reply (message_inout, NULL);
+  result = task_p->put (message_inout, NULL);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Task::reply(): \"%m\", aborting\n")));
-
-    // clean up
-    messageBlock_inout->release ();
-    messageBlock_inout = NULL;
-
-    return false;
+                ACE_TEXT ("failed to ACE_Task::put(): \"%m\", returning\n")));
+    goto clean_up;
   } // end IF
 
-  return (result >= 0);
+  return;
+
+clean_up:
+  message_inout->release ();
+  message_inout = NULL;
 }
 
 template <typename HandlerType,

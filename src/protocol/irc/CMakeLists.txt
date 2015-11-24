@@ -144,9 +144,15 @@ target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACEStream)
 #target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACENetwork)
 #target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACENetwork_Client)
 
+# add all targets to the build-tree export set
+export (TARGETS ${PROJECT_NAME}_Protocol_IRC
+        APPEND FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
+
+############### install files ################
 install (TARGETS ${PROJECT_NAME}_Protocol_IRC
          EXPORT ${PROJECT_NAME}Targets
          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
          LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT shlib
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
+

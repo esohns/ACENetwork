@@ -361,7 +361,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
               break;
             } // end IF
             ACE_NEW_NORETURN (reply_p->command.string,
-                              std::string (IRC_Message::CommandType2String (IRC_Record::PONG)));
+                              std::string (IRC_Message::Command2String (IRC_Record::PONG)));
             if (!reply_p->command.string)
             {
               ACE_DEBUG ((LM_CRITICAL,
@@ -1472,7 +1472,7 @@ IRC_Client_Module_IRCHandler::allocateMessage (IRC_Record::CommandType type_in)
     return NULL;
   } // end IF
   ACE_NEW_NORETURN (message_p->command.string,
-                    std::string (IRC_Message::CommandType2String (type_in)));
+                    std::string (IRC_Message::Command2String (type_in)));
   if (!message_p->command.string)
   {
     ACE_DEBUG ((LM_CRITICAL,

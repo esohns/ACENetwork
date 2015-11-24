@@ -32,15 +32,21 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 class Net_SessionMessage;
-template <typename MessageType,
+template <typename AllocatorConfigurationType,
+          ///////////////////////////////
+          typename MessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Net_Message
- : public Stream_MessageBase_T<Net_Remote_Comm::MessageHeader,
+ : public Stream_MessageBase_2<Stream_AllocatorConfiguration,
+                               //////////
+                               Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t>
 {
   // enable access to specific private ctors...
-  friend class Stream_MessageAllocatorHeapBase_T<Net_Message,
+  friend class Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
+                                                 
+                                                 Net_Message,
                                                  Net_SessionMessage>;
 
  public:
@@ -48,7 +54,7 @@ class Net_Message
   virtual ~Net_Message ();
 
   virtual Net_MessageType_t command () const; // return value: message type
-  static std::string CommandType2String (Net_MessageType_t);
+  static std::string Command2String (Net_MessageType_t);
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -64,7 +70,9 @@ class Net_Message
   Net_Message (const Net_Message&);
 
  private:
-  typedef Stream_MessageBase_T<Net_Remote_Comm::MessageHeader,
+  typedef Stream_MessageBase_2<Stream_AllocatorConfiguration,
+                               //////////
+                               Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Message ())

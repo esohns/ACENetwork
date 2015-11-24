@@ -69,12 +69,22 @@ endif ()
 add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ATCD/ACE)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/misc)
+#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ATCD/ACE)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/bison)
+#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
+#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
+#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/file)
+#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/misc)
+#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/net)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/file)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/misc)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/net)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/http)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ############## next target ################
@@ -86,21 +96,12 @@ set (${PROJECT_NAME}_Protocol_EXE_SRCS
      test_u_defines.h
      test_u_message.cpp
      test_u_message.h
-     test_u_module_parser.cpp
-     test_u_module_parser.h
-     test_u_module_bissector.cpp
-     test_u_module_bissector.h
-     test_u_module_streamer.cpp
-     test_u_module_streamer.h
      test_u_session_message.cpp
      test_u_session_message.h
      test_u_protocol.cpp
      test_u_protocol_common.h
      test_u_protocol_signalhandler.cpp
      test_u_protocol_signalhandler.h
-     test_u_protocol_stream.cpp
-     test_u_protocol_stream.h
-     test_u_protocol_stream.inl
 #  test_u_template_instantiations.cpp
      stdafx.cpp
      stdafx.h)
@@ -113,13 +114,14 @@ add_executable (${EXECUTABLE} ${ACENetwork_Protocol_EXE_SRCS})
 #add_dependencies (${PROJECT_NAME} Common)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
-## *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
-#set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
+set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} ACEStream)
 target_link_libraries (${EXECUTABLE} ACENetwork)
 #target_link_libraries (${EXECUTABLE} ACENetwork_Client)
+target_link_libraries (${EXECUTABLE} ACENetwork_Protocol_HTTP)
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets

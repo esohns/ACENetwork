@@ -34,7 +34,9 @@ class ACE_Data_Block;
 class ACE_Message_Block;
 
 class IRC_Export IRC_SessionMessage
- : public Stream_SessionMessageBase_T<IRC_Stream_SessionData_t,
+ : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
+                                      ///
+                                      IRC_Stream_SessionData_t,
                                       IRC_Stream_UserData>
 {
 //  // enable access to private ctor(s)...
@@ -57,7 +59,9 @@ class IRC_Export IRC_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<IRC_Stream_SessionData_t,
+  typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
+                                      ///
+                                      IRC_Stream_SessionData_t,
                                       IRC_Stream_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_SessionMessage ())

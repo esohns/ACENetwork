@@ -19,73 +19,74 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "test_i_message.h"
+#include "test_u_message.h"
 
+#include "ace/Log_Msg.h"
 #include "ace/Malloc_Base.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
-Test_I_Stream_Message::Test_I_Stream_Message (unsigned int size_in)
+Test_U_Message::Test_U_Message (unsigned int size_in)
  : inherited (size_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
 
 }
 
-Test_I_Stream_Message::Test_I_Stream_Message (const Test_I_Stream_Message& message_in)
+Test_U_Message::Test_U_Message (const Test_U_Message& message_in)
  : inherited (message_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
 
 }
 
-Test_I_Stream_Message::Test_I_Stream_Message (ACE_Data_Block* dataBlock_in,
-                                              ACE_Allocator* messageAllocator_in,
-                                              bool incrementMessageCounter_in)
+Test_U_Message::Test_U_Message (ACE_Data_Block* dataBlock_in,
+                                ACE_Allocator* messageAllocator_in,
+                                bool incrementMessageCounter_in)
  : inherited (dataBlock_in,        // use (don't own (!) memory of-) this data block
               messageAllocator_in, // re-use the same allocator
               incrementMessageCounter_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
 
 }
 
-Test_I_Stream_Message::Test_I_Stream_Message (ACE_Allocator* messageAllocator_in)
- : inherited (messageAllocator_in) // message block allocator
-{
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
+//Test_U_Message::Test_U_Message (ACE_Allocator* messageAllocator_in)
+// : inherited (messageAllocator_in) // message block allocator
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
+//
+//}
 
-}
-
-Test_I_Stream_Message::~Test_I_Stream_Message ()
+Test_U_Message::~Test_U_Message ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::~Test_I_Stream_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::~Test_U_Message"));
 
 }
 
 ACE_Message_Block*
-Test_I_Stream_Message::duplicate (void) const
+Test_U_Message::duplicate (void) const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::duplicate"));
 
-  Test_I_Stream_Message* message_p = NULL;
+  Test_U_Message* message_p = NULL;
 
-  // create a new Test_I_Stream_MessageBase that contains unique copies of
+  // create a new Test_U_MessageBase that contains unique copies of
   // the message block fields, but a (reference counted) shallow duplicate of
   // the ACE_Data_Block.
 
   // if there is no allocator, use the standard new and delete calls.
   if (inherited::message_block_allocator_ == NULL)
     ACE_NEW_NORETURN (message_p,
-                      Test_I_Stream_Message (*this));
+                      Test_U_Message (*this));
   else // otherwise, use the existing message_block_allocator
   {
     // *NOTE*: the argument to malloc doesn't matter, as this will be
     //         a shallow copy which just references the same data block
     ACE_NEW_MALLOC_NORETURN (message_p,
-                             static_cast<Test_I_Stream_Message*> (inherited::message_block_allocator_->calloc (inherited::capacity (),
+                             static_cast<Test_U_Message*> (inherited::message_block_allocator_->calloc (inherited::capacity (),
                                                                                                                '\0')),
-                             Test_I_Stream_Message (*this));
+                             Test_U_Message (*this));
   } // end ELSE
   if (!message_p)
   {
@@ -94,7 +95,7 @@ Test_I_Stream_Message::duplicate (void) const
     ACE_ASSERT (allocator_p);
     if (allocator_p->block ())
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate Test_I_Stream_MessageBase: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to allocate Test_U_MessageBase: \"%m\", aborting\n")));
     return NULL;
   } // end IF
 
@@ -105,7 +106,7 @@ Test_I_Stream_Message::duplicate (void) const
     if (!message_p->cont_)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Test_I_Stream_MessageBase::duplicate(): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to Test_U_MessageBase::duplicate(): \"%m\", aborting\n")));
 
       // clean up
       message_p->release ();
@@ -117,22 +118,4 @@ Test_I_Stream_Message::duplicate (void) const
   // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
 
   return message_p;
-}
-
-Stream_CommandType_t
-Test_I_Stream_Message::command () const
-{
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::command"));
-
-  return ACE_Message_Block::MB_DATA;
-}
-
-std::string
-Test_I_Stream_Message::CommandType2String (Stream_CommandType_t command_in)
-{
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::CommandType2String"));
-
-  ACE_UNUSED_ARG (command_in);
-
-  return ACE_TEXT_ALWAYS_CHAR ("MB_DATA");
 }

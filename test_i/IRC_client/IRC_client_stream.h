@@ -21,13 +21,14 @@
 #ifndef IRC_CLIENT_STREAM_H
 #define IRC_CLIENT_STREAM_H
 
+#include <string>
+
 #include "ace/Global_Macros.h"
 
 #include "irc_common.h"
 #include "irc_common_modules.h"
 #include "irc_configuration.h"
 #include "irc_message.h"
-//#include "irc_sessionmessage.h"
 #include "irc_stream.h"
 #include "irc_stream_common.h"
 
@@ -50,7 +51,7 @@ class IRC_Client_Stream
                        IRC_Message>
 {
  public:
-  IRC_Client_Stream ();
+  IRC_Client_Stream (const std::string&); // name
   virtual ~IRC_Client_Stream ();
 
   // implement Common_IInitialize_T
@@ -79,6 +80,7 @@ class IRC_Client_Stream
                        IRC_Client_SessionMessage,
                        IRC_Message> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream (const IRC_Client_Stream&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream& operator= (const IRC_Client_Stream&))
 

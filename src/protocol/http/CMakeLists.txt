@@ -78,7 +78,6 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_common_modules.h
      http_configuration.h
      http_defines.h
-     http_icontrol.h
      http_codes.h
      http_bisector.cpp
      http_bisector.h
@@ -94,6 +93,7 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_scanner.h
      http_message.cpp
      http_message.h
+     http_message.inl
      http_module_parser.cpp
      http_module_parser.h
      http_module_parser.inl
@@ -104,9 +104,6 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_module_streamer.h
      http_module_streamer.inl
      http_network.h
-     http_session.cpp
-     http_session.h
-     http_session.inl
      http_sessionmessage.cpp
      http_sessionmessage.h
      http_stream.cpp
@@ -142,9 +139,15 @@ target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ACEStream)
 #target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ACENetwork)
 #target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ACENetwork_Client)
 
+# add all targets to the build-tree export set
+export (TARGETS ${PROJECT_NAME}_Protocol_HTTP
+        APPEND FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
+
+############### install files ################
 install (TARGETS ${PROJECT_NAME}_Protocol_HTTP
          EXPORT ${PROJECT_NAME}Targets
          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
          LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT shlib
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
+

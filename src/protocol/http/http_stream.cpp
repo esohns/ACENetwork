@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "irc_stream.h"
+#include "http_stream.h"
 
-#include "irc_message.h"
-#include "irc_sessionmessage.h"
+#include "http_message.h"
+#include "http_sessionmessage.h"

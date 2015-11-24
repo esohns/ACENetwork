@@ -97,9 +97,9 @@ Net_Message::command () const
 }
 
 std::string
-Net_Message::CommandType2String (Net_MessageType_t messageType_in)
+Net_Message::Command2String (Net_MessageType_t messageType_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Message::CommandType2String"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Message::Command2String"));
 
   std::string result = ACE_TEXT ("INVALID");
 

@@ -19,4 +19,4 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "irc_module_parser.h"
+#include "http_module_parser.h"

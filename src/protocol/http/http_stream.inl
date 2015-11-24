@@ -20,8 +20,6 @@
 
 #include "ace/Log_Msg.h"
 
-//#include "stream_common.h"
-
 #include "net_macros.h"
 
 template <typename StreamStateType,
@@ -32,29 +30,29 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename SessionMessageType,
           typename ProtocolMessageType>
-IRC_Stream_T<StreamStateType, 
-             ConfigurationType,
-             StatisticContainerType,
-             ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::IRC_Stream_T (const std::string& name_in)
+HTTP_Stream_T<StreamStateType, 
+              ConfigurationType,
+              StatisticContainerType,
+              ModuleHandlerConfigurationType,
+              SessionDataType,
+              SessionDataContainerType,
+              SessionMessageType,
+              ProtocolMessageType>::HTTP_Stream_T (const std::string& name_in)
  : inherited (name_in)
  , marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
              NULL,
              false)
- , parser_ (ACE_TEXT_ALWAYS_CHAR ("Parser"),
-            NULL,
-            false)
- //, handler_ (ACE_TEXT_ALWAYS_CHAR ("IRCHandler"),
- //            NULL,
- //            false)
+ //, parser_ (ACE_TEXT_ALWAYS_CHAR ("Parser"),
+ //           NULL,
+ //           false)
  , runtimeStatistic_ (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
                       NULL,
                       false)
+//, handler_ (ACE_TEXT_ALWAYS_CHAR ("Handler"),
+//            NULL,
+//            false)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::IRC_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::HTTP_Stream_T"));
 
   // remember the ones we "own"...
   // *TODO*: clean this up
@@ -62,7 +60,7 @@ IRC_Stream_T<StreamStateType,
   // modules which we have NOT enqueued onto the stream (e.g. because init()
   // failed...)
   inherited::availableModules_.push_front (&marshal_);
-  inherited::availableModules_.push_front (&parser_);
+  //inherited::availableModules_.push_front (&parser_);
   inherited::availableModules_.push_front (&runtimeStatistic_);
 
   // *TODO*: fix ACE bug: modules should initialize their "next" member to NULL
@@ -85,16 +83,16 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename SessionMessageType,
           typename ProtocolMessageType>
-IRC_Stream_T<StreamStateType, 
-             ConfigurationType,
-             StatisticContainerType,
-             ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::~IRC_Stream_T ()
+HTTP_Stream_T<StreamStateType, 
+              ConfigurationType,
+              StatisticContainerType,
+              ModuleHandlerConfigurationType,
+              SessionDataType,
+              SessionDataContainerType,
+              SessionMessageType,
+              ProtocolMessageType>::~HTTP_Stream_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::~IRC_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::~HTTP_Stream_T"));
 
   // *NOTE*: this implements an ordered shutdown on destruction...
   inherited::shutdown ();
@@ -109,20 +107,22 @@ template <typename StreamStateType,
           typename SessionMessageType,
           typename ProtocolMessageType>
 bool
-IRC_Stream_T<StreamStateType, 
-             ConfigurationType,
-             StatisticContainerType,
-             ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::initialize (const ConfigurationType& configuration_in)
+HTTP_Stream_T<StreamStateType, 
+              ConfigurationType,
+              StatisticContainerType,
+              ModuleHandlerConfigurationType,
+              SessionDataType,
+              SessionDataContainerType,
+              SessionMessageType,
+              ProtocolMessageType>::initialize (const ConfigurationType& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
   ACE_ASSERT (!isRunning ());
+  ACE_ASSERT (configuration_in.moduleConfiguration);
+  ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
 
   // allocate a new session state, reset stream
   if (!inherited::initialize (configuration_in))
@@ -186,7 +186,7 @@ IRC_Stream_T<StreamStateType,
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    if (!module_2->initialize (configuration_in.moduleConfiguration_2))
+    if (!module_2->initialize (*configuration_in.moduleConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to initialize module, aborting\n"),
@@ -204,7 +204,7 @@ IRC_Stream_T<StreamStateType,
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    if (!module_handler_p->initialize (configuration_in.moduleHandlerConfiguration_2))
+    if (!module_handler_p->initialize (*configuration_in.moduleHandlerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to initialize module handler, aborting\n"),
@@ -222,6 +222,35 @@ IRC_Stream_T<StreamStateType,
   } // end IF
 
   // ---------------------------------------------------------------------------
+
+  //   // ******************* Handler ************************
+  //   IRC_Module_Handler* handler_impl = NULL;
+  //   handler_impl = dynamic_cast<IRC_Module_Handler*> (handler_.writer ());
+  //   if (!handler_impl)
+  //   {
+  //     ACE_DEBUG ((LM_ERROR,
+  //                 ACE_TEXT ("dynamic_cast<IRC_Module_Handler> failed, aborting\n")));
+  //     return false;
+  //   } // end IF
+  //   if (!handler_impl->initialize (configuration_in.messageAllocator,
+  //                                  (configuration_in.clientPingInterval ? false // servers shouldn't receive "pings" in the first place
+  //                                                                       : NET_DEF_PING_PONG), // auto-answer "ping" as a client ?...
+  //                                  (configuration_in.clientPingInterval == 0))) // clients print ('.') dots for received "pings"...
+  //   {
+  //     ACE_DEBUG ((LM_ERROR,
+  //                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //                 handler_.name ()));
+  //     return false;
+  //   } // end IF
+  //
+  //   // enqueue the module...
+  //   if (inherited::push (&handler_))
+  //   {
+  //     ACE_DEBUG ((LM_ERROR,
+  //                 ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
+  //                 handler_.name ()));
+  //     return false;
+  //   } // end IF
 
   // ******************* Runtime Statistics ************************
   STATISTIC_WRITER_T* runtimeStatistic_impl_p =
@@ -251,84 +280,54 @@ IRC_Stream_T<StreamStateType,
     return false;
   } // end IF
 
-//   // ******************* Handler ************************
-//   IRC_Module_Handler* handler_impl = NULL;
-//   handler_impl = dynamic_cast<IRC_Module_Handler*> (handler_.writer ());
-//   if (!handler_impl)
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("dynamic_cast<IRC_Module_Handler> failed, aborting\n")));
-//     return false;
-//   } // end IF
-//   if (!handler_impl->initialize (configuration_in.messageAllocator,
-//                                  (configuration_in.clientPingInterval ? false // servers shouldn't receive "pings" in the first place
-//                                                                       : NET_DEF_PING_PONG), // auto-answer "ping" as a client ?...
-//                                  (configuration_in.clientPingInterval == 0))) // clients print ('.') dots for received "pings"...
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-//                 handler_.name ()));
-//     return false;
-//   } // end IF
-//
-//   // enqueue the module...
-//   if (inherited::push (&handler_))
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-//                 handler_.name ()));
-//     return false;
-//   } // end IF
+  //// ******************* Parser ************************
+  //PARSER_T* parser_impl_p = NULL;
+  //parser_impl_p =
+  //  dynamic_cast<PARSER_T*> (parser_.writer ());
+  //if (!parser_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<IRC_Module_Parser_T*> failed, aborting\n")));
+  //  return false;
+  //} // end IF
+  //if (!parser_impl_p->initialize (configuration_in.messageAllocator,                            // message allocator
+  //                                configuration_in.moduleHandlerConfiguration_2.crunchMessages, // "crunch" messages ?
+  //                                configuration_in.moduleHandlerConfiguration_2.traceScanning,  // debug scanner ?
+  //                                configuration_in.moduleHandlerConfiguration_2.traceParsing))  // debug parser ?
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              parser_.name ()));
+  //  return false;
+  //} // end IF
 
-  // ******************* Parser ************************
-  PARSER_T* parser_impl_p = NULL;
-  parser_impl_p =
-    dynamic_cast<PARSER_T*> (parser_.writer ());
+  //// enqueue the module...
+  //result = inherited::push (&parser_);
+  //if (result == -1)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
+  //              parser_.name ()));
+  //  return false;
+  //} // end IF
+
+  // ******************* Marshal ************************
+  PARSER_T* parser_impl_p =
+   dynamic_cast<PARSER_T*> (marshal_.writer ());
   if (!parser_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_Module_Parser_T*> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<HTTP_Module_Parser_T*> failed, aborting\n")));
     return false;
   } // end IF
-  if (!parser_impl_p->initialize (configuration_in.messageAllocator,                            // message allocator
-                                  configuration_in.moduleHandlerConfiguration_2.crunchMessages, // "crunch" messages ?
-                                  configuration_in.moduleHandlerConfiguration_2.traceScanning,  // debug scanner ?
-                                  configuration_in.moduleHandlerConfiguration_2.traceParsing))  // debug parser ?
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                parser_.name ()));
-    return false;
-  } // end IF
-
-  // enqueue the module...
-  result = inherited::push (&parser_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-                parser_.name ()));
-    return false;
-  } // end IF
-
-  // ******************* Marshal ************************
-  BISECTOR_T* bisector_impl_p = NULL;
-  bisector_impl_p =
-   dynamic_cast<BISECTOR_T*> (marshal_.writer ());
-  if (!bisector_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_Module_Bisector_T*> failed, aborting\n")));
-    return false;
-  } // end IF
-  if (!bisector_impl_p->initialize (configuration_in.moduleHandlerConfiguration_2))
+  if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
                 marshal_.name ()));
     return false;
   } // end IF
-  if (!bisector_impl_p->initialize (inherited::state_))
+  if (!parser_impl_p->initialize (inherited::state_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -370,16 +369,16 @@ template <typename StreamStateType,
           typename SessionMessageType,
           typename ProtocolMessageType>
 bool
-IRC_Stream_T<StreamStateType, 
-             ConfigurationType,
-             StatisticContainerType,
-             ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::collect (StatisticContainerType& data_out)
+HTTP_Stream_T<StreamStateType, 
+              ConfigurationType,
+              StatisticContainerType,
+              ModuleHandlerConfigurationType,
+              SessionDataType,
+              SessionDataContainerType,
+              SessionMessageType,
+              ProtocolMessageType>::collect (StatisticContainerType& data_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::collect"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::collect"));
 
   STATISTIC_WRITER_T* runtimeStatistic_impl_p = NULL;
   runtimeStatistic_impl_p =
@@ -404,16 +403,16 @@ template <typename StreamStateType,
           typename SessionMessageType,
           typename ProtocolMessageType>
 void
-IRC_Stream_T<StreamStateType,
-             ConfigurationType,
-             StatisticContainerType,
-             ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::report () const
+HTTP_Stream_T<StreamStateType,
+              ConfigurationType,
+              StatisticContainerType,
+              ModuleHandlerConfigurationType,
+              SessionDataType,
+              SessionDataContainerType,
+              SessionMessageType,
+              ProtocolMessageType>::report () const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::report"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::report"));
 
 //   RPG_Net_Module_RuntimeStatistic* runtimeStatistic_impl = NULL;
 //   runtimeStatistic_impl = dynamic_cast<RPG_Net_Module_RuntimeStatistic*> (//                                            myRuntimeStatistic.writer());
@@ -443,16 +442,16 @@ template <typename StreamStateType,
           typename SessionMessageType,
           typename ProtocolMessageType>
 void
-IRC_Stream_T<StreamStateType, 
-             ConfigurationType,
-             StatisticContainerType,
-             ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::ping ()
+HTTP_Stream_T<StreamStateType, 
+              ConfigurationType,
+              StatisticContainerType,
+              ModuleHandlerConfigurationType,
+              SessionDataType,
+              SessionDataContainerType,
+              SessionMessageType,
+              ProtocolMessageType>::ping ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::ping"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::ping"));
 
   // delegate to the head module, skip over ACE_Stream_Head...
   MODULE_T* module_p = inherited::head ();
