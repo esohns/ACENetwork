@@ -33,11 +33,11 @@ IRC_Module_Parser_T<TaskSynchType,
                     ProtocolMessageType>::IRC_Module_Parser_T ()
  : inherited ()
  , allocator_ (NULL)
- , debugScanner_ (IRC_DEF_LEX_TRACE) // trace scanning ?
- , debugParser_ (IRC_DEF_YACC_TRACE) // trace parsing ?
- , driver_ (IRC_DEF_LEX_TRACE,  // trace scanning ?
-            IRC_DEF_YACC_TRACE) // trace parsing ?
- , crunchMessages_ (IRC_DEF_CRUNCH_MESSAGES) // "crunch" messages ?
+ , debugScanner_ (IRC_DEFAULT_LEX_TRACE) // trace scanning ?
+ , debugParser_ (IRC_DEFAULT_YACC_TRACE) // trace parsing ?
+ , driver_ (IRC_DEFAULT_LEX_TRACE,  // trace scanning ?
+            IRC_DEFAULT_YACC_TRACE) // trace parsing ?
+ , crunchMessages_ (IRC_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
  , isInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Parser_T::IRC_Module_Parser_T"));
@@ -80,9 +80,9 @@ IRC_Module_Parser_T<TaskSynchType,
                 ACE_TEXT ("re-initializing...\n")));
 
     allocator_ = NULL;
-    debugScanner_ = debugScanner_in;
-    debugParser_ = debugParser_in;
-    crunchMessages_ = IRC_DEF_CRUNCH_MESSAGES;
+    debugScanner_ = IRC_DEFAULT_LEX_TRACE;
+    debugParser_ = IRC_DEFAULT_YACC_TRACE;
+    crunchMessages_ = IRC_DEFAULT_CRUNCH_MESSAGES;
     isInitialized_ = false;
   } // end IF
 
@@ -206,7 +206,7 @@ IRC_Module_Parser_T<TaskSynchType,
 //              message_p->length(),
 //              std::string(message_p->rd_ptr(), message_p->length()).c_str()));
 
-  driver_.initialize (const_cast<IRC_Record&> (*message_p->getData ()),
+  driver_.initialize (const_cast<IRC_Record&> (message_p->get ()),
                       debugScanner_,
                       debugParser_);
   if (!driver_.parse (message_p,        // data block

@@ -36,10 +36,12 @@
 #include "net_macros.h"
 
 #include "irc_codes.h"
+#include "irc_defines.h"
 #include "irc_tools.h"
 
 template <typename ConnectionType,
           typename SessionDataType,
+          typename ControllerType,
           typename NotificationType,
           typename ConfigurationType,
           typename SessionMessageType,
@@ -52,6 +54,7 @@ template <typename ConnectionType,
           typename LogOutputType>
 IRC_Session_T<ConnectionType,
               SessionDataType,
+              ControllerType,
               NotificationType,
               ConfigurationType,
               SessionMessageType,
@@ -78,6 +81,7 @@ IRC_Session_T<ConnectionType,
 
 template <typename ConnectionType,
           typename SessionDataType,
+          typename ControllerType,
           typename NotificationType,
           typename ConfigurationType,
           typename SessionMessageType,
@@ -90,6 +94,7 @@ template <typename ConnectionType,
           typename LogOutputType>
 IRC_Session_T<ConnectionType,
               SessionDataType,
+              ControllerType,
               NotificationType,
               ConfigurationType,
               SessionMessageType,
@@ -140,6 +145,7 @@ IRC_Session_T<ConnectionType,
 
 template <typename ConnectionType,
           typename SessionDataType,
+          typename ControllerType,
           typename NotificationType,
           typename ConfigurationType,
           typename SessionMessageType,
@@ -153,6 +159,7 @@ template <typename ConnectionType,
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
+              ControllerType,
               NotificationType,
               ConfigurationType,
               SessionMessageType,
@@ -170,7 +177,7 @@ IRC_Session_T<ConnectionType,
   int result = -1;
 
   // step0a: retrieve controller handle
-  const IRC_Client_Stream& stream_r = inherited::stream ();
+  const typename inherited::CONNECTION_BASE_T::STREAM_T& stream_r = inherited::stream ();
   const typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T* module_p = NULL;
   for (typename inherited::CONNECTION_BASE_T::STREAM_T::ITERATOR_T iterator (stream_r);
        (iterator.next (module_p) != 0);
@@ -190,12 +197,12 @@ IRC_Session_T<ConnectionType,
     return;
   } // end IF
   inherited::state_.controller =
-    dynamic_cast<IRC_Client_IControl_t*> (const_cast<typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
+    dynamic_cast<ControllerType*> (const_cast<typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
   if (!inherited::state_.controller)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<IRC_Client_IControl_t*> failed, returning\n"),
-                ACE_TEXT (module_p->name ())));
+                ACE_TEXT ("%s: dynamic_cast<IRC_IControl_T*> failed, returning\n"),
+                module_p->name ()));
 
     // close connection
     inherited::close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
@@ -225,7 +232,7 @@ IRC_Session_T<ConnectionType,
     std::string file_name =
         Common_File_Tools::getLogDirectory (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME));
     file_name += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-    file_name += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_SESSION_LOG_FILENAME_PREFIX);
+    file_name += ACE_TEXT_ALWAYS_CHAR (IRC_SESSION_LOG_FILENAME_PREFIX);
     file_name += COMMON_LOG_FILENAME_SUFFIX;
     ACE_FILE_Addr address;
     result = address.set (ACE_TEXT (file_name.c_str ()));
@@ -298,7 +305,7 @@ IRC_Session_T<ConnectionType,
 }
 
 //template <typename ConnectionType>
-//const IRC_Client_ConnectionState&
+//const IRC_ConnectionState&
 //IRC_Session_T<ConnectionType>::state () const
 //{
 //  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::state"));
@@ -308,6 +315,7 @@ IRC_Session_T<ConnectionType,
 
 template <typename ConnectionType,
           typename SessionDataType,
+          typename ControllerType,
           typename NotificationType,
           typename ConfigurationType,
           typename SessionMessageType,
@@ -321,6 +329,7 @@ template <typename ConnectionType,
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
+              ControllerType,
               NotificationType,
               ConfigurationType,
               SessionMessageType,
@@ -815,6 +824,7 @@ IRC_Session_T<ConnectionType,
 }
 template <typename ConnectionType,
           typename SessionDataType,
+          typename ControllerType,
           typename NotificationType,
           typename ConfigurationType,
           typename SessionMessageType,
@@ -828,6 +838,7 @@ template <typename ConnectionType,
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
+              ControllerType,
               NotificationType,
               ConfigurationType,
               SessionMessageType,
@@ -850,6 +861,7 @@ IRC_Session_T<ConnectionType,
 
 template <typename ConnectionType,
           typename SessionDataType,
+          typename ControllerType,
           typename NotificationType,
           typename ConfigurationType,
           typename SessionMessageType,
@@ -863,6 +875,7 @@ template <typename ConnectionType,
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
+              ControllerType,
               NotificationType,
               ConfigurationType,
               SessionMessageType,
@@ -895,6 +908,7 @@ IRC_Session_T<ConnectionType,
 
 template <typename ConnectionType,
           typename SessionDataType,
+          typename ControllerType,
           typename NotificationType,
           typename ConfigurationType,
           typename SessionMessageType,
@@ -908,6 +922,7 @@ template <typename ConnectionType,
 int
 IRC_Session_T<ConnectionType,
               SessionDataType,
+              ControllerType,
               NotificationType,
               ConfigurationType,
               SessionMessageType,
@@ -985,7 +1000,7 @@ IRC_Session_T<ConnectionType,
   } // end IF
   else
     module_handler_configuration_p =
-        &(inherited::CONNECTION_BASE_T::configuration_.streamConfiguration.moduleHandlerConfiguration_2);
+        &(inherited::CONNECTION_BASE_T::configuration_.moduleHandlerConfiguration);
   ACE_ASSERT (module_handler_configuration_p);
 
   module_handler_configuration_p->subscriber = this;
@@ -1008,6 +1023,7 @@ IRC_Session_T<ConnectionType,
 
 template <typename ConnectionType,
           typename SessionDataType,
+          typename ControllerType,
           typename NotificationType,
           typename ConfigurationType,
           typename SessionMessageType,
@@ -1021,6 +1037,7 @@ template <typename ConnectionType,
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
+              ControllerType,
               NotificationType,
               ConfigurationType,
               SessionMessageType,
@@ -1074,14 +1091,14 @@ IRC_Session_T<ConnectionType,
 //  } // end IF
 //  else
   module_handler_configuration_p =
-        &(inherited::CONNECTION_BASE_T::configuration_.streamConfiguration.moduleHandlerConfiguration_2);
+        &(inherited::CONNECTION_BASE_T::configuration_.moduleHandlerConfiguration);
   // sanity check(s)
   ACE_ASSERT (module_handler_configuration_p);
   module_handler_configuration_p->subscriber = this;
 //  ACE_ASSERT (module_handler_configuration_p->userData);
-//  const IRC_Client_ConnectionState& connection_state_r = inherited::state ();
+//  const IRC_ConnectionState& connection_state_r = inherited::state ();
 //  module_handler_configuration_p->userData->connectionState =
-//      &const_cast<IRC_Client_ConnectionState&> (connection_state_r);
+//      &const_cast<IRC_ConnectionState&> (connection_state_r);
 
   // step1: initialize/start stream, tweak socket, register reading data with
   //        reactor, ...
@@ -1091,6 +1108,7 @@ IRC_Session_T<ConnectionType,
 
 template <typename ConnectionType,
           typename SessionDataType,
+          typename ControllerType,
           typename NotificationType,
           typename ConfigurationType,
           typename SessionMessageType,
@@ -1104,6 +1122,7 @@ template <typename ConnectionType,
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
+              ControllerType,
               NotificationType,
               ConfigurationType,
               SessionMessageType,
@@ -1125,6 +1144,7 @@ IRC_Session_T<ConnectionType,
 
 template <typename ConnectionType,
           typename SessionDataType,
+          typename ControllerType,
           typename NotificationType,
           typename ConfigurationType,
           typename SessionMessageType,
@@ -1138,6 +1158,7 @@ template <typename ConnectionType,
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
+              ControllerType,
               NotificationType,
               ConfigurationType,
               SessionMessageType,
@@ -1174,6 +1195,7 @@ IRC_Session_T<ConnectionType,
 
 template <typename ConnectionType,
           typename SessionDataType,
+          typename ControllerType,
           typename NotificationType,
           typename ConfigurationType,
           typename SessionMessageType,
@@ -1187,6 +1209,7 @@ template <typename ConnectionType,
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
+              ControllerType,
               NotificationType,
               ConfigurationType,
               SessionMessageType,

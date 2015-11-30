@@ -500,4 +500,3 @@ namespace yy {
 
 
 #endif // !YY_YY_IRC_PARSER_H_INCLUDED
-

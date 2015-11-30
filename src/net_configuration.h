@@ -28,6 +28,10 @@
 #endif
 
 #include "net_defines.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include "net_netlinksockethandler.h"
+#endif
 
 // forward declarations
 struct Net_UserData;

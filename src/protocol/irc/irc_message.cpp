@@ -74,22 +74,22 @@ IRC_Message::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Message::command"));
 
-  const IRC_Record* data_p = inherited::getData ();
-
   // sanity check(s)
-  ACE_ASSERT (data_p);
+  if (!inherited::initialized_)
+    return IRC_Record::IRC_COMMANDTYPE_INVALID;
+  ACE_ASSERT (inherited::data_);
 
-  switch (data_p->command.discriminator)
+  switch (data_->command.discriminator)
   {
     case IRC_Record::Command::STRING:
-      return IRC_Tools::Command2Type (*data_p->command.string);
+      return IRC_Tools::Command2Type (*data_->command.string);
     case IRC_Record::Command::NUMERIC:
-      return static_cast<IRC_CommandType_t> (data_p->command.numeric);
+      return static_cast<IRC_CommandType_t> (data_->command.numeric);
     default:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid command type (was: %d), aborting\n"),
-                  data_p->command.discriminator));
+                  data_->command.discriminator));
       break;
     }
   } // end SWITCH

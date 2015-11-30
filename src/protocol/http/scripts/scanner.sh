@@ -15,33 +15,33 @@ command -v tee >/dev/null 2>&1 || { echo "tee is not installed, aborting" >&2; e
 
 PROJECT_ROOT=$(dirname $0)/..
 #[ ! -d ./${PROJECT_ROOT} ] && echo "ERROR: invalid directory (was: ${PROJECT_ROOT}), aborting" && exit 1
-SCRIPTS_DIR=${PROJECT_ROOT}/scripts
-[ ! -d ${SCRIPTS_DIR} ] && echo "ERROR: invalid directory (was: ${SCRIPTS_DIR}), aborting" && exit 1
+SCRIPTS_DIRECTORY=${PROJECT_ROOT}/scripts
+[ ! -d ${SCRIPTS_DIRECTORY} ] && echo "ERROR: invalid directory (was: ${SCRIPTS_DIRECTORY}), aborting" && exit 1
 BISECT_L=bisector.l
-[ ! -f ${SCRIPTS_DIR}/${BISECT_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIR}/${BISECT_L}), aborting" && exit 1
+[ ! -f ${SCRIPTS_DIRECTORY}/${BISECT_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${BISECT_L}), aborting" && exit 1
 SCANNER_L=scanner.l
-[ ! -f ${SCRIPTS_DIR}/${SCANNER_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIR}/${SCANNER_L}), aborting" && exit 1
+[ ! -f ${SCRIPTS_DIRECTORY}/${SCANNER_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${SCANNER_L}), aborting" && exit 1
 
-# generate a scanner for bisecting IRC messages from the input stream
-flex ${SCRIPTS_DIR}/${BISECT_L} 2>&1 | tee ${SCRIPTS_DIR}/bisector_report.txt
+# generate a scanner for bisecting HTTP messages from the input stream
+flex ${SCRIPTS_DIRECTORY}/${BISECT_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bisector_report.txt
 [ $? -ne 0 ] && echo "ERROR: failed to flex \"${BISECT_L}\", aborting" && exit 1
 
 # list generated files
-FILES="irc_bisector.cpp irc_bisector.h"
+FILES="http_bisector.cpp http_bisector.h"
 
 # -------------------------------------------------------------------
 
-# generate a scanner for use by the IRC message parser
-flex ${SCRIPTS_DIR}/${SCANNER_L} 2>&1 | tee ${SCRIPTS_DIR}/scanner_report.txt
+# generate a scanner for use by the HTTP message parser
+flex --noline ${SCRIPTS_DIRECTORY}/${SCANNER_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/scanner_report.txt
 [ $? -ne 0 ] && echo "ERROR: failed to flex \"${SCANNER_L}\", aborting" && exit 1
 
 # append to list
-FILES="${FILES} irc_scanner.cpp irc_scanner.h"
+FILES="${FILES} http_scanner.cpp http_scanner.h"
 
 # move the files into the project directory
 for FILE in $FILES
 do
-mv -f $FILE ${PROJECT_ROOT}
+mv -f $FILE ${SCRIPTS_DIRECTORY}/..
 if [ $? -ne 0 ]; then
  echo "ERROR: failed to mv \"$FILE\", aborting"
  exit 1

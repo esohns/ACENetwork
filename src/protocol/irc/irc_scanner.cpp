@@ -201,7 +201,15 @@ typedef void* yyscan_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -1954,12 +1962,12 @@ static yyconst flex_int32_t yy_rule_linenum[23] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "scanner.l"
+#line 1 "./../scripts/scanner.l"
 /* *NOTE*: this version of the scanner is rather straight-forward, as it assumes
            a continuous buffer containing the whole frame and hence makes no
            provisions for switching buffers, backing-up and the like. In this
            sense, it is optimized for speed and efficiency */
-#line 7 "scanner.l"
+#line 7 "./../scripts/scanner.l"
 //#include <stdlib.h>
 
 // *WORKAROUND*
@@ -2040,13 +2048,13 @@ And so on...
 
 
 
-#line 113 "scanner.l"
+#line 113 "./../scripts/scanner.l"
 #define YY_USER_ACTION yylloc->columns(yyleng);
 /* *NOTE*: it seems that the following "exceptions" are allowed:
            - the trailing param does NOT need a ':' prefix IF it doesn't contain
              <SPACE>s...
 */
-#line 2050 "irc_scanner.cpp"
+#line 2058 "irc_scanner.cpp"
 
 #define INITIAL 0
 #define prefix 1
@@ -2206,7 +2214,12 @@ static int input (yyscan_t yyscanner );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -2373,7 +2386,7 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 121 "scanner.l"
+#line 121 "./../scripts/scanner.l"
 
 
   yylloc->step();
@@ -2381,7 +2394,7 @@ YY_DECL
   std::stringstream converter;
 
 
-#line 2385 "irc_scanner.cpp"
+#line 2398 "irc_scanner.cpp"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -2458,7 +2471,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 129 "scanner.l"
+#line 129 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(prefix);
                              yylval->ival = 1;
@@ -2466,7 +2479,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 133 "scanner.l"
+#line 133 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(end_of_frame);
                              yylval->ival = 1; }
@@ -2475,7 +2488,7 @@ YY_RULE_SETUP
 
 case 3:
 YY_RULE_SETUP
-#line 138 "scanner.l"
+#line 138 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(command);
                              yylval->ival = yyleng;
@@ -2483,7 +2496,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 142 "scanner.l"
+#line 142 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(user);
                              yylval->ival = 1;
@@ -2491,7 +2504,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 146 "scanner.l"
+#line 146 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(host);
                              yylval->ival = 1;
@@ -2499,7 +2512,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 150 "scanner.l"
+#line 150 "./../scripts/scanner.l"
 { yylloc->step();
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
@@ -2510,7 +2523,7 @@ YY_RULE_SETUP
 
 case 7:
 YY_RULE_SETUP
-#line 157 "scanner.l"
+#line 157 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(command);
                              yylval->ival = yyleng;
@@ -2518,7 +2531,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 161 "scanner.l"
+#line 161 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(host);
                              yylval->ival = 1;
@@ -2528,7 +2541,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 167 "scanner.l"
+#line 167 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(prefix);
                              ACE_NEW_NORETURN(yylval->sval,
@@ -2540,7 +2553,7 @@ YY_RULE_SETUP
 
 case 10:
 YY_RULE_SETUP
-#line 175 "scanner.l"
+#line 175 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(command);
                              yylval->ival = yyleng;
@@ -2548,7 +2561,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 179 "scanner.l"
+#line 179 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(prefix);
                              ACE_NEW_NORETURN(yylval->sval,
@@ -2560,7 +2573,7 @@ YY_RULE_SETUP
 
 case 12:
 YY_RULE_SETUP
-#line 187 "scanner.l"
+#line 187 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(params);
                              yylval->ival = yyleng;
@@ -2568,7 +2581,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 191 "scanner.l"
+#line 191 "./../scripts/scanner.l"
 { yylloc->step();
                              converter.str(ACE_TEXT_ALWAYS_CHAR(""));
                              converter.clear();
@@ -2578,7 +2591,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 197 "scanner.l"
+#line 197 "./../scripts/scanner.l"
 { yylloc->step();
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
@@ -2589,14 +2602,14 @@ YY_RULE_SETUP
 
 case 15:
 YY_RULE_SETUP
-#line 204 "scanner.l"
+#line 204 "./../scripts/scanner.l"
 { yylloc->step();
                              yylval->ival = yyleng;
                              return yy::IRC_Parser::token::SPACE; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 207 "scanner.l"
+#line 207 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(trailing);
                              yylval->ival = 1;
@@ -2604,13 +2617,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 211 "scanner.l"
+#line 211 "./../scripts/scanner.l"
 { yylloc->step(); /* *NOTE*: non-compliant (see above) */
                              BEGIN(end_of_frame); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 213 "scanner.l"
+#line 213 "./../scripts/scanner.l"
 { yylloc->step();
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
@@ -2621,13 +2634,13 @@ YY_RULE_SETUP
 
 case 19:
 YY_RULE_SETUP
-#line 220 "scanner.l"
+#line 220 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(end_of_frame); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 222 "scanner.l"
+#line 222 "./../scripts/scanner.l"
 { yylloc->step();
                              if (yyleng > 0)
                              {
@@ -2643,7 +2656,7 @@ YY_RULE_SETUP
 case 21:
 /* rule 21 can match eol */
 YY_RULE_SETUP
-#line 233 "scanner.l"
+#line 233 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(INITIAL);
                              yylval->ival = 2;
@@ -2658,13 +2671,13 @@ case YY_STATE_EOF(command):
 case YY_STATE_EOF(params):
 case YY_STATE_EOF(trailing):
 case YY_STATE_EOF(end_of_frame):
-#line 238 "scanner.l"
+#line 238 "./../scripts/scanner.l"
 { yyterminate(); }
 	YY_BREAK
 case 22:
 /* rule 22 can match eol */
 YY_RULE_SETUP
-#line 239 "scanner.l"
+#line 239 "./../scripts/scanner.l"
 { /* *TODO*: use (?s:.) ? */
                              yylloc->step();
 
@@ -2678,10 +2691,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 249 "scanner.l"
+#line 249 "./../scripts/scanner.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 2685 "irc_scanner.cpp"
+#line 2698 "irc_scanner.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3915,7 +3928,7 @@ void IRC_Scanner_free (void * ptr , yyscan_t yyscanner)
 
 /* %ok-for-header */
 
-#line 249 "scanner.l"
+#line 248 "./../scripts/scanner.l"
 
 
 

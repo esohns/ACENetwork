@@ -32,7 +32,7 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename SessionMessageType,
           typename ProtocolMessageType>
-IRC_Stream_T<StreamStateType, 
+IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
              ModuleHandlerConfigurationType,
@@ -71,7 +71,7 @@ IRC_Stream_T<StreamStateType,
   //     iterator.next (module_p);
   //     iterator.advance ())
   //  module_p->next (NULL);
-  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::availableModules_.begin ();
+  for (typename inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::availableModules_.begin ();
        iterator != inherited::availableModules_.end ();
        iterator++)
     (*iterator)->next (NULL);
@@ -85,7 +85,7 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename SessionMessageType,
           typename ProtocolMessageType>
-IRC_Stream_T<StreamStateType, 
+IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
              ModuleHandlerConfigurationType,
@@ -109,7 +109,7 @@ template <typename StreamStateType,
           typename SessionMessageType,
           typename ProtocolMessageType>
 bool
-IRC_Stream_T<StreamStateType, 
+IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
              ModuleHandlerConfigurationType,
@@ -122,7 +122,9 @@ IRC_Stream_T<StreamStateType,
 
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
-  ACE_ASSERT (!isRunning ());
+  ACE_ASSERT (!inherited::isRunning ());
+  ACE_ASSERT (configuration_in.moduleConfiguration);
+  ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
 
   // allocate a new session state, reset stream
   if (!inherited::initialize (configuration_in))
@@ -142,7 +144,7 @@ IRC_Stream_T<StreamStateType,
   session_data_r.sessionID = configuration_in.sessionID;
 
   int result = -1;
-  inherited::MODULE_T* module_p = NULL;
+  typename inherited::MODULE_T* module_p = NULL;
   if (configuration_in.notificationStrategy)
   {
     module_p = inherited::head ();
@@ -152,14 +154,14 @@ IRC_Stream_T<StreamStateType,
                   ACE_TEXT ("no head module found, aborting\n")));
       return false;
     } // end IF
-    inherited::TASK_T* task_p = module_p->reader ();
+    typename inherited::TASK_T* task_p = module_p->reader ();
     if (!task_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("no head module reader task found, aborting\n")));
       return false;
     } // end IF
-    inherited::QUEUE_T* queue_p = task_p->msg_queue ();
+    typename inherited::QUEUE_T* queue_p = task_p->msg_queue ();
     if (!queue_p)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -177,8 +179,8 @@ IRC_Stream_T<StreamStateType,
   {
     // *TODO*: (at least part of) this procedure belongs in libACEStream
     //         --> remove type inferences
-    inherited::IMODULE_T* module_2 =
-      dynamic_cast<inherited::IMODULE_T*> (configuration_in.module);
+    typename inherited::IMODULE_T* module_2 =
+      dynamic_cast<typename inherited::IMODULE_T*> (configuration_in.module);
     if (!module_2)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -186,7 +188,7 @@ IRC_Stream_T<StreamStateType,
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    if (!module_2->initialize (configuration_in.moduleConfiguration_2))
+    if (!module_2->initialize (*configuration_in.moduleConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to initialize module, aborting\n"),
@@ -195,8 +197,8 @@ IRC_Stream_T<StreamStateType,
     } // end IF
     Stream_Task_t* task_p = configuration_in.module->writer ();
     ACE_ASSERT (task_p);
-    inherited::IMODULEHANDLER_T* module_handler_p =
-        dynamic_cast<inherited::IMODULEHANDLER_T*> (task_p);
+    typename inherited::IMODULEHANDLER_T* module_handler_p =
+        dynamic_cast<typename inherited::IMODULEHANDLER_T*> (task_p);
     if (!module_handler_p)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -204,7 +206,7 @@ IRC_Stream_T<StreamStateType,
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    if (!module_handler_p->initialize (configuration_in.moduleHandlerConfiguration_2))
+    if (!module_handler_p->initialize (*configuration_in.moduleHandlerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to initialize module handler, aborting\n"),
@@ -291,9 +293,9 @@ IRC_Stream_T<StreamStateType,
     return false;
   } // end IF
   if (!parser_impl_p->initialize (configuration_in.messageAllocator,                            // message allocator
-                                  configuration_in.moduleHandlerConfiguration_2.crunchMessages, // "crunch" messages ?
-                                  configuration_in.moduleHandlerConfiguration_2.traceScanning,  // debug scanner ?
-                                  configuration_in.moduleHandlerConfiguration_2.traceParsing))  // debug parser ?
+                                  configuration_in.moduleHandlerConfiguration->crunchMessages, // "crunch" messages ?
+                                  configuration_in.moduleHandlerConfiguration->traceScanning,  // debug scanner ?
+                                  configuration_in.moduleHandlerConfiguration->traceParsing))  // debug parser ?
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -321,7 +323,7 @@ IRC_Stream_T<StreamStateType,
                 ACE_TEXT ("dynamic_cast<IRC_Module_Bisector_T*> failed, aborting\n")));
     return false;
   } // end IF
-  if (!bisector_impl_p->initialize (configuration_in.moduleHandlerConfiguration_2))
+  if (!bisector_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -370,7 +372,7 @@ template <typename StreamStateType,
           typename SessionMessageType,
           typename ProtocolMessageType>
 bool
-IRC_Stream_T<StreamStateType, 
+IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
              ModuleHandlerConfigurationType,
@@ -443,7 +445,7 @@ template <typename StreamStateType,
           typename SessionMessageType,
           typename ProtocolMessageType>
 void
-IRC_Stream_T<StreamStateType, 
+IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
              ModuleHandlerConfigurationType,
@@ -455,7 +457,7 @@ IRC_Stream_T<StreamStateType,
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::ping"));
 
   // delegate to the head module, skip over ACE_Stream_Head...
-  MODULE_T* module_p = inherited::head ();
+  typename inherited::MODULE_T* module_p = inherited::head ();
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -478,8 +480,9 @@ IRC_Stream_T<StreamStateType,
     return;
   } // end IF
 
-  ISTREAM_CONTROL_T* control_impl = NULL;
-  control_impl = dynamic_cast<ISTREAM_CONTROL_T*> (module_p->reader ());
+  typename inherited::ISTREAM_CONTROL_T* control_impl = NULL;
+  control_impl =
+      dynamic_cast<typename inherited::ISTREAM_CONTROL_T*> (module_p->reader ());
   if (!control_impl)
   {
     ACE_DEBUG ((LM_ERROR,

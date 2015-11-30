@@ -39,7 +39,6 @@
 //#include "http_module_bisector.h"
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
-#include "http_record.h"
 #include "http_stream_common.h"
 
 template <typename StreamStateType,
@@ -131,21 +130,21 @@ class HTTP_Stream_T
   //                               SessionDataContainerType,
   //                               ///////////
   //                               StatisticContainerType> BISECTOR_T;
-  typedef HTTP_Module_Parser_T<ACE_SYNCH_MUTEX,
-                               //////////
-                               ACE_MT_SYNCH,
-                               Common_TimePolicy_t,
-                               SessionMessageType,
-                               ProtocolMessageType,
-                               //////////
-                               ModuleHandlerConfigurationType,
-                               //////////
-                               StreamStateType,
-                               //////////
-                               SessionDataType,
-                               SessionDataContainerType,
-                               //////////
-                               StatisticContainerType> PARSER_T;
+  typedef HTTP_Module_ParserH_T<ACE_SYNCH_MUTEX,
+                                //////////
+                                ACE_MT_SYNCH,
+                                Common_TimePolicy_t,
+                                SessionMessageType,
+                                ProtocolMessageType,
+                                //////////
+                                ModuleHandlerConfigurationType,
+                                //////////
+                                StreamStateType,
+                                //////////
+                                SessionDataType,
+                                SessionDataContainerType,
+                                //////////
+                                StatisticContainerType> PARSER_T;
   //typedef Stream_StreamModule_T<ACE_MT_SYNCH,
   //                              Common_TimePolicy_t,
   //                              Stream_ModuleConfiguration,

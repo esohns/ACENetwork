@@ -138,7 +138,7 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    if (!module_2->initialize (configuration_in.moduleConfiguration_2))
+    if (!module_2->initialize (*configuration_in.moduleConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to initialize module, aborting\n"),
@@ -156,7 +156,7 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    if (!module_handler_p->initialize (configuration_in.moduleHandlerConfiguration_2))
+    if (!module_handler_p->initialize (*configuration_in.moduleHandlerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to initialize module handler, aborting\n"),

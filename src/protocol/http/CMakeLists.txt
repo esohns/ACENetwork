@@ -11,7 +11,7 @@ if (UNIX)
  if (DEFINED ENV{ACE_ROOT})
   find_library (ACE_LIBRARY ${ACE_LIB_FILE}
                 PATHS ENV ACE_ROOT
-                PATH_SUFFIXES build/linux/lib
+                PATH_SUFFIXES lib
                 DOC "searching for ${ACE_LIB_FILE}")
  else ()
   find_library (ACE_LIBRARY ${ACE_LIB_FILE}
@@ -62,11 +62,16 @@ endif ()
 add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
-#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ATCD/ACE)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../ATCD/ACE)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
+if (UNIX)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACE)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src)
+elseif (WIN32)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../ATCD/ACE)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
+endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../..)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
@@ -87,8 +92,6 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_parser.h
      http_parser_driver.cpp
      http_parser_driver.h
-     http_record.cpp
-     http_record.h
      http_scanner.cpp
      http_scanner.h
      http_message.cpp

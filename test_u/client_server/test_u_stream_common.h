@@ -32,7 +32,7 @@
 
 #include "stream_common.h"
 #include "stream_imodule.h"
-#include "stream_session_data_base.h"
+#include "stream_session_data.h"
 #include "stream_messageallocatorheap_base.h"
 
 #include "test_u_message.h"
@@ -72,11 +72,11 @@ struct Net_StreamState
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
-                                          
+
                                           Net_Message,
                                           Net_SessionMessage> Net_StreamMessageAllocator_t;
 
-typedef Stream_SessionDataBase_T<Net_StreamSessionData> Net_StreamSessionData_t;
+typedef Stream_SessionData_T<Net_StreamSessionData> Net_StreamSessionData_t;
 
 typedef Stream_IModuleHandler_T<Stream_ModuleHandlerConfiguration> Net_IModuleHandler_t;
 typedef Stream_IModule_T<ACE_MT_SYNCH,

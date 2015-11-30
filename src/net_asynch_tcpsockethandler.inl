@@ -271,6 +271,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 #else
     if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
     if ((error != ENOENT)     && // 2  : *TODO*
+        (error != EINVAL)     && // 22 : Linux [client: local close()]
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif
       ACE_DEBUG ((LM_ERROR,

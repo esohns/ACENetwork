@@ -77,12 +77,21 @@ class IRC_Module_Bisector_T
   IRC_Module_Bisector_T ();
   virtual ~IRC_Module_Bisector_T ();
 
-//#if defined (__GNUG__) || defined (_MSC_VER)
-#if defined (_MSC_VER)
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
-  using Stream_HeadModuleTaskBase_T::initialize;
-#endif
+  using Stream_HeadModuleTaskBase_T<LockType,
+                                    /////
+                                    TaskSynchType,
+                                    TimePolicyType,
+                                    SessionMessageType,
+                                    ProtocolMessageType,
+                                    /////
+                                    ConfigurationType,
+                                    /////
+                                    StreamStateType,
+                                    /////
+                                    SessionDataType,
+                                    SessionDataContainerType>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&);

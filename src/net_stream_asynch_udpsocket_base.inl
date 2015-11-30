@@ -809,36 +809,36 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
+  AddressType local_address, peer_address;
   info (handle,
-        local_inet_address,
-        peer_inet_address);
+        local_address,
+        peer_address);
 
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  result = local_inet_address.addr_to_string (buffer,
-                                              sizeof (buffer));
+  std::string local_address_string;
+  result = local_address.addr_to_string (buffer,
+                                         sizeof (buffer));
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
   else
-    local_address = buffer;
+    local_address_string = ACE_TEXT_ALWAYS_CHAR (buffer);
   ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-  result = peer_inet_address.addr_to_string (buffer,
-                                             sizeof (buffer));
+  std::string peer_address_string;
+  result = peer_address.addr_to_string (buffer,
+                                        sizeof (buffer));
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
   else
-    peer_address = buffer;
+    peer_address_string = ACE_TEXT_ALWAYS_CHAR (buffer);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
+              ACE_TEXT (local_address_string.c_str ()),
+              ACE_TEXT (peer_address_string.c_str ())));
 }
 
 template <typename HandlerType,

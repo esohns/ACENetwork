@@ -65,10 +65,10 @@ class IRC_Module_Parser_T
   virtual ~IRC_Module_Parser_T ();
 
   // configuration / initialization
-  bool initialize (Stream_IAllocator*,             // message allocator
-                   bool = IRC_DEF_CRUNCH_MESSAGES, // crunch messages ?
-                   bool = IRC_DEF_LEX_TRACE,       // debug scanner ?
-                   bool = IRC_DEF_YACC_TRACE);     // debug parser ?
+  bool initialize (Stream_IAllocator*,                 // message allocator
+                   bool = IRC_DEFAULT_CRUNCH_MESSAGES, // crunch messages ?
+                   bool = IRC_DEFAULT_LEX_TRACE,       // debug scanner ?
+                   bool = IRC_DEFAULT_YACC_TRACE);     // debug parser ?
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (ProtocolMessageType*&, // data message handle

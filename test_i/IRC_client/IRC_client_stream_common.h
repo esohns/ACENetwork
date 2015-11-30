@@ -28,7 +28,7 @@
 
 #include "stream_common.h"
 #include "stream_imodule.h"
-#include "stream_session_data_base.h"
+#include "stream_session_data.h"
 
 #include "irc_icontrol.h"
 #include "irc_record.h"
@@ -59,7 +59,7 @@ struct IRC_Client_StreamState
   IRC_Client_UserData*    userData;
 };
 
-typedef Stream_SessionDataBase_T<IRC_Client_SessionData> IRC_Client_SessionData_t;
+typedef Stream_SessionData_T<IRC_Client_SessionData> IRC_Client_SessionData_t;
 
 typedef Common_INotify_T<IRC_Client_SessionData,
                          IRC_Record,

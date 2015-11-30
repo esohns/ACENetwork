@@ -33,7 +33,6 @@
 
 #include "net_common.h"
 
-#include "irc_defines.h"
 #include "irc_icontrol.h"
 
 // forward declarations
@@ -141,7 +140,7 @@ struct IRC_LoginOptions
 {
   inline IRC_LoginOptions ()
     : passWord ()
-    , nickName (IRC_DEF_IRC_NICKNAME)
+    , nickName ()
     , user ()
     , channel ()
   {};

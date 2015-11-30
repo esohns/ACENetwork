@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_STREAM_H
-#define NET_STREAM_H
+#ifndef TEST_U_STREAM_H
+#define TEST_U_STREAM_H
 
 #include <string>
 
@@ -32,40 +32,40 @@
 #include "stream_common.h"
 #include "stream_statemachine_control.h"
 
+#include "test_u_common.h"
 #include "test_u_common_modules.h"
-#include "test_u_configuration.h"
 #include "test_u_message.h"
-#include "test_u_module_headerparser.h"
-#include "test_u_module_protocolhandler.h"
-#include "test_u_sessionmessage.h"
 
-class Net_Stream
+// forward declarations
+class Test_U_SessionMessage;
+
+class Test_U_Stream
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
                         /////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////
                         Stream_StateMachine_ControlState,
-                        Net_StreamState,
+                        Test_U_StreamState,
                         /////////////////
-                        Net_StreamConfiguration,
+                        Test_U_StreamConfiguration,
                         /////////////////
-                        Net_RuntimeStatistic_t,
+                        HTTP_RuntimeStatistic_t,
                         /////////////////
                         Stream_ModuleConfiguration,
-                        Stream_ModuleHandlerConfiguration,
+                        HTTP_ModuleHandlerConfiguration,
                         /////////////////
-                        Net_StreamSessionData,   // session data
-                        Net_StreamSessionData_t, // session data container (reference counted)
-                        Net_SessionMessage,
-                        Net_Message>
+                        Test_U_StreamSessionData,   // session data
+                        Test_U_StreamSessionData_t, // session data container (reference counted)
+                        Test_U_SessionMessage,
+                        Test_U_Message>
 {
  public:
-  Net_Stream (const std::string&); // name
-  virtual ~Net_Stream ();
+  Test_U_Stream (const std::string&); // name
+  virtual ~Test_U_Stream ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Net_StreamConfiguration&); // configuration
+  virtual bool initialize (const Test_U_StreamConfiguration&); // configuration
 
   // *TODO*: re-consider this API
   void ping ();
@@ -82,23 +82,23 @@ class Net_Stream
                         Common_TimePolicy_t,
                         /////////////////
                         Stream_StateMachine_ControlState,
-                        Net_StreamState,
+                        Test_U_StreamState,
                         /////////////////
-                        Net_StreamConfiguration,
+                        Test_U_StreamConfiguration,
                         /////////////////
-                        Net_RuntimeStatistic_t,
+                        HTTP_RuntimeStatistic_t,
                         /////////////////
                         Stream_ModuleConfiguration,
-                        Stream_ModuleHandlerConfiguration,
+                        HTTP_ModuleHandlerConfiguration,
                         /////////////////
-                        Net_StreamSessionData,
-                        Net_StreamSessionData_t,
-                        Net_SessionMessage,
-                        Net_Message> inherited;
+                        Test_U_StreamSessionData,   // session data
+                        Test_U_StreamSessionData_t, // session data container (reference counted)
+                        Test_U_SessionMessage,
+                        Test_U_Message> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Stream ())
-  ACE_UNIMPLEMENTED_FUNC (Net_Stream (const Net_Stream&))
-  ACE_UNIMPLEMENTED_FUNC (Net_Stream& operator= (const Net_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream ())
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream& operator= (const Test_U_Stream&))
 
   // finalize stream
   // *NOTE*: need this to clean up queued modules if something goes wrong during
@@ -106,10 +106,14 @@ class Net_Stream
   bool finalize (const Stream_Configuration&); // configuration
 
   // modules
-  Net_Module_SocketHandler_Module    socketHandler_;
-  Net_Module_HeaderParser_Module     headerParser_;
-  Net_Module_ProtocolHandler_Module  protocolHandler_;
-  Net_Module_RuntimeStatistic_Module runtimeStatistic_;
+  Test_U_Module_FileWriterH_Module      dump_; // <-- raw HTTP output
+  Test_U_Module_Marshal_Module          marshal_;
+  Test_U_Module_RuntimeStatistic_Module runtimeStatistic_;
+  Test_U_Module_FileWriter_Module       fileWriter_; // <-- entity (HTML) output
+  // *NOTE*: the final module needs to be supplied to the stream from outside,
+  //         otherwise data might be lost if event dispatch runs in (a) separate
+  //         thread(s)
+  //   Test_U_Module_Handler_Module handler_;
 };
 
 #endif

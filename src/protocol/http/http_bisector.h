@@ -1,10 +1,10 @@
-#ifndef IRC_Bisector_HEADER_H
-#define IRC_Bisector_HEADER_H 1
-#define IRC_Bisector_IN_HEADER 1
+#ifndef HTTP_Bisector_HEADER_H
+#define HTTP_Bisector_HEADER_H 1
+#define HTTP_Bisector_IN_HEADER 1
 
-#line 6 "irc_bisector.h"
+#line 6 "http_bisector.h"
 
-#line 8 "irc_bisector.h"
+#line 8 "http_bisector.h"
 
 #define  YY_INT_ALIGNED long int
 
@@ -166,7 +166,15 @@ typedef void* yyscan_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 #ifndef YY_TYPEDEF_YY_BUFFER_STATE
@@ -255,28 +263,28 @@ struct yy_buffer_state
 
 /* %endif */
 
-void IRC_Bisector_restart (FILE *input_file ,yyscan_t yyscanner );
-void IRC_Bisector__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Bisector__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void IRC_Bisector__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Bisector__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void IRC_Bisector_pop_buffer_state (yyscan_t yyscanner );
+void HTTP_Bisector_restart (FILE *input_file ,yyscan_t yyscanner );
+void HTTP_Bisector__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void HTTP_Bisector__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Bisector__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void HTTP_Bisector_pop_buffer_state (yyscan_t yyscanner );
 
-YY_BUFFER_STATE IRC_Bisector__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Bisector__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Bisector__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
 
 /* %endif */
 
-void *IRC_Bisector_alloc (yy_size_t ,yyscan_t yyscanner );
-void *IRC_Bisector_realloc (void *,yy_size_t ,yyscan_t yyscanner );
-void IRC_Bisector_free (void * ,yyscan_t yyscanner );
+void *HTTP_Bisector_alloc (yy_size_t ,yyscan_t yyscanner );
+void *HTTP_Bisector_realloc (void *,yy_size_t ,yyscan_t yyscanner );
+void HTTP_Bisector_free (void * ,yyscan_t yyscanner );
 
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
 
-#define IRC_Bisector_wrap(yyscanner) 1
+#define HTTP_Bisector_wrap(yyscanner) 1
 #define YY_SKIP_YYWRAP
 
 #define FLEX_DEBUG
@@ -318,9 +326,9 @@ void IRC_Bisector_free (void * ,yyscan_t yyscanner );
 
 /* %if-reentrant */
 
-int IRC_Bisector_lex_init (yyscan_t* scanner);
+int HTTP_Bisector_lex_init (yyscan_t* scanner);
 
-int IRC_Bisector_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int HTTP_Bisector_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
 /* %endif */
 
@@ -329,35 +337,35 @@ int IRC_Bisector_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int IRC_Bisector_lex_destroy (yyscan_t yyscanner );
+int HTTP_Bisector_lex_destroy (yyscan_t yyscanner );
 
-int IRC_Bisector_get_debug (yyscan_t yyscanner );
+int HTTP_Bisector_get_debug (yyscan_t yyscanner );
 
-void IRC_Bisector_set_debug (int debug_flag ,yyscan_t yyscanner );
+void HTTP_Bisector_set_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE IRC_Bisector_get_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE HTTP_Bisector_get_extra (yyscan_t yyscanner );
 
-void IRC_Bisector_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void HTTP_Bisector_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
-FILE *IRC_Bisector_get_in (yyscan_t yyscanner );
+FILE *HTTP_Bisector_get_in (yyscan_t yyscanner );
 
-void IRC_Bisector_set_in  (FILE * in_str ,yyscan_t yyscanner );
+void HTTP_Bisector_set_in  (FILE * in_str ,yyscan_t yyscanner );
 
-FILE *IRC_Bisector_get_out (yyscan_t yyscanner );
+FILE *HTTP_Bisector_get_out (yyscan_t yyscanner );
 
-void IRC_Bisector_set_out  (FILE * out_str ,yyscan_t yyscanner );
+void HTTP_Bisector_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-yy_size_t IRC_Bisector_get_leng (yyscan_t yyscanner );
+yy_size_t HTTP_Bisector_get_leng (yyscan_t yyscanner );
 
-char *IRC_Bisector_get_text (yyscan_t yyscanner );
+char *HTTP_Bisector_get_text (yyscan_t yyscanner );
 
-int IRC_Bisector_get_lineno (yyscan_t yyscanner );
+int HTTP_Bisector_get_lineno (yyscan_t yyscanner );
 
-void IRC_Bisector_set_lineno (int line_number ,yyscan_t yyscanner );
+void HTTP_Bisector_set_lineno (int line_number ,yyscan_t yyscanner );
 
-int IRC_Bisector_get_column  (yyscan_t yyscanner );
+int HTTP_Bisector_get_column  (yyscan_t yyscanner );
 
-void IRC_Bisector_set_column (int column_no ,yyscan_t yyscanner );
+void HTTP_Bisector_set_column (int column_no ,yyscan_t yyscanner );
 
 /* %if-bison-bridge */
 /* %endif */
@@ -368,9 +376,9 @@ void IRC_Bisector_set_column (int column_no ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int IRC_Bisector_wrap (yyscan_t yyscanner );
+extern "C" int HTTP_Bisector_wrap (yyscan_t yyscanner );
 #else
-extern int IRC_Bisector_wrap (yyscan_t yyscanner );
+extern int HTTP_Bisector_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -399,7 +407,12 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Number of entries by which start-condition stack grows. */
@@ -419,9 +432,9 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #define YY_DECL_IS_OURS 1
 /* %if-c-only Standard (non-C++) definition */
 
-extern int IRC_Bisector_lex (yyscan_t yyscanner);
+extern int HTTP_Bisector_lex (yyscan_t yyscanner);
 
-#define YY_DECL int IRC_Bisector_lex (yyscan_t yyscanner)
+#define YY_DECL int HTTP_Bisector_lex (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only C++ definition */
 /* %endif */
@@ -451,9 +464,9 @@ extern int IRC_Bisector_lex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 69 "bisector.l"
+#line 68 "./../scripts/bisector.l"
 
 
-#line 458 "irc_bisector.h"
-#undef IRC_Bisector_IN_HEADER
-#endif /* IRC_Bisector_HEADER_H */
+#line 471 "http_bisector.h"
+#undef HTTP_Bisector_IN_HEADER
+#endif /* HTTP_Bisector_HEADER_H */

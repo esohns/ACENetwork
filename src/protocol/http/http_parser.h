@@ -40,12 +40,26 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 48 "parser.y" /* glr.c:197  */
+
 
 #include <cstdio>
 #include <string>
 
-enum yytokentype;
+enum yytokentype
+{
+  END = 0,
+  METHOD = 258,
+  URI = 259,
+  VERSION = 260,
+  HEADER = 261,
+  DELIMITER = 262,
+  STATUS = 263,
+  REASON = 264,
+  BODY = 265,
+  CHUNK = 266
+};
+#define YYTOKENTYPE
+//enum yytokentype;
 class HTTP_ParserDriver;
 //class HTTP_Scanner;
 struct YYLTYPE;
@@ -54,10 +68,10 @@ union YYSTYPE;
 typedef void* yyscan_t;
 
 //#define YYERROR_VERBOSE
-void yyerror (YYLTYPE*, HTTP_ParserDriver*, yyscan_t, const char*);
-void yyprint (FILE*, yytokentype, YYSTYPE);
+extern void yyerror (YYLTYPE*, HTTP_ParserDriver*, yyscan_t, const char*);
+extern void yyprint (FILE*, yytokentype, YYSTYPE);
 
-#line 61 "http_parser.h" /* glr.c:197  */
+
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -66,12 +80,14 @@ void yyprint (FILE*, yytokentype, YYSTYPE);
   {
     END = 0,
     METHOD = 258,
-    VERSION = 259,
-    REQUEST = 260,
-    RESPONSE = 261,
-    HEADER = 262,
-    DELIMITER = 263,
-    BODY = 264
+    URI = 259,
+    VERSION = 260,
+    HEADER = 261,
+    DELIMITER = 262,
+    STATUS = 263,
+    REASON = 264,
+    BODY = 265,
+    CHUNK = 266
   };
 #endif
 
@@ -80,12 +96,12 @@ void yyprint (FILE*, yytokentype, YYSTYPE);
 
 union YYSTYPE
 {
-#line 87 "parser.y" /* glr.c:197  */
+
 
   int          ival;
   std::string* sval;
 
-#line 89 "http_parser.h" /* glr.c:197  */
+
 };
 
 typedef union YYSTYPE YYSTYPE;

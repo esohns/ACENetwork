@@ -45,6 +45,13 @@
 //         switching of buffers/"backing-up" reliably and stress-test the
 //         application to see which option proves to be more efficient...
 #define HTTP_DEFAULT_CRUNCH_MESSAGES              true
+// *IMPORTANT NOTE*: scans buffers in-place (avoids a copy,
+//         see: http://flex.sourceforge.net/manual/Multiple-Input-Buffers.html)
+//         --> in order to use yy_scan_buffer(), the buffer needs to have been
+//             prepared for usage by flex: buffers need two trailing '\0's
+//             BEYOND their datas' tail byte (i.e. at positions length() + 1 and
+//             length() + 2)
+#define HTTP_DEFAULT_USE_YY_SCAN_BUFFER           true
 
 // output more debugging information
 #define HTTP_DEFAULT_LEX_TRACE                    false
@@ -57,6 +64,11 @@
 
 // protocol
 #define HTTP_DEFAULT_PRINT_PROGRESSDOT            false
-#define HTTP_VERSION_STRING_PREFIX                "HTTP/"
+#define HTTP_COMMAND_STRING_RESPONSE              "HTTP_RESPONSE"
+#define HTTP_PRT_VERSION_STRING_PREFIX            "HTTP/"
+// headers
+#define HTTP_PRT_LOCATION_HEADER_STRING           "Location"
+#define HTTP_PRT_TRANSFER_ENCODING_HEADER_STRING  "Transfer-Encoding"
+#define HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING "chunked"
 
 #endif

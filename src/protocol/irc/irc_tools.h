@@ -35,7 +35,6 @@
 #include "irc_exports.h"
 #include "irc_record.h"
 #include "irc_codes.h"
-#include "irc_network.h"
 
 // forward declaration(s)
 struct IRC_LoginOptions;

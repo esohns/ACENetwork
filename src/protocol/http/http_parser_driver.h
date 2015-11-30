@@ -24,42 +24,39 @@
 #include <string>
 
 #include "ace/Global_Macros.h"
+#include "ace/Message_Block.h"
 
 #include "location.hh"
 
+#include "http_defines.h"
 #include "http_exports.h"
-//#include "http_parser.h"
+//#include "http_scanner.h"
 
 // forward declaration(s)
-class ACE_Message_Block;
+class ACE_Message_Queue_Base;
 class HTTP_Record;
+//class HTTP_Scanner;
 typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 struct YYLTYPE;
 
 class HTTP_Export HTTP_ParserDriver
 {
+  friend class HTTP_Scanner;
+
  public:
   HTTP_ParserDriver (bool,  // debug scanning ?
                      bool); // debug parsing ?
   virtual ~HTTP_ParserDriver ();
 
-  // target data, needs to be set PRIOR to invoking parse() !
-  void initialize (HTTP_Record&,  // target data
-                   bool = false,  // debug scanner ?
-                   bool = false); // debug parser ?
-  // *WARNING*: in order to use the faster yy_scan_buffer(), the argument needs
-  // to have been prepared for usage by flex:
-  // --> buffers need two trailing '\0's BEYOND their data
-  //    (at positions length() + 1, length() + 2)
-  // --> indicated by the second argument
-  bool parse (ACE_Message_Block*, // data
-              bool = false);      // is data prepared for yy_scan_buffer ?
+  // target data, needs to be set before invoking parse() !
+  void initialize (HTTP_Record&,                            // target data
+                   bool = HTTP_DEFAULT_LEX_TRACE,           // debug scanner ?
+                   bool = HTTP_DEFAULT_YACC_TRACE,          // debug parser ?
+                   ACE_Message_Queue_Base* = NULL,          // data buffer queue (yywrap)
+                   bool = HTTP_DEFAULT_USE_YY_SCAN_BUFFER); // yy_scan_buffer() ? : yy_scan_bytes()
 
-  // invoked by the scanner ONLY !!!
-  bool switchBuffer ();
-  bool moreData ();
-  bool getDebugScanner () const;
+  bool parse (ACE_Message_Block*); // data
 
   // error handling
   void error (const yy::location&, // location
@@ -68,8 +65,18 @@ class HTTP_Export HTTP_ParserDriver
   void error (const YYLTYPE&,      // location
               const std::string&); // message
 
+  // *NOTE*: to be invoked by the scanner (ONLY !)
+  bool switchBuffer ();
+  bool getDebugScanner () const;
+  void wait ();
+
+  // *NOTE*: current (unscanned) data fragment
+  bool                    finished_; // processed the whole entity ?
+  ACE_Message_Block*      fragment_;
+  unsigned int            offset_; // parsed entity bytes
+
   // target
-  HTTP_Record*       record_;
+  HTTP_Record*            record_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver ())
@@ -80,24 +87,22 @@ class HTTP_Export HTTP_ParserDriver
   //typedef HTTP_Message_T<AllocatorConfigurationType> MESSAGE_T;
 
   // helper methods
-  bool scan_begin (bool); // use yy_scan_buffer : yy_scan_bytes
+  bool scan_begin ();
   void scan_end ();
 
   // context
-  bool               trace_;
+  bool                    trace_;
 
   //// parser
   //yy::HTTP_Parser    parser_;
 
   // scanner
-  yyscan_t           scannerState_;
-  YY_BUFFER_STATE    bufferState_;
+  yyscan_t                scannerState_;
+  YY_BUFFER_STATE         bufferState_;
+  ACE_Message_Queue_Base* messageQueue_;
+  bool                    useYYScanBuffer_;
 
-  // *NOTE*: stores unscanned data, enabling transitions between continuations
-  ACE_Message_Block* fragment_;
-  bool               fragmentIsResized_;
-
-  bool               isInitialized_;
+  bool                    initialized_;
 };
 
 #endif

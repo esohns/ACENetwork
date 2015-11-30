@@ -30,7 +30,7 @@ bison --verbose --graph=parser_graph.txt --xml=parser_graph.xml ${SOURCE_FILE} -
 # *NOTE*: a specific method needs to be added to the parser class
 # --> copy a pre-patched version (back) into the project directory instead
 # *TODO*: needs to be updated after every change
-TARGET_DIRECTORY=${PROJECT_ROOT}
+TARGET_DIRECTORY=${SCRIPTS_DIRECTORY}/..
 TARGET_FILE=${TARGET_DIRECTORY}/irc_parser.h
 SOURCE_FILE=${SCRIPTS_DIRECTORY}/irc_parser_patched.h
 [ ! -f ${SOURCE_FILE} ] && echo "ERROR: file ${SOURCE_FILE} not found, aborting" && exit 1
@@ -56,3 +56,4 @@ do
  fi
  echo "moved \"$FILE\"..."
 done
+

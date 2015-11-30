@@ -24,6 +24,8 @@
 #include "ace/Log_Msg.h"
 #include "ace/Malloc_Base.h"
 
+#include "http_tools.h"
+
 #include "net_macros.h"
 
 Test_U_Message::Test_U_Message (unsigned int size_in)
@@ -62,6 +64,32 @@ Test_U_Message::~Test_U_Message ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Message::~Test_U_Message"));
 
+}
+
+HTTP_Method_t
+Test_U_Message::command () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::command"));
+
+  // sanity check(s)
+  if (!inherited::initialized_)
+    return HTTP_Codes::HTTP_METHOD_INVALID;
+  ACE_ASSERT (inherited::data_);
+
+  const typename Test_U_MessageData_t::DATA_T& data_r =
+      inherited::data_->get ();
+
+  return (data_r.HTTPRecord ? data_r.HTTPRecord->method
+                            : HTTP_Codes::HTTP_METHOD_INVALID);
+}
+
+std::string
+Test_U_Message::Command2String (HTTP_Method_t method_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Command2String"));
+
+  return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
+                                                       : HTTP_Tools::Method2String (method_in));
 }
 
 ACE_Message_Block*

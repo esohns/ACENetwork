@@ -34,7 +34,6 @@
 
 #include "net_iconnection.h"
 
-#include "irc_network.h"
 #include "irc_record.h"
 
 // forward declarations
@@ -42,7 +41,8 @@ class ACE_Message_Block;
 
 template <typename ConnectionType,
           typename SessionDataType,
-          typename NotificationType,
+          typename ControllerType, // IRC_IControl_T
+          typename NotificationType, // Common_INotify_T
           typename ConfigurationType,
           typename SessionMessageType,
           typename SocketHandlerConfigurationType,
@@ -66,6 +66,7 @@ class IRC_Session_T
 {
  friend class ACE_Connector<IRC_Session_T<ConnectionType,
                                           SessionDataType,
+                                          ControllerType,
                                           NotificationType,
                                           ConfigurationType,
                                           SessionMessageType,
@@ -79,6 +80,7 @@ class IRC_Session_T
                             ACE_SOCK_CONNECTOR>;
  friend class ACE_Asynch_Connector<IRC_Session_T<ConnectionType,
                                                  SessionDataType,
+                                                 ControllerType,
                                                  NotificationType,
                                                  ConfigurationType,
                                                  SessionMessageType,

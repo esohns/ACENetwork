@@ -23,6 +23,7 @@
 
 #include "common_timer_manager_common.h"
 
+#include "stream_defines.h"
 #include "stream_iallocator.h"
 
 #include "net_macros.h"
@@ -59,8 +60,8 @@ IRC_Module_Bisector_T<LockType,
                              false)
  , statisticCollectHandlerID_ (-1)
  , bufferState_ (NULL)
- , numberOfFrames_ (0)
  , context_ (NULL)
+ , numberOfFrames_ (0)
  , buffer_ (NULL)
  , messageLength_ (0)
  , isInitialized_ (false)
@@ -72,7 +73,7 @@ IRC_Module_Bisector_T<LockType,
                 ACE_TEXT ("failed to yylex_init(): \"%m\", continuing\n")));
 
   // trace ?
-  IRC_Bisector_set_debug ((IRC_DEF_LEX_TRACE ? 1 : 0),
+  IRC_Bisector_set_debug ((IRC_DEFAULT_LEX_TRACE ? 1 : 0),
                           context_);
 }
 
@@ -429,7 +430,7 @@ IRC_Module_Bisector_T<LockType,
 //                    message_block_p->total_length ()));
 
         // --> push it downstream...
-        result = put_next (message_p, NULL);
+        result = inherited::put_next (message_p, NULL);
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,

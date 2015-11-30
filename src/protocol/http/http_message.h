@@ -27,8 +27,8 @@
 
 #include "stream_data_message_base.h"
 
+#include "http_codes.h"
 #include "http_exports.h"
-#include "http_record.h"
 
 // forward declaration(s)
 class ACE_Allocator;
@@ -42,18 +42,21 @@ template <typename AllocatorConfigurationType,
           typename MessageType,
           typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename DataType>
 class HTTP_Message_T
  : public Stream_DataMessageBase_T<AllocatorConfigurationType,
-                                   HTTP_Record,
+                                   DataType,
                                    HTTP_Method_t>
 {
   // enable access to specific private ctors...
   friend class Stream_MessageAllocatorHeapBase_T<AllocatorConfigurationType,
-                                                 HTTP_Message_T<AllocatorConfigurationType>,
+                                                 HTTP_Message_T<AllocatorConfigurationType,
+                                                                DataType>,
                                                  HTTP_SessionMessage>;
   friend class Stream_CachedMessageAllocator_T<AllocatorConfigurationType,
-                                               HTTP_Message_T<AllocatorConfigurationType>,
+                                               HTTP_Message_T<AllocatorConfigurationType,
+                                                              DataType>,
                                                HTTP_SessionMessage>;
 
  public:
@@ -101,7 +104,7 @@ class HTTP_Message_T
 
  private:
   typedef Stream_DataMessageBase_T<AllocatorConfigurationType,
-                                   HTTP_Record,
+                                   DataType,
                                    HTTP_Method_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Message_T ())

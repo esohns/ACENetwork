@@ -46,18 +46,18 @@
 
 
 /* "%code top" blocks.  */
-#line 15 "parser.y" /* glr.c:222  */
+
 
 #include "stdafx.h"
 
-#line 54 "http_parser.cpp" /* glr.c:222  */
+
 
 
 
 
 /* First part of user declarations.  */
 
-#line 61 "http_parser.cpp" /* glr.c:240  */
+
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -90,9 +90,9 @@ static YYLTYPE yyloc_default
 
 /* Copy the second part of user declarations.  */
 
-#line 94 "http_parser.cpp" /* glr.c:263  */
+
 /* Unqualified %code blocks.  */
-#line 94 "parser.y" /* glr.c:264  */
+
 
 // *NOTE*: necessary only if %debug is set in the definition file (see: parser.y)
 #if defined (YYDEBUG)
@@ -116,8 +116,9 @@ using namespace std;
 
 #include "net_macros.h"
 
+#include "http_common.h"
+#include "http_defines.h"
 #include "http_parser_driver.h"
-#include "http_record.h"
 #include "http_scanner.h"
 #include "http_tools.h"
 
@@ -126,7 +127,7 @@ using namespace std;
 
 #define YYPRINT(file, type, value) yyprint (file, type, value)
 
-#line 130 "http_parser.cpp" /* glr.c:264  */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -231,18 +232,18 @@ using namespace std;
 #endif
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  9
+#define YYFINAL  14
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   11
+#define YYLAST   55
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  10
+#define YYNTOKENS  12
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  7
+#define YYNNTS  12
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  10
+#define YYNRULES  22
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  18
+#define YYNSTATES  33
 /* YYMAXRHS -- Maximum number of symbols on right-hand side of rule.  */
 #define YYMAXRHS 4
 /* YYMAXLEFT -- Maximum number of symbols to the left of a handle
@@ -251,7 +252,7 @@ using namespace std;
 
 /* YYTRANSLATE(X) -- Bison symbol number corresponding to X.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   264
+#define YYMAXUTOK   266
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -285,15 +286,16 @@ static const unsigned char yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9
+       5,     6,     7,     8,     9,    10,    11
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short int yyrline[] =
 {
-       0,   160,   160,   161,   167,   172,   205,   242,   270,   271,
-     272
+       0,   181,   181,   182,   189,   219,   221,   222,   228,   230,
+     237,   239,   240,   251,   253,   259,   261,   299,   300,   302,
+     304,   306,   307
 };
 #endif
 
@@ -302,22 +304,25 @@ static const unsigned short int yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "\"end_of_message\"", "error", "$undefined", "\"method\"",
-  "\"version\"", "\"request_line\"", "\"status_line\"", "\"header\"",
-  "\"delimiter\"", "\"body\"", "$accept", "message", "head", "request",
-  "response", "headers", "body", YY_NULLPTR
+  "\"end_of_fragment\"", "error", "$undefined", "\"method\"", "\"uri\"",
+  "\"version\"", "\"header\"", "\"delimiter\"", "\"status\"", "\"reason\"",
+  "\"body\"", "\"chunk\"", "$accept", "message", "head", "head_rest1",
+  "request_line_rest1", "request_line_rest2", "head_rest2",
+  "status_line_rest1", "status_line_rest2", "headers", "body", "chunks", YY_NULLPTR
 };
 #endif
 
-#define YYPACT_NINF -8
-#define YYTABLE_NINF -1
+#define YYPACT_NINF -14
+#define YYTABLE_NINF -23
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
 static const signed char yypact[] =
 {
-      -2,     0,    -3,     6,    -1,     1,    -8,     1,    -8,    -8,
-       2,     1,    -8,    -8,    -8,     9,    -8,    -8
+       3,     0,     5,     2,    23,    11,    14,    17,    43,    18,
+      20,     4,    44,    18,   -14,     1,    22,    24,    26,    28,
+      30,    32,    34,    36,    52,     8,    53,    38,     8,    18,
+      40,    42,    54
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -325,57 +330,73 @@ static const signed char yypact[] =
      means the default is an error.  */
 static const unsigned char yydefact[] =
 {
-       0,     0,     0,     0,     0,     8,     3,     8,     4,     1,
-      10,     8,     5,     6,     9,     0,     7,     2
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     1,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const signed char yypgoto[] =
 {
-      -8,    -8,    -8,    -8,    -8,    -7,    -8
+     -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -13,
+     -14,    27
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const signed char yydefgoto[] =
 {
-      -1,     3,     4,     6,     8,    12,    15
+      -1,     4,     5,     8,     9,    18,    12,    13,    22,    19,
+      26,    29
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
      positive, shift that token.  If negative, reduce the rule whose
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const unsigned char yytable[] =
+static const signed char yytable[] =
 {
-      13,     1,     2,     7,    16,     5,     9,    10,    11,    17,
-       0,    14
+      23,   -20,    10,     1,    20,     6,     2,    -5,     3,     7,
+      11,    24,    25,    21,   -22,   -22,    31,    16,    15,    28,
+      -8,    -8,    17,    14,   -17,   -17,   -13,   -13,   -10,   -10,
+      -9,    -9,    -7,    -7,    27,    -6,   -15,   -15,   -14,   -14,
+     -12,   -12,    27,   -11,   -16,   -16,   -21,   -21,    27,    32,
+      -3,    -4,   -18,    -2,   -19,    30
 };
 
-static const signed char yycheck[] =
+static const unsigned char yycheck[] =
 {
-       7,     3,     4,     6,    11,     5,     0,     8,     7,     0,
-      -1,     9
+      13,     0,     0,     0,     0,     0,     3,     7,     5,     4,
+       8,    10,    11,     9,     6,     7,    29,     0,     7,    11,
+       6,     7,     5,     0,     6,     7,     6,     7,     6,     7,
+       6,     7,     6,     7,     6,     7,     6,     7,     6,     7,
+       6,     7,     6,     7,     6,     7,     6,     7,     6,     7,
+       7,     7,     0,     0,     0,    28
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const unsigned char yystos[] =
 {
-       0,     3,     4,    11,    12,     5,    13,     6,    14,     0,
-       8,     7,    15,    15,     9,    16,    15,     0
+       0,     0,     3,     5,    13,    14,     0,     4,    15,    16,
+       0,     8,    18,    19,     0,     7,     0,     5,    17,    21,
+       0,     9,    20,    21,    10,    11,    22,     6,    11,    23,
+      23,    21,     7
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const unsigned char yyr1[] =
 {
-       0,    10,    11,    12,    12,    13,    14,    15,    15,    16,
-      16
+       0,    12,    13,    14,    14,    14,    15,    16,    16,    17,
+      17,    18,    19,    19,    20,    20,    21,    21,    22,    22,
+      22,    23,    23
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const unsigned char yyr2[] =
 {
-       0,     2,     4,     2,     2,     2,     2,     2,     0,     1,
-       0
+       0,     2,     3,     2,     2,     1,     2,     2,     1,     1,
+       1,     2,     2,     1,     1,     1,     2,     0,     1,     4,
+       0,     2,     0
 };
 
 
@@ -383,14 +404,16 @@ static const unsigned char yyr2[] =
 static const unsigned char yydprec[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0
 };
 
 /* YYMERGER[RULE-NUM] -- Index of merging function for rule #RULE-NUM.  */
 static const unsigned char yymerger[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0
 };
 
 /* YYIMMEDIATE[RULE-NUM] -- True iff rule #RULE-NUM is not to be deferred, as
@@ -398,7 +421,8 @@ static const unsigned char yymerger[] =
 static const yybool yyimmediate[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0
 };
 
 /* YYCONFLP[YYPACT[STATE-NUM]] -- Pointer into YYCONFL of start of
@@ -408,7 +432,11 @@ static const yybool yyimmediate[] =
 static const unsigned char yyconflp[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0
 };
 
 /* YYCONFL[I] -- lists of conflicting rule numbers, each terminated by
@@ -546,46 +574,130 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
     return;
   switch (yytype)
     {
-          case 3: /* "method"  */
-#line 149 "parser.y" /* glr.c:463  */
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
-#line 553 "http_parser.cpp" /* glr.c:463  */
-        break;
+          case 0: /* "end_of_fragment"  */
 
-    case 4: /* "version"  */
-#line 149 "parser.y" /* glr.c:463  */
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
-#line 559 "http_parser.cpp" /* glr.c:463  */
-        break;
-
-    case 5: /* "request_line"  */
-#line 149 "parser.y" /* glr.c:463  */
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
-#line 565 "http_parser.cpp" /* glr.c:463  */
-        break;
-
-    case 6: /* "status_line"  */
-#line 149 "parser.y" /* glr.c:463  */
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
-#line 571 "http_parser.cpp" /* glr.c:463  */
-        break;
-
-    case 7: /* "header"  */
-#line 149 "parser.y" /* glr.c:463  */
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
-#line 577 "http_parser.cpp" /* glr.c:463  */
-        break;
-
-    case 8: /* "delimiter"  */
-#line 150 "parser.y" /* glr.c:463  */
       { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-#line 583 "http_parser.cpp" /* glr.c:463  */
+
         break;
 
-    case 9: /* "body"  */
-#line 150 "parser.y" /* glr.c:463  */
+    case 3: /* "method"  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
+
+        break;
+
+    case 4: /* "uri"  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
+
+        break;
+
+    case 5: /* "version"  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
+
+        break;
+
+    case 6: /* "header"  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
+
+        break;
+
+    case 7: /* "delimiter"  */
+
       { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-#line 589 "http_parser.cpp" /* glr.c:463  */
+
+        break;
+
+    case 8: /* "status"  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
+
+        break;
+
+    case 9: /* "reason"  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
+
+        break;
+
+    case 10: /* "body"  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 11: /* "chunk"  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 13: /* message  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 14: /* head  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 15: /* head_rest1  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 16: /* request_line_rest1  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 17: /* request_line_rest2  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 18: /* head_rest2  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 19: /* status_line_rest1  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 20: /* status_line_rest2  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 21: /* headers  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 22: /* body  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 23: /* chunks  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
         break;
 
 
@@ -964,142 +1076,240 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
   switch (yyn)
     {
-        case 3:
-#line 161 "parser.y" /* glr.c:816  */
-    {
-                                                       driver->record_->method_ =
+        case 2:
+
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+
+    break;
+
+  case 3:
+
+    { ((*yyvalp).ival) = (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).size () + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival) + 1;
+                                                       driver->record_->method =
                                                          HTTP_Tools::Method2Type (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval));
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set method: \"%s\"\n"),
-                                                                   ACE_TEXT ((*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).c_str ()))); }
-#line 976 "http_parser.cpp" /* glr.c:816  */
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set method: \"%s\"\n"),
+//                                                                   ACE_TEXT ((*$1).c_str ())));
+                                                     }
+
     break;
 
   case 4:
-#line 167 "parser.y" /* glr.c:816  */
-    { driver->record_->version_ =
-                                                         HTTP_Tools::Version2Type (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval));
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set version: \"%s\"\n"),
-                                                                   ACE_TEXT ((*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).c_str ()))); }
-#line 986 "http_parser.cpp" /* glr.c:816  */
+
+    { ((*yyvalp).ival) = (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).size () + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival) + 1;
+                                                       std::string regex_string =
+                                                         ACE_TEXT_ALWAYS_CHAR ("^");
+                                                       regex_string +=
+                                                         ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
+                                                       regex_string +=
+                                                         ACE_TEXT_ALWAYS_CHAR ("([[:digit:]]{1}\\.[[:digit:]]{1})$");
+                                                       std::regex regex (regex_string);
+                                                       std::smatch match_results;
+                                                       if (!std::regex_match (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval),
+                                                                              match_results,
+                                                                              regex,
+                                                                              std::regex_constants::match_default))
+                                                       {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("invalid HTTP version (was: \"%s\"), continuing\n"),
+                                                                     ACE_TEXT ((*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).c_str ())));
+                                                       } // end IF
+                                                       else
+                                                       {
+                                                         ACE_ASSERT (match_results.ready () && !match_results.empty ());
+                                                         ACE_ASSERT (match_results[1].matched);
+
+                                                         driver->record_->version =
+                                                             HTTP_Tools::Version2Type (match_results[1].str ());
+//                                                         ACE_DEBUG ((LM_DEBUG,
+//                                                                     ACE_TEXT ("set version: \"%s\"\n"),
+//                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
+                                                       } // end ELSE
+                                                     }
+
     break;
 
   case 5:
-#line 172 "parser.y" /* glr.c:816  */
-    { /* *TODO*: modify the scanner so it emits the proper fields itself */
-                                                       std::string regex_string =
-                                                         ACE_TEXT_ALWAYS_CHAR ("^([[^\\s]+)\\s([[^\\s]+)\\sHTTP/([[:digit:]]+)\\.([[:digit:]]+)$");
-                                                       std::regex regex (regex_string);
-                                                       std::smatch match_results;
-                                                       if (!std::regex_match (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval),
-                                                                              match_results,
-                                                                              regex,
-                                                                              std::regex_constants::match_default))
-                                                       {
-                                                         ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("invalid HTTP request-line (was: \"%s\"), continuing\n"),
-                                                                     ACE_TEXT ((*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).c_str ())));
-                                                       } // end IF
-                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
-                                                       ACE_ASSERT (match_results[1].matched);
-                                                       driver->record_->method_ =
-                                                         HTTP_Tools::Method2Type (match_results[1]);
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set method: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[1].str ().c_str ())));
-                                                       ACE_ASSERT (match_results[2].matched);
-                                                       driver->record_->URI_ = match_results[2];
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set URI: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
-                                                       ACE_ASSERT (match_results[3].matched);
-                                                       driver->record_->version_ =
-                                                         HTTP_Tools::Version2Type (match_results[3]);
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set version: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[3].str ().c_str ()))); }
-#line 1024 "http_parser.cpp" /* glr.c:816  */
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
+                                                       yyclearin; }
+
     break;
 
   case 6:
-#line 205 "parser.y" /* glr.c:816  */
-    { /* *TODO*: modify the scanner so it emits the proper fields itself */
-                                                       std::string regex_string =
-                                                         ACE_TEXT_ALWAYS_CHAR ("^([[^\\s]+)\\s([[:digit:]{3})\\s(.+)$");
-                                                       std::regex regex (regex_string);
-                                                       std::smatch match_results;
-                                                       if (!std::regex_match (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval),
-                                                                              match_results,
-                                                                              regex,
-                                                                              std::regex_constants::match_default))
-                                                       {
-                                                         ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("invalid HTTP status-line (was: \"%s\"), continuing\n"),
-                                                                     ACE_TEXT ((*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).c_str ())));
-                                                       } // end IF
-                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
-                                                       ACE_ASSERT (match_results[1].matched);
-                                                       driver->record_->version_ =
-                                                         HTTP_Tools::Version2Type (match_results[1]);
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set version: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[1].str ().c_str ())));
-                                                       ACE_ASSERT (match_results[2].matched);
-                                                       std::stringstream converter;
-                                                       converter.str (match_results[2].str ().c_str ());
-                                                       int status;
-                                                       converter >> status;
-                                                       driver->record_->status_ =
-                                                         static_cast<HTTP_Status_t> (status);
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set status: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
-                                                       ACE_ASSERT (match_results[3].matched);
-                                                       /* driver->record_->reason_ = match_results[3];
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set reason: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[3].str ().c_str ()))); */ }
-#line 1066 "http_parser.cpp" /* glr.c:816  */
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+
     break;
 
   case 7:
-#line 242 "parser.y" /* glr.c:816  */
-    { /* *TODO*: modify the scanner so it emits the proper fields itself */
+
+    { ((*yyvalp).ival) = (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).size () + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival) + 1;
+                                                       driver->record_->URI = *(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval);
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set URI: \"%s\"\n"),
+//                                                                   ACE_TEXT ((*$1).c_str ())));
+                                                     }
+
+    break;
+
+  case 8:
+
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
+                                                       yyclearin; }
+
+    break;
+
+  case 9:
+
+    { ((*yyvalp).ival) = (*(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)).size () + 2;
+                                                       driver->record_->version =
+                                                         HTTP_Tools::Version2Type (*(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval));
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set version: \"%s\"\n"),
+//                                                                   ACE_TEXT ((*$1).c_str ())));
+                                                     }
+
+    break;
+
+  case 10:
+
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
+                                                       yyclearin; }
+
+    break;
+
+  case 11:
+
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+
+    break;
+
+  case 12:
+
+    { ((*yyvalp).ival) = (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).size () + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival) + 1;
+                                                       std::stringstream converter;
+                                                       converter.str (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval));
+                                                       int status;
+                                                       converter >> status;
+                                                       driver->record_->status =
+                                                           static_cast<HTTP_Status_t> (status);
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set status: %d\n"),
+//                                                                   status));
+                                                     }
+
+    break;
+
+  case 13:
+
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
+                                                       yyclearin; }
+
+    break;
+
+  case 14:
+
+    { ((*yyvalp).ival) = (*(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)).size () + 2;
+                                                       driver->record_->reason = *(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval);
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set reason: \"%s\"\n"),
+//                                                                   ACE_TEXT ((*$1).c_str ())));
+                                                     }
+
+    break;
+
+  case 15:
+
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
+                                                       yyclearin; }
+
+    break;
+
+  case 16:
+
+    { /* NOTE*: use right-recursion here to force early state reductions
+                                                                 (i.e. parse headers). This is required so the scanner can
+                                                                 act on any set transfer encoding. */
+                                                       ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + (*(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)).size ();
+                                                       /* *TODO*: modify the scanner so it emits the proper fields itself */
                                                        std::string regex_string =
                                                          ACE_TEXT_ALWAYS_CHAR ("^([^:]+):\\s(.+)$");
                                                        std::regex regex (regex_string);
                                                        std::smatch match_results;
-                                                       if (!std::regex_match (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval),
+                                                       if (!std::regex_match (*(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval),
                                                                               match_results,
                                                                               regex,
                                                                               std::regex_constants::match_default))
                                                        {
                                                          ACE_DEBUG ((LM_ERROR,
                                                                      ACE_TEXT ("invalid HTTP header (was: \"%s\"), continuing\n"),
-                                                                     ACE_TEXT ((*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).c_str ())));
+                                                                     ACE_TEXT ((*(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)).c_str ())));
                                                        } // end IF
                                                        ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
                                                        ACE_ASSERT (match_results[1].matched);
                                                        HTTP_HeadersIterator_t iterator =
-                                                         driver->record_->headers_.find (match_results[1]);
-                                                       ACE_ASSERT (iterator == driver->record_->headers_.end ());
+                                                         driver->record_->headers.find (match_results[1]);
+                                                       if (iterator != driver->record_->headers.end ())
+                                                       {
+                                                         ACE_DEBUG ((LM_WARNING,
+                                                                     ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
+                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
+                                                       } // end IF
                                                        ACE_ASSERT (match_results[2].matched);
                                                        ACE_ASSERT (!match_results[2].str ().empty ());
-                                                       driver->record_->headers_[match_results[1]] =
+                                                       driver->record_->headers[match_results[1]] =
                                                          match_results[2];
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set header: \"%s\" to \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[1].str ().c_str ()),
-                                                                   ACE_TEXT (match_results[2].str ().c_str ()))); }
-#line 1099 "http_parser.cpp" /* glr.c:816  */
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set header: \"%s\" to \"%s\"\n"),
+//                                                                   ACE_TEXT (match_results[1].str ().c_str ()),
+//                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
+                                                     }
+
+    break;
+
+  case 17:
+
+    { ((*yyvalp).ival) = 0; }
+
+    break;
+
+  case 18:
+
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
+                                                       YYACCEPT; }
+
+    break;
+
+  case 19:
+
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
+                                                       YYACCEPT; }
+
+    break;
+
+  case 20:
+
+    { ((*yyvalp).ival) = 0;
+                                                       YYACCEPT; }
+
+    break;
+
+  case 21:
+
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+
+    break;
+
+  case 22:
+
+    { ((*yyvalp).ival) = 0; }
+
     break;
 
 
-#line 1103 "http_parser.cpp" /* glr.c:816  */
+
       default: break;
     }
 
@@ -1147,95 +1357,130 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocatio
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   switch (yytype)
     {
-          case 0: /* "end_of_message"  */
-#line 153 "parser.y" /* glr.c:846  */
-      { ACE_DEBUG ((LM_DEBUG,
-                                        ACE_TEXT ("discarding tagless symbol...\n"))); }
-#line 1155 "http_parser.cpp" /* glr.c:846  */
+          case 0: /* "end_of_fragment"  */
+
+      { ((*yyvaluep).ival) = 0; }
+
         break;
 
     case 3: /* "method"  */
-#line 151 "parser.y" /* glr.c:846  */
+
       { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
-#line 1161 "http_parser.cpp" /* glr.c:846  */
+
         break;
 
-    case 4: /* "version"  */
-#line 151 "parser.y" /* glr.c:846  */
+    case 4: /* "uri"  */
+
       { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
-#line 1167 "http_parser.cpp" /* glr.c:846  */
+
         break;
 
-    case 5: /* "request_line"  */
-#line 151 "parser.y" /* glr.c:846  */
+    case 5: /* "version"  */
+
       { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
-#line 1173 "http_parser.cpp" /* glr.c:846  */
+
         break;
 
-    case 6: /* "status_line"  */
-#line 151 "parser.y" /* glr.c:846  */
+    case 6: /* "header"  */
+
       { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
-#line 1179 "http_parser.cpp" /* glr.c:846  */
+
         break;
 
-    case 7: /* "header"  */
-#line 151 "parser.y" /* glr.c:846  */
-      { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
-#line 1185 "http_parser.cpp" /* glr.c:846  */
-        break;
+    case 7: /* "delimiter"  */
 
-    case 8: /* "delimiter"  */
-#line 152 "parser.y" /* glr.c:846  */
       { ((*yyvaluep).ival) = 0; }
-#line 1191 "http_parser.cpp" /* glr.c:846  */
+
         break;
 
-    case 9: /* "body"  */
-#line 152 "parser.y" /* glr.c:846  */
+    case 8: /* "status"  */
+
+      { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
+
+        break;
+
+    case 9: /* "reason"  */
+
+      { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
+
+        break;
+
+    case 10: /* "body"  */
+
       { ((*yyvaluep).ival) = 0; }
-#line 1197 "http_parser.cpp" /* glr.c:846  */
+
         break;
 
-    case 11: /* message  */
-#line 153 "parser.y" /* glr.c:846  */
-      { ACE_DEBUG ((LM_DEBUG,
-                                        ACE_TEXT ("discarding tagless symbol...\n"))); }
-#line 1204 "http_parser.cpp" /* glr.c:846  */
+    case 11: /* "chunk"  */
+
+      { ((*yyvaluep).ival) = 0; }
+
         break;
 
-    case 12: /* head  */
-#line 153 "parser.y" /* glr.c:846  */
-      { ACE_DEBUG ((LM_DEBUG,
-                                        ACE_TEXT ("discarding tagless symbol...\n"))); }
-#line 1211 "http_parser.cpp" /* glr.c:846  */
+    case 13: /* message  */
+
+      { ((*yyvaluep).ival) = 0; }
+
         break;
 
-    case 13: /* request  */
-#line 153 "parser.y" /* glr.c:846  */
-      { ACE_DEBUG ((LM_DEBUG,
-                                        ACE_TEXT ("discarding tagless symbol...\n"))); }
-#line 1218 "http_parser.cpp" /* glr.c:846  */
+    case 14: /* head  */
+
+      { ((*yyvaluep).ival) = 0; }
+
         break;
 
-    case 14: /* response  */
-#line 153 "parser.y" /* glr.c:846  */
-      { ACE_DEBUG ((LM_DEBUG,
-                                        ACE_TEXT ("discarding tagless symbol...\n"))); }
-#line 1225 "http_parser.cpp" /* glr.c:846  */
+    case 15: /* head_rest1  */
+
+      { ((*yyvaluep).ival) = 0; }
+
         break;
 
-    case 15: /* headers  */
-#line 153 "parser.y" /* glr.c:846  */
-      { ACE_DEBUG ((LM_DEBUG,
-                                        ACE_TEXT ("discarding tagless symbol...\n"))); }
-#line 1232 "http_parser.cpp" /* glr.c:846  */
+    case 16: /* request_line_rest1  */
+
+      { ((*yyvaluep).ival) = 0; }
+
         break;
 
-    case 16: /* body  */
-#line 153 "parser.y" /* glr.c:846  */
-      { ACE_DEBUG ((LM_DEBUG,
-                                        ACE_TEXT ("discarding tagless symbol...\n"))); }
-#line 1239 "http_parser.cpp" /* glr.c:846  */
+    case 17: /* request_line_rest2  */
+
+      { ((*yyvaluep).ival) = 0; }
+
+        break;
+
+    case 18: /* head_rest2  */
+
+      { ((*yyvaluep).ival) = 0; }
+
+        break;
+
+    case 19: /* status_line_rest1  */
+
+      { ((*yyvaluep).ival) = 0; }
+
+        break;
+
+    case 20: /* status_line_rest2  */
+
+      { ((*yyvaluep).ival) = 0; }
+
+        break;
+
+    case 21: /* headers  */
+
+      { ((*yyvaluep).ival) = 0; }
+
+        break;
+
+    case 22: /* body  */
+
+      { ((*yyvaluep).ival) = 0; }
+
+        break;
+
+    case 23: /* chunks  */
+
+      { ((*yyvaluep).ival) = 0; }
+
         break;
 
 
@@ -1292,7 +1537,7 @@ yylhsNonterm (yyRuleNum yyrule)
 }
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-8)))
+  (!!((Yystate) == (-14)))
 
 /** True iff LR state YYSTATE has only a default reduction (regardless
  *  of token).  */
@@ -2669,7 +2914,7 @@ yyparse (HTTP_ParserDriver* driver, yyscan_t yyscanner)
   yylloc = yyloc_default;
 
   /* User initialization code.  */
-  #line 74 "parser.y" /* glr.c:2270  */
+  
 {
   // initialize the location
   //@$.initialize (YY_NULLPTR, 1, 1);
@@ -2681,7 +2926,7 @@ yyparse (HTTP_ParserDriver* driver, yyscan_t yyscanner)
   (yylval).sval = NULL;
 }
 
-#line 2685 "http_parser.cpp" /* glr.c:2270  */
+
 
   if (! yyinitGLRStack (yystackp, YYINITDEPTH))
     goto yyexhaustedlab;
@@ -2982,7 +3227,7 @@ yypdumpstack (yyGLRStack* yystackp)
 
 
 
-#line 273 "parser.y" /* glr.c:2584  */
+
 
 
 /* void
@@ -3032,16 +3277,17 @@ yyprint (FILE* file_in,
   switch (type_in)
   {
     case METHOD:
+    case URI:
     case VERSION:
-    case REQUEST:
-    case RESPONSE:
     case HEADER:
+    case STATUS:
+    case REASON:
     {
       format_string = ACE_TEXT_ALWAYS_CHAR (" %s");
       break;
     }
-    case BODY:
     case DELIMITER:
+    case BODY:
     case END:
     {
       format_string = ACE_TEXT_ALWAYS_CHAR (" %d");
@@ -3055,7 +3301,7 @@ yyprint (FILE* file_in,
       return;
     }
   } // end SWITCH
-  
+
   result = ACE_OS::fprintf (file_in,
                             ACE_TEXT (format_string.c_str ()),
                             value_in);

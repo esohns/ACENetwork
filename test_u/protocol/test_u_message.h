@@ -23,7 +23,7 @@
 
 #include "ace/Global_Macros.h"
 
-#include "http_message.h"
+#include "stream_data_message_base.h"
 
 #include "test_u_common.h"
 
@@ -38,7 +38,9 @@ template <typename AllocatorConfigurationType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_Message
- : public HTTP_Message_T<Test_U_AllocatorConfiguration>
+ : public Stream_DataMessageBase_T<Test_U_AllocatorConfiguration,
+                                   Test_U_MessageData_t,
+                                   HTTP_Method_t>
 {
   // grant access to specific private ctors...
   friend class Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
@@ -49,6 +51,9 @@ class Test_U_Message
  public:
   Test_U_Message (unsigned int); // size
   virtual ~Test_U_Message ();
+
+  virtual HTTP_Method_t command () const; // return value: message type
+  static std::string Command2String (HTTP_Method_t);
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -63,7 +68,9 @@ class Test_U_Message
  private:
 //  typedef Stream_DataMessageBase_T<xmlDoc,
 //                                   Stream_CommandType_t> inherited;
-  typedef HTTP_Message_T<Test_U_AllocatorConfiguration> inherited;
+  typedef Stream_DataMessageBase_T<Test_U_AllocatorConfiguration,
+                                   Test_U_MessageData_t,
+                                   HTTP_Method_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
   // *NOTE*: to be used by message allocators...

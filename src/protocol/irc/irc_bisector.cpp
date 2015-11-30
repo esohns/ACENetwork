@@ -201,7 +201,15 @@ typedef void* yyscan_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -814,8 +822,8 @@ static yyconst flex_int32_t yy_rule_linenum[6] =
 #define yymore() (yyg->yy_more_flag = 1)
 #define YY_MORE_ADJ yyg->yy_more_len
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "bisector.l"
-#line 2 "bisector.l"
+#line 1 "./../scripts/bisector.l"
+#line 2 "./../scripts/bisector.l"
 // *WORKAROUND*
 #include <iostream>
 using namespace std;
@@ -838,7 +846,7 @@ using namespace std;
 /*         --> use ASCII codes directly */
 /* CRLF                   \x0D\x0A */
 
-#line 842 "irc_bisector.cpp"
+#line 850 "irc_bisector.cpp"
 
 #define INITIAL 0
 #define end_of_frame 1
@@ -994,7 +1002,12 @@ static int input (yyscan_t yyscanner );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -1161,10 +1174,10 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 40 "bisector.l"
+#line 40 "./../scripts/bisector.l"
 
 
-#line 1168 "irc_bisector.cpp"
+#line 1181 "irc_bisector.cpp"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -1233,18 +1246,18 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 43 "bisector.l"
+#line 43 "./../scripts/bisector.l"
 { BEGIN(end_of_frame); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 44 "bisector.l"
+#line 44 "./../scripts/bisector.l"
 { return yyleng; }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 45 "bisector.l"
+#line 45 "./../scripts/bisector.l"
 { /* *TODO*: use (?s:.) ? */
 //                         ACE_DEBUG ((LM_ERROR,
 //                                     ACE_TEXT ("ignoring invalid character: \"%c\" (%d)\n"),
@@ -1260,7 +1273,7 @@ YY_RULE_SETUP
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 56 "bisector.l"
+#line 56 "./../scripts/bisector.l"
 { BEGIN(INITIAL);
                          /* (*yyextra)++; */
                          return -1;
@@ -1269,7 +1282,7 @@ YY_RULE_SETUP
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 60 "bisector.l"
+#line 60 "./../scripts/bisector.l"
 { /* *TODO*: use (?s:.) ? */
                          BEGIN(INITIAL);
                          yymore();
@@ -1280,15 +1293,15 @@ YY_RULE_SETUP
 // end <end_of_frame>
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(end_of_frame):
-#line 67 "bisector.l"
+#line 67 "./../scripts/bisector.l"
 { return 0; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 69 "bisector.l"
+#line 69 "./../scripts/bisector.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1292 "irc_bisector.cpp"
+#line 1305 "irc_bisector.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2507,7 +2520,7 @@ void IRC_Bisector_free (void * ptr , yyscan_t yyscanner)
 
 /* %ok-for-header */
 
-#line 69 "bisector.l"
+#line 68 "./../scripts/bisector.l"
 
 
 

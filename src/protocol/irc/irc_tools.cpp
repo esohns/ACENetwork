@@ -35,7 +35,6 @@
 
 #include "irc_configuration.h"
 #include "irc_defines.h"
-#include "irc_network.h"
 
 std::string
 IRC_Tools::dump (const IRC_Record& message_in)

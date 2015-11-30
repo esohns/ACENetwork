@@ -53,8 +53,8 @@ class IRC_Client_SignalHandler
  , public Common_ISignal
 {
  public:
-  IRC_Client_SignalHandler (bool = IRC_CLIENT_DEF_CLIENT_USES_REACTOR, // use reactor ?
-                            bool = IRC_CLIENT_SESSION_DEF_CURSES);     // use curses library ?
+  IRC_Client_SignalHandler (bool = IRC_CLIENT_DEFAULT_USE_REACTOR, // use reactor ?
+                            bool = IRC_CLIENT_SESSION_USE_CURSES); // use curses library ?
   virtual ~IRC_Client_SignalHandler ();
 
   // implement Common_IInitialize_T
@@ -66,9 +66,9 @@ class IRC_Client_SignalHandler
  private:
   typedef Common_SignalHandler inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler ());
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler (const IRC_Client_SignalHandler&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler& operator= (const IRC_Client_SignalHandler&));
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler ())
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler (const IRC_Client_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler& operator= (const IRC_Client_SignalHandler&))
 
   IRC_Client_SignalHandlerConfiguration* configuration_;
   bool                                   useCursesLibrary_;

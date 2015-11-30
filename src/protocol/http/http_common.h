@@ -21,25 +21,63 @@
 #ifndef HTTP_COMMON_H
 #define HTTP_COMMON_H
 
+#include <map>
+#include <string>
+
 #include "common_inotify.h"
 
 #include "stream_common.h"
+#include "stream_data_base.h"
 
 #include "net_common.h"
 
+#include "http_codes.h"
+
 // forward declarations
 struct HTTP_Configuration;
-class HTTP_Record;
+struct HTTP_Record;
 class HTTP_SessionMessage;
 struct HTTP_Stream_SessionData;
 struct HTTP_Stream_UserData;
-
 typedef Common_INotify_T<HTTP_Stream_SessionData,
                          HTTP_Record,
                          HTTP_SessionMessage> HTTP_IStreamNotify_t;
-
-
 typedef Stream_Statistic HTTP_RuntimeStatistic_t;
+
+typedef std::map<std::string, std::string> HTTP_Headers_t;
+typedef HTTP_Headers_t::const_iterator HTTP_HeadersIterator_t;
+struct HTTP_Record
+{
+  inline HTTP_Record ()
+   : headers ()
+   , method (HTTP_Codes::HTTP_METHOD_INVALID)
+   , reason ()
+   , status (HTTP_Codes::HTTP_STATUS_INVALID)
+   , URI ()
+   , version (HTTP_Codes::HTTP_VERSION_INVALID)
+  {};
+
+  HTTP_Headers_t          headers;
+  HTTP_Codes::MethodType  method;
+  std::string             reason;
+  HTTP_Codes::StatusType  status;
+  std::string             URI;
+  HTTP_Codes::VersionType version;
+};
+struct HTTP_MessageData
+{
+  inline HTTP_MessageData ()
+   : HTTPRecord (NULL)
+  {};
+  inline ~HTTP_MessageData ()
+  {
+    if (HTTPRecord)
+      delete HTTPRecord;
+  };
+
+  HTTP_Record* HTTPRecord;
+};
+typedef Stream_DataBase_T<HTTP_MessageData> HTTP_MessageData_t;
 
 struct HTTP_ConnectionState
  : Net_ConnectionState

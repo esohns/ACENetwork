@@ -40,17 +40,18 @@
 
 #include "stream_base.h"
 #include "stream_common.h"
+#include "stream_data_base.h"
 #include "stream_messageallocatorheap_base.h"
-#include "stream_session_data_base.h"
+#include "stream_session_data.h"
 
 #include "net_defines.h"
+#include "net_iconnection.h"
+#include "net_iconnectionmanager.h"
 
 #include "http_common.h"
 #include "http_configuration.h"
 #include "http_defines.h"
 
-#include "test_u_connection_common.h"
-#include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
 //#include "test_u_message.h"
 //#include "test_u_session_message.h"
@@ -87,6 +88,21 @@ struct Test_U_UserData
   Test_U_StreamConfiguration* streamConfiguration;
 };
 
+struct Test_U_MessageData
+{
+  inline Test_U_MessageData ()
+   : HTTPRecord (NULL)
+  {};
+  inline ~Test_U_MessageData ()
+  {
+    if (HTTPRecord)
+      delete HTTPRecord;
+  };
+
+  HTTP_Record* HTTPRecord;
+};
+typedef Stream_DataBase_T<Test_U_MessageData> Test_U_MessageData_t;
+
 struct Test_U_StreamSessionData
  : Stream_SessionData
 {
@@ -112,7 +128,7 @@ struct Test_U_StreamSessionData
   std::string           targetFileName; // file writer module
   Test_U_UserData*      userData;
 };
-typedef Stream_SessionDataBase_T<Test_U_StreamSessionData> Test_U_StreamSessionData_t;
+typedef Stream_SessionData_T<Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 
 struct Test_U_SocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
@@ -128,6 +144,17 @@ struct Test_U_SocketHandlerConfiguration
 
 // forward declarations
 struct Test_U_Configuration;
+struct Test_U_ConnectionState;
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          Test_U_Configuration,
+                          Test_U_ConnectionState,
+                          HTTP_RuntimeStatistic_t> Test_U_IConnection_t;
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                 Test_U_Configuration,
+                                 Test_U_ConnectionState,
+                                 HTTP_RuntimeStatistic_t,
+                                 ////////
+                                 Test_U_UserData> Test_U_IConnectionManager_t;
 struct Test_U_ModuleHandlerConfiguration
  : HTTP_ModuleHandlerConfiguration
 {
@@ -136,9 +163,9 @@ struct Test_U_ModuleHandlerConfiguration
    , configuration (NULL)
    , connection (NULL)
    , connectionManager (NULL)
+   , dumpFileName ()
    , hostName ()
    , inbound (true)
-   , passive (false)
    , printProgressDot (true)
    , socketConfiguration (NULL)
    , socketHandlerConfiguration (NULL)
@@ -149,14 +176,14 @@ struct Test_U_ModuleHandlerConfiguration
   Test_U_Configuration*              configuration;
   Test_U_IConnection_t*              connection; // TCP target/IO module
   Test_U_IConnectionManager_t*       connectionManager; // TCP IO module
+  std::string                        dumpFileName; // file writer module (HTTP)
   std::string                        hostName; // net source module
   bool                               inbound; // net io module
-  bool                               passive; // net source module
   bool                               printProgressDot; // file writer module
   Net_SocketConfiguration*           socketConfiguration;
   Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-  std::string                        targetFileName; // file writer module
-  std::string                        URL; // HTTP get module
+  std::string                        targetFileName; // file writer module (HTML)
+  std::string                        URL;
 };
 
 struct Test_U_SignalHandlerConfiguration
@@ -223,7 +250,7 @@ struct Test_U_Configuration
 
 typedef Stream_IModuleHandler_T<Test_U_ModuleHandlerConfiguration> Test_U_IModuleHandler_t;
 typedef Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
-                                          
+
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_MessageAllocator_t;
 

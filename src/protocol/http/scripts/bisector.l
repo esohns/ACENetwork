@@ -22,11 +22,11 @@ using namespace std;
 /* *IMPORTANT NOTE*: flex 2.5.4 does not recognize 'reentrant, nounistd, */
 /*                   ansi-definitions, ansi-prototypes, header-file' */
 %option reentrant
-%option header-file="irc_bisector.h"
+%option header-file="http_bisector.h"
 /* *IMPORTANT NOTE*: 'yylineno' is not compatible with 'read' */
 /* *NOTE*: flex 2.5.39 does not recognize 'noline' */
 %option nomain nostdinit noyywrap
-%option outfile="irc_bisector.cpp" prefix="IRC_Bisector_"
+%option outfile="http_bisector.cpp" prefix="HTTP_Bisector_"
 %option nounput
 
 /* *NOTE*: "\r\n" is (ANSI-C) implementation-dependent */

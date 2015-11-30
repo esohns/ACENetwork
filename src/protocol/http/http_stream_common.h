@@ -28,16 +28,15 @@
 
 #include "stream_common.h"
 #include "stream_imodule.h"
-#include "stream_session_data_base.h"
+#include "stream_session_data.h"
 
 #include "http_common.h"
-#include "http_record.h"
 
 // forward declarations
 struct HTTP_ConnectionState;
 struct HTTP_ModuleHandlerConfiguration;
-//struct HTTP_State;
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename DataType>
 class HTTP_Message_T;
 class HTTP_SessionMessage;
 template <typename StreamStateType,
@@ -56,7 +55,8 @@ typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Common_TimePolicy_t,
                          Stream_ModuleConfiguration,
                          HTTP_ModuleHandlerConfiguration> HTTP_IModule_t;
-typedef HTTP_Message_T<Stream_AllocatorConfiguration> HTTP_Message_t;
+typedef HTTP_Message_T<Stream_AllocatorConfiguration,
+                       HTTP_MessageData_t> HTTP_Message_t;
 
 struct HTTP_Stream_SessionData
  : Stream_SessionData
@@ -99,7 +99,7 @@ struct HTTP_StreamState
   HTTP_Stream_UserData*    userData;
 };
 
-typedef Stream_SessionDataBase_T<HTTP_Stream_SessionData> HTTP_Stream_SessionData_t;
+typedef Stream_SessionData_T<HTTP_Stream_SessionData> HTTP_Stream_SessionData_t;
 
 typedef Common_INotify_T<HTTP_Stream_SessionData,
                          HTTP_Record,

@@ -2,11 +2,10 @@
 #define HTTP_Scanner_HEADER_H 1
 #define HTTP_Scanner_IN_HEADER 1
 
-#line 6 "http_scanner.h"
-#line 2 "scanner.l"
+#line 2 "./../scripts/scanner.l"
 #include "http_parser.h"
 
-/* 
+/*
 #define YY_DECL                                                 \
 yy::HTTP_Parser::token_type                                     \
 HTTP_Scanner_lex (yy::HTTP_Parser::semantic_type* yylval_param, \
@@ -28,7 +27,7 @@ YY_DECL;
 
 
 
-#line 32 "http_scanner.h"
+#line 31 "http_scanner.h"
 
 #define  YY_INT_ALIGNED long int
 
@@ -190,7 +189,15 @@ typedef void* yyscan_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 #ifndef YY_TYPEDEF_YY_BUFFER_STATE
@@ -300,9 +307,6 @@ void HTTP_Scanner_free (void * ,yyscan_t yyscanner );
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
 
-#define HTTP_Scanner_wrap(yyscanner) 1
-#define YY_SKIP_YYWRAP
-
 #define FLEX_DEBUG
 
 #define yytext_ptr yytext_r
@@ -314,12 +318,17 @@ void HTTP_Scanner_free (void * ,yyscan_t yyscanner );
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
 #define request 1
-#define request_headers 2
-#define response 3
-#define response_headers 4
-#define crlf 5
-#define body 6
-#define end_of_frame 7
+#define method 2
+#define uri 3
+#define version 4
+#define request_headers 5
+#define response 6
+#define status 7
+#define reason 8
+#define response_headers 9
+#define body 10
+#define chunked_body 11
+#define chunk 12
 
 #endif
 
@@ -436,7 +445,12 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Number of entries by which start-condition stack grows. */
@@ -490,9 +504,6 @@ extern int HTTP_Scanner_lex \
 #undef YY_DECL
 #endif
 
-#line 419 "scanner.l"
-
-
-#line 497 "http_scanner.h"
+#line 508 "http_scanner.h"
 #undef HTTP_Scanner_IN_HEADER
 #endif /* HTTP_Scanner_HEADER_H */

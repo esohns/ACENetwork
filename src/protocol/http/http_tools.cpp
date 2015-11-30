@@ -40,33 +40,38 @@ HTTP_Tools::dump (const HTTP_Record& record_in)
     is_request = true;
 
     buffer = ACE_TEXT_ALWAYS_CHAR ("Method: ");
-    buffer += HTTP_Tools::Method2String (record_in.method_);
+    buffer += HTTP_Tools::Method2String (record_in.method);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-    buffer = ACE_TEXT_ALWAYS_CHAR ("Request-URI: ");
-    buffer += record_in.URI_;
+    buffer += ACE_TEXT_ALWAYS_CHAR ("Request-URI: ");
+    buffer += record_in.URI;
     buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-    buffer = ACE_TEXT_ALWAYS_CHAR ("Version: ");
-    buffer += HTTP_Tools::Version2String (record_in.version_);
+    buffer += ACE_TEXT_ALWAYS_CHAR ("Version: ");
+    buffer += HTTP_Tools::Version2String (record_in.version);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   } // end IF
   else
   {
     buffer = ACE_TEXT_ALWAYS_CHAR ("Version: ");
-    buffer += HTTP_Tools::Version2String (record_in.version_);
+    buffer += HTTP_Tools::Version2String (record_in.version);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-    buffer = ACE_TEXT_ALWAYS_CHAR ("Status: ");
-    converter << record_in.status_;
+    buffer += ACE_TEXT_ALWAYS_CHAR ("Status: ");
+    converter << record_in.status;
     buffer += converter.str ();
     buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-    buffer = ACE_TEXT_ALWAYS_CHAR ("Reason: ");
-    buffer += HTTP_Tools::Status2Reason (record_in.status_);
-    buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+    buffer += ACE_TEXT_ALWAYS_CHAR ("Reason: \"");
+    buffer += HTTP_Tools::Status2Reason (record_in.status);
+    buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
   } // end ELSE
 
-  buffer += ACE_TEXT_ALWAYS_CHAR ("Headers:\n");
+  buffer += ACE_TEXT_ALWAYS_CHAR ("Headers (");
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+  converter.clear ();
+  converter << record_in.headers.size ();
+  buffer += converter.str ();
+  buffer += ACE_TEXT_ALWAYS_CHAR ("):\n");
   // general headers
-  for (HTTP_HeadersIterator_t iterator = record_in.headers_.begin ();
-       iterator != record_in.headers_.end ();
+  for (HTTP_HeadersIterator_t iterator = record_in.headers.begin ();
+       iterator != record_in.headers.end ();
        ++iterator)
   {
     if (!HTTP_Tools::isHeaderType ((*iterator).first,
@@ -74,14 +79,15 @@ HTTP_Tools::dump (const HTTP_Record& record_in)
       continue;
 
     buffer += (*iterator).first;
-    buffer += ACE_TEXT_ALWAYS_CHAR (": ");
+    buffer += ACE_TEXT_ALWAYS_CHAR (": \"");
     buffer += (*iterator).second;
-    buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+    buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
   } // end FOR
+  buffer += ACE_TEXT_ALWAYS_CHAR ("-------------------------------\n");
 
   // general headers
-  for (HTTP_HeadersIterator_t iterator = record_in.headers_.begin ();
-       iterator != record_in.headers_.end ();
+  for (HTTP_HeadersIterator_t iterator = record_in.headers.begin ();
+       iterator != record_in.headers.end ();
        ++iterator)
   {
     if (!HTTP_Tools::isHeaderType ((*iterator).first,
@@ -90,14 +96,15 @@ HTTP_Tools::dump (const HTTP_Record& record_in)
       continue;
 
     buffer += (*iterator).first;
-    buffer += ACE_TEXT_ALWAYS_CHAR (": ");
+    buffer += ACE_TEXT_ALWAYS_CHAR (": \"");
     buffer += (*iterator).second;
-    buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+    buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
   } // end FOR
+  buffer += ACE_TEXT_ALWAYS_CHAR ("-------------------------------\n");
 
   // general headers
-  for (HTTP_HeadersIterator_t iterator = record_in.headers_.begin ();
-       iterator != record_in.headers_.end ();
+  for (HTTP_HeadersIterator_t iterator = record_in.headers.begin ();
+       iterator != record_in.headers.end ();
        ++iterator)
   {
     if (!HTTP_Tools::isHeaderType ((*iterator).first,
@@ -105,9 +112,9 @@ HTTP_Tools::dump (const HTTP_Record& record_in)
       continue;
 
     buffer += (*iterator).first;
-    buffer += ACE_TEXT_ALWAYS_CHAR (": ");
+    buffer += ACE_TEXT_ALWAYS_CHAR (": \"");
     buffer += (*iterator).second;
-    buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+    buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
   } // end FOR
   buffer += ACE_TEXT_ALWAYS_CHAR ("Headers /END\n");
 
@@ -275,7 +282,7 @@ HTTP_Tools::isRequest (const HTTP_Record& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::isRequest"));
 
-  return (record_in.method_ < HTTP_Codes::HTTP_METHOD_MAX);
+  return (record_in.method < HTTP_Codes::HTTP_METHOD_MAX);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

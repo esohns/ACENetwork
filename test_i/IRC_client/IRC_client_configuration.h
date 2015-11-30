@@ -34,9 +34,8 @@
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 
-//#include "net_configuration.h"
-
 #include "irc_configuration.h"
+#include "irc_defines.h"
 
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
@@ -111,19 +110,19 @@ struct IRC_Client_StreamConfiguration
 {
   inline IRC_Client_StreamConfiguration ()
    : Stream_Configuration ()
-   , moduleConfiguration_2 ()
-   , moduleHandlerConfiguration_2 ()
+   , moduleConfiguration (NULL)
+   , moduleHandlerConfiguration (NULL)
    , protocolConfiguration (NULL)
    , userData (NULL)
   {
     bufferSize = IRC_BUFFER_SIZE;
   };
 
-  Stream_ModuleConfiguration            moduleConfiguration_2;        // stream module configuration
-  IRC_Client_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
-  IRC_ProtocolConfiguration*            protocolConfiguration;        // protocol configuration
+  Stream_ModuleConfiguration*            moduleConfiguration;        // stream module configuration
+  IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
+  IRC_ProtocolConfiguration*             protocolConfiguration;      // protocol configuration
 
-  IRC_Client_UserData*                  userData;
+  IRC_Client_UserData*                   userData;
 };
 
 struct IRC_Client_InputHandlerConfiguration
@@ -149,16 +148,18 @@ struct IRC_Client_Configuration
    , protocolConfiguration ()
    //////////////////////////////////////
    , cursesState (NULL)
-   , encoding (IRC_DEF_ENCODING)
+   , encoding (IRC_PRT_DEFAULT_ENCODING)
    , groupID (COMMON_EVENT_THREAD_GROUP_ID)
-   , logToFile (IRC_SESSION_DEF_LOG)
-   , useReactor (NET_EVENT_USE_REACTOR)
+   , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
+   , useReactor (IRC_CLIENT_DEFAULT_USE_REACTOR)
   {};
 
   // ****************************** socket *************************************
   Net_SocketConfiguration               socketConfiguration;
   IRC_Client_SocketHandlerConfiguration socketHandlerConfiguration;
   // ****************************** stream *************************************
+  Stream_ModuleConfiguration            moduleConfiguration;
+  IRC_Client_ModuleHandlerConfiguration moduleHandlerConfiguration;
   IRC_Client_StreamConfiguration        streamConfiguration;
   IRC_Client_UserData*                  userData;
   // ***************************** protocol ************************************

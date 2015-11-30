@@ -24,6 +24,7 @@
 #include "net_macros.h"
 
 #include "irc_defines.h"
+#include "irc_record.h"
 
 template <typename TaskSynchType,
           typename TimePolicyType,
@@ -74,7 +75,7 @@ IRC_Module_Streamer_T<TaskSynchType,
 
   // sanity check(s)
   ACE_ASSERT (message_inout->length () == 0);
-  ACE_ASSERT (message_inout->space () >= IRC_FRAME_MAXSIZE);
+  ACE_ASSERT (message_inout->space () >= IRC_MAXIMUM_FRAME_SIZE);
 
   // serialize our structured data
   // --> create the appropriate bytestream corresponding to its elements
@@ -91,22 +92,21 @@ IRC_Module_Streamer_T<TaskSynchType,
   //                   NUL or CR or LF>
 
   // prefix
-  const IRC_Record* data_p = message_inout->getData ();
-  ACE_ASSERT (data_p);
-  if (!data_p->prefix.origin.empty ())
+  const IRC_Record& data_r = message_inout->get ();
+  if (!data_r.prefix.origin.empty ())
   {
     // prefix the prefix
     *message_inout->wr_ptr () = ':';
     message_inout->wr_ptr (1);
 
-    result = message_inout->copy (data_p->prefix.origin.c_str (),
-                                  data_p->prefix.origin.size ());
+    result = message_inout->copy (data_r.prefix.origin.c_str (),
+                                  data_r.prefix.origin.size ());
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
-                  ACE_TEXT (data_p->prefix.origin.c_str ()),
-                  data_p->prefix.origin.size ()));
+                  ACE_TEXT (data_r.prefix.origin.c_str ()),
+                  data_r.prefix.origin.size ()));
 
       // clean up
       passMessageDownstream_out = false;
@@ -117,7 +117,7 @@ IRC_Module_Streamer_T<TaskSynchType,
     } // end IF
 
     // append user
-    if (!data_p->prefix.user.empty ())
+    if (!data_r.prefix.user.empty ())
     {
       // sanity check
       if (message_inout->space () < 1)
@@ -140,14 +140,14 @@ IRC_Module_Streamer_T<TaskSynchType,
       *message_inout->wr_ptr () = '!';
       message_inout->wr_ptr (1);
 
-      result = message_inout->copy (data_p->prefix.user.c_str (),
-                                    data_p->prefix.user.size ());
+      result = message_inout->copy (data_r.prefix.user.c_str (),
+                                    data_r.prefix.user.size ());
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
-                    ACE_TEXT (data_p->prefix.user.c_str ()),
-                    data_p->prefix.user.size ()));
+                    ACE_TEXT (data_r.prefix.user.c_str ()),
+                    data_r.prefix.user.size ()));
 
         // clean up
         passMessageDownstream_out = false;
@@ -159,7 +159,7 @@ IRC_Module_Streamer_T<TaskSynchType,
     } // end IF
 
     // append host
-    if (!data_p->prefix.host.empty ())
+    if (!data_r.prefix.host.empty ())
     {
       // sanity check
       if (message_inout->space () < 1)
@@ -182,14 +182,14 @@ IRC_Module_Streamer_T<TaskSynchType,
       *message_inout->wr_ptr () = '@';
       message_inout->wr_ptr (1);
 
-      result = message_inout->copy (data_p->prefix.host.c_str (),
-                                    data_p->prefix.host.size ());
+      result = message_inout->copy (data_r.prefix.host.c_str (),
+                                    data_r.prefix.host.size ());
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
-                    ACE_TEXT (message_inout->getData ()->prefix.host.c_str ()),
-                    message_inout->getData ()->prefix.host.size ()));
+                    ACE_TEXT (data_r.prefix.host.c_str ()),
+                    data_r.prefix.host.size ()));
 
         // clean up
         passMessageDownstream_out = false;
@@ -223,7 +223,7 @@ IRC_Module_Streamer_T<TaskSynchType,
   } // end IF
 
   // command
-  switch (data_p->command.discriminator)
+  switch (data_r.command.discriminator)
   {
     case IRC_Record::Command::NUMERIC:
     {
@@ -248,7 +248,7 @@ IRC_Module_Streamer_T<TaskSynchType,
       result = ACE_OS::snprintf (message_inout->wr_ptr (),      // target
                                  4,                             // max length
                                  ACE_TEXT_ALWAYS_CHAR ("%.3u"), // format string
-                                 data_p->command.numeric);
+                                 data_r.command.numeric);
       if (result != 3)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -269,14 +269,14 @@ IRC_Module_Streamer_T<TaskSynchType,
     }
     case IRC_Record::Command::STRING:
     {
-      result = message_inout->copy (data_p->command.string->c_str (),
-                                    data_p->command.string->size ());
+      result = message_inout->copy (data_r.command.string->c_str (),
+                                    data_r.command.string->size ());
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
-                    ACE_TEXT (data_p->command.string->c_str ()),
-                    data_p->command.string->size ()));
+                    ACE_TEXT (data_r.command.string->c_str ()),
+                    data_r.command.string->size ()));
 
         // clean up
         passMessageDownstream_out = false;
@@ -293,7 +293,7 @@ IRC_Module_Streamer_T<TaskSynchType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: invalid command type (was: %d), aborting\n"),
                   message_inout->getID (),
-                  data_p->command.discriminator));
+                  data_r.command.discriminator));
 
       // clean up
       passMessageDownstream_out = false;
@@ -305,7 +305,7 @@ IRC_Module_Streamer_T<TaskSynchType,
   } // end SWITCH
 
   // parameter(s)
-  if (!data_p->params.empty ())
+  if (!data_r.params.empty ())
   {
     // sanity check
     if (message_inout->space () < 1)
@@ -329,24 +329,24 @@ IRC_Module_Streamer_T<TaskSynchType,
     message_inout->wr_ptr (1);
   } // end IF
   unsigned long forward_i = 0;
-  unsigned long reverse_i = data_p->params.size ();
+  unsigned long reverse_i = data_r.params.size ();
   char param_separator = ' ';
   list_items_ranges_iterator_t range_iterator =
-    data_p->list_param_ranges.begin ();
-  for (IRC_ParametersIterator_t iterator = data_p->params.begin ();
-       iterator != data_p->params.end ();
+    data_r.list_param_ranges.begin ();
+  for (IRC_ParametersIterator_t iterator = data_r.params.begin ();
+       iterator != data_r.params.end ();
        iterator++, forward_i++, reverse_i--)
   {
     // (re-)set to default
     param_separator = ' ';
 
     // advance range iterator ?
-    if ((range_iterator != data_p->list_param_ranges.end ()) &&
+    if ((range_iterator != data_r.list_param_ranges.end ()) &&
         (forward_i > (*range_iterator).second))
       range_iterator++;
 
     // param part of a list ?
-    if ((range_iterator != data_p->list_param_ranges.end ()) &&
+    if ((range_iterator != data_r.list_param_ranges.end ()) &&
         (forward_i >= (*range_iterator).first) &&
         (forward_i <= (*range_iterator).second))
       param_separator = ',';

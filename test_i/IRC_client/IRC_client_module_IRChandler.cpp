@@ -131,13 +131,12 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
-  const IRC_Record* message_data_p = message_inout->getData ();
-  ACE_ASSERT (message_data_p);
   ACE_ASSERT (configuration_.protocolConfiguration);
 
+  const IRC_Record& data_r = message_inout->get ();
 //   try
 //   {
-//     message_data_p->dump_state ();
+//     data_r.dump_state ();
 //   }
 //   catch (...)
 //   {
@@ -145,7 +144,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //                ACE_TEXT("caught exception in Common_IDumpState::dump_state(), continuing\n")));
 //   }
 
-  switch (message_data_p->command.discriminator)
+  switch (data_r.command.discriminator)
   {
     case IRC_Record::Command::NUMERIC:
     {
@@ -155,7 +154,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //                  IRC_Client_Tools::IRCCode2String(message_inout->getData()->command.numeric).c_str(),
 //                  message_inout->getData()->command.numeric));
 
-      switch (message_data_p->command.numeric)
+      switch (data_r.command.numeric)
       {
         // *NOTE* these are the "regular" (== known) codes
         // [sent by ircd-hybrid-7.2.3 and others]...
@@ -225,8 +224,8 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("[%u]: received unknown (numeric) command/reply: \"%s\" (%u), continuing\n"),
                       message_inout->getID (),
-                      ACE_TEXT (IRC_Tools::Command2String (message_data_p->command.numeric).c_str ()),
-                      message_data_p->command.numeric));
+                      ACE_TEXT (IRC_Tools::Command2String (data_r.command.numeric).c_str ()),
+                      data_r.command.numeric));
           break;
         }
       } // end SWITCH
@@ -235,7 +234,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
     }
     case IRC_Record::Command::STRING:
     {
-      switch (IRC_Tools::Command2Type (*message_data_p->command.string))
+      switch (IRC_Tools::Command2Type (*data_r.command.string))
       {
         case IRC_Record::NICK:
         {
@@ -374,7 +373,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
             } // end IF
             reply_p->command.discriminator =
               IRC_Record::Command::STRING;
-            reply_p->params.push_back (message_data_p->params.back ());
+            reply_p->params.push_back (data_r.params.back ());
 
             // step1: send it upstream
             sendMessage (reply_p);
@@ -390,7 +389,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"PONG\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_data_p->params.back().c_str()));
+//                      data_r.params.back().c_str()));
           break;
         }
 #if defined ACE_WIN32 || defined ACE_WIN64
@@ -403,7 +402,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"ERROR\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_data_p->params.back().c_str()));
+//                      data_r.params.back().c_str()));
           break;
         }
         case IRC_Record::AWAY:
@@ -435,7 +434,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("[%u]: received unknown command (was: \"%s\"), continuing\n"),
                       message_inout->getID (),
-                      ACE_TEXT (message_data_p->command.string->c_str ())));
+                      ACE_TEXT (data_r.command.string->c_str ())));
           break;
         }
       } // end SWITCH
@@ -447,7 +446,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: invalid command type (was: %u), continuing\n"),
                   message_inout->getID (),
-                  message_data_p->command.discriminator));
+                  data_r.command.discriminator));
       break;
     }
   } // end SWITCH
@@ -471,7 +470,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
     {
       try
       {
-        (*iterator++)->notify (*message_data_p);
+        (*iterator++)->notify (data_r);
       }
       catch (...)
       {
@@ -708,7 +707,7 @@ IRC_Client_Module_IRCHandler::registerc (const IRC_LoginOptions& loginOptions_in
       //         - connection to establish
       //         [- the initial NOTICEs to arrive]
       //         before proceeding...
-      ACE_Time_Value timeout (IRC_MAX_NOTICE_DELAY, 0);
+      ACE_Time_Value timeout (IRC_MAXIMUM_NOTICE_DELAY, 0);
       // *NOTE*: cannot use COMMON_TIME_NOW, as this is a high precision monotonous
       //         clock... --> use standard getimeofday
       ACE_Time_Value deadline = ACE_OS::gettimeofday () + timeout;

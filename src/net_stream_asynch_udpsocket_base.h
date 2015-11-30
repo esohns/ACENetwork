@@ -35,6 +35,7 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #include "net_asynch_netlinksockethandler.h"
+#include "net_netlinksockethandler.h"
 #endif
 #include "net_connection_base.h"
 #include "net_iconnectionmanager.h"

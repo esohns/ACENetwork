@@ -113,6 +113,7 @@ class IRC_Export IRC_Record
     // *WARNING*: this class assumes responsibility for all dynamic objects
     // "attached" to it in the course of its life (see dtor)
     IRC_Record ();
+    virtual ~IRC_Record ();
 
     // implement Common_IDumpState
     virtual void dump_state () const;
@@ -148,7 +149,6 @@ class IRC_Export IRC_Record
 
    ACE_UNIMPLEMENTED_FUNC (IRC_Record (const IRC_Record&))
    ACE_UNIMPLEMENTED_FUNC (IRC_Record& operator= (const IRC_Record&))
-   virtual ~IRC_Record ();
 };
 
 typedef IRC_Record::CommandType IRC_CommandType_t;

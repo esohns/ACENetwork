@@ -32,6 +32,7 @@
 #include "stream_common.h"
 
 #include "stream_module_io_stream.h"
+#include "stream_session_data.h"
 
 #include "net_asynch_tcpsockethandler.h"
 #include "net_common.h"
@@ -46,7 +47,9 @@
 #include "net_client_connector.h"
 
 #include "http_common.h"
-#include "http_stream.h"
+//#include "http_stream.h"
+
+#include "test_u_stream.h"
 
 // forward declarations
 class Test_U_Message;
@@ -56,7 +59,7 @@ struct Test_U_ConnectionState;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 struct Test_U_StreamSessionData;
-typedef Stream_SessionDataBase_T<Test_U_StreamSessionData> Test_U_StreamSessionData_t;
+typedef Stream_SessionData_T<Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 struct Test_U_StreamState;
 struct Test_U_UserData;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
@@ -66,18 +69,19 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  ////////
                                  Test_U_UserData> Test_U_ConnectionManager_t;
 struct Test_U_SocketHandlerConfiguration;
-typedef HTTP_Stream_T<Test_U_StreamState,
-                      ///////////////////
-                      Test_U_StreamConfiguration,
-                      ///////////////////
-                      HTTP_RuntimeStatistic_t,
-                      ///////////////////
-                      Test_U_ModuleHandlerConfiguration,
-                      ///////////////////
-                      Test_U_StreamSessionData,
-                      Test_U_StreamSessionData_t,
-                      Test_U_SessionMessage,
-                      Test_U_Message> Test_U_Stream_t;
+//typedef HTTP_Stream_T<Test_U_StreamState,
+//                      ///////////////////
+//                      Test_U_StreamConfiguration,
+//                      ///////////////////
+//                      HTTP_RuntimeStatistic_t,
+//                      ///////////////////
+//                      Test_U_ModuleHandlerConfiguration,
+//                      ///////////////////
+//                      Test_U_StreamSessionData,
+//                      Test_U_StreamSessionData_t,
+//                      Test_U_SessionMessage,
+//                      Test_U_Message> Test_U_Stream_t;
+typedef Test_U_Stream Test_U_Stream_t;
 
 /////////////////////////////////////////
 

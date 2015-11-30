@@ -21,6 +21,4 @@
 #ifndef TEST_U_PROTOCOL_COMMON_H
 #define TEST_U_PROTOCOL_COMMON_H
 
-//#include "test_u_common.h"
-
 #endif

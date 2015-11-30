@@ -1,6 +1,6 @@
-#line 2 "irc_bisector.cpp"
+#line 2 "http_bisector.cpp"
 
-#line 4 "irc_bisector.cpp"
+#line 4 "http_bisector.cpp"
 
 #define  YY_INT_ALIGNED long int
 
@@ -195,13 +195,21 @@ typedef void* yyscan_t;
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
 
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE IRC_Bisector_restart(yyin ,yyscanner )
+#define YY_NEW_FILE HTTP_Bisector_restart(yyin ,yyscanner )
 
 #define YY_END_OF_BUFFER_CHAR 0
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -311,7 +319,7 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via IRC_Bisector_restart()), so that the user can continue scanning by
+	 * (via HTTP_Bisector_restart()), so that the user can continue scanning by
 	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
@@ -352,38 +360,38 @@ struct yy_buffer_state
 
 /* %endif */
 
-void IRC_Bisector_restart (FILE *input_file ,yyscan_t yyscanner );
-void IRC_Bisector__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Bisector__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void IRC_Bisector__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Bisector__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void IRC_Bisector_pop_buffer_state (yyscan_t yyscanner );
+void HTTP_Bisector_restart (FILE *input_file ,yyscan_t yyscanner );
+void HTTP_Bisector__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void HTTP_Bisector__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Bisector__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void HTTP_Bisector_pop_buffer_state (yyscan_t yyscanner );
 
-static void IRC_Bisector_ensure_buffer_stack (yyscan_t yyscanner );
-static void IRC_Bisector__load_buffer_state (yyscan_t yyscanner );
-static void IRC_Bisector__init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
+static void HTTP_Bisector_ensure_buffer_stack (yyscan_t yyscanner );
+static void HTTP_Bisector__load_buffer_state (yyscan_t yyscanner );
+static void HTTP_Bisector__init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
 
-#define YY_FLUSH_BUFFER IRC_Bisector__flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
+#define YY_FLUSH_BUFFER HTTP_Bisector__flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
 
-YY_BUFFER_STATE IRC_Bisector__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Bisector__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Bisector__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
 
 /* %endif */
 
-void *IRC_Bisector_alloc (yy_size_t ,yyscan_t yyscanner );
-void *IRC_Bisector_realloc (void *,yy_size_t ,yyscan_t yyscanner );
-void IRC_Bisector_free (void * ,yyscan_t yyscanner );
+void *HTTP_Bisector_alloc (yy_size_t ,yyscan_t yyscanner );
+void *HTTP_Bisector_realloc (void *,yy_size_t ,yyscan_t yyscanner );
+void HTTP_Bisector_free (void * ,yyscan_t yyscanner );
 
-#define yy_new_buffer IRC_Bisector__create_buffer
+#define yy_new_buffer HTTP_Bisector__create_buffer
 
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        IRC_Bisector_ensure_buffer_stack (yyscanner); \
+        HTTP_Bisector_ensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            IRC_Bisector__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            HTTP_Bisector__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
@@ -391,9 +399,9 @@ void IRC_Bisector_free (void * ,yyscan_t yyscanner );
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        IRC_Bisector_ensure_buffer_stack (yyscanner); \
+        HTTP_Bisector_ensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            IRC_Bisector__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            HTTP_Bisector__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
@@ -403,7 +411,7 @@ void IRC_Bisector_free (void * ,yyscan_t yyscanner );
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
 
-#define IRC_Bisector_wrap(yyscanner) 1
+#define HTTP_Bisector_wrap(yyscanner) 1
 #define YY_SKIP_YYWRAP
 
 #define FLEX_DEBUG
@@ -814,8 +822,8 @@ static yyconst flex_int32_t yy_rule_linenum[6] =
 #define yymore() (yyg->yy_more_flag = 1)
 #define YY_MORE_ADJ yyg->yy_more_len
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "bisector.l"
-#line 2 "bisector.l"
+#line 1 "./../scripts/bisector.l"
+#line 2 "./../scripts/bisector.l"
 // *WORKAROUND*
 #include <iostream>
 using namespace std;
@@ -838,7 +846,7 @@ using namespace std;
 /*         --> use ASCII codes directly */
 /* CRLF                   \x0D\x0A */
 
-#line 842 "irc_bisector.cpp"
+#line 850 "http_bisector.cpp"
 
 #define INITIAL 0
 #define end_of_frame 1
@@ -904,9 +912,9 @@ static int yy_init_globals (yyscan_t yyscanner );
 
 /* %if-reentrant */
 
-int IRC_Bisector_lex_init (yyscan_t* scanner);
+int HTTP_Bisector_lex_init (yyscan_t* scanner);
 
-int IRC_Bisector_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int HTTP_Bisector_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
 /* %endif */
 
@@ -915,35 +923,35 @@ int IRC_Bisector_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int IRC_Bisector_lex_destroy (yyscan_t yyscanner );
+int HTTP_Bisector_lex_destroy (yyscan_t yyscanner );
 
-int IRC_Bisector_get_debug (yyscan_t yyscanner );
+int HTTP_Bisector_get_debug (yyscan_t yyscanner );
 
-void IRC_Bisector_set_debug (int debug_flag ,yyscan_t yyscanner );
+void HTTP_Bisector_set_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE IRC_Bisector_get_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE HTTP_Bisector_get_extra (yyscan_t yyscanner );
 
-void IRC_Bisector_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void HTTP_Bisector_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
-FILE *IRC_Bisector_get_in (yyscan_t yyscanner );
+FILE *HTTP_Bisector_get_in (yyscan_t yyscanner );
 
-void IRC_Bisector_set_in  (FILE * in_str ,yyscan_t yyscanner );
+void HTTP_Bisector_set_in  (FILE * in_str ,yyscan_t yyscanner );
 
-FILE *IRC_Bisector_get_out (yyscan_t yyscanner );
+FILE *HTTP_Bisector_get_out (yyscan_t yyscanner );
 
-void IRC_Bisector_set_out  (FILE * out_str ,yyscan_t yyscanner );
+void HTTP_Bisector_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-yy_size_t IRC_Bisector_get_leng (yyscan_t yyscanner );
+yy_size_t HTTP_Bisector_get_leng (yyscan_t yyscanner );
 
-char *IRC_Bisector_get_text (yyscan_t yyscanner );
+char *HTTP_Bisector_get_text (yyscan_t yyscanner );
 
-int IRC_Bisector_get_lineno (yyscan_t yyscanner );
+int HTTP_Bisector_get_lineno (yyscan_t yyscanner );
 
-void IRC_Bisector_set_lineno (int line_number ,yyscan_t yyscanner );
+void HTTP_Bisector_set_lineno (int line_number ,yyscan_t yyscanner );
 
-int IRC_Bisector_get_column  (yyscan_t yyscanner );
+int HTTP_Bisector_get_column  (yyscan_t yyscanner );
 
-void IRC_Bisector_set_column (int column_no ,yyscan_t yyscanner );
+void HTTP_Bisector_set_column (int column_no ,yyscan_t yyscanner );
 
 /* %if-bison-bridge */
 /* %endif */
@@ -954,9 +962,9 @@ void IRC_Bisector_set_column (int column_no ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int IRC_Bisector_wrap (yyscan_t yyscanner );
+extern "C" int HTTP_Bisector_wrap (yyscan_t yyscanner );
 #else
-extern int IRC_Bisector_wrap (yyscan_t yyscanner );
+extern int HTTP_Bisector_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -994,7 +1002,12 @@ static int input (yyscan_t yyscanner );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -1090,9 +1103,9 @@ static int input (yyscan_t yyscanner );
 #define YY_DECL_IS_OURS 1
 /* %if-c-only Standard (non-C++) definition */
 
-extern int IRC_Bisector_lex (yyscan_t yyscanner);
+extern int HTTP_Bisector_lex (yyscan_t yyscanner);
 
-#define YY_DECL int IRC_Bisector_lex (yyscan_t yyscanner)
+#define YY_DECL int HTTP_Bisector_lex (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only C++ definition */
 /* %endif */
@@ -1151,20 +1164,20 @@ YY_DECL
 /* %endif */
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			IRC_Bisector_ensure_buffer_stack (yyscanner);
+			HTTP_Bisector_ensure_buffer_stack (yyscanner);
 			YY_CURRENT_BUFFER_LVALUE =
-				IRC_Bisector__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+				HTTP_Bisector__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
 		}
 
-		IRC_Bisector__load_buffer_state(yyscanner );
+		HTTP_Bisector__load_buffer_state(yyscanner );
 		}
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 40 "bisector.l"
+#line 40 "./../scripts/bisector.l"
 
 
-#line 1168 "irc_bisector.cpp"
+#line 1181 "http_bisector.cpp"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -1233,18 +1246,18 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 43 "bisector.l"
+#line 43 "./../scripts/bisector.l"
 { BEGIN(end_of_frame); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 44 "bisector.l"
+#line 44 "./../scripts/bisector.l"
 { return yyleng; }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 45 "bisector.l"
+#line 45 "./../scripts/bisector.l"
 { /* *TODO*: use (?s:.) ? */
 //                         ACE_DEBUG ((LM_ERROR,
 //                                     ACE_TEXT ("ignoring invalid character: \"%c\" (%d)\n"),
@@ -1260,7 +1273,7 @@ YY_RULE_SETUP
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 56 "bisector.l"
+#line 56 "./../scripts/bisector.l"
 { BEGIN(INITIAL);
                          /* (*yyextra)++; */
                          return -1;
@@ -1269,7 +1282,7 @@ YY_RULE_SETUP
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 60 "bisector.l"
+#line 60 "./../scripts/bisector.l"
 { /* *TODO*: use (?s:.) ? */
                          BEGIN(INITIAL);
                          yymore();
@@ -1280,15 +1293,15 @@ YY_RULE_SETUP
 // end <end_of_frame>
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(end_of_frame):
-#line 67 "bisector.l"
+#line 67 "./../scripts/bisector.l"
 { return 0; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 69 "bisector.l"
+#line 69 "./../scripts/bisector.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1292 "irc_bisector.cpp"
+#line 1305 "http_bisector.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1304,7 +1317,7 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
 			 * just pointed yyin at a new source and called
-			 * IRC_Bisector_lex().  If so, then we have to assure
+			 * HTTP_Bisector_lex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
@@ -1365,7 +1378,7 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 				{
 				yyg->yy_did_buffer_switch_on_eof = 0;
 
-				if ( IRC_Bisector_wrap(yyscanner ) )
+				if ( HTTP_Bisector_wrap(yyscanner ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
@@ -1419,7 +1432,7 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 	} /* end of action switch */
 		} /* end of scanning one token */
 	} /* end of user's declarations */
-} /* end of IRC_Bisector_lex */
+} /* end of HTTP_Bisector_lex */
 /* %ok-for-header */
 
 /* %if-c++-only */
@@ -1510,7 +1523,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					IRC_Bisector_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
+					HTTP_Bisector_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
 				}
 			else
 				/* Can't grow it, we don't own it. */
@@ -1542,7 +1555,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			IRC_Bisector_restart(yyin  ,yyscanner);
+			HTTP_Bisector_restart(yyin  ,yyscanner);
 			}
 
 		else
@@ -1559,7 +1572,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	if ((yy_size_t) (yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
 		yy_size_t new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) IRC_Bisector_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) HTTP_Bisector_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
 	}
@@ -1675,13 +1688,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 					 */
 
 					/* Reset buffer status. */
-					IRC_Bisector_restart(yyin ,yyscanner);
+					HTTP_Bisector_restart(yyin ,yyscanner);
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( IRC_Bisector_wrap(yyscanner ) )
+					if ( HTTP_Bisector_wrap(yyscanner ) )
 						return EOF;
 
 					if ( ! yyg->yy_did_buffer_switch_on_eof )
@@ -1718,7 +1731,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
  * @note This function does not reset the start condition to @c INITIAL .
  */
 /* %if-c-only */
-    void IRC_Bisector_restart  (FILE * input_file , yyscan_t yyscanner)
+    void HTTP_Bisector_restart  (FILE * input_file , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
@@ -1726,13 +1739,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if ( ! YY_CURRENT_BUFFER ){
-        IRC_Bisector_ensure_buffer_stack (yyscanner);
+        HTTP_Bisector_ensure_buffer_stack (yyscanner);
 		YY_CURRENT_BUFFER_LVALUE =
-            IRC_Bisector__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+            HTTP_Bisector__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
 	}
 
-	IRC_Bisector__init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
-	IRC_Bisector__load_buffer_state(yyscanner );
+	HTTP_Bisector__init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
+	HTTP_Bisector__load_buffer_state(yyscanner );
 }
 
 /** Switch to a different input buffer.
@@ -1740,7 +1753,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  */
 /* %if-c-only */
-    void IRC_Bisector__switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
+    void HTTP_Bisector__switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
@@ -1749,10 +1762,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 	/* TODO. We should be able to replace this entire function body
 	 * with
-	 *		IRC_Bisector_pop_buffer_state();
-	 *		IRC_Bisector_push_buffer_state(new_buffer);
+	 *		HTTP_Bisector_pop_buffer_state();
+	 *		HTTP_Bisector_push_buffer_state(new_buffer);
      */
-	IRC_Bisector_ensure_buffer_stack (yyscanner);
+	HTTP_Bisector_ensure_buffer_stack (yyscanner);
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
@@ -1765,18 +1778,18 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	IRC_Bisector__load_buffer_state(yyscanner );
+	HTTP_Bisector__load_buffer_state(yyscanner );
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (IRC_Bisector_wrap()) processing, but the only time this flag
-	 * is looked at is after IRC_Bisector_wrap() is called, so it's safe
+	 * EOF (HTTP_Bisector_wrap()) processing, but the only time this flag
+	 * is looked at is after HTTP_Bisector_wrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
 /* %if-c-only */
-static void IRC_Bisector__load_buffer_state  (yyscan_t yyscanner)
+static void HTTP_Bisector__load_buffer_state  (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
@@ -1795,39 +1808,39 @@ static void IRC_Bisector__load_buffer_state  (yyscan_t yyscanner)
  * @return the allocated buffer state.
  */
 /* %if-c-only */
-    YY_BUFFER_STATE IRC_Bisector__create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
+    YY_BUFFER_STATE HTTP_Bisector__create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) IRC_Bisector_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) HTTP_Bisector_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in IRC_Bisector__create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in HTTP_Bisector__create_buffer()" );
 
 	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) IRC_Bisector_alloc(b->yy_buf_size + 2 ,yyscanner );
+	b->yy_ch_buf = (char *) HTTP_Bisector_alloc(b->yy_buf_size + 2 ,yyscanner );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in IRC_Bisector__create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in HTTP_Bisector__create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	IRC_Bisector__init_buffer(b,file ,yyscanner);
+	HTTP_Bisector__init_buffer(b,file ,yyscanner);
 
 	return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with IRC_Bisector__create_buffer()
+ * @param b a buffer created with HTTP_Bisector__create_buffer()
  * @param yyscanner The scanner object.
  */
 /* %if-c-only */
-    void IRC_Bisector__delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void HTTP_Bisector__delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
@@ -1841,17 +1854,17 @@ static void IRC_Bisector__load_buffer_state  (yyscan_t yyscanner)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		IRC_Bisector_free((void *) b->yy_ch_buf ,yyscanner );
+		HTTP_Bisector_free((void *) b->yy_ch_buf ,yyscanner );
 
-	IRC_Bisector_free((void *) b ,yyscanner );
+	HTTP_Bisector_free((void *) b ,yyscanner );
 }
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a IRC_Bisector_restart() or at EOF.
+ * such as during a HTTP_Bisector_restart() or at EOF.
  */
 /* %if-c-only */
-    static void IRC_Bisector__init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
+    static void HTTP_Bisector__init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
@@ -1860,13 +1873,13 @@ static void IRC_Bisector__load_buffer_state  (yyscan_t yyscanner)
 	int oerrno = errno;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-	IRC_Bisector__flush_buffer(b ,yyscanner);
+	HTTP_Bisector__flush_buffer(b ,yyscanner);
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then IRC_Bisector__init_buffer was _probably_
-     * called from IRC_Bisector_restart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then HTTP_Bisector__init_buffer was _probably_
+     * called from HTTP_Bisector_restart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -1889,7 +1902,7 @@ static void IRC_Bisector__load_buffer_state  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  */
 /* %if-c-only */
-    void IRC_Bisector__flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void HTTP_Bisector__flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
@@ -1913,7 +1926,7 @@ static void IRC_Bisector__load_buffer_state  (yyscan_t yyscanner)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		IRC_Bisector__load_buffer_state(yyscanner );
+		HTTP_Bisector__load_buffer_state(yyscanner );
 }
 
 /* %if-c-or-c++ */
@@ -1924,7 +1937,7 @@ static void IRC_Bisector__load_buffer_state  (yyscan_t yyscanner)
  *  @param yyscanner The scanner object.
  */
 /* %if-c-only */
-void IRC_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
+void HTTP_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
@@ -1933,9 +1946,9 @@ void IRC_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yysca
 	if (new_buffer == NULL)
 		return;
 
-	IRC_Bisector_ensure_buffer_stack(yyscanner);
+	HTTP_Bisector_ensure_buffer_stack(yyscanner);
 
-	/* This block is copied from IRC_Bisector__switch_to_buffer. */
+	/* This block is copied from HTTP_Bisector__switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
@@ -1949,8 +1962,8 @@ void IRC_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yysca
 		yyg->yy_buffer_stack_top++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-	/* copied from IRC_Bisector__switch_to_buffer. */
-	IRC_Bisector__load_buffer_state(yyscanner );
+	/* copied from HTTP_Bisector__switch_to_buffer. */
+	HTTP_Bisector__load_buffer_state(yyscanner );
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 /* %endif */
@@ -1961,7 +1974,7 @@ void IRC_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yysca
  *  @param yyscanner The scanner object.
  */
 /* %if-c-only */
-void IRC_Bisector_pop_buffer_state (yyscan_t yyscanner)
+void HTTP_Bisector_pop_buffer_state (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
@@ -1970,13 +1983,13 @@ void IRC_Bisector_pop_buffer_state (yyscan_t yyscanner)
 	if (!YY_CURRENT_BUFFER)
 		return;
 
-	IRC_Bisector__delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
+	HTTP_Bisector__delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
 	YY_CURRENT_BUFFER_LVALUE = NULL;
 	if (yyg->yy_buffer_stack_top > 0)
 		--yyg->yy_buffer_stack_top;
 
 	if (YY_CURRENT_BUFFER) {
-		IRC_Bisector__load_buffer_state(yyscanner );
+		HTTP_Bisector__load_buffer_state(yyscanner );
 		yyg->yy_did_buffer_switch_on_eof = 1;
 	}
 }
@@ -1987,7 +2000,7 @@ void IRC_Bisector_pop_buffer_state (yyscan_t yyscanner)
  *  Guarantees space for at least one push.
  */
 /* %if-c-only */
-static void IRC_Bisector_ensure_buffer_stack (yyscan_t yyscanner)
+static void HTTP_Bisector_ensure_buffer_stack (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
@@ -2002,11 +2015,11 @@ static void IRC_Bisector_ensure_buffer_stack (yyscan_t yyscanner)
 		 * immediate realloc on the next call.
          */
 		num_to_alloc = 1;
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)IRC_Bisector_alloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)HTTP_Bisector_alloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in IRC_Bisector_ensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in HTTP_Bisector_ensure_buffer_stack()" );
 								  
 		memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
 				
@@ -2021,12 +2034,12 @@ static void IRC_Bisector_ensure_buffer_stack (yyscan_t yyscanner)
 		int grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)IRC_Bisector_realloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)HTTP_Bisector_realloc
 								(yyg->yy_buffer_stack,
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in IRC_Bisector_ensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in HTTP_Bisector_ensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -2042,7 +2055,7 @@ static void IRC_Bisector_ensure_buffer_stack (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object. 
  */
-YY_BUFFER_STATE IRC_Bisector__scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
+YY_BUFFER_STATE HTTP_Bisector__scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
     
@@ -2052,9 +2065,9 @@ YY_BUFFER_STATE IRC_Bisector__scan_buffer  (char * base, yy_size_t  size , yysca
 		/* They forgot to leave room for the EOB's. */
 		return 0;
 
-	b = (YY_BUFFER_STATE) IRC_Bisector_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) HTTP_Bisector_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in IRC_Bisector__scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in HTTP_Bisector__scan_buffer()" );
 
 	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
@@ -2066,37 +2079,37 @@ YY_BUFFER_STATE IRC_Bisector__scan_buffer  (char * base, yy_size_t  size , yysca
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	IRC_Bisector__switch_to_buffer(b ,yyscanner );
+	HTTP_Bisector__switch_to_buffer(b ,yyscanner );
 
 	return b;
 }
 /* %endif */
 
 /* %if-c-only */
-/** Setup the input buffer state to scan a string. The next call to IRC_Bisector_lex() will
+/** Setup the input buffer state to scan a string. The next call to HTTP_Bisector_lex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       IRC_Bisector__scan_bytes() instead.
+ *       HTTP_Bisector__scan_bytes() instead.
  */
-YY_BUFFER_STATE IRC_Bisector__scan_string (yyconst char * yystr , yyscan_t yyscanner)
+YY_BUFFER_STATE HTTP_Bisector__scan_string (yyconst char * yystr , yyscan_t yyscanner)
 {
     
-	return IRC_Bisector__scan_bytes(yystr,strlen(yystr) ,yyscanner);
+	return HTTP_Bisector__scan_bytes(yystr,strlen(yystr) ,yyscanner);
 }
 /* %endif */
 
 /* %if-c-only */
-/** Setup the input buffer state to scan the given bytes. The next call to IRC_Bisector_lex() will
+/** Setup the input buffer state to scan the given bytes. The next call to HTTP_Bisector_lex() will
  * scan from a @e copy of @a bytes.
  * @param yybytes the byte buffer to scan
  * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE IRC_Bisector__scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE HTTP_Bisector__scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 	char *buf;
@@ -2105,18 +2118,18 @@ YY_BUFFER_STATE IRC_Bisector__scan_bytes  (yyconst char * yybytes, yy_size_t  _y
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
-	buf = (char *) IRC_Bisector_alloc(n ,yyscanner );
+	buf = (char *) HTTP_Bisector_alloc(n ,yyscanner );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in IRC_Bisector__scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in HTTP_Bisector__scan_bytes()" );
 
 	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = IRC_Bisector__scan_buffer(buf,n ,yyscanner);
+	b = HTTP_Bisector__scan_buffer(buf,n ,yyscanner);
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in IRC_Bisector__scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in HTTP_Bisector__scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -2166,7 +2179,7 @@ static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 /** Get the user-defined data for this scanner.
  * @param yyscanner The scanner object.
  */
-YY_EXTRA_TYPE IRC_Bisector_get_extra  (yyscan_t yyscanner)
+YY_EXTRA_TYPE HTTP_Bisector_get_extra  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyextra;
@@ -2177,7 +2190,7 @@ YY_EXTRA_TYPE IRC_Bisector_get_extra  (yyscan_t yyscanner)
 /** Get the current line number.
  * @param yyscanner The scanner object.
  */
-int IRC_Bisector_get_lineno  (yyscan_t yyscanner)
+int HTTP_Bisector_get_lineno  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     
@@ -2190,7 +2203,7 @@ int IRC_Bisector_get_lineno  (yyscan_t yyscanner)
 /** Get the current column number.
  * @param yyscanner The scanner object.
  */
-int IRC_Bisector_get_column  (yyscan_t yyscanner)
+int HTTP_Bisector_get_column  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     
@@ -2203,7 +2216,7 @@ int IRC_Bisector_get_column  (yyscan_t yyscanner)
 /** Get the input stream.
  * @param yyscanner The scanner object.
  */
-FILE *IRC_Bisector_get_in  (yyscan_t yyscanner)
+FILE *HTTP_Bisector_get_in  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyin;
@@ -2212,7 +2225,7 @@ FILE *IRC_Bisector_get_in  (yyscan_t yyscanner)
 /** Get the output stream.
  * @param yyscanner The scanner object.
  */
-FILE *IRC_Bisector_get_out  (yyscan_t yyscanner)
+FILE *HTTP_Bisector_get_out  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyout;
@@ -2221,7 +2234,7 @@ FILE *IRC_Bisector_get_out  (yyscan_t yyscanner)
 /** Get the length of the current token.
  * @param yyscanner The scanner object.
  */
-yy_size_t IRC_Bisector_get_leng  (yyscan_t yyscanner)
+yy_size_t HTTP_Bisector_get_leng  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyleng;
@@ -2231,7 +2244,7 @@ yy_size_t IRC_Bisector_get_leng  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  */
 
-char *IRC_Bisector_get_text  (yyscan_t yyscanner)
+char *HTTP_Bisector_get_text  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yytext;
@@ -2243,7 +2256,7 @@ char *IRC_Bisector_get_text  (yyscan_t yyscanner)
  * @param user_defined The data to be associated with this scanner.
  * @param yyscanner The scanner object.
  */
-void IRC_Bisector_set_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
+void HTTP_Bisector_set_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyextra = user_defined ;
@@ -2255,13 +2268,13 @@ void IRC_Bisector_set_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
  * @param line_number
  * @param yyscanner The scanner object.
  */
-void IRC_Bisector_set_lineno (int  line_number , yyscan_t yyscanner)
+void HTTP_Bisector_set_lineno (int  line_number , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "IRC_Bisector_set_lineno called with no buffer" );
+           YY_FATAL_ERROR( "HTTP_Bisector_set_lineno called with no buffer" );
     
     yylineno = line_number;
 }
@@ -2270,13 +2283,13 @@ void IRC_Bisector_set_lineno (int  line_number , yyscan_t yyscanner)
  * @param line_number
  * @param yyscanner The scanner object.
  */
-void IRC_Bisector_set_column (int  column_no , yyscan_t yyscanner)
+void HTTP_Bisector_set_column (int  column_no , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "IRC_Bisector_set_column called with no buffer" );
+           YY_FATAL_ERROR( "HTTP_Bisector_set_column called with no buffer" );
     
     yycolumn = column_no;
 }
@@ -2285,27 +2298,27 @@ void IRC_Bisector_set_column (int  column_no , yyscan_t yyscanner)
  * input buffer.
  * @param in_str A readable stream.
  * @param yyscanner The scanner object.
- * @see IRC_Bisector__switch_to_buffer
+ * @see HTTP_Bisector__switch_to_buffer
  */
-void IRC_Bisector_set_in (FILE *  in_str , yyscan_t yyscanner)
+void HTTP_Bisector_set_in (FILE *  in_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyin = in_str ;
 }
 
-void IRC_Bisector_set_out (FILE *  out_str , yyscan_t yyscanner)
+void HTTP_Bisector_set_out (FILE *  out_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyout = out_str ;
 }
 
-int IRC_Bisector_get_debug  (yyscan_t yyscanner)
+int HTTP_Bisector_get_debug  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yy_flex_debug;
 }
 
-void IRC_Bisector_set_debug (int  bdebug , yyscan_t yyscanner)
+void HTTP_Bisector_set_debug (int  bdebug , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yy_flex_debug = bdebug ;
@@ -2321,12 +2334,12 @@ void IRC_Bisector_set_debug (int  bdebug , yyscan_t yyscanner)
 
 /* User-visible API */
 
-/* IRC_Bisector_lex_init is special because it creates the scanner itself, so it is
+/* HTTP_Bisector_lex_init is special because it creates the scanner itself, so it is
  * the ONLY reentrant function that doesn't take the scanner as the last argument.
  * That's why we explicitly handle the declaration, instead of using our macros.
  */
 
-int IRC_Bisector_lex_init(yyscan_t* ptr_yy_globals)
+int HTTP_Bisector_lex_init(yyscan_t* ptr_yy_globals)
 
 {
     if (ptr_yy_globals == NULL){
@@ -2334,7 +2347,7 @@ int IRC_Bisector_lex_init(yyscan_t* ptr_yy_globals)
         return 1;
     }
 
-    *ptr_yy_globals = (yyscan_t) IRC_Bisector_alloc ( sizeof( struct yyguts_t ), NULL );
+    *ptr_yy_globals = (yyscan_t) HTTP_Bisector_alloc ( sizeof( struct yyguts_t ), NULL );
 
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
@@ -2347,27 +2360,27 @@ int IRC_Bisector_lex_init(yyscan_t* ptr_yy_globals)
     return yy_init_globals ( *ptr_yy_globals );
 }
 
-/* IRC_Bisector_lex_init_extra has the same functionality as IRC_Bisector_lex_init, but follows the
+/* HTTP_Bisector_lex_init_extra has the same functionality as HTTP_Bisector_lex_init, but follows the
  * convention of taking the scanner as the last argument. Note however, that
  * this is a *pointer* to a scanner, as it will be allocated by this call (and
  * is the reason, too, why this function also must handle its own declaration).
- * The user defined value in the first argument will be available to IRC_Bisector_alloc in
+ * The user defined value in the first argument will be available to HTTP_Bisector_alloc in
  * the yyextra field.
  */
 
-int IRC_Bisector_lex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
+int HTTP_Bisector_lex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
 
 {
     struct yyguts_t dummy_yyguts;
 
-    IRC_Bisector_set_extra (yy_user_defined, &dummy_yyguts);
+    HTTP_Bisector_set_extra (yy_user_defined, &dummy_yyguts);
 
     if (ptr_yy_globals == NULL){
         errno = EINVAL;
         return 1;
     }
 	
-    *ptr_yy_globals = (yyscan_t) IRC_Bisector_alloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
+    *ptr_yy_globals = (yyscan_t) HTTP_Bisector_alloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
 	
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
@@ -2378,7 +2391,7 @@ int IRC_Bisector_lex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_g
     yy_init_globals. Leave at 0x00 for releases. */
     memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
     
-    IRC_Bisector_set_extra (yy_user_defined, *ptr_yy_globals);
+    HTTP_Bisector_set_extra (yy_user_defined, *ptr_yy_globals);
     
     return yy_init_globals ( *ptr_yy_globals );
 }
@@ -2390,7 +2403,7 @@ static int yy_init_globals (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from IRC_Bisector_lex_destroy(), so don't allocate here.
+     * This function is called from HTTP_Bisector_lex_destroy(), so don't allocate here.
      */
 
     yyg->yy_buffer_stack = 0;
@@ -2414,40 +2427,40 @@ static int yy_init_globals (yyscan_t yyscanner)
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * IRC_Bisector_lex_init()
+     * HTTP_Bisector_lex_init()
      */
     return 0;
 }
 /* %endif */
 
 /* %if-c-only SNIP! this currently causes conflicts with the c++ scanner */
-/* IRC_Bisector_lex_destroy is for both reentrant and non-reentrant scanners. */
-int IRC_Bisector_lex_destroy  (yyscan_t yyscanner)
+/* HTTP_Bisector_lex_destroy is for both reentrant and non-reentrant scanners. */
+int HTTP_Bisector_lex_destroy  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		IRC_Bisector__delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
+		HTTP_Bisector__delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
 		YY_CURRENT_BUFFER_LVALUE = NULL;
-		IRC_Bisector_pop_buffer_state(yyscanner);
+		HTTP_Bisector_pop_buffer_state(yyscanner);
 	}
 
 	/* Destroy the stack itself. */
-	IRC_Bisector_free(yyg->yy_buffer_stack ,yyscanner);
+	HTTP_Bisector_free(yyg->yy_buffer_stack ,yyscanner);
 	yyg->yy_buffer_stack = NULL;
 
     /* Destroy the start condition stack. */
-        IRC_Bisector_free(yyg->yy_start_stack ,yyscanner );
+        HTTP_Bisector_free(yyg->yy_start_stack ,yyscanner );
         yyg->yy_start_stack = NULL;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * IRC_Bisector_lex() is called, initialization will occur. */
+     * HTTP_Bisector_lex() is called, initialization will occur. */
     yy_init_globals( yyscanner);
 
 /* %if-reentrant */
     /* Destroy the main struct (reentrant only). */
-    IRC_Bisector_free ( yyscanner , yyscanner );
+    HTTP_Bisector_free ( yyscanner , yyscanner );
     yyscanner = NULL;
 /* %endif */
     return 0;
@@ -2478,12 +2491,12 @@ static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 }
 #endif
 
-void *IRC_Bisector_alloc (yy_size_t  size , yyscan_t yyscanner)
+void *HTTP_Bisector_alloc (yy_size_t  size , yyscan_t yyscanner)
 {
 	return (void *) malloc( size );
 }
 
-void *IRC_Bisector_realloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
+void *HTTP_Bisector_realloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 {
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
@@ -2495,9 +2508,9 @@ void *IRC_Bisector_realloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 	return (void *) realloc( (char *) ptr, size );
 }
 
-void IRC_Bisector_free (void * ptr , yyscan_t yyscanner)
+void HTTP_Bisector_free (void * ptr , yyscan_t yyscanner)
 {
-	free( (char *) ptr );	/* see IRC_Bisector_realloc() for (char *) cast */
+	free( (char *) ptr );	/* see HTTP_Bisector_realloc() for (char *) cast */
 }
 
 /* %if-tables-serialization definitions */
@@ -2507,7 +2520,7 @@ void IRC_Bisector_free (void * ptr , yyscan_t yyscanner)
 
 /* %ok-for-header */
 
-#line 69 "bisector.l"
+#line 68 "./../scripts/bisector.l"
 
 
 

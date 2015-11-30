@@ -430,7 +430,7 @@ HTTP_Module_Bisector_T<LockType,
 //                    message_block_p->total_length ()));
 
         // --> push it downstream...
-        result = put_next (message_p, NULL);
+        result = inherited::put_next (message_p, NULL);
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,

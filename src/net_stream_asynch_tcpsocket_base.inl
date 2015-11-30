@@ -452,11 +452,12 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   int result = -1;
 
-  // step1: stop, flush and wait for all workers within the stream (if any)
+  // step1: stop(, flush) and wait for all workers within the stream (if any)
   stream_.finished (true);
 //  stream_.stop (false, // wait for completion
 //                true); // lock ?
-  stream_.flush (true); // flush upstream (if any)
+  if (mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) // some error occurred
+    stream_.flush (true); // flush upstream (if any)
   stream_.waitForCompletion (true, // wait for worker(s) (if any)
                              true); // wait for upstream (if any)
 
@@ -706,6 +707,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
     if ((error != ENOENT)     && // 2  : *TODO*
         (error != EBADF)      && // 9  : Linux [client: local close()]
+        (error != EINVAL)     && // 22 : Linux [client: local close()]
         (error != EPIPE)      && // 32 : Linux [client: remote close()]
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif
@@ -1024,8 +1026,10 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   result_in.message_block ().release ();
 
 close:
-  result = handle_close (inherited::handle (),
-                         ACE_Event_Handler::ALL_EVENTS_MASK);
+  result =
+      handle_close (inherited::handle (),
+                    ((result_in.bytes_transferred () == 0) ? ACE_Event_Handler::READ_MASK // peer closed the connection
+                                                           : ACE_Event_Handler::ALL_EVENTS_MASK));
   if (result == -1)
   {
     error = ACE_OS::last_error ();

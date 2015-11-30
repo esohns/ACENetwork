@@ -25,9 +25,9 @@
 
 #include "ace/Global_Macros.h"
 
-#include "http_exports.h"
-#include "http_record.h"
 #include "http_codes.h"
+#include "http_common.h"
+#include "http_exports.h"
 
 class HTTP_Export HTTP_Tools
 {

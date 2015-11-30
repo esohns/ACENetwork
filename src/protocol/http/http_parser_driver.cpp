@@ -23,27 +23,31 @@
 
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
+#include "ace/Message_Queue.h"
 
 #include "net_macros.h"
 
+#include "http_common.h"
 #include "http_defines.h"
-#include "http_record.h"
+#include "http_message.h"
 #include "http_parser.h"
 #include "http_scanner.h"
-#include "http_message.h"
 
 HTTP_ParserDriver::HTTP_ParserDriver (bool traceScanning_in,
                                       bool traceParsing_in)
- : record_ (NULL)
+ : finished_ (false)
+ , fragment_ (NULL)
+ , offset_ (0)
+ , record_ (NULL)
  , trace_ (traceParsing_in)
+//, parser_ (this,               // driver
+//           &numberOfMessages_, // counter
+//           scannerState_)      // scanner
  , scannerState_ (NULL)
  , bufferState_ (NULL)
- , fragment_ (NULL)
- , fragmentIsResized_ (false)
- //, parser_ (this,               // driver
- //           &numberOfMessages_, // counter
- //           scannerState_)      // scanner
- , isInitialized_ (false)
+ , messageQueue_ (NULL)
+ , useYYScanBuffer_ (HTTP_DEFAULT_USE_YY_SCAN_BUFFER)
+ , initialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::HTTP_ParserDriver"));
 
@@ -76,12 +80,24 @@ HTTP_ParserDriver::~HTTP_ParserDriver ()
 void
 HTTP_ParserDriver::initialize (HTTP_Record& record_in,
                                bool traceScanning_in,
-                               bool traceParsing_in)
+                               bool traceParsing_in,
+                               ACE_Message_Queue_Base* messageQueue_in,
+                               bool useYYScanBuffer_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::initialize"));
 
-  // sanity check(s)
-  ACE_ASSERT (!isInitialized_);
+  if (initialized_)
+  {
+    finished_ = false;
+    if (fragment_)
+    {
+      fragment_->release ();
+      fragment_ = NULL;
+    } // end IF
+    offset_ = 0;
+
+    initialized_ = false;
+  } // end IF
 
   // set parse target
   record_ = &record_in;
@@ -90,23 +106,24 @@ HTTP_ParserDriver::initialize (HTTP_Record& record_in,
   HTTP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
                           scannerState_);
 #if YYDEBUG
-  //parser_.set_debug_level (traceParsing_in ? 1 
+  //parser_.set_debug_level (traceParsing_in ? 1
   //                                         : 0); // binary (see bison manual)
   yydebug = (traceParsing_in ? 1 : 0);
 #endif
+  messageQueue_ = messageQueue_in;
+  useYYScanBuffer_ = useYYScanBuffer_in;
 
   // OK
-  isInitialized_ = true;
+  initialized_ = true;
 }
 
 bool
-HTTP_ParserDriver::parse (ACE_Message_Block* data_in,
-                          bool useYYScanBuffer_in)
+HTTP_ParserDriver::parse (ACE_Message_Block* data_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::parse"));
 
   // sanity check(s)
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (initialized_);
   ACE_ASSERT (data_in);
 
   // start with the first fragment...
@@ -116,8 +133,8 @@ HTTP_ParserDriver::parse (ACE_Message_Block* data_in,
   // *TODO*: yyrestart(), yy_create_buffer/yy_switch_to_buffer, YY_INPUT...
   int result = -1;
 //   do
-//   { // init scan buffer
-    if (!scan_begin (useYYScanBuffer_in))
+//   { // initialize scan buffer
+    if (!scan_begin ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to HTTP_ParserDriver::scan_begin(), aborting\n")));
@@ -129,7 +146,17 @@ HTTP_ParserDriver::parse (ACE_Message_Block* data_in,
       return false;
     } // end IF
 
-    // parse our data
+    // initialize scanner
+    HTTP_Scanner_set_column (1, scannerState_);
+    HTTP_Scanner_set_lineno (1, scannerState_);
+    int debug_level = 0;
+#if YYDEBUG
+    //debug_level = parser_.debug_level ();
+    debug_level = yydebug;
+#endif
+    ACE_UNUSED_ARG (debug_level);
+
+    // parse data fragment
     try
     {
       //result = parser_.parse ();
@@ -140,34 +167,48 @@ HTTP_ParserDriver::parse (ACE_Message_Block* data_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
     }
-    if (result)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to parse message fragment, aborting\n")));
+    switch (result)
+    {
+      case 0:
+        break; // done
+      case 1:
+      default:
+      { // *NOTE*: need more data
+//        ACE_DEBUG ((LM_DEBUG,
+//                    ACE_TEXT ("failed to parse message fragment (result was: %d), aborting\n"),
+//                    result));
+
+//        // debug info
+//        if (debug_level)
+//        {
+//          try
+//          {
+//            record_->dump_state ();
+//          }
+//          catch (...)
+//          {
+//            ACE_DEBUG ((LM_ERROR,
+//                        ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
+//          }
+//        } // end IF
+
+        break;
+      }
+    } // end SWITCH
 
     // finalize buffer/scanner
     scan_end ();
-
-    int debug_level = 0;
-#if YYDEBUG
-    //debug_level = parser_.debug_level ();
-    debug_level = yydebug;
-#endif
-    // debug info
-    if (debug_level)
-    {
-      try
-      {
-        record_->dump_state ();
-      }
-      catch (...)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
-      }
-    } // end IF
 //   } while (fragment_);
 
   return (result == 0);
+}
+
+bool
+HTTP_ParserDriver::getDebugScanner () const
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::getDebugScanner"));
+
+  return (HTTP_Scanner_get_debug (scannerState_) != 0);
 }
 
 bool
@@ -177,55 +218,91 @@ HTTP_ParserDriver::switchBuffer ()
 
   // sanity check(s)
   ACE_ASSERT (scannerState_);
-  if (fragment_->cont () == NULL)
-    return false; // <-- nothing to do
 
-  // switch to the next fragment
+  if (fragment_->cont () == NULL)
+    wait (); // <-- wait for data
+  if (!fragment_->cont ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("no data after HTTP_ParserDriver::wait(), aborting\n")));
+    return false;
+  } // end IF
   fragment_ = fragment_->cont ();
 
+  // switch to the next fragment
+
   // clean state
-  ACE_ASSERT (bufferState_);
-  HTTP_Scanner__delete_buffer (bufferState_,
-                               scannerState_);
-  bufferState_ = NULL;
+  scan_end ();
 
   // initialize next buffer
-  //bufferState_ = IRCScanner_scan_bytes(fragment_->rd_ptr(),
-  //                                             fragment_->length(),
-  //                                             myScannerContext);
-//   if (!bufferState_)
-//   {
-//     ACE_DEBUG((LM_ERROR,
-//                ACE_TEXT("failed to ::IRCScanner_scan_bytes(%@, %d), aborting\n"),
-//                fragment_->rd_ptr(),
-//                fragment_->length()));
-//     return false;
-//   } // end IF
 
-//  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
-  HTTP_Scanner__switch_to_buffer (bufferState_,
-                                  scannerState_);
+  // append the "\0\0"-sequence, as required by flex
+  ACE_ASSERT (fragment_->capacity () - fragment_->length () >= HTTP_FLEX_BUFFER_BOUNDARY_SIZE);
+  *(fragment_->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
+  *(fragment_->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
+  // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-//   ACE_DEBUG((LM_DEBUG,
-//              ACE_TEXT("switched to next buffer...\n")));
+  if (!scan_begin ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HTTP_ParserDriver::scan_begin(), aborting\n")));
+    return false;
+  } // end IF
+
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("switched input buffers...\n")));
 
   return true;
 }
 
-bool
-HTTP_ParserDriver::moreData ()
+void
+HTTP_ParserDriver::wait ()
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::moreData"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::wait"));
 
-  return (fragment_->cont () != NULL);
-}
+  int result = -1;
+  ACE_Message_Block* message_block_p = NULL;
 
-bool
-HTTP_ParserDriver::getDebugScanner () const
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::getDebugScanner"));
+  // *IMPORTANT NOTE*: 'this' is the parser thread currently blocked in yylex()
 
-  return (HTTP_Scanner_get_debug (scannerState_) != 0);
+  // sanity check(s)
+  if (!messageQueue_)
+    return;
+
+  // 1. wait for data
+  do
+  {
+    result = messageQueue_->dequeue_head (message_block_p,
+                                          NULL);
+    if (result == -1)
+    {
+      int error = ACE_OS::last_error ();
+      if (error != ESHUTDOWN)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Message_Queue::dequeue_head(): \"%m\", returning\n")));
+      return;
+    } // end IF
+    ACE_ASSERT (message_block_p);
+
+    if (message_block_p->msg_type () >= STREAM_MESSAGE_MAP_2)
+      break;
+
+    // session message --> put it back
+    result = messageQueue_->enqueue_tail (message_block_p, NULL);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Message_Queue::enqueue_tail(): \"%m\", aborting\n")));
+      return;
+    } // end IF
+  } while (true);
+
+  // 2. enqueue data
+  ACE_Message_Block* message_block_2 = fragment_;
+  for (;
+       message_block_2->cont ();
+       message_block_2 = message_block_2->cont ());
+  message_block_2->cont (message_block_p);
 }
 
 void
@@ -322,16 +399,18 @@ HTTP_ParserDriver::error (const YYLTYPE& location_in,
 }
 
 bool
-HTTP_ParserDriver::scan_begin (bool useYYScanBuffer_in)
+HTTP_ParserDriver::scan_begin ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::scan_begin"));
+
+//  static int counter = 1;
 
   // sanity check(s)
   ACE_ASSERT (bufferState_ == NULL);
   ACE_ASSERT (fragment_);
 
   // create/initialize a new buffer state
-  if (useYYScanBuffer_in)
+  if (useYYScanBuffer_)
   {
     bufferState_ =
       HTTP_Scanner__scan_buffer (fragment_->rd_ptr (),
@@ -353,10 +432,14 @@ HTTP_ParserDriver::scan_begin (bool useYYScanBuffer_in)
                 fragment_->length ()));
     return false;
   } // end IF
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("parsing fragment #%d --> %d byte(s)...\n"),
+//              counter++,
+//              fragment_->length ()));
 
-  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
-  HTTP_Scanner__switch_to_buffer (bufferState_,
-                                  scannerState_);
+//  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
+//  HTTP_Scanner__switch_to_buffer (bufferState_,
+//                                  scannerState_);
 
   return true;
 }
@@ -369,21 +452,8 @@ HTTP_ParserDriver::scan_end ()
   // sanity check(s)
   ACE_ASSERT (bufferState_);
 
-//   // clean buffer
-//   if (fragmentIsResized_)
-//   {
-//     if (fragment_->size(fragment_->size() - IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE))
-//       ACE_DEBUG((LM_ERROR,
-//                  ACE_TEXT("failed to ACE_Message_Block::size(%u), continuing\n"),
-//                  (fragment_->size() - IRC_CLIENT_FLEX_BUFFER_BOUNDARY_SIZE)));
-//     fragmentIsResized_ = false;
-//   } // end IF
-
   // clean state
   HTTP_Scanner__delete_buffer (bufferState_,
                                scannerState_);
   bufferState_ = NULL;
-
-//   // switch to the next fragment (if any)
-//   fragment_ = fragment_->cont();
 }

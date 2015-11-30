@@ -57,10 +57,12 @@
 #include "http_defines.h"
 
 #include "test_u_common.h"
-#include "test_u_common_modules.h"
+#include "test_u_connection_common.h"
+#include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
-#include "test_u_protocol_common.h"
+#include "test_u_message.h"
 #include "test_u_protocol_signalhandler.h"
+#include "test_u_session_message.h"
 
 void
 do_printUsage (const std::string& programName_in)
@@ -482,20 +484,20 @@ do_work (unsigned int bufferSize_in,
   configuration.useReactor = useReactor_in;
 
   Stream_Module_t* module_p = NULL;
-  Test_U_Module_FileWriter_Module file_writer (ACE_TEXT_ALWAYS_CHAR ("FileWriter"),
-                                               NULL,
-                                               true);
-  module_p = &file_writer;
-  Test_U_IModuleHandler_t* module_handler_p =
-    dynamic_cast<Test_U_IModuleHandler_t*> (module_p->writer ());
-  if (!module_handler_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Test_U_IModuleHandler_t>(0x%@) failed, returning\n"),
-                module_p->name (),
-                module_p->writer ()));
-    return;
-  } // end IF
+//  Test_U_Module_FileWriter_Module file_writer (ACE_TEXT_ALWAYS_CHAR ("FileWriter"),
+//                                               NULL,
+//                                               true);
+//  module_p = &file_writer;
+//  Test_U_IModuleHandler_t* module_handler_p =
+//    dynamic_cast<Test_U_IModuleHandler_t*> (module_p->writer ());
+//  if (!module_handler_p)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("%s: dynamic_cast<Test_U_IModuleHandler_t>(0x%@) failed, returning\n"),
+//                module_p->name (),
+//                module_p->writer ()));
+//    return;
+//  } // end IF
 
   Stream_AllocatorHeap_T<Test_U_AllocatorConfiguration> heap_allocator;
   Test_U_MessageAllocator_t message_allocator (TEST_U_MAX_MESSAGES, // maximum #buffers
@@ -542,9 +544,19 @@ do_work (unsigned int bufferSize_in,
   configuration.moduleHandlerConfiguration.streamConfiguration =
     &configuration.streamConfiguration;
 
+  // *NOTE*: yyparse() does not currently return until the whole entity has been
+  //         processed --> use (a) dedicated thread(s) so the event dispatch
+  //         does not deadlock in single-threaded reactor/proactor scenarios
+  configuration.moduleHandlerConfiguration.active = true;
   configuration.moduleHandlerConfiguration.configuration = &configuration;
   configuration.moduleHandlerConfiguration.connectionManager =
     connection_manager_p;
+  configuration.moduleHandlerConfiguration.dumpFileName =
+      Common_File_Tools::getLogDirectory (LIBACENETWORK_PACKAGE_NAME);
+  configuration.moduleHandlerConfiguration.dumpFileName +=
+      ACE_DIRECTORY_SEPARATOR_CHAR_A;;
+  configuration.moduleHandlerConfiguration.dumpFileName +=
+      ACE_TEXT_ALWAYS_CHAR ("dump.txt");
   configuration.moduleHandlerConfiguration.traceParsing = debugParser_in;
   if (debugParser_in)
     configuration.moduleHandlerConfiguration.traceScanning = true;
@@ -582,7 +594,7 @@ do_work (unsigned int bufferSize_in,
   // step0c: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   connection_manager_p->set (configuration,
-                              &configuration.userData);
+                             &configuration.userData);
 
   // step0d: initialize regular (global) statistic reporting
   Common_Timer_Manager_t* timer_manager_p =
@@ -686,6 +698,9 @@ do_work (unsigned int bufferSize_in,
   ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
   ACE_Time_Value deadline;
   Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
+  Test_U_MessageData* message_data_p = NULL;
+  Test_U_MessageData_t* message_data_container_p = NULL;
+  Test_U_Message* message_p = NULL;
   if (useReactor_in)
     ACE_NEW_NORETURN (iconnector_p,
                       Test_U_TCPConnector_t (connection_manager_p,
@@ -786,10 +801,9 @@ do_work (unsigned int bufferSize_in,
               buffer));
 
   // step2: send HTTP request
-  HTTP_Record* record_p = NULL;
-  ACE_NEW_NORETURN (record_p,
-                    HTTP_Record ());
-  if (!record_p)
+  ACE_NEW_NORETURN (message_data_p,
+                    Test_U_MessageData ());
+  if (!message_data_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
@@ -800,7 +814,36 @@ do_work (unsigned int bufferSize_in,
 
     goto clean_up;
   } // end IF
-  Test_U_Message* message_p = NULL;
+  ACE_NEW_NORETURN (message_data_p->HTTPRecord,
+                    HTTP_Record ());
+  if (!message_data_p->HTTPRecord)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+
+    // clean up
+    connection_p->close ();
+    connection_p->decrease ();
+    delete message_data_p;
+
+    goto clean_up;
+  } // end IF
+  // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
+  ACE_NEW_NORETURN (message_data_container_p,
+                    Test_U_MessageData_t (message_data_p,
+                                          true));
+  if (!message_data_container_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+
+    // clean up
+    connection_p->close ();
+    connection_p->decrease ();
+    delete message_data_p;
+
+    goto clean_up;
+  } // end IF
 allocate:
   message_p =
     static_cast<Test_U_Message*> (message_allocator.malloc (configuration.socketHandlerConfiguration.PDUSize));
@@ -815,14 +858,15 @@ allocate:
     // clean up
     connection_p->close ();
     connection_p->decrease ();
-    delete record_p;
+    message_data_container_p->decrease ();
 
     goto clean_up;
   } // end IF
-  record_p->method_ = HTTP_Codes::HTTP_METHOD_GET;
-  record_p->URI_ = URL_in;
-  record_p->version_ = HTTP_Codes::HTTP_VERSION_1_1;
-  message_p->initialize (record_p, NULL);
+  message_data_p->HTTPRecord->method = HTTP_Codes::HTTP_METHOD_GET;
+  message_data_p->HTTPRecord->URI = URL_in;
+  message_data_p->HTTPRecord->version = HTTP_Codes::HTTP_VERSION_1_1;
+  // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
+  message_p->initialize (message_data_container_p, NULL);
   isocket_connection_p->send (message_p);
 
   connection_manager_p->wait ();
@@ -858,11 +902,11 @@ clean_up:
   //			g_source_remove(*iterator);
   //	} // end lock scope
 
-  result = file_writer.close (ACE_Module_Base::M_DELETE_NONE);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to ACE_Module::close (): \"%m\", continuing\n"),
-                file_writer.name ()));
+//  result = file_writer.close (ACE_Module_Base::M_DELETE_NONE);
+//  if (result == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("%s: failed to ACE_Module::close (): \"%m\", continuing\n"),
+//                file_writer.name ()));
 }
 
 void

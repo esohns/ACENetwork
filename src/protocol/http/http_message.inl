@@ -25,28 +25,35 @@
 
 #include "net_macros.h"
 
+#include "http_defines.h"
 #include "http_tools.h"
 
-template <typename AllocatorConfigurationType>
-HTTP_Message_T<AllocatorConfigurationType>::HTTP_Message_T (unsigned int requestedSize_in)
+template <typename AllocatorConfigurationType,
+          typename DataType>
+HTTP_Message_T<AllocatorConfigurationType,
+               DataType>::HTTP_Message_T (unsigned int requestedSize_in)
  : inherited (requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::HTTP_Message_T"));
 
 }
 
-template <typename AllocatorConfigurationType>
-HTTP_Message_T<AllocatorConfigurationType>::HTTP_Message_T (const HTTP_Message_T& message_in)
+template <typename AllocatorConfigurationType,
+          typename DataType>
+HTTP_Message_T<AllocatorConfigurationType,
+               DataType>::HTTP_Message_T (const HTTP_Message_T& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::HTTP_Message_T"));
 
 }
 
-template <typename AllocatorConfigurationType>
-HTTP_Message_T<AllocatorConfigurationType>::HTTP_Message_T (ACE_Data_Block* dataBlock_in,
-                                                            ACE_Allocator* messageAllocator_in,
-                                                            bool incrementMessageCounter_in)
+template <typename AllocatorConfigurationType,
+          typename DataType>
+HTTP_Message_T<AllocatorConfigurationType,
+               DataType>::HTTP_Message_T (ACE_Data_Block* dataBlock_in,
+                                          ACE_Allocator* messageAllocator_in,
+                                          bool incrementMessageCounter_in)
  : inherited (dataBlock_in,               // use (don't own !) this data block
               messageAllocator_in,        // allocator
               incrementMessageCounter_in) // increment message counter ?
@@ -64,40 +71,49 @@ HTTP_Message_T<AllocatorConfigurationType>::HTTP_Message_T (ACE_Data_Block* data
 //
 // }
 
-template <typename AllocatorConfigurationType>
-HTTP_Message_T<AllocatorConfigurationType>::~HTTP_Message_T ()
+template <typename AllocatorConfigurationType,
+          typename DataType>
+HTTP_Message_T<AllocatorConfigurationType,
+               DataType>::~HTTP_Message_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::~HTTP_Message_T"));
 
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename DataType>
 HTTP_Method_t
-HTTP_Message_T<AllocatorConfigurationType>::command () const
+HTTP_Message_T<AllocatorConfigurationType,
+               DataType>::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::command"));
 
-  const HTTP_Record* data_p = inherited::getData ();
-
   // sanity check(s)
-  ACE_ASSERT (data_p);
+  if (!inherited::initialized_)
+    return HTTP_Codes::HTTP_METHOD_INVALID;
+  ACE_ASSERT (inherited::data_);
 
-  return data_p->method_;
+  return inherited::data_->method_;
 }
 
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename DataType>
 std::string
-HTTP_Message_T<AllocatorConfigurationType>::Command2String (HTTP_Method_t method_in)
+HTTP_Message_T<AllocatorConfigurationType,
+               DataType>::Command2String (HTTP_Method_t method_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::Command2String"));
 
-  return HTTP_Tools::Method2String (method_in);
+  return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
+                                                       : HTTP_Tools::Method2String (method_in));
 }
 
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename DataType>
 void
-HTTP_Message_T<AllocatorConfigurationType>::dump_state () const
+HTTP_Message_T<AllocatorConfigurationType,
+               DataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::dump_state"));
 
@@ -123,16 +139,18 @@ HTTP_Message_T<AllocatorConfigurationType>::dump_state () const
   } // end FOR
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s"),
-              getID (),
-              total_length (),
+              this->getID (),
+              inherited::total_length (),
               ACE_TEXT (info.c_str ())));
   // delegate to base
   inherited::dump_state ();
 }
 
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename DataType>
 void
-HTTP_Message_T<AllocatorConfigurationType>::crunch ()
+HTTP_Message_T<AllocatorConfigurationType,
+               DataType>::crunch ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::crunch"));
 
@@ -199,9 +217,11 @@ HTTP_Message_T<AllocatorConfigurationType>::crunch ()
   } while (true);
 }
 
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename DataType>
 ACE_Message_Block*
-HTTP_Message_T<AllocatorConfigurationType>::duplicate (void) const
+HTTP_Message_T<AllocatorConfigurationType,
+               DataType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::duplicate"));
 

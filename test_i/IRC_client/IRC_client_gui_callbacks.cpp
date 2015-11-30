@@ -142,8 +142,7 @@ connection_setup_function (void* arg_in)
     return result;
   } // end IF
 //  gdk_threads_leave ();
-  data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2.subscriber =
-    connection_p;
+  data_p->configuration->moduleHandlerConfiguration.subscriber = connection_p;
 
   // *WARNING*: beyond this point, need to remove the connection page !
   //            --> goto remove_page
@@ -831,7 +830,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 
     // set active item
     if ((*iterator_2).first ==
-        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SERVER_HOSTNAME))
+        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEFAULT_SERVER_HOSTNAME))
       gtk_combo_box_set_active_iter (combo_box_p,
                                      &tree_iter_2);
   } // end FOR
@@ -1662,7 +1661,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   // enforce sane values
   // *TODO*: support the NICKLEN=xxx "feature" of the server...
   gtk_entry_set_max_length (entry_p,
-                            IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH);
+                            IRC_PRT_MAXIMUM_NICKNAME_LENGTH);
   //   gtk_entry_set_width_chars(main_entry_entry,
   //                             -1); // reset to default
   gtk_entry_set_text (entry_p,
@@ -1712,8 +1711,8 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 
     // sanity check: <= IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH characters ?
     // *TODO*: support the NICKLEN=xxx "feature" of the server...
-    if (login_options.nickName.size () > IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH)
-      login_options.nickName.resize (IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH);
+    if (login_options.nickName.size () > IRC_PRT_MAXIMUM_NICKNAME_LENGTH)
+      login_options.nickName.resize (IRC_PRT_MAXIMUM_NICKNAME_LENGTH);
 
     // sanity check: nickname already in use ?
     nick_name_taken = false;
@@ -2177,7 +2176,7 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
 
   try
   {
-    data_p->controller->quit (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_LEAVE_REASON));
+    data_p->controller->quit (ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_LEAVE_REASON));
   }
   catch (...)
   {
@@ -2305,8 +2304,8 @@ nickname_clicked_cb (GtkWidget* widget_in,
 
   // sanity check: <= IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH characters ?
   // *TODO*: support the NICKLEN=xxx "feature" of the server...
-  if (nickname_string.size () > IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH)
-    nickname_string.resize (IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH);
+  if (nickname_string.size () > IRC_PRT_MAXIMUM_NICKNAME_LENGTH)
+    nickname_string.resize (IRC_PRT_MAXIMUM_NICKNAME_LENGTH);
 
   try
   {
@@ -2377,8 +2376,8 @@ usersbox_changed_cb (GtkWidget* widget_in,
   g_free (string_p);
   // sanity check(s): larger than IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH characters ?
   // *TODO*: support the NICKLEN=xxx "feature" of the server...
-  if (username.size () > IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH)
-    username.resize (IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH);
+  if (username.size () > IRC_PRT_MAXIMUM_NICKNAME_LENGTH)
+    username.resize (IRC_PRT_MAXIMUM_NICKNAME_LENGTH);
 
   // *TODO*: if a conversation exists, simply activate the corresponding page
   { // synch access
@@ -2544,8 +2543,8 @@ join_clicked_cb (GtkWidget* widget_in,
     channel_string.insert (channel_string.begin (), '#');
   // sanity check(s): larger than IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH characters ?
   // *TODO*: support the CHANNELLEN=xxx "feature" of the server...
-  if (channel_string.size () > IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH)
-    channel_string.resize (IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH);
+  if (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH)
+    channel_string.resize (IRC_PRT_MAXIMUM_CHANNEL_LENGTH);
 
   // *TODO*: support channel keys/multi-join ?
   string_list_t channels, keys;
@@ -2631,8 +2630,8 @@ channelbox_changed_cb (GtkWidget* widget_in,
     channel_string.insert (channel_string.begin (), '#');
   // sanity check(s): larger than IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH characters ?
   // *TODO*: support the CHANNELLEN=xxx "feature" of the server...
-  if (channel_string.size () > IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH)
-    channel_string.resize (IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH);
+  if (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH)
+    channel_string.resize (IRC_PRT_MAXIMUM_CHANNEL_LENGTH);
 
   // *TODO*: support channel key ?
   string_list_t channels;
@@ -2905,7 +2904,7 @@ action_away_cb (GtkAction* action_in,
   //   gtk_entry_set_width_chars(entry_p,
   //                             -1); // reset to default
     gtk_entry_set_text (entry_p,
-                        IRC_CLIENT_DEF_IRC_AWAY_MESSAGE);
+                        ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_AWAY_MESSAGE));
     gtk_editable_select_region (GTK_EDITABLE (entry_p),
                                 0, -1);
 
@@ -2941,7 +2940,7 @@ action_away_cb (GtkAction* action_in,
     {
       // *NOTE*: need to set SOME value, as an AWAY-message with no parameter will
       // actually "un-away" the user (see RFC1459 Section 5.1)...
-      away_message = IRC_CLIENT_DEF_IRC_AWAY_MESSAGE;
+      away_message = ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_AWAY_MESSAGE);
     } // end IF
   } // end IF
 
@@ -3744,7 +3743,7 @@ action_kick_cb (GtkAction* action_in,
     {
       data_p->controller->kick (data_p->id,
                                 *iterator,
-                                ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_KICK_REASON));
+                                ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_KICK_REASON));
     }
     catch (...)
     {

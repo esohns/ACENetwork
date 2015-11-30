@@ -97,9 +97,9 @@ struct IRC_SocketHandlerConfiguration
 struct IRC_ProtocolConfiguration
 {
   inline IRC_ProtocolConfiguration ()
-   : automaticPong (IRC_STREAM_DEF_AUTOPONG)
+   : automaticPong (IRC_STREAM_DEFAULT_AUTOPONG)
    , loginOptions ()
-   , printPingDot (IRC_DEF_PRINT_PINGDOT)
+   , printPingDot (IRC_CLIENT_DEFAULT_PRINT_PINGDOT)
   {};
 
   bool             automaticPong; // automatically answer "ping" messages
@@ -115,9 +115,9 @@ struct IRC_ModuleHandlerConfiguration
    //////////////////////////////////////
    , active (false)
    //////////////////////////////////////
-   , crunchMessages (IRC_DEF_CRUNCH_MESSAGES)
-   , traceParsing (IRC_DEF_YACC_TRACE)
-   , traceScanning (IRC_DEF_LEX_TRACE)
+   , crunchMessages (IRC_DEFAULT_CRUNCH_MESSAGES)
+   , traceParsing (IRC_DEFAULT_YACC_TRACE)
+   , traceScanning (IRC_DEFAULT_LEX_TRACE)
    //////////////////////////////////////
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)

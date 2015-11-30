@@ -3,7 +3,7 @@
 /* %language                         "c++" */
 %language                         "C"
 %locations
-/* %no-lines */
+%no-lines
 %output                           "http_parser.cpp"
 %require                          "2.4.1"
 %skeleton                         "glr.c"
@@ -24,12 +24,14 @@
 %define api.prefix                {yy}
 /* %pure-parser */
 %define api.pure                  true
-/* %define api.push-pull             {pull} */
+/* *TODO*: implement a push parser */
+/* %define api.push-pull             push */
 /* %define api.token.constructor */
 %define api.token.prefix          {}
 /* %define api.value.type            variant */
 /* %define api.value.union.name      YYSTYPE */
-%define lr.default-reduction      most
+/* %define lr.default-reduction      most */
+%define lr.default-reduction      accepting
 %define lr.keep-unreachable-state false
 %define lr.type                   lalr
 
@@ -49,7 +51,21 @@
 #include <cstdio>
 #include <string>
 
-enum yytokentype;
+enum yytokentype
+{
+  END = 0,
+  METHOD = 258,
+  URI = 259,
+  VERSION = 260,
+  HEADER = 261,
+  DELIMITER = 262,
+  STATUS = 263,
+  REASON = 264,
+  BODY = 265,
+  CHUNK = 266
+};
+#define YYTOKENTYPE
+//enum yytokentype;
 class HTTP_ParserDriver;
 //class HTTP_Scanner;
 struct YYLTYPE;
@@ -58,8 +74,8 @@ union YYSTYPE;
 typedef void* yyscan_t;
 
 //#define YYERROR_VERBOSE
-void yyerror (YYLTYPE*, HTTP_ParserDriver*, yyscan_t, const char*);
-void yyprint (FILE*, yytokentype, YYSTYPE);
+extern void yyerror (YYLTYPE*, HTTP_ParserDriver*, yyscan_t, const char*);
+extern void yyprint (FILE*, yytokentype, YYSTYPE);
 }
 
 // calling conventions / parameter passing
@@ -114,8 +130,9 @@ using namespace std;
 
 #include "net_macros.h"
 
+#include "http_common.h"
+#include "http_defines.h"
 #include "http_parser_driver.h"
-#include "http_record.h"
 #include "http_scanner.h"
 #include "http_tools.h"
 
@@ -126,14 +143,14 @@ using namespace std;
 }
 
 %token <sval> METHOD      "method"
+%token <sval> URI         "uri"
 %token <sval> VERSION     "version"
-%token <sval> REQUEST     "request_line"
-%token <sval> RESPONSE    "status_line"
 %token <sval> HEADER      "header"
 %token <ival> DELIMITER   "delimiter"
+%token <sval> STATUS      "status"
+%token <sval> REASON      "reason"
 %token <ival> BODY        "body"
-/* %type  <sval> METHOD VERSION REQUEST RESPONSE HEADER
-%type  <ival> DELIMITER BODY */
+%token <ival> CHUNK       "chunk"
 /* %token <std::string> METHOD      "method"
 %token <std::string> VERSION     "version"
 %token <std::string> REQUEST     "request_line"
@@ -141,135 +158,153 @@ using namespace std;
 %token <std::string> HEADER      "header"
 %token <std::string> DELIMITER   "delimiter"
 %token <int>         BODY        "body" */
-%token               END 0       "end_of_message"
+%token <ival> END 0       "end_of_fragment"
+
+%type  <ival> message head body
+%type  <ival> head_rest1 head_rest2 headers chunks
+%type  <ival> request_line_rest1 request_line_rest2
+%type  <ival> status_line_rest1 status_line_rest2
 
 /* %printer                  { yyoutput << $$; } <*>; */
 /* %printer                  { yyoutput << *$$; } <sval>
 %printer                  { debug_stream () << $$; }  <ival> */
 %printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*$$).c_str ()); } <sval>
-%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); }  <ival>
-%destructor               { delete $$; $$ = NULL; }   <sval>
-%destructor               { $$ = 0; }                 <ival>
-%destructor               { ACE_DEBUG ((LM_DEBUG,
-                                        ACE_TEXT ("discarding tagless symbol...\n"))); } <>
+%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); }             <ival>
+%destructor               { delete $$; $$ = NULL; } <sval>
+%destructor               { $$ = 0; }               <ival>
+/* %destructor               { ACE_DEBUG ((LM_DEBUG,
+                                        ACE_TEXT ("discarding tagless symbol...\n"))); } <> */
 
 %%
 %start        message;
-/* %nonassoc                 ':' '!' '@'; */
 
-message:      head "delimiter" body "end_of_message" /* default */
-head:         "method" request                       {
-                                                       driver->record_->method_ =
+message:            head "delimiter" body            { $$ = $1 + $2 + $3; };
+head:               "method" head_rest1              { $$ = (*$1).size () + $2 + 1;
+                                                       driver->record_->method =
                                                          HTTP_Tools::Method2Type (*$1);
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set method: \"%s\"\n"),
-                                                                   ACE_TEXT ((*$1).c_str ()))); };
-              | "version" response                   { driver->record_->version_ =
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set method: \"%s\"\n"),
+//                                                                   ACE_TEXT ((*$1).c_str ())));
+                                                     };
+                    | "version" head_rest2           { $$ = (*$1).size () + $2 + 1;
+                                                       std::string regex_string =
+                                                         ACE_TEXT_ALWAYS_CHAR ("^");
+                                                       regex_string +=
+                                                         ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
+                                                       regex_string +=
+                                                         ACE_TEXT_ALWAYS_CHAR ("([[:digit:]]{1}\\.[[:digit:]]{1})$");
+                                                       std::regex regex (regex_string);
+                                                       std::smatch match_results;
+                                                       if (!std::regex_match (*$1,
+                                                                              match_results,
+                                                                              regex,
+                                                                              std::regex_constants::match_default))
+                                                       {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("invalid HTTP version (was: \"%s\"), continuing\n"),
+                                                                     ACE_TEXT ((*$1).c_str ())));
+                                                       } // end IF
+                                                       else
+                                                       {
+                                                         ACE_ASSERT (match_results.ready () && !match_results.empty ());
+                                                         ACE_ASSERT (match_results[1].matched);
+
+                                                         driver->record_->version =
+                                                             HTTP_Tools::Version2Type (match_results[1].str ());
+//                                                         ACE_DEBUG ((LM_DEBUG,
+//                                                                     ACE_TEXT ("set version: \"%s\"\n"),
+//                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
+                                                       } // end ELSE
+                                                     };
+                    | "end_of_fragment"              { $$ = $1;
+                                                       yyclearin; };
+head_rest1:         request_line_rest1 headers       { $$ = $1 + $2; };
+request_line_rest1: "uri" request_line_rest2         { $$ = (*$1).size () + $2 + 1;
+                                                       driver->record_->URI = *$1;
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set URI: \"%s\"\n"),
+//                                                                   ACE_TEXT ((*$1).c_str ())));
+                                                     };
+                    | "end_of_fragment"              { $$ = $1;
+                                                       yyclearin; };
+request_line_rest2: "version"                        { $$ = (*$1).size () + 2;
+                                                       driver->record_->version =
                                                          HTTP_Tools::Version2Type (*$1);
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set version: \"%s\"\n"),
-                                                                   ACE_TEXT ((*$1).c_str ()))); };
-request:      "request_line" headers                 { /* *TODO*: modify the scanner so it emits the proper fields itself */
-                                                       std::string regex_string =
-                                                         ACE_TEXT_ALWAYS_CHAR ("^([[^\\s]+)\\s([[^\\s]+)\\sHTTP/([[:digit:]]+)\\.([[:digit:]]+)$");
-                                                       std::regex regex (regex_string);
-                                                       std::smatch match_results;
-                                                       if (!std::regex_match (*$1,
-                                                                              match_results,
-                                                                              regex,
-                                                                              std::regex_constants::match_default))
-                                                       {
-                                                         ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("invalid HTTP request-line (was: \"%s\"), continuing\n"),
-                                                                     ACE_TEXT ((*$1).c_str ())));
-                                                       } // end IF
-                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
-
-                                                       ACE_ASSERT (match_results[1].matched);
-                                                       driver->record_->method_ =
-                                                         HTTP_Tools::Method2Type (match_results[1]);
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set method: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[1].str ().c_str ())));
-                                                       ACE_ASSERT (match_results[2].matched);
-                                                       driver->record_->URI_ = match_results[2];
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set URI: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
-                                                       ACE_ASSERT (match_results[3].matched);
-                                                       driver->record_->version_ =
-                                                         HTTP_Tools::Version2Type (match_results[3]);
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set version: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[3].str ().c_str ()))); };
-response:     "status_line" headers                  { /* *TODO*: modify the scanner so it emits the proper fields itself */
-                                                       std::string regex_string =
-                                                         ACE_TEXT_ALWAYS_CHAR ("^([[^\\s]+)\\s([[:digit:]{3})\\s(.+)$");
-                                                       std::regex regex (regex_string);
-                                                       std::smatch match_results;
-                                                       if (!std::regex_match (*$1,
-                                                                              match_results,
-                                                                              regex,
-                                                                              std::regex_constants::match_default))
-                                                       {
-                                                         ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("invalid HTTP status-line (was: \"%s\"), continuing\n"),
-                                                                     ACE_TEXT ((*$1).c_str ())));
-                                                       } // end IF
-                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
-
-                                                       ACE_ASSERT (match_results[1].matched);
-                                                       driver->record_->version_ =
-                                                         HTTP_Tools::Version2Type (match_results[1]);
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set version: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[1].str ().c_str ())));
-                                                       ACE_ASSERT (match_results[2].matched);
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set version: \"%s\"\n"),
+//                                                                   ACE_TEXT ((*$1).c_str ())));
+                                                     };
+                    | "end_of_fragment"              { $$ = $1;
+                                                       yyclearin; };
+head_rest2:         status_line_rest1 headers        { $$ = $1 + $2; };
+status_line_rest1:  "status" status_line_rest2       { $$ = (*$1).size () + $2 + 1;
                                                        std::stringstream converter;
-                                                       converter.str (match_results[2].str ().c_str ());
+                                                       converter.str (*$1);
                                                        int status;
                                                        converter >> status;
-                                                       driver->record_->status_ =
-                                                         static_cast<HTTP_Status_t> (status);
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set status: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
-                                                       ACE_ASSERT (match_results[3].matched);
-                                                       /* driver->record_->reason_ = match_results[3];
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set reason: \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[3].str ().c_str ()))); */ };
-headers:      "header" headers                       { /* *TODO*: modify the scanner so it emits the proper fields itself */
+                                                       driver->record_->status =
+                                                           static_cast<HTTP_Status_t> (status);
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set status: %d\n"),
+//                                                                   status));
+                                                     };
+                    | "end_of_fragment"              { $$ = $1;
+                                                       yyclearin; };
+status_line_rest2:  "reason"                         { $$ = (*$1).size () + 2;
+                                                       driver->record_->reason = *$1;
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set reason: \"%s\"\n"),
+//                                                                   ACE_TEXT ((*$1).c_str ())));
+                                                     };
+                    | "end_of_fragment"              { $$ = $1;
+                                                       yyclearin; };
+headers:            headers "header"                 { /* NOTE*: use right-recursion here to force early state reductions
+                                                                 (i.e. parse headers). This is required so the scanner can
+                                                                 act on any set transfer encoding. */
+                                                       $$ = $1 + (*$2).size ();
+                                                       /* *TODO*: modify the scanner so it emits the proper fields itself */
                                                        std::string regex_string =
                                                          ACE_TEXT_ALWAYS_CHAR ("^([^:]+):\\s(.+)$");
                                                        std::regex regex (regex_string);
                                                        std::smatch match_results;
-                                                       if (!std::regex_match (*$1,
+                                                       if (!std::regex_match (*$2,
                                                                               match_results,
                                                                               regex,
                                                                               std::regex_constants::match_default))
                                                        {
                                                          ACE_DEBUG ((LM_ERROR,
                                                                      ACE_TEXT ("invalid HTTP header (was: \"%s\"), continuing\n"),
-                                                                     ACE_TEXT ((*$1).c_str ())));
+                                                                     ACE_TEXT ((*$2).c_str ())));
                                                        } // end IF
                                                        ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
                                                        ACE_ASSERT (match_results[1].matched);
                                                        HTTP_HeadersIterator_t iterator =
-                                                         driver->record_->headers_.find (match_results[1]);
-                                                       ACE_ASSERT (iterator == driver->record_->headers_.end ());
+                                                         driver->record_->headers.find (match_results[1]);
+                                                       if (iterator != driver->record_->headers.end ())
+                                                       {
+                                                         ACE_DEBUG ((LM_WARNING,
+                                                                     ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
+                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
+                                                       } // end IF
                                                        ACE_ASSERT (match_results[2].matched);
                                                        ACE_ASSERT (!match_results[2].str ().empty ());
-                                                       driver->record_->headers_[match_results[1]] =
+                                                       driver->record_->headers[match_results[1]] =
                                                          match_results[2];
-                                                       ACE_DEBUG ((LM_DEBUG,
-                                                                   ACE_TEXT ("set header: \"%s\" to \"%s\"\n"),
-                                                                   ACE_TEXT (match_results[1].str ().c_str ()),
-                                                                   ACE_TEXT (match_results[2].str ().c_str ()))); };
-              | %empty                               /* empty */ /* *TODO*: enforce the standard here */
-body:         "body"                                 /* default */
-              | %empty                               /* empty */
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set header: \"%s\" to \"%s\"\n"),
+//                                                                   ACE_TEXT (match_results[1].str ().c_str ()),
+//                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
+                                                     };
+                    | %empty                         { $$ = 0; };
+body:               "body"                           { $$ = $1;
+                                                       YYACCEPT; }; // *NOTE*: any following (entity) fragments will not be parsed
+                    | "chunk" chunks headers "delimiter" { $$ = $1 + $2 + $3 + $4; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
+                                                       YYACCEPT; };
+                    | %empty                         { $$ = 0;
+                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
+chunks:             "chunk" chunks                   { $$ = $1 + $2; };
+                    | %empty                         { $$ = 0; };
 %%
 
 /* void
@@ -319,16 +354,17 @@ yyprint (FILE* file_in,
   switch (type_in)
   {
     case METHOD:
+    case URI:
     case VERSION:
-    case REQUEST:
-    case RESPONSE:
     case HEADER:
+    case STATUS:
+    case REASON:
     {
       format_string = ACE_TEXT_ALWAYS_CHAR (" %s");
       break;
     }
-    case BODY:
     case DELIMITER:
+    case BODY:
     case END:
     {
       format_string = ACE_TEXT_ALWAYS_CHAR (" %d");
@@ -342,7 +378,7 @@ yyprint (FILE* file_in,
       return;
     }
   } // end SWITCH
-  
+
   result = ACE_OS::fprintf (file_in,
                             ACE_TEXT (format_string.c_str ()),
                             value_in);

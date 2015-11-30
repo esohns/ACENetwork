@@ -55,7 +55,8 @@
 #endif
 #include "net_defines.h"
 
-#include "IRC_common.h"
+#include "irc_common.h"
+#include "irc_defines.h"
 
 #include "IRC_client_defines.h"
 #include "IRC_client_gui_callbacks.h"
@@ -96,13 +97,13 @@ do_printUsage (const std::string& programName_in)
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_CNF_DEF_INI_FILE);
+  path += ACE_TEXT (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILENAME]   : configuration file [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d              : debug [")
-            << (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE)
+            << (IRC_DEFAULT_LEX_TRACE || IRC_DEFAULT_YACC_TRACE)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   path = configuration_path;
@@ -132,7 +133,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r              : use reactor [")
-            << NET_EVENT_USE_REACTOR
+            << IRC_CLIENT_DEFAULT_USE_REACTOR
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]      : reporting interval (seconds) [0: off] [")
@@ -155,7 +156,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]      : #thread pool threads [")
-            << IRC_CLIENT_DEF_NUM_TP_THREADS
+            << IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 } // end print_usage
@@ -197,10 +198,10 @@ do_processArguments (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
 
   debug_out                      =
-    (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE);
+    (IRC_DEFAULT_LEX_TRACE || IRC_DEFAULT_YACC_TRACE);
 
   UIRCFile_out                   = configuration_path;
   UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -223,7 +224,7 @@ do_processArguments (int argc_in,
   phonebookFile_out             +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
-  useReactor_out                 = NET_EVENT_USE_REACTOR;
+  useReactor_out                 = IRC_CLIENT_DEFAULT_USE_REACTOR;
 
   statisticReportingInterval_out =
     IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
@@ -236,7 +237,7 @@ do_processArguments (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
 
   printVersionAndExit_out        = false;
-  numThreadPoolThreads_out       = IRC_CLIENT_DEF_NUM_TP_THREADS;
+  numThreadPoolThreads_out       = IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
@@ -455,16 +456,14 @@ do_work (bool useThreadPool_in,
   ACE_ASSERT (userData_in.configuration);
 
   // step1: initialize IRC handler module
-  userData_in.configuration->streamConfiguration.moduleHandlerConfiguration_2.protocolConfiguration =
-      &userData_in.configuration->protocolConfiguration;
-  userData_in.configuration->streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
+  userData_in.configuration->moduleHandlerConfiguration.streamConfiguration =
       &userData_in.configuration->streamConfiguration;
-
-  userData_in.configuration->streamConfiguration.moduleConfiguration =
-      &userData_in.configuration->streamConfiguration.moduleConfiguration_2;
+  userData_in.configuration->moduleHandlerConfiguration.protocolConfiguration =
+      &userData_in.configuration->protocolConfiguration;
   userData_in.configuration->streamConfiguration.moduleHandlerConfiguration =
-      &userData_in.configuration->streamConfiguration.moduleHandlerConfiguration_2;
-
+      &userData_in.configuration->moduleHandlerConfiguration;
+  userData_in.configuration->streamConfiguration.moduleConfiguration =
+      &userData_in.configuration->moduleConfiguration;
   IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
                                                    NULL,
                                                    true);
@@ -477,7 +476,7 @@ do_work (bool useThreadPool_in,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
     return;
   } // end IF
-  if (!IRCHandler_impl_p->initialize (userData_in.configuration->streamConfiguration.moduleHandlerConfiguration_2))
+  if (!IRCHandler_impl_p->initialize (userData_in.configuration->moduleHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::initialize(), returning\n")));
@@ -989,10 +988,10 @@ do_parsePhonebookFile (const std::string& phonebookFilename_in,
               phoneBook_out.networks.size ()));
 
   // add localhost
-  entry.hostName = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_SERVER_HOSTNAME);
+  entry.hostName = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEFAULT_SERVER_HOSTNAME);
   entry.ports.clear ();
-  entry.ports.push_back (std::make_pair (IRC_CLIENT_DEF_SERVER_PORT,
-                                         IRC_CLIENT_DEF_SERVER_PORT));
+  entry.ports.push_back (std::make_pair (IRC_DEFAULT_SERVER_PORT,
+                                         IRC_DEFAULT_SERVER_PORT));
   entry.netWork.clear ();
   phoneBook_out.servers.insert (std::make_pair (entry.hostName, entry));
 
@@ -1110,10 +1109,10 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEF_INI_FILE);
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
 
   bool debug                                 =
-    (IRC_CLIENT_DEF_LEX_TRACE || IRC_CLIENT_DEF_YACC_TRACE);
+    (IRC_DEFAULT_LEX_TRACE || IRC_DEFAULT_YACC_TRACE);
 
   std::string UIRC_file_name                 = configuration_path;
   UIRC_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1135,7 +1134,7 @@ ACE_TMAIN (int argc_in,
   phonebook_file_name                       +=
       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
-  bool use_reactor                           = NET_EVENT_USE_REACTOR;
+  bool use_reactor                           = IRC_CLIENT_DEFAULT_USE_REACTOR;
 
   unsigned int reporting_interval            =
     IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
@@ -1148,7 +1147,8 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
 
   bool print_version_and_exit                = false;
-  unsigned int number_of_thread_pool_threads = IRC_CLIENT_DEF_NUM_TP_THREADS;
+  unsigned int number_of_thread_pool_threads =
+      IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
                             configuration_file_name,
@@ -1316,10 +1316,9 @@ ACE_TMAIN (int argc_in,
       &configuration.socketConfiguration;
   ////////////////////////// stream configuration //////////////////////////////
   configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
+  configuration.streamConfiguration.moduleConfiguration->streamConfiguration =
       &configuration.streamConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.traceParsing =
-      debug;
+  configuration.moduleHandlerConfiguration.traceParsing = debug;
   configuration.streamConfiguration.statisticReportingInterval =
       reporting_interval;
   configuration.userData = &user_data;
@@ -1330,7 +1329,7 @@ ACE_TMAIN (int argc_in,
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
   cb_user_data.configuration->protocolConfiguration.loginOptions.nickName =
-      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_NICKNAME);
+      ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
 //   userData.loginOptions.user.username = ;
   std::string host_name;
   if (!Net_Common_Tools::getHostname (host_name))
@@ -1352,7 +1351,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (IRC_CLIENT_CNF_IRC_USERMSG_TRADITIONAL)
+  if (IRC_PRT_USERMSG_TRADITIONAL)
   {
     configuration.protocolConfiguration.loginOptions.user.hostName.discriminator =
       IRC_LoginOptions::User::Hostname::STRING;
@@ -1365,12 +1364,12 @@ ACE_TMAIN (int argc_in,
       IRC_LoginOptions::User::Hostname::MODE;
     // *NOTE*: hybrid-7.2.3 seems to have a bug: 4 --> +i
     configuration.protocolConfiguration.loginOptions.user.hostName.mode =
-      IRC_CLIENT_DEF_IRC_USERMODE;
+      IRC_DEFAULT_USERMODE;
   } // end ELSE
   configuration.protocolConfiguration.loginOptions.user.serverName =
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_SERVERNAME);
+    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_SERVERNAME);
   configuration.protocolConfiguration.loginOptions.channel =
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEF_IRC_CHANNEL);
+    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_CHANNEL);
   // populate user/realname
   Common_Tools::getCurrentUserName (configuration.protocolConfiguration.loginOptions.user.userName,
                                     configuration.protocolConfiguration.loginOptions.user.realName);

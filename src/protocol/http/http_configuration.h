@@ -108,27 +108,14 @@ struct HTTP_ModuleHandlerConfiguration
   inline HTTP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    //////////////////////////////////////
-   , active (false)
-   //////////////////////////////////////
-   , crunchMessages (HTTP_DEFAULT_CRUNCH_MESSAGES)
-   , traceParsing (HTTP_DEFAULT_YACC_TRACE)
-   , traceScanning (HTTP_DEFAULT_LEX_TRACE)
-   //////////////////////////////////////
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)
-  {};
+  {
+    crunchMessages = HTTP_DEFAULT_CRUNCH_MESSAGES; // http parser module
 
-  /* socket handler */
-  bool                        active;
-
-  /* splitter */
-  // *NOTE*: this option may be useful for (downstream) parsers that only work
-  //         on CONTIGUOUS buffers (i.e. cannot parse chained message blocks)
-  // *WARNING*: currently, this does NOT work with multithreaded streams
-  //            --> USE WITH CAUTION !
-  bool                        crunchMessages;
-  bool                        traceParsing;       // debug yacc (bison) ?
-  bool                        traceScanning;      // debug (f)lex ?
+    traceParsing = HTTP_DEFAULT_YACC_TRACE; // http parser module
+    traceScanning = HTTP_DEFAULT_LEX_TRACE; // http parser module
+  };
 
   HTTP_ProtocolConfiguration* protocolConfiguration;
 

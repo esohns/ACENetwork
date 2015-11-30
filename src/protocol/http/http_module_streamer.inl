@@ -23,17 +23,18 @@
 
 #include "net_macros.h"
 
+#include "http_common.h"
 #include "http_defines.h"
-#include "http_record.h"
+#include "http_tools.h"
 
 template <typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType>
 HTTP_Module_Streamer_T<TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType>::HTTP_Module_Streamer_T ()
+                       TimePolicyType,
+                       SessionMessageType,
+                       ProtocolMessageType>::HTTP_Module_Streamer_T ()
  : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Streamer_T::HTTP_Module_Streamer_T"));
@@ -45,9 +46,9 @@ template <typename TaskSynchType,
           typename SessionMessageType,
           typename ProtocolMessageType>
 HTTP_Module_Streamer_T<TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType>::~HTTP_Module_Streamer_T ()
+                       TimePolicyType,
+                       SessionMessageType,
+                       ProtocolMessageType>::~HTTP_Module_Streamer_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Streamer_T::~HTTP_Module_Streamer_T"));
 
@@ -59,10 +60,10 @@ template <typename TaskSynchType,
           typename ProtocolMessageType>
 void
 HTTP_Module_Streamer_T<TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                               bool& passMessageDownstream_out)
+                       TimePolicyType,
+                       SessionMessageType,
+                       ProtocolMessageType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                                                                bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Streamer_T::handleDataMessage"));
 
@@ -78,37 +79,41 @@ HTTP_Module_Streamer_T<TaskSynchType,
 
   // serialize structured data
   // --> create the appropriate bytestream corresponding to its elements
-  const HTTP_Record* data_p = message_inout->getData ();
-  ACE_ASSERT (data_p);
+  const typename ProtocolMessageType::DATA_T& data_container_r =
+      message_inout->get ();
+  const typename ProtocolMessageType::DATA_T::DATA_T& data_r =
+        data_container_r.get ();
+  ACE_ASSERT (data_r.HTTPRecord);
   std::string buffer;
   bool is_request = true;
-  if (HTTP_Tools::isRequest (*data_p))
+  // *TODO*: remove type inferences
+  if (HTTP_Tools::isRequest (*data_r.HTTPRecord))
   {
-    buffer = HTTP_Tools::Method2String (data_p->method_);
+    buffer = HTTP_Tools::Method2String (data_r.HTTPRecord->method);
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    buffer += data_p->URI_;
+    buffer += data_r.HTTPRecord->URI;
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    buffer += ACE_TEXT_ALWAYS_CHAR (HTTP_VERSION_STRING_PREFIX);
-    buffer += HTTP_Tools::Version2String (data_p->version_);
+    buffer += ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
+    buffer += HTTP_Tools::Version2String (data_r.HTTPRecord->version);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end IF
   else
   {
     is_request = false;
 
-    buffer = ACE_TEXT_ALWAYS_CHAR (HTTP_VERSION_STRING_PREFIX);
-    buffer += HTTP_Tools::Version2String (data_p->version_);
+    buffer = ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
+    buffer += HTTP_Tools::Version2String (data_r.HTTPRecord->version);
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
     std::ostringstream converter;
-    converter << data_p->status_;
+    converter << data_r.HTTPRecord->status;
     buffer += converter.str ();
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    buffer += HTTP_Tools::Status2Reason (data_p->status_);
+    buffer += HTTP_Tools::Status2Reason (data_r.HTTPRecord->status);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end ELSE
 
-  for (HTTP_HeadersIterator_t iterator = data_p->headers_.begin ();
-       iterator != data_p->headers_.end ();
+  for (HTTP_HeadersIterator_t iterator = data_r.HTTPRecord->headers.begin ();
+       iterator != data_r.HTTPRecord->headers.end ();
        ++iterator)
   {
     if (!HTTP_Tools::isHeaderType ((*iterator).first,
@@ -121,8 +126,8 @@ HTTP_Module_Streamer_T<TaskSynchType,
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end FOR
 
-  for (HTTP_HeadersIterator_t iterator = data_p->headers_.begin ();
-       iterator != data_p->headers_.end ();
+  for (HTTP_HeadersIterator_t iterator = data_r.HTTPRecord->headers.begin ();
+       iterator != data_r.HTTPRecord->headers.end ();
        ++iterator)
   {
     if (!HTTP_Tools::isHeaderType ((*iterator).first,
@@ -136,8 +141,8 @@ HTTP_Module_Streamer_T<TaskSynchType,
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end FOR
 
-  for (HTTP_HeadersIterator_t iterator = data_p->headers_.begin ();
-       iterator != data_p->headers_.end ();
+  for (HTTP_HeadersIterator_t iterator = data_r.HTTPRecord->headers.begin ();
+       iterator != data_r.HTTPRecord->headers.end ();
        ++iterator)
   {
     if (!HTTP_Tools::isHeaderType ((*iterator).first,

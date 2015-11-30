@@ -211,7 +211,7 @@ Net_Module_MessageHandler_T<SessionMessageType,
       // *TODO*: remove type inferences
       const typename SessionMessageType::SESSION_DATA_T& session_data_container_r =
           message_inout->get ();
-      const typename SessionMessageType::SESSION_DATA_T::SESSION_DATA_T& session_data_r =
+      const typename SessionMessageType::SESSION_DATA_T::DATA_T& session_data_r =
           session_data_container_r.get ();
 
       // synch access
