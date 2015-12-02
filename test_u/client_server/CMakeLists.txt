@@ -25,18 +25,18 @@ elseif (WIN32)
  set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
                PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib\\${CMAKE_BUILD_TYPE}\\Win32
+               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
                DOC "searching for ${ACE_LIB_FILE}")
 endif ()
 #if (NOT EXISTS ACE_LIBRARY)
 if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
+else ()
+ message (STATUS "Found ACE library \"${ACE_LIBRARY}\"")
 endif ()
 
 include (FindPkgConfig)
 #pkg_check_modules (PKGACE REQUIRED ACE)
-
-#pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
  pkg_check_modules (PKG_GTK_GLADE REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
 endif ()
@@ -82,7 +82,7 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
 elseif (WIN32)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
+ include_directories ($ENV{ACE_ROOT})
  # *TODO*: repair pkgconfig support
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/include/atk-1.0)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/include/pango-1.0)
@@ -143,7 +143,10 @@ set (EXECUTABLE client)
 add_executable (${EXECUTABLE} ${client_SRCS} etc/net_client.glade)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
-#add_dependencies (${PROJECT_NAME} Common)
+add_dependencies (${PROJECT_NAME} Common)
+add_dependencies (${PROJECT_NAME} ACEStream)
+add_dependencies (${PROJECT_NAME} ACENetwork)
+add_dependencies (${PROJECT_NAME} ACENetwork_Client)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
@@ -167,7 +170,6 @@ endif ()
 target_link_libraries (${EXECUTABLE} CommonUI)
 target_link_libraries (${EXECUTABLE} ACEStream)
 target_link_libraries (${EXECUTABLE} ACENetwork)
-#target_link_libraries (${EXECUTABLE} ACENetwork_Client)
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
@@ -219,7 +221,10 @@ set (EXECUTABLE server)
 add_executable (${EXECUTABLE} ${server_SRCS} etc/net_server.glade)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
-#add_dependencies (${PROJECT_NAME} Common)
+add_dependencies (${PROJECT_NAME} Common)
+add_dependencies (${PROJECT_NAME} ACEStream)
+add_dependencies (${PROJECT_NAME} ACENetwork)
+add_dependencies (${PROJECT_NAME} ACENetwork_Server)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})

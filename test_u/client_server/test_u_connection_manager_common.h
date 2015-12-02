@@ -34,25 +34,6 @@
 
 #include "test_u_common.h"
 #include "test_u_configuration.h"
-#include "test_u_connection_common.h"
-#include "test_u_stream_common.h"
-
-// forward declarations
-//struct Net_Configuration;
-//struct Net_SocketConfiguration;
-//struct Net_StreamUserData;
-//class Net_Stream;
-
-//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-//typedef Net_IConnection_T<ACE_Netlink_Addr,
-//                          Net_Configuration,
-//                          Stream_Statistic,
-//                          Net_Stream> Net_INetlinkConnection_t;
-//#endif
-//typedef Net_IConnection_T<ACE_INET_Addr,
-//                          Net_Configuration,
-//                          Stream_Statistic,
-//                          Net_Stream> Net_IConnection_t;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else

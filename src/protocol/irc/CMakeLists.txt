@@ -1,44 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
 
-if (UNIX)
-# include (CheckLibraryExists)
-# check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
- find_package (Threads REQUIRED)
-endif ()
-
-set (ACE_LIB_FILE libACE.so)
-if (UNIX)
- if (DEFINED ENV{ACE_ROOT})
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib
-                DOC "searching for ${ACE_LIB_FILE}")
- else ()
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                DOC "searching for ${ACE_LIB_FILE} (system paths)")
- endif ()
-elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
- endif ()
- unset (ACE_LIB_FILE)
- set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_LIB_FILE}")
-endif ()
-#if (NOT EXISTS ACE_LIBRARY)
-if (NOT ACE_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
-endif ()
-
-#include (FindPkgConfig)
-#pkg_check_modules (PKGACE REQUIRED ACE)
-
-include (FindPkgConfig)
-#pkg_check_modules (PKG_ACE REQUIRED ACE)
-
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -62,11 +23,9 @@ endif ()
 add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 if (UNIX)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACE)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src)
 elseif (WIN32)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../ATCD/ACE)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
@@ -142,11 +101,11 @@ set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES DEFINE_SYMBOL IRC
 set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 #target_link_libraries (${PROJECT_NAME}_Protocol_IRC ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries (${PROJECT_NAME}_Protocol_IRC ${ACE_LIBRARY})
-target_link_libraries (${PROJECT_NAME}_Protocol_IRC Common)
-target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACEStream)
-#target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACENetwork)
-#target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACENetwork_Client)
+if (WIN32)
+ target_link_libraries (${PROJECT_NAME}_Protocol_IRC ${ACE_LIBRARY})
+ target_link_libraries (${PROJECT_NAME}_Protocol_IRC Common)
+ target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACEStream)
+endif ()
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_IRC

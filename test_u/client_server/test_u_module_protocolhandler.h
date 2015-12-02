@@ -24,7 +24,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common_itimer.h"
+#include "common_itimerhandler.h"
 #include "common_time_common.h"
 #include "common_timerhandler.h"
 
@@ -41,7 +41,7 @@ class Net_Module_ProtocolHandler
  : public Stream_TaskBaseSynch_T<Common_TimePolicy_t,
                                  Net_SessionMessage,
                                  Net_Message>
- , public Common_ITimer
+ , public Common_ITimerHandler
 {
  public:
   Net_Module_ProtocolHandler ();
@@ -59,7 +59,7 @@ class Net_Module_ProtocolHandler
   virtual void handleSessionMessage (Net_SessionMessage*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
-  // implement Common_ITimer
+  // implement Common_ITimerHandler
   virtual void handleTimeout (const void*); // asynchronous completion token
 
   // implement Common_IDumpState
@@ -70,8 +70,8 @@ class Net_Module_ProtocolHandler
                                  Net_SessionMessage,
                                  Net_Message> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_ProtocolHandler (const Net_Module_ProtocolHandler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_ProtocolHandler& operator= (const Net_Module_ProtocolHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_ProtocolHandler (const Net_Module_ProtocolHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_ProtocolHandler& operator= (const Net_Module_ProtocolHandler&))
 
   // helper methods
   Net_Message* allocateMessage (unsigned int); // requested size

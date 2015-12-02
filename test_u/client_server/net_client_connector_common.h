@@ -29,10 +29,11 @@
 #include "net_client_connector.h"
 
 #include "test_u_configuration.h"
-#include "test_u_stream.h"
+//#include "test_u_stream.h"
 #include "test_u_tcpconnection.h"
 
 // forward declarations
+class Net_Stream;
 struct IRC_State;
 
 /////////////////////////////////////////

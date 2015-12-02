@@ -23,7 +23,7 @@
 
 #include "ace/Log_Msg.h"
 
-#include "common_timer_manager.h"
+//#include "common_timer_manager.h"
 #include "common_tools.h"
 
 #include "common_ui_gtk_manager.h"

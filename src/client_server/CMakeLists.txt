@@ -1,20 +1,9 @@
 cmake_minimum_required (VERSION 2.8)
 
-include (CheckLibraryExists)
-#check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
-#find_library (HAVE_LIB_ACE libACE)
-##add_dependencies (libCommon ACE)
-
-#include (FindPkgConfig)
-#pkg_check_modules (PKGACE REQUIRED ACE)
-#pkg_check_modules (PKGGTK REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
-
 if (UNIX)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ATCD/ACE)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
 else ()
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
 endif ()
@@ -36,19 +25,8 @@ set (${PROJECT_NAME}_Client_LIB_SRCS
 
 add_library (${PROJECT_NAME}_Client SHARED ${ACENetwork_Client_LIB_SRCS})
 
-#add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
-#add_dependencies (${PROJECT_NAME}_Client Common)
-#add_dependencies (${PROJECT_NAME}_Client ACEStream)
-#add_dependencies (${PROJECT_NAME}_Client ACENetwork)
-
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES DEFINE_SYMBOL NET_CLIENT_BUILD_DLL)
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
-
-#if (WIN32)
-# target_link_libraries (${PROJECT_NAME}_Client ${ACE_LIBRARY})
-#endif ()
-#target_link_libraries (${PROJECT_NAME}_Client Common)
-#target_link_libraries (${PROJECT_NAME}_Client ${PROJECT_NAME})
 
 ############## next target ################
 set (${PROJECT_NAME}_Server_LIB_SRCS
@@ -67,16 +45,10 @@ set (${PROJECT_NAME}_Server_LIB_SRCS
 
 add_library (${PROJECT_NAME}_Server SHARED ${ACENetwork_Server_LIB_SRCS})
 
-#add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
-#add_dependencies (${PROJECT_NAME}_Server Common)
-#add_dependencies (${PROJECT_NAME}_Server ACEStream)
-#add_dependencies (${PROJECT_NAME}_Server ACENetwork)
-
 if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Server ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Server Common)
 endif ()
-#target_link_libraries (${PROJECT_NAME}_Server ${PROJECT_NAME})
 
 set_target_properties (${PROJECT_NAME}_Server PROPERTIES DEFINE_SYMBOL NET_SERVER_BUILD_DLL)
 set_target_properties (${PROJECT_NAME}_Server PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)

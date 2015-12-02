@@ -34,7 +34,7 @@
 
 // forward declaration(s)
 class ACE_Message_Queue_Base;
-class HTTP_Record;
+struct HTTP_Record;
 //class HTTP_Scanner;
 typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;

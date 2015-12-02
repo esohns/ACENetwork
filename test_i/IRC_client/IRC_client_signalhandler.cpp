@@ -31,7 +31,6 @@
 
 #include "net_macros.h"
 
-//#include "IRC_client_common.h"
 #include "IRC_client_curses.h"
 
 IRC_Client_SignalHandler::IRC_Client_SignalHandler (bool useReactor_in,

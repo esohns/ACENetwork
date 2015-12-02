@@ -30,7 +30,7 @@
 #include "ace/Reactor.h"
 
 #include "common_icontrol.h"
-#include "common_timer_manager.h"
+#include "common_timer_manager_common.h"
 #include "common_tools.h"
 
 #include "common_ui_gtk_manager.h"

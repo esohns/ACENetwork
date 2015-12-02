@@ -1035,7 +1035,7 @@ close:
     error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != ENOENT)                  && // 2   :
-        (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
+        (error != ENOMEM)                  && // 12  : [server: local close()], [client: peer reset ()]
         (error != ERROR_IO_PENDING)        && // 997 :
         (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
 #else

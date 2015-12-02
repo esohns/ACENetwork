@@ -41,7 +41,7 @@
 
 // forward declarations
 struct HTTP_ConnectionState;
-class HTTP_Record;
+struct HTTP_Record;
 struct HTTP_ModuleHandlerConfiguration;
 class HTTP_SessionMessage;
 struct HTTP_Stream_SessionData;

@@ -13,6 +13,17 @@ if (VERSION_DEVEL)
  set (VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}-${VERSION_DEVEL})
 endif ()
 
+# *NOTE*: if the user specifies -DCMAKE_BUILD_TYPE on the command line, take
+#         their definition and dump it in the cache along with proper
+#         documentation, otherwise set CMAKE_BUILD_TYPE to Debug prior to
+#         calling PROJECT()
+set (BUILD_TYPE_CACHE_STRING "choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
+if (DEFINED CMAKE_BUILD_TYPE)
+ set (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING ${BUILD_TYPE_CACHE_STRING})
+else ()
+ set (CMAKE_BUILD_TYPE Debug CACHE STRING ${BUILD_TYPE_CACHE_STRING})
+endif ()
+
 cmake_policy (SET CMP0048 NEW) # allow project VERSION
 project (ACENetwork
          VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}

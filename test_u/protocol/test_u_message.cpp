@@ -76,7 +76,7 @@ Test_U_Message::command () const
     return HTTP_Codes::HTTP_METHOD_INVALID;
   ACE_ASSERT (inherited::data_);
 
-  const typename Test_U_MessageData_t::DATA_T& data_r =
+  const Test_U_MessageData_t::DATA_T& data_r =
       inherited::data_->get ();
 
   return (data_r.HTTPRecord ? data_r.HTTPRecord->method
