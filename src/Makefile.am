@@ -5,7 +5,7 @@ DEFS += \
 #  -I/usr/include/c++/3.4.6/backward
 #  -I$(top_srcdir)/3rd_party/c++
 AM_CPPFLAGS = \
-  -I$(top_srcdir)/modules/ATCD/ACE
+  -I$(top_srcdir)/modules/ACE
 if VALGRIND_SUPPORT
 AM_CPPFLAGS += \
   $(PKGVALGRIND_CFLAGS)

@@ -51,24 +51,17 @@ http_get_SOURCES = \
 http_get_CPPFLAGS = \
   $(AM_CPPFLAGS) \
   -I$(top_srcdir)/modules/libCommon/src \
-  -I$(top_srcdir)/src \
-  -I$(top_srcdir)/src/modules/file \
-  -I$(top_srcdir)/src/modules/misc \
-  -I$(top_srcdir)/src/modules/net/modules/libACENetwork/src \
-  -I$(top_srcdir)/src/modules/net/modules/libACENetwork/src/client_server \
-  -I$(top_srcdir)/src/modules/net \
-  -I$(top_srcdir)/src/modules/net/protocols
+  -I$(top_srcdir)/modules/libACEStream/file \
+  -I$(top_srcdir)/modules/libACEStream/misc \
+  -I$(top_srcdir)/../src
+
 http_get_LDFLAGS = \
   -L$(abs_top_srcdir)/modules/ATCD/ACE/build/linux/lib \
   $(PKGGTK_LDFLAGS) \
   -L$(abs_builddir)/../../modules/libCommon/src/.libs \
-  -L$(abs_builddir)/../../src/.libs \
-  -L$(abs_builddir)/../../src/modules/file/.libs \
-  -L$(abs_builddir)/../../src/modules/misc/.libs \
-  -L$(abs_builddir)/modules/libACENetwork/src/.libs \
-  -L$(abs_builddir)/modules/libACENetwork/src/client_server/.libs \
-  -L$(abs_builddir)/../../src/modules/net/.libs \
-  -L$(abs_builddir)/../../src/modules/net/protocols/.libs
+  -L$(abs_builddir)/../../modules/libACEStream/src/.libs \
+  -L$(abs_builddir)/../../modules/libACEStream/modules/file/.libs \
+  -L$(abs_builddir)/../../modules/libACEStream/modules/misc/.libs
 http_get_LDADD = \
   -lACE \
   $(PKGXML2_LIBS) \
@@ -76,21 +69,10 @@ http_get_LDADD = \
   -lACEStream \
   -lACEStream_File \
   -lACEStream_Misc \
-  -lACEStream_Net \
-  -lACEStream_Net_Protocol_HTTP_Get \
   -lACENetwork \
   -lACENetwork_Client
-
-SUBDIRS = \
-  modules \
-  .
-
-DIST_SUBDIRS = \
-  .
-if BUILD_MODULES
-  DIST_SUBDIRS += modules
-endif
 
 EXTRA_DIST = \
   ReadMe.txt \
   targetver.h
+

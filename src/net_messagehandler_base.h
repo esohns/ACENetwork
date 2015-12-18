@@ -43,7 +43,6 @@ class Net_MessageHandlerBase_T
   virtual void end ();
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_MessageHandlerBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_MessageHandlerBase_T (const Net_MessageHandlerBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_MessageHandlerBase_T& operator= (const Net_MessageHandlerBase_T&))
 };

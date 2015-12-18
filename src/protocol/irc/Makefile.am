@@ -16,81 +16,84 @@ endif
 DEFS = \
   -DHAVE_CONFIG_H \
   -DBASEDIR=\"$(datadir)/@PACKAGE_NAME@\"
-if DEBUG
-DEFS += \
-  -DDEBUG_DEBUGGER
-endif
-
-check_PROGRAMS = \
-  IRC_client \
-  IRC_client_gui
 
 noinst_HEADERS = stdafx.h
+include_HEADERS = \
+  irc_bisector.cpp \
+  irc_bisector.h \
+  irc_codes.h \
+  irc_common.h \
+  irc_common_modules.h \
+  irc_configuration.h \
+  irc_defines.h \
+  irc_exports.h \
+  irc_icontrol.h \
+  irc_message.h \
+  irc_module_bisector.h \
+  irc_module_bisector.inl \
+  irc_module_parser.h \
+  irc_module_parser.inl \
+  irc_module_streamer.h \
+  irc_module_streamer.inl \
+  irc_network.h \
+  irc_parser.h \
+  irc_parser_driver.h \
+  irc_record.h \
+  irc_scanner.h \
+  irc_session.h \
+  irc_session.inl \
+  irc_sessionmessage.h \
+  irc_statemachine_registration.h \
+  irc_stream.h \
+  irc_stream.inl \
+  irc_stream_common.h \
+  irc_tools.h
 
-IRC_client_SOURCES = \
-  FILE_Stream.cpp \
-  FILE_Stream.h \
-  FILE_Stream.inl \
-  IOStream_alt_macros.h \
-  IOStream_alt_T.cpp \
-  IOStream_alt_T.h \
-  IOStream_alt_T.inl \
-  IRC_client.cpp \
-  IRC_client_common.h \
-  IRC_client_common_modules.h \
-  IRC_client_configuration.h \
-  IRC_client_curses.cpp \
-  IRC_client_curses.h \
-  IRC_client_defines.h \
-  IRC_client_iIRCControl.h \
-  IRC_client_inputhandler.cpp \
-  IRC_client_inputhandler.h \
-  IRC_client_IRC_codes.h \
-  IRC_client_IRCbisect.cpp \
-  IRC_client_IRCbisect.h \
-  IRC_client_IRCmessage.cpp \
-  IRC_client_IRCmessage.h \
-  IRC_client_IRCparser.cpp \
-  IRC_client_IRCparser.h \
-  IRC_client_IRCparser_driver.cpp \
-  IRC_client_IRCparser_driver.h \
-  IRC_client_IRCscanner.cpp \
-  IRC_client_IRCscanner.h \
-  IRC_client_IRCsession.cpp \
-  IRC_client_IRCsession.h \
-  IRC_client_IRCsession.inl \
-  IRC_client_message.cpp \
-  IRC_client_message.h \
-  IRC_client_messageallocator.cpp \
-  IRC_client_messageallocator.h \
-  IRC_client_module_IRChandler.cpp \
-  IRC_client_module_IRChandler.h \
-  IRC_client_module_IRCparser.cpp \
-  IRC_client_module_IRCparser.h \
-  IRC_client_module_IRCsplitter.cpp \
-  IRC_client_module_IRCsplitter.h \
-  IRC_client_module_IRCstreamer.cpp \
-  IRC_client_module_IRCstreamer.h \
-  IRC_client_network.h \
-  IRC_client_session_common.h \
-  IRC_client_sessionmessage.cpp \
-  IRC_client_sessionmessage.h \
-  IRC_client_signalhandler.cpp \
-  IRC_client_signalhandler.h \
-  IRC_client_statemachine_registration.cpp \
-  IRC_client_statemachine_registration.h \
-  IRC_client_stream.cpp \
-  IRC_client_stream.h \
-  IRC_client_stream_common.h \
-  IRC_client_tools.cpp \
-  IRC_client_tools.h \
-  IRC_common.h \
-  Streambuf_alt.cpp \
-  Streambuf_alt.h \
-  Streambuf_alt.inl
+lib_LTLIBRARIES = libACENetwork_Protocol_IRC.la
+
+libACENetwork_Protocol_IRC_la_SOURCES = \
+  irc_bisector.cpp \
+  irc_bisector.h \
+  irc_codes.h \
+  irc_common.h \
+  irc_common_modules.h \
+  irc_configuration.h \
+  irc_defines.h \
+  irc_exports.h \
+  irc_icontrol.h \
+  irc_message.cpp \
+  irc_message.h \
+  irc_message.inl \
+  irc_module_bisector.cpp \
+  irc_module_bisector.h \
+  irc_module_bisector.inl \
+  irc_module_parser.cpp \
+  irc_module_parser.h \
+  irc_module_parser.inl \
+  irc_module_streamer.cpp \
+  irc_module_streamer.h \
+  irc_module_streamer.inl \
+  irc_network.h \
+  irc_parser.cpp \
+  irc_parser.h \
+  irc_parser_driver.cpp \
+  irc_parser_driver.h \
+  irc_scanner.cpp \
+  irc_scanner.h \
+  irc_session.cpp \
+  irc_session.h \
+  irc_session.inl \
+  irc_sessionmessage.cpp \
+  irc_sessionmessage.h \
+  irc_stream.cpp \
+  irc_stream.h \
+  irc_stream.inl \
+  irc_stream_common.h \
+  irc_tools.cpp \
+  irc_tools.h
 #  stdafx.cpp \
 #  stdafx.h
-IRC_client_CPPFLAGS = \
+libACENetwork_Protocol_IRC_la_CPPFLAGS = \
   $(AM_CPPFLAGS) \
   -I$(top_srcdir)/modules/libCommon/src \
   -I$(top_srcdir)/modules/libCommon/src/ui \
@@ -99,7 +102,7 @@ IRC_client_CPPFLAGS = \
   -I$(top_srcdir)/src/client_server \
   -I$(srcdir)/../test_u \
   -I$(builddir)/../..
-IRC_client_LDFLAGS = \
+libACENetwork_Protocol_IRC_la_LDFLAGS = \
   -L$(abs_top_srcdir)/modules/ATCD/ACE/build/linux/lib \
   $(PKGCURSES_LDFLAGS) \
   $(PKGSDL_LDFLAGS) \
@@ -108,100 +111,8 @@ IRC_client_LDFLAGS = \
   -L$(abs_builddir)/../modules/libCommon/src/ui/.libs \
   -L$(abs_builddir)/../modules/libACEStream/src/.libs \
   -L$(abs_builddir)/../src/.libs
-IRC_client_LDADD = \
-  -lrt \
-  -lACE \
-  $(PKGCURSES_LIBS) \
-  $(PKGSDL_LIBS) \
-  $(PKGGTK_LIBS) \
-  -lCommon \
-  -lCommon_UI \
-  -lACEStream \
-  -lACENetwork
-
-IRC_client_gui_SOURCES = \
-  IRC_client_common.h \
-  IRC_client_common_modules.h \
-  IRC_client_configuration.h \
-  IRC_client_defines.h \
-  IRC_client_gui.cpp \
-  IRC_client_gui_callbacks.cpp \
-  IRC_client_gui_callbacks.h \
-  IRC_client_gui_common.h \
-  IRC_client_gui_connection.cpp \
-  IRC_client_gui_connection.h \
-  IRC_client_gui_defines.h \
-  IRC_client_gui_messagehandler.cpp \
-  IRC_client_gui_messagehandler.h \
-  IRC_client_gui_tools.cpp \
-  IRC_client_gui_tools.h \
-  IRC_client_iIRCControl.h \
-  IRC_client_IRC_codes.h \
-  IRC_client_IRCbisect.cpp \
-  IRC_client_IRCbisect.h \
-  IRC_client_IRCmessage.cpp \
-  IRC_client_IRCmessage.h \
-  IRC_client_IRCparser.cpp \
-  IRC_client_IRCparser.h \
-  IRC_client_IRCparser_driver.cpp \
-  IRC_client_IRCparser_driver.h \
-  IRC_client_IRCscanner.cpp \
-  IRC_client_IRCscanner.h \
-  IRC_client_message.cpp \
-  IRC_client_message.h \
-  IRC_client_messageallocator.cpp \
-  IRC_client_messageallocator.h \
-  IRC_client_module_IRChandler.cpp \
-  IRC_client_module_IRChandler.h \
-  IRC_client_module_IRCparser.cpp \
-  IRC_client_module_IRCparser.h \
-  IRC_client_module_IRCsplitter.cpp \
-  IRC_client_module_IRCsplitter.h \
-  IRC_client_module_IRCstreamer.cpp \
-  IRC_client_module_IRCstreamer.h \
-  IRC_client_network.h \
-  IRC_client_sessionmessage.cpp \
-  IRC_client_sessionmessage.h \
-  IRC_client_signalhandler.cpp \
-  IRC_client_signalhandler.h \
-  IRC_client_statemachine_registration.cpp \
-  IRC_client_statemachine_registration.h \
-  IRC_client_stream.cpp \
-  IRC_client_stream.h \
-  IRC_client_stream_common.h \
-  IRC_client_tools.cpp \
-  IRC_client_tools.h \
-  IRC_common.h
-#  stdafx.cpp \
-#  stdafx.h
-IRC_client_gui_CPPFLAGS = \
-  $(AM_CPPFLAGS) \
-  -I$(top_srcdir)/modules/libCommon/src \
-  -I$(top_srcdir)/modules/libCommon/src/ui \
-  -I$(top_srcdir)/modules/libACEStream/src \
-  -I$(top_srcdir)/src \
-  -I$(top_srcdir)/src/client_server \
-  -I$(srcdir)/../test_u \
-  -I$(builddir)/../..
-IRC_client_gui_LDFLAGS = \
-  -L$(abs_top_srcdir)/modules/ATCD/ACE/build/linux/lib \
-  $(PKGSDL_LDFLAGS) \
-  $(PKGGTK_LDFLAGS) \
-  -L$(abs_builddir)/../modules/libCommon/src/.libs \
-  -L$(abs_builddir)/../modules/libCommon/src/ui/.libs \
-  -L$(abs_builddir)/../modules/libACEStream/src/.libs \
-  -L$(abs_builddir)/../src/.libs
-IRC_client_gui_LDADD = \
-  -lrt \
-  -lACE \
-  $(PKGSDL_LIBS) \
-  $(PKGGTK_LIBS) \
-  -lCommon \
-  -lCommon_UI \
-  -lACEStream \
-  -lACENetwork
 
 SUBDIRS = \
   . \
-  etc \
   scripts
+
