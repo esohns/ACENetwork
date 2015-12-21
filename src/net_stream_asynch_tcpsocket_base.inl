@@ -456,8 +456,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   stream_.finished (true);
 //  stream_.stop (false, // wait for completion
 //                true); // lock ?
-  if (mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) // some error occurred
-    stream_.flush (true); // flush upstream (if any)
+  //if (mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) // some error occurred
+  //  stream_.flush (true); // flush upstream (if any)
   stream_.waitForCompletion (true, // wait for worker(s) (if any)
                              true); // wait for upstream (if any)
 

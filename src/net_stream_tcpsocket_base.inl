@@ -905,7 +905,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
       stream_.finished (true);
       //stream_.stop (false, // wait for completion
       //              true); // lock ?
-      stream_.flush (true); // flush upstream (if any)
+      //stream_.flush (true); // flush upstream (if any)
       stream_.waitForCompletion (true,  // wait for worker(s) (if any)
                                  true); // wait for upstream (if any)
 
