@@ -38,7 +38,7 @@ Net_UDPConnectionBase_T<HandlerType,
                         StreamType,
                         HandlerConfigurationType,
                         UserDataType>::Net_UDPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                unsigned int statisticCollectionInterval_in)
+                                                                const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -61,7 +61,7 @@ Net_UDPConnectionBase_T<HandlerType,
                         HandlerConfigurationType,
                         UserDataType>::Net_UDPConnectionBase_T ()
  : inherited (NULL,
-              0)
+              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::Net_UDPConnectionBase_T"));
 
@@ -143,7 +143,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
                               StreamType,
                               HandlerConfigurationType,
                               UserDataType>::Net_AsynchUDPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                            unsigned int statisticCollectionInterval_in)
+                                                                            const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -166,7 +166,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
                               HandlerConfigurationType,
                               UserDataType>::Net_AsynchUDPConnectionBase_T ()
  : inherited (NULL,
-              0)
+              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::Net_AsynchUDPConnectionBase_T"));
 

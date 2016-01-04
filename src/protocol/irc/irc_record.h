@@ -53,102 +53,104 @@ class IRC_Export IRC_Record
  : public Common_ReferenceCounterBase,
    public Common_IDumpState
 {
-  public:
-    enum CommandType
-    {
-      // *NOTE*: in an effort to avoid clashes and still handle IRC commands and
-      //         replies/errors uniformly, start this beyond the range of
-      //         (numeric) commands (== three-digit number)
-      //         --> check RFC1459 (see also: irc_codes.h)
-      PASS = 1000,
-      NICK,
-      USER,
-      SERVER,
-      OPER,
-      QUIT,
-      SQUIT,
-      JOIN,
-      PART,
-      MODE,
-      TOPIC,
-      NAMES,
-      LIST,
-      INVITE,
-      KICK,
-      SVERSION, // *TODO*: "VERSION" is taken by config.h...
-      STATS,
-      LINKS,
-      TIME,
-      CONNECT,
-      TRACE,
-      ADMIN,
-      INFO,
-      PRIVMSG,
-      NOTICE,
-      WHO,
-      WHOIS,
-      WHOWAS,
-      KILL,
-      PING,
-      PONG,
+ public:
+  enum CommandType
+  {
+    // *NOTE*: in an effort to avoid clashes and still handle IRC commands and
+    //         replies/errors uniformly, start this beyond the range of
+    //         (numeric) commands (== three-digit number)
+    //         --> check RFC1459 (see also: irc_codes.h)
+    PASS = 1000,
+    NICK,
+    USER,
+    SERVER,
+    OPER,
+    QUIT,
+    SQUIT,
+    JOIN,
+    PART,
+    MODE,
+    TOPIC,
+    NAMES,
+    LIST,
+    INVITE,
+    KICK,
+    SVERSION, // *TODO*: "VERSION" is taken by config.h...
+    STATS,
+    LINKS,
+    TIME,
+    CONNECT,
+    TRACE,
+    ADMIN,
+    INFO,
+    PRIVMSG,
+    NOTICE,
+    WHO,
+    WHOIS,
+    WHOWAS,
+    KILL,
+    PING,
+    PONG,
 #if defined ACE_WIN32 || defined ACE_WIN64
 #pragma message("applying quirk code for this compiler...")
-      __QUIRK__ERROR,
+    __QUIRK__ERROR,
 #else
-      ERROR,
+    ERROR,
 #endif
-      AWAY,
-      REHASH,
-      RESTART,
-      SUMMON,
-      USERS,
-      WALLOPS,
-      USERHOST,
-      ISON,
-      //
-      IRC_COMMANDTYPE_MAX,
-      IRC_COMMANDTYPE_INVALID
+    AWAY,
+    REHASH,
+    RESTART,
+    SUMMON,
+    USERS,
+    WALLOPS,
+    USERHOST,
+    ISON,
+    //
+    IRC_COMMANDTYPE_MAX,
+    IRC_COMMANDTYPE_INVALID
+  };
+
+  // *WARNING*: this class assumes responsibility for all dynamic objects
+  //            "attached" to it in the course of its life (see dtor)
+  IRC_Record ();
+  IRC_Record (IRC_Record&);
+  virtual ~IRC_Record ();
+
+  IRC_Record& operator= (IRC_Record&);
+
+  // implement Common_IDumpState
+  virtual void dump_state () const;
+
+  struct Prefix
+  {
+    std::string origin; // <servername> || <nick>
+    std::string user;
+    std::string host;
+  };
+
+  struct Command
+  {
+    union
+    {
+      IRC_Codes::RFC1459Numeric numeric;
+      std::string*              string;
     };
-
-    // *WARNING*: this class assumes responsibility for all dynamic objects
-    // "attached" to it in the course of its life (see dtor)
-    IRC_Record ();
-    virtual ~IRC_Record ();
-
-    // implement Common_IDumpState
-    virtual void dump_state () const;
-
-    struct Prefix
+    enum discriminator_t
     {
-      std::string origin; // <servername> || <nick>
-      std::string user;
-      std::string host;
-    } prefix;
+      NUMERIC = 0,
+      STRING,
+      INVALID
+    };
+    discriminator_t discriminator;
+  };
 
-    struct Command
-    {
-      union
-      {
-        IRC_Codes::RFC1459Numeric numeric;
-        std::string*              string;
-      };
-      enum discriminator_t
-      {
-        NUMERIC = 0,
-        STRING,
-        INVALID
-      };
-      discriminator_t discriminator;
-    } command;
+  Prefix              prefix_;
+  Command             command_;
+  IRC_Parameters_t    parameters_;
+  list_items_ranges_t parameterRanges_;
 
-    IRC_Parameters_t    params;
-    list_items_ranges_t list_param_ranges;
-
-  private:
-   typedef Common_ReferenceCounterBase inherited;
-
-   ACE_UNIMPLEMENTED_FUNC (IRC_Record (const IRC_Record&))
-   ACE_UNIMPLEMENTED_FUNC (IRC_Record& operator= (const IRC_Record&))
+ private:
+  typedef Common_ReferenceCounterBase inherited;
 };
 
 typedef IRC_Record::CommandType IRC_CommandType_t;

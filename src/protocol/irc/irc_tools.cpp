@@ -43,35 +43,35 @@ IRC_Tools::dump (const IRC_Record& message_in)
 
   std::ostringstream converter;
   // see RFC1459
-  if (!message_in.prefix.origin.empty ())
+  if (!message_in.prefix_.origin.empty ())
   {
     converter << ACE_TEXT_ALWAYS_CHAR ("PREFIX [origin: \"")
-              << message_in.prefix.origin
+              << message_in.prefix_.origin
               << ACE_TEXT_ALWAYS_CHAR ("\"]");
-    if (!message_in.prefix.user.empty ())
+    if (!message_in.prefix_.user.empty ())
       converter << ACE_TEXT_ALWAYS_CHAR (", [user: \"")
-                << message_in.prefix.user
+                << message_in.prefix_.user
                 << ACE_TEXT_ALWAYS_CHAR ("\"]");
-    if (!message_in.prefix.host.empty ())
+    if (!message_in.prefix_.host.empty ())
       converter << ACE_TEXT_ALWAYS_CHAR (", [host: \"")
-                << message_in.prefix.host
+                << message_in.prefix_.host
                 << ACE_TEXT_ALWAYS_CHAR ("\"]");
     converter << ACE_TEXT_ALWAYS_CHAR (" \\PREFIX") << std::endl;
   } // end IF
   converter << ACE_TEXT_ALWAYS_CHAR ("COMMAND [");
-  switch (message_in.command.discriminator)
+  switch (message_in.command_.discriminator)
   {
     case IRC_Record::Command::STRING:
     {
-      converter << message_in.command.string;
+      converter << message_in.command_.string;
       break;
     }
     case IRC_Record::Command::NUMERIC:
     {
       converter << ACE_TEXT_ALWAYS_CHAR ("\"")
-                << IRC_Tools::Command2String (message_in.command.numeric)
+                << IRC_Tools::Command2String (message_in.command_.numeric)
                 << ACE_TEXT_ALWAYS_CHAR ("\" [")
-                << message_in.command.numeric
+                << message_in.command_.numeric
                 << ACE_TEXT_ALWAYS_CHAR ("]");
       break;
     }
@@ -85,17 +85,17 @@ IRC_Tools::dump (const IRC_Record& message_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid command discriminator (was: %d), aborting\n"),
-                  message_in.command.discriminator));
+                  message_in.command_.discriminator));
       return std::string ();
     }
   } // end SWITCH
   converter << ACE_TEXT_ALWAYS_CHAR ("] \\COMMAND") << std::endl;
-  if (!message_in.params.empty ())
+  if (!message_in.parameters_.empty ())
   {
     converter << ACE_TEXT_ALWAYS_CHAR ("PARAMS") << std::endl;
     int i = 1;
-    for (std::list<std::string>::const_iterator iterator = message_in.params.begin ();
-          iterator != message_in.params.end ();
+    for (std::list<std::string>::const_iterator iterator = message_in.parameters_.begin ();
+          iterator != message_in.parameters_.end ();
           iterator++, i++)
     {
       converter << ACE_TEXT_ALWAYS_CHAR ("#")
@@ -1424,54 +1424,54 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
   // initialize result
   std::string result;
 
-  switch (message_in.command.discriminator)
+  switch (message_in.command_.discriminator)
   {
     case IRC_Record::Command::STRING:
     {
       IRC_Record::CommandType command =
-        IRC_Tools::Command2Type (*message_in.command.string);
+        IRC_Tools::Command2Type (*message_in.command_.string);
       switch (command)
       {
         case IRC_Record::NICK:
         {
-          result = message_in.prefix.origin;
+          result = message_in.prefix_.origin;
           result += ACE_TEXT_ALWAYS_CHAR (" --> ");
-          result += message_in.params.back ();
+          result += message_in.parameters_.back ();
           break;
         }
         case IRC_Record::QUIT:
         {
-          result = message_in.prefix.origin;
+          result = message_in.prefix_.origin;
           result += ACE_TEXT_ALWAYS_CHAR (" has QUIT IRC (reason: \"");
-          result += message_in.params.back ();
+          result += message_in.parameters_.back ();
           result += ACE_TEXT_ALWAYS_CHAR ("\")");
           break;
         }
         case IRC_Record::JOIN:
         {
           result = '"';
-          result += message_in.prefix.origin;
+          result += message_in.prefix_.origin;
           result += ACE_TEXT_ALWAYS_CHAR ("\" (");
-          result += message_in.prefix.user;
+          result += message_in.prefix_.user;
           result += '@';
-          result += message_in.prefix.host;
+          result += message_in.prefix_.host;
           result += ACE_TEXT_ALWAYS_CHAR (") has joined channel \"");
-          result += message_in.params.back ();
+          result += message_in.parameters_.back ();
           result += '"';
           break;
         }
         case IRC_Record::PART:
         {
           result = '"';
-          result += message_in.prefix.origin;
+          result += message_in.prefix_.origin;
           result += ACE_TEXT_ALWAYS_CHAR ("\" (");
-          result += message_in.prefix.user;
+          result += message_in.prefix_.user;
           result += '@';
-          result += message_in.prefix.host;
+          result += message_in.prefix_.host;
           result += ACE_TEXT_ALWAYS_CHAR (") has left channel \"");
-          IRC_ParametersIterator_t iterator = message_in.params.begin ();
+          IRC_ParametersIterator_t iterator = message_in.parameters_.begin ();
           result += *iterator;
-          if (message_in.params.size () >= 2)
+          if (message_in.parameters_.size () >= 2)
           {
             ++iterator;
             result += ACE_TEXT_ALWAYS_CHAR ("\" (reason: \"");
@@ -1484,7 +1484,7 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
         }
         case IRC_Record::NOTICE:
         {
-          result = IRC_Tools::stringify (message_in.params,
+          result = IRC_Tools::stringify (message_in.parameters_,
                                          1);
           break;
         }
@@ -1502,14 +1502,14 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
         case IRC_Record::USERS:
         case IRC_Record::USERHOST:
         {
-          result = IRC_Tools::stringify (message_in.params);
+          result = IRC_Tools::stringify (message_in.parameters_);
           break;
         }
         default:
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid command (was: \"%s\"), aborting\n"),
-                      ACE_TEXT (message_in.command.string->c_str ())));
+                      ACE_TEXT (message_in.command_.string->c_str ())));
 
           message_in.dump_state ();
 
@@ -1521,7 +1521,7 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
     }
     case IRC_Record::Command::NUMERIC:
     {
-      switch (message_in.command.numeric)
+      switch (message_in.command_.numeric)
       {
         case IRC_Codes::RPL_WELCOME:          //   1
         case IRC_Codes::RPL_YOURHOST:         //   2
@@ -1542,13 +1542,13 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
         case IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
         case IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         {
-          result = IRC_Tools::stringify (message_in.params,
+          result = IRC_Tools::stringify (message_in.parameters_,
                                          -1);
           break;
         }
         case IRC_Codes::RPL_BANLIST:          // 367
         {
-          result = IRC_Tools::stringify (message_in.params);
+          result = IRC_Tools::stringify (message_in.parameters_);
           break;
         }
         case IRC_Codes::RPL_MYINFO:           //   4
@@ -1572,19 +1572,19 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
         case IRC_Codes::ERR_BADCHANNAME:      // 479
         case IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
         {
-          result = IRC_Tools::stringify (message_in.params,
+          result = IRC_Tools::stringify (message_in.parameters_,
                                          1);
           break;
         }
         case IRC_Codes::RPL_ENDOFWHO:         // 315
         {
-          result = IRC_Tools::stringify (message_in.params,
+          result = IRC_Tools::stringify (message_in.parameters_,
                                          2);
           break;
         }
         case IRC_Codes::RPL_WHOREPLY:         // 352
         {
-          result = IRC_Tools::stringify (message_in.params,
+          result = IRC_Tools::stringify (message_in.parameters_,
                                          5);
           break;
         }
@@ -1592,8 +1592,8 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid (numeric) command (was: %u [\"%s\"]), aborting\n"),
-                      message_in.command.numeric,
-                      ACE_TEXT (IRC_Tools::Command2String (message_in.command.numeric).c_str ())));
+                      message_in.command_.numeric,
+                      ACE_TEXT (IRC_Tools::Command2String (message_in.command_.numeric).c_str ())));
 
           message_in.dump_state ();
 
@@ -1607,7 +1607,7 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid command discriminator (was: %d), aborting\n"),
-                  message_in.command.discriminator));
+                  message_in.command_.discriminator));
       return result;
     }
   } // end SWITCH
@@ -1616,7 +1616,7 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
 }
 
 std::string
-IRC_Tools::stringify (const IRC_Parameters_t& params_in,
+IRC_Tools::stringify (const IRC_Parameters_t& parameters_in,
                       int index_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Tools::stringify"));
@@ -1624,23 +1624,23 @@ IRC_Tools::stringify (const IRC_Parameters_t& params_in,
   std::string result;
 
   // sanity check(s)
-  if (params_in.empty () ||
-      (index_in > static_cast<int> ((params_in.size () - 1))))
+  if (parameters_in.empty () ||
+      (index_in > static_cast<int> ((parameters_in.size () - 1))))
     return result;
 
   if (index_in == -1)
-    return params_in.back ();
+    return parameters_in.back ();
 
-  IRC_ParametersIterator_t iterator = params_in.begin ();
+  IRC_ParametersIterator_t iterator = parameters_in.begin ();
   std::advance (iterator, index_in);
   for (;
-       iterator != params_in.end ();
+       iterator != parameters_in.end ();
        iterator++)
   {
     result += *iterator;
     result += ACE_TEXT_ALWAYS_CHAR (" ");
   } // end FOR
-  if (index_in < static_cast<int> ((params_in.size () - 1)))
+  if (index_in < static_cast<int> ((parameters_in.size () - 1)))
     result.erase (--result.end ());
 
   return result;

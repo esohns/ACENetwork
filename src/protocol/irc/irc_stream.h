@@ -33,7 +33,7 @@
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
 
-#include "net_module_runtimestatistic.h"
+#include "stream_module_runtimestatistic.h"
 
 #include "irc_common.h"
 #include "irc_module_bisector.h"
@@ -148,18 +148,22 @@ class IRC_Stream_T
                                          ModuleHandlerConfigurationType,
                                          PARSER_T> MODULE_PARSER_T;
 
-  typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
-                                            Common_TimePolicy_t,
-                                            SessionMessageType,
-                                            ProtocolMessageType,
-                                            IRC_CommandType_t,
-                                            IRC_RuntimeStatistic_t> STATISTIC_READER_T;
-  typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
-                                            Common_TimePolicy_t,
-                                            SessionMessageType,
-                                            ProtocolMessageType,
-                                            IRC_CommandType_t,
-                                            IRC_RuntimeStatistic_t> STATISTIC_WRITER_T;
+  typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
+                                               Common_TimePolicy_t,
+                                               SessionMessageType,
+                                               ProtocolMessageType,
+                                               IRC_CommandType_t,
+                                               IRC_RuntimeStatistic_t,
+                                               SessionDataType,
+                                               SessionDataContainerType> STATISTIC_READER_T;
+  typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
+                                               Common_TimePolicy_t,
+                                               SessionMessageType,
+                                               ProtocolMessageType,
+                                               IRC_CommandType_t,
+                                               IRC_RuntimeStatistic_t,
+                                               SessionDataType,
+                                               SessionDataContainerType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_ModuleConfiguration,

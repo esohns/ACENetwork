@@ -77,19 +77,18 @@ IRC_Message::command () const
   // sanity check(s)
   if (!inherited::initialized_)
     return IRC_Record::IRC_COMMANDTYPE_INVALID;
-  ACE_ASSERT (inherited::data_);
 
-  switch (data_->command.discriminator)
+  switch (data_.command_.discriminator)
   {
     case IRC_Record::Command::STRING:
-      return IRC_Tools::Command2Type (*data_->command.string);
+      return IRC_Tools::Command2Type (*data_.command_.string);
     case IRC_Record::Command::NUMERIC:
-      return static_cast<IRC_CommandType_t> (data_->command.numeric);
+      return static_cast<IRC_CommandType_t> (data_.command_.numeric);
     default:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid command type (was: %d), aborting\n"),
-                  data_->command.discriminator));
+                  data_.command_.discriminator));
       break;
     }
   } // end SWITCH
@@ -286,99 +285,99 @@ allocate:
 }
 
 std::string
-IRC_Message::Command2String(const IRC_CommandType_t& commandType_in)
+IRC_Message::CommandType2String(const IRC_CommandType_t& commandType_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Message::Command2String"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Message::CommandType2String"));
 
   std::string result = ACE_TEXT ("INVALID/UNKNOWN");
 
   switch (commandType_in)
   {
     case IRC_Record::PASS:
-      result = ACE_TEXT ("PASS"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("PASS"); break;
     case IRC_Record::NICK:
-      result = ACE_TEXT ("NICK"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("NICK"); break;
     case IRC_Record::USER:
-      result = ACE_TEXT ("USER"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("USER"); break;
     case IRC_Record::SERVER:
-      result = ACE_TEXT ("SERVER"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("SERVER"); break;
     case IRC_Record::OPER:
-      result = ACE_TEXT ("OPER"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("OPER"); break;
     case IRC_Record::QUIT:
-      result = ACE_TEXT ("QUIT"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("QUIT"); break;
     case IRC_Record::SQUIT:
-      result = ACE_TEXT ("SQUIT"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("SQUIT"); break;
     case IRC_Record::JOIN:
-      result = ACE_TEXT ("JOIN"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("JOIN"); break;
     case IRC_Record::PART:
-      result = ACE_TEXT ("PART"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("PART"); break;
     case IRC_Record::MODE:
-      result = ACE_TEXT ("MODE"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("MODE"); break;
     case IRC_Record::TOPIC:
-      result = ACE_TEXT ("TOPIC"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("TOPIC"); break;
     case IRC_Record::NAMES:
-      result = ACE_TEXT ("NAMES"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("NAMES"); break;
     case IRC_Record::LIST:
-      result = ACE_TEXT ("LIST"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("LIST"); break;
     case IRC_Record::INVITE:
-      result = ACE_TEXT ("INVITE"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("INVITE"); break;
     case IRC_Record::KICK:
-      result = ACE_TEXT ("KICK"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("KICK"); break;
     case IRC_Record::SVERSION:
-      result = ACE_TEXT ("VERSION"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("VERSION"); break;
     case IRC_Record::STATS:
-      result = ACE_TEXT ("STATS"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("STATS"); break;
     case IRC_Record::LINKS:
-      result = ACE_TEXT ("LINKS"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("LINKS"); break;
     case IRC_Record::TIME:
-      result = ACE_TEXT ("TIME"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("TIME"); break;
     case IRC_Record::CONNECT:
-      result = ACE_TEXT ("CONNECT"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("CONNECT"); break;
     case IRC_Record::TRACE:
-      result = ACE_TEXT ("TRACE"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("TRACE"); break;
     case IRC_Record::ADMIN:
-      result = ACE_TEXT ("ADMIN"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("ADMIN"); break;
     case IRC_Record::INFO:
-      result = ACE_TEXT ("INFO"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("INFO"); break;
     case IRC_Record::PRIVMSG:
-      result = ACE_TEXT ("PRIVMSG"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("PRIVMSG"); break;
     case IRC_Record::NOTICE:
-      result = ACE_TEXT ("NOTICE"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("NOTICE"); break;
     case IRC_Record::WHO:
-      result = ACE_TEXT ("WHO"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("WHO"); break;
     case IRC_Record::WHOIS:
-      result = ACE_TEXT ("WHOIS"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("WHOIS"); break;
     case IRC_Record::WHOWAS:
-      result = ACE_TEXT ("WHOWAS"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("WHOWAS"); break;
     case IRC_Record::KILL:
-      result = ACE_TEXT ("KILL"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("KILL"); break;
     case IRC_Record::PING:
-      result = ACE_TEXT ("PING"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("PING"); break;
     case IRC_Record::PONG:
-      result = ACE_TEXT ("PONG"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("PONG"); break;
 #if defined ACE_WIN32 || defined ACE_WIN64
 #pragma message("applying quirk code for this compiler...")
     case IRC_Record::__QUIRK__ERROR:
 #else
     case IRC_Record::ERROR:
 #endif
-      result = ACE_TEXT ("ERROR"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("ERROR"); break;
     case IRC_Record::AWAY:
-      result = ACE_TEXT ("AWAY"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("AWAY"); break;
     case IRC_Record::REHASH:
-      result = ACE_TEXT ("REHASH"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("REHASH"); break;
     case IRC_Record::RESTART:
-      result = ACE_TEXT ("RESTART"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("RESTART"); break;
     case IRC_Record::SUMMON:
-      result = ACE_TEXT ("SUMMON"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("SUMMON"); break;
     case IRC_Record::USERS:
-      result = ACE_TEXT ("USERS"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("USERS"); break;
     case IRC_Record::WALLOPS:
-      result = ACE_TEXT ("WALLOPS"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("WALLOPS"); break;
     case IRC_Record::USERHOST:
-      result = ACE_TEXT ("USERHOST"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("USERHOST"); break;
     case IRC_Record::ISON:
-      result = ACE_TEXT ("ISON"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("ISON"); break;
     default:
     {
       // try numeric conversion

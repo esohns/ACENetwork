@@ -30,29 +30,73 @@
 IRC_Record::IRC_Record ()
  : inherited (1,
               true)
+ , prefix_ ()
+ , command_ ()
+ , parameters_ ()
+ , parameterRanges_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Record::IRC_Record"));
 
-  command.string = NULL;
-  command.discriminator = Command::INVALID;
+  command_.string = NULL;
+  command_.discriminator = Command::INVALID;
+}
+
+IRC_Record::IRC_Record (IRC_Record& record_in)
+ : inherited (1,
+              true)
+ , prefix_ ()
+ , command_ ()
+ , parameters_ ()
+ , parameterRanges_ ()
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Record::IRC_Record"));
+
+  *this = record_in;
 }
 
 IRC_Record::~IRC_Record ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Record::~IRC_Record"));
 
-  switch (command.discriminator)
+  switch (command_.discriminator)
   {
     case IRC_Record::Command::STRING:
     {
-      if (command.string)
-        delete command.string;
-
+      if (command_.string)
+        delete command_.string;
       break;
     }
     default:
       break;
   } // end SWITCH
+}
+
+IRC_Record&
+IRC_Record::operator= (IRC_Record& lhs_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Record::operator="));
+
+  prefix_ = lhs_in.prefix_;
+  if (command_.discriminator == Command::STRING)
+  {
+    delete command_.string;
+    command_.string = NULL;
+  } // end IF
+  if (lhs_in.command_.discriminator == Command::STRING)
+  {
+    ACE_NEW_NORETURN (command_.string,
+                      std::string (*lhs_in.command_.string));
+    if (!command_.string)
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory, continuing")));
+    command_.discriminator = Command::STRING;
+  } // end IF
+  else
+    command_ = lhs_in.command_;
+  parameters_ = lhs_in.parameters_;
+  parameterRanges_ = lhs_in.parameterRanges_;
+
+  return *this;
 }
 
 void

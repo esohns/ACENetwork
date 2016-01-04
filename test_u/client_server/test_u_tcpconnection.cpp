@@ -23,10 +23,11 @@
 
 #include "ace/Log_Msg.h"
 
+#include "net_defines.h"
 #include "net_macros.h"
 
 Net_TCPConnection::Net_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                      unsigned int statisticCollectionInterval_in)
+                                      const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -36,7 +37,7 @@ Net_TCPConnection::Net_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
 
 Net_TCPConnection::Net_TCPConnection ()
  : inherited (NULL,
-              0)
+              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
 
@@ -51,7 +52,7 @@ Net_TCPConnection::~Net_TCPConnection ()
 /////////////////////////////////////////
 
 Net_AsynchTCPConnection::Net_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                  unsigned int statisticCollectionInterval_in)
+                                                  const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -61,7 +62,7 @@ Net_AsynchTCPConnection::Net_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfa
 
 Net_AsynchTCPConnection::Net_AsynchTCPConnection ()
  : inherited (NULL,
-              0)
+              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
 

@@ -25,9 +25,11 @@ add_definitions (-DHAVE_CONFIG_H)
 if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/misc)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
 endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
@@ -83,7 +85,7 @@ set (${PROJECT_NAME}_Protocol_IRC_SRCS
      stdafx.cpp
      stdafx.h)
 
-#set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
+#set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/libACENetwork/protocol/irc")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS -DIRC_BUILD_DLL)
 
 # *NOTE*: generate .def file and export all symbols on Windows

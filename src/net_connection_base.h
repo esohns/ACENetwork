@@ -21,6 +21,9 @@
 #ifndef NET_CONNECTION_BASE_H
 #define NET_CONNECTION_BASE_H
 
+#include "ace/Global_Macros.h"
+#include "ace/Time_Value.h"
+
 #include "common_referencecounter_base.h"
 
 #include "stream_common.h"
@@ -68,8 +71,8 @@ class Net_ConnectionBase_T
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_ConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                        unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
+  Net_ConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                        const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_ConnectionBase_T ();
 
   // (de-)register with the connection manager (if any)
@@ -108,7 +111,6 @@ class Net_ConnectionBase_T
                                UserDataType> OWN_TYPE_T;
 
   // timer
-  unsigned int                      statisticCollectionInterval_; // seconds [0: off]
   Stream_StatisticHandler_Reactor_t statisticCollectHandler_;
   long                              statisticCollectHandlerID_;
 };

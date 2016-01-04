@@ -228,6 +228,7 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in)
     return false;
   } // end IF
   if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
+                                            true,                                        // push statistic messages downstream ?
                                             configuration_in.printFinalReport,           // print final report ?
                                             configuration_in.messageAllocator))          // message allocator handle
   {

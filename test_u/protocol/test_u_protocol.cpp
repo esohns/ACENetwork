@@ -124,8 +124,8 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]  : statistic reporting interval (second(s)) [")
-            << STREAM_DEFAULT_STATISTIC_REPORTING
-            << ACE_TEXT_ALWAYS_CHAR ("] {0: off}")
+            << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
+            << ACE_TEXT_ALWAYS_CHAR ("] [0: off]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t          : trace information [")
             << false
@@ -186,7 +186,7 @@ do_processArguments (int argc_in,
   useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
   port_out = HTTP_DEFAULT_SERVER_PORT;
   useReactor_out = NET_EVENT_USE_REACTOR;
-  statisticReportingInterval_out = STREAM_DEFAULT_STATISTIC_REPORTING;
+  statisticReportingInterval_out = STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
   URI_out.clear ();
   printVersionAndExit_out = false;
@@ -866,7 +866,8 @@ allocate:
   message_data_p->HTTPRecord->URI = URL_in;
   message_data_p->HTTPRecord->version = HTTP_Codes::HTTP_VERSION_1_1;
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
-  message_p->initialize (message_data_container_p, NULL);
+  message_p->initialize (*message_data_container_p,
+                         NULL);
   isocket_connection_p->send (message_p);
 
   connection_manager_p->wait ();
@@ -1006,7 +1007,7 @@ ACE_TMAIN (int argc_in,
   unsigned short port = HTTP_DEFAULT_SERVER_PORT;
   bool use_reactor = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval =
-    STREAM_DEFAULT_STATISTIC_REPORTING;
+    STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information = false;
   std::string URL;
   bool print_version_and_exit = false;

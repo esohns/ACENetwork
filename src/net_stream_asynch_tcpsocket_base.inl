@@ -46,7 +46,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 UserDataType,
                                 ModuleConfigurationType,
                                 ModuleHandlerConfigurationType>::Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                                  unsigned int statisticCollectionInterval_in)
+                                                                                                  const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited ()
  , inherited2 ()
  , inherited3 (interfaceHandle_in,

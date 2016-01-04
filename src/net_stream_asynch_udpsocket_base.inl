@@ -48,7 +48,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ModuleConfigurationType,
                                 ModuleHandlerConfigurationType,
                                 HandlerConfigurationType>::Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                            unsigned int statisticCollectionInterval_in)
+                                                                                            const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited4 (interfaceHandle_in,
                statisticCollectionInterval_in)
 // , buffer_ (NULL)
@@ -1109,7 +1109,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ModuleConfigurationType,
                                 ModuleHandlerConfigurationType,
                                 HandlerConfigurationType>::Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                            unsigned int statisticCollectionInterval_in)
+                                                                                            const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited4 (interfaceHandle_in,
                statisticCollectionInterval_in)
 // , buffer_ (NULL)

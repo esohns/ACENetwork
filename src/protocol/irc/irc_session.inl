@@ -65,7 +65,7 @@ IRC_Session_T<ConnectionType,
               InputHandlerType,
               InputHandlerConfigurationType,
               LogOutputType>::IRC_Session_T (ConnectionManagerType* interfaceHandle_in,
-                                             unsigned int statisticCollectionInterval_in)
+                                             const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
  , close_ (false)
@@ -339,15 +339,15 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::notify (const IRC_Record& message_in)
+              LogOutputType>::notify (const IRC_Record& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
 
-  switch (message_in.command.discriminator)
+  switch (record_in.command_.discriminator)
   {
     case IRC_Record::Command::NUMERIC:
     {
-      switch (message_in.command.numeric)
+      switch (record_in.command_.numeric)
       {
         case IRC_Codes::RPL_WELCOME:          //   1
         {
@@ -372,7 +372,7 @@ IRC_Session_T<ConnectionType,
         case IRC_Codes::RPL_GLOBALUSERS:      // 266
         case IRC_Codes::RPL_INVITING:         // 341
         {
-          log (message_in);
+          log (record_in);
           break;
         }
         case IRC_Codes::RPL_USERHOST:         // 302
@@ -381,7 +381,7 @@ IRC_Session_T<ConnectionType,
 
           //ACE_DEBUG ((LM_DEBUG,
           //            ACE_TEXT ("bisecting records: \"%s\"...\n"),
-          //            ACE_TEXT (message_in.params.back ().c_str ())));
+          //            ACE_TEXT (record_in.params.back ().c_str ())));
 
           std::string::size_type current_position = 0;
           std::string::size_type last_position = 0;
@@ -389,11 +389,11 @@ IRC_Session_T<ConnectionType,
           string_list_t list;
           do
           {
-            current_position = message_in.params.back ().find (' ', last_position);
+            current_position = record_in.parameters_.back ().find (' ', last_position);
 
             record =
-              message_in.params.back ().substr (last_position,
-              (((current_position == std::string::npos) ? message_in.params.back ().size ()
+              record_in.parameters_.back ().substr (last_position,
+              (((current_position == std::string::npos) ? record_in.parameters_.back ().size ()
               : current_position) - last_position));
 
             // check whether the record is empty
@@ -446,19 +446,19 @@ IRC_Session_T<ConnectionType,
         }
         case IRC_Codes::RPL_UNAWAY:           // 305
         {
-          log (message_in);
+          log (record_in);
 
           break;
         }
         case IRC_Codes::RPL_NOWAWAY:          // 306
         {
-          log (message_in);
+          log (record_in);
 
           break;
         }
         case IRC_Codes::RPL_ENDOFWHO:         // 315
         {
-          log (message_in);
+          log (record_in);
 
           inherited::state_.isFirstMessage = true;
 
@@ -470,21 +470,21 @@ IRC_Session_T<ConnectionType,
         }
         case IRC_Codes::RPL_LISTEND:          // 323
         {
-          log (message_in);
+          log (record_in);
 
           break;
         }
         case IRC_Codes::RPL_LIST:             // 322
         {
           // convert <# visible>
-          IRC_ParametersIterator_t param_iterator = message_in.params.begin ();
-          ACE_ASSERT (message_in.params.size () >= 3);
-          std::advance (param_iterator, 2);
+          IRC_ParametersIterator_t iterator = record_in.parameters_.begin ();
+          ACE_ASSERT (record_in.parameters_.size () >= 3);
+          std::advance (iterator, 2);
           std::stringstream converter;
           int num_members = 0;
-          converter << *param_iterator;
+          converter << *iterator;
           converter >> num_members;
-          param_iterator--;
+          iterator--;
 
           break;
         }
@@ -496,8 +496,8 @@ IRC_Session_T<ConnectionType,
         {
           // bisect user information from parameter strings
           IRC_ParametersIterator_t iterator_2 =
-            message_in.params.begin ();
-          ACE_ASSERT (message_in.params.size () >= 8);
+            record_in.parameters_.begin ();
+          ACE_ASSERT (record_in.parameters_.size () >= 8);
           std::advance (iterator_2, 5); // nick position
           std::string nick = *iterator_2;
           iterator_2++;
@@ -516,10 +516,10 @@ IRC_Session_T<ConnectionType,
           std::string real_name;
           std::stringstream converter;
           std::string::size_type ws_position = 0;
-          ws_position = message_in.params.back ().find (' ', 0);
-          converter << message_in.params.back ().substr (0, ws_position);
+          ws_position = record_in.parameters_.back ().find (' ', 0);
+          converter << record_in.parameters_.back ().substr (0, ws_position);
           converter >> hop_count;
-          real_name = message_in.params.back ().substr (ws_position + 1);
+          real_name = record_in.parameters_.back ().substr (ws_position + 1);
 
           if (inherited::state_.isFirstMessage)
             inherited::state_.isFirstMessage = false;
@@ -536,7 +536,7 @@ IRC_Session_T<ConnectionType,
 
           //ACE_DEBUG ((LM_DEBUG,
           //            ACE_TEXT ("bisecting nicknames: \"%s\"...\n"),
-          //            ACE_TEXT (message_in.params.back ().c_str ())));
+          //            ACE_TEXT (record_in.params.back ().c_str ())));
 
           std::string::size_type current_position = 0;
           std::string::size_type last_position = 0;
@@ -546,10 +546,10 @@ IRC_Session_T<ConnectionType,
           do
           {
             current_position =
-              message_in.params.back ().find (' ', last_position);
+              record_in.parameters_.back ().find (' ', last_position);
             nick =
-              message_in.params.back ().substr (last_position,
-              (((current_position == std::string::npos) ? message_in.params.back ().size ()
+              record_in.parameters_.back ().substr (last_position,
+              (((current_position == std::string::npos) ? record_in.parameters_.back ().size ()
               : current_position) - last_position));
 
             //// check whether user is a channel operator
@@ -564,19 +564,19 @@ IRC_Session_T<ConnectionType,
           } while (current_position != std::string::npos);
 
           // retrieve channel name
-          IRC_ParametersIterator_t param_iterator =
-            message_in.params.begin ();
-          ACE_ASSERT (message_in.params.size () >= 3);
-          std::advance (param_iterator, 2);
+          IRC_ParametersIterator_t iterator =
+            record_in.parameters_.begin ();
+          ACE_ASSERT (record_in.parameters_.size () >= 3);
+          std::advance (iterator, 2);
 
           break;
         }
         case IRC_Codes::RPL_ENDOFNAMES:       // 366
         {
           // retrieve channel name
-          IRC_ParametersIterator_t param_iterator =
-            message_in.params.begin ();
-          param_iterator++;
+          IRC_ParametersIterator_t iterator =
+            record_in.parameters_.begin ();
+          iterator++;
 
           break;
         }
@@ -598,19 +598,19 @@ IRC_Session_T<ConnectionType,
         case IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         case IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
         {
-          log (message_in);
+          log (record_in);
 
-          if ((message_in.command.numeric == IRC_Codes::ERR_NOSUCHNICK)       ||
-              (message_in.command.numeric == IRC_Codes::ERR_UNKNOWNCOMMAND)   ||
-              (message_in.command.numeric == IRC_Codes::ERR_ERRONEUSNICKNAME) ||
-              (message_in.command.numeric == IRC_Codes::ERR_NICKNAMEINUSE)    ||
-              (message_in.command.numeric == IRC_Codes::ERR_NOTREGISTERED)    ||
-              (message_in.command.numeric == IRC_Codes::ERR_ALREADYREGISTRED) ||
-              (message_in.command.numeric == IRC_Codes::ERR_YOUREBANNEDCREEP) ||
-              (message_in.command.numeric == IRC_Codes::ERR_BADCHANNAME)      ||
-              (message_in.command.numeric == IRC_Codes::ERR_CHANOPRIVSNEEDED) ||
-              (message_in.command.numeric == IRC_Codes::ERR_UMODEUNKNOWNFLAG))
-            error (message_in); // show in statusbar as well...
+          if ((record_in.command_.numeric == IRC_Codes::ERR_NOSUCHNICK)       ||
+              (record_in.command_.numeric == IRC_Codes::ERR_UNKNOWNCOMMAND)   ||
+              (record_in.command_.numeric == IRC_Codes::ERR_ERRONEUSNICKNAME) ||
+              (record_in.command_.numeric == IRC_Codes::ERR_NICKNAMEINUSE)    ||
+              (record_in.command_.numeric == IRC_Codes::ERR_NOTREGISTERED)    ||
+              (record_in.command_.numeric == IRC_Codes::ERR_ALREADYREGISTRED) ||
+              (record_in.command_.numeric == IRC_Codes::ERR_YOUREBANNEDCREEP) ||
+              (record_in.command_.numeric == IRC_Codes::ERR_BADCHANNAME)      ||
+              (record_in.command_.numeric == IRC_Codes::ERR_CHANOPRIVSNEEDED) ||
+              (record_in.command_.numeric == IRC_Codes::ERR_UMODEUNKNOWNFLAG))
+            error (record_in); // show in statusbar as well...
 
           break;
         }
@@ -618,10 +618,10 @@ IRC_Session_T<ConnectionType,
         {
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("invalid/unknown (numeric) command/reply (was: \"%s\" (%u)), continuing\n"),
-                      ACE_TEXT (IRC_Tools::Command2String (message_in.command.numeric).c_str ()),
-                      message_in.command.numeric));
+                      ACE_TEXT (IRC_Tools::Command2String (record_in.command_.numeric).c_str ()),
+                      record_in.command_.numeric));
 
-          message_in.dump_state ();
+          record_in.dump_state ();
 
           break;
         }
@@ -632,25 +632,25 @@ IRC_Session_T<ConnectionType,
     case IRC_Record::Command::STRING:
     {
       IRC_Record::CommandType command =
-        IRC_Tools::Command2Type (*message_in.command.string);
+        IRC_Tools::Command2Type (*record_in.command_.string);
       switch (command)
       {
         case IRC_Record::NICK:
         {
           // remember changed nick name
           std::string nick_name = inherited::state_.nickName;
-          inherited::state_.nickName = message_in.params.front ();
+          inherited::state_.nickName = record_in.parameters_.front ();
 
           // *WARNING*: falls through !
         }
         case IRC_Record::USER:
         case IRC_Record::QUIT:
         {
-          log (message_in);
+          log (record_in);
 
-          if ((message_in.prefix.origin == inherited::state_.nickName) &&
+          if ((record_in.prefix_.origin == inherited::state_.nickName) &&
               (command == IRC_Record::QUIT))
-            error (message_in); // --> show on statusbar as well
+            error (record_in); // --> show on statusbar as well
 
           break;
         }
@@ -661,9 +661,9 @@ IRC_Session_T<ConnectionType,
           // - stranger entering the channel
 
           // reply from a successful join request ?
-          if (message_in.prefix.origin == inherited::state_.nickName)
+          if (record_in.prefix_.origin == inherited::state_.nickName)
           {
-            std::string channel = message_in.params.front ();
+            std::string channel = record_in.parameters_.front ();
             if ((inherited::state_.channel.empty ()) &&
                 UIState_)
               if (!curses_join (channel,
@@ -678,7 +678,7 @@ IRC_Session_T<ConnectionType,
           } // end IF
 
           // someone joined a common channel...
-          log (message_in);
+          log (record_in);
 
           break;
         }
@@ -689,9 +689,9 @@ IRC_Session_T<ConnectionType,
           // - someone left a common channel
 
           // reply from a successful part request ?
-          if (message_in.prefix.origin == inherited::state_.nickName)
+          if (record_in.prefix_.origin == inherited::state_.nickName)
           {
-            std::string channel = message_in.params.front ();
+            std::string channel = record_in.parameters_.front ();
             if ((!inherited::state_.channel.empty ()) &&
                 UIState_)
               if (!curses_part (channel,
@@ -705,7 +705,7 @@ IRC_Session_T<ConnectionType,
           } // end IF
 
           // someone left a common channel...
-          log (message_in);
+          log (record_in);
 
           break;
         }
@@ -714,23 +714,23 @@ IRC_Session_T<ConnectionType,
           // there are two possibilities:
           // - user mode message
           // - channel mode message
-          log (message_in);
+          log (record_in);
 
           // retrieve mode string
-          IRC_ParametersIterator_t param_iterator =
-            message_in.params.begin ();
-          param_iterator++;
+          IRC_ParametersIterator_t iterator =
+            record_in.parameters_.begin ();
+          iterator++;
 
-          if (message_in.params.front () == inherited::state_.nickName)
+          if (record_in.parameters_.front () == inherited::state_.nickName)
           {
             // --> user mode
-            IRC_Tools::merge (message_in.params.back (),
+            IRC_Tools::merge (record_in.parameters_.back (),
                               inherited::state_.userModes);
           } // end IF
           else
           {
             // --> channel mode
-            IRC_Tools::merge (*param_iterator,
+            IRC_Tools::merge (*iterator,
                               inherited::state_.channelModes);
           } // end ELSE
 
@@ -738,17 +738,17 @@ IRC_Session_T<ConnectionType,
         }
         case IRC_Record::TOPIC:
         {
-          log (message_in);
+          log (record_in);
           break;
         }
         case IRC_Record::KICK:
         {
-          log (message_in);
+          log (record_in);
 
           //// retrieve nickname string
-          //IRC_ParametersIterator_t param_iterator =
-          //  message_in.params.begin ();
-          //param_iterator++;
+          //IRC_ParametersIterator_t iterator =
+          //  record_in.params.begin ();
+          //iterator++;
           break;
         }
         case IRC_Record::PRIVMSG:
@@ -756,24 +756,24 @@ IRC_Session_T<ConnectionType,
           // *TODO*: parse (list of) receiver(s)
 
           std::string message_text;
-          if (!message_in.prefix.origin.empty ())
+          if (!record_in.prefix_.origin.empty ())
           {
             message_text += ACE_TEXT_ALWAYS_CHAR ("<");
-            message_text += message_in.prefix.origin;
+            message_text += record_in.prefix_.origin;
             message_text += ACE_TEXT_ALWAYS_CHAR ("> ");
           } // end IF
-          message_text += message_in.params.back ();
+          message_text += record_in.parameters_.back ();
 
           // private message ?
 //          std::string target_id;
-          if (inherited::state_.nickName == message_in.params.front ())
+          if (inherited::state_.nickName == record_in.parameters_.front ())
           {
             // --> send to private conversation handler
 
             // part of an existing conversation ?
           } // end IF
 
-          log (message_in.params.back (),
+          log (record_in.parameters_.back (),
                message_text);
 
           break;
@@ -786,14 +786,14 @@ IRC_Session_T<ConnectionType,
 #endif
         case IRC_Record::AWAY:
         {
-          log (message_in);
+          log (record_in);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           if (command == IRC_Record::__QUIRK__ERROR)
 #else
           if (command == IRC_Record::ERROR)
 #endif
-            error (message_in); // --> show on statusbar as well...
+            error (record_in); // --> show on statusbar as well...
 
           break;
         }
@@ -803,9 +803,9 @@ IRC_Session_T<ConnectionType,
         {
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("invalid/unknown command (was: \"%s\"), continuing\n"),
-                      ACE_TEXT (message_in.command.string->c_str ())));
+                      ACE_TEXT (record_in.command_.string->c_str ())));
 
-          message_in.dump_state ();
+          record_in.dump_state ();
 
           break;
         }
@@ -817,7 +817,7 @@ IRC_Session_T<ConnectionType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("unknown/invalid command type (was: %u), continuing\n"),
-                  message_in.command.discriminator));
+                  record_in.command_.discriminator));
       break;
     }
   } // end SWITCH
@@ -848,15 +848,15 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::notify (const SessionMessageType& sessionMessage_in)
+              LogOutputType>::notify (const SessionMessageType& sessionrecord_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
 
 //  IRC_Client_GTK_Event event =
-//    ((sessionMessage_in.type () == STREAM_SESSION_STATISTIC) ? NET_GTKEVENT_STATISTIC
+//    ((sessionrecord_in.type () == STREAM_SESSION_STATISTIC) ? NET_GTKEVENT_STATISTIC
 //                                                             : NET_GKTEVENT_INVALID);
 //  ACE_UNUSED_ARG (event);
-    ACE_UNUSED_ARG (sessionMessage_in);
+    ACE_UNUSED_ARG (sessionrecord_in);
 }
 
 template <typename ConnectionType,
@@ -1132,11 +1132,11 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::error (const IRC_Record& message_in)
+              LogOutputType>::error (const IRC_Record& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::error"));
 
-  std::string message_text = IRC_Tools::Record2String (message_in);
+  std::string message_text = IRC_Tools::Record2String (record_in);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("received error message: \"%s\"\n"),
               ACE_TEXT (message_text.c_str ())));
@@ -1219,11 +1219,11 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::log (const IRC_Record& message_in)
+              LogOutputType>::log (const IRC_Record& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::log"));
 
-  std::string message_text = IRC_Tools::Record2String (message_in);
+  std::string message_text = IRC_Tools::Record2String (record_in);
   log (std::string (), // --> server log
        message_text);
 }

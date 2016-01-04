@@ -235,6 +235,8 @@ IRC_Stream_T<StreamStateType,
     return false;
   } // end IF
   if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
+                                            true,
+                                            configuration_in.printFinalReport,
                                             configuration_in.messageAllocator))
   {
     ACE_DEBUG ((LM_ERROR,

@@ -605,7 +605,7 @@ HTTP_Module_ParserH_T<LockType,
   if (configuration_in.streamConfiguration->statisticReportingInterval)
   {
     // schedule regular statistics collection...
-    ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION, 0);
+    ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION_INTERVAL, 0);
     ACE_ASSERT (statisticCollectHandlerID_ == -1);
     ACE_Event_Handler* handler_p = &statisticCollectHandler_;
     statisticCollectHandlerID_ =
@@ -715,7 +715,7 @@ HTTP_Module_ParserH_T<LockType,
     dataContainer_->increase ();
     data_container_p = dataContainer_;
     // *TODO*: need to merge message data here
-    message_inout->initialize (data_container_p,
+    message_inout->initialize (*data_container_p,
                                NULL);
     return; // done
   } // end IF
@@ -805,7 +805,7 @@ HTTP_Module_ParserH_T<LockType,
   {
     dataContainer_->increase ();
     data_container_p = dataContainer_;
-    headFragment_->initialize (data_container_p,
+    headFragment_->initialize (*data_container_p,
                                NULL);
     DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
     record_p = data_r.HTTPRecord;
@@ -853,7 +853,7 @@ HTTP_Module_ParserH_T<LockType,
     dataContainer_->increase ();
     data_container_p = dataContainer_;
     // *TODO*: need to merge message data here
-    message_p->initialize (data_container_p,
+    message_p->initialize (*data_container_p,
                            NULL);
     message_p = dynamic_cast<ProtocolMessageType*> (message_p->cont ());
   } // end WHILE
@@ -973,18 +973,19 @@ HTTP_Module_ParserH_T<LockType,
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::allocateMessage"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::configuration_.streamConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->streamConfiguration);
 
   // initialize return value(s)
   ProtocolMessageType* message_p = NULL;
 
-  if (inherited::configuration_.streamConfiguration->messageAllocator)
+  if (inherited::configuration_->streamConfiguration->messageAllocator)
   {
 allocate:
     try
     {
       message_p =
-        static_cast<ProtocolMessageType*> (inherited::configuration_.streamConfiguration->messageAllocator->malloc (requestedSize_in));
+        static_cast<ProtocolMessageType*> (inherited::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
     }
     catch (...)
     {
@@ -995,7 +996,7 @@ allocate:
     }
 
     // keep retrying ?
-    if (!message_p && !inherited::configuration_.streamConfiguration->messageAllocator->block ())
+    if (!message_p && !inherited::configuration_->streamConfiguration->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
@@ -1003,9 +1004,9 @@ allocate:
                       ProtocolMessageType (requestedSize_in));
   if (!message_p)
   {
-    if (inherited::configuration_.streamConfiguration->messageAllocator)
+    if (inherited::configuration_->streamConfiguration->messageAllocator)
     {
-      if (inherited::configuration_.streamConfiguration->messageAllocator->block ())
+      if (inherited::configuration_->streamConfiguration->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
     } // end IF
@@ -1117,7 +1118,8 @@ HTTP_Module_ParserH_T<LockType,
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::putStatisticMessage"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::configuration_.streamConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->streamConfiguration);
 
 //  // step1: initialize session data
 //  IRC_StreamSessionData* session_data_p = NULL;
@@ -1155,5 +1157,5 @@ HTTP_Module_ParserH_T<LockType,
   // *NOTE*: fire-and-forget session_data_container_p
   return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
                                        *inherited::sessionData_,
-                                       inherited::configuration_.streamConfiguration->messageAllocator);
+                                       inherited::configuration_->streamConfiguration->messageAllocator);
 }

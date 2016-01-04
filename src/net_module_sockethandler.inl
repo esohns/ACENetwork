@@ -254,7 +254,8 @@ Net_Module_SocketHandler_T<LockType,
 
   // sanity check(s)
   // *TODO*: remove type inference
-  ACE_ASSERT (inherited::configuration_.streamConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->streamConfiguration);
   ACE_ASSERT (message_inout);
   ACE_ASSERT (isInitialized_);
 
@@ -262,10 +263,10 @@ Net_Module_SocketHandler_T<LockType,
   {
     case STREAM_SESSION_BEGIN:
     {
-      if (inherited::configuration_.streamConfiguration->statisticReportingInterval)
+      if (inherited::configuration_->streamConfiguration->statisticReportingInterval)
       {
         // schedule regular statistics collection...
-        ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION, 0);
+        ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION_INTERVAL, 0);
         ACE_ASSERT (timerID_ == -1);
         ACE_Event_Handler* handler_p = &statisticCollectionHandler_;
         timerID_ =
@@ -347,10 +348,10 @@ Net_Module_SocketHandler_T<LockType,
   //         (and propagate it downstream ?)
 
   // step1: send the container downstream
-  if (!putStatisticsMessage (data_out)) // data container
+  if (!putStatisticMessage (data_out)) // data container
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to putSessionMessage(SESSION_STATISTICS), aborting\n")));
+                ACE_TEXT ("failed to Net_Module_SocketHandler_T::putStatisticMessage(), aborting\n")));
     return false;
   } // end IF
 
@@ -579,14 +580,15 @@ Net_Module_SocketHandler_T<LockType,
                            SessionDataType,
                            SessionDataContainerType,
                            StatisticContainerType,
-                           ProtocolHeaderType>::putStatisticsMessage (const StatisticContainerType& statisticData_in) const
+                           ProtocolHeaderType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::putStatisticsMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::putStatisticMessage"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::sessionData_);
   // *TODO*: remove type inferences
-  ACE_ASSERT (inherited::configuration_.streamConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->streamConfiguration);
 
   // step1: update session state
   // *TODO*: remove type inferences
@@ -613,7 +615,7 @@ Net_Module_SocketHandler_T<LockType,
   // *TODO*: remove type inference
   return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
                                        *inherited::sessionData_,
-                                       inherited::configuration_.streamConfiguration->messageAllocator);
+                                       inherited::configuration_->streamConfiguration->messageAllocator);
 }
 
 /////////////////////////////////////////

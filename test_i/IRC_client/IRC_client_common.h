@@ -143,9 +143,12 @@ struct IRC_Client_SessionData
   inline IRC_Client_SessionData ()
    : IRC_Stream_SessionData ()
    , connectionState (NULL)
+   , userData (NULL)
   {};
 
   IRC_Client_SessionState* connectionState;
+
+  IRC_Client_UserData*     userData;
 };
 
 typedef Stream_Statistic IRC_RuntimeStatistic_t;

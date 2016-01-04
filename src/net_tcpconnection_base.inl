@@ -20,6 +20,7 @@
 
 #include "ace/Log_Msg.h"
 
+#include "net_defines.h"
 #include "net_macros.h"
 
 template <typename HandlerType,
@@ -36,7 +37,7 @@ Net_TCPConnectionBase_T<HandlerType,
                         StreamType,
                         HandlerConfigurationType,
                         UserDataType>::Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                unsigned int statisticCollectionInterval_in)
+                                                                const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -59,7 +60,7 @@ Net_TCPConnectionBase_T<HandlerType,
                         HandlerConfigurationType,
                         UserDataType>::Net_TCPConnectionBase_T ()
  : inherited (NULL,
-              0)
+              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::Net_TCPConnectionBase_T"));
 
@@ -100,7 +101,7 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
                               StreamType,
                               HandlerConfigurationType,
                               UserDataType>::Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                            unsigned int statisticCollectionInterval_in)
+                                                                            const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
@@ -123,7 +124,7 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
                               HandlerConfigurationType,
                               UserDataType>::Net_AsynchTCPConnectionBase_T ()
  : inherited (NULL,
-              0)
+              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::Net_AsynchTCPConnectionBase_T"));
 

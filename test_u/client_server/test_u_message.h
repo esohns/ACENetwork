@@ -54,7 +54,7 @@ class Net_Message
   virtual ~Net_Message ();
 
   virtual Net_MessageType_t command () const; // return value: message type
-  static std::string Command2String (Net_MessageType_t);
+  static std::string CommandType2String (Net_MessageType_t);
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet

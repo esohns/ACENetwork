@@ -26,6 +26,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
 //#include "ace/SOCK_Connector.h"
+#include "ace/Time_Value.h"
 
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
@@ -106,8 +107,8 @@ class Net_SocketConnectionBase_T
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                              unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
+  Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                              const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
 
   // helper methods
   // *IMPORTANT NOTE*: dummy stub to integrate asynch/synch connection handlers
@@ -196,8 +197,8 @@ class Net_AsynchSocketConnectionBase_T
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                    unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
+  Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                                    const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
 
   // helper methods
   // *IMPORTANT NOTE*: dummy stub to integrate asynch/synch connection handlers

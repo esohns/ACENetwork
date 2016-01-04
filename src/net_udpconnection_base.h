@@ -26,6 +26,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/SOCK_Connector.h"
+#include "ace/Time_Value.h"
 
 #include "stream_statemachine_control.h"
 
@@ -80,8 +81,8 @@ class Net_UDPConnectionBase_T
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_UDPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                           unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
+  Net_UDPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_UDPConnectionBase_T ();
 
   // override / implement (part of) Net_IInetTransportLayer
@@ -176,8 +177,8 @@ class Net_AsynchUDPConnectionBase_T
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_AsynchUDPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                 unsigned int = 0);      // statistic collecting interval (second(s)) [0:off]
+  Net_AsynchUDPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_AsynchUDPConnectionBase_T ();
 
   // override / implement (part of) Net_IInetTransportLayer

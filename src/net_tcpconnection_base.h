@@ -29,6 +29,7 @@
 #include "ace/INET_Addr.h"
 #include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Connector.h"
+#include "ace/Time_Value.h"
 
 #include "stream_statemachine_control.h"
 
@@ -112,8 +113,8 @@ class Net_TCPConnectionBase_T
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                           unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
+  Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_TCPConnectionBase_T ();
 
  private:
@@ -198,8 +199,8 @@ class Net_AsynchTCPConnectionBase_T
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                 unsigned int = 0);      // statistics collecting interval (second(s)) [0: off]
+  Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_AsynchTCPConnectionBase_T ();
 
  private:

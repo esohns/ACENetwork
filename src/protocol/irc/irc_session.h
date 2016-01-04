@@ -29,6 +29,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/SOCK_Connector.h"
 #include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
 #include "stream_common.h"
 
@@ -93,8 +94,8 @@ class IRC_Session_T
                                                  LogOutputType> >;
 
  public:
-  IRC_Session_T (ConnectionManagerType* = NULL, // connection manager handle
-                 unsigned int = 0);             // statistic collecting interval (second(s)) [0: off]
+  IRC_Session_T (ConnectionManagerType* = NULL,                 // connection manager handle
+                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~IRC_Session_T ();
 
   // implement Net_ISession_T

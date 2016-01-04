@@ -25,6 +25,7 @@
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include "ace/Netlink_Addr.h"
 #endif
+#include "ace/Time_Value.h"
 
 #include "stream_common.h"
 #include "stream_iallocator.h"
@@ -119,7 +120,7 @@ struct Net_ListenerConfiguration
    , connectionManager (NULL)
    , messageAllocator (NULL)
    , socketHandlerConfiguration (NULL)
-   , statisticReportingInterval (0)
+   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0)
    , useLoopBackDevice (false)
   {};
 
@@ -128,7 +129,7 @@ struct Net_ListenerConfiguration
   Net_IInetConnectionManager_t*   connectionManager;
   Stream_IAllocator*              messageAllocator;
   Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  unsigned int                    statisticReportingInterval; // (second(s)) [0: off]
+  ACE_Time_Value                  statisticReportingInterval; // [ACE_Time_Value::zero: off]
   bool                            useLoopBackDevice;
 };
 

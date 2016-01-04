@@ -87,7 +87,7 @@ class IRC_Export IRC_Message
   // *NOTE*: this uses our allocator (if any) to create a new message
   virtual ACE_Message_Block* duplicate (void) const;
 
-  static std::string Command2String (const IRC_CommandType_t&);
+  static std::string CommandType2String (const IRC_CommandType_t&);
 
  protected:
    // *NOTE*: to be used by allocators...

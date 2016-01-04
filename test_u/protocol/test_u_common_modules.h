@@ -29,8 +29,7 @@
 #include "stream_streammodule_base.h"
 
 #include "stream_module_filewriter.h"
-
-#include "net_module_runtimestatistic.h"
+#include "stream_module_runtimestatistic.h"
 
 #include "http_codes.h"
 #include "http_common.h"
@@ -88,18 +87,22 @@ typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                               Test_U_SessionMessage,
                               Test_U_Message> Test_U_Module_Streamer;
 
-typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
-                                          Common_TimePolicy_t,
-                                          Test_U_SessionMessage,
-                                          Test_U_Message,
-                                          HTTP_Method_t,
-                                          HTTP_RuntimeStatistic_t> Test_U_Module_Statistic_ReaderTask_t;
-typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
-                                          Common_TimePolicy_t,
-                                          Test_U_SessionMessage,
-                                          Test_U_Message,
-                                          HTTP_Method_t,
-                                          HTTP_RuntimeStatistic_t> Test_U_Module_Statistic_WriterTask_t;
+typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
+                                             Common_TimePolicy_t,
+                                             Test_U_SessionMessage,
+                                             Test_U_Message,
+                                             HTTP_Method_t,
+                                             HTTP_RuntimeStatistic_t,
+                                             Test_U_StreamSessionData,
+                                             Test_U_StreamSessionData_t> Test_U_Module_Statistic_ReaderTask_t;
+typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
+                                             Common_TimePolicy_t,
+                                             Test_U_SessionMessage,
+                                             Test_U_Message,
+                                             HTTP_Method_t,
+                                             HTTP_RuntimeStatistic_t,
+                                             Test_U_StreamSessionData,
+                                             Test_U_StreamSessionData_t> Test_U_Module_Statistic_WriterTask_t;
 
 typedef Stream_Module_FileWriter_T<Test_U_SessionMessage,
                                    Test_U_Message,

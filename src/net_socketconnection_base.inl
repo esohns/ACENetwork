@@ -50,7 +50,7 @@ Net_SocketConnectionBase_T<HandlerType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
                            UserDataType>::Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                      unsigned int statisticCollectionInterval_in)
+                                                                      const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
  , configuration_ ()
@@ -897,7 +897,7 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
                                  UserDataType>::Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                  unsigned int statisticCollectionInterval_in)
+                                                                                  const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
  , configuration_ ()

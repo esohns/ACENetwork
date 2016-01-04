@@ -27,6 +27,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
 #include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
 #include "common_time_common.h"
 
@@ -107,8 +108,8 @@ class Net_StreamAsynchTCPSocketBase_T
                            ModuleConfigurationType,
                            ModuleHandlerConfigurationType> IMODULE_T;
 
-  Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                   unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
+  Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                                   const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
 
   // implement some handler methods
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result

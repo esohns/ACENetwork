@@ -178,17 +178,16 @@ IRC_Module_Bisector_T<LockType,
     isInitialized_ = false;
   } // end IF
 
-  if (configuration_in.streamConfiguration->statisticReportingInterval)
+  if (configuration_in.streamConfiguration->statisticReportingInterval != ACE_Time_Value::zero)
   {
-    // schedule regular statistics collection...
-    ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION, 0);
+    // schedule regular statistic collection
     ACE_ASSERT (statisticCollectHandlerID_ == -1);
     ACE_Event_Handler* handler_p = &statisticCollectHandler_;
     statisticCollectHandlerID_ =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                        // event handler
-                                                            NULL,                             // act
-                                                            COMMON_TIME_POLICY () + interval, // first wakeup time
-                                                            interval);                        // interval
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                                                                          // event handler
+                                                            NULL,                                                                               // act
+                                                            COMMON_TIME_NOW + configuration_in.streamConfiguration->statisticReportingInterval, // first wakeup time
+                                                            configuration_in.streamConfiguration->statisticReportingInterval);                  // interval
     if (statisticCollectHandlerID_ == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -196,9 +195,9 @@ IRC_Module_Bisector_T<LockType,
       return false;
     } // end IF
 //     ACE_DEBUG ((LM_DEBUG,
-//                 ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
+//                 ACE_TEXT ("scheduled statistics collecting timer (ID: %d, interval: %#T)...\n"),
 //                 statisticCollectHandlerID_,
-//                 statisticCollectionInterval_in));
+//                 configuration_in.streamConfiguration->statisticReportingInterval));
   } // end IF
 
   // *NOTE*: need to clean up timer beyond this point !
@@ -631,7 +630,8 @@ IRC_Module_Bisector_T<LockType,
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::putStatisticMessage"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::configuration_.streamConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->streamConfiguration);
 
 //  // step1: initialize session data
 //  IRC_StreamSessionData* session_data_p = NULL;
@@ -669,7 +669,7 @@ IRC_Module_Bisector_T<LockType,
   // *NOTE*: fire-and-forget session_data_container_p
   return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
                                        *inherited::sessionData_,
-                                       inherited::configuration_.streamConfiguration->messageAllocator);
+                                       inherited::configuration_->streamConfiguration->messageAllocator);
 }
 
 template <typename LockType,

@@ -26,9 +26,10 @@ bison --verbose --graph=parser_graph.txt --xml=parser_graph.xml ${SOURCE_FILE} -
 #mv -f stack.hh ./..
 #mv -f location.hh ./..
 # --> these files are static (*CHECK*) and included by default
-#mv -f IRC_client_IRCparser.h/.cpp ./..
+#mv -f irc_parser.h/.cpp ./..
 # *NOTE*: a specific method needs to be added to the parser class
-# --> copy a pre-patched version (back) into the project directory instead
+#         --> copy a pre-patched version (back) into the project directory
+#             instead
 # *TODO*: needs to be updated after every change
 TARGET_DIRECTORY=${SCRIPTS_DIRECTORY}/..
 TARGET_FILE=${TARGET_DIRECTORY}/irc_parser.h
@@ -43,13 +44,23 @@ rm -f ${SOURCE_FILE}
 [ $? -ne 0 ] && echo "ERROR: failed to rm \"${SOURCE_FILE}\", aborting" && exit 1
 
 FILES="irc_parser.cpp"
-#location.hh
-#position.hh
-#stack.hh"
 # move the files into the project directory
 for FILE in $FILES
 do
  mv -f $FILE ${PROJECT_ROOT}
+ if [ $? -ne 0 ]; then
+  echo "ERROR: failed to mv \"$FILE\", aborting"
+  exit 1
+ fi
+ echo "moved \"$FILE\"..."
+done
+
+TARGET_DIRECTORY=${PROJECT_ROOT}/3rd_party/bison
+FILES="location.hh position.hh stack.hh"
+# move the files into the 3rd_party include directory
+for FILE in $FILES
+do
+ mv -f $FILE ${TARGET_DIRECTORY}
  if [ $? -ne 0 ]; then
   echo "ERROR: failed to mv \"$FILE\", aborting"
   exit 1

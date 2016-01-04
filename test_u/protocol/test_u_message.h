@@ -53,7 +53,7 @@ class Test_U_Message
   virtual ~Test_U_Message ();
 
   virtual HTTP_Method_t command () const; // return value: message type
-  static std::string Command2String (HTTP_Method_t);
+  static std::string CommandType2String (HTTP_Method_t);
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet

@@ -122,7 +122,7 @@ class Net_Module_SocketHandler_T
   // helper methods
   bool bisectMessages (ProtocolMessageType*&); // return value: complete message (chain)
 //   Net_Message* allocateMessage(const unsigned int&); // requested size
-  bool putStatisticsMessage (const StatisticContainerType&) const; // statistics info
+  bool putStatisticMessage (const StatisticContainerType&) const; // statistics info
 
   // protocol
   ProtocolMessageType*              currentBuffer_;

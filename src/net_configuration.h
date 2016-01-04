@@ -26,6 +26,7 @@
 #else
 #include "ace/Netlink_Addr.h"
 #endif
+#include "ace/Time_Value.h"
 
 #include "net_defines.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -86,7 +87,7 @@ struct Net_SocketHandlerConfiguration
    : messageAllocator (NULL)
    , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , socketConfiguration (NULL)
-   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING)
+   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0)
    //////////////////////////////////////
    , userData (NULL)
   {};
@@ -97,7 +98,7 @@ struct Net_SocketHandlerConfiguration
   //         stream buffers
   unsigned int             PDUSize; // package data unit size
   Net_SocketConfiguration* socketConfiguration;
-  unsigned int             statisticReportingInterval; // seconds [0: off]
+  ACE_Time_Value           statisticReportingInterval; // [ACE_Time_Value::zero: off]
 
   Net_UserData*            userData;
 };

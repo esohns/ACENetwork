@@ -144,7 +144,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //                ACE_TEXT("caught exception in Common_IDumpState::dump_state(), continuing\n")));
 //   }
 
-  switch (data_r.command.discriminator)
+  switch (data_r.command_.discriminator)
   {
     case IRC_Record::Command::NUMERIC:
     {
@@ -154,7 +154,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //                  IRC_Client_Tools::IRCCode2String(message_inout->getData()->command.numeric).c_str(),
 //                  message_inout->getData()->command.numeric));
 
-      switch (data_r.command.numeric)
+      switch (data_r.command_.numeric)
       {
         // *NOTE* these are the "regular" (== known) codes
         // [sent by ircd-hybrid-7.2.3 and others]...
@@ -224,8 +224,8 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("[%u]: received unknown (numeric) command/reply: \"%s\" (%u), continuing\n"),
                       message_inout->getID (),
-                      ACE_TEXT (IRC_Tools::Command2String (data_r.command.numeric).c_str ()),
-                      data_r.command.numeric));
+                      ACE_TEXT (IRC_Tools::Command2String (data_r.command_.numeric).c_str ()),
+                      data_r.command_.numeric));
           break;
         }
       } // end SWITCH
@@ -234,14 +234,14 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
     }
     case IRC_Record::Command::STRING:
     {
-      switch (IRC_Tools::Command2Type (*data_r.command.string))
+      switch (IRC_Tools::Command2Type (*data_r.command_.string))
       {
         case IRC_Record::NICK:
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"NICK\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::QUIT:
@@ -249,7 +249,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"QUIT\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::JOIN:
@@ -257,7 +257,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"JOIN\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::PART:
@@ -265,7 +265,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"PART\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::MODE:
@@ -273,7 +273,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"MODE\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::TOPIC:
@@ -281,7 +281,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"TOPIC\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::NAMES:
@@ -289,7 +289,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"NAMES\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::LIST:
@@ -297,7 +297,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"LIST\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::INVITE:
@@ -305,7 +305,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"INVITE\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::KICK:
@@ -313,7 +313,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"KICK\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::PRIVMSG:
@@ -321,7 +321,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"PRIVMSG\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::NOTICE:
@@ -329,7 +329,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"NOTICE\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
 
           // remember first contact
           if (!receivedInitialNotice_)
@@ -342,7 +342,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"PING\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
 
           // auto-answer ?
           if (configuration_.protocolConfiguration->automaticPong)
@@ -359,9 +359,9 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
                           ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
               break;
             } // end IF
-            ACE_NEW_NORETURN (reply_p->command.string,
-                              std::string (IRC_Message::Command2String (IRC_Record::PONG)));
-            if (!reply_p->command.string)
+            ACE_NEW_NORETURN (reply_p->command_.string,
+                              std::string (IRC_Message::CommandType2String (IRC_Record::PONG)));
+            if (!reply_p->command_.string)
             {
               ACE_DEBUG ((LM_CRITICAL,
                           ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
@@ -371,9 +371,9 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 
               break;
             } // end IF
-            reply_p->command.discriminator =
+            reply_p->command_.discriminator =
               IRC_Record::Command::STRING;
-            reply_p->params.push_back (data_r.params.back ());
+            reply_p->parameters_.push_back (data_r.parameters_.back ());
 
             // step1: send it upstream
             sendMessage (reply_p);
@@ -389,7 +389,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"PONG\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      data_r.params.back().c_str()));
+//                      data_r.parameters_.back().c_str()));
           break;
         }
 #if defined ACE_WIN32 || defined ACE_WIN64
@@ -402,7 +402,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"ERROR\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      data_r.params.back().c_str()));
+//                      data_r.parameters_.back().c_str()));
           break;
         }
         case IRC_Record::AWAY:
@@ -410,7 +410,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"AWAY\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::USERS:
@@ -418,7 +418,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"USERS\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         case IRC_Record::USERHOST:
@@ -426,7 +426,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"USERHOST\": \"%s\"\n"),
 //                      message_inout->getID(),
-//                      message_inout->getData()->params.back().c_str()));
+//                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
         default:
@@ -434,7 +434,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("[%u]: received unknown command (was: \"%s\"), continuing\n"),
                       message_inout->getID (),
-                      ACE_TEXT (data_r.command.string->c_str ())));
+                      ACE_TEXT (data_r.command_.string->c_str ())));
           break;
         }
       } // end SWITCH
@@ -446,7 +446,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: invalid command type (was: %u), continuing\n"),
                   message_inout->getID (),
-                  data_r.command.discriminator));
+                  data_r.command_.discriminator));
       break;
     }
   } // end SWITCH
@@ -776,7 +776,7 @@ IRC_Client_Module_IRCHandler::registerc (const IRC_LoginOptions& loginOptions_in
     return false;
   } // end IF
 
-  message_p->params.push_back (loginOptions_in.passWord);
+  message_p->parameters_.push_back (loginOptions_in.passWord);
 
   // step3b: send it upstream
   sendMessage (message_p);
@@ -793,20 +793,20 @@ IRC_Client_Module_IRCHandler::registerc (const IRC_LoginOptions& loginOptions_in
     return false;
   } // end IF
 
-  message_p->params.push_back (loginOptions_in.user.userName);
+  message_p->parameters_.push_back (loginOptions_in.user.userName);
   switch (loginOptions_in.user.hostName.discriminator)
   {
     case IRC_LoginOptions::User::Hostname::STRING:
     {
       ACE_ASSERT (loginOptions_in.user.hostName.string);
-      message_p->params.push_back (*loginOptions_in.user.hostName.string);
+      message_p->parameters_.push_back (*loginOptions_in.user.hostName.string);
       break;
     }
     case IRC_LoginOptions::User::Hostname::MODE:
     {
       std::ostringstream converter;
       converter << static_cast<unsigned int> (loginOptions_in.user.hostName.mode);
-      message_p->params.push_back (std::string (converter.str ()));
+      message_p->parameters_.push_back (std::string (converter.str ()));
       break;
     }
     default:
@@ -821,8 +821,8 @@ IRC_Client_Module_IRCHandler::registerc (const IRC_LoginOptions& loginOptions_in
       return false;
     }
   } // end SWITCH
-  message_p->params.push_back (loginOptions_in.user.serverName);
-  message_p->params.push_back (loginOptions_in.user.realName);
+  message_p->parameters_.push_back (loginOptions_in.user.serverName);
+  message_p->parameters_.push_back (loginOptions_in.user.realName);
 
   // step5b: send it upstream
   sendMessage (message_p);
@@ -838,7 +838,7 @@ IRC_Client_Module_IRCHandler::registerc (const IRC_LoginOptions& loginOptions_in
 //   join_struct->command.discriminator = IRC_Client_IRCMessage::Command::STRING;
 // //   std::string channel_name = ACE_TEXT_ALWAYS_CHAR("#");
 // //   channel_name += loginOptions_in.channel;
-//   join_struct->params.push_back(loginOptions_in.channel);
+//   join_struct->parameters_.push_back(loginOptions_in.channel);
 //
 //   // step5b: send it upstream
 //   sendMessage(join_struct);
@@ -928,7 +928,7 @@ IRC_Client_Module_IRCHandler::nick (const std::string& nickName_in)
     return;
   } // end IF
 
-  message_p->params.push_back (nickName_in);
+  message_p->parameters_.push_back (nickName_in);
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -950,7 +950,7 @@ IRC_Client_Module_IRCHandler::quit (const std::string& reason_in)
   } // end IF
 
   if (!reason_in.empty ())
-    message_p->params.push_back (reason_in);
+    message_p->parameters_.push_back (reason_in);
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -980,21 +980,21 @@ IRC_Client_Module_IRCHandler::join (const string_list_t& channels_in,
     {
       range.first = 0;
       range.second = (channels_in.size () - 1);
-      message_p->list_param_ranges.push_back (range);
+      message_p->parameterRanges_.push_back (range);
     } // end IF
     if (keys_in.size () > 1)
     {
       range.first = channels_in.size ();
       range.second = (channels_in.size () + keys_in.size () - 1);
-      message_p->list_param_ranges.push_back (range);
+      message_p->parameterRanges_.push_back (range);
     } // end IF
   } // end IF
-  message_p->params = channels_in;
+  message_p->parameters_ = channels_in;
   // append any keys
   if (!keys_in.empty ())
-    message_p->params.insert (message_p->params.end (),
-                              keys_in.begin (),
-                              keys_in.end ());
+    message_p->parameters_.insert (message_p->parameters_.end (),
+                                   keys_in.begin (),
+                                   keys_in.end ());
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1015,7 +1015,7 @@ IRC_Client_Module_IRCHandler::part (const string_list_t& channels_in)
     return;
   } // end IF
 
-  message_p->params = channels_in;
+  message_p->parameters_ = channels_in;
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1044,10 +1044,10 @@ IRC_Client_Module_IRCHandler::mode (const std::string& target_in,
                                        : ACE_TEXT_ALWAYS_CHAR("-"));
   mode_string += mode_in;
 
-  message_p->params.push_back (target_in);
-  message_p->params.push_back (mode_string);
+  message_p->parameters_.push_back (target_in);
+  message_p->parameters_.push_back (mode_string);
   // append any parameters
-  message_p->params.insert (message_p->params.end (),
+  message_p->parameters_.insert (message_p->parameters_.end (),
                             parameters_in.begin (),
                             parameters_in.end ());
 
@@ -1074,8 +1074,8 @@ IRC_Client_Module_IRCHandler::topic (const std::string& channel_in,
     return;
   } // end IF
 
-  message_p->params.push_back (channel_in);
-  message_p->params.push_back (topic_in);
+  message_p->parameters_.push_back (channel_in);
+  message_p->parameters_.push_back (topic_in);
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1102,9 +1102,9 @@ IRC_Client_Module_IRCHandler::names (const string_list_t& channels_in)
     list_item_range_t range;
     range.first = 0;
     range.second = (channels_in.size () - 1);
-    message_p->list_param_ranges.push_back (range);
+    message_p->parameterRanges_.push_back (range);
   } // end IF
-  message_p->params = channels_in;
+  message_p->parameters_ = channels_in;
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1131,9 +1131,9 @@ IRC_Client_Module_IRCHandler::list (const string_list_t& channels_in)
     list_item_range_t range;
     range.first = 0;
     range.second = (channels_in.size () - 1);
-    message_p->list_param_ranges.push_back (range);
+    message_p->parameterRanges_.push_back (range);
   } // end IF
-  message_p->params = channels_in;
+  message_p->parameters_ = channels_in;
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1155,8 +1155,8 @@ IRC_Client_Module_IRCHandler::invite (const std::string& nick_in,
     return;
   } // end IF
 
-  message_p->params.push_back (nick_in);
-  message_p->params.push_back (channel_in);
+  message_p->parameters_.push_back (nick_in);
+  message_p->parameters_.push_back (channel_in);
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1179,10 +1179,10 @@ IRC_Client_Module_IRCHandler::kick (const std::string& channel_in,
     return;
   } // end IF
 
-  message_p->params.push_back (channel_in);
-  message_p->params.push_back (nick_in);
+  message_p->parameters_.push_back (channel_in);
+  message_p->parameters_.push_back (nick_in);
   if (!comment_in.empty ())
-    message_p->params.push_back (comment_in);
+    message_p->parameters_.push_back (comment_in);
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1214,10 +1214,10 @@ IRC_Client_Module_IRCHandler::send (const string_list_t& receivers_in,
     list_item_range_t range;
     range.first = 0;
     range.second = (receivers_in.size () - 1);
-    message_p->list_param_ranges.push_back (range);
+    message_p->parameterRanges_.push_back (range);
   } // end IF
-  message_p->params = receivers_in;
-  message_p->params.push_back (message_in);
+  message_p->parameters_ = receivers_in;
+  message_p->parameters_.push_back (message_in);
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1239,9 +1239,9 @@ IRC_Client_Module_IRCHandler::who (const std::string& name_in,
     return;
   } // end IF
 
-  message_p->params.push_back (name_in);
+  message_p->parameters_.push_back (name_in);
   if (operatorsOnly_in)
-    message_p->params.push_back (std::string ("o"));
+    message_p->parameters_.push_back (std::string ("o"));
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1263,9 +1263,9 @@ IRC_Client_Module_IRCHandler::whois (const std::string& servername_in,
     return;
   } // end IF
 
-  message_p->params = nicknames_in;
+  message_p->parameters_ = nicknames_in;
   if (!servername_in.empty ())
-    message_p->params.push_front (servername_in);
+    message_p->parameters_.push_front (servername_in);
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1288,17 +1288,17 @@ IRC_Client_Module_IRCHandler::whowas (const std::string& nick_in,
     return;
   } // end IF
 
-  message_p->params.push_back (nick_in);
+  message_p->parameters_.push_back (nick_in);
   if (count_in)
   {
     std::stringstream converter;
     converter << count_in;
     std::string count_string;
     converter >> count_string;
-    message_p->params.push_back (count_string);
+    message_p->parameters_.push_back (count_string);
   } // end IF
   if (!servername_in.empty ())
-    message_p->params.push_back (servername_in);
+    message_p->parameters_.push_back (servername_in);
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1322,7 +1322,7 @@ IRC_Client_Module_IRCHandler::away (const std::string& message_in)
   // *NOTE*: if there is no away message parameter, the semantic is to
   // "un-away" the user
   if (!message_in.empty ())
-    message_p->params.push_back (message_in);
+    message_p->parameters_.push_back (message_in);
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1344,7 +1344,7 @@ IRC_Client_Module_IRCHandler::users (const std::string& server_in)
   } // end IF
 
   if (!server_in.empty ())
-    message_p->params.push_back (server_in);
+    message_p->parameters_.push_back (server_in);
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1365,7 +1365,7 @@ IRC_Client_Module_IRCHandler::userhost (const string_list_t& nicknames_in)
     return;
   } // end IF
 
-  message_p->params = nicknames_in;
+  message_p->parameters_ = nicknames_in;
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1470,9 +1470,9 @@ IRC_Client_Module_IRCHandler::allocateMessage (IRC_Record::CommandType type_in)
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     return NULL;
   } // end IF
-  ACE_NEW_NORETURN (message_p->command.string,
-                    std::string (IRC_Message::Command2String (type_in)));
-  if (!message_p->command.string)
+  ACE_NEW_NORETURN (message_p->command_.string,
+                    std::string (IRC_Message::CommandType2String (type_in)));
+  if (!message_p->command_.string)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -1482,13 +1482,13 @@ IRC_Client_Module_IRCHandler::allocateMessage (IRC_Record::CommandType type_in)
 
     return NULL;
   } // end IF
-  message_p->command.discriminator = IRC_Record::Command::STRING;
+  message_p->command_.discriminator = IRC_Record::Command::STRING;
 
   return message_p;
 }
 
 void
-IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& command_in)
+IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::sendMessage"));
 
@@ -1496,6 +1496,7 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& command_in)
 
   // sanity check(s)
   ACE_ASSERT (configuration_.streamConfiguration);
+  ACE_ASSERT (record_inout);
 
   // step1: get a message buffer
   IRC_Message* message_p =
@@ -1507,17 +1508,18 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& command_in)
                 configuration_.streamConfiguration->bufferSize));
 
     // clean up
-    command_in->decrease ();
-    command_in = NULL;
+    record_inout->decrease ();
+    record_inout = NULL;
 
     return;
   } // end IF
 
   // step2: attach the command
   // *NOTE*: message assumes control over command_in
-  message_p->initialize (command_in);
+  message_p->initialize (*record_inout,
+                         NULL);
   // --> bye bye...
-  command_in = NULL;
+  record_inout = NULL;
 
   // step3: send it upstream
 

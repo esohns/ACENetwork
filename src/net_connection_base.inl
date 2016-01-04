@@ -37,14 +37,13 @@ Net_ConnectionBase_T<AddressType,
                      StatisticContainerType,
                      StreamType,
                      UserDataType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                          unsigned int statisticCollectionInterval_in)
+                                                          const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
  , configuration_ ()
  , state_ ()
  , isRegistered_ (false)
  , manager_ (interfaceHandle_in)
- , statisticCollectionInterval_ (statisticCollectionInterval_in)
  , statisticCollectHandler_ (ACTION_COLLECT,
                              this,
                              true)
@@ -52,28 +51,27 @@ Net_ConnectionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
 
-  if (statisticCollectionInterval_)
+  if (statisticCollectionInterval_in != ACE_Time_Value::zero)
   {
-    // schedule regular statistics collection...
-    ACE_Time_Value interval (statisticCollectionInterval_, 0);
+    // schedule regular statistic collection
     ACE_ASSERT (statisticCollectHandlerID_ == -1);
     ACE_Event_Handler* handler_p = &statisticCollectHandler_;
     Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
     ACE_ASSERT (timer_manager_p);
     statisticCollectHandlerID_ =
-      timer_manager_p->schedule_timer (handler_p,                  // event handler
-                                       NULL,                       // argument
-                                       COMMON_TIME_NOW + interval, // first wakeup time
-                                       interval);                  // interval
+      timer_manager_p->schedule_timer (handler_p,                                        // event handler
+                                       NULL,                                             // argument
+                                       COMMON_TIME_NOW + statisticCollectionInterval_in, // first wakeup time
+                                       statisticCollectionInterval_in);                  // interval
     if (statisticCollectHandlerID_ == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(), continuing\n")));
 //    else
 //      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for intervals of %u second(s)...\n"),
+//                  ACE_TEXT ("scheduled statistics collecting timer (ID: %d, interval: %#T)...\n"),
 //                  statisticCollectHandlerID_,
-//                  statisticCollectionInterval_));
+//                  &statisticCollectionInterval_in));
   } // end IF
 
   // initialize configuration/user data

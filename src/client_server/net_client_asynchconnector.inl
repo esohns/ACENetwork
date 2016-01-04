@@ -38,7 +38,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              StreamType,
                              HandlerConfigurationType,
                              UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                                          unsigned int statisticCollectionInterval_in)
+                                                                          const ACE_Time_Value& statisticCollectionInterval_in)
  : configuration_ ()
  , connectHandle_ (ACE_INVALID_HANDLE)
  , connectionManager_ (connectionManager_in)
@@ -587,7 +587,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                              StreamType,
                              HandlerConfigurationType,
                              UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                                          unsigned int statisticCollectionInterval_in)
+                                                                          const ACE_Time_Value& statisticCollectionInterval_in)
  : configuration_ ()
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
@@ -932,7 +932,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              StreamType,
                              HandlerConfigurationType,
                              UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                                          unsigned int statisticCollectionInterval_in)
+                                                                          const ACE_Time_Value& statisticCollectionInterval_in)
  : configuration_ ()
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)

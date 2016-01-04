@@ -42,7 +42,7 @@ Net_Client_Connector_T<HandlerType,
                        StreamType,
                        HandlerConfigurationType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                              unsigned int statisticCollectionInterval_in)
+                                                              const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (ACE_Reactor::instance (), // default reactor
               // *IMPORTANT NOTE*: ACE_NONBLOCK is only set if timeout != NULL
               //                   (see: SOCK_Connector.cpp:94), set via the
@@ -359,7 +359,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                        StreamType,
                        HandlerConfigurationType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                              unsigned int statisticCollectionInterval_in)
+                                                              const ACE_Time_Value& statisticCollectionInterval_in)
  : configuration_ ()
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
@@ -789,7 +789,7 @@ Net_Client_Connector_T<HandlerType,
                        StreamType,
                        HandlerConfigurationType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                              unsigned int statisticCollectionInterval_in)
+                                                              const ACE_Time_Value& statisticCollectionInterval_in)
  : configuration_ ()
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)

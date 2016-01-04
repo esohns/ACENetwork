@@ -24,6 +24,7 @@
 #include "ace/Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
+#include "ace/Time_Value.h"
 
 #include "stream_statemachine_control.h"
 
@@ -80,8 +81,8 @@ class Net_Client_Connector_T
   typedef Net_IConnector_T<AddressType,
                            HandlerConfigurationType> INTERFACE_T;
 
-  Net_Client_Connector_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                          unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
+  Net_Client_Connector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                          const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
@@ -111,7 +112,7 @@ class Net_Client_Connector_T
   HandlerConfigurationType configuration_;
 
   ICONNECTION_MANAGER_T*   connectionManager_;
-  unsigned int             statisticCollectionInterval_;
+  ACE_Time_Value           statisticCollectionInterval_;
 };
 
 /////////////////////////////////////////
@@ -189,8 +190,8 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   typedef Net_IConnector_T<ACE_INET_Addr,
                            HandlerConfigurationType> INTERFACE_T;
 
-  Net_Client_Connector_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                          unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
+  Net_Client_Connector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                          const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
@@ -241,7 +242,7 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   HandlerConfigurationType configuration_;
 
   ICONNECTION_MANAGER_T*   connectionManager_;
-  unsigned int             statisticCollectionInterval_;
+  ACE_Time_Value           statisticCollectionInterval_;
 };
 
 /////////////////////////////////////////
@@ -302,8 +303,8 @@ class Net_Client_Connector_T<HandlerType,
   typedef Net_IConnector_T<Net_Netlink_Addr,
                            HandlerConfigurationType> INTERFACE_T;
 
-  Net_Client_Connector_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                          unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
+  Net_Client_Connector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                          const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
@@ -328,7 +329,7 @@ class Net_Client_Connector_T<HandlerType,
   HandlerConfigurationType configuration_;
 
   ICONNECTION_MANAGER_T*   connectionManager_;
-  unsigned int             statisticCollectionInterval_;
+  ACE_Time_Value           statisticCollectionInterval_;
 };
 #endif
 

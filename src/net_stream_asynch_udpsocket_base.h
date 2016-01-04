@@ -27,6 +27,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
 #include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
 #include "common_time_common.h"
 
@@ -113,8 +114,8 @@ class Net_StreamAsynchUDPSocketBase_T
                            ModuleConfigurationType,
                            ModuleHandlerConfigurationType> IMODULE_T;
 
-  Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                   unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
+  Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                                   const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
 
   // helper methods
   virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
@@ -226,8 +227,8 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                   unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
+  Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                                   const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
 
   // helper methods
   virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result

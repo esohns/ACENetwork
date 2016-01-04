@@ -74,19 +74,18 @@ Test_U_Message::command () const
   // sanity check(s)
   if (!inherited::initialized_)
     return HTTP_Codes::HTTP_METHOD_INVALID;
-  ACE_ASSERT (inherited::data_);
 
   const Test_U_MessageData_t::DATA_T& data_r =
-      inherited::data_->get ();
+      inherited::data_.get ();
 
   return (data_r.HTTPRecord ? data_r.HTTPRecord->method
                             : HTTP_Codes::HTTP_METHOD_INVALID);
 }
 
 std::string
-Test_U_Message::Command2String (HTTP_Method_t method_in)
+Test_U_Message::CommandType2String (HTTP_Method_t method_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Command2String"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::CommandType2String"));
 
   return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
                                                        : HTTP_Tools::Method2String (method_in));

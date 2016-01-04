@@ -194,7 +194,7 @@ IRC_Module_Parser_T<TaskSynchType,
   //         side and either:
   //         - make the parser more intelligent
   //         - bisect any list items in a post-processing step...
-  message_p->initialize (container_p);
+  message_p->initialize (*container_p);
 
   // *NOTE*: message has assumed control over "container"...
 

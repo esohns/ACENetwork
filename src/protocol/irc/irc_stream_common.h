@@ -56,20 +56,6 @@ typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Stream_ModuleConfiguration,
                          IRC_ModuleHandlerConfiguration> IRC_IModule_t;
 
-struct IRC_Stream_SessionData
- : Stream_SessionData
-{
-  inline IRC_Stream_SessionData ()
-   : Stream_SessionData ()
-   , connectionState (NULL)
-   //, currentStatistic ()
-  {};
-
-  IRC_ConnectionState*   connectionState;
-
-  //IRC_RuntimeStatistic_t currentStatistic;
-};
-
 struct IRC_Stream_UserData
  : Stream_UserData
 {
@@ -82,6 +68,23 @@ struct IRC_Stream_UserData
   // *TODO*: remove these ASAP
   Stream_ModuleConfiguration*     moduleConfiguration;
   IRC_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+};
+
+struct IRC_Stream_SessionData
+ : Stream_SessionData
+{
+  inline IRC_Stream_SessionData ()
+   : Stream_SessionData ()
+   , connectionState (NULL)
+   //, currentStatistic ()
+   , userData (NULL)
+  {};
+
+  IRC_ConnectionState*   connectionState;
+
+  //IRC_RuntimeStatistic_t currentStatistic;
+
+  IRC_Stream_UserData*   userData;
 };
 
 struct IRC_StreamState

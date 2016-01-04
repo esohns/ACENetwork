@@ -93,20 +93,20 @@ IRC_Module_Streamer_T<TaskSynchType,
 
   // prefix
   const IRC_Record& data_r = message_inout->get ();
-  if (!data_r.prefix.origin.empty ())
+  if (!data_r.prefix_.origin.empty ())
   {
     // prefix the prefix
     *message_inout->wr_ptr () = ':';
     message_inout->wr_ptr (1);
 
-    result = message_inout->copy (data_r.prefix.origin.c_str (),
-                                  data_r.prefix.origin.size ());
+    result = message_inout->copy (data_r.prefix_.origin.c_str (),
+                                  data_r.prefix_.origin.size ());
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
-                  ACE_TEXT (data_r.prefix.origin.c_str ()),
-                  data_r.prefix.origin.size ()));
+                  ACE_TEXT (data_r.prefix_.origin.c_str ()),
+                  data_r.prefix_.origin.size ()));
 
       // clean up
       passMessageDownstream_out = false;
@@ -117,7 +117,7 @@ IRC_Module_Streamer_T<TaskSynchType,
     } // end IF
 
     // append user
-    if (!data_r.prefix.user.empty ())
+    if (!data_r.prefix_.user.empty ())
     {
       // sanity check
       if (message_inout->space () < 1)
@@ -140,14 +140,14 @@ IRC_Module_Streamer_T<TaskSynchType,
       *message_inout->wr_ptr () = '!';
       message_inout->wr_ptr (1);
 
-      result = message_inout->copy (data_r.prefix.user.c_str (),
-                                    data_r.prefix.user.size ());
+      result = message_inout->copy (data_r.prefix_.user.c_str (),
+                                    data_r.prefix_.user.size ());
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
-                    ACE_TEXT (data_r.prefix.user.c_str ()),
-                    data_r.prefix.user.size ()));
+                    ACE_TEXT (data_r.prefix_.user.c_str ()),
+                    data_r.prefix_.user.size ()));
 
         // clean up
         passMessageDownstream_out = false;
@@ -159,7 +159,7 @@ IRC_Module_Streamer_T<TaskSynchType,
     } // end IF
 
     // append host
-    if (!data_r.prefix.host.empty ())
+    if (!data_r.prefix_.host.empty ())
     {
       // sanity check
       if (message_inout->space () < 1)
@@ -182,14 +182,14 @@ IRC_Module_Streamer_T<TaskSynchType,
       *message_inout->wr_ptr () = '@';
       message_inout->wr_ptr (1);
 
-      result = message_inout->copy (data_r.prefix.host.c_str (),
-                                    data_r.prefix.host.size ());
+      result = message_inout->copy (data_r.prefix_.host.c_str (),
+                                    data_r.prefix_.host.size ());
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
-                    ACE_TEXT (data_r.prefix.host.c_str ()),
-                    data_r.prefix.host.size ()));
+                    ACE_TEXT (data_r.prefix_.host.c_str ()),
+                    data_r.prefix_.host.size ()));
 
         // clean up
         passMessageDownstream_out = false;
@@ -223,7 +223,7 @@ IRC_Module_Streamer_T<TaskSynchType,
   } // end IF
 
   // command
-  switch (data_r.command.discriminator)
+  switch (data_r.command_.discriminator)
   {
     case IRC_Record::Command::NUMERIC:
     {
@@ -248,7 +248,7 @@ IRC_Module_Streamer_T<TaskSynchType,
       result = ACE_OS::snprintf (message_inout->wr_ptr (),      // target
                                  4,                             // max length
                                  ACE_TEXT_ALWAYS_CHAR ("%.3u"), // format string
-                                 data_r.command.numeric);
+                                 data_r.command_.numeric);
       if (result != 3)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -269,14 +269,14 @@ IRC_Module_Streamer_T<TaskSynchType,
     }
     case IRC_Record::Command::STRING:
     {
-      result = message_inout->copy (data_r.command.string->c_str (),
-                                    data_r.command.string->size ());
+      result = message_inout->copy (data_r.command_.string->c_str (),
+                                    data_r.command_.string->size ());
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::copy(\"%s\", %u): \"%m\", aborting\n"),
-                    ACE_TEXT (data_r.command.string->c_str ()),
-                    data_r.command.string->size ()));
+                    ACE_TEXT (data_r.command_.string->c_str ()),
+                    data_r.command_.string->size ()));
 
         // clean up
         passMessageDownstream_out = false;
@@ -293,7 +293,7 @@ IRC_Module_Streamer_T<TaskSynchType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: invalid command type (was: %d), aborting\n"),
                   message_inout->getID (),
-                  data_r.command.discriminator));
+                  data_r.command_.discriminator));
 
       // clean up
       passMessageDownstream_out = false;
@@ -305,7 +305,7 @@ IRC_Module_Streamer_T<TaskSynchType,
   } // end SWITCH
 
   // parameter(s)
-  if (!data_r.params.empty ())
+  if (!data_r.parameters_.empty ())
   {
     // sanity check
     if (message_inout->space () < 1)
@@ -329,27 +329,27 @@ IRC_Module_Streamer_T<TaskSynchType,
     message_inout->wr_ptr (1);
   } // end IF
   unsigned long forward_i = 0;
-  unsigned long reverse_i = data_r.params.size ();
-  char param_separator = ' ';
+  unsigned long reverse_i = data_r.parameters_.size ();
+  char parameter_separator = ' ';
   list_items_ranges_iterator_t range_iterator =
-    data_r.list_param_ranges.begin ();
-  for (IRC_ParametersIterator_t iterator = data_r.params.begin ();
-       iterator != data_r.params.end ();
+    data_r.parameterRanges_.begin ();
+  for (IRC_ParametersIterator_t iterator = data_r.parameters_.begin ();
+       iterator != data_r.parameters_.end ();
        iterator++, forward_i++, reverse_i--)
   {
     // (re-)set to default
-    param_separator = ' ';
+    parameter_separator = ' ';
 
     // advance range iterator ?
-    if ((range_iterator != data_r.list_param_ranges.end ()) &&
+    if ((range_iterator != data_r.parameterRanges_.end ()) &&
         (forward_i > (*range_iterator).second))
       range_iterator++;
 
-    // param part of a list ?
-    if ((range_iterator != data_r.list_param_ranges.end ()) &&
+    // parameter part of a list ?
+    if ((range_iterator != data_r.parameterRanges_.end ()) &&
         (forward_i >= (*range_iterator).first) &&
         (forward_i <= (*range_iterator).second))
-      param_separator = ',';
+      parameter_separator = ',';
 
     // special handling for last parameter (may contain <SPACE> characters)
     // --> if necessary, prefix the trailing parameter
@@ -364,7 +364,7 @@ IRC_Module_Streamer_T<TaskSynchType,
 #endif
     {
       // sanity check(s)
-      ACE_ASSERT (param_separator == ' '); // cannot be (part of) a list-item
+      ACE_ASSERT (parameter_separator == ' '); // cannot be (part of) a list-item
       if (message_inout->space () < 1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -423,7 +423,7 @@ IRC_Module_Streamer_T<TaskSynchType,
 
         return;
       } // end IF
-      *message_inout->wr_ptr () = param_separator;
+      *message_inout->wr_ptr () = parameter_separator;
       message_inout->wr_ptr (1);
     } // end IF
   } // end FOR

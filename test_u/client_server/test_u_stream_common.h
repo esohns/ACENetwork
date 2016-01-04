@@ -51,11 +51,14 @@ struct Net_StreamSessionData
    : Stream_SessionData ()
    , connectionState (NULL)
    , currentStatistic ()
+   , userData (NULL)
   {};
 
   Net_ConnectionState*   connectionState;
 
   Net_RuntimeStatistic_t currentStatistic;
+
+  Net_UserData*          userData;
 };
 
 struct Net_StreamState

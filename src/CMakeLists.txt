@@ -38,7 +38,7 @@ endif ()
 if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
 else ()
- message (STATUS "Found ACE library \"${ACE_LIBRARY}\"")
+ message (STATUS "found ACE library \"${ACE_LIBRARY}\"")
 endif ()
 add_definitions (-DACE_HAS_DLL)
 
