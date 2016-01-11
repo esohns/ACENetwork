@@ -656,7 +656,6 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              driver->error (*yylloc, error_message);
                              yyterminate(); }
 %%
-
 #ifdef __cplusplus
 extern "C"
 {

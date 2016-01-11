@@ -35,7 +35,7 @@ if NOT exist "%LEX_FILE%" (
  echo invalid lex file ^(was: "%LEX_FILE%"^)^, exiting
  goto Failed
 )
-%FlexEXE% %LEX_FILE% 2>scanner_report_scanner.txt
+%FlexEXE% --noline %LEX_FILE% 2>scanner_report_scanner.txt
 if %ERRORLEVEL% NEQ 0 (
  echo failed to generate scanner from %LEX_FILE%^, exiting
  set RC=%ERRORLEVEL%

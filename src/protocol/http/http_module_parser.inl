@@ -181,7 +181,6 @@ HTTP_Module_Parser_T<TimePolicyType,
   ProtocolMessageType* message_p = message_inout;
   HTTP_Record* record_p = NULL;
 
-  // sanity check(s)
   if (finished_)
   {
     ACE_ASSERT (dataContainer_);
@@ -437,11 +436,11 @@ allocate:
     {
       if (allocator_->block ())
         ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to allocate ProtocolMessageType: \"%m\", aborting\n")));
     } // end IF
     else
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to allocate ProtocolMessageType: \"%m\", aborting\n")));
   } // end IF
 
   return message_p;
