@@ -33,7 +33,7 @@
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
 
-#include "stream_module_runtimestatistic.h"
+#include "stream_misc_runtimestatistic.h"
 
 #include "irc_common.h"
 #include "irc_module_bisector.h"

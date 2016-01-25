@@ -92,7 +92,7 @@ class IRC_Export IRC_Record
     PING,
     PONG,
 #if defined ACE_WIN32 || defined ACE_WIN64
-#pragma message("applying quirk code for this compiler...")
+#pragma message ("applying quirk code for this compiler")
     __QUIRK__ERROR,
 #else
     ERROR,

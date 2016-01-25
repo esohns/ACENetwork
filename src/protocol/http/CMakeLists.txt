@@ -56,12 +56,12 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_message.cpp
      http_message.h
      http_message.inl
-     http_module_parser.cpp
-     http_module_parser.h
-     http_module_parser.inl
      http_module_bisector.cpp
      http_module_bisector.h
      http_module_bisector.inl
+     http_module_parser.cpp
+     http_module_parser.h
+     http_module_parser.inl
      http_module_streamer.cpp
      http_module_streamer.h
      http_module_streamer.inl
@@ -106,6 +106,32 @@ export (TARGETS ${PROJECT_NAME}_Protocol_HTTP
         APPEND FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
 
 ############### install files ################
+install (FILES
+         http_common.h
+         http_common_modules.h
+         http_configuration.h
+         http_defines.h
+         http_codes.h
+         http_bisector.h
+         http_message.h
+         http_parser.h
+         http_parser_driver.h
+         http_scanner.h
+         http_message.h
+         http_message.inl
+         http_module_bisector.h
+         http_module_bisector.inl
+         http_module_parser.h
+         http_module_parser.inl
+         http_module_streamer.h
+         http_module_streamer.inl
+         http_network.h
+         http_sessionmessage.h
+         http_stream.h
+         http_stream.inl
+         http_stream_common.h
+         http_tools.h
+         DESTINATION include)
 install (TARGETS ${PROJECT_NAME}_Protocol_HTTP
          EXPORT ${PROJECT_NAME}Targets
          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib

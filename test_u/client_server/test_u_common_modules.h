@@ -27,7 +27,7 @@
 
 #include "stream_streammodule_base.h"
 
-#include "stream_module_runtimestatistic.h"
+#include "stream_misc_runtimestatistic.h"
 
 #include "net_module_sockethandler.h"
 #include "net_remote_comm.h"

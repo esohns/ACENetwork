@@ -122,9 +122,9 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_module_messagehandler.cpp
      net_module_messagehandler.h
      net_module_messagehandler.inl
-     net_module_runtimestatistic.cpp
-     net_module_runtimestatistic.h
-     net_module_runtimestatistic.inl
+#     net_module_runtimestatistic.cpp
+#     net_module_runtimestatistic.h
+#     net_module_runtimestatistic.inl
      net_module_sockethandler.cpp
      net_module_sockethandler.h
      net_module_sockethandler.inl
@@ -228,8 +228,8 @@ install (FILES
          net_macros.h
          net_module_messagehandler.h
          net_module_messagehandler.inl
-         net_module_runtimestatistic.h
-         net_module_runtimestatistic.inl
+ #        net_module_runtimestatistic.h
+ #        net_module_runtimestatistic.inl
          net_module_sockethandler.h
          net_module_sockethandler.inl
          net_netlinkconnection.h
@@ -276,3 +276,4 @@ install (TARGETS ${PROJECT_NAME}
 
 add_subdirectory (client_server)
 add_subdirectory (protocol)
+

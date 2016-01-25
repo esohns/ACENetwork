@@ -181,7 +181,7 @@ HTTP_Module_Bisector_T<LockType,
   if (configuration_in.streamConfiguration->statisticReportingInterval)
   {
     // schedule regular statistics collection...
-    ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION, 0);
+    ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION_INTERVAL, 0);
     ACE_ASSERT (statisticCollectHandlerID_ == -1);
     ACE_Event_Handler* handler_p = &statisticCollectHandler_;
     statisticCollectHandlerID_ =

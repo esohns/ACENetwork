@@ -193,7 +193,7 @@ Net_Common_Tools::IPProtocol2String (unsigned char protocol_in)
 }
 
 std::string
-Net_Common_Tools::MACAddress2String (const char* const addressDataPtr_in)
+Net_Common_Tools::MACAddress2String (const unsigned char* const addressDataPtr_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::MACAddress2String"));
 

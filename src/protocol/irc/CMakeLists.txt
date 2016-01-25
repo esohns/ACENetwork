@@ -114,6 +114,36 @@ export (TARGETS ${PROJECT_NAME}_Protocol_IRC
         APPEND FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
 
 ############### install files ################
+install (FILES
+         irc_common.h
+         irc_common_modules.h
+         irc_configuration.h
+         irc_defines.h
+         irc_icontrol.h
+         irc_codes.h
+         irc_bisector.h
+         irc_message.h
+         irc_parser.h
+         irc_parser_driver.h
+         irc_record.h
+         irc_scanner.h
+         irc_message.h
+         irc_module_parser.h
+         irc_module_parser.inl
+         irc_module_bisector.h
+         irc_module_bisector.inl
+         irc_module_streamer.h
+         irc_module_streamer.inl
+         irc_network.h
+         irc_session.h
+         irc_session.inl
+         irc_sessionmessage.h
+         irc_statemachine_registration.h
+         irc_stream.h
+         irc_stream.inl
+         irc_stream_common.h
+         irc_tools.h
+         DESTINATION include)
 install (TARGETS ${PROJECT_NAME}_Protocol_IRC
          EXPORT ${PROJECT_NAME}Targets
          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
