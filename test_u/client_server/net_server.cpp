@@ -97,20 +97,21 @@ do_printUsage (const std::string& programName_in)
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("client_server");
 #endif // #ifdef DEBUG_DEBUGGER
 
-  std::cout << ACE_TEXT ("usage: ")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
-            << ACE_TEXT (" [OPTIONS]")
+            << ACE_TEXT_ALWAYS_CHAR (" [OPTIONS]")
             << std::endl
             << std::endl;
-  std::cout << ACE_TEXT ("currently available options:") << std::endl;
-  std::cout << ACE_TEXT ("-c [VALUE]   : maximum number of (concurrent) connections [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:") << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [VALUE]   : maximum number of (concurrent) connections [")
             << NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -118,57 +119,58 @@ do_printUsage (const std::string& programName_in)
   std::string UI_file = path;
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
-  std::cout << ACE_TEXT ("-g[[STRING]] : UI file [\"")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-g[[STRING]] : UI definition file [\"")
             << path
-            << ACE_TEXT ("\"] {\"\" --> no GUI}")
+            << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
-  std::cout << ACE_TEXT ("-h           : use thread-pool [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-h           : use thread-pool [")
             << NET_EVENT_USE_THREAD_POOL
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-i [VALUE]   : client ping interval (ms) [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [VALUE]   : client ping interval (ms) [")
             << NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL
-            << ACE_TEXT ("] {0 --> OFF})")
+            << ACE_TEXT_ALWAYS_CHAR ("] {0: off})")
             << std::endl;
-//  std::cout << ACE_TEXT("-k [VALUE]  : client keep-alive timeout ([")
+//  std::cout << ACE_TEXT_ALWAYS_CHAR("-k [VALUE]  : client keep-alive timeout ([")
 //            << NET_SERVER_DEF_CLIENT_KEEPALIVE
-//            << ACE_TEXT("] second(s) {0 --> no timeout})")
+//            << ACE_TEXT_ALWAYS_CHAR("] second(s) {0 --> no timeout})")
 //            << std::endl;
-  std::cout << ACE_TEXT ("-l           : log to a file [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-l           : log to a file [")
             << false
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-m           : receive uni/multi/broadcast UDP [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-m           : receive uni/multi/broadcast UDP [")
             << false
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-n [STRING]  : network interface [\"")
-            << ACE_TEXT (NET_INTERFACE_DEFAULT)
-            << ACE_TEXT ("\"]")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING]  : network interface [\"")
+            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT)
+            << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
-  // *TODO*: this doesn't really make sense (yet)
-  std::cout << ACE_TEXT ("-o           : use loopback [")
-            << false
-            << ACE_TEXT ("]")
+  // *TODO*: this doesn't really make sense (see '-n' option)
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-o           : use loopback [")
+            << NET_INTERFACE_DEFAULT_USE_LOOPBACK
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-p [VALUE]   : listening port [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-p [VALUE]   : listening port [")
             << NET_SERVER_DEFAULT_LISTENING_PORT
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-r           : use reactor [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r           : use reactor [")
             << NET_EVENT_USE_REACTOR
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-s [VALUE]   : statistic reporting interval (second(s)) [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]   : statistic reporting interval (second(s)) [")
             << NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL
-            << ACE_TEXT ("] {0 --> OFF})")
+            << ACE_TEXT_ALWAYS_CHAR ("] {0: off})")
             << std::endl;
-  std::cout << ACE_TEXT ("-t           : trace information") << std::endl;
-  std::cout << ACE_TEXT ("-v           : print version information and exit")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-t           : trace information")
             << std::endl;
-  std::cout << ACE_TEXT ("-x [VALUE]   : #dispatch threads [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-v           : print version information and exit")
+            << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]   : #dispatch threads [")
             << NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 }
 
@@ -196,9 +198,10 @@ do_processArguments (const int& argc_in,
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory ();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("client_server");
 #endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
@@ -218,7 +221,7 @@ do_processArguments (const int& argc_in,
   useUDP_out = false;
   networkInterface_out =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT);
-  useLoopBack_out = false;
+  useLoopBack_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   listeningPortNumber_out = NET_SERVER_DEFAULT_LISTENING_PORT;
   useReactor_out = NET_EVENT_USE_REACTOR;
   statisticReportingInterval_out =
@@ -551,13 +554,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
-  Stream_StatisticHandler_Reactor_t statistics_handler (ACTION_REPORT,
-                                                        NET_CONNECTIONMANAGER_SINGLETON::instance (),
-                                                        false);
+  Stream_StatisticHandler_Reactor_t statistic_handler (ACTION_REPORT,
+                                                       NET_CONNECTIONMANAGER_SINGLETON::instance (),
+                                                       false);
   long timer_id = -1;
   if (statisticReportingInterval_in)
   {
-    ACE_Event_Handler* handler_p = &statistics_handler;
+    ACE_Event_Handler* handler_p = &statistic_handler;
     ACE_Time_Value interval (statisticReportingInterval_in,
                              0);
     timer_id =
@@ -689,8 +692,36 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 
   // step4c: start listening
-  configuration.listenerConfiguration.address.set_port_number (listeningPortNumber_in,
-                                                               1);
+  //if (networkInterface_in.empty ()); // *TODO*
+  if (useLoopBack_in)
+  {
+    result =
+      configuration.listenerConfiguration.address.set (listeningPortNumber_in,
+                                                       INADDR_LOOPBACK);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+
+      // clean up
+      //		{ // synch access
+      //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
+
+      //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
+      //					 iterator != CBData_in.event_source_ids.end();
+      //					 iterator++)
+      //				g_source_remove(*iterator);
+      //		} // end lock scope
+      if (!UIDefinitionFile_in.empty ())
+        COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+      timer_manager_p->stop ();
+
+      return;
+    } // end IF
+  } // end IF
+  else
+    configuration.listenerConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                 1);
   configuration.listenerConfiguration.connectionManager =
     NET_CONNECTIONMANAGER_SINGLETON::instance ();
   configuration.listenerConfiguration.messageAllocator = &message_allocator;
@@ -891,9 +922,10 @@ ACE_TMAIN (int argc_in,
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
 #if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory ();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("client_server");
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
@@ -912,7 +944,7 @@ ACE_TMAIN (int argc_in,
   bool use_udp = false;
   std::string network_interface =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT);
-  bool use_loopback = false;
+  bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
   bool use_reactor = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval =
@@ -971,8 +1003,8 @@ ACE_TMAIN (int argc_in,
   if (NET_STREAM_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
-  if ((!UI_file.empty () && !Common_File_Tools::isReadable (UI_file)) ||
-      (use_thread_pool && !use_reactor) ||
+  if ((!UI_file.empty () && !Common_File_Tools::isReadable (UI_file))      ||
+      (use_thread_pool && !use_reactor)                                    ||
       (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1003,23 +1035,11 @@ ACE_TMAIN (int argc_in,
   Common_Logger logger (&gtk_cb_user_data.logStack,
                         &gtk_cb_user_data.lock);
   std::string log_file_name;
-  if (log_to_file &&
-      !Net_Server_Common_Tools::getNextLogFileName (Common_File_Tools::getTempDirectory (),
-                                                    log_file_name))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::getNextLogFileName(), aborting\n")));
-
-    // *PORTABILITY*: on Windows, finalize ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    result = ACE::fini ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
-    return EXIT_FAILURE;
-  } // end IF
+  if (log_to_file)
+    log_file_name =
+    Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME),
+                                                 ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX));
+                                                 //ACE::basename (argv_in[0]));
   if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]),    // program name
                                         log_file_name,                 // log file name
                                         true,                          // log to syslog ?

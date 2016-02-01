@@ -34,6 +34,13 @@ if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
 endif ()
 
+include (FindPkgConfig)
+if (UNIX)
+#pkg_check_modules (PKG_ACE REQUIRED ACE)
+# *NOTE*: libCommon requires libcap
+ pkg_check_modules (PKG_CAP REQUIRED libcap)
+endif ()
+
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -71,6 +78,7 @@ add_definitions (-DHAVE_CONFIG_H)
 
 if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
+ include_directories (${PKG_CAP_INCLUDE_DIRS})
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/file)
@@ -119,8 +127,10 @@ add_executable (${EXECUTABLE} ${ACENetwork_Protocol_EXE_SRCS})
 #add_dependencies (${PROJECT_NAME} Common)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
-if (WIN32)
- ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
+if (UNIX)
+ target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
+elseif (WIN32)
+# *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
@@ -134,4 +144,3 @@ install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
-

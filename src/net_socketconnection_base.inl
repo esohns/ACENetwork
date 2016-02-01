@@ -84,9 +84,12 @@ Net_SocketConnectionBase_T<HandlerType,
 
   int result = -1;
 
-  // wait for our worker (if any)
+  // sanity check(s)
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+
+  // wait for any worker(s)
   // *TODO*: remove type inference
-  if (inherited::CONNECTION_BASE_T::configuration_.streamConfiguration.useThreadPerConnection)
+  if (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration.useThreadPerConnection)
   {
     result = ACE_Task_Base::wait ();
     if (result == -1)
@@ -121,8 +124,10 @@ Net_SocketConnectionBase_T<HandlerType,
 
   int result = -1;
 
-  Stream_Module_t* module_p = NULL;
+  Stream_Module_t* module_p, *module_2 = NULL;
   Stream_Task_t* task_p = NULL;
+  // *NOTE*: feed the data into the stream at the 'top' of the outbound stream
+  //         (which is the module just above the stream tail)
   result = inherited::stream_.top (module_p);
   if (result == -1)
   {
@@ -131,13 +136,20 @@ Net_SocketConnectionBase_T<HandlerType,
     goto clean_up;
   } // end IF
   ACE_ASSERT (module_p);
-  task_p = module_p->writer ();
+  module_2 = inherited::stream_.tail ();
+  ACE_ASSERT (module_2);
+  while (module_p->next () != module_2)
+    module_p = module_p->next ();
+  ACE_ASSERT (module_p);
+  //Stream_Task_t* task_p = module_p->writer ();
+  task_p = module_p->reader ();
   ACE_ASSERT (task_p);
-  result = task_p->reply (message_inout, NULL);
+  //result = task_p->reply (message_inout, NULL);
+  result = task_p->put (message_inout, NULL);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Task::reply(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to ACE_Task::put(): \"%m\", returning\n")));
     goto clean_up;
   } // end IF
 

@@ -174,7 +174,7 @@ Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::get (ConfigurationType& configuration_out,
+                         UserDataType>::get (ConfigurationType*& configuration_out,
                                              UserDataType*& userData_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
@@ -184,7 +184,7 @@ Net_Connection_Manager_T<AddressType,
 
   //ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
-  configuration_out = configuration_;
+  configuration_out = &configuration_;
   userData_out = userData_;
 }
 
@@ -309,6 +309,8 @@ Net_Connection_Manager_T<AddressType,
                           peer_address);
       if (peer_address == peerAddress_in)
         break;
+
+      connection_p = NULL;
     } // end FOR
     if (connection_p)
       connection_p->increase (); // increase reference count

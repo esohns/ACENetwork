@@ -35,6 +35,8 @@
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 
+#include "net_server_defines.h"
+
 // forward declarations
 struct Net_Configuration;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
@@ -115,13 +117,15 @@ struct Net_Configuration
 struct Net_ListenerConfiguration
 {
   inline Net_ListenerConfiguration ()
-   : address (static_cast<unsigned short> (0), INADDR_NONE)
+   : address (NET_SERVER_DEFAULT_LISTENING_PORT,
+              static_cast<ACE_UINT32> (INADDR_ANY))
    , addressFamily (ACE_ADDRESS_FAMILY_INET)
    , connectionManager (NULL)
    , messageAllocator (NULL)
    , socketHandlerConfiguration (NULL)
-   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0)
-   , useLoopBackDevice (false)
+   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
+                                 0)
+   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
   ACE_INET_Addr                   address;

@@ -515,10 +515,6 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
 }
 
 template <typename HandlerType,

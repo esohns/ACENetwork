@@ -174,8 +174,11 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_Message_Block* message_block_p = NULL;
   // *TODO*: remove type inference
   if (configuration_.messageAllocator)
-    message_block_p =
-      static_cast<ACE_Message_Block*> (configuration_.messageAllocator->malloc (space_needed));
+  {
+    typename StreamType::PROTOCOL_DATA_T* message_p =
+      static_cast<typename StreamType::PROTOCOL_DATA_T*> (configuration_.messageAllocator->malloc (space_needed));
+    message_block_p = message_p;
+  } // end IF
   else
     ACE_NEW_NORETURN (message_block_p,
                       ACE_Message_Block (space_needed,
@@ -245,15 +248,16 @@ Net_Server_AsynchListener_T<HandlerType,
   ILISTENER_T* listener_p = this;
   const void* act_p = (act_in ? act_in : listener_p);
   // *TODO*: remove type inference
-  result = asynch_accept_r.accept (*message_block_p,                    // message block
-                                   bytesToRead_in,                      // bytes to read initially
-                                   //accept_handle,                       // new connection handle
-                                   ACE_INVALID_HANDLE,
-                                   act_p,                               // ACT
-                                   0,                                   // priority
-                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL, // (real-time) signal
-                                   //this->addr_family_,                // address family
-                                   configuration_.addressFamily);
+  result =
+    asynch_accept_r.accept (*message_block_p,                    // message block
+                            bytesToRead_in,                      // bytes to read initially
+                            //accept_handle,                       // new connection handle
+                            ACE_INVALID_HANDLE,
+                            act_p,                               // ACT
+                            0,                                   // priority
+                            COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL, // (real-time) signal
+                            //this->addr_family_,                // address family
+                            configuration_.addressFamily);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,

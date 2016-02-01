@@ -64,6 +64,73 @@ Test_U_Message::~Test_U_Message ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Message::~Test_U_Message"));
 
+  // *NOTE*: will be called just BEFORE this is passed back to the allocator
+}
+
+DHCP_MessageType_t
+Test_U_Message::command () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::command"));
+
+  // sanity check(s)
+  if (!inherited::initialized_)
+    return DHCP_Codes::DHCP_MESSAGE_INVALID;
+//  ACE_ASSERT (inherited::data_);
+  ACE_ASSERT (inherited::data_.DHCPRecord);
+
+  DHCP_OptionsIterator_t iterator =
+      inherited::data_.DHCPRecord->options.find (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE);
+  ACE_ASSERT (iterator != inherited::data_.DHCPRecord->options.end ());
+//  Test_U_MessageData& data_r =
+//      const_cast<Test_U_MessageData&> (inherited::data_->get ());
+//  ACE_ASSERT (data_r.DHCPRecord);
+//  DHCP_OptionsIterator_t iterator =
+//    data_r.DHCPRecord->options.find (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE);
+//  ACE_ASSERT (iterator != data_r.DHCPRecord->options.end ());
+
+  return DHCP_Tools::MessageType2Type ((*iterator).second);
+}
+
+std::string
+Test_U_Message::Command2String (DHCP_MessageType_t type_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Command2String"));
+
+  return DHCP_Tools::MessageType2String (type_in);
+}
+
+void
+Test_U_Message::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::dump_state"));
+
+  std::ostringstream converter;
+
+  // count continuations
+  unsigned int count = 1;
+  std::string info;
+  for (const ACE_Message_Block* source = this;
+       source != NULL;
+       source = source->cont (), count++)
+  {
+    converter.str (ACE_TEXT (""));
+    converter << count;
+    info += converter.str ();
+    info += ACE_TEXT ("# [");
+    converter.str (ACE_TEXT (""));
+    converter << source->length ();
+    info += converter.str ();
+    info += ACE_TEXT (" byte(s)]: \"");
+    info.append (source->rd_ptr (), source->length ());
+    info += ACE_TEXT ("\"\n");
+  } // end FOR
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s"),
+              this->getID (),
+              inherited::total_length (),
+              ACE_TEXT (info.c_str ())));
+  // delegate to base
+  inherited::dump_state ();
 }
 
 ACE_Message_Block*

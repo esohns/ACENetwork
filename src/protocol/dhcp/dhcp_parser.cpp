@@ -101,6 +101,7 @@ static YYLTYPE yyloc_default
 //#include <regex>
 //#include <sstream>
 #include <string>
+#include <utility>
 
 // *WORKAROUND*
 using namespace std;
@@ -126,7 +127,7 @@ using namespace std;
 // *TODO*: this shouldn't be necessary
 #define yylex DHCP_Scanner_lex
 
-#define YYPRINT(file, type, value) yyprint (file, type, value)
+//#define YYPRINT(file, type, value) yyprint (file, type, value)
 
 
 
@@ -233,16 +234,16 @@ using namespace std;
 #endif
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  6
+#define YYFINAL  5
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   34
+#define YYLAST   25
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  19
+#define YYNTOKENS  20
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  4
+#define YYNNTS  5
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  6
+#define YYNRULES  7
 /* YYNRULES -- Number of states.  */
 #define YYNSTATES  24
 /* YYMAXRHS -- Maximum number of symbols on right-hand side of rule.  */
@@ -253,7 +254,7 @@ using namespace std;
 
 /* YYTRANSLATE(X) -- Bison symbol number corresponding to X.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   273
+#define YYMAXUTOK   274
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -288,14 +289,14 @@ static const unsigned char yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18
+      15,    16,    17,    18,    19
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short int yyrline[] =
 {
-       0,   197,   197,   198,   259,   261,   263
+       0,   195,   195,   201,   262,   263,   264,   267
 };
 #endif
 
@@ -304,24 +305,24 @@ static const unsigned short int yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "\"end_of_fragment\"", "error", "$undefined", "\"op\"", "\"htype\"",
-  "\"hlen\"", "\"hops\"", "\"xid\"", "\"secs\"", "\"flags\"", "\"ciaddr\"",
+  "\"end\"", "error", "$undefined", "\"op\"", "\"htype\"", "\"hlen\"",
+  "\"hops\"", "\"xid\"", "\"secs\"", "\"flags\"", "\"ciaddr\"",
   "\"yiaddr\"", "\"siaddr\"", "\"giaddr\"", "\"chaddr\"", "\"sname\"",
-  "\"file\"", "\"key\"", "\"value\"", "$accept", "message", "header",
-  "options", YY_NULLPTR
+  "\"file\"", "\"cookie\"", "\"tag\"", "\"value\"", "$accept", "message",
+  "header", "options", "option", YY_NULLPTR
 };
 #endif
 
-#define YYPACT_NINF -10
-#define YYTABLE_NINF -7
+#define YYPACT_NINF -15
+#define YYTABLE_NINF -1
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
 static const signed char yypact[] =
 {
-       3,     0,     4,     5,     1,    -1,   -10,     7,    -9,    10,
-       6,     1,     8,    11,    12,    13,    14,    15,     9,    16,
-      17,    -2,    18,     2
+      -3,    -2,     1,   -14,    -1,   -15,   -13,     0,   -12,   -15,
+     -13,     2,   -15,   -15,     3,     4,     5,     6,    -4,     7,
+       8,    -5,     9,   -15
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -329,81 +330,79 @@ static const signed char yypact[] =
      means the default is an error.  */
 static const unsigned char yydefact[] =
 {
-       0,     0,     0,     0,     0,     0,     1,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0
+       0,     0,     0,     0,     0,     1,     4,     0,     6,     2,
+       4,     0,     7,     5,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     3
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const signed char yypgoto[] =
 {
-     -10,   -10,   -10,    19
+     -15,   -15,   -15,    11,   -15
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const signed char yydefgoto[] =
 {
-      -1,     3,     4,     9
+      -1,     2,     3,     9,    10
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
      positive, shift that token.  If negative, reduce the rule whose
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const signed char yytable[] =
+static const unsigned char yytable[] =
 {
-      -4,     7,    -3,     1,    10,     6,     2,    -6,     5,    11,
-      -2,    -5,    12,    22,     0,    14,     0,    -4,     8,    -3,
-      15,    19,    16,     0,    17,     0,    18,     0,     0,    20,
-      13,    21,     0,     0,    23
+       1,     5,     4,     6,     7,     8,    11,    12,    19,    14,
+      22,    15,     0,    16,     0,    17,     0,    18,     0,     0,
+      20,    13,    21,     0,     0,    23
 };
 
 static const signed char yycheck[] =
 {
-       0,     0,     0,     0,     5,     0,     3,     0,     4,    18,
-       0,     0,     6,    15,    -1,     7,    -1,    17,    17,    17,
-       8,    12,     9,    -1,    10,    -1,    11,    -1,    -1,    13,
-      11,    14,    -1,    -1,    16
+       3,     0,     4,    17,     5,    18,     6,    19,    12,     7,
+      15,     8,    -1,     9,    -1,    10,    -1,    11,    -1,    -1,
+      13,    10,    14,    -1,    -1,    16
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const unsigned char yystos[] =
 {
-       0,     0,     3,    20,    21,     4,     0,     0,    17,    22,
-       5,    18,     6,    22,     7,     8,     9,    10,    11,    12,
+       0,     3,    21,    22,     4,     0,    17,     5,    18,    23,
+      24,     6,    19,    23,     7,     8,     9,    10,    11,    12,
       13,    14,    15,    16
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const unsigned char yyr1[] =
 {
-       0,    19,    20,    21,    21,    22,    22
+       0,    20,    21,    22,    23,    23,    24,    24
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const unsigned char yyr2[] =
 {
-       0,     2,     2,    14,     1,     3,     1
+       0,     2,     3,    14,     0,     2,     1,     2
 };
 
 
 /* YYDPREC[RULE-NUM] -- Dynamic precedence of rule #RULE-NUM (0 if none).  */
 static const unsigned char yydprec[] =
 {
-       0,     0,     0,     0,     0,     0,     0
+       0,     0,     0,     0,     0,     0,     0,     0
 };
 
 /* YYMERGER[RULE-NUM] -- Index of merging function for rule #RULE-NUM.  */
 static const unsigned char yymerger[] =
 {
-       0,     0,     0,     0,     0,     0,     0
+       0,     0,     0,     0,     0,     0,     0,     0
 };
 
 /* YYIMMEDIATE[RULE-NUM] -- True iff rule #RULE-NUM is not to be deferred, as
    in the case of predicates.  */
 static const yybool yyimmediate[] =
 {
-       0,     0,     0,     0,     0,     0,     0
+       0,     0,     0,     0,     0,     0,     0,     0
 };
 
 /* YYCONFLP[YYPACT[STATE-NUM]] -- Pointer into YYCONFL of start of
@@ -414,8 +413,7 @@ static const unsigned char yyconflp[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0
+       0,     0,     0,     0,     0,     0
 };
 
 /* YYCONFL[I] -- lists of conflicting rule numbers, each terminated by
@@ -553,7 +551,7 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
     return;
   switch (yytype)
     {
-          case 0: /* "end_of_fragment"  */
+          case 0: /* "end"  */
 
       { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
 
@@ -643,31 +641,43 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
 
         break;
 
-    case 17: /* "key"  */
+    case 17: /* "cookie"  */
 
       { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
 
         break;
 
-    case 18: /* "value"  */
+    case 18: /* "tag"  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 19: /* "value"  */
 
       { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
 
         break;
 
-    case 20: /* message  */
+    case 21: /* message  */
 
       { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
 
         break;
 
-    case 21: /* header  */
+    case 22: /* header  */
 
       { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
 
         break;
 
-    case 22: /* options  */
+    case 23: /* options  */
+
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+
+        break;
+
+    case 24: /* option  */
 
       { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
 
@@ -1051,7 +1061,12 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
     {
         case 2:
 
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + 312; }
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + 4 + 308;
+                                                       driver->record_->cookie = (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival);
+//                                                       ACE_DEBUG ((LM_DEBUG,
+//                                                                   ACE_TEXT ("set cookie: %d\n"),
+//                                                                   driver->record_->cookie));
+                                                     }
 
     break;
 
@@ -1103,10 +1118,10 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set giaddr: \"%s\"\n"),
 //                                                                   ACE_TEXT (Net_Tools::IP2String (driver->record_->giaddr).c_str ())));
-                                                       ACE_OS::memcpy (driver->record_->chaddr, (((yyGLRStackItem const *)yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.aval), 16);
+                                                       ACE_OS::memcpy (driver->record_->chaddr, (((yyGLRStackItem const *)yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.aval), DHCP_CHADDR_SIZE);
 //                                                       ACE_DEBUG ((LM_DEBUG,
-//                                                                   ACE_TEXT ("set chaddr: %d:%d:%d:%d\n"),
-//                                                                   driver->record_->chaddr, driver->record_->chaddr[4], driver->record_->chaddr[8], driver->record_->chaddr[12]));
+//                                                                   ACE_TEXT ("set chaddr: %s\n"),
+//                                                                   ACE_TEXT (Net_Common_Tools::MACAddress2String (driver->record_->chaddr).c_str ())));
                                                        ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval));
                                                        driver->record_->sname = *(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval);
 //                                                       ACE_DEBUG ((LM_DEBUG,
@@ -1121,24 +1136,25 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
     break;
 
-  case 4:
-
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
-                                                       yyclearin; }
-
-    break;
-
   case 5:
 
-    { ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval));
-                                                       driver->record_->options.insert (std::make_pair ((((yyGLRStackItem const *)yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival), *(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval))); }
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
 
     break;
 
   case 6:
 
     { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
-                                                       YYACCEPT; }
+                                                       if ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival) == 255)
+                                                         YYACCEPT; }
+
+    break;
+
+  case 7:
+
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + 1 + (*(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)).size ();
+                                                       driver->record_->options.insert (std::make_pair (static_cast<unsigned char> ((((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival)),
+                                                                                                        *(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval))); }
 
     break;
 
@@ -1203,7 +1219,7 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocatio
 
         break;
 
-    case 18: /* "value"  */
+    case 19: /* "value"  */
 
       { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
 
@@ -1263,7 +1279,7 @@ yylhsNonterm (yyRuleNum yyrule)
 }
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-10)))
+  (!!((Yystate) == (-15)))
 
 /** True iff LR state YYSTATE has only a default reduction (regardless
  *  of token).  */
@@ -2991,81 +3007,82 @@ yyerror (YYLTYPE* location_in,
   driver_in->error (*location_in, std::string (message_in));
 }
 
-void
-yyprint (FILE* file_in,
-         yytokentype type_in,
-         YYSTYPE value_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::yyprint"));
+//void
+//yyprint (FILE* file_in,
+//         yytokentype type_in,
+//         YYSTYPE value_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("::yyprint"));
+//
+//  int result = -1;
+//
+//  std::string format_string;
+//  switch (type_in)
+//  {
+//    case OP:
+//    case HTYPE:
+//    case HLEN:
+//    case HOPS:
+//    case XID:
+//    case SECS:
+//    case FLAGS:
+//    {
+//      result = ACE_OS::fprintf (file_in,
+//                                ACE_TEXT (" %d"),
+//                                value_in.ival);
+//      if (result < 0)
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
+//      break;
+//    }
+//    case CIADDR:
+//    case YIADDR:
+//    case SIADDR:
+//    case GIADDR:
+//    {
+//      std::string address_string =
+//          Net_Common_Tools::IPAddress2String (0, value_in.ival);
+//      result = ACE_OS::fprintf (file_in,
+//                                ACE_TEXT (" %s"),
+//                                address_string.c_str ());
+//      if (result < 0)
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
+//      break;
+//    }
+//    case CHADDR:
+//    {
+//      std::string address_string =
+//          Net_Common_Tools::MACAddress2String (value_in.aval);
+//      result = ACE_OS::fprintf (file_in,
+//                                ACE_TEXT (" %s"),
+//                                address_string.c_str ());
+//      if (result < 0)
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
+//      break;
+//    }
+//    case SNAME:
+//    case FILE_:
+//    case OPTION_KEY:
+//    case OPTION_VALUE:
+//    {
+//      ACE_ASSERT (value_in.sval);
+//      result = ACE_OS::fprintf (file_in,
+//                                ACE_TEXT (" %s"),
+//                                value_in.sval->c_str ());
+//      if (result < 0)
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
+//      break;
+//    }
+//    default:
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("invalid/unknown token type (was: %d), returning\n"),
+//                  type_in));
+//      return;
+//    }
+//  } // end SWITCH
+//}
 
-  int result = -1;
-
-  std::string format_string;
-  switch (type_in)
-  {
-    case OP:
-    case HTYPE:
-    case HLEN:
-    case HOPS:
-    case XID:
-    case SECS:
-    case FLAGS:
-    {
-      result = ACE_OS::fprintf (file_in,
-                                ACE_TEXT (" %d"),
-                                value_in.ival);
-      if (result < 0)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
-      break;
-    }
-    case CIADDR:
-    case YIADDR:
-    case SIADDR:
-    case GIADDR:
-    {
-      std::string address_string =
-          Net_Common_Tools::IPAddress2String (0, value_in.ival);
-      result = ACE_OS::fprintf (file_in,
-                                ACE_TEXT (" %s"),
-                                address_string.c_str ());
-      if (result < 0)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
-      break;
-    }
-    case CHADDR:
-    {
-      std::string address_string =
-          Net_Common_Tools::MACAddress2String (value_in.aval);
-      result = ACE_OS::fprintf (file_in,
-                                ACE_TEXT (" %s"),
-                                address_string.c_str ());
-      if (result < 0)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
-      break;
-    }
-    case SNAME:
-    case FILE_:
-    case OPTION_KEY:
-    case OPTION_VALUE:
-    {
-      ACE_ASSERT (value_in.sval);
-      result = ACE_OS::fprintf (file_in,
-                                ACE_TEXT (" %s"),
-                                value_in.sval->c_str ());
-      if (result < 0)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
-      break;
-    }
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown token type (was: %d), returning\n"),
-                  type_in));
-      return;
-    }
-  } // end SWITCH
-}

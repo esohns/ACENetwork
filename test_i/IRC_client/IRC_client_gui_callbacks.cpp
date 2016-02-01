@@ -177,14 +177,15 @@ connection_setup_function (void* arg_in)
   //IRC_Client_ConnectorConfiguration connector_configuration;
 
   // step2b: set up configuration passed to processing stream
-  IRC_Client_Configuration configuration;
+  IRC_Client_Configuration* configuration_p = NULL;
   IRC_Client_UserData* user_data_p = NULL;
   // load defaults
-  connection_manager_p->get (configuration,
+  connection_manager_p->get (configuration_p,
                              user_data_p);
+  ACE_ASSERT (configuration_p);
 
   // step2c: initialize connector
-  if (!connector_p->initialize (configuration.socketHandlerConfiguration))
+  if (!connector_p->initialize (configuration_p->socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
@@ -228,10 +229,10 @@ connection_setup_function (void* arg_in)
       g_free (string_p);
 
       result_3 =
-        configuration.socketConfiguration.peerAddress.set (current_port,
-                                                           data_p->phonebookEntry.hostName.c_str (),
-                                                           1,
-                                                           ACE_ADDRESS_FAMILY_INET);
+        configuration_p->socketConfiguration.address.set (current_port,
+                                                          data_p->phonebookEntry.hostName.c_str (),
+                                                          1,
+                                                          ACE_ADDRESS_FAMILY_INET);
       if (result_3 == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -241,15 +242,15 @@ connection_setup_function (void* arg_in)
 
       // step3: (try to) connect to the server
       handle =
-        connector_p->connect (configuration.socketConfiguration.peerAddress);
+        connector_p->connect (configuration_p->socketConfiguration.address);
       if (handle == ACE_INVALID_HANDLE)
       {
         // debug info
         ACE_TCHAR buffer[BUFSIZ];
         ACE_OS::memset (buffer, 0, sizeof (buffer));
         result_3 =
-          configuration.socketConfiguration.peerAddress.addr_to_string (buffer,
-                                                                        sizeof (buffer));
+          configuration_p->socketConfiguration.address.addr_to_string (buffer,
+                                                                       sizeof (buffer));
         if (result_3 == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
@@ -303,7 +304,7 @@ connection_failed:
 
       // *TODO*: this does not work...
       connection_2 =
-        connection_manager_p->get (configuration.socketConfiguration.peerAddress);
+        connection_manager_p->get (configuration_p->socketConfiguration.address);
       if (connection_2)
         break; // done
     } while (COMMON_TIME_NOW < deadline);

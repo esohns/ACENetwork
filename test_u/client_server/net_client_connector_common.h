@@ -34,14 +34,11 @@
 
 // forward declarations
 class Net_Stream;
-struct IRC_State;
 
 /////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
                          Net_SocketHandlerConfiguration> Net_IConnector_t;
-//typedef Net_IConnector_T<ACE_INET_Addr,
-//                         Net_Client_ConnectorConfiguration> Net_IConnector_t;
 
 typedef Net_Client_AsynchConnector_T<Net_AsynchTCPConnection,
                                      ////

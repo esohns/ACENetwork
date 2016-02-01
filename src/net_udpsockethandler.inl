@@ -23,6 +23,7 @@
 #include "ace/Reactor.h"
 
 #include "common_defines.h"
+#include "common_tools.h"
 
 #include "net_common_tools.h"
 #include "net_defines.h"
@@ -132,6 +133,10 @@ Net_UDPSocketHandler_T<SocketType,
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::open"));
 
   int result = -1;
+#if defined (ACE_LINUX)
+  bool handle_priviledges = false;
+#endif
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
   // sanity check(s)
   ACE_ASSERT (arg_in);
@@ -145,39 +150,51 @@ Net_UDPSocketHandler_T<SocketType,
   // *NOTE*: even when this is a write-only connection
   //         (configuration_p->socketConfiguration->writeOnly), the
   //         base class still requires a valid handle to open the output stream
-  ACE_INET_Addr local_SAP (static_cast<u_short> (0),
-                           static_cast<ACE_UINT32> (INADDR_ANY));
-  result =
-    inherited2::peer_.open ((configuration_p->socketConfiguration->writeOnly ? local_SAP
-                                                                             : configuration_p->socketConfiguration->peerAddress), // local SAP
-                            ACE_PROTOCOL_FAMILY_INET,                          // protocol family
-                            0,                                                 // protocol
-                            1);                                                // reuse_addr
-      //inherited2::peer_.open (configuration_p->socketConfiguration->peerAddress, // remote SAP
-      //                        (configuration_p->inbound ? configuration_p->socketConfiguration->peerAddress
-      //                                                  : ACE_Addr::sap_any),    // local SAP
-      //                        ACE_PROTOCOL_FAMILY_INET,                          // protocol family
-      //                        0,                                                 // protocol
-      //                        1);                                                // reuse_addr
+  ACE_INET_Addr SAP_any (static_cast<u_short> (0),
+                         static_cast<ACE_UINT32> (INADDR_ANY));
+  ACE_INET_Addr local_SAP =
+    (configuration_p->socketConfiguration->writeOnly ? SAP_any
+                                                     : configuration_p->socketConfiguration->address);
+#if defined (ACE_LINUX)
+  // (temporarily) elevate priviledges to open system sockets
+  if (!configuration_p->socketConfiguration->writeOnly &&
+      (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT))
+  {
+    if (!Common_Tools::setRootPriviledges ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_Tools::setRootPriviledges(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    handle_priviledges = true;
+  } // end IF
+#endif
+  result = inherited2::peer_.open (local_SAP,                // local SAP
+                                   ACE_PROTOCOL_FAMILY_INET, // protocol family
+                                   0,                        // protocol
+                                   1);                       // reuse_addr
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result =
-      configuration_p->socketConfiguration->peerAddress.addr_to_string (buffer,
-                                                                        sizeof (buffer),
-                                                                        1);
+    result = local_SAP.addr_to_string (buffer,
+                                       sizeof (buffer),
+                                       1);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
                 buffer));
-    return -1;
+    goto error;
   } // end IF
+#if defined (ACE_LINUX)
+  if (handle_priviledges)
+    Common_Tools::dropRootPriviledges ();
+#endif
 
   // step2: tweak socket
-  ACE_HANDLE handle = SVC_HANDLER_T::get_handle ();
+  handle = SVC_HANDLER_T::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
   if (configuration_p->socketConfiguration->bufferSize)
   {
@@ -196,7 +213,7 @@ Net_UDPSocketHandler_T<SocketType,
                   configuration_p->socketConfiguration->bufferSize,
                   handle));
 #endif
-      return -1;
+      goto error;
     } // end IF
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_SNDBUF,
@@ -213,10 +230,11 @@ Net_UDPSocketHandler_T<SocketType,
                   configuration_p->socketConfiguration->bufferSize,
                   handle));
 #endif
-      return -1;
+      goto error;
     } // end IF
   } // end IF
-// *PORTABILITY*: currently, MS Windows UDP sockets do not support SO_LINGER
+// *PORTABILITY*: (currently,) MS Windows (TM) UDP sockets do not support
+//                SO_LINGER
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   if (!Net_Common_Tools::setLinger (handle,
@@ -228,7 +246,7 @@ Net_UDPSocketHandler_T<SocketType,
                 (configuration_p->socketConfiguration->linger ? ACE_TEXT ("true")
                                                               : ACE_TEXT ("false")),
                 handle));
-    return -1;
+    goto error;
   } // end IF
 #endif
 
@@ -247,6 +265,14 @@ Net_UDPSocketHandler_T<SocketType,
 //#endif
 
   return 0;
+
+error:
+#if defined (ACE_LINUX)
+  if (handle_priviledges)
+    Common_Tools::dropRootPriviledges ();
+#endif
+
+  return -1;
 }
 
 template <typename SocketType,

@@ -25,9 +25,13 @@
 #include <sstream>
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include <iphlpapi.h>
 #include <mstcpip.h>
 #else
 #include <netinet/ether.h>
+#include <linux/if_ether.h>
+#include <linux/if_packet.h>
+#include <ifaddrs.h>
 #endif
 
 #include "ace/Dirent_Selector.h"
@@ -201,26 +205,34 @@ Net_Common_Tools::MACAddress2String (const unsigned char* const addressDataPtr_i
   std::string result;
 
   // convert 6 bytes to ASCII
-  // *IMPORTANT NOTE*: ether_ntoa_r is not portable...
+  // *IMPORTANT NOTE*: ether_ntoa_r is not portable
   // *TODO*: ether_ntoa_r is not portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_UNUSED_ARG (addressDataPtr_in);
-  // *TODO*: implement this
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (result);
-  ACE_NOTREACHED (return result;)
+  char buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  int result_2 =
+    ACE_OS::sprintf (buffer,
+                     ACE_TEXT_ALWAYS_CHAR ("%02X:%02X:%02X:%02X:%02X:%02X"),
+                     addressDataPtr_in[0], addressDataPtr_in[1],
+                     addressDataPtr_in[2], addressDataPtr_in[3],
+                     addressDataPtr_in[4], addressDataPtr_in[5]);
+  if (result_2 == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", aborting\n")));
+    return std::string ();
+  } // end IF
+  result = buffer;
 #else
-  // *TODO*: make this thread-safe !
-  static char address[(ETH_ALEN * 2) + ETH_ALEN + 1]; // "ab:cd:ef:gh:ij:kl\0"
+  char address[(ETH_ALEN * 2) + (ETH_ALEN - 1) + 1]; // "ab:cd:ef:gh:ij:kl\0"
   ACE_OS::memset (&address, 0, sizeof (address));
   if (::ether_ntoa_r (reinterpret_cast<const ether_addr*> (addressDataPtr_in),
                       address) != address)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::ether_ntoa_r(): \"%m\", aborting\n")));
-    return result;
+    return std::string ();
   } // end IF
-
   result = address;
 #endif
 
@@ -551,100 +563,271 @@ Net_Common_Tools::EthernetProtocolTypeID2String (unsigned short frameType_in)
 // }
 
 bool
-Net_Common_Tools::getInterfaceIPAddress (const std::string& interfaceIdentifier_in,
-                                         std::string& IPaddress_out)
+Net_Common_Tools::interface2MACAddress (const std::string& interfaceIdentifier_in,
+                                        unsigned char MACAddress_out[])
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getInterfaceIPAddress"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interface2MACAddress"));
 
-  ACE_UNUSED_ARG (interfaceIdentifier_in);
+//  // sanity check(s)
+//  ACE_ASSERT (sizeof (MACAddress_out) >= 6);
 
   // initialize return value(s)
-  IPaddress_out.clear ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  //  ACE_OS::memset (MACAddress_out, 0, sizeof (MACAddress_out));
+    ACE_OS::memset (MACAddress_out, 0, 6);
 
-//   // validate/retrieve interface identifier index
-//   unsigned long index = 0;
-//   // *PORTABILITY*
-//   index = ACE_OS::if_nametoindex(interfaceIdentifier_in.c_str());
-//   if (!index)
-//   {
-//     ACE_DEBUG((LM_ERROR,
-//                ACE_TEXT("failed to ACE_OS::if_nametoindex(\"%s\"): \"%s\", aborting\n"),
-//                interfaceIdentifier_in.c_str(),
-//                ACE_OS::strerror(ACE_OS::last_error())));
-  //
-//     return false;
-//   } // end IF
+  // sanity check(s)
+  //ACE_ASSERT (sizeof (MACAddress_out) >= MAX_ADAPTER_ADDRESS_LENGTH);
 
-  size_t count = 0;
-  ACE_INET_Addr* addr_array = NULL;
-  if (ACE::get_ip_interfaces (count,
-                              addr_array))
+  PIP_ADAPTER_INFO ip_adapter_info_p = NULL;
+  ULONG buffer_length = 0;
+  ULONG result = GetAdaptersInfo (ip_adapter_info_p, &buffer_length);
+  if (result != ERROR_BUFFER_OVERFLOW)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE::get_ip_interfaces(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::error2String (result).c_str ())));
     return false;
   } // end IF
-  if (count == 0)
+  ACE_ASSERT (buffer_length);
+  ip_adapter_info_p =
+    static_cast<PIP_ADAPTER_INFO> (ACE_MALLOC_FUNC (buffer_length));
+  if (!ip_adapter_info_p)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("could not find any IP network interfaces, aborting\n")));
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     return false;
   } // end IF
 
-  // *NOTE*: beyond this point, clean up addr_array...
-
-  char ip_address[MAXHOSTNAMELEN + 1];
-  ACE_OS::memset (&ip_address, 0, sizeof (ip_address));
-//   sockaddr_in* addr_handle = NULL;
-  for (size_t i = 0;
-       i < count;
-       i++)
+  result = GetAdaptersInfo (ip_adapter_info_p,
+                            &buffer_length);
+  if (result != NO_ERROR)
   {
-    // reset buffer
-    ACE_OS::memset (&ip_address, 0, sizeof (ip_address));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::error2String (result).c_str ())));
 
-    // reset address handle
-//     addr_handle = NULL;
+    // clean up
+    ACE_FREE_FUNC (ip_adapter_info_p);
 
-    // sanity check: only support IPv4 (for now)
-    if (addr_array[i].get_type () != AF_INET)
-    {
-      // try next one...
+    return false;
+  } // end IF
+
+  PIP_ADAPTER_INFO ip_adapter_info_2 = ip_adapter_info_p;
+  do
+  {
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("found network interface: \"%s\"...\n"),
+    //            ACE_TEXT (Net_Common_Tools::MACAddress2String (ip_adapter_info_2->Address).c_str ())));
+
+    if (ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
+                        ip_adapter_info_2->AdapterName))
+      goto continue_;
+
+    ACE_OS::memcpy (MACAddress_out, ip_adapter_info_2->Address,
+                    6);
+    break;
+
+continue_:
+    ip_adapter_info_2 = ip_adapter_info_2->Next;
+  } while (ip_adapter_info_2);
+
+  // clean up
+  ACE_FREE_FUNC (ip_adapter_info_p);
+#else
+  //  ACE_OS::memset (MACAddress_out, 0, sizeof (MACAddress_out));
+  ACE_OS::memset (MACAddress_out, 0, ETH_ALEN);
+
+#if defined (ACE_HAS_GETIFADDRS)
+  struct ifaddrs* ifaddrs_p = NULL;
+  int result = ::getifaddrs (&ifaddrs_p);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  ACE_ASSERT (ifaddrs_p);
+
+  struct sockaddr_ll* sockaddr_ll_p = NULL;
+  for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
+       ifaddrs_2;
+       ifaddrs_2 = ifaddrs_p->ifa_next)
+  {
+    if (ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
+                        ifaddrs_2->ifa_name))
       continue;
-    } // end IF
 
-//     // sanity check: ignore loopback
-//     if (addr_array[i].is_loopback())
-//     {
-//       // try next one...
-//       continue;
-//     } // end IF
+#if defined (ACE_LINUX)
+    if (ifaddrs_2->ifa_addr->sa_family != AF_PACKET)
+#else
+    // *TODO*: this may work on BSD and APPLE systems
+    if (ifaddrs_2->ifa_addr->sa_family != AF_LINK)
+#endif
+      continue;
 
-    if (addr_array[i].get_host_addr (ip_address,
-                                     sizeof (ip_address)) == NULL)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::get_host_addr(): \"%m\", aborting\n")));
-
-      // clean up
-      delete [] addr_array;
-
-      return false;
-    } // end IF
-
-    // *TODO*: sanity check: correct interface ?
-    // --> implement interface <--> address mapping
-//     ACE_DEBUG((LM_DEBUG,
-//                ACE_TEXT("found host address: \"%s\"...\n"),
-//                ip));
-
-//     addr_handle = static_cast<sockaddr_in*> (// addr_array[i].get_addr());
-
-    IPaddress_out = ip_address;
+    sockaddr_ll_p =
+        reinterpret_cast<struct sockaddr_ll*> (ifaddrs_2->ifa_addr);
+    ACE_OS::memcpy (MACAddress_out, sockaddr_ll_p->sll_addr,
+                    ETH_ALEN);
+    break;
   } // end FOR
 
   // clean up
-  delete [] addr_array;
+  ::freeifaddrs (ifaddrs_p);
+#else
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
+  ACE_NOTREACHED (return false;)
+#endif /* ACE_HAS_GETIFADDRS */
+#endif
+
+  return true;
+}
+bool
+Net_Common_Tools::interface2IPAddress (const std::string& interfaceIdentifier_in,
+                                       ACE_INET_Addr& IPAddress_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interface2IPAddress"));
+
+  // initialize return value(s)
+  IPAddress_out.set (static_cast<u_short> (0),
+                     static_cast<ACE_UINT32> (INADDR_ANY));
+
+  // initialize return value(s)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  PIP_ADAPTER_ADDRESSES ip_adapter_addresses_p = NULL;
+  ULONG buffer_length = 0;
+  ULONG result =
+    GetAdaptersAddresses (AF_UNSPEC,              // Family
+                          0,                      // Flags
+                          NULL,                   // Reserved
+                          ip_adapter_addresses_p, // AdapterAddresses
+                          &buffer_length);        // SizePointer
+  if (result != ERROR_BUFFER_OVERFLOW)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::error2String (result).c_str ())));
+    return false;
+  } // end IF
+  ACE_ASSERT (buffer_length);
+  ip_adapter_addresses_p =
+    static_cast<PIP_ADAPTER_ADDRESSES> (ACE_MALLOC_FUNC (buffer_length));
+  if (!ip_adapter_addresses_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  result =
+    GetAdaptersAddresses (AF_UNSPEC,              // Family
+                          0,                      // Flags
+                          NULL,                   // Reserved
+                          ip_adapter_addresses_p, // AdapterAddresses
+                          &buffer_length);        // SizePointer
+  if (result != NO_ERROR)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::error2String (result).c_str ())));
+
+    // clean up
+    ACE_FREE_FUNC (ip_adapter_addresses_p);
+
+    return false;
+  } // end IF
+
+  PIP_ADAPTER_ADDRESSES ip_adapter_addresses_2 = ip_adapter_addresses_p;
+  SOCKET_ADDRESS* socket_address_p = NULL;
+  struct sockaddr_in* sockaddr_in_p = NULL;
+  do
+  {
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("found network interface: \"%s\"...\n"),
+    //            ACE_TEXT (Net_Common_Tools::MACAddress2String (ip_adapter_info_2->Address).c_str ())));
+
+//    if ((ip_adapter_addresses_2->OperStatus != IfOperStatusUp) ||
+//        (!ip_adapter_addresses_2->FirstUnicastAddress))
+//      continue;
+    if (ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
+                        ip_adapter_addresses_2->AdapterName))
+      goto continue_;
+
+    socket_address_p = &ip_adapter_addresses_2->FirstUnicastAddress->Address;
+    ACE_ASSERT (socket_address_p->lpSockaddr);
+    sockaddr_in_p = (struct sockaddr_in*)socket_address_p->lpSockaddr;
+    result = IPAddress_out.set (sockaddr_in_p,
+                                socket_address_p->iSockaddrLength);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+
+      // clean up
+      ACE_FREE_FUNC (ip_adapter_addresses_p);
+
+      return false;
+    } // end IF
+    break;
+
+continue_:
+    ip_adapter_addresses_2 = ip_adapter_addresses_2->Next;
+  } while (ip_adapter_addresses_2);
+
+  // clean up
+  ACE_FREE_FUNC (ip_adapter_addresses_p);
+#else
+#if defined (ACE_HAS_GETIFADDRS)
+  struct ifaddrs* ifaddrs_p = NULL;
+  int result = ::getifaddrs (&ifaddrs_p);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  ACE_ASSERT (ifaddrs_p);
+
+  struct sockaddr_in* sockaddr_in_p = NULL;
+  for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
+       ifaddrs_2;
+       ifaddrs_2 = ifaddrs_2->ifa_next)
+  {
+    if (((ifaddrs_2->ifa_flags & IFF_UP) == 0) ||
+        (!ifaddrs_2->ifa_addr))
+      continue;
+    if (ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
+                        ifaddrs_2->ifa_name))
+      continue;
+
+    if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
+      continue;
+
+    sockaddr_in_p = (struct sockaddr_in*)ifaddrs_2->ifa_addr;
+    result = IPAddress_out.set (sockaddr_in_p,
+                                sizeof (struct sockaddr_in));
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+
+      // clean up
+      ::freeifaddrs (ifaddrs_p);
+
+      return false;
+    } // end IF
+    break;
+  } // end FOR
+
+  // clean up
+  ::freeifaddrs (ifaddrs_p);
+#else
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
+  ACE_NOTREACHED (return false;)
+#endif /* ACE_HAS_GETIFADDRS */
+#endif
 
   return true;
 }

@@ -39,6 +39,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::Net_AsynchUDPSocketHandler_T ()
  , counter_ (0) // initial count
  , inputStream_ ()
  , outputStream_ ()
+ , writeOnly_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::Net_AsynchUDPSocketHandler_T"));
 
@@ -75,7 +76,8 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   ACE_HANDLE handle =
     ((handle_in != ACE_INVALID_HANDLE) ? handle_in
                                        : inherited2::handle ());
-  if (!inherited::configuration_.socketConfiguration->writeOnly)
+  writeOnly_ = inherited::configuration_.socketConfiguration->writeOnly;
+  if (!writeOnly_)
   {
     // step1: tweak socket
     if (inherited::configuration_.socketConfiguration->bufferSize)
@@ -133,7 +135,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     } // end IF
   } // end IF
 
-  // step2: initialize output stream
+  // step3: initialize output stream
   result = outputStream_.open (*this,
                                handle,
                                NULL,
@@ -176,14 +178,11 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   ACE_UNUSED_ARG (handle_in);
   ACE_UNUSED_ARG (mask_in);
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_.socketConfiguration);
-
   int result = -1;
 
   // *BUG*: Posix_Proactor.cpp:1575 should read:
   //        int rc = ::aio_cancel (result->handle_, result);
-  if (!inherited::configuration_.socketConfiguration->writeOnly)
+  if (!writeOnly_)
   {
     result = inputStream_.cancel ();
     if (result)
@@ -200,8 +199,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   else
     result = 0;
   int result_2 = outputStream_.cancel ();
-//  if ((result_2 != 0) && (result_2 != 1))
-  if (result_2)
+  if ((result_2 != 0) && (result_2 != 1))
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -371,12 +369,12 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
         (error != EBADF)) // 9 happens on Linux (local close())
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", aborting\n"),
+                  ACE_TEXT ("failed to write to output stream (handle was: 0x%@): \"%s\", aborting\n"),
                   result_in.handle (),
                   ACE::sock_error (static_cast<int> (error))));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
+                  ACE_TEXT ("failed to write to output stream (handle was: %d): \"%s\", aborting\n"),
                   result_in.handle (),
                   ACE_TEXT (ACE_OS::strerror (error))));
 #endif
@@ -401,7 +399,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
                     ACE::sock_error (static_cast<int> (error))));
 #else
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
+                    ACE_TEXT ("failed to write to output stream (handle was: %d): \"%s\", aborting\n"),
                     result_in.handle (),
                     ACE_TEXT (ACE_OS::strerror (error))));
 #endif
@@ -429,7 +427,9 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
   } // end SWITCH
 
   // clean up
-  result_in.message_block ()->release ();
+  ACE_Message_Block* message_block_p = result_in.message_block ();
+  ACE_ASSERT (message_block_p);
+  message_block_p->release ();
 
   if (close)
   {
@@ -470,7 +470,7 @@ allocate:
     // keep retrying ?
     if (!message_block_p &&
         !inherited::configuration_.messageAllocator->block ())
-        goto allocate;
+      goto allocate;
   } // end IF
   else
     ACE_NEW_NORETURN (message_block_p,

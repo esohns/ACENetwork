@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef HTTP_COMMON_MODULES_H
-#define HTTP_COMMON_MODULES_H
+#ifndef DHCP_COMMON_MODULES_H
+#define DHCP_COMMON_MODULES_H
 
 #include "ace/Synch_Traits.h"
 
@@ -30,82 +30,86 @@
 
 #include "net_module_runtimestatistic.h"
 
-#include "http_codes.h"
-#include "http_common.h"
-#include "http_configuration.h"
-//#include "http_module_bisector.h"
-#include "http_module_parser.h"
-#include "http_module_streamer.h"
-//#include "http_stream_common.h"
+#include "dhcp_codes.h"
+#include "dhcp_common.h"
+#include "dhcp_configuration.h"
+//#include "dhcp_module_bisector.h"
+#include "dhcp_module_parser.h"
+#include "dhcp_module_streamer.h"
+//#include "dhcp_stream_common.h"
 
 // forward declarations
-class HTTP_SessionMessage;
-class HTTP_Message_T<>;
-//struct HTTP_Stream_SessionData;
-//struct HTTP_StreamState;
+class DHCP_SessionMessage;
+template <typename AllocatorConfigurationType,
+          typename DataType>
+class DHCP_Message_T;
+typedef DHCP_Message_T<Stream_AllocatorConfiguration,
+                       DHCP_Record> DHCP_Message_t;
+//struct DHCP_StreamSessionData;
+//struct DHCP_StreamState;
 
-typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
+typedef DHCP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
-                             HTTP_SessionMessage,
-                             HTTP_Message> HTTP_Module_Parser;
-typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
+                             DHCP_SessionMessage,
+                             DHCP_Message_t> DHCP_Module_Parser;
+typedef DHCP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
-                               HTTP_SessionMessage,
-                               HTTP_Message> HTTP_Module_Streamer;
+                               DHCP_SessionMessage,
+                               DHCP_Message_t> DHCP_Module_Streamer;
 
 typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          HTTP_SessionMessage,
-                                          HTTP_Message,
-                                          HTTP_MethodType_t,
-                                          HTTP_RuntimeStatistic_t> HTTP_Module_Statistic_ReaderTask_t;
+                                          DHCP_SessionMessage,
+                                          DHCP_Message_t,
+                                          DHCP_MessageType_t,
+                                          DHCP_RuntimeStatistic_t> DHCP_Module_Statistic_ReaderTask_t;
 typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          HTTP_SessionMessage,
-                                          HTTP_Message,
-                                          HTTP_MethodType_t,
-                                          HTTP_RuntimeStatistic_t> HTTP_Module_Statistic_WriterTask_t;
+                                          DHCP_SessionMessage,
+                                          DHCP_Message_t,
+                                          DHCP_MessageType_t,
+                                          DHCP_RuntimeStatistic_t> DHCP_Module_Statistic_WriterTask_t;
 
-//typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
+//typedef DHCP_Module_Streamer_T<ACE_MT_SYNCH,
 //                              Common_TimePolicy_t,
-//                              HTTP_SessionMessage,
-//                              HTTP_Message> HTTP_Module_Streamer_t;
-//typedef HTTP_Module_Bisector_T<ACE_SYNCH_MUTEX,
+//                              DHCP_SessionMessage,
+//                              DHCP_Message> DHCP_Module_Streamer_t;
+//typedef DHCP_Module_Bisector_T<ACE_SYNCH_MUTEX,
 //                              ///////////
 //                              ACE_MT_SYNCH,
 //                              Common_TimePolicy_t,
-//                              HTTP_SessionMessage,
-//                              HTTP_Message,
+//                              DHCP_SessionMessage,
+//                              DHCP_Message_t,
 //                              ///////////
-//                              HTTP_ModuleHandlerConfiguration,
+//                              DHCP_ModuleHandlerConfiguration,
 //                              ///////////
-//                              HTTP_StreamState,
+//                              DHCP_StreamState,
 //                              ///////////
-//                              HTTP_Stream_SessionData,
-//                              HTTP_Stream_SessionData_t,
+//                              DHCP_Stream_SessionData,
+//                              DHCP_Stream_SessionData_t,
 //                              ///////////
-//                              HTTP_RuntimeStatistic_t> HTTP_Module_Bisector_t;
+//                              DHCP_RuntimeStatistic_t> DHCP_Module_Bisector_t;
 
 // declare module(s)
 //DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                    // task synch type
 //                              Common_TimePolicy_t,             // time policy
 //                              Stream_ModuleConfiguration,      // module configuration type
-//                              HTTP_ModuleHandlerConfiguration, // module handler configuration type
-//                              HTTP_Module_Parser);             // writer type
+//                              DHCP_ModuleHandlerConfiguration, // module handler configuration type
+//                              DHCP_Module_Parser);             // writer type
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                    // task synch type
                           Common_TimePolicy_t,             // time policy
                           Stream_ModuleConfiguration,      // module configuration type
-                          HTTP_ModuleHandlerConfiguration, // module handler configuration type
-                          HTTP_Module_Streamer,            // reader type
-                          HTTP_Module_Parser,              // writer type
-                          HTTP_Module_Marshal);            // name
+                          DHCP_ModuleHandlerConfiguration, // module handler configuration type
+                          DHCP_Module_Streamer,            // reader type
+                          DHCP_Module_Parser,              // writer type
+                          DHCP_Module_Marshal);            // name
 
-DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                      // task synch type
-                          Common_TimePolicy_t,               // time policy type
-                          Stream_ModuleConfiguration,        // module configuration type
-                          HTTP_ModuleHandlerConfiguration,    // module handler configuration type
-                          HTTP_Module_Statistic_ReaderTask_t, // reader type
-                          HTTP_Module_Statistic_WriterTask_t, // writer type
-                          HTTP_Module_RuntimeStatistic);      // name
+DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                       // task synch type
+                          Common_TimePolicy_t,                // time policy type
+                          Stream_ModuleConfiguration,         // module configuration type
+                          DHCP_ModuleHandlerConfiguration,    // module handler configuration type
+                          DHCP_Module_Statistic_ReaderTask_t, // reader type
+                          DHCP_Module_Statistic_WriterTask_t, // writer type
+                          DHCP_Module_RuntimeStatistic);      // name
 
 #endif

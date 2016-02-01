@@ -21,13 +21,11 @@
 #ifndef NET_STREAM_UDPSOCKET_BASE_H
 #define NET_STREAM_UDPSOCKET_BASE_H
 
-//#include "ace/Acceptor.h"
-#include "ace/config-lite.h"
 #include "ace/Connector.h"
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
-//#include "ace/SOCK_Acceptor.h"
+#include "ace/Notification_Strategy.h"
 #include "ace/SOCK_Connector.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
@@ -67,21 +65,21 @@ class Net_StreamUDPSocketBase_T
                                //////////
                                UserDataType>
 {
-  //friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerType,
+  friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerType,
 
-  //                                                     AddressType,
-  //                                                     ConfigurationType,
-  //                                                     StateType,
-  //                                                     StatisticContainerType,
-  //                                                     StreamType,
+                                                       AddressType,
+                                                       ConfigurationType,
+                                                       StateType,
+                                                       StatisticContainerType,
+                                                       StreamType,
 
-  //                                                     UserDataType,
+                                                       UserDataType,
 
-  //                                                     ModuleConfigurationType,
-  //                                                     ModuleHandlerConfigurationType,
+                                                       ModuleConfigurationType,
+                                                       ModuleHandlerConfigurationType,
 
-  //                                                     HandlerConfigurationType>,
-  //                           ACE_SOCK_CONNECTOR>;
+                                                       HandlerConfigurationType>,
+                             ACE_SOCK_CONNECTOR>;
 
  public:
   virtual ~Net_StreamUDPSocketBase_T ();

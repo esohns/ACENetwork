@@ -45,38 +45,41 @@ extern int yydebug;
 #include <cstdio>
 #include <string>
 
-enum yytokentype
-{
-  END = 0,
-  OP = 258,
-  HTYPE = 259,
-  HLEN = 260,
-  HOPS = 261,
-  XID = 262,
-  SECS = 263,
-  FLAGS = 264,
-  CIADDR = 265,
-  YIADDR = 266,
-  SIADDR = 267,
-  GIADDR = 268,
-  CHADDR = 269,
-  SNAME = 270,
-  FILE_ = 271,
-  OPTION_KEY = 272,
-  OPTION_VALUE = 273
-};
-#define YYTOKENTYPE
-//enum yytokentype;
+//enum yytokentype
+//{
+//  END = 0,
+//  OP = 258,
+//  HTYPE = 259,
+//  HLEN = 260,
+//  HOPS = 261,
+//  XID = 262,
+//  SECS = 263,
+//  FLAGS = 264,
+//  CIADDR = 265,
+//  YIADDR = 266,
+//  SIADDR = 267,
+//  GIADDR = 268,
+//  CHADDR = 269,
+//  SNAME = 270,
+//  FILE_ = 271,
+//  COOKIE = 272,
+//  OPTION_KEY = 273,
+//  OPTION_VALUE = 274
+//};
+//#define YYTOKENTYPE
 class DHCP_ParserDriver;
 //class DHCP_Scanner;
 struct YYLTYPE;
-union YYSTYPE;
+//union YYSTYPE;
 
 typedef void* yyscan_t;
 
 //#define YYERROR_VERBOSE
 extern void yyerror (YYLTYPE*, DHCP_ParserDriver*, yyscan_t, const char*);
-extern void yyprint (FILE*, yytokentype, YYSTYPE);
+extern int yyparse (DHCP_ParserDriver*, yyscan_t);
+
+#undef YYPRINT
+//extern void yyprint (FILE*, yytokentype, YYSTYPE);
 
 
 
@@ -100,8 +103,9 @@ extern void yyprint (FILE*, yytokentype, YYSTYPE);
     CHADDR = 269,
     SNAME = 270,
     FILE_ = 271,
-    OPTION_KEY = 272,
-    OPTION_VALUE = 273
+    COOKIE = 272,
+    OPTION_TAG = 273,
+    OPTION_VALUE = 274
   };
 #endif
 

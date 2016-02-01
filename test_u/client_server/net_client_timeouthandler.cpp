@@ -23,6 +23,8 @@
 
 #include "ace/Log_Msg.h"
 
+#include "common_tools.h"
+
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -42,7 +44,6 @@ Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
  , maximumNumberOfConnections_ (maximumNumberOfConnections_in)
  , mode_ (mode_in)
  , peerAddress_ (remoteSAP_in)
- , randomSeed_ (0)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
  , randomStateInitializationBuffer_ ()
@@ -54,20 +55,19 @@ Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::Net_Client_TimeoutHandler"));
 
-  randomSeed_ = COMMON_TIME_NOW.usec ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   ACE_OS::memset (randomStateInitializationBuffer_,
                   0,
                   sizeof (randomStateInitializationBuffer_));
   int result =
-    ::initstate_r (randomSeed_,
+    ::initstate_r (Common_Tools::randomSeed_,
                    randomStateInitializationBuffer_, sizeof (randomStateInitializationBuffer_),
                    &randomState_);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::initstate_r(): \"%m\", continuing\n")));
-  result = ::srandom_r (randomSeed_, &randomState_);
+  result = ::srandom_r (Common_Tools::randomSeed_, &randomState_);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::srandom_r(): \"%m\", continuing\n")));
@@ -154,7 +154,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         // *PORTABILITY*: outside glibc, this is not very portable...
         // *TODO*: use STL funcionality instead
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        index = (ACE_OS::rand_r (&randomSeed_) % number_of_connections);
+        index = (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections);
 #else
         result = ::random_r (&randomState_, &index);
         if (result == -1)
@@ -212,7 +212,8 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
             // *PORTABILITY*: outside glibc, this is not very portable...
             // *TODO*: use STL funcionality instead
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-            index = (ACE_OS::rand_r (&randomSeed_) % number_of_connections);
+            index =
+              (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections);
 #else
             result = ::random_r (&randomState_, &index);
             if (result == -1)
@@ -293,7 +294,8 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         //        std::uniform_int_distribution<int> distribution (0, number_of_connections - 1);
         //        index = distribution (randomGenerator_);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        index = (ACE_OS::rand_r (&randomSeed_) % number_of_connections);
+        index =
+          (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections);
 #else
         result = ::random_r (&randomState_, &index);
         if (result == -1)

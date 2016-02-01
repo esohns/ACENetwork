@@ -21,6 +21,7 @@
 #ifndef TEST_U_COMMON_MODULES_H
 #define TEST_U_COMMON_MODULES_H
 
+#include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
@@ -28,8 +29,12 @@
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
 
-//#include "stream_misc_dump.h"
+#include "stream_misc_dump.h"
 #include "stream_misc_runtimestatistic.h"
+
+#include "stream_module_io.h"
+
+#include "net_connection_manager.h"
 
 #include "dhcp_common.h"
 #include "dhcp_configuration.h"
@@ -44,12 +49,59 @@
 // forward declarations
 class Test_U_SessionMessage;
 class Test_U_Message;
+typedef Net_Connection_Manager_T<ACE_INET_Addr,
+                                 Test_U_Configuration,
+                                 Test_U_ConnectionState,
+                                 Test_U_RuntimeStatistic_t,
+                                 /////////
+                                 Test_U_UserData> Test_U_ConnectionManager_t;
 
 // declare module(s)
+typedef Stream_Module_Net_IOWriter_T<ACE_SYNCH_MUTEX,
+                                     /////
+                                     Test_U_SessionMessage,
+                                     Test_U_Message,
+                                     /////
+                                     Test_U_StreamModuleHandlerConfiguration,
+                                     /////
+                                     Test_U_StreamState,
+                                     /////
+                                     Test_U_StreamSessionData,
+                                     Test_U_StreamSessionData_t,
+                                     /////
+                                     Test_U_RuntimeStatistic_t,
+                                     /////
+                                     ACE_INET_Addr,
+                                     Test_U_ConnectionManager_t> Test_U_Module_Net_Writer_t;
+typedef Stream_Module_Net_IOReader_T<Test_U_SessionMessage,
+                                     Test_U_Message,
+                                     /////
+                                     Test_U_Configuration,
+                                     /////
+                                     Test_U_StreamModuleHandlerConfiguration,
+                                     /////
+                                     Test_U_StreamSessionData,
+                                     Test_U_StreamSessionData_t,
+                                     /////
+                                     ACE_INET_Addr,
+                                     Test_U_ConnectionManager_t> Test_U_Module_Net_Reader_t;
+
 typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                Test_U_SessionMessage,
-                               Test_U_Message> Test_U_Module_DHCPDiscover;
+                               Test_U_Message,
+                               ///////////
+                               Test_U_StreamModuleHandlerConfiguration> Test_U_Module_DHCPDiscover;
+typedef DHCP_Module_DiscoverH_T<ACE_SYNCH_MUTEX,
+                                ACE_MT_SYNCH,
+                                Common_TimePolicy_t,
+                                Test_U_SessionMessage,
+                                Test_U_Message,
+                                Test_U_StreamModuleHandlerConfiguration,
+                                Test_U_StreamState,
+                                Test_U_StreamSessionData,
+                                Test_U_StreamSessionData_t,
+                                Test_U_RuntimeStatistic_t> Test_U_Module_DHCPDiscoverH;
 
 //typedef DHCP_Module_Bisector_T<ACE_SYNCH_MUTEX,
 //                               ACE_MT_SYNCH,
@@ -58,28 +110,31 @@ typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
 //                               Test_U_Message,
 //                               Test_U_StreamModuleHandlerConfiguration,
 //                               Test_U_StreamState,
-//                               Test_U_Stream_SessionData,
-//                               Test_U_Stream_SessionData_t,
+//                               Test_U_StreamSessionData,
+//                               Test_U_StreamSessionData_t,
 //                               Test_U_RuntimeStatistic_t> Test_U_Module_Bisector;
 
-//typedef DHCP_Module_Parser_T<ACE_MT_SYNCH,
-//                             Common_TimePolicy_t,
-//                             Test_U_SessionMessage,
-//                             Test_U_Message> Test_U_Module_Parser;
-typedef DHCP_Module_ParserH_T<ACE_SYNCH_MUTEX,
-                              ACE_MT_SYNCH,
-                              Common_TimePolicy_t,
-                              Test_U_SessionMessage,
-                              Test_U_Message,
-                              Test_U_StreamModuleHandlerConfiguration,
-                              Test_U_StreamState,
-                              Test_U_StreamSessionData,
-                              Test_U_StreamSessionData_t,
-                              Test_U_RuntimeStatistic_t> Test_U_Module_Parser;
 typedef DHCP_Module_Streamer_T<ACE_MT_SYNCH,
-                              Common_TimePolicy_t,
-                              Test_U_SessionMessage,
-                              Test_U_Message> Test_U_Module_Streamer;
+                               Common_TimePolicy_t,
+                               Test_U_SessionMessage,
+                               Test_U_Message> Test_U_Module_Streamer;
+
+typedef DHCP_Module_Parser_T<Common_TimePolicy_t,
+                             Test_U_SessionMessage,
+                             Test_U_Message,
+                             Test_U_StreamModuleHandlerConfiguration> Test_U_Module_Parser;
+//typedef DHCP_Module_ParserH_T<ACE_SYNCH_MUTEX,
+//                              ////////////
+//                              ACE_MT_SYNCH,
+//                              ////////////
+//                              Common_TimePolicy_t,
+//                              Test_U_SessionMessage,
+//                              Test_U_Message,
+//                              Test_U_StreamModuleHandlerConfiguration,
+//                              Test_U_StreamState,
+//                              Test_U_StreamSessionData,
+//                              Test_U_StreamSessionData_t,
+//                              Test_U_RuntimeStatistic_t> Test_U_Module_Parser;
 
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
@@ -98,36 +153,38 @@ typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                              Test_U_StreamSessionData,
                                              Test_U_StreamSessionData_t> Test_U_Module_Statistic_WriterTask_t;
 
-//typedef Stream_Module_Dump_T<ACE_SYNCH_MUTEX,
-//                             ACE_MT_SYNCH,
-//                             Common_TimePolicy_t,
-//                             Test_U_SessionMessage,
-//                             Test_U_Message,
-//                             Test_U_StreamModuleHandlerConfiguration,
-//                             Test_U_StreamState,
-//                             Test_U_StreamSessionData,
-//                             Test_U_StreamSessionData_t,
-//                             Test_U_RuntimeStatistic_t> Test_U_Module_Dump;
+typedef Stream_Module_Dump_T<Test_U_SessionMessage,
+                             Test_U_Message,
+                             Test_U_StreamModuleHandlerConfiguration,
+                             Test_U_StreamSessionData_t> Test_U_Module_Dump;
 
 // declare module(s)
+DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                             // task synch type
+                          Common_TimePolicy_t,                      // time policy
+                          Stream_ModuleConfiguration,               // module configuration type
+                          Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+                          Test_U_Module_Net_Reader_t,              // reader type
+                          Test_U_Module_Net_Writer_t,              // writer type
+                          Test_U_Module_Net_IO);                   // name
+
 DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                            // task synch type
                               Common_TimePolicy_t,                     // time policy
                               Stream_ModuleConfiguration,              // module configuration type
                               Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
                               Test_U_Module_DHCPDiscover);             // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                            // task synch type
+                              Common_TimePolicy_t,                     // time policy
+                              Stream_ModuleConfiguration,              // module configuration type
+                              Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+                              Test_U_Module_DHCPDiscoverH);            // writer type
 
-//DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                    // task synch type
-//                              Common_TimePolicy_t,             // time policy
-//                              Stream_ModuleConfiguration,      // module configuration type
-//                              HTTP_ModuleHandlerConfiguration, // module handler configuration type
-//                              Test_U_Module_Parser);           // writer type
-//DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                   // task synch type
-//                          Common_TimePolicy_t,            // time policy
-//                          Stream_ModuleConfiguration,     // module configuration type
-//                          HTTP_ModuleHandlerConfiguration, // module handler configuration type
-//                          HTTP_Module_Streamer,            // reader type
-//                          HTTP_Module_Bisector_t,          // writer type
-//                          HTTP_Module_Marshal);            // name
+//DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                            // task synch type
+//                          Common_TimePolicy_t,                     // time policy
+//                          Stream_ModuleConfiguration,              // module configuration type
+//                          Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+//                          Test_U_Module_Streamer,                  // reader type
+//                          Test_U_Module_Bisector,                  // writer type
+//                          Test_U_Module_Marshal);                  // name
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                            // task synch type
                           Common_TimePolicy_t,                     // time policy
                           Stream_ModuleConfiguration,              // module configuration type
@@ -135,6 +192,11 @@ DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                            // task synch
                           Test_U_Module_Streamer,                  // reader type
                           Test_U_Module_Parser,                    // writer type
                           Test_U_Module_Marshal);                  // name
+//DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                            // task synch type
+//                              Common_TimePolicy_t,                     // time policy
+//                              Stream_ModuleConfiguration,              // module configuration type
+//                              Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+//                              Test_U_Module_Parser);                   // writer type
 
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                            // task synch type
                           Common_TimePolicy_t,                     // time policy type
@@ -144,10 +206,10 @@ DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                            // task synch
                           Test_U_Module_Statistic_WriterTask_t,    // writer type
                           Test_U_Module_RuntimeStatistic);         // name
 
-//DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                            // task synch type
-//                              Common_TimePolicy_t,                     // time policy
-//                              Stream_ModuleConfiguration,              // module configuration type
-//                              Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
-//                              Test_U_Module_Dump);                     // writer type
+DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                            // task synch type
+                              Common_TimePolicy_t,                     // time policy
+                              Stream_ModuleConfiguration,              // module configuration type
+                              Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+                              Test_U_Module_Dump);                     // writer type
 
 #endif

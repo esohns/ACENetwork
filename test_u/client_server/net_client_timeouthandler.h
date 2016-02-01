@@ -84,7 +84,6 @@ class Net_Client_TimeoutHandler
   unsigned int                       maximumNumberOfConnections_;
   ActionMode_t                       mode_;
   ACE_INET_Addr                      peerAddress_;
-  unsigned int                       randomSeed_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   char                               randomStateInitializationBuffer_[BUFSIZ];

@@ -90,7 +90,7 @@ Test_U_SignalHandler::handleSignal (int signal_in)
     case SIGBREAK:
 #endif
     {
-      // print statistics
+      // print statistic
       statistic = true;
 
       break;
@@ -101,7 +101,7 @@ Test_U_SignalHandler::handleSignal (int signal_in)
 #endif
     case SIGTERM:
     {
-      // print statistics
+      // print statistic
       statistic = true;
 
       break;
@@ -111,8 +111,11 @@ Test_U_SignalHandler::handleSignal (int signal_in)
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("received invalid/unknown signal: \"%S\", aborting\n"),
-                  signal_in));
+                  ACE_TEXT ("received invalid/unknown signal (was: %d --> \"%S\"), aborting\n"),
+                  signal_in, signal_in));
+
+      ACE_OS::last_error (EINVAL);
+
       return false;
     }
   } // end SWITCH

@@ -11,20 +11,21 @@
 # sanity check(s)
 command -v dirname >/dev/null 2>&1 || { echo "dirname is not installed, aborting" >&2; exit 1; }
 command -v bison >/dev/null 2>&1 || { echo "bison is not installed, aborting" >&2; exit 1; }
-command -v dot >/dev/null 2>&1 || { echo "graphviz is not installed, aborting" >&2; exit 1; }
+#command -v dot >/dev/null 2>&1 || { echo "graphviz is not installed, aborting" >&2; exit 1; }
 
 PROJECT_ROOT=$(dirname $0)/../../../..
 SCRIPTS_DIRECTORY=${PROJECT_ROOT}/src/protocol/dhcp/scripts
 
 SOURCE_FILE=${SCRIPTS_DIRECTORY}/parser.y
 [ ! -f ${SOURCE_FILE} ] && echo "ERROR: file ${SOURCE_FILE} not found, aborting" && exit 1
-bison --feature=caret --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${SOURCE_FILE}
+#bison --no-lines --feature=caret --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${SOURCE_FILE}
+bison --no-lines --locations --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${SOURCE_FILE}
 [ $? -ne 0 ] && echo "ERROR: \"${SOURCE_FILE}\" failed (status was: $?), aborting" && exit 1
-DOT_FILE=${SCRIPTS_DIRECTORY}/dhcp_parser.dot
-[ ! -f ${DOT_FILE} ] && echo "ERROR: file ${DOT_FILE} not found, aborting" && exit 1
-IMAGE_FILE=dhcp_parser.png
-dot -Tpng ${DOT_FILE} >${IMAGE_FILE}
-[ $? -ne 0 ] && echo "ERROR: \"${DOT_FILE}\" failed (status was: $?), aborting" && exit 1
+#DOT_FILE=${SCRIPTS_DIRECTORY}/dhcp_parser.dot
+#[ ! -f ${DOT_FILE} ] && echo "ERROR: file ${DOT_FILE} not found, aborting" && exit 1
+#IMAGE_FILE=dhcp_parser.png
+#dot -Tpng ${DOT_FILE} >${IMAGE_FILE}
+#[ $? -ne 0 ] && echo "ERROR: \"${DOT_FILE}\" failed (status was: $?), aborting" && exit 1
 # *TODO*: xsltproc /usr/local/share/bison/xslt/xml2xhtml.xsl gr.xml >gr.html
 
 # move generated file(s) into the project directory

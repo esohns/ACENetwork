@@ -39,9 +39,10 @@ endif ()
 include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
+# *NOTE*: libCommon requires libcap
+ pkg_check_modules (PKG_CAP REQUIRED libcap)
  pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
  pkg_check_modules (PKG_GTK_GLADE REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
-
  if ((!PKG_CURSES) OR (!PKG_GTK_GLADE))
   message (FATAL_ERROR "required packages not found, aborting")
  endif ()
@@ -104,7 +105,9 @@ add_definitions (-DIRC_HAS_DLL)
 
 if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
+ include_directories (${PKG_CAP_INCLUDE_DIRS})
  include_directories (${PKG_CURSES_INCLUDE_DIRS})
+ include_directories (${PKG_GTK_GLADE_INCLUDE_DIRS})
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/misc)
@@ -172,6 +175,7 @@ add_executable(${EXECUTABLE} ${IRC_client_SRCS})
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
+ target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
 elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ${CURSES_LIBRARY})
@@ -183,7 +187,7 @@ target_link_libraries (${EXECUTABLE} ACENetwork)
 target_link_libraries (${EXECUTABLE} ACENetwork_Protocol_IRC)
 #target_link_libraries (${EXECUTABLE} ACENetwork_Client)
 
-install (TARGETS IRC_client
+install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
@@ -255,6 +259,7 @@ add_executable (${EXECUTABLE} ${IRC_client_gui_SRCS})
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
+ target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${PKG_GTK_GLADE_LIBRARIES})
 elseif (WIN32)
 # *TODO*: repair WIN32 pkgconfig support
@@ -277,7 +282,7 @@ target_link_libraries (${EXECUTABLE} ACENetwork)
 target_link_libraries (${EXECUTABLE} ACENetwork_Protocol_IRC)
 #target_link_libraries (${EXECUTABLE} ACENetwork_Client)
 
-install (TARGETS IRC_client_gui
+install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)

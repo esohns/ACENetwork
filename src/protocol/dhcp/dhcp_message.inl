@@ -94,7 +94,8 @@ DHCP_Message_T<AllocatorConfigurationType,
     return DHCP_Codes::DHCP_MESSAGE_INVALID;
   ACE_ASSERT (inherited::data_);
 
-  typename const DataType::DATA_T& data_r = inherited::data_->get ();
+  typename DataType::DATA_T& data_r =
+      const_cast<typename DataType::DATA_T&> (inherited::data_->get ());
   ACE_ASSERT (data_r.DHCPRecord);
   DHCP_OptionsIterator_t iterator =
     data_r.DHCPRecord->options.find (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE);

@@ -24,6 +24,9 @@
 #include "dhcp_tools.h"
 
 #include "ace/Log_Msg.h"
+#include "ace/OS.h"
+
+#include "common_tools.h"
 
 #include "net_common_tools.h"
 #include "net_macros.h"
@@ -102,7 +105,7 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
 }
 
 std::string
-DHCP_Tools::Op2String (const DHCP_Op_t& op_in)
+DHCP_Tools::Op2String (DHCP_Op_t op_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::Op2String"));
 
@@ -127,7 +130,7 @@ DHCP_Tools::Op2String (const DHCP_Op_t& op_in)
   return result;
 }
 std::string
-DHCP_Tools::Option2String (const DHCP_Option_t& option_in)
+DHCP_Tools::Option2String (DHCP_Option_t option_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::Option2String"));
 
@@ -154,7 +157,7 @@ DHCP_Tools::Option2String (const DHCP_Option_t& option_in)
   return result;
 }
 std::string
-DHCP_Tools::MessageType2String (const DHCP_MessageType_t& type_in)
+DHCP_Tools::MessageType2String (DHCP_MessageType_t type_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::MessageType2String"));
 
@@ -186,20 +189,33 @@ DHCP_Tools::MessageType2Type (const std::string& type_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::MessageType2Type"));
 
-  if (type_in == ACE_TEXT_ALWAYS_CHAR ("DHCPDISCOVER"))
-    return DHCP_Codes::DHCP_MESSAGE_DISCOVER;
-//  else if (method_in == ACE_TEXT_ALWAYS_CHAR ("POST"))
-//    return HTTP_Codes::HTTP_METHOD_POST;
-//  else if (method_in == ACE_TEXT_ALWAYS_CHAR ("HEAD"))
-//    return HTTP_Codes::HTTP_METHOD_HEAD;
-  else
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("invalid/unknown message type (was: \"%s\"), aborting\n"),
-                ACE_TEXT (type_in.c_str ())));
-  } // end IF
+  // sanity check(s)
+  ACE_ASSERT (type_in.size () == 1);
 
-  return DHCP_Codes::DHCP_MESSAGE_INVALID;
+  const char* char_p = type_in.c_str ();
+
+  return static_cast<DHCP_MessageType_t> (*char_p);
+}
+
+DHCP_OptionFieldType_t
+DHCP_Tools::Option2FieldType (DHCP_Option_t option_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::Option2FieldType"));
+
+  switch (option_in)
+  {
+    case DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE:
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_INTEGER;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown option (was: \"%s\"), aborting\n"),
+                  ACE_TEXT (DHCP_Tools::Option2String (option_in).c_str ())));
+      break;
+    }
+  } // end SWITCH
+
+  return DHCP_Codes::DHCP_OPTION_FIELDTYPE_INVALID;
 }
 
 bool
@@ -208,4 +224,12 @@ DHCP_Tools::isRequest (const DHCP_Record& record_in)
   NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::isRequest"));
 
   return (record_in.op == DHCP_Codes::DHCP_OP_REQUEST);
+}
+
+unsigned int
+DHCP_Tools::generateXID ()
+{
+  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::generateXID"));
+
+  return static_cast<unsigned int> (ACE_OS::rand_r (&Common_Tools::randomSeed_));
 }

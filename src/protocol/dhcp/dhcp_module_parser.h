@@ -27,7 +27,7 @@
 
 #include "stream_headmoduletask_base.h"
 #include "stream_statistichandler.h"
-#include "stream_task_base_asynch.h"
+#include "stream_task_base_synch.h"
 
 #include "dhcp_defines.h"
 #include "dhcp_parser_driver.h"
@@ -41,9 +41,9 @@ template <typename TimePolicyType,
           ///////////////////////////////
           typename ConfigurationType>
 class DHCP_Module_Parser_T
- : public Stream_TaskBaseAsynch_T<TimePolicyType,
-                                  SessionMessageType,
-                                  ProtocolMessageType>
+ : public Stream_TaskBaseSynch_T<TimePolicyType,
+                                 SessionMessageType,
+                                 ProtocolMessageType>
 {
  public:
   DHCP_Module_Parser_T ();
@@ -61,33 +61,25 @@ class DHCP_Module_Parser_T
                                      bool&);               // return value: pass message downstream ?
 
  private:
-  typedef Stream_TaskBaseAsynch_T<TimePolicyType,
-                                  SessionMessageType,
-                                  ProtocolMessageType> inherited;
+  typedef Stream_TaskBaseSynch_T<TimePolicyType,
+                                 SessionMessageType,
+                                 ProtocolMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Parser_T (const DHCP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Parser_T& operator= (const DHCP_Module_Parser_T&))
 
   // convenient types
-  typedef typename ProtocolMessageType::DATA_T DATA_CONTAINER_T;
-  typedef typename ProtocolMessageType::DATA_T::DATA_T DATA_T;
-
-  // helper methods
-  ProtocolMessageType* allocateMessage (unsigned int); // requested size
-
-  Stream_IAllocator*   allocator_;
+  typedef typename ProtocolMessageType::DATA_T DATA_T;
+//  typedef typename ProtocolMessageType::DATA_T DATA_CONTAINER_T;
+//  typedef typename ProtocolMessageType::DATA_T::DATA_T DATA_T;
 
   // driver
-  bool                 debugScanner_;
-  bool                 debugParser_;
-  DHCP_ParserDriver    driver_;
-  bool                 finished_;
-  ProtocolMessageType* headFragment_;
-  bool                 isDriverInitialized_;
+  bool              debugScanner_;
+  bool              debugParser_;
+  DHCP_ParserDriver driver_;
+  bool              isDriverInitialized_;
 
-  bool                 crunchMessages_;
-  DATA_CONTAINER_T*    dataContainer_;
-  bool                 initialized_;
+  bool              initialized_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -121,8 +113,8 @@ class DHCP_Module_ParserH_T
                                       ///
                                       SessionDataType,
                                       SessionDataContainerType>
- // implement this to have a generic (timed) event handler to trigger
- // periodic statistic collection
+// implement this to have a generic (timed) event handler to trigger
+// periodic statistic collection
  , public Common_IStatistic_T<StatisticContainerType>
 {
  public:
@@ -181,28 +173,24 @@ class DHCP_Module_ParserH_T
 
   // convenience types
   typedef Stream_StatisticHandler_Reactor_T<StatisticContainerType> STATISTICHANDLER_T;
-  typedef typename ProtocolMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename ProtocolMessageType::DATA_T::DATA_T DATA_T;
+//  typedef typename ProtocolMessageType::DATA_T DATA_CONTAINER_T;
+//  typedef typename ProtocolMessageType::DATA_T::DATA_T DATA_T;
 
   // helper methods
   bool putStatisticMessage (const StatisticContainerType&) const;
-  ProtocolMessageType* allocateMessage (unsigned int); // requested size
 
   // timer
-  STATISTICHANDLER_T   statisticCollectHandler_;
-  long                 statisticCollectHandlerID_;
+  STATISTICHANDLER_T statisticCollectHandler_;
+  long               statisticCollectHandlerID_;
 
   // driver
-  bool                 debugScanner_;
-  bool                 debugParser_;
-  DHCP_ParserDriver    driver_;
-  bool                 finished_;
-  ProtocolMessageType* headFragment_;
-  bool                 isDriverInitialized_;
+  bool               debugScanner_;
+  bool               debugParser_;
+  DHCP_ParserDriver  driver_;
+  bool               isDriverInitialized_;
 
-  bool                 crunchMessages_;
-  DATA_CONTAINER_T*    dataContainer_;
-  bool                 initialized_;
+  bool               initialized_;
 };
 
 // include template implementation

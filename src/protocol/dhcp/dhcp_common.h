@@ -25,6 +25,7 @@
 #include <string>
 
 #include "ace/OS.h"
+#include "ace/Time_Value.h"
 
 #include "common_inotify.h"
 
@@ -34,6 +35,7 @@
 #include "net_common.h"
 
 #include "dhcp_codes.h"
+#include "dhcp_defines.h"
 
 // forward declarations
 struct DHCP_Configuration;
@@ -46,7 +48,8 @@ typedef Common_INotify_T<DHCP_Stream_SessionData,
                          DHCP_SessionMessage> DHCP_IStreamNotify_t;
 typedef Stream_Statistic DHCP_RuntimeStatistic_t;
 
-typedef std::map<unsigned int, std::string> DHCP_Options_t;
+//typedef std::list<std::pair<unsigned char, std::string> > DHCP_Options_t;
+typedef std::map<unsigned char, std::string> DHCP_Options_t;
 typedef DHCP_Options_t::const_iterator DHCP_OptionsIterator_t;
 struct DHCP_Record
 {
@@ -65,6 +68,7 @@ struct DHCP_Record
 //   , chaddr ()
    , sname ()
    , file ()
+   , cookie (0)
    , options ()
   {
     ACE_OS::memset (chaddr, 0, 16);
@@ -82,11 +86,12 @@ struct DHCP_Record
   unsigned int       yiaddr;
   unsigned int       siaddr;
   unsigned int       giaddr;
-  unsigned char      chaddr[16];
+  unsigned char      chaddr[DHCP_CHADDR_SIZE];
   std::string        sname;   // max. 64 bytes
   std::string        file;    // max. 128 bytes
+  unsigned int       cookie;
   DHCP_Options_t     options; // max. 312 bytes (negotiable)
-//  unsigned char      options[312];
+//  unsigned char      options[DHCP_OPTIONS_SIZE];
 };
 struct DHCP_MessageData
 {
@@ -110,11 +115,15 @@ struct DHCP_ConnectionState
    : Net_ConnectionState ()
    , configuration (NULL)
    , userData (NULL)
+   , timeStamp (ACE_Time_Value::zero)
+   , xid (0)
   {};
 
   DHCP_Configuration*   configuration;
-
   DHCP_Stream_UserData* userData;
+
+  ACE_Time_Value        timeStamp; // lease timeout
+  unsigned int          xid;       // session ID
 };
 
 #endif

@@ -36,8 +36,8 @@ class Net_Server_Export Net_Server_Common_Tools
 {
  public:
   // *NOTE*: implements log rotation
-  static bool getNextLogFileName (const std::string&, // directory
-                                  std::string&);      // return value: log filename
+  static std::string getNextLogFileName (const std::string&,  // package name
+                                         const std::string&); // program name
 
 //  static Net_IListener_t* getListenerSingleton ();
 //  static Net_IListener_t* getAsynchListenerSingleton ();

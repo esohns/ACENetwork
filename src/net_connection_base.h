@@ -88,7 +88,7 @@ class Net_ConnectionBase_T
 //#endif
   void deregister ();
 
-  ConfigurationType      configuration_;
+  ConfigurationType*     configuration_;
   StateType              state_;
 
   bool                   isRegistered_;

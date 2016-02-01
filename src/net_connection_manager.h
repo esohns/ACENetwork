@@ -81,9 +81,9 @@ class Net_Connection_Manager_T
   virtual void set (const ConfigurationType&, // connection handler (default)
                                               // configuration
                     UserDataType*);           // (stream) user data
-  virtual void get (ConfigurationType&, // return value: (default)
-                                        // connection handler configuration
-                    UserDataType*&);    // return value: (stream) user data
+  virtual void get (ConfigurationType*&, // return value: (default)
+                                         // connection handler configuration
+                    UserDataType*&);     // return value: (stream) user data
 
   virtual ICONNECTION_T* operator[] (unsigned int) const; // index
   virtual ICONNECTION_T* get (ACE_HANDLE) const; // socket handle

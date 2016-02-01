@@ -25,6 +25,7 @@
 #include "ace/Reactor_Notification_Strategy.h"
 //#include "ace/SOCK_CODgram.h"
 #include "ace/SOCK_Dgram.h"
+#include "ace/SOCK_Dgram_Bcast.h"
 #include "ace/Svc_Handler.h"
 #include "ace/Synch_Traits.h"
 
@@ -40,6 +41,15 @@ class Net_SOCK_Dgram
 
  private:
   typedef ACE_SOCK_Dgram inherited;
+};
+class Net_SOCK_Dgram_Bcast
+ : public ACE_SOCK_Dgram_Bcast
+{
+ public:
+  int get_remote_addr (ACE_Addr&) const;
+
+ private:
+  typedef ACE_SOCK_Dgram_Bcast inherited;
 };
 //typedef ACE_SOCK_CODgram Net_SOCK_Dgram;
 

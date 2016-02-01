@@ -43,8 +43,8 @@ set (${PROJECT_NAME}_Protocol_DHCP_SRCS
      dhcp_configuration.h
      dhcp_defines.h
      dhcp_codes.h
-     dhcp_bisector.cpp
-     dhcp_bisector.h
+#     dhcp_bisector.cpp
+#     dhcp_bisector.h
      dhcp_message.cpp
      dhcp_message.h
      dhcp_parser.cpp
@@ -56,9 +56,9 @@ set (${PROJECT_NAME}_Protocol_DHCP_SRCS
      dhcp_message.cpp
      dhcp_message.h
      dhcp_message.inl
-     dhcp_module_bisector.cpp
-     dhcp_module_bisector.h
-     dhcp_module_bisector.inl
+#     dhcp_module_bisector.cpp
+#     dhcp_module_bisector.h
+#     dhcp_module_bisector.inl
      dhcp_module_discover.cpp
      dhcp_module_discover.h
      dhcp_module_discover.inl
@@ -102,6 +102,7 @@ if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP Common)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACEStream)
+ target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACENetwork)
 endif ()
 
 # add all targets to the build-tree export set

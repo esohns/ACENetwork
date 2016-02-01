@@ -218,7 +218,7 @@ IRC_Session_T<ConnectionType,
   //  configuration_p = &const_cast<IRC_Client_Configuration&> (configuration_r);
   //} // end IF
   //else
-    configuration_p = &(inherited::CONNECTION_BASE_T::configuration_);
+    configuration_p = inherited::CONNECTION_BASE_T::configuration_;
   // sanity check(s)
   ACE_ASSERT (configuration_p);
   inherited::state_.nickName =
@@ -999,8 +999,11 @@ IRC_Session_T<ConnectionType,
     ACE_ASSERT (module_handler_configuration_p);
   } // end IF
   else
+  {
+    ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
     module_handler_configuration_p =
-        &(inherited::CONNECTION_BASE_T::configuration_.moduleHandlerConfiguration);
+        &(inherited::CONNECTION_BASE_T::configuration_->moduleHandlerConfiguration);
+  } // end ELSE
   ACE_ASSERT (module_handler_configuration_p);
 
   module_handler_configuration_p->subscriber = this;
@@ -1052,6 +1055,9 @@ IRC_Session_T<ConnectionType,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::open"));
 
+  // sanity checK(s)
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+
   // step0: intialize configuration object
   ModuleHandlerConfigurationType* module_handler_configuration_p = NULL;
 //  if (!inherited::manager_)
@@ -1091,7 +1097,7 @@ IRC_Session_T<ConnectionType,
 //  } // end IF
 //  else
   module_handler_configuration_p =
-        &(inherited::CONNECTION_BASE_T::configuration_.moduleHandlerConfiguration);
+        &(inherited::CONNECTION_BASE_T::configuration_->moduleHandlerConfiguration);
   // sanity check(s)
   ACE_ASSERT (module_handler_configuration_p);
   module_handler_configuration_p->subscriber = this;

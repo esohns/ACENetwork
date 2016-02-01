@@ -510,10 +510,10 @@ do_work (unsigned int bufferSize_in,
 
   // *********************** socket configuration data ************************
   int result =
-    configuration.socketConfiguration.peerAddress.set (port_in,
-                                                       hostName_in.c_str (),
-                                                       1,
-                                                       ACE_ADDRESS_FAMILY_INET);
+    configuration.socketConfiguration.address.set (port_in,
+                                                   hostName_in.c_str (),
+                                                   1,
+                                                   ACE_ADDRESS_FAMILY_INET);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -523,7 +523,7 @@ do_work (unsigned int bufferSize_in,
     return;
   } // end IF
   configuration.socketConfiguration.useLoopBackDevice =
-    configuration.socketConfiguration.peerAddress.is_loopback ();
+    configuration.socketConfiguration.address.is_loopback ();
   configuration.socketConfiguration.writeOnly = true;
   // ******************** socket handler configuration data *******************
   configuration.socketHandlerConfiguration.messageAllocator =
@@ -684,9 +684,9 @@ do_work (unsigned int bufferSize_in,
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   result =
-    configuration.socketConfiguration.peerAddress.addr_to_string (buffer,
-                                                                  sizeof (buffer),
-                                                                  1);
+    configuration.socketConfiguration.address.addr_to_string (buffer,
+                                                              sizeof (buffer),
+                                                              1);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string: \"%m\", continuing\n")));
@@ -722,7 +722,7 @@ do_work (unsigned int bufferSize_in,
     goto clean_up;
   } // end IF
   handle =
-    iconnector_p->connect (configuration.socketConfiguration.peerAddress);
+    iconnector_p->connect (configuration.socketConfiguration.address);
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -747,7 +747,7 @@ do_work (unsigned int bufferSize_in,
     do
     {
       connection_p =
-        connection_manager_p->get (configuration.socketConfiguration.peerAddress);
+        connection_manager_p->get (configuration.socketConfiguration.address);
       if (connection_p) break;
     } while (COMMON_TIME_NOW < deadline);
   } // end IF

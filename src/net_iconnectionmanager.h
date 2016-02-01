@@ -48,9 +48,9 @@ class Net_IConnectionManager_T
   virtual void set (const ConfigurationType&, // connection handler (default)
                                               // configuration
                     UserDataType*) = 0;       // (stream) user data
-  virtual void get (ConfigurationType&,  // return value: (default)
-                                         // connection handler configuration
-                    UserDataType*&) = 0; // return value: (stream) user data
+  virtual void get (ConfigurationType*&,  // return value: (default)
+                                          // connection handler configuration
+                    UserDataType*&) = 0;  // return value: (stream) user data
 
   // *WARNING*: if (!= NULL) callers must decrease() the returned handle
   virtual CONNECTION_T* operator[] (unsigned int) const = 0; // index

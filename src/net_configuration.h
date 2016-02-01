@@ -48,18 +48,19 @@ struct Net_SocketConfiguration
    , netlinkAddress ()
    , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
  #endif
-   , peerAddress (static_cast<u_short> (0),
-                  static_cast<ACE_UINT32> (INADDR_ANY))
+   , address (static_cast<u_short> (0),
+              static_cast<ACE_UINT32> (INADDR_ANY))
+   , networkInterface ()
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
    , writeOnly (false)
   {
     int result = -1;
     if (useLoopBackDevice)
     {
-      result = peerAddress.set (static_cast<unsigned short> (0),
-                                INADDR_LOOPBACK,
-                                1,
-                                0);
+      result = address.set (static_cast<u_short> (0),
+                            INADDR_LOOPBACK,
+                            1,
+                            0);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
@@ -74,11 +75,10 @@ struct Net_SocketConfiguration
   Net_Netlink_Addr netlinkAddress;
   int              netlinkProtocol;
 #endif
-  ACE_INET_Addr    peerAddress;
+  ACE_INET_Addr    address;
+  std::string      networkInterface;
   bool             useLoopBackDevice;
-  bool             writeOnly; // UDP ?
-  // *TODO*: add network interface specifier (interface index on linux, (G)UID
-  //         on windows)
+  bool             writeOnly; // UDP
 };
 
 struct Net_SocketHandlerConfiguration

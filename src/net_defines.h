@@ -30,8 +30,8 @@
 //#include "stream_defines.h"
 
 // interface
-// *PORTABILITY*: interface names are not portable, so let the user choose the
-//                interface from a list on Windows (see select_interface())...
+// *PORTABILITY*: nic device names are not portable
+//                --> (on Windows) let the user choose the interface from a list
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define NET_INTERFACE_DEFAULT                           ""
 #else
@@ -44,6 +44,10 @@
 #endif
 
 // addresses
+#if defined (ACE_LINUX)
+// *NOTE*: binding to these ports requires the CAP_NET_BIND_SERVICE capability
+#define NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT            1023
+#endif
 #define NET_ADDRESS_DEFAULT_PORT                        10001
 #define NET_ADDRESS_DEFAULT_IP_MULTICAST                "224.0.0.1"
 #define NET_ADDRESS_DEFAULT_IP_BROADCAST                "255.255.255.255"

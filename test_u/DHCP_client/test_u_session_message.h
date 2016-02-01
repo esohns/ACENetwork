@@ -43,7 +43,7 @@ class Test_U_SessionMessage
                                       Test_U_StreamSessionData_t,
                                       Test_U_UserData>
 {
-  // grant access to specific private ctors...
+  // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
 
                                                  Test_U_Message,
@@ -51,7 +51,7 @@ class Test_U_SessionMessage
 
  public:
   // *NOTE*: assumes responsibility for the second argument !
-  // *TODO*: (using gcc) cannot pass reference to pointer for some reason...
+  // *TODO*: (using gcc) cannot pass reference to pointer for some reason
   Test_U_SessionMessage (Stream_SessionMessageType,    // session message type
                          Test_U_StreamSessionData_t*&, // session data container handle
                          Test_U_UserData*);            // user data handle
@@ -69,8 +69,8 @@ class Test_U_SessionMessage
   // copy ctor to be used by duplicate()
   Test_U_SessionMessage (const Test_U_SessionMessage&);
 
-  // *NOTE*: these may be used by message allocators...
-  // *WARNING*: these ctors are NOT threadsafe...
+  // *NOTE*: these may be used by message allocators
+  // *WARNING*: these ctors are NOT threadsafe
   Test_U_SessionMessage (ACE_Allocator*); // message allocator
   Test_U_SessionMessage (ACE_Data_Block*, // data block
                          ACE_Allocator*); // message allocator

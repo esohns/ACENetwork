@@ -68,6 +68,7 @@ class Net_AsynchUDPSocketHandler_T
   Common_ReferenceCounterBase counter_;
   ACE_Asynch_Read_Dgram       inputStream_;
   ACE_Asynch_Write_Dgram      outputStream_;
+  bool                        writeOnly_;
 
  private:
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;

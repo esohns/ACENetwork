@@ -20,39 +20,35 @@
 
 #include "ace/Log_Msg.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
 template <typename ConnectorType>
-Test_U_DHCPClient_Stream_T<ConnectorType>::Test_U_DHCPClient_Stream_T ()
- : inherited (ACE_TEXT_ALWAYS_CHAR ("SourceStream"))
- , netSource_ (ACE_TEXT_ALWAYS_CHAR ("NetSource"),
-               NULL,
-               false)
+Test_U_Stream_T<ConnectorType>::Test_U_Stream_T ()
+ : inherited (ACE_TEXT_ALWAYS_CHAR ("DHCPClientStream"))
+ , DHCPDiscover_ (ACE_TEXT_ALWAYS_CHAR ("DHCPClient"),
+                  NULL,
+                  false)
  , runtimeStatistic_ (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
                       NULL,
                       false)
- , DHCPDisover_ (ACE_TEXT_ALWAYS_CHAR ("DHCPDiscover"),
-                 NULL,
-                 false)
- , DHCPParser_ (ACE_TEXT_ALWAYS_CHAR ("DHCPParser"),
-                NULL,
-                false)
- //, dump_ (ACE_TEXT_ALWAYS_CHAR ("Dump"),
- //         NULL,
- //         false)
+ , marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+             NULL,
+             false)
+ , netTarget_ (ACE_TEXT_ALWAYS_CHAR ("NetTarget"),
+               NULL,
+               false)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_DHCPClient_Stream_T::Test_U_DHCPClient_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::Test_U_Stream_T"));
 
   // remember the "owned" ones...
   // *TODO*: clean this up
   // *NOTE*: one problem is that all modules which have NOT enqueued onto the
   //         stream (e.g. because initialize() failed...) need to be explicitly
   //         close()d
-  inherited::availableModules_.push_front (&netSource_);
-  inherited::availableModules_.push_front (&runtimeStatistic_);
   inherited::availableModules_.push_front (&DHCPDiscover_);
-  inherited::availableModules_.push_front (&DHCPParser_);
-  //inherited::availableModules_.push_front (&dump_);
+  inherited::availableModules_.push_front (&runtimeStatistic_);
+  inherited::availableModules_.push_front (&marshal_);
+  inherited::availableModules_.push_front (&netTarget_);
 
   // *TODO* fix ACE bug: modules should initialize their "next" member to NULL
   //inherited::MODULE_T* module_p = NULL;
@@ -67,9 +63,9 @@ Test_U_DHCPClient_Stream_T<ConnectorType>::Test_U_DHCPClient_Stream_T ()
 }
 
 template <typename ConnectorType>
-Test_U_DHCPClient_Stream_T<ConnectorType>::~Test_U_DHCPClient_Stream_T ()
+Test_U_Stream_T<ConnectorType>::~Test_U_Stream_T ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_DHCPClient_Stream_T::~Test_U_DHCPClient_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::~Test_U_Stream_T"));
 
   // *NOTE*: this implements an ordered shutdown on destruction...
   inherited::shutdown ();
@@ -77,9 +73,9 @@ Test_U_DHCPClient_Stream_T<ConnectorType>::~Test_U_DHCPClient_Stream_T ()
 
 template <typename ConnectorType>
 void
-Test_U_DHCPClient_Stream_T<ConnectorType>::ping ()
+Test_U_Stream_T<ConnectorType>::ping ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_DHCPClient_Stream_T::ping"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::ping"));
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
@@ -89,9 +85,9 @@ Test_U_DHCPClient_Stream_T<ConnectorType>::ping ()
 
 template <typename ConnectorType>
 bool
-Test_U_DHCPClient_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& configuration_in)
+Test_U_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& configuration_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_DHCPClient_Stream_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::initialize"));
 
   int result = -1;
 
@@ -153,8 +149,8 @@ Test_U_DHCPClient_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfig
     return false;
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
-  Test_U_Stream_SessionData& session_data_r =
-      const_cast<Test_U_Stream_SessionData&> (inherited::sessionData_->get ());
+  Test_U_StreamSessionData& session_data_r =
+      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
   // *TODO*: remove type inferences
   ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
   session_data_r.targetFileName =
@@ -254,100 +250,70 @@ Test_U_DHCPClient_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfig
 
   // ---------------------------------------------------------------------------
 
-  //Test_U_Stream_Module_Dump* dump_impl_p = NULL;
-  Test_U_Stream_Module_DHCPParser* DHCPParser_impl_p = NULL;
-  Test_U_Stream_Module_DHCPDiscover* DHCPDiscover_impl_p = NULL;
-  Test_U_Stream_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p = NULL;
-  SOURCE_WRITER_T* netSource_impl_p = NULL;
+  WRITER_T* netTarget_impl_p = NULL;
+  Test_U_Module_Parser* parser_impl_p = NULL;
+  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p = NULL;
+  Test_U_Module_DHCPDiscoverH* DHCPDiscover_impl_p = NULL;
 
-  //// ******************* Dump ************************
-  //dump_.initialize (*configuration_in.moduleConfiguration);
-  //dump_impl_p =
-  //  dynamic_cast<Test_U_Stream_Module_Dump*> (dump_.writer ());
-  //if (!dump_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Test_U_Stream_Module_Dump> failed, aborting\n")));
-  //  goto failed;
-  //} // end IF
-  //if (!dump_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              dump_.name ()));
-  //  goto failed;
-  //} // end IF
-  //result = inherited::push (&dump_);
-  //if (result == -1)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-  //              dump_.name ()));
-  //  goto failed;
-  //} // end IF
-
-  // ******************* DHCP Parser ************************
-  DHCPParser_.initialize (*configuration_in.moduleConfiguration);
-  DHCPParser_impl_p = dynamic_cast<Test_U_Stream_Module_DHCPParser*> (DHCPParser_.writer ());
-  if (!DHCPParser_impl_p)
+  // ******************* Net Target ************************
+  netTarget_.initialize (*configuration_in.moduleConfiguration);
+  netTarget_impl_p = dynamic_cast<WRITER_T*> (netTarget_.writer ());
+  if (!netTarget_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Stream_Module_DHCPParser> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Stream_Module_Net_Target_T> failed, aborting\n")));
     goto failed;
   } // end IF
-  // *TODO*: remove type inferences
-  if (!DHCPParser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+  if (!netTarget_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                DHCPParser_.name ()));
+                netTarget_.name ()));
     goto failed;
   } // end IF
-  result = inherited::push (&DHCPParser_);
+  result = inherited::push (&netTarget_);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                DHCPParser_.name ()));
+                netTarget_.name ()));
     goto failed;
   } // end IF
 
-  // ******************* DHCP Discover ************************
-  DHCPDiscover_.initialize (*configuration_in.moduleConfiguration);
-  DHCPDiscover_impl_p =
-    dynamic_cast<Test_U_Stream_Module_DHCPDiscover*> (DHCPDiscover_.writer ());
-  if (!DHCPDiscover_impl_p)
+  // ******************* Marshal ************************
+  marshal_.initialize (*configuration_in.moduleConfiguration);
+  parser_impl_p = dynamic_cast<Test_U_Module_Parser*> (marshal_.writer ());
+  if (!parser_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Stream_Module_DHCPDiscover> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_Parser> failed, aborting\n")));
     goto failed;
   } // end IF
-  // *TODO*: remove type inferences
-  if (!DHCPDiscover_impl_p->initialize (configuration_in.messageAllocator,
-                                        configuration_in.moduleHandlerConfiguration->URL))
+    // *TODO*: remove type inferences
+  if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                DHCPDiscover_.name ()));
+                marshal_.name ()));
     goto failed;
   } // end IF
-  result = inherited::push (&DHCPDiscover_);
+  result = inherited::push (&marshal_);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                DHCPDiscover_.name ()));
+                marshal_.name ()));
     goto failed;
   } // end IF
 
   // ******************* Runtime Statistic ************************
   runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
   runtimeStatistic_impl_p =
-      dynamic_cast<Test_U_Stream_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
+      dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
   if (!runtimeStatistic_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Stream_Module_RuntimeStatistic> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_RuntimeStatistic> failed, aborting\n")));
     goto failed;
   } // end IF
   if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
@@ -368,39 +334,41 @@ Test_U_DHCPClient_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfig
     goto failed;
   } // end IF
 
-  // ******************* Net Source ************************
-  netSource_.initialize (*configuration_in.moduleConfiguration);
-  netSource_impl_p = dynamic_cast<SOURCE_WRITER_T*> (netSource_.writer ());
-  if (!netSource_impl_p)
+  // ******************* DHCP Discover ************************
+  DHCPDiscover_.initialize (*configuration_in.moduleConfiguration);
+  DHCPDiscover_impl_p =
+    dynamic_cast<Test_U_Module_DHCPDiscoverH*> (DHCPDiscover_.writer ());
+  if (!DHCPDiscover_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Stream_Module_Net_Source_T> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_DHCPDiscoverH> failed, aborting\n")));
     goto failed;
   } // end IF
-  if (!netSource_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+  // *TODO*: remove type inferences
+  if (!DHCPDiscover_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                netSource_.name ()));
+                DHCPDiscover_.name ()));
     goto failed;
   } // end IF
-  if (!netSource_impl_p->initialize (inherited::state_))
+  if (!DHCPDiscover_impl_p->initialize (inherited::state_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                netSource_.name ()));
+                DHCPDiscover_.name ()));
     goto failed;
   } // end IF
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
-  netSource_.arg (inherited::sessionData_);
-  result = inherited::push (&netSource_);
+  DHCPDiscover_.arg (inherited::sessionData_);
+  result = inherited::push (&DHCPDiscover_);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                netSource_.name ()));
+                DHCPDiscover_.name ()));
     goto failed;
   } // end IF
 
@@ -425,19 +393,19 @@ failed:
 
 template <typename ConnectorType>
 bool
-Test_U_DHCPClient_Stream_T<ConnectorType>::collect (Test_U_RuntimeStatistic_t& data_out)
+Test_U_Stream_T<ConnectorType>::collect (Test_U_RuntimeStatistic_t& data_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_DHCPClient_Stream_T::collect"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::collect"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::sessionData_);
 
   int result = -1;
-  Test_U_Stream_SessionData& session_data_r =
-      const_cast<Test_U_Stream_SessionData&> (inherited::sessionData_->get ());
+  Test_U_StreamSessionData& session_data_r =
+      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
 
-  Test_U_Stream_Module_Statistic_WriterTask_t* runtimeStatistic_impl =
-    dynamic_cast<Test_U_Stream_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
+  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl =
+    dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
   if (!runtimeStatistic_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -457,7 +425,7 @@ Test_U_DHCPClient_Stream_T<ConnectorType>::collect (Test_U_RuntimeStatistic_t& d
     } // end IF
   } // end IF
 
-  session_data_r.currentStatistic.timestamp = COMMON_TIME_NOW;
+  session_data_r.currentStatistic.timeStamp = COMMON_TIME_NOW;
 
   // delegate to the statistics module...
   bool result_2 = false;
@@ -489,9 +457,9 @@ Test_U_DHCPClient_Stream_T<ConnectorType>::collect (Test_U_RuntimeStatistic_t& d
 
 template <typename ConnectorType>
 void
-Test_U_DHCPClient_Stream_T<ConnectorType>::report () const
+Test_U_Stream_T<ConnectorType>::report () const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_DHCPClient_Stream_T::report"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::report"));
 
 //   Net_Module_Statistic_ReaderTask_t* runtimeStatistic_impl = NULL;
 //   runtimeStatistic_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());

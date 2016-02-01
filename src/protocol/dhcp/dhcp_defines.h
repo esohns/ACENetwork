@@ -58,17 +58,35 @@
 #define DHCP_DEFAULT_YACC_TRACE                   false
 
 #define DHCP_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds {0: off}
-
-#define DHCP_DEFAULT_SERVER_HOSTNAME              ACE_LOCALHOST
-#define DHCP_DEFAULT_SERVER_PORT                  80
+#define DHCP_DEFAULT_PRINT_PROGRESSDOT            false
 
 // protocol
-#define DHCP_DEFAULT_PRINT_PROGRESSDOT            false
-//#define DHCP_COMMAND_STRING_RESPONSE              "DHCP_RESPONSE"
-//#define DHCP_PRT_VERSION_STRING_PREFIX            "HTTP/"
-//// headers
-//#define DHCP_PRT_LOCATION_HEADER_STRING           "Location"
-//#define DHCP_PRT_TRANSFER_ENCODING_HEADER_STRING  "Transfer-Encoding"
-//#define DHCP_PRT_TRANSFER_ENCODING_CHUNKED_STRING "chunked"
+#define DHCP_DEFAULT_CLIENT_PORT                  68
+#define DHCP_DEFAULT_SERVER_PORT                  67
+
+// *TODO*: this is the minimum, DHCP supports negotiation of larger frames
+#define DHCP_MESSAGE_SIZE                         576
+
+// flags
+#define DHCP_DEFAULT_FLAGS_BROADCAST              false
+#define DHCP_FLAGS_BROADCAST                      0x1000 // 2 bytes
+
+#define DHCP_CHADDR_SIZE                          16
+#define DHCP_SNAME_SIZE                           64
+#define DHCP_FILE_SIZE                            128
+
+// *NOTE*: already in network (== big-endian) byte order
+//         --> swap on little-endian systems
+#define DHCP_MAGIC_COOKIE                         0x63825363 // 99.130.83.99
+#define DHCP_OPTIONS_SIZE                         312 // min. size
+
+#define DHCP_OPTION_TAG_PAD                       0
+#define DHCP_OPTION_TAG_END                       255
+
+// *NOTE*: see RFC-2131 (Table 1), and "ARP" section of RFC-1700
+// *TODO*: should correspond with the target hardware
+#define DHCP_FRAME_HTYPE                          1 // --> (10Mb) Ethernet
+// *TODO*: should correspond with the target hardware
+#define DHCP_FRAME_HLEN                           6 // --> (10Mb) Ethernet
 
 #endif

@@ -233,14 +233,14 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
   int result = -1;
-  IRC_Client_Configuration configuration;
+  IRC_Client_Configuration* configuration_p = NULL;
   IRC_Client_UserData* user_data_p = NULL;
 
   // step0: retrive default configuration
   IRC_Client_IConnection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  connection_manager_p->get (configuration,
+  connection_manager_p->get (configuration_p,
                              user_data_p);
   ACE_ASSERT (user_data_p);
   // *TODO*: remove type inferences
@@ -249,8 +249,7 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   // step1: set up configuration
   user_data_p->configuration->protocolConfiguration.loginOptions =
     loginOptions_in;
-  user_data_p->configuration->socketConfiguration.peerAddress =
-    peerAddress_in;
+  user_data_p->configuration->socketConfiguration.address = peerAddress_in;
   if (finalModule_inout)
   {
     user_data_p->configuration->streamConfiguration.cloneModule =

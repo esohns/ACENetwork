@@ -35,13 +35,16 @@ class NET_PROTOCOL_DHCP_Export DHCP_Tools
   // debug info
   static std::string dump (const DHCP_Record&);
 
-  static std::string Op2String (const DHCP_Op_t&);
-  static std::string Option2String (const DHCP_Option_t&);
-  static std::string MessageType2String (const DHCP_MessageType_t&);
+  static std::string Op2String (DHCP_Op_t);
+  static std::string Option2String (DHCP_Option_t);
+  static std::string MessageType2String (DHCP_MessageType_t);
 
   static DHCP_MessageType_t MessageType2Type (const std::string&);
+  static DHCP_OptionFieldType_t Option2FieldType (DHCP_Option_t);
 
   static bool isRequest (const DHCP_Record&);
+
+  static unsigned int generateXID ();
 
  private:
   ACE_UNIMPLEMENTED_FUNC (DHCP_Tools ())

@@ -35,16 +35,11 @@ DHCP_Module_Parser_T<TimePolicyType,
                      ProtocolMessageType,
                      ConfigurationType>::DHCP_Module_Parser_T ()
  : inherited ()
- , allocator_ ()
  , debugScanner_ (DHCP_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (DHCP_DEFAULT_YACC_TRACE) // trace parsing ?
  , driver_ (DHCP_DEFAULT_LEX_TRACE,  // trace scanning ?
             DHCP_DEFAULT_YACC_TRACE) // trace parsing ?
- , finished_ (false)
- , headFragment_ (NULL)
  , isDriverInitialized_ (false)
- , crunchMessages_ (DHCP_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
- , dataContainer_ (NULL)
  , initialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::DHCP_Module_Parser_T"));
@@ -62,11 +57,6 @@ DHCP_Module_Parser_T<TimePolicyType,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::~DHCP_Module_Parser_T"));
 
-  if (headFragment_)
-    headFragment_->release ();
-
-  if (dataContainer_)
-    dataContainer_->decrease ();
 }
 
 template <typename TimePolicyType,
@@ -81,8 +71,6 @@ DHCP_Module_Parser_T<TimePolicyType,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::initialize"));
 
-  int result = -1;
-
   // sanity check(s)
   ACE_ASSERT (configuration_in.streamConfiguration);
 
@@ -91,73 +79,18 @@ DHCP_Module_Parser_T<TimePolicyType,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
 
-    ACE_Message_Queue_Base* queue_p = inherited::msg_queue ();
-    result = queue_p->activate ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Queue_Base::activate(): \"%m\", continuing\n")));
-
-    allocator_ = NULL;
     debugScanner_ = DHCP_DEFAULT_LEX_TRACE;
     debugParser_ = DHCP_DEFAULT_YACC_TRACE;
-    finished_ = false;
-    if (headFragment_)
-    {
-      headFragment_->release ();
-      headFragment_ = NULL;
-    } // end IF
     isDriverInitialized_ = false;
 
-    crunchMessages_ = DHCP_DEFAULT_CRUNCH_MESSAGES;
-    if (dataContainer_)
-    {
-      dataContainer_->decrease ();
-      dataContainer_ = NULL;
-    } // end IF
     initialized_ = false;
   } // end IF
 
   // *NOTE*: need to clean up timer beyond this point !
 
-  allocator_ = configuration_in.streamConfiguration->messageAllocator;
   debugScanner_ = configuration_in.traceScanning;
   debugParser_ = configuration_in.traceParsing;
 
-  crunchMessages_ = configuration_in.crunchMessages;
-  DATA_T* data_p = NULL;
-  ACE_NEW_NORETURN (data_p,
-                    DATA_T ());
-  if (!data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-    return false;
-  } // end IF
-  ACE_NEW_NORETURN (data_p->HTTPRecord,
-                    DHCP_Record ());
-  if (!data_p->HTTPRecord)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-
-    // clean up
-    delete data_p;
-
-    return false;
-  } // end IF
-  // *IMPORTANT NOTE*: fire-and-forget API (data_p)
-  ACE_NEW_NORETURN (dataContainer_,
-                    DATA_CONTAINER_T (data_p));
-  if (!dataContainer_)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-
-    // clean up
-    delete data_p;
-
-    return false;
-  } // end IF
   initialized_ = true;
 
   return true;
@@ -176,21 +109,7 @@ DHCP_Module_Parser_T<TimePolicyType,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::handleDataMessage"));
 
-  int result = -1;
-  DATA_CONTAINER_T* data_container_p = NULL;
-  ProtocolMessageType* message_p = message_inout;
   DHCP_Record* record_p = NULL;
-
-  if (finished_)
-  {
-    ACE_ASSERT (dataContainer_);
-    dataContainer_->increase ();
-    data_container_p = dataContainer_;
-    // *TODO*: need to merge message data here
-    message_inout->initialize (data_container_p,
-                               NULL);
-    return; // done
-  } // end IF
 
   // append the "\0\0"-sequence, as required by flex
   ACE_ASSERT (message_inout->capacity () - message_inout->length () >= DHCP_FLEX_BUFFER_BOUNDARY_SIZE);
@@ -198,100 +117,29 @@ DHCP_Module_Parser_T<TimePolicyType,
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-  if (!headFragment_)
-    headFragment_ = message_inout;
-  else
+//  DATA_CONTAINER_T& data_container_r =
+//    const_cast<DATA_CONTAINER_T&> (message_inout->get ());
+//  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.get ());
+  DATA_T& data_r = const_cast<DATA_T&> (message_inout->get ());
+  if (!data_r.DHCPRecord)
   {
-    ACE_Message_Block* message_2 = headFragment_;
-    for (;
-         message_2->cont ();
-         message_2 = message_2->cont ());
-    message_2->cont (message_inout);
-  } // end IF
-  ACE_ASSERT (headFragment_);
-  message_inout = NULL;
-  passMessageDownstream_out = false;
-
-  // "crunch" messages for easier parsing ?
-  if (crunchMessages_ &&
-      headFragment_->cont ())
-  {
-//     message->dump_state();
-
-    // step1: get a new message buffer
-    message_p = allocateMessage (DHCP_BUFFER_SIZE);
-    if (!message_p)
+    ACE_NEW_NORETURN (data_r.DHCPRecord,
+                      DHCP_Record ());
+    if (!data_r.DHCPRecord)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to allocate message(%u), returning\n"),
-                  DHCP_BUFFER_SIZE));
-      goto error;
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory, returning\n")));
+      return;
     } // end IF
-
-    // step2: copy available data
-    for (ACE_Message_Block* message_block_p = headFragment_;
-         message_block_p;
-         message_block_p = message_block_p->cont ())
-    {
-      ACE_ASSERT (message_block_p->length () <= message_p->space ());
-      result = message_p->copy (message_block_p->rd_ptr (),
-                                message_block_p->length ());
-      if (result == -1)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", returning\n")));
-
-        // clean up
-        message_p->release ();
-
-        goto error;
-      } // end IF
-    } // end FOR
-
-    // clean up
-    headFragment_->release ();
-    headFragment_ = message_p;
   } // end IF
-
-  if (headFragment_->isInitialized ())
-  {
-    dataContainer_->decrease ();
-    dataContainer_ =
-        &const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-    dataContainer_->increase ();
-    DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-    if (!data_r.HTTPRecord)
-    {
-      ACE_NEW_NORETURN (data_r.HTTPRecord,
-                        DHCP_Record ());
-      if (!data_r.HTTPRecord)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory, aborting\n")));
-        goto error;
-      } // end IF
-    } // end IF
-    record_p = data_r.HTTPRecord;
-  } // end IF
-  else
-  {
-    dataContainer_->increase ();
-    data_container_p = dataContainer_;
-    headFragment_->initialize (data_container_p,
-                               NULL);
-    DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-    record_p = data_r.HTTPRecord;
-  } // end IF
-  ACE_ASSERT (record_p);
+  record_p = data_r.DHCPRecord;
 
   // initialize driver ?
   if (!isDriverInitialized_)
   {
     driver_.initialize (*record_p,
                         debugScanner_,
-                        debugParser_,
-                        inherited::msg_queue (),
-                        crunchMessages_);
+                        debugParser_);
     isDriverInitialized_ = true;
   } // end IF
 
@@ -302,50 +150,13 @@ DHCP_Module_Parser_T<TimePolicyType,
 //              message_p->getID (),
 //              message_p->length ()));
 
-  if (!driver_.parse (headFragment_))
-  { // *NOTE*: most probable cause: need more data
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("failed to DHCP_ParserDriver::parse() (message ID: %d), returning\n"),
-//                message_p->getID ()));
-    goto done;
-  } // end IF
-
-  // *NOTE*: the (chained) fragment has been parsed, the read pointer has been
-  //         advanced to the entity body
-  //         --> pass message (and following) downstream
-  finished_ = true;
-  ACE_ASSERT (driver_.record_);
-//  driver_.record_->dump_state ();
-
-  // make sure the chain references the same data
-  message_p = dynamic_cast<ProtocolMessageType*> (headFragment_->cont ());
-
-  ACE_ASSERT (dataContainer_);
-  while (message_p)
-  {
-    dataContainer_->increase ();
-    data_container_p = dataContainer_;
-    // *TODO*: need to merge message data here
-    message_p->initialize (data_container_p,
-                           NULL);
-    message_p = dynamic_cast<ProtocolMessageType*> (message_p->cont ());
-  } // end WHILE
-
-  result = inherited::put_next (headFragment_, NULL);
-  if (result == -1)
+  if (!driver_.parse (message_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Task_T::put_next(): \"%m\", continuing\n")));
-    goto error;
+                ACE_TEXT ("failed to DHCP_ParserDriver::parse() (message ID: %d), returning\n"),
+                message_inout->getID ()));
+    return;
   } // end IF
-  headFragment_ = NULL;
-
-done:
-  return;
-
-error:
-  headFragment_->release ();
-  headFragment_ = NULL;
 }
 
 template <typename TimePolicyType,
@@ -361,8 +172,6 @@ DHCP_Module_Parser_T<TimePolicyType,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::handleSessionMessage"));
 
-  int result = -1;
-
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
@@ -371,79 +180,9 @@ DHCP_Module_Parser_T<TimePolicyType,
 
   switch (message_inout->type ())
   {
-    case STREAM_SESSION_END:
-    {
-      // *NOTE*: a parser thread may be waiting for additional (entity)
-      //         fragments to arrive
-      //         --> tell it to return
-      ACE_Message_Queue_Base* queue_p = inherited::msg_queue ();
-      result = queue_p->pulse ();
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
-
-      break;
-    }
     default:
-    {
-      // don't do anything...
       break;
-    }
   } // end SWITCH
-}
-
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType>
-ProtocolMessageType*
-DHCP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType>::allocateMessage (unsigned int requestedSize_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::allocateMessage"));
-
-  // initialize return value(s)
-  ProtocolMessageType* message_p = NULL;
-
-  if (allocator_)
-  {
-allocate:
-    try
-    {
-      message_p =
-        static_cast<ProtocolMessageType*> (allocator_->malloc (requestedSize_in));
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-                  requestedSize_in));
-      return NULL;
-    }
-
-    // keep retrying ?
-    if (!message_p && !allocator_->block ())
-      goto allocate;
-  } // end IF
-  else
-    ACE_NEW_NORETURN (message_p,
-                      ProtocolMessageType (requestedSize_in));
-  if (!message_p)
-  {
-    if (allocator_)
-    {
-      if (allocator_->block ())
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate ProtocolMessageType: \"%m\", aborting\n")));
-    } // end IF
-    else
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate ProtocolMessageType: \"%m\", aborting\n")));
-  } // end IF
-
-  return message_p;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -486,11 +225,7 @@ DHCP_Module_ParserH_T<LockType,
  , debugParser_ (DHCP_DEFAULT_YACC_TRACE) // trace parsing ?
  , driver_ (DHCP_DEFAULT_LEX_TRACE,  // trace scanning ?
             DHCP_DEFAULT_YACC_TRACE) // trace parsing ?
- , finished_ (false)
- , headFragment_ (NULL)
  , isDriverInitialized_ (false)
- , crunchMessages_ (DHCP_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
- , dataContainer_ (NULL)
  , initialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::DHCP_Module_ParserH_T"));
@@ -530,12 +265,6 @@ DHCP_Module_ParserH_T<LockType,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
                   statisticCollectHandlerID_));
   } // end IF
-
-  if (headFragment_)
-    headFragment_->release ();
-
-  if (dataContainer_)
-    dataContainer_->decrease ();
 }
 
 template <typename LockType,
@@ -584,20 +313,8 @@ DHCP_Module_ParserH_T<LockType,
 
     debugScanner_ = DHCP_DEFAULT_LEX_TRACE;
     debugParser_ = DHCP_DEFAULT_YACC_TRACE;
-    finished_ = false;
-    if (headFragment_)
-    {
-      headFragment_->release ();
-      headFragment_ = NULL;
-    } // end IF
     isDriverInitialized_ = false;
 
-    crunchMessages_ = DHCP_DEFAULT_CRUNCH_MESSAGES;
-    if (dataContainer_)
-    {
-      dataContainer_->decrease ();
-      dataContainer_ = NULL;
-    } // end IF
     initialized_ = false;
   } // end IF
 
@@ -628,42 +345,6 @@ DHCP_Module_ParserH_T<LockType,
 
   debugScanner_ = configuration_in.traceScanning;
   debugParser_ = configuration_in.traceParsing;
-
-  crunchMessages_ = configuration_in.crunchMessages;
-  DATA_T* data_p = NULL;
-  ACE_NEW_NORETURN (data_p,
-                    DATA_T ());
-  if (!data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-    return false;
-  } // end IF
-  ACE_NEW_NORETURN (data_p->HTTPRecord,
-                    DHCP_Record ());
-  if (!data_p->HTTPRecord)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-
-    // clean up
-    delete data_p;
-
-    return false;
-  } // end IF
-  // *IMPORTANT NOTE*: fire-and-forget API (data_p)
-  ACE_NEW_NORETURN (dataContainer_,
-                    DATA_CONTAINER_T (data_p));
-  if (!dataContainer_)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-
-    // clean up
-    delete data_p;
-
-    return false;
-  } // end IF
 
   // OK: all's well...
   initialized_ = inherited::initialize (configuration_in);
@@ -703,21 +384,7 @@ DHCP_Module_ParserH_T<LockType,
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::handleDataMessage"));
 
   int result = -1;
-  DATA_CONTAINER_T* data_container_p = NULL;
-  ProtocolMessageType* message_p = message_inout;
   DHCP_Record* record_p = NULL;
-
-  // sanity check(s)
-  if (finished_)
-  {
-    ACE_ASSERT (dataContainer_);
-    dataContainer_->increase ();
-    data_container_p = dataContainer_;
-    // *TODO*: need to merge message data here
-    message_inout->initialize (*data_container_p,
-                               NULL);
-    return; // done
-  } // end IF
 
   // append the "\0\0"-sequence, as required by flex
   ACE_ASSERT (message_inout->capacity () - message_inout->length () >= DHCP_FLEX_BUFFER_BOUNDARY_SIZE);
@@ -725,153 +392,46 @@ DHCP_Module_ParserH_T<LockType,
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-  if (!headFragment_)
-    headFragment_ = message_inout;
-  else
+//  DATA_CONTAINER_T& data_container_r =
+//    const_cast<DATA_CONTAINER_T&> (message_inout->get ());
+//  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.get ());
+  DATA_T& data_r = const_cast<DATA_T&> (message_inout->get ());
+  if (!data_r.DHCPRecord)
   {
-    ACE_Message_Block* message_2 = headFragment_;
-    for (;
-         message_2->cont ();
-         message_2 = message_2->cont ());
-    message_2->cont (message_inout);
-  } // end IF
-  ACE_ASSERT (headFragment_);
-  message_inout = NULL;
-  passMessageDownstream_out = false;
-
-  // "crunch" messages for easier parsing ?
-  if (crunchMessages_ &&
-      headFragment_->cont ())
-  {
-//     message->dump_state();
-
-    // step1: get a new message buffer
-    message_p = allocateMessage (DHCP_BUFFER_SIZE);
-    if (!message_p)
+    ACE_NEW_NORETURN (data_r.DHCPRecord,
+                      DHCP_Record ());
+    if (!data_r.DHCPRecord)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to allocate message(%u), returning\n"),
-                  DHCP_BUFFER_SIZE));
-      goto error;
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory, returning\n")));
+      return;
     } // end IF
-
-    // step2: copy available data
-    for (ACE_Message_Block* message_block_p = headFragment_;
-         message_block_p;
-         message_block_p = message_block_p->cont ())
-    {
-      ACE_ASSERT (message_block_p->length () <= message_p->space ());
-      result = message_p->copy (message_block_p->rd_ptr (),
-                                message_block_p->length ());
-      if (result == -1)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", returning\n")));
-
-        // clean up
-        message_p->release ();
-
-        goto error;
-      } // end IF
-    } // end FOR
-
-    // clean up
-    headFragment_->release ();
-    headFragment_ = message_p;
   } // end IF
-
-  if (headFragment_->isInitialized ())
-  {
-    dataContainer_->decrease ();
-    dataContainer_ =
-        &const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-    dataContainer_->increase ();
-    DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-    if (!data_r.HTTPRecord)
-    {
-      ACE_NEW_NORETURN (data_r.HTTPRecord,
-                        DHCP_Record ());
-      if (!data_r.HTTPRecord)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory, aborting\n")));
-        goto error;
-      } // end IF
-    } // end IF
-    record_p = data_r.HTTPRecord;
-  } // end IF
-  else
-  {
-    dataContainer_->increase ();
-    data_container_p = dataContainer_;
-    headFragment_->initialize (*data_container_p,
-                               NULL);
-    DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-    record_p = data_r.HTTPRecord;
-  } // end IF
-  ACE_ASSERT (record_p);
+  record_p = data_r.DHCPRecord;
 
   // initialize driver ?
   if (!isDriverInitialized_)
   {
     driver_.initialize (*record_p,
                         debugScanner_,
-                        debugParser_,
-                        inherited::msg_queue (),
-                        crunchMessages_);
+                        debugParser_);
     isDriverInitialized_ = true;
   } // end IF
 
-  // OK: parse this message
+    // OK: parse this message
 
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-//              message_p->getID (),
-//              message_p->length ()));
+    //  ACE_DEBUG ((LM_DEBUG,
+    //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
+    //              message_p->getID (),
+    //              message_p->length ()));
 
-  if (!driver_.parse (headFragment_))
-  { // *NOTE*: most probable cause: need more data
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("failed to DHCP_ParserDriver::parse() (message ID: %d), returning\n"),
-//                message_p->getID ()));
-    goto done;
-  } // end IF
-
-  // *NOTE*: the (chained) fragment has been parsed, the read pointer has been
-  //         advanced to the entity body
-  //         --> pass message (and following) downstream
-  finished_ = true;
-  ACE_ASSERT (driver_.record_);
-//  driver_.record_->dump_state ();
-
-  // make sure the chain references the same data
-  message_p = dynamic_cast<ProtocolMessageType*> (headFragment_->cont ());
-
-  while (message_p)
-  {
-    dataContainer_->increase ();
-    data_container_p = dataContainer_;
-    // *TODO*: need to merge message data here
-    message_p->initialize (*data_container_p,
-                           NULL);
-    message_p = dynamic_cast<ProtocolMessageType*> (message_p->cont ());
-  } // end WHILE
-
-  result = inherited::put_next (headFragment_, NULL);
-  if (result == -1)
+  if (!driver_.parse (message_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Task_T::put_next(): \"%m\", continuing\n")));
-    goto error;
+                ACE_TEXT ("failed to DHCP_ParserDriver::parse() (message ID: %d), returning\n"),
+                message_inout->getID ()));
+    return;
   } // end IF
-  headFragment_ = NULL;
-
-done:
-  return;
-
-error:
-  headFragment_->release ();
-  headFragment_ = NULL;
 }
 
 template <typename LockType,
@@ -899,8 +459,6 @@ DHCP_Module_ParserH_T<LockType,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::handleSessionMessage"));
 
-  int result = -1;
-
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
@@ -927,94 +485,9 @@ DHCP_Module_ParserH_T<LockType,
       break;
     }
     case STREAM_SESSION_END:
-    {
-      // *NOTE*: a parser thread may be waiting for additional (entity)
-      //         fragments to arrive
-      //         --> tell it to return
-      ACE_Message_Queue_Base* queue_p = inherited::msg_queue ();
-      result = queue_p->pulse ();
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
-
-      break;
-    }
     default:
-    {
-      // don't do anything...
       break;
-    }
   } // end SWITCH
-}
-
-template <typename LockType,
-          typename TaskSynchType,
-          typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType>
-ProtocolMessageType*
-DHCP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::allocateMessage (unsigned int requestedSize_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::allocateMessage"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->streamConfiguration);
-
-  // initialize return value(s)
-  ProtocolMessageType* message_p = NULL;
-
-  if (inherited::configuration_->streamConfiguration->messageAllocator)
-  {
-allocate:
-    try
-    {
-      message_p =
-        static_cast<ProtocolMessageType*> (inherited::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-                  requestedSize_in));
-      return NULL;
-    }
-
-    // keep retrying ?
-    if (!message_p && !inherited::configuration_->streamConfiguration->messageAllocator->block ())
-      goto allocate;
-  } // end IF
-  else
-    ACE_NEW_NORETURN (message_p,
-                      ProtocolMessageType (requestedSize_in));
-  if (!message_p)
-  {
-    if (inherited::configuration_->streamConfiguration->messageAllocator)
-    {
-      if (inherited::configuration_->streamConfiguration->messageAllocator->block ())
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
-    } // end IF
-    else
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
-  } // end IF
-
-  return message_p;
 }
 
 template <typename LockType,

@@ -29,12 +29,28 @@ class DHCP_Codes
   enum OpType
   {
     DHCP_OP_REQUEST = 1,
-    DHCP_OP_REPLY   = 2,
+    DHCP_OP_REPLY,
     /////////////////////////////////////
     DHCP_OP_MAX,
     DHCP_OP_INVALID
   };
 
+  enum OptionFieldType
+  {
+    DHCP_OPTION_FIELDTYPE_ADDRESS = 0,
+    DHCP_OPTION_FIELDTYPE_INTEGER,
+    /////////////////////////////////////
+    DHCP_OPTION_FIELDTYPE_MAX,
+    DHCP_OPTION_FIELDTYPE_INVALID
+  };
+  //enum OptionValueType
+  //{
+  //  DHCP_OPTION_VALUETYPE_FIXED = 0,
+  //  DHCP_OPTION_VALUETYPE_VARIABLE,
+  //  /////////////////////////////////////
+  //  DHCP_OPTION_VALUETYPE_MAX,
+  //  DHCP_OPTION_VALUETYPE_INVALID
+  //};
   enum OptionType
   { // *NOTE*: see RFC-951
     DHCP_OPTION_PAD = 0,    // "fixed length"
@@ -244,6 +260,7 @@ class DHCP_Codes
 
 // convenient type definitions
 typedef DHCP_Codes::OpType DHCP_Op_t;
+typedef DHCP_Codes::OptionFieldType DHCP_OptionFieldType_t;
 typedef DHCP_Codes::OptionType DHCP_Option_t;
 typedef DHCP_Codes::MessageType DHCP_MessageType_t;
 

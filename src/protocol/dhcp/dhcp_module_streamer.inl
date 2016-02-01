@@ -68,6 +68,13 @@ DHCP_Module_Streamer_T<TaskSynchType,
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Streamer_T::handleDataMessage"));
 
   int result = -1;
+  char buffer[DHCP_SNAME_SIZE];
+  char buffer_2[DHCP_FILE_SIZE];
+  unsigned int magic_cookie = DHCP_MAGIC_COOKIE;
+  unsigned char field_length;
+  unsigned int offset = 0;
+  unsigned char tag = DHCP_OPTION_TAG_END;
+  char buffer_3[DHCP_OPTIONS_SIZE];
 
   // don't care (implies yes per default, if part of a stream)
   // *NOTE*: as this is an "upstream" module, the "wording" is wrong
@@ -76,120 +83,133 @@ DHCP_Module_Streamer_T<TaskSynchType,
 
   // sanity check(s)
   ACE_ASSERT (message_inout->length () == 0);
+  ACE_ASSERT (message_inout->capacity () >= DHCP_MESSAGE_SIZE);
 
   // serialize structured data
   // --> create the appropriate bytestream corresponding to its elements
-  const typename ProtocolMessageType::DATA_T& data_container_r =
+//  const typename ProtocolMessageType::DATA_T& data_container_r =
+//      message_inout->get ();
+//  const typename ProtocolMessageType::DATA_T::DATA_T& data_r =
+//        data_container_r.get ();
+  const typename ProtocolMessageType::DATA_T& data_r =
       message_inout->get ();
-  const typename ProtocolMessageType::DATA_T::DATA_T& data_r =
-        data_container_r.get ();
-  ACE_ASSERT (data_r.HTTPRecord);
-  std::string buffer;
-  bool is_request = true;
-  // *TODO*: remove type inferences
-  if (DHCP_Tools::isRequest (*data_r.HTTPRecord))
-  {
-    buffer = DHCP_Tools::Method2String (data_r.HTTPRecord->method);
-    buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    buffer += data_r.HTTPRecord->URI;
-    buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    buffer += ACE_TEXT_ALWAYS_CHAR (DHCP_PRT_VERSION_STRING_PREFIX);
-    buffer += DHCP_Tools::Version2String (data_r.HTTPRecord->version);
-    buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
-  } // end IF
-  else
-  {
-    is_request = false;
+  ACE_ASSERT (data_r.DHCPRecord);
 
-    buffer = ACE_TEXT_ALWAYS_CHAR (DHCP_PRT_VERSION_STRING_PREFIX);
-    buffer += DHCP_Tools::Version2String (data_r.HTTPRecord->version);
-    buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    std::ostringstream converter;
-    converter << data_r.HTTPRecord->status;
-    buffer += converter.str ();
-    buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    buffer += DHCP_Tools::Status2Reason (data_r.HTTPRecord->status);
-    buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
-  } // end ELSE
-
-  for (DHCP_HeadersIterator_t iterator = data_r.HTTPRecord->headers.begin ();
-       iterator != data_r.HTTPRecord->headers.end ();
-       ++iterator)
-  {
-    if (!DHCP_Tools::isHeaderType ((*iterator).first,
-                                   DHCP_Codes::DHCP_HEADER_GENERAL))
-      continue;
-
-    buffer += (*iterator).first;
-    buffer += ACE_TEXT_ALWAYS_CHAR (":");
-    buffer += (*iterator).second;
-    buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
-  } // end FOR
-
-  for (DHCP_HeadersIterator_t iterator = data_r.HTTPRecord->headers.begin ();
-       iterator != data_r.HTTPRecord->headers.end ();
-       ++iterator)
-  {
-    if (!DHCP_Tools::isHeaderType ((*iterator).first,
-                                   (is_request ? DHCP_Codes::DHCP_HEADER_REQUEST
-                                               : DHCP_Codes::DHCP_HEADER_RESPONSE)))
-      continue;
-
-    buffer += (*iterator).first;
-    buffer += ACE_TEXT_ALWAYS_CHAR (":");
-    buffer += (*iterator).second;
-    buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
-  } // end FOR
-
-  for (DHCP_HeadersIterator_t iterator = data_r.HTTPRecord->headers.begin ();
-       iterator != data_r.HTTPRecord->headers.end ();
-       ++iterator)
-  {
-    if (!DHCP_Tools::isHeaderType ((*iterator).first,
-                                   DHCP_Codes::DHCP_HEADER_ENTITY))
-      continue;
-
-    buffer += (*iterator).first;
-    buffer += ACE_TEXT_ALWAYS_CHAR (":");
-    buffer += (*iterator).second;
-    buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
-  } // end FOR
-
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
-
-  // sanity check
-  if (message_inout->space () < buffer.size ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("[%u]: not enough buffer space (was: %d/%d), aborting\n"),
-                message_inout->getID (),
-                message_inout->space (), buffer.size ()));
-
-    // clean up
-    passMessageDownstream_out = false;
-    message_inout->release ();
-    message_inout = NULL;
-
-    return;
-  } // end IF
-
-  result = message_inout->copy (buffer.c_str (),
-                                buffer.size ());
+  result =
+    message_inout->copy (reinterpret_cast<char*> (&data_r.DHCPRecord->op),
+                         1);
   if (result == -1)
+    goto error;
+  result =
+    message_inout->copy (reinterpret_cast<char*> (&data_r.DHCPRecord->htype),
+                         1);
+  if (result == -1)
+    goto error;
+  result =
+    message_inout->copy (reinterpret_cast<char*> (&data_r.DHCPRecord->hlen),
+                         1);
+  if (result == -1)
+    goto error;
+  result =
+    message_inout->copy (reinterpret_cast<char*> (&data_r.DHCPRecord->hops),
+                         1);
+  if (result == -1)
+    goto error;
+  //
+  result =
+    message_inout->copy (reinterpret_cast<char*> (&data_r.DHCPRecord->xid),
+                         4);
+  if (result == -1)
+    goto error;
+  //
+  result =
+    message_inout->copy (reinterpret_cast<char*> (&data_r.DHCPRecord->secs),
+                         2);
+  if (result == -1)
+    goto error;
+  result =
+    message_inout->copy (reinterpret_cast<char*> (&data_r.DHCPRecord->flags),
+                         2);
+  if (result == -1)
+    goto error;
+  //
+  result =
+    message_inout->copy (reinterpret_cast<char*> (&data_r.DHCPRecord->ciaddr),
+                         4);
+  if (result == -1)
+    goto error;
+  //
+  result =
+    message_inout->copy (reinterpret_cast<char*> (&data_r.DHCPRecord->yiaddr),
+                         4);
+  if (result == -1)
+    goto error;
+  //
+  result =
+    message_inout->copy (reinterpret_cast<char*> (&data_r.DHCPRecord->siaddr),
+                         4);
+  if (result == -1)
+    goto error;
+  //
+  result =
+    message_inout->copy (reinterpret_cast<char*> (&data_r.DHCPRecord->giaddr),
+                         4);
+  if (result == -1)
+    goto error;
+  ////////
+  result =
+    message_inout->copy (reinterpret_cast<char*> (data_r.DHCPRecord->chaddr),
+                         16);
+  if (result == -1)
+    goto error;
+  ////////////////////////////////
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  ACE_OS::memcpy (buffer, data_r.DHCPRecord->sname.c_str (),
+                  data_r.DHCPRecord->sname.size ());
+  result = message_inout->copy (buffer, DHCP_SNAME_SIZE);
+  if (result == -1)
+    goto error;
+  ////////////////////////////////////////////////////////////////
+  ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
+  ACE_OS::memcpy (buffer_2, data_r.DHCPRecord->file.c_str (),
+                  data_r.DHCPRecord->file.size ());
+  result = message_inout->copy (buffer_2, DHCP_FILE_SIZE);
+  if (result == -1)
+    goto error;
+  ///////////////////////////////////////////////////////////////////////////...
+  ACE_OS::memset (buffer_3, 0, sizeof (buffer_3));
+  if (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN)
+    magic_cookie = ACE_SWAP_LONG (magic_cookie);
+  ACE_OS::memcpy (buffer_3, &magic_cookie, 4);
+  offset += 4;
+  for (DHCP_OptionsIterator_t iterator = data_r.DHCPRecord->options.begin ();
+       iterator != data_r.DHCPRecord->options.end ();
+       ++iterator)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+    ACE_OS::memcpy (buffer_3 + offset, &(*iterator).first, 1);
+    ++offset;
+    ACE_ASSERT ((*iterator).second.size () <=
+                std::numeric_limits<unsigned char>::max ());
+    field_length = static_cast<unsigned char> ((*iterator).second.size ());
+    ACE_OS::memcpy (buffer_3 + offset, &field_length, 1);
+    ++offset;
+    ACE_OS::memcpy (buffer_3 + offset, (*iterator).second.c_str (),
+                    (*iterator).second.size ());
+    offset += (*iterator).second.size ();
+  } // end FOR
+  ACE_OS::memcpy (buffer_3 + offset, &tag, 1);
+  result = message_inout->copy (buffer_3, DHCP_OPTIONS_SIZE);
+  if (result == -1)
+    goto error;
 
-    // clean up
-    passMessageDownstream_out = false;
-    message_inout->release ();
-    message_inout = NULL;
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("[%u]: streamed [%u byte(s)]...\n"),
+  //            message_inout->getID (),
+  //            message_inout->length ()));
 
-    return;
-  } // end IF
+  return;
 
-//   ACE_DEBUG ((LM_DEBUG,
-//               ACE_TEXT ("[%u]: streamed [%u byte(s)]...\n"),
-//               message_inout->getID (),
-//               message_inout->length ()));
+error:
+  ACE_DEBUG ((LM_ERROR,
+              ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", continuing\n")));
 }

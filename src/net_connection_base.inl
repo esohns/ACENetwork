@@ -40,7 +40,7 @@ Net_ConnectionBase_T<AddressType,
                                                           const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
- , configuration_ ()
+ , configuration_ (NULL)
  , state_ ()
  , isRegistered_ (false)
  , manager_ (interfaceHandle_in)
@@ -330,7 +330,10 @@ Net_ConnectionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::get"));
 
-  return configuration_;
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+
+  return *configuration_;
 }
 
 template <typename AddressType,
@@ -351,7 +354,7 @@ Net_ConnectionBase_T<AddressType,
 
   // *NOTE*: when using a connection manager, the (default) configuration is
   //         retrieved in the ctor
-  configuration_ = configuration_in;
+  configuration_ = &const_cast<ConfigurationType&> (configuration_in);
 
   return true;
 }

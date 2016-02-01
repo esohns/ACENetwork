@@ -24,9 +24,10 @@
 #include <limits>
 #include <string>
 
+#include "ace/Basic_Types.h"
 #include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 
-//#include "net_connection_manager_common.h"
 #include "net_exports.h"
 
 class Net_Export Net_Common_Tools
@@ -39,12 +40,15 @@ class Net_Export Net_Common_Tools
                                        unsigned int);  // IP address (network byte order !)
   static std::string IPProtocol2String (unsigned char); // protocol
   static std::string MACAddress2String (const unsigned char* const); // pointer to message data (START of ethernet header address field !)
-  static std::string EthernetProtocolTypeID2String (unsigned short); // ethernet frame type (network byte order !)
+  static std::string EthernetProtocolTypeID2String (unsigned short); // ethernet frame type (network (== big-endian) byte order !)
 
 //   static const bool selectNetworkInterface(const std::string&, // default interface identifier
 //                                            std::string&);      // return value: interface identifier
-  static bool getInterfaceIPAddress (const std::string&, // interface identifier
-                                     std::string&);      // return value: IP address (dotted-decimal)
+  static bool interface2IPAddress (const std::string&, // interface identifier
+                                   ACE_INET_Addr&);    // return value: (first) IP address
+  // *WARNING*: ensure that the array argument can hold at least 6 bytes !
+  static bool interface2MACAddress (const std::string&, // interface identifier
+                                    unsigned char[]);   // return value: MAC address
   static bool getAddress (std::string&,  // host name
                           std::string&); // dotted-decimal
   static bool getHostname (std::string&); // return value: hostname

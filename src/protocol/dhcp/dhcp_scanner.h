@@ -12,8 +12,9 @@ DHCP_Scanner_lex (yy::DHCP_Parser::semantic_type* yylval_param, \
                   yy::DHCP_Parser::location_type* yylloc_param, \
                   DHCP_ParserDriver* driver,                    \
                   yyscan_t yyscanner) */
+/* yytokentype */
 #define YY_DECL                              \
-yytokentype                                  \
+int                                          \
 DHCP_Scanner_lex (YYSTYPE* yylval_param,     \
                   YYLTYPE* yylloc_param,     \
                   DHCP_ParserDriver* driver, \
@@ -21,13 +22,15 @@ DHCP_Scanner_lex (YYSTYPE* yylval_param,     \
 // ... and declare it for the parser's sake
 YY_DECL;
 
+void DHCP_Scanner_set_column (int, yyscan_t);
+
 //using namespace yy;
 //#define YYLTYPE DHCP_Parser::location_type
 //#define YYSTYPE DHCP_Parser::semantic_type
 
 
 
-#line 31 "dhcp_scanner.h"
+#line 34 "dhcp_scanner.h"
 
 #define  YY_INT_ALIGNED long int
 
@@ -332,7 +335,9 @@ void DHCP_Scanner_free (void * ,yyscan_t yyscanner );
 #define chaddr 13
 #define sname 14
 #define file_ 15
-#define options 16
+#define cookie 16
+#define option_tag 17
+#define option_length 18
 
 #endif
 
@@ -508,6 +513,6 @@ extern int DHCP_Scanner_lex \
 #undef YY_DECL
 #endif
 
-#line 512 "dhcp_scanner.h"
+#line 517 "dhcp_scanner.h"
 #undef DHCP_Scanner_IN_HEADER
 #endif /* DHCP_Scanner_HEADER_H */

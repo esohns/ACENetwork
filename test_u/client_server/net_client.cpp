@@ -101,6 +101,8 @@ do_printUsage (const std::string& programName_in)
 #if defined (DEBUG_DEBUGGER)
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("client_server");
 #endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT("usage: ")
@@ -114,7 +116,7 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT("]")
             << std::endl;
-  std::cout << ACE_TEXT("-c [VALUE]   : max #connections [")
+  std::cout << ACE_TEXT("-c [VALUE]   : maximum #connections [")
             << NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS
             << ACE_TEXT("] {0 --> unlimited}")
             << std::endl;
@@ -204,6 +206,8 @@ do_processArguments (int argc_in,
 #if defined (DEBUG_DEBUGGER)
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("client_server");
 #endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
@@ -463,6 +467,9 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
+
+  // step0a: initialize random number generator
+  Common_Tools::initialize ();
 
   // step0a: initialize configuration
   Net_Client_Configuration configuration;
@@ -930,13 +937,15 @@ ACE_TMAIN (int argc_in,
 #if defined (DEBUG_DEBUGGER)
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
+  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path += ACE_TEXT_ALWAYS_CHAR ("client_server");
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
   Net_Client_TimeoutHandler::ActionMode_t action_mode =
    Net_Client_TimeoutHandler::ACTION_NORMAL;
   bool alternating_mode = false;
-  unsigned int max_num_connections =
+  unsigned int maximum_number_of_connections =
    NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -944,7 +953,7 @@ ACE_TMAIN (int argc_in,
   std::string UI_file = path;
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
-  bool use_threadpool = NET_EVENT_USE_THREAD_POOL;
+  bool use_thread_pool = NET_EVENT_USE_THREAD_POOL;
   unsigned int connection_interval =
    NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
   bool log_to_file = false;
@@ -958,7 +967,7 @@ ACE_TMAIN (int argc_in,
   bool trace_information = false;
   bool use_UDP = false;
   bool print_version_and_exit = false;
-  unsigned int num_dispatch_threads =
+  unsigned int number_of_dispatch_threads =
    NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS;
   bool run_stress_test = false;
 
@@ -966,9 +975,9 @@ ACE_TMAIN (int argc_in,
   if (!do_processArguments (argc_in,
                             argv_in,
                             alternating_mode,
-                            max_num_connections,
+                            maximum_number_of_connections,
                             UI_file,
-                            use_threadpool,
+                            use_thread_pool,
                             connection_interval,
                             log_to_file,
                             server_hostname,
@@ -978,7 +987,7 @@ ACE_TMAIN (int argc_in,
                             trace_information,
                             use_UDP,
                             print_version_and_exit,
-                            num_dispatch_threads,
+                            number_of_dispatch_threads,
                             run_stress_test))
   {
     // make 'em learn...
@@ -1003,9 +1012,10 @@ ACE_TMAIN (int argc_in,
   if (NET_STREAM_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
-  if ((use_threadpool && !use_reactor)                             ||
+  if ((!UI_file.empty () && !Common_File_Tools::isReadable (UI_file))       ||
+      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool) ||
       (run_stress_test && ((server_ping_interval != 0) ||
-                           (connection_interval != 0)))            ||
+                           (connection_interval != 0)))                     ||
       (alternating_mode && run_stress_test))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1040,8 +1050,8 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (num_dispatch_threads == 0)
-    num_dispatch_threads = 1;
+  if (number_of_dispatch_threads == 0)
+    number_of_dispatch_threads = 1;
   if (alternating_mode)
     action_mode = Net_Client_TimeoutHandler::ACTION_ALTERNATING;
   if (run_stress_test)
@@ -1192,15 +1202,15 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   // step2: do actual work
   do_work (action_mode,
-           max_num_connections,
+           maximum_number_of_connections,
            UI_file,
-           use_threadpool,
+           use_thread_pool,
            connection_interval,
            server_hostname,
            server_port_number,
            use_reactor,
            server_ping_interval,
-           num_dispatch_threads,
+           number_of_dispatch_threads,
            use_UDP,
            gtk_cb_user_data,
            signal_set,

@@ -21,6 +21,8 @@
 #include "ace/Log_Msg.h"
 #include "ace/Stream.h"
 
+#include "common_tools.h"
+
 #include "stream_common.h"
 
 #include "net_defines.h"
@@ -83,26 +85,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
 
-  // step1: remove enqueued module (if any)
-  // *TODO*: remove type inferences
-  if (inherited4::configuration_.streamConfiguration.module)
-  {
-    Stream_Module_t* module_p =
-      stream_.find (inherited4::configuration_.streamConfiguration.module->name ());
-    if (module_p)
-    {
-      int result =
-        stream_.remove (inherited4::configuration_.streamConfiguration.module->name (),
-                        ACE_Module_Base::M_DELETE_NONE);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    inherited4::configuration_.streamConfiguration.module->name ()));
-    } // end IF
-    if (inherited4::configuration_.streamConfiguration.deleteModule)
-      delete inherited4::configuration_.streamConfiguration.module;
-  } // end IF
-
 //  if (buffer_)
 //    buffer_->release ();
 }
@@ -136,9 +118,14 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   ACE_UNUSED_ARG (handle_in);
 
+  // sanity check(s)
+  ACE_ASSERT (inherited4::configuration_);
+
   int result = -1;
+#if defined (ACE_LINUX)
+  bool handle_priviledges = false;
+#endif
   bool handle_manager = false;
-  bool handle_module = true;
   bool handle_socket = false;
   // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
@@ -149,27 +136,37 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // *NOTE*: even when this is a write-only connection
   //         (inherited4::configuration_.socketConfiguration.writeOnly), the
   //         base class still requires a valid handle to open the output stream
-  ACE_INET_Addr local_SAP (static_cast<u_short> (0),
-                           static_cast<ACE_UINT32> (INADDR_ANY));
+  ACE_INET_Addr SAP_any (static_cast<u_short> (0),
+                         static_cast<ACE_UINT32> (INADDR_ANY));
+  ACE_INET_Addr local_SAP =
+    (inherited4::configuration_->socketConfiguration.writeOnly ? SAP_any
+                                                               : inherited4::configuration_->socketConfiguration.address);
+#if defined (ACE_LINUX)
+  // (temporarily) elevate priviledges to open system sockets
+  if (!inherited4::configuration_->socketConfiguration.writeOnly &&
+      (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT))
+  {
+    if (!Common_Tools::setRootPriviledges ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_Tools::setRootPriviledges(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    handle_priviledges = true;
+  } // end IF
+#endif
   result =
-    inherited2::open ((inherited4::configuration_.socketConfiguration.writeOnly ? local_SAP
-                                                                                : inherited4::configuration_.socketConfiguration.peerAddress), // local SAP
-                      ACE_PROTOCOL_FAMILY_INET,                                   // protocol family
-                      0,                                                          // protocol
-                      1);                                                         // reuse_addr
-      //inherited2::open (inherited4::configuration_.socketConfiguration.peerAddress, // remote SAP
-      //                  inherited4::configuration_.socketConfiguration.peerAddress, // local SAP
-      //                  ACE_PROTOCOL_FAMILY_INET,                                   // protocol family
-      //                  0,                                                          // protocol
-      //                  1);                                                         // reuse_addr
+    inherited2::open (local_SAP,                // local SAP
+                      ACE_PROTOCOL_FAMILY_INET, // protocol family
+                      0,                        // protocol
+                      1);                       // reuse_addr
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    int result_2 =
-      inherited4::configuration_.socketConfiguration.peerAddress.addr_to_string (buffer,
-                                                                                 sizeof (buffer),
-                                                                                 1);
+    int result_2 = local_SAP.addr_to_string (buffer,
+                                             sizeof (buffer),
+                                             1);
     if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
@@ -178,11 +175,15 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                 ACE_TEXT (buffer)));
     goto error;
   } // end IF
+#if defined (ACE_LINUX)
+  if (handle_priviledges)
+    Common_Tools::dropRootPriviledges ();
+#endif
   handle_socket = true;
   inherited::handle (inherited2::get_handle ());
 
   // step2a: initialize base-class
-  if (!inherited::initialize (inherited4::configuration_.socketHandlerConfiguration))
+  if (!inherited::initialize (inherited4::configuration_->socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SocketHandlerBase::initialize(): \"%m\", aborting\n")));
@@ -208,66 +209,24 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // step3: initialize/start stream
 
   // step3a: connect stream head message queue with a notification pipe/queue ?
-  if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
-    inherited4::configuration_.streamConfiguration.notificationStrategy =
+  if (!inherited4::configuration_->streamConfiguration.useThreadPerConnection)
+    inherited4::configuration_->streamConfiguration.notificationStrategy =
       this;
-
-  if (inherited4::configuration_.streamConfiguration.module)
-  {
-    // step3b: initialize final module (if any)
-    if (inherited4::configuration_.streamConfiguration.cloneModule)
-    {
-      IMODULE_T* imodule_p =
-        dynamic_cast<IMODULE_T*> (inherited4::configuration_.streamConfiguration.module);
-      if (!imodule_p)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
-                    inherited4::configuration_.streamConfiguration.module->name ()));
-        goto error;
-      } // end IF
-      Stream_Module_t* clone_p = NULL;
-      try
-      {
-        clone_p = imodule_p->clone ();
-      }
-      catch (...)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: caught exception in Stream_IModule_T::clone(), aborting\n"),
-                    inherited4::configuration_.streamConfiguration.module->name ()));
-        goto error;
-      }
-      if (!clone_p)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to Stream_IModule_T::clone(), aborting\n"),
-                    inherited4::configuration_.streamConfiguration.module->name ()));
-        goto error;
-      }
-      inherited4::configuration_.streamConfiguration.module = clone_p;
-      inherited4::configuration_.streamConfiguration.deleteModule = true;
-    } // end IF
-
-    // *TODO*: step3c: initialize final module
-  } // end IF
 
   // step3d: initialize stream
   // *TODO*: this clearly is a design glitch
-  inherited4::configuration_.streamConfiguration.sessionID =
+  inherited4::configuration_->streamConfiguration.sessionID =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       reinterpret_cast<size_t> (inherited::handle ()); // (== socket handle)
 #else
       static_cast<size_t> (inherited::handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (inherited4::configuration_.streamConfiguration))
+  if (!stream_.initialize (inherited4::configuration_->streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
     goto error;
   } // end IF
-  // *NOTE*: do not worry about the enqueued module (if any) beyond this point !
-  handle_module = false;
   session_data_container_p = stream_.get ();
   ACE_ASSERT (session_data_container_p);
   session_data_p = &session_data_container_p->get ();
@@ -288,7 +247,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step4: start reading (need to pass any data ?)
-  if (!inherited4::configuration_.socketConfiguration.writeOnly)
+  if (!inherited4::configuration_->socketConfiguration.writeOnly)
   {
     if (messageBlock_in.length () == 0)
       inherited::initiate_read_dgram ();
@@ -337,7 +296,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     // *NOTE*: registered with the proactor at this point
     //         --> data may start arriving at handle_input ()
   } // end IF
-  if (inherited4::configuration_.socketConfiguration.writeOnly)
+  if (inherited4::configuration_->socketConfiguration.writeOnly)
     this->decrease (); // float the connection (connection manager)
                        //ACE_ASSERT (this->count () == 2); // connection manager & read operation
                        //                                     (+ stream module(s))
@@ -348,14 +307,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
 error:
   stream_.stop (true); // <-- wait for completion
-  if (handle_module                                              &&
-      inherited4::configuration_.streamConfiguration.module      &&
-      inherited4::configuration_.streamConfiguration.deleteModule)
-  {
-    delete inherited4::configuration_.streamConfiguration.module;
-    inherited4::configuration_.streamConfiguration.module = NULL;
-    inherited4::configuration_.streamConfiguration.deleteModule = false;
-  } // end IF
+
+#if defined (ACE_LINUX)
+  if (handle_priviledges)
+    Common_Tools::dropRootPriviledges ();
+#endif
 
   if (handle_socket)
   {
@@ -400,6 +356,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   ACE_UNUSED_ARG (handle_in);
 
+  // sanity check(s)
+  ACE_ASSERT (inherited4::configuration_);
+
   int result = -1;
   ACE_Message_Block* message_block_p = NULL;
   size_t bytes_to_send = 0;
@@ -431,14 +390,14 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   int error = 0;
 send:
   result_2 =
-//      inherited::outputStream_.send (buffer_,                                                    // data
-    inherited::outputStream_.send (message_block_p,                                            // data
-                                   bytes_to_send,                                              // #bytes to send
-                                   0,                                                          // flags
-                                   inherited4::configuration_.socketConfiguration.peerAddress, // remote address (ignored)
-                                   NULL,                                                       // ACT
-                                   0,                                                          // priority
-                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                       // signal
+//      inherited::outputStream_.send (buffer_,                                             // data
+    inherited::outputStream_.send (message_block_p,                                         // data
+                                   bytes_to_send,                                           // #bytes to send
+                                   0,                                                       // flags
+                                   inherited4::configuration_->socketConfiguration.address, // remote address (ignored)
+                                   NULL,                                                    // ACT
+                                   0,                                                       // priority
+                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                    // signal
   if (result_2 == -1)
   {
     error = ACE_OS::last_error ();
@@ -447,7 +406,7 @@ send:
 
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
-                bytes_to_send));
+                message_block_p->length ()));
 
     // clean up
 //    buffer_->release ();
@@ -493,12 +452,16 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   int result = -1;
 
+  // sanity check(s)
+  ACE_ASSERT (inherited4::configuration_);
+
   // step1: wait for all workers within the stream (if any)
-  stream_.stop (true); // <-- wait for completion
+  stream_.stop (true,  // <-- wait for completion
+                true); // locked access ?
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
-  if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
+  if (!inherited4::configuration_->streamConfiguration.useThreadPerConnection)
   {
     Stream_Iterator_t iterator (stream_);
     const Stream_Module_t* module_p = NULL;
@@ -568,22 +531,19 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   int result = -1;
 
+  // sanity check(s)
+  ACE_ASSERT (inherited4::configuration_);
+
   handle_out = inherited2::get_handle ();
-  result = localSAP_out.set (static_cast<u_short> (0),
-                             static_cast<ACE_UINT32> (INADDR_NONE));
+  localSAP_out.reset ();
+  remoteSAP_out.reset ();
+
+  result = inherited2::get_local_addr (localSAP_out);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
-                INADDR_NONE));
-  if (!inherited4::configuration_.socketConfiguration.writeOnly)
-  {
-    result = inherited2::get_local_addr (localSAP_out);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
-  } // end IF
-  remoteSAP_out =
-    inherited4::configuration_.socketConfiguration.peerAddress;
+                ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+  if (inherited4::configuration_->socketConfiguration.writeOnly)
+    remoteSAP_out = inherited4::configuration_->socketConfiguration.address;
 }
 
 template <typename HandlerType,
@@ -702,20 +662,19 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StatisticContainerType,
                                 StreamType,
                                 UserDataType,
-//                                ModuleConfigurationType>::close (u_long arg_in)
                                 ModuleConfigurationType,
                                 ModuleHandlerConfigurationType,
                                 HandlerConfigurationType>::close ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::close"));
 
-//  ACE_UNUSED_ARG (arg_in);
   int result = -1;
 
   // step1: shutdown operations
   ACE_HANDLE handle = inherited::handle ();
 
-  if (inherited4::configuration_.socketConfiguration.writeOnly)
+  // *TODO*: remove type inference
+  if (inherited::writeOnly_)
     result = handle_close (handle,
                            ACE_Event_Handler::ALL_EVENTS_MASK);
   else
@@ -1143,26 +1102,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
 
-  // step1: remove enqueued module (if any)
-  if (inherited4::configuration_.streamConfiguration.module)
-  {
-    Stream_Module_t* module_p =
-      stream_.find (inherited4::configuration_.streamConfiguration.module->name ());
-    if (module_p)
-    {
-      int result =
-        stream_.remove (inherited4::configuration_.streamConfiguration.module->name (),
-                        ACE_Module_Base::M_DELETE_NONE);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Stream::remove(\"%s\"): \"%m\", continuing\n"),
-                    inherited4::configuration_.streamConfiguration.module->name ()));
-    } // end IF
-    if (inherited4::configuration_.streamConfiguration.cloneModule ||
-        inherited4::configuration_.streamConfiguration.deleteModule)
-      delete inherited4::configuration_.streamConfiguration.module;
-  } // end IF
-
 //  if (buffer_)
 //    buffer_->release ();
 }
@@ -1194,8 +1133,8 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   ACE_UNUSED_ARG (handle_in);
 
-  //// sanity check(s)
-  //ACE_ASSERT (inherited4::configuration_.socketHandlerConfiguration);
+  // sanity check(s)
+  ACE_ASSERT (inherited4::configuration_);
 
   int result = -1;
   // *TODO*: remove type inferences
@@ -1203,9 +1142,9 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   // step1: open socket
   result =
-      inherited2::open (inherited4::configuration_.socketConfiguration.netlinkAddress,   // local SAP
-                        ACE_PROTOCOL_FAMILY_NETLINK,                                     // protocol family
-                        inherited4::configuration_.socketConfiguration.netlinkProtocol); // protocol
+      inherited2::open (inherited4::configuration_->socketConfiguration.netlinkAddress,   // local SAP
+                        ACE_PROTOCOL_FAMILY_NETLINK,                                      // protocol family
+                        inherited4::configuration_->socketConfiguration.netlinkProtocol); // protocol
                         // NETLINK_USERSOCK);                                             // protocol
                         //NETLINK_GENERIC);                                              // protocol
   if (result == -1)
@@ -1226,7 +1165,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   } // end IF
 
   // step2a: initialize base-class
-  if (!inherited::initialize (inherited4::configuration_.socketHandlerConfiguration))
+  if (!inherited::initialize (inherited4::configuration_->socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SocketHandlerBase::initialize(): \"%m\", aborting\n")));
@@ -1238,57 +1177,18 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   // step3: initialize/start stream
   // step3a: connect stream head message queue with a notification pipe/queue ?
-  if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
-    inherited4::configuration_.streamConfiguration.notificationStrategy = this;
+  if (!inherited4::configuration_->streamConfiguration.useThreadPerConnection)
+    inherited4::configuration_->streamConfiguration.notificationStrategy = this;
 
-  if (inherited4::configuration_.streamConfiguration.module)
-  {
-    // step3b: clone final module ?
-    if (inherited4::configuration_.streamConfiguration.cloneModule)
-    {
-      Stream_IModule_t* imodule_p =
-        dynamic_cast<Stream_IModule_t*> (inherited4::configuration_.streamConfiguration.module);
-      if (!imodule_p)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: dynamic_cast<Stream_IModule> failed, aborting\n"),
-                    ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
-        goto close;
-      } // end IF
-      Stream_Module_t* clone_p = NULL;
-      try
-      {
-        clone_p = imodule_p->clone ();
-      }
-      catch (...)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: caught exception in Stream_IModule::clone(), aborting\n"),
-                    ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
-        goto close;
-      }
-      if (!clone_p)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to Stream_IModule::clone(), aborting\n"),
-                    ACE_TEXT (inherited4::configuration_.streamConfiguration.module->name ())));
-        goto close;
-      }
-      inherited4::configuration_.streamConfiguration.module = clone_p;
-      inherited4::configuration_.streamConfiguration.deleteModule = true;
-    } // end IF
-
-    // *TODO*: step3b: initialize final module
-  } // end IF
   // *TODO*: this clearly is a design glitch
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inherited4::configuration_.streamConfiguration.sessionID =
+  inherited4::configuration_->streamConfiguration.sessionID =
     reinterpret_cast<unsigned int> (inherited2::get_handle ()); // (== socket handle)
 #else
-  inherited4::configuration_.streamConfiguration.sessionID =
+  inherited4::configuration_->streamConfiguration.sessionID =
     static_cast<unsigned int> (inherited2::get_handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (inherited4::configuration_.streamConfiguration))
+  if (!stream_.initialize (inherited4::configuration_->streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
