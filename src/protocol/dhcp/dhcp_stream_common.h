@@ -35,8 +35,7 @@
 // forward declarations
 struct DHCP_ConnectionState;
 struct DHCP_ModuleHandlerConfiguration;
-template <typename AllocatorConfigurationType,
-          typename DataType>
+template <typename AllocatorConfigurationType>
 class DHCP_Message_T;
 class DHCP_SessionMessage;
 template <typename StreamStateType,
@@ -55,8 +54,7 @@ typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Common_TimePolicy_t,
                          Stream_ModuleConfiguration,
                          DHCP_ModuleHandlerConfiguration> DHCP_IModule_t;
-typedef DHCP_Message_T<Stream_AllocatorConfiguration,
-                       DHCP_MessageData_t> DHCP_Message_t;
+typedef DHCP_Message_T<Stream_AllocatorConfiguration> DHCP_Message_t;
 
 struct DHCP_Stream_SessionData
  : Stream_SessionData

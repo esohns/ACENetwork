@@ -296,7 +296,7 @@ static const unsigned char yytranslate[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short int yyrline[] =
 {
-       0,   195,   195,   201,   262,   263,   264,   267
+       0,   204,   204,   211,   277,   278,   279,   282
 };
 #endif
 
@@ -1066,6 +1066,7 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set cookie: %d\n"),
 //                                                                   driver->record_->cookie));
+                                                       ACE_ASSERT (driver->record_->cookie == DHCP_MAGIC_COOKIE);
                                                      }
 
     break;
@@ -1090,15 +1091,20 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set hops: %d\n"),
 //                                                                   static_cast<int> (driver->record_->hops)));
-                                                       driver->record_->xid = (((yyGLRStackItem const *)yyvsp)[YYFILL (-9)].yystate.yysemantics.yysval.ival);
+                                                       driver->record_->xid =
+                                                         ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((((yyGLRStackItem const *)yyvsp)[YYFILL (-9)].yystate.yysemantics.yysval.ival)) : (((yyGLRStackItem const *)yyvsp)[YYFILL (-9)].yystate.yysemantics.yysval.ival));
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set xid: %d\n"),
 //                                                                   driver->record_->xid));
                                                        driver->record_->secs = (((yyGLRStackItem const *)yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.ival);
+                                                       if (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN)
+                                                         ACE_SWAP_WORD (driver->record_->secs);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set secs: %d\n"),
 //                                                                   static_cast<int> (driver->record_->secs)));
                                                        driver->record_->flags = (((yyGLRStackItem const *)yyvsp)[YYFILL (-7)].yystate.yysemantics.yysval.ival);
+                                                       if (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN)
+                                                         ACE_SWAP_WORD (driver->record_->flags);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set flags: %d\n"),
 //                                                                   static_cast<int> (driver->record_->flags)));

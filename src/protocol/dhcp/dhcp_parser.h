@@ -72,6 +72,15 @@ class DHCP_ParserDriver;
 struct YYLTYPE;
 //union YYSTYPE;
 
+union yytoken
+{
+  unsigned char aval[16];
+  int           ival;
+  std::string*  sval;
+};
+typedef yytoken yytoken_t;
+#define YYSTYPE yytoken_t
+
 typedef void* yyscan_t;
 
 //#define YYERROR_VERBOSE

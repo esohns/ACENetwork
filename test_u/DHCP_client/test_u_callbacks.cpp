@@ -93,7 +93,7 @@ load_network_interfaces (GtkListStore* listStore_in)
   } // end IF
 
   result_2 = GetAdaptersInfo (ip_adapter_info_p,
-                            &buffer_length);
+                              &buffer_length);
   if (result_2 != NO_ERROR)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -583,6 +583,17 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (result_2);
 
   object_p =
+      gtk_builder_get_object ((*iterator).second.second,
+                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_BROADCAST_NAME));
+  ACE_ASSERT (object_p);
+  result_2 =
+      g_signal_connect (object_p,
+                        ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                        G_CALLBACK (checkbutton_broadcast_toggled_cb),
+                        userData_in);
+  ACE_ASSERT (result_2);
+
+  object_p =
     gtk_builder_get_object ((*iterator).second.second,
                             ACE_TEXT_ALWAYS_CHAR(TEST_U_UI_GTK_TEXTVIEW_NAME));
   ACE_ASSERT (object_p);
@@ -625,15 +636,6 @@ idle_initialize_UI_cb (gpointer userData_in)
                         userData_in);
   ACE_ASSERT (result_2);
   ACE_UNUSED_ARG (result_2);
-
-  // step7: set defaults
-  GtkToggleAction* toggle_action_p =
-    //GTK_BUTTON (glade_xml_get_widget ((*iterator).second.second,
-    //                                  ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_BUTTON_CLOSE_NAME)));
-    GTK_TOGGLE_ACTION (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TOGGLEACTION_LISTEN_NAME)));
-  ACE_ASSERT (toggle_action_p);
-  gtk_action_activate (GTK_ACTION (toggle_action_p));
 
   //   // step8: use correct screen
   //   if (parentWidget_in)
@@ -696,6 +698,15 @@ idle_initialize_UI_cb (gpointer userData_in)
   } // end IF
   else
     gtk_widget_set_sensitive (GTK_WIDGET (combo_box_p), FALSE);
+
+  // step7: start listening
+  GtkToggleAction* toggle_action_p =
+    //GTK_BUTTON (glade_xml_get_widget ((*iterator).second.second,
+    //                                  ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_BUTTON_CLOSE_NAME)));
+    GTK_TOGGLE_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TOGGLEACTION_LISTEN_NAME)));
+  ACE_ASSERT (toggle_action_p);
+  gtk_action_activate (GTK_ACTION (toggle_action_p));
 
   return G_SOURCE_REMOVE;
 }
@@ -1142,34 +1153,30 @@ action_send_activate_cb (GtkAction* action_in,
   //ACE_ASSERT (frame_p);
   //gtk_widget_set_sensitive (GTK_WIDGET (frame_p), FALSE);
 
-  // step1: update configuration
-//  // retrieve network interface
-//  GtkComboBox* combo_box_p =
-//    //GTK_TEXT_VIEW (glade_xml_get_widget ((*iterator).second.second,
-//    //                                     ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TEXTVIEW_NAME)));
-//    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-//                                           ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_COMBOBOX_INTERFACE_NAME)));
-//  ACE_ASSERT (combo_box_p);
-//  GtkTreeIter iterator_2;
-//  gboolean result = gtk_combo_box_get_active_iter (combo_box_p,
-//                                                   &iterator_2);
-//  ACE_ASSERT (result);
-//  GtkListStore* list_store_p =
-//    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-//                                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_LISTSTORE_INTERFACE_NAME)));
-//  ACE_ASSERT (list_store_p);
-//  GValue value = {0,};
-//  gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
-//                            &iterator_2,
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//                            1, &value);
-//#else
-//                            0, &value);
-//#endif
-//  ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
-//  data_p->configuration->socketConfiguration.networkInterface =
-//      g_value_get_string (&value);
-//  g_value_unset (&value);
+  //// step1: update configuration
+  //int result = -1;
+  //if (data_p->configuration->socketConfiguration.useLoopBackDevice)
+  //  result =
+  //    data_p->configuration->socketConfiguration.address.set (DHCP_DEFAULT_SERVER_PORT,
+  //                                                            ACE_LOCALHOST,
+  //                                                            1,
+  //                                                            ACE_ADDRESS_FAMILY_INET);
+  //else if (!data_p->configuration->socketConfiguration.networkInterface.empty ())
+  //{
+  //  if (!Net_Common_Tools::interface2IPAddress (data_p->configuration->socketConfiguration.networkInterface,
+  //                                              data_p->configuration->socketConfiguration.address))
+  //  {
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("failed to Net_Common_Tools::interface2IPAddress(), continuing\n")));
+  //    result = -1;
+  //  } // end IF
+  //  data_p->configuration->socketConfiguration.address.set_port_number (DHCP_DEFAULT_SERVER_PORT,
+  //                                                                      1);
+  //} // end ELSE IF
+  //else
+  //  result =
+  //    data_p->configuration->listenerConfiguration.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+  //                                                              static_cast<ACE_UINT32> (INADDR_ANY));
 
   // retrieve port number
   GtkSpinButton* spin_button_p =
@@ -1201,7 +1208,7 @@ action_send_activate_cb (GtkAction* action_in,
   data_p->configuration->streamConfiguration.bufferSize =
     static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
 
-  Test_U_MessageData* message_data_p = NULL;
+//  Test_U_MessageData* message_data_p = NULL;
 //  Test_U_MessageData_t* message_data_container_p = NULL;
   Test_U_Message* message_p = NULL;
 //  ACE_NEW_NORETURN (message_data_p,
@@ -1255,28 +1262,15 @@ allocate:
 
     return;
   } // end IF
-  Test_U_MessageData& message_data_r =
-      const_cast<Test_U_MessageData&> (message_p->get ());
-  ACE_NEW_NORETURN (message_data_r.DHCPRecord,
-                    DHCP_Record ());
-  if (!message_data_r.DHCPRecord)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, returning\n")));
-
-    // clean up
-//    delete message_data_p;
-
-    return;
-  } // end IF
-  message_data_r.DHCPRecord->op = DHCP_Codes::DHCP_OP_REQUEST;
-  message_data_r.DHCPRecord->htype = DHCP_FRAME_HTYPE;
-  message_data_r.DHCPRecord->hlen = DHCP_FRAME_HLEN;
-  message_data_r.DHCPRecord->xid = DHCP_Tools::generateXID ();
-  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button_p)))
-    message_data_r.DHCPRecord->flags = DHCP_FLAGS_BROADCAST;
+  DHCP_Record DHCP_record;
+  DHCP_record.op = DHCP_Codes::DHCP_OP_REQUEST;
+  DHCP_record.htype = DHCP_FRAME_HTYPE;
+  DHCP_record.hlen = DHCP_FRAME_HLEN;
+  DHCP_record.xid = DHCP_Tools::generateXID ();
+  if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
+    DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   if (!Net_Common_Tools::interface2MACAddress (data_p->configuration->socketConfiguration.networkInterface,
-                                               message_data_r.DHCPRecord->chaddr))
+                                               DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interface2MACAddress(), returning\n")));
@@ -1291,8 +1285,8 @@ allocate:
   //         - 'IP address lease time'   (51)
   //         - 'overload'                (52)
   char message_type = DHCP_Codes::DHCP_MESSAGE_DISCOVER;
-  message_data_r.DHCPRecord->options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE,
-                                                             std::string (1, message_type)));
+  DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE,
+                                              std::string (1, message_type)));
   //         - 'parameter request list'  (55) [include in all subsequent messages]
   //         - 'message'                 (56)
   //         - 'maximum message size'    (57)
@@ -1300,8 +1294,8 @@ allocate:
   //         - 'client identifier'       (61)
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
 //  message_p->initialize (message_data_container_p,
-//  message_p->initialize (message_data_p,
-//                         NULL);
+  message_p->initialize (DHCP_record,
+                         NULL);
   Test_U_ISocketConnection_t* isocket_connection_p =
     dynamic_cast<Test_U_ISocketConnection_t*> (data_p->configuration->moduleHandlerConfiguration_2.connection);
   ACE_ASSERT (isocket_connection_p);
@@ -1309,7 +1303,7 @@ allocate:
   Test_U_ConnectionState& state_r =
     const_cast<Test_U_ConnectionState&> (data_p->configuration->moduleHandlerConfiguration_2.connection->state ());
   state_r.timeStamp = COMMON_TIME_NOW;
-  state_r.xid = message_data_r.DHCPRecord->xid;
+  state_r.xid = DHCP_record.xid;
   isocket_connection_p->send (message_p);
 
   return;
@@ -1373,9 +1367,26 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
                             0, &value);
 #endif
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
-  data_p->configuration->socketConfiguration.networkInterface =
+  data_p->configuration->listenerConfiguration.networkInterface =
       g_value_get_string (&value);
   g_value_unset (&value);
+}
+
+void
+checkbutton_broadcast_toggled_cb (GtkCheckButton* checkButton_in,
+                                  gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::checkbutton_broadcast_toggled_cb"));
+
+  Test_U_DHCPClient_GTK_CBData* data_p =
+      static_cast<Test_U_DHCPClient_GTK_CBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+
+  data_p->configuration->protocolConfiguration.requestBroadcastReplies =
+      gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (checkButton_in));
 }
 
 void
@@ -1425,7 +1436,9 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 //                                                        : ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_IMAGE_DISCONNECT_NAME))));
 //  ACE_ASSERT (image_p);
 //  gtk_button_set_image (GTK_BUTTON (toggle_button_p), GTK_WIDGET (image_p));
-  gtk_action_set_stock_id (GTK_ACTION (toggleAction_in), GTK_STOCK_DISCONNECT);
+  gtk_action_set_stock_id (GTK_ACTION (toggleAction_in),
+                           (start_listening ? GTK_STOCK_DISCONNECT 
+                                            : GTK_STOCK_CONNECT));
 
   bool failed = true;
   Test_U_ConnectionManager_t* connection_manager_p =
@@ -1446,8 +1459,38 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       data_p->configuration->handle = ACE_INVALID_HANDLE;
     } // end IF
 
-    bool handle_connection_manager = false;
     int result = -1;
+    if (data_p->configuration->listenerConfiguration.useLoopBackDevice)
+      result =
+        data_p->configuration->listenerConfiguration.address.set (DHCP_DEFAULT_CLIENT_PORT,
+                                                                  ACE_LOCALHOST,
+                                                                  1,
+                                                                  ACE_ADDRESS_FAMILY_INET);
+    else if (!data_p->configuration->listenerConfiguration.networkInterface.empty ())
+    {
+      if (!Net_Common_Tools::interface2IPAddress (data_p->configuration->listenerConfiguration.networkInterface,
+                                                  data_p->configuration->listenerConfiguration.address))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_Common_Tools::interface2IPAddress(), continuing\n")));
+        result = -1;
+      } // end IF
+      data_p->configuration->listenerConfiguration.address.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
+                                                                            1);
+      result = 0;
+    } // end ELSE IF
+    else
+      result =
+        data_p->configuration->listenerConfiguration.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                                  static_cast<ACE_UINT32> (INADDR_ANY));
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
+      return;
+    } // end IF
+
+    bool handle_connection_manager = false;
     ACE_INET_Addr peer_address;
     Test_U_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
         connection_manager_p;

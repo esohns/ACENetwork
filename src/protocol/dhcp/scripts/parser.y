@@ -78,6 +78,15 @@ class DHCP_ParserDriver;
 struct YYLTYPE;
 //union YYSTYPE;
 
+union yytoken
+{
+  unsigned char aval[16];
+  int           ival;
+  std::string*  sval;
+};
+typedef yytoken yytoken_t;
+#define YYSTYPE yytoken_t
+
 typedef void* yyscan_t;
 
 //#define YYERROR_VERBOSE
@@ -93,8 +102,8 @@ extern int yyparse (DHCP_ParserDriver*, yyscan_t);
 %parse-param              { yyscan_t yyscanner }
 /* %lex-param                { YYSTYPE* yylval } */
 /* %lex-param                { YYLTYPE* yylloc } */
-%lex-param                 { DHCP_ParserDriver* driver }
-%lex-param                 { yyscan_t yyscanner }
+%lex-param                { DHCP_ParserDriver* driver }
+%lex-param                { yyscan_t yyscanner }
 
 %initial-action
 {
@@ -197,6 +206,7 @@ message:            header "cookie" options          { $$ = $1 + 4 + 308;
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set cookie: %d\n"),
 //                                                                   driver->record_->cookie));
+                                                       ACE_ASSERT (driver->record_->cookie == DHCP_MAGIC_COOKIE);
                                                      };
 header:             "op" "htype" "hlen" "hops" "xid" "secs" "flags" "ciaddr" "yiaddr" "siaddr" "giaddr" "chaddr" "sname" "file" { $$ = $1 + $2 + $3 + $4 + $5 + $6 + $7 + $8 + $9 + $10 + $11 + 16 + 64 + 128;
                                                        driver->record_->op =
@@ -216,15 +226,20 @@ header:             "op" "htype" "hlen" "hops" "xid" "secs" "flags" "ciaddr" "yi
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set hops: %d\n"),
 //                                                                   static_cast<int> (driver->record_->hops)));
-                                                       driver->record_->xid = $5;
+                                                       driver->record_->xid =
+                                                         ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ($5) : $5);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set xid: %d\n"),
 //                                                                   driver->record_->xid));
                                                        driver->record_->secs = $6;
+                                                       if (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN)
+                                                         ACE_SWAP_WORD (driver->record_->secs);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set secs: %d\n"),
 //                                                                   static_cast<int> (driver->record_->secs)));
                                                        driver->record_->flags = $7;
+                                                       if (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN)
+                                                         ACE_SWAP_WORD (driver->record_->flags);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set flags: %d\n"),
 //                                                                   static_cast<int> (driver->record_->flags)));

@@ -37,71 +37,155 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
   NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::dump"));
 
   std::ostringstream converter;
-  std::string buffer;
-  buffer = ACE_TEXT_ALWAYS_CHAR ("op: ");
-  buffer += DHCP_Tools::Op2String (record_in.op);
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("htype: ");
-  buffer += record_in.htype;
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("hlen: ");
-  buffer += record_in.hlen;
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("hops: ");
-  buffer += record_in.hops;
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("xid: ");
-  buffer += record_in.xid;
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("secs: ");
+  std::string string_buffer;
+
+  string_buffer = ACE_TEXT_ALWAYS_CHAR ("op: ");
+  string_buffer += DHCP_Tools::Op2String (record_in.op);
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("htype: ");
+  converter << static_cast<unsigned int> (record_in.htype);
+  string_buffer += converter.str ();
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("hlen: ");
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+  converter.clear ();
+  converter << static_cast<unsigned int> (record_in.hlen);
+  string_buffer += converter.str ();
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("hops: ");
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+  converter.clear ();
+  converter << static_cast<unsigned int> (record_in.hops);
+  string_buffer += converter.str ();
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("xid: ");
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+  converter.clear ();
+  converter << record_in.xid;
+  string_buffer += converter.str ();
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("secs: ");
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+  converter.clear ();
   converter << record_in.secs;
-  buffer += converter.str ();
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("flags: 0x");
+  string_buffer += converter.str ();
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("flags: 0x");
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << std::hex << record_in.flags;
-  buffer += converter.str ();
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("ciaddr: ");
-  buffer += record_in.ciaddr;
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("yiaddr: ");
-  buffer += record_in.yiaddr;
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("siaddr: ");
-  buffer += record_in.siaddr;
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("giaddr: ");
-  buffer += record_in.giaddr;
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("chaddr: ");
-  buffer += Net_Common_Tools::MACAddress2String (record_in.chaddr);
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("sname: ");
-  buffer += record_in.sname;
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("file: ");
-  buffer += record_in.file;
-  buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  buffer += ACE_TEXT_ALWAYS_CHAR ("options (");
+  string_buffer += converter.str ();
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("ciaddr: ");
+  string_buffer += Net_Common_Tools::IPAddress2String (0, record_in.ciaddr);
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("yiaddr: ");
+  string_buffer += Net_Common_Tools::IPAddress2String (0, record_in.yiaddr);
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("siaddr: ");
+  string_buffer += Net_Common_Tools::IPAddress2String (0, record_in.siaddr);
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("giaddr: ");
+  string_buffer += Net_Common_Tools::IPAddress2String (0, record_in.giaddr);
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("chaddr: ");
+  string_buffer += Net_Common_Tools::MACAddress2String (record_in.chaddr);
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("sname: \"");
+  string_buffer += record_in.sname;
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("file: \"");
+  string_buffer += record_in.file;
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("options (");
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << record_in.options.size ();
-  buffer += converter.str ();
-  buffer += ACE_TEXT_ALWAYS_CHAR ("):\n");
+  string_buffer += converter.str ();
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("):\n");
+  DHCP_Codes::OptionFieldType field_type;
   for (DHCP_OptionsIterator_t iterator = record_in.options.begin ();
        iterator != record_in.options.end ();
        ++iterator)
   {
-    buffer += (*iterator).first;
-    buffer += ACE_TEXT_ALWAYS_CHAR (": \"");
-    buffer += (*iterator).second;
-    buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
-  } // end FOR
-  buffer += ACE_TEXT_ALWAYS_CHAR ("options /END\n");
+    field_type =
+      DHCP_Tools::Option2FieldType (static_cast<DHCP_Codes::OptionType> ((*iterator).first));
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter << static_cast<unsigned int> ((*iterator).first);
+    string_buffer += converter.str ();
+    string_buffer += ACE_TEXT_ALWAYS_CHAR (": ");
+    switch (field_type)
+    {
+      case DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESS:
+      {
+        // sanity check(s)
+        ACE_ASSERT ((*iterator).second.size () % 4 == 0);
 
-  return buffer;
+        ACE_UINT32 ip_address =
+          *reinterpret_cast<const unsigned int*> ((*iterator).second.c_str ());
+        if ((*iterator).second.size () == 4)
+          string_buffer += Net_Common_Tools::IPAddress2String (0, ip_address);
+        else
+          for (unsigned int i = 0;
+               i < ((*iterator).second.size () / 4);
+               ++i)
+          {
+            ip_address =
+              *reinterpret_cast<const unsigned int*> ((*iterator).second.c_str () + (i * 4));
+            string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+            converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+            converter.clear ();
+            converter << (i + 1);
+            string_buffer += converter.str ();
+            string_buffer += ACE_TEXT_ALWAYS_CHAR (": ");
+            string_buffer += Net_Common_Tools::IPAddress2String (0, ip_address);
+          } // end FOR
+        break;
+      }
+      case DHCP_Codes::DHCP_OPTION_FIELDTYPE_INTEGER:
+      {
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        // *TODO*: support value multiplicity here
+        switch ((*iterator).second.size ())
+        {
+          case 1:
+            converter <<
+              static_cast<unsigned int> (*reinterpret_cast<const unsigned char*> ((*iterator).second.c_str ()));
+            break;
+          case 2:
+            converter <<
+              *reinterpret_cast<const unsigned short*> ((*iterator).second.c_str ());
+            break;
+          case 4:
+            converter <<
+              *reinterpret_cast<const unsigned int*> ((*iterator).second.c_str ());
+            break;
+          default:
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("invalid/unknown field size (was: %d), aborting\n"),
+                        (*iterator).second.size ()));
+            break;
+          }
+        } // end SWITCH
+        string_buffer += converter.str ();
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown field type (was: %d), aborting\n"),
+                    field_type));
+        break;
+      }
+    } // end SWITCH
+    string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  } // end FOR
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("options /END\n");
+
+  return string_buffer;
 }
 
 std::string
@@ -206,6 +290,8 @@ DHCP_Tools::Option2FieldType (DHCP_Option_t option_in)
   {
     case DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE:
       return DHCP_Codes::DHCP_OPTION_FIELDTYPE_INTEGER;
+    case DHCP_Codes::DHCP_OPTION_SUBNETMASK:
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESS;
     default:
     {
       ACE_DEBUG ((LM_ERROR,

@@ -258,10 +258,4 @@ class DHCP_Codes
   ACE_UNIMPLEMENTED_FUNC (virtual ~DHCP_Codes ())
 };
 
-// convenient type definitions
-typedef DHCP_Codes::OpType DHCP_Op_t;
-typedef DHCP_Codes::OptionFieldType DHCP_OptionFieldType_t;
-typedef DHCP_Codes::OptionType DHCP_Option_t;
-typedef DHCP_Codes::MessageType DHCP_MessageType_t;
-
 #endif

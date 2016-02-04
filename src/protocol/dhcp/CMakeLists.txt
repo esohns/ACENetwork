@@ -79,6 +79,9 @@ set (${PROJECT_NAME}_Protocol_DHCP_SRCS
      dhcp_tools.h
      stdafx.cpp
      stdafx.h)
+set (${PROJECT_NAME}_Protocol_DCHP_SCRIPTS
+     scripts/scanner.l
+     scripts/parser.y)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_dhcp_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_dhcp_SRCS PROPERTIES COMPILE_DEFINITIONS -Ddhcp_BUILD_DLL)
@@ -86,9 +89,12 @@ set (${PROJECT_NAME}_Protocol_DHCP_SRCS
 # *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
  set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ source_group (scripts FILES ${PROJECT_NAME}_Protocol_DCHP_SCRIPTS)
 endif ()
 
-add_library (${PROJECT_NAME}_Protocol_DHCP SHARED ${ACENetwork_Protocol_DHCP_SRCS})
+add_library (${PROJECT_NAME}_Protocol_DHCP SHARED
+             ${ACENetwork_Protocol_DHCP_SRCS}
+             ${ACENetwork_Protocol_DCHP_SCRIPTS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${PROJECT_NAME}_Protocol_DHCP Common)

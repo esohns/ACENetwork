@@ -48,6 +48,12 @@ typedef Common_INotify_T<DHCP_Stream_SessionData,
                          DHCP_SessionMessage> DHCP_IStreamNotify_t;
 typedef Stream_Statistic DHCP_RuntimeStatistic_t;
 
+// convenient type definitions
+typedef DHCP_Codes::OpType DHCP_Op_t;
+typedef DHCP_Codes::OptionFieldType DHCP_OptionFieldType_t;
+typedef DHCP_Codes::OptionType DHCP_Option_t;
+typedef DHCP_Codes::MessageType DHCP_MessageType_t;
+
 //typedef std::list<std::pair<unsigned char, std::string> > DHCP_Options_t;
 typedef std::map<unsigned char, std::string> DHCP_Options_t;
 typedef DHCP_Options_t::const_iterator DHCP_OptionsIterator_t;

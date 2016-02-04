@@ -25,7 +25,7 @@
 
 #include "stream_data_message_base.h"
 
-//#include "dhcp_message.h"
+#include "dhcp_message.h"
 
 #include "test_u_common.h"
 
@@ -40,14 +40,7 @@ template <typename AllocatorConfigurationType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_Message
- : public Stream_DataMessageBase_T<Test_U_AllocatorConfiguration,
-                                   Test_U_MessageData,
-                                   DHCP_MessageType_t>
-// : public Stream_DataMessageBase_2<Test_U_AllocatorConfiguration,
-//                                   Test_U_MessageData_t,
-//                                   DHCP_MessageType_t>
-// : public DHCP_Message_T<Test_U_AllocatorConfiguration,
-//                         Test_U_MessageData_t>
+ : public DHCP_Message_T<Test_U_AllocatorConfiguration>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
@@ -59,16 +52,10 @@ class Test_U_Message
   Test_U_Message (unsigned int); // size
   virtual ~Test_U_Message ();
 
-  virtual DHCP_MessageType_t command () const; // return value: message type
-  static std::string Command2String (DHCP_MessageType_t);
-
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
   // *NOTE*: this uses our allocator (if any) to create a new message
   virtual ACE_Message_Block* duplicate (void) const;
-
-  // implement Common_IDumpState
-  virtual void dump_state () const;
 
  protected:
   // copy ctor to be used by duplicate() and child classes
@@ -76,9 +63,7 @@ class Test_U_Message
   Test_U_Message (const Test_U_Message&);
 
  private:
-  typedef Stream_DataMessageBase_T<Test_U_AllocatorConfiguration,
-                                   Test_U_MessageData,
-                                   DHCP_MessageType_t> inherited;
+  typedef DHCP_Message_T<Test_U_AllocatorConfiguration> inherited;
 //  typedef Stream_DataMessageBase_2<Test_U_AllocatorConfiguration,
 //                                   Test_U_MessageData_t,
 //                                   DHCP_MessageType_t> inherited;

@@ -48,7 +48,7 @@
 // *IMPORTANT NOTE*: scans buffers in-place (avoids a copy,
 //         see: http://flex.sourceforge.net/manual/Multiple-Input-Buffers.html)
 //         --> in order to use yy_scan_buffer(), the buffer needs to have been
-//             prepared for usage by flex: buffers need two trailing '\0's
+//             prepared for use by flex: buffers need two trailing '\0's
 //             BEYOND their datas' tail byte (i.e. at positions length() + 1 and
 //             length() + 2)
 #define DHCP_DEFAULT_USE_YY_SCAN_BUFFER           true
@@ -69,7 +69,7 @@
 
 // flags
 #define DHCP_DEFAULT_FLAGS_BROADCAST              false
-#define DHCP_FLAGS_BROADCAST                      0x1000 // 2 bytes
+#define DHCP_FLAGS_BROADCAST                      0x8000 // 2 bytes
 
 #define DHCP_CHADDR_SIZE                          16
 #define DHCP_SNAME_SIZE                           64

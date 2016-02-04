@@ -167,33 +167,33 @@ Test_U_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& co
   // - push them onto the stream (tail-first) !
   // ------------------------------------
 
-  //inherited::MODULE_T* module_p = NULL;
-  //if (configuration_in.notificationStrategy)
-  //{
-  //  module_p = inherited::head ();
-  //  if (!module_p)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("no head module found, aborting\n")));
-  //    return false;
-  //  } // end IF
-  //  inherited::TASK_T* task_p = module_p->reader ();
-  //  if (!task_p)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("no head module reader task found, aborting\n")));
-  //    return false;
-  //  } // end IF
-  //  inherited::QUEUE_T* queue_p = task_p->msg_queue ();
-  //  if (!queue_p)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("no head module reader task queue found, aborting\n")));
-  //    return false;
-  //  } // end IF
-  //  queue_p->notification_strategy (configuration_in.notificationStrategy);
-  //} // end IF
-//  configuration_in.moduleConfiguration.streamState = &state_;
+  inherited::MODULE_T* module_p = NULL;
+  if (configuration_in.notificationStrategy)
+  {
+    module_p = inherited::head ();
+    if (!module_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("no head module found, aborting\n")));
+      return false;
+    } // end IF
+    inherited::TASK_T* task_p = module_p->reader ();
+    if (!task_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("no head module reader task found, aborting\n")));
+      return false;
+    } // end IF
+    inherited::QUEUE_T* queue_p = task_p->msg_queue ();
+    if (!queue_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("no head module reader task queue found, aborting\n")));
+      return false;
+    } // end IF
+    queue_p->notification_strategy (configuration_in.notificationStrategy);
+  } // end IF
+  //configuration_in.moduleConfiguration.streamState = &state_;
 
   // ---------------------------------------------------------------------------
   // *TODO*: remove type inferences

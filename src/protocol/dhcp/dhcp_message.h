@@ -27,7 +27,7 @@
 
 #include "stream_data_message_base.h"
 
-#include "dhcp_codes.h"
+#include "dhcp_common.h"
 #include "dhcp_exports.h"
 
 // forward declaration(s)
@@ -42,21 +42,18 @@ template <typename AllocatorConfigurationType,
           typename MessageType,
           typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
-template <typename AllocatorConfigurationType,
-          typename DataType>
+template <typename AllocatorConfigurationType>
 class DHCP_Message_T
- : public Stream_DataMessageBase_2<AllocatorConfigurationType,
-                                   DataType,
+ : public Stream_DataMessageBase_T<AllocatorConfigurationType,
+                                   DHCP_Record,
                                    DHCP_MessageType_t>
 {
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<AllocatorConfigurationType,
-                                                 DHCP_Message_T<AllocatorConfigurationType,
-                                                                DataType>,
+                                                 DHCP_Message_T<AllocatorConfigurationType>,
                                                  DHCP_SessionMessage>;
   friend class Stream_CachedMessageAllocator_T<AllocatorConfigurationType,
-                                               DHCP_Message_T<AllocatorConfigurationType,
-                                                              DataType>,
+                                               DHCP_Message_T<AllocatorConfigurationType>,
                                                DHCP_SessionMessage>;
 
  public:
@@ -103,8 +100,8 @@ class DHCP_Message_T
   DHCP_Message_T (const DHCP_Message_T&);
 
  private:
-  typedef Stream_DataMessageBase_2<AllocatorConfigurationType,
-                                   DataType,
+  typedef Stream_DataMessageBase_T<AllocatorConfigurationType,
+                                   DHCP_Record,
                                    DHCP_MessageType_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Message_T ())

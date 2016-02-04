@@ -414,8 +414,8 @@ DHCP_ParserDriver::scan_begin ()
   {
     bufferState_ =
       DHCP_Scanner__scan_buffer (fragment_->rd_ptr (),
-                                fragment_->length () + DHCP_FLEX_BUFFER_BOUNDARY_SIZE,
-                                scannerState_);
+                                 fragment_->length () + DHCP_FLEX_BUFFER_BOUNDARY_SIZE,
+                                 scannerState_);
   } // end IF
   else
   {

@@ -117,7 +117,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
   bool handle_manager = false;
   bool handle_reactor = false;
   bool handle_socket = false;
-  const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p = NULL;
+  const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
+    NULL;
   const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   ACE_Reactor* reactor_p = inherited::reactor ();
   ACE_ASSERT (reactor_p);
@@ -146,8 +147,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   //                       (see handle_close())
   inherited::closing_ = true;
   // *TODO*: find a better way to do this
-  serializeOutput_ =
-    configuration_p->streamConfiguration.serializeOutput;
+  serializeOutput_ = configuration_p->streamConfiguration.serializeOutput;
 
   // step1: open / tweak socket, ...
   // *TODO*: remove type inferences
@@ -937,6 +937,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
   localSAP_out.reset ();
+  remoteSAP_out = inherited2::configuration_->socketConfiguration.address;
 
   if (!inherited2::configuration_->socketConfiguration.writeOnly)
   {
@@ -945,7 +946,6 @@ Net_StreamUDPSocketBase_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
   } // end IF
-  remoteSAP_out = inherited2::configuration_->socketConfiguration.address;
 }
 
 template <typename HandlerType,

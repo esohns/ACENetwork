@@ -9553,7 +9553,7 @@ static yyconst yy_state_type yy_NUL_trans[284] =
 static yyconst flex_int32_t yy_rule_linenum[21] =
     {   0,
       118,  124,  130,  141,  152,  163,  174,  185,  196,  207,
-      218,  229,  240,  251,  260,  273,  286,  297,  310,  328
+      218,  229,  240,  251,  261,  275,  289,  301,  314,  332
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -10101,7 +10101,7 @@ case 5:
 YY_RULE_SETUP
 { driver->fragment_->rd_ptr (yyleng);
                              driver->offset_ += yyleng;
-                             BEGIN (hlen);
+                             BEGIN (hops);
                              yylval->ival =
                                  *reinterpret_cast<unsigned char*> (yytext);
                              /* *TODO*: error handling */
@@ -10120,7 +10120,7 @@ YY_RULE_SETUP
                              yylval->ival =
                                  *reinterpret_cast<unsigned char*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::HOPS;
                              /* return yy::DHCP_Parser::token::VERSION; */ }
 	YY_BREAK
@@ -10150,7 +10150,7 @@ YY_RULE_SETUP
                              yylval->ival =
                                  *reinterpret_cast<unsigned short*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::SECS;
                              /* return yy::DHCP_Parser::token::REASON; */ }
 	YY_BREAK
@@ -10165,7 +10165,7 @@ YY_RULE_SETUP
                              yylval->ival =
                                  *reinterpret_cast<unsigned short*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::FLAGS;
                              /* return yy::DHCP_Parser::token::HEADER; */ }
 	YY_BREAK
@@ -10195,7 +10195,7 @@ YY_RULE_SETUP
                              yylval->ival =
                                  *reinterpret_cast<unsigned int*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::YIADDR;
                              /* return yy::DHCP_Parser::token::BODY; */ }
 	YY_BREAK
@@ -10236,6 +10236,7 @@ case 14:
 YY_RULE_SETUP
 { driver->fragment_->rd_ptr (yyleng);
                              driver->offset_ += yyleng;
+                             ACE_ASSERT (yyleng == DHCP_CHADDR_SIZE);
                              BEGIN (sname);
                              ACE_OS::memcpy (yylval->aval, yytext, DHCP_CHADDR_SIZE);
                              /* *TODO*: error handling */
@@ -10247,15 +10248,16 @@ YY_RULE_SETUP
 case 15:
 /* rule 15 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
+{ driver->fragment_->rd_ptr (DHCP_SNAME_SIZE);
                              driver->offset_ += yyleng;
+                             ACE_ASSERT (yyleng == DHCP_SNAME_SIZE);
                              BEGIN (file_);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
-                             yylval->sval->append (yytext, yyleng - 2);
+                             *yylval->sval = yytext;
                              return yytokentype::SNAME;
                              /* return yy::DHCP_Parser::token::BODY; */ }
 	YY_BREAK
@@ -10264,15 +10266,16 @@ YY_RULE_SETUP
 case 16:
 /* rule 16 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
+{ driver->fragment_->rd_ptr (DHCP_FILE_SIZE);
                              driver->offset_ += yyleng;
+                             ACE_ASSERT (yyleng == DHCP_FILE_SIZE);
                              BEGIN (cookie);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
-                             yylval->sval->append (yytext, yyleng - 2);
+                             *yylval->sval = yytext;
                              return yytokentype::FILE_;
                              /* return yy::DHCP_Parser::token::BODY; */ }
 	YY_BREAK
@@ -10283,6 +10286,7 @@ case 17:
 YY_RULE_SETUP
 { driver->fragment_->rd_ptr (yyleng);
                              driver->offset_ += yyleng;
+                             ACE_ASSERT (yyleng == 4);
                              BEGIN (option_tag);
                              yylval->ival =
                                *reinterpret_cast<unsigned int*> (yytext);
@@ -10318,14 +10322,14 @@ YY_RULE_SETUP
                              option_size =
                                *reinterpret_cast<unsigned char*> (yytext);
 
-//                             /* undo the effects of YY_DO_BEFORE_ACTION *///                             *yy_cp = yyg->yy_hold_char;
+                             /* undo the effects of YY_DO_BEFORE_ACTION */                             *yy_cp = yyg->yy_hold_char;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (driver->fragment_->rd_ptr (), option_size);
 
-                             // skip over value bytes                             yyg->yy_c_buf_p += yylval->ival;                             yyg->yy_hold_char = *yyg->yy_c_buf_p;//                           YY_FLUSH_BUFFER; // --> refill scan buffer//                           char c;//                           for (unsigned int i = 0;//                                i < remainder;//                                ++i)//                             c = yyinput (yyscanner);//                           ACE_UNUSED_ARG (c);
+                             // skip over value bytes                             yyg->yy_c_buf_p += (yyleng + option_size);                             yyg->yy_hold_char = *yyg->yy_c_buf_p;//                             YY_FLUSH_BUFFER; // --> refill scan buffer//                             char c;//                             for (unsigned int i = 0;//                                  i <= option_size;//                                  ++i)//                               c = yyinput (yyscanner);//                             ACE_UNUSED_ARG (c);                             driver->fragment_->rd_ptr (option_size);                             driver->offset_ += option_size;
                              BEGIN (option_tag);
                              return yytokentype::OPTION_VALUE;
                              /* return yy::DHCP_Parser::token::BODY; */ }

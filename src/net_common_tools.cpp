@@ -691,8 +691,7 @@ Net_Common_Tools::interface2IPAddress (const std::string& interfaceIdentifier_in
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interface2IPAddress"));
 
   // initialize return value(s)
-  IPAddress_out.set (static_cast<u_short> (0),
-                     static_cast<ACE_UINT32> (INADDR_ANY));
+  IPAddress_out.reset ();
 
   // initialize return value(s)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -739,6 +738,7 @@ Net_Common_Tools::interface2IPAddress (const std::string& interfaceIdentifier_in
   } // end IF
 
   PIP_ADAPTER_ADDRESSES ip_adapter_addresses_2 = ip_adapter_addresses_p;
+  PIP_ADAPTER_UNICAST_ADDRESS unicast_address_p = NULL;
   SOCKET_ADDRESS* socket_address_p = NULL;
   struct sockaddr_in* sockaddr_in_p = NULL;
   do
@@ -754,8 +754,30 @@ Net_Common_Tools::interface2IPAddress (const std::string& interfaceIdentifier_in
                         ip_adapter_addresses_2->AdapterName))
       goto continue_;
 
-    socket_address_p = &ip_adapter_addresses_2->FirstUnicastAddress->Address;
-    ACE_ASSERT (socket_address_p->lpSockaddr);
+    unicast_address_p = ip_adapter_addresses_2->FirstUnicastAddress;
+    ACE_ASSERT (unicast_address_p);
+    do
+    {
+      socket_address_p = &unicast_address_p->Address;
+      ACE_ASSERT (socket_address_p->lpSockaddr);
+      if (socket_address_p->lpSockaddr->sa_family == AF_INET)
+        break;
+
+      unicast_address_p = unicast_address_p->Next;
+    } while (unicast_address_p);
+    if (!unicast_address_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("adapter \"%s:\"\"%s\" does not currently have any unicast IPv4 address, aborting\n"),
+                  ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName),
+                  ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->Description)));
+
+      // clean up
+      ACE_FREE_FUNC (ip_adapter_addresses_p);
+
+      return false;
+    } // end IF
+
     sockaddr_in_p = (struct sockaddr_in*)socket_address_p->lpSockaddr;
     result = IPAddress_out.set (sockaddr_in_p,
                                 socket_address_p->iSockaddrLength);

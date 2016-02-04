@@ -55,6 +55,7 @@ extern "C"
 // callbacks
 G_MODULE_EXPORT void action_send_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void action_report_activate_cb (GtkAction*, gpointer);
+G_MODULE_EXPORT void checkbutton_broadcast_toggled_cb (GtkCheckButton*, gpointer);
 G_MODULE_EXPORT void combobox_interface_changed_cb (GtkComboBox*, gpointer);
 //G_MODULE_EXPORT void spinbutton_buffer_value_changed_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT void spinbutton_port_value_changed_cb (GtkWidget*, gpointer);

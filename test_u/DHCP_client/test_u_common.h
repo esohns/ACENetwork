@@ -90,20 +90,20 @@ struct Test_U_UserData
   Test_U_StreamConfiguration* streamConfiguration;
 };
 
-struct Test_U_MessageData
-{
-  inline Test_U_MessageData ()
-   : DHCPRecord (NULL)
-  {};
-  inline ~Test_U_MessageData ()
-  {
-    if (DHCPRecord)
-      delete DHCPRecord;
-  };
+//struct Test_U_MessageData
+//{
+//  inline Test_U_MessageData ()
+//   : DHCPRecord (NULL)
+//  {};
+//  inline ~Test_U_MessageData ()
+//  {
+//    if (DHCPRecord)
+//      delete DHCPRecord;
+//  };
 
-  DHCP_Record* DHCPRecord;
-};
-typedef Stream_DataBase_T<Test_U_MessageData> Test_U_MessageData_t;
+//  DHCP_Record* DHCPRecord;
+//};
+//typedef Stream_DataBase_T<Test_U_MessageData> Test_U_MessageData_t;
 
 struct Test_U_StreamSessionData
  : Stream_SessionData
@@ -212,6 +212,8 @@ struct Test_U_StreamModuleHandlerConfiguration
   std::string                        targetFileName; // dump module
 };
 
+typedef DHCP_ProtocolConfiguration Test_U_ProtocolConfiguration_t;
+
 struct Test_U_ListenerConfiguration
 {
   inline Test_U_ListenerConfiguration ()
@@ -219,6 +221,7 @@ struct Test_U_ListenerConfiguration
    , addressFamily (ACE_ADDRESS_FAMILY_INET)
    , connectionManager (NULL)
    , messageAllocator (NULL)
+   , networkInterface ()
    , socketHandlerConfiguration (NULL)
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
                                  0)
@@ -229,6 +232,7 @@ struct Test_U_ListenerConfiguration
   int                                addressFamily;
   Test_U_IConnectionManager_t*       connectionManager;
   Stream_IAllocator*                 messageAllocator;
+  std::string                        networkInterface;
   Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
   ACE_Time_Value                     statisticReportingInterval; // [ACE_Time_Value::zero: off]
   bool                               useLoopBackDevice;
@@ -301,6 +305,7 @@ struct Test_U_Configuration
   Test_U_StreamModuleHandlerConfiguration moduleHandlerConfiguration_2;
   Test_U_StreamConfiguration              streamConfiguration;
   // *************************** protocol data *********************************
+  Test_U_ProtocolConfiguration_t          protocolConfiguration;
   // *************************** listener data *********************************
   Test_U_ListenerConfiguration            listenerConfiguration;
 

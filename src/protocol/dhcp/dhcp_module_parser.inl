@@ -121,18 +121,19 @@ DHCP_Module_Parser_T<TimePolicyType,
 //    const_cast<DATA_CONTAINER_T&> (message_inout->get ());
 //  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.get ());
   DATA_T& data_r = const_cast<DATA_T&> (message_inout->get ());
-  if (!data_r.DHCPRecord)
-  {
-    ACE_NEW_NORETURN (data_r.DHCPRecord,
-                      DHCP_Record ());
-    if (!data_r.DHCPRecord)
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate memory, returning\n")));
-      return;
-    } // end IF
-  } // end IF
-  record_p = data_r.DHCPRecord;
+//  if (!data_r.DHCPRecord)
+//  {
+//    ACE_NEW_NORETURN (data_r.DHCPRecord,
+//                      DHCP_Record ());
+//    if (!data_r.DHCPRecord)
+//    {
+//      ACE_DEBUG ((LM_CRITICAL,
+//                  ACE_TEXT ("failed to allocate memory, returning\n")));
+//      return;
+//    } // end IF
+//  } // end IF
+//  record_p = data_r.DHCPRecord;
+  record_p = &data_r;
 
   // initialize driver ?
   if (!isDriverInitialized_)
@@ -157,6 +158,9 @@ DHCP_Module_Parser_T<TimePolicyType,
                 message_inout->getID ()));
     return;
   } // end IF
+  message_inout->initialize (*record_p,
+                             NULL);
+  isDriverInitialized_ = false;
 }
 
 template <typename TimePolicyType,

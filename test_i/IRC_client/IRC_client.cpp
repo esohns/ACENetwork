@@ -690,9 +690,14 @@ do_work (IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step2: initialize event dispatch
+  struct Common_DispatchThreadData thread_data;
+  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data.useReactor = configuration_in.useReactor;
   if (!Common_Tools::initializeEventDispatch (configuration_in.useReactor,
-                                              (numberOfDispatchThreads_in > 1),
-                                              numberOfDispatchThreads_in,
+                                              (thread_data.numberOfDispatchThreads > 1),
+                                              thread_data.numberOfDispatchThreads,
+                                              thread_data.proactorType,
+                                              thread_data.reactorType,
                                               configuration_in.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -786,8 +791,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5a: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (&configuration_in.useReactor,
-                                         numberOfDispatchThreads_in,
+  if (!Common_Tools::startEventDispatch (thread_data,
                                          configuration_in.groupID))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -913,8 +917,7 @@ do_work (IRC_Client_Configuration& configuration_in,
               ACE_TEXT ("connected...\n")));
 
   // step6b: dispatch events
-  if (!Common_Tools::startEventDispatch (&configuration_in.useReactor,
-                                         numberOfDispatchThreads_in,
+  if (!Common_Tools::startEventDispatch (thread_data,
                                          configuration_in.groupID))
   {
     ACE_DEBUG ((LM_ERROR,

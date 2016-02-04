@@ -103,6 +103,10 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-b          : reuqest broadcast replies [")
+            << DHCP_DEFAULT_FLAGS_BROADCAST
+            << ACE_TEXT_ALWAYS_CHAR ("])")
+            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d          : debug parser [")
             << DHCP_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
@@ -174,6 +178,7 @@ do_printUsage (const std::string& programName_in)
 bool
 do_processArguments (int argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
+                     bool& requestBroadcastReplies_out,
                      bool& debugParser_out,
                      std::string& GtkRcFileName_out,
                      std::string& fileName_out,
@@ -204,6 +209,7 @@ do_processArguments (int argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
+  requestBroadcastReplies_out = DHCP_DEFAULT_FLAGS_BROADCAST;
   debugParser_out = DHCP_DEFAULT_YACC_TRACE;
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -231,7 +237,7 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("de:f::g::ln::oprs:tvx:"),
+                              ACE_TEXT ("bde:f::g::ln::oprs:tvx:"),
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -243,6 +249,11 @@ do_processArguments (int argc_in,
   {
     switch (option)
     {
+      case 'b':
+      {
+        requestBroadcastReplies_out = true;
+        break;
+      }
       case 'd':
       {
         debugParser_out = true;
@@ -433,7 +444,8 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
 }
 
 void
-do_work (bool debugParser_in,
+do_work (bool requestBroadcastReplies_in,
+         bool debugParser_in,
          const std::string& fileName_in,
          const std::string& UIDefinitionFileName_in,
          const std::string& interface_in,
@@ -571,6 +583,10 @@ do_work (bool debugParser_in,
     &configuration.socketHandlerConfiguration;
   configuration.moduleHandlerConfiguration_2.stream = stream_p;
 
+  // ********************** protocol configuration data ************************
+  configuration.protocolConfiguration.requestBroadcastReplies =
+      requestBroadcastReplies_in;
+
   // ********************* listener configuration data ************************
   if (useLoopback_in)
     result =
@@ -589,6 +605,7 @@ do_work (bool debugParser_in,
     } // end IF
     configuration.listenerConfiguration.address.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
                                                                  1);
+    result = 0;
   } // end ELSE IF
   else
     result =
@@ -610,9 +627,14 @@ do_work (bool debugParser_in,
   configuration.listenerConfiguration.useLoopBackDevice = useLoopback_in;
 
   // step0b: initialize event dispatch
-  if (!Common_Tools::initializeEventDispatch (useReactor_in,
+  struct Common_DispatchThreadData thread_data;
+  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data.useReactor = useReactor_in;
+  if (!Common_Tools::initializeEventDispatch (thread_data.useReactor,
                                               useThreadPool_in,
-                                              numberOfDispatchThreads_in,
+                                              thread_data.numberOfDispatchThreads,
+                                              thread_data.proactorType,
+                                              thread_data.reactorType,
                                               configuration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -633,7 +655,7 @@ do_work (bool debugParser_in,
   Test_U_ISocketConnection_t* isocket_connection_p = NULL;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
-  Test_U_MessageData* message_data_p = NULL;
+//  Test_U_MessageData* message_data_p = NULL;
 //  Test_U_MessageData_t* message_data_container_p = NULL;
   Test_U_Message* message_p = NULL;
 
@@ -706,8 +728,7 @@ do_work (bool debugParser_in,
   // - dispatch UI events (if any)
 
   // step1a: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (&useReactor_in,
-                                         numberOfDispatchThreads_in,
+  if (!Common_Tools::startEventDispatch (thread_data,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -843,12 +864,20 @@ do_work (bool debugParser_in,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate memory, returning\n")));
+
+      // clean up
+      connection_manager_p->abort ();
+
       goto clean_up;
     } // end IF
     if (!iconnector_p->initialize (configuration.socketHandlerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
+
+      // clean up
+      connection_manager_p->abort ();
+
       goto clean_up;
     } // end IF
 
@@ -904,6 +933,7 @@ do_work (bool debugParser_in,
 
       // clean up
       iconnector_p->abort ();
+      connection_manager_p->abort ();
 
       goto clean_up;
     } // end IF
@@ -963,22 +993,26 @@ allocate:
 
       // clean up
 //      message_data_container_p->decrease ();
+      connection_manager_p->abort ();
 
       goto clean_up;
     } // end IF
-    message_data_p = &const_cast<Test_U_MessageData&> (message_p->get ());
-    message_data_p->DHCPRecord->op = DHCP_Codes::DHCP_OP_REQUEST;
-    message_data_p->DHCPRecord->htype = DHCP_FRAME_HTYPE;
-    message_data_p->DHCPRecord->hlen = DHCP_FRAME_HLEN;
-    message_data_p->DHCPRecord->xid = DHCP_Tools::generateXID ();
-    if (!Net_Common_Tools::interface2MACAddress (interface_in,
-                                                 message_data_p->DHCPRecord->chaddr))
+    DHCP_Record DHCP_record;
+    DHCP_record.op = DHCP_Codes::DHCP_OP_REQUEST;
+    DHCP_record.htype = DHCP_FRAME_HTYPE;
+    DHCP_record.hlen = DHCP_FRAME_HLEN;
+    DHCP_record.xid = DHCP_Tools::generateXID ();
+    if (configuration.protocolConfiguration.requestBroadcastReplies)
+      DHCP_record.flags = DHCP_FLAGS_BROADCAST;
+    if (!Net_Common_Tools::interface2MACAddress (configuration.socketConfiguration.networkInterface,
+                                                 DHCP_record.chaddr))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interface2MACAddress(), returning\n")));
 
       // clean up
-//      message_data_container_p->decrease ();
+      //    message_data_container_p->decrease ();
+      connection_manager_p->abort ();
 
       goto clean_up;
     } // end IF
@@ -987,21 +1021,22 @@ allocate:
     //         - 'IP address lease time'   (51)
     //         - 'overload'                (52)
     char message_type = DHCP_Codes::DHCP_MESSAGE_DISCOVER;
-    message_data_p->DHCPRecord->options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE,
-                                                                std::string (1, message_type)));
+    DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE,
+                                                std::string (1, message_type)));
     //         - 'parameter request list'  (55) [include in all subsequent messages]
     //         - 'message'                 (56)
     //         - 'maximum message size'    (57)
     //         - 'vendor class identifier' (60)
     //         - 'client identifier'       (61)
     // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
-//    message_p->initialize (message_data_container_p,
-//                           NULL);
+    //  message_p->initialize (message_data_container_p,
+    message_p->initialize (DHCP_record,
+                           NULL);
 
     Test_U_ConnectionState& state_r =
       const_cast<Test_U_ConnectionState&> (configuration.moduleHandlerConfiguration_2.connection->state ());
     state_r.timeStamp = COMMON_TIME_NOW;
-    state_r.xid = message_data_p->DHCPRecord->xid;
+    state_r.xid = DHCP_record.xid;
     isocket_connection_p->send (message_p);
   } // end IF
 
@@ -1030,6 +1065,10 @@ allocate:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
+
+      // clean up
+      connection_manager_p->abort ();
+
       goto clean_up;
     } // end IF
 
@@ -1041,8 +1080,8 @@ allocate:
                   ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
       goto clean_up;
     } // end IF
-    BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
-    ACE_UNUSED_ARG (was_visible_b);
+    //BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
+    //ACE_UNUSED_ARG (was_visible_b);
 #endif
 
     result = COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
@@ -1189,6 +1228,7 @@ ACE_TMAIN (int argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
+  bool request_broadcast_replies = DHCP_DEFAULT_FLAGS_BROADCAST;
   bool debug_parser = DHCP_DEFAULT_YACC_TRACE;
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1218,6 +1258,7 @@ ACE_TMAIN (int argc_in,
   // step1b: parse/process/validate configuration
   if (!do_processArguments (argc_in,
                             argv_in,
+                            request_broadcast_replies,
                             debug_parser,
                             gtk_rc_file,
                             output_file,
@@ -1460,7 +1501,8 @@ ACE_TMAIN (int argc_in,
   ACE_High_Res_Timer timer;
   timer.start ();
   // step2: do actual work
-  do_work (debug_parser,
+  do_work (request_broadcast_replies,
+           debug_parser,
            output_file,
            ui_definition_file,
            interface,

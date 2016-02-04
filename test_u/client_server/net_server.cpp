@@ -537,9 +537,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
   //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
   // step0b: initialize event dispatch
-  if (!Common_Tools::initializeEventDispatch (useReactor_in,
+  struct Common_DispatchThreadData thread_data;
+  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data.useReactor = useReactor_in;
+  if (!Common_Tools::initializeEventDispatch (thread_data.useReactor,
                                               useThreadPool_in,
-                                              numberOfDispatchThreads_in,
+                                              thread_data.numberOfDispatchThreads,
+                                              thread_data.proactorType,
+                                              thread_data.reactorType,
                                               configuration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -668,8 +673,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // *NOTE*: this variable needs to stay on the working stack, it's passed to
   //         the worker(s) (if any)
   bool use_reactor = useReactor_in;
-  if (!Common_Tools::startEventDispatch (&use_reactor,
-                                         numberOfDispatchThreads_in,
+  if (!Common_Tools::startEventDispatch (thread_data,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,

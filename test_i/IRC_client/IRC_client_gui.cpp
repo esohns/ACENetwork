@@ -486,9 +486,14 @@ do_work (bool useThreadPool_in,
   userData_in.configuration->streamConfiguration.cloneModule = true;
 
   // step2: initialize event dispatch
+  struct Common_DispatchThreadData thread_data;
+  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data.useReactor = userData_in.configuration->useReactor;
   if (!Common_Tools::initializeEventDispatch (userData_in.configuration->useReactor,
-                                              (numberOfDispatchThreads_in > 1),
-                                              numberOfDispatchThreads_in,
+                                              (thread_data.numberOfDispatchThreads > 1),
+                                              thread_data.numberOfDispatchThreads,
+                                              thread_data.proactorType,
+                                              thread_data.reactorType,
                                               userData_in.configuration->streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -568,8 +573,7 @@ do_work (bool useThreadPool_in,
 
   // step6: initialize worker(s)
   int group_id = -1;
-  if (!Common_Tools::startEventDispatch (&(userData_in.configuration->useReactor),
-                                         numberOfDispatchThreads_in,
+  if (!Common_Tools::startEventDispatch (thread_data,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,

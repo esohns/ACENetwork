@@ -95,10 +95,10 @@ struct DHCP_SocketHandlerConfiguration
 struct DHCP_ProtocolConfiguration
 {
   inline DHCP_ProtocolConfiguration ()
-   : printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)
+   : requestBroadcastReplies (DHCP_DEFAULT_FLAGS_BROADCAST)
   {};
 
-  bool printProgressDot;  // print dot '.' (stdlog) for received messages
+  bool requestBroadcastReplies;
 };
 
 struct DHCP_StreamConfiguration;
@@ -108,6 +108,7 @@ struct DHCP_ModuleHandlerConfiguration
   inline DHCP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    //////////////////////////////////////
+   , printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)
   {
@@ -117,6 +118,7 @@ struct DHCP_ModuleHandlerConfiguration
     traceScanning = DHCP_DEFAULT_LEX_TRACE; // http parser module
   };
 
+  bool                        printProgressDot;  // print dot '.' (stdlog) for received messages
   DHCP_ProtocolConfiguration* protocolConfiguration;
 
   DHCP_StreamConfiguration*   streamConfiguration;

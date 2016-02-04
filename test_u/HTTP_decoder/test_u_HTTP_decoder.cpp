@@ -581,9 +581,14 @@ do_work (unsigned int bufferSize_in,
     statisticReportingInterval_in;
 
   // step0b: initialize event dispatch
-  if (!Common_Tools::initializeEventDispatch (useReactor_in,
+  struct Common_DispatchThreadData thread_data;
+  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data.useReactor = useReactor_in;
+  if (!Common_Tools::initializeEventDispatch (thread_data.useReactor,
                                               useThreadPool_in,
-                                              numberOfDispatchThreads_in,
+                                              thread_data.numberOfDispatchThreads,
+                                              thread_data.proactorType,
+                                              thread_data.reactorType,
                                               configuration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -659,8 +664,7 @@ do_work (unsigned int bufferSize_in,
 
   // step1a: initialize worker(s)
   int group_id = -1;
-  if (!Common_Tools::startEventDispatch (&useReactor_in,
-                                         numberOfDispatchThreads_in,
+  if (!Common_Tools::startEventDispatch (thread_data,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,

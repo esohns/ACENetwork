@@ -147,7 +147,7 @@ Test_U_ConnectionStream::initialize (const Test_U_StreamConfiguration& configura
                   ACE_TEXT ("failed to Stream_Base_T::finalize(): \"%m\", continuing\n")));
   } // end IF
 
-    // allocate a new session state, reset stream
+  // allocate a new session state, reset stream
   if (!inherited::initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,

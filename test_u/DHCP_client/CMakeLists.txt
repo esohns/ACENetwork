@@ -174,6 +174,9 @@ set (${PROJECT_NAME}_DHCPClient_EXE_SRCS
 #  test_u_template_instantiations.cpp
      stdafx.cpp
      stdafx.h)
+set (${PROJECT_NAME}_DHCPClient_EXE_CFG
+     etc/test_u.glade
+     etc/resources.rc)
 
 #string (TOLOWER "${PROJECT_NAME}_DHCPClient" EXECUTABLE)
 set (EXECUTABLE DHCP_client)
@@ -215,5 +218,7 @@ install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
-install (FILES etc/test_u.glade etc/resources.rc
-         DESTINATION etc/libACEStream/${EXECUTABLE} COMPONENT config)
+if (UNIX)
+ install (FILES ${PROJECT_NAME}_DHCPClient_EXE_CFG
+          DESTINATION etc/libACENetwork/${EXECUTABLE} COMPONENT config)
+endif ()

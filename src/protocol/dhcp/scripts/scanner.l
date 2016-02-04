@@ -151,7 +151,7 @@ NUL            [\x00]
 <hlen>{
 {OCTET}{1}                 { driver->fragment_->rd_ptr (yyleng);
                              driver->offset_ += yyleng;
-                             BEGIN (hlen);
+                             BEGIN (hops);
                              yylval->ival =
                                  *reinterpret_cast<unsigned char*> (yytext);
                              /* *TODO*: error handling */
@@ -166,7 +166,7 @@ NUL            [\x00]
                              yylval->ival =
                                  *reinterpret_cast<unsigned char*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::HOPS;
                              /* return yy::DHCP_Parser::token::VERSION; */ }
 } // end <hops>
@@ -188,7 +188,7 @@ NUL            [\x00]
                              yylval->ival =
                                  *reinterpret_cast<unsigned short*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::SECS;
                              /* return yy::DHCP_Parser::token::REASON; */ }
 } // end <secs>
@@ -199,7 +199,7 @@ NUL            [\x00]
                              yylval->ival =
                                  *reinterpret_cast<unsigned short*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::FLAGS;
                              /* return yy::DHCP_Parser::token::HEADER; */ }
 } // end <flags>
@@ -221,7 +221,7 @@ NUL            [\x00]
                              yylval->ival =
                                  *reinterpret_cast<unsigned int*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::YIADDR;
                              /* return yy::DHCP_Parser::token::BODY; */ }
 } // end <yiaddr>
@@ -250,6 +250,7 @@ NUL            [\x00]
 <chaddr>{
 {OCTET}{16}                { driver->fragment_->rd_ptr (yyleng);
                              driver->offset_ += yyleng;
+                             ACE_ASSERT (yyleng == DHCP_CHADDR_SIZE);
                              BEGIN (sname);
                              ACE_OS::memcpy (yylval->aval, yytext, DHCP_CHADDR_SIZE);
                              /* *TODO*: error handling */
@@ -257,34 +258,37 @@ NUL            [\x00]
                              /* return yy::DHCP_Parser::token::BODY; */ }
 } // end <chaddr>
 <sname>{
-{OCTET}{64}                { driver->fragment_->rd_ptr (yyleng);
+{OCTET}{64}                { driver->fragment_->rd_ptr (DHCP_SNAME_SIZE);
                              driver->offset_ += yyleng;
+                             ACE_ASSERT (yyleng == DHCP_SNAME_SIZE);
                              BEGIN (file_);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
-                             yylval->sval->append (yytext, yyleng - 2);
+                             *yylval->sval = yytext;
                              return yytokentype::SNAME;
                              /* return yy::DHCP_Parser::token::BODY; */ }
 } // end <sname>
 <file_>{
-{OCTET}{128}               { driver->fragment_->rd_ptr (yyleng);
+{OCTET}{128}               { driver->fragment_->rd_ptr (DHCP_FILE_SIZE);
                              driver->offset_ += yyleng;
+                             ACE_ASSERT (yyleng == DHCP_FILE_SIZE);
                              BEGIN (cookie);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
-                             yylval->sval->append (yytext, yyleng - 2);
+                             *yylval->sval = yytext;
                              return yytokentype::FILE_;
                              /* return yy::DHCP_Parser::token::BODY; */ }
 } // end <file_>
 <cookie>{
 {OCTET}{4}                 { driver->fragment_->rd_ptr (yyleng);
                              driver->offset_ += yyleng;
+                             ACE_ASSERT (yyleng == 4);
                              BEGIN (option_tag);
                              yylval->ival =
                                *reinterpret_cast<unsigned int*> (yytext);
@@ -312,14 +316,14 @@ NUL            [\x00]
                              option_size =
                                *reinterpret_cast<unsigned char*> (yytext);
 
-//                             /* undo the effects of YY_DO_BEFORE_ACTION *///                             *yy_cp = yyg->yy_hold_char;
+                             /* undo the effects of YY_DO_BEFORE_ACTION */                             *yy_cp = yyg->yy_hold_char;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (driver->fragment_->rd_ptr (), option_size);
 
-                             // skip over value bytes                             yyg->yy_c_buf_p += yylval->ival;                             yyg->yy_hold_char = *yyg->yy_c_buf_p;//                           YY_FLUSH_BUFFER; // --> refill scan buffer//                           char c;//                           for (unsigned int i = 0;//                                i < remainder;//                                ++i)//                             c = yyinput (yyscanner);//                           ACE_UNUSED_ARG (c);
+                             // skip over value bytes                             yyg->yy_c_buf_p += (yyleng + option_size);                             yyg->yy_hold_char = *yyg->yy_c_buf_p;//                             YY_FLUSH_BUFFER; // --> refill scan buffer//                             char c;//                             for (unsigned int i = 0;//                                  i <= option_size;//                                  ++i)//                               c = yyinput (yyscanner);//                             ACE_UNUSED_ARG (c);                             driver->fragment_->rd_ptr (option_size);                             driver->offset_ += option_size;
                              BEGIN (option_tag);
                              return yytokentype::OPTION_VALUE;
                              /* return yy::DHCP_Parser::token::BODY; */ }

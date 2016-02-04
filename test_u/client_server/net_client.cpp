@@ -456,7 +456,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
          unsigned short serverPortNumber_in,
          bool useReactor_in,
          unsigned int serverPingInterval_in,
-         unsigned int numDispatchThreads_in,
+         unsigned int numberOfDispatchThreads_in,
          bool useUDP_in,
          Net_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
@@ -547,9 +547,14 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
   // step0b: initialize event dispatch
-  if (!Common_Tools::initializeEventDispatch (useReactor_in,
+  struct Common_DispatchThreadData thread_data;
+  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data.useReactor = useReactor_in;
+  if (!Common_Tools::initializeEventDispatch (thread_data.useReactor,
                                               useThreadPool_in,
-                                              numDispatchThreads_in,
+                                              thread_data.numberOfDispatchThreads,
+                                              thread_data.proactorType,
+                                              thread_data.reactorType,
                                               configuration.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -706,8 +711,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // *NOTE*: this variable needs to stay on the working stack, it's passed to
   //         the worker(s) (if any)
   bool use_reactor = useReactor_in;
-  if (!Common_Tools::startEventDispatch (&use_reactor,
-                                         numDispatchThreads_in,
+  if (!Common_Tools::startEventDispatch (thread_data,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -762,8 +766,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                   ACE_TEXT (buffer)));
 
       // clean up
-      if (useThreadPool_in &&
-          (numDispatchThreads_in > 1))
+      if (numberOfDispatchThreads_in >= 1)
         Common_Tools::finalizeEventDispatch (useReactor_in,
                                              !useReactor_in,
                                              group_id);
