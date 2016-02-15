@@ -16,9 +16,10 @@ DHCP_Scanner_lex (YYSTYPE* yylval_param,     \
                   DHCP_ParserDriver* driver, \
                   yyscan_t yyscanner)
 // ... and declare it for the parser's sake
-YY_DECL;
+extern YY_DECL;
 
-void DHCP_Scanner_set_column (int, yyscan_t);
+extern int DHCP_Scanner_reset (yyscan_t);
+extern void DHCP_Scanner_set_column (int, yyscan_t);
 
 //using namespace yy;
 //#define YYLTYPE DHCP_Parser::location_type
@@ -210,7 +211,7 @@ NUL            [\x00]
                              yylval->ival =
                                  *reinterpret_cast<unsigned int*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::CIADDR;
                              /* return yy::DHCP_Parser::token::BODY; */ }
 } // end <ciaddr>
@@ -232,7 +233,7 @@ NUL            [\x00]
                              yylval->ival =
                                  *reinterpret_cast<unsigned int*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::SIADDR;
                              /* return yy::DHCP_Parser::token::BODY; */ }
 } // end <siaddr>
@@ -243,7 +244,7 @@ NUL            [\x00]
                              yylval->ival =
                                  *reinterpret_cast<unsigned int*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::GIADDR;
                              /* return yy::DHCP_Parser::token::BODY; */ }
 } // end <giaddr>
@@ -316,14 +317,26 @@ NUL            [\x00]
                              option_size =
                                *reinterpret_cast<unsigned char*> (yytext);
 
-                             /* undo the effects of YY_DO_BEFORE_ACTION */                             *yy_cp = yyg->yy_hold_char;
+                             /* undo the effects of YY_DO_BEFORE_ACTION */                             *yy_cp = yyg->yy_hold_char;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (driver->fragment_->rd_ptr (), option_size);
 
-                             // skip over value bytes                             yyg->yy_c_buf_p += (yyleng + option_size);                             yyg->yy_hold_char = *yyg->yy_c_buf_p;//                             YY_FLUSH_BUFFER; // --> refill scan buffer//                             char c;//                             for (unsigned int i = 0;//                                  i <= option_size;//                                  ++i)//                               c = yyinput (yyscanner);//                             ACE_UNUSED_ARG (c);                             driver->fragment_->rd_ptr (option_size);                             driver->offset_ += option_size;
+                             // skip over value bytes
+                             //yyg->yy_c_buf_p += option_size;
+                             //yyg->yy_hold_char = *yyg->yy_c_buf_p;
+                             //YY_FLUSH_BUFFER;
+                             // --> refill scan buffer
+                             char c;
+                             for (unsigned int i = 0;
+                                  i < option_size;
+                                  ++i)
+                               c = yyinput (yyscanner);
+                             ACE_UNUSED_ARG (c);
+                             driver->fragment_->rd_ptr (option_size);
+                             driver->offset_ += option_size;
                              BEGIN (option_tag);
                              return yytokentype::OPTION_VALUE;
                              /* return yy::DHCP_Parser::token::BODY; */ }
@@ -343,6 +356,23 @@ NUL            [\x00]
                              driver->error (*yylloc, error_message);
                              yyterminate(); }
 %%
+
+int
+DHCP_Scanner_reset (yyscan_t yyscanner)
+{
+  NETWORK_TRACE (ACE_TEXT ("::DHCP_Scanner_reset"));
+
+  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
+  DHCP_ParserDriver* driver = DHCP_Scanner_get_extra (yyscanner);
+
+  // sanity check(s)
+  ACE_ASSERT (driver);
+  ACE_ASSERT (driver->fragment_);
+
+  BEGIN (INITIAL);
+
+  return 0;
+}
 #ifdef __cplusplus
 extern "C"
 {
@@ -355,48 +385,12 @@ DHCP_Scanner_wrap (yyscan_t yyscanner)
   struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
   DHCP_ParserDriver* driver = DHCP_Scanner_get_extra (yyscanner);
 
-  // sanity check(s)
-  ACE_ASSERT (driver);
-  if (driver->finished_)
-    return 1; // done
-  ACE_ASSERT (driver->fragment_);
-
-  // *NOTE*: there is more data
-  // 1. gobble/save the rest
-  // 2. switch buffers
-  // 3. unput the rest
-  // 4. continue scanning
-
-  // step1
-  std::string the_rest;
-  the_rest.append (yytext, yyleng);
-//  for (char c = yyinput (yyscanner);
-//       c != EOF;
-//       c = yyinput (yyscanner));
-  yyg->yy_c_buf_p += yyleng;
-  yyg->yy_hold_char = *yyg->yy_c_buf_p;
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("the rest: \"%s\"\n"),
-              ACE_TEXT (the_rest.c_str ())));
-
-  // step2
-  if (!driver->switchBuffer ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to DHCP_ParserDriver::switchBuffer() [remaining data was: \"%s\"], aborting\n"),
-                ACE_TEXT (the_rest.c_str ())));
-    return 1;
-  } // end IF
-
-  // step3
-  for (std::string::reverse_iterator iterator = the_rest.rbegin ();
-       iterator != the_rest.rend ();
-       ++iterator)
-    unput (*iterator);
-
-  // step4
-  // yymore ();
-  return 0;
+//  // sanity check(s)
+//  ACE_ASSERT (driver);
+//  ACE_ASSERT (driver->fragment_);
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (0);
+  ACE_NOTREACHED (return 0;)
 }
 #ifdef __cplusplus
 }

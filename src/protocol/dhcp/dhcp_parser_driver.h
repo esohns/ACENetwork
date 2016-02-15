@@ -66,12 +66,9 @@ class NET_PROTOCOL_DHCP_Export DHCP_ParserDriver
               const std::string&); // message
 
   // *NOTE*: to be invoked by the scanner (ONLY !)
-  bool switchBuffer ();
   bool getDebugScanner () const;
-  void wait ();
 
   // *NOTE*: current (unscanned) data fragment
-  bool                    finished_; // processed the whole entity ?
   ACE_Message_Block*      fragment_;
   unsigned int            offset_; // parsed entity bytes
 

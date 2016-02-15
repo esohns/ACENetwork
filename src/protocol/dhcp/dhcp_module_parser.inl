@@ -140,7 +140,9 @@ DHCP_Module_Parser_T<TimePolicyType,
   {
     driver_.initialize (*record_p,
                         debugScanner_,
-                        debugParser_);
+                        debugParser_,
+                        NULL,
+                        DHCP_DEFAULT_USE_YY_SCAN_BUFFER);
     isDriverInitialized_ = true;
   } // end IF
 

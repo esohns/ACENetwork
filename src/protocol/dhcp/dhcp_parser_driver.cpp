@@ -35,8 +35,7 @@
 
 DHCP_ParserDriver::DHCP_ParserDriver (bool traceScanning_in,
                                       bool traceParsing_in)
- : finished_ (false)
- , fragment_ (NULL)
+ : fragment_ (NULL)
  , offset_ (0)
  , record_ (NULL)
  , trace_ (traceParsing_in)
@@ -88,12 +87,8 @@ DHCP_ParserDriver::initialize (DHCP_Record& record_in,
 
   if (initialized_)
   {
-    finished_ = false;
     if (fragment_)
-    {
-      fragment_->release ();
       fragment_ = NULL;
-    } // end IF
     offset_ = 0;
 
     initialized_ = false;
@@ -131,49 +126,46 @@ DHCP_ParserDriver::parse (ACE_Message_Block* data_in)
 
   // *NOTE*: parse ALL available message fragments
   // *TODO*: yyrestart(), yy_create_buffer/yy_switch_to_buffer, YY_INPUT...
-  int result = -1;
-//   do
-//   { // initialize scan buffer
-    if (!scan_begin ())
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to DHCP_ParserDriver::scan_begin(), aborting\n")));
+  if (!scan_begin ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to DHCP_ParserDriver::scan_begin(), aborting\n")));
 
-      // clean up
-      fragment_ = NULL;
+    // clean up
+    fragment_ = NULL;
 
-//       break;
-      return false;
-    } // end IF
+    return false;
+  } // end IF
 
-    // initialize scanner
-    DHCP_Scanner_set_column (1, scannerState_);
-    DHCP_Scanner_set_lineno (1, scannerState_);
-    int debug_level = 0;
+  // initialize scanner
+  DHCP_Scanner_set_column (1, scannerState_);
+  DHCP_Scanner_set_lineno (1, scannerState_);
+  int debug_level = 0;
 #if YYDEBUG
-    //debug_level = parser_.debug_level ();
-    debug_level = yydebug;
+  //debug_level = parser_.debug_level ();
+  debug_level = yydebug;
 #endif
-    ACE_UNUSED_ARG (debug_level);
+  ACE_UNUSED_ARG (debug_level);
 
-    // parse data fragment
-    try
-    {
-      //result = parser_.parse ();
-      result = yyparse (this, scannerState_);
-    }
-    catch (...)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
-    }
-    switch (result)
-    {
-      case 0:
-        break; // done
-      case 1:
-      default:
-      { // *NOTE*: need more data
+  // parse data fragment
+  int result = -1;
+  try
+  {
+    //result = parser_.parse ();
+    result = yyparse (this, scannerState_);
+  }
+  catch (...)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
+  }
+  switch (result)
+  {
+    case 0:
+      break; // done
+    case 1:
+    default:
+    { // *NOTE*: need more data
 //        ACE_DEBUG ((LM_DEBUG,
 //                    ACE_TEXT ("failed to parse message fragment (result was: %d), aborting\n"),
 //                    result));
@@ -192,13 +184,15 @@ DHCP_ParserDriver::parse (ACE_Message_Block* data_in)
 //          }
 //        } // end IF
 
-        break;
-      }
-    } // end SWITCH
+      break;
+    }
+  } // end SWITCH
 
-    // finalize buffer/scanner
-    scan_end ();
-//   } while (fragment_);
+  // finalize buffer/scanner
+  scan_end ();
+
+  if (fragment_)
+    fragment_ = NULL;
 
   return (result == 0);
 }
@@ -209,100 +203,6 @@ DHCP_ParserDriver::getDebugScanner () const
   NETWORK_TRACE (ACE_TEXT ("DHCP_ParserDriver::getDebugScanner"));
 
   return (DHCP_Scanner_get_debug (scannerState_) != 0);
-}
-
-bool
-DHCP_ParserDriver::switchBuffer ()
-{
-  NETWORK_TRACE (ACE_TEXT ("DHCP_ParserDriver::switchBuffer"));
-
-  // sanity check(s)
-  ACE_ASSERT (scannerState_);
-
-  if (fragment_->cont () == NULL)
-    wait (); // <-- wait for data
-  if (!fragment_->cont ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("no data after DHCP_ParserDriver::wait(), aborting\n")));
-    return false;
-  } // end IF
-  fragment_ = fragment_->cont ();
-
-  // switch to the next fragment
-
-  // clean state
-  scan_end ();
-
-  // initialize next buffer
-
-  // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (fragment_->capacity () - fragment_->length () >= DHCP_FLEX_BUFFER_BOUNDARY_SIZE);
-  *(fragment_->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
-  *(fragment_->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
-  // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
-
-  if (!scan_begin ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to DHCP_ParserDriver::scan_begin(), aborting\n")));
-    return false;
-  } // end IF
-
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("switched input buffers...\n")));
-
-  return true;
-}
-
-void
-DHCP_ParserDriver::wait ()
-{
-  NETWORK_TRACE (ACE_TEXT ("DHCP_ParserDriver::wait"));
-
-  int result = -1;
-  ACE_Message_Block* message_block_p = NULL;
-
-  // *IMPORTANT NOTE*: 'this' is the parser thread currently blocked in yylex()
-
-  // sanity check(s)
-  if (!messageQueue_)
-    return;
-
-  // 1. wait for data
-  do
-  {
-    result = messageQueue_->dequeue_head (message_block_p,
-                                          NULL);
-    if (result == -1)
-    {
-      int error = ACE_OS::last_error ();
-      if (error != ESHUTDOWN)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Message_Queue::dequeue_head(): \"%m\", returning\n")));
-      return;
-    } // end IF
-    ACE_ASSERT (message_block_p);
-
-    if (message_block_p->msg_type () >= STREAM_MESSAGE_MAP_2)
-      break;
-
-    // session message --> put it back
-    result = messageQueue_->enqueue_tail (message_block_p, NULL);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Queue::enqueue_tail(): \"%m\", aborting\n")));
-      return;
-    } // end IF
-  } while (true);
-
-  // 2. enqueue data
-  ACE_Message_Block* message_block_2 = fragment_;
-  for (;
-       message_block_2->cont ();
-       message_block_2 = message_block_2->cont ());
-  message_block_2->cont (message_block_p);
 }
 
 void
@@ -403,11 +303,12 @@ DHCP_ParserDriver::scan_begin ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_ParserDriver::scan_begin"));
 
-//  static int counter = 1;
-
   // sanity check(s)
   ACE_ASSERT (bufferState_ == NULL);
   ACE_ASSERT (fragment_);
+
+  // reset scanner state
+  DHCP_Scanner_reset (scannerState_);
 
   // create/initialize a new buffer state
   if (useYYScanBuffer_)
@@ -432,10 +333,6 @@ DHCP_ParserDriver::scan_begin ()
                 fragment_->length ()));
     return false;
   } // end IF
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("parsing fragment #%d --> %d byte(s)...\n"),
-//              counter++,
-//              fragment_->length ()));
 
 //  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
 //  DHCP_Scanner__switch_to_buffer (bufferState_,

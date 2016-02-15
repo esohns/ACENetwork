@@ -161,11 +161,8 @@ Net_UDPSocketHandler_T<SocketType,
       (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT))
   {
     if (!Common_Tools::setRootPriviledges ())
-    {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::setRootPriviledges(): \"%m\", aborting\n")));
-      goto error;
-    } // end IF
+                  ACE_TEXT ("failed to Common_Tools::setRootPriviledges(): \"%m\", continuing\n")));
     handle_priviledges = true;
   } // end IF
 #endif

@@ -24,6 +24,12 @@
 #include <regex>
 #include <string>
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#elif defined (ACE_LINUX)
+#include <sys/capability.h>
+#include <linux/capability.h>
+#endif
+
 #include "ace/Get_Opt.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
@@ -462,10 +468,33 @@ do_work (bool requestBroadcastReplies_in,
 {
   STREAM_TRACE (ACE_TEXT ("::do_work"));
 
+  int result = -1;
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #if defined (DEBUG)
   Common_Tools::printCapabilities ();
+  if (!Common_Tools::setCapability (CAP_NET_BIND_SERVICE))
+  {
+    char* capability_name_string_p = ::cap_to_name (CAP_NET_BIND_SERVICE);
+    if (!capability_name_string_p)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ::cap_to_name(%d): \"%m\", continuing\n"),
+                  CAP_NET_BIND_SERVICE));
+
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_Tools::setCapability(\"%s\"): \"%m\", returning\n"),
+                ACE_TEXT (capability_name_string_p)));
+
+    // clean up
+    result = ::cap_free (capability_name_string_p);
+    if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ::cap_free(): \"%m\", continuing\n")));
+
+    return;
+  } // end IF
+  ACE_ASSERT (Common_Tools::hasCapability (CAP_NET_BIND_SERVICE));
   Common_Tools::printPriviledges ();
 #endif
 #endif
@@ -527,7 +556,7 @@ do_work (bool requestBroadcastReplies_in,
   ACE_ASSERT (connection_manager_p);
 
   // *********************** socket configuration data ************************
-  int result =
+  result =
     configuration.socketConfiguration.address.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
                                                    static_cast<ACE_UINT32> (INADDR_BROADCAST),
                                                    1,

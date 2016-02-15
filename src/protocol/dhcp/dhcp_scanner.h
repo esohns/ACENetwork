@@ -20,9 +20,10 @@ DHCP_Scanner_lex (YYSTYPE* yylval_param,     \
                   DHCP_ParserDriver* driver, \
                   yyscan_t yyscanner)
 // ... and declare it for the parser's sake
-YY_DECL;
+extern YY_DECL;
 
-void DHCP_Scanner_set_column (int, yyscan_t);
+extern int DHCP_Scanner_reset (yyscan_t);
+extern void DHCP_Scanner_set_column (int, yyscan_t);
 
 //using namespace yy;
 //#define YYLTYPE DHCP_Parser::location_type
@@ -30,7 +31,7 @@ void DHCP_Scanner_set_column (int, yyscan_t);
 
 
 
-#line 34 "dhcp_scanner.h"
+#line 35 "dhcp_scanner.h"
 
 #define  YY_INT_ALIGNED long int
 
@@ -513,6 +514,6 @@ extern int DHCP_Scanner_lex \
 #undef YY_DECL
 #endif
 
-#line 517 "dhcp_scanner.h"
+#line 518 "dhcp_scanner.h"
 #undef DHCP_Scanner_IN_HEADER
 #endif /* DHCP_Scanner_HEADER_H */

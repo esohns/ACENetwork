@@ -1,4 +1,3 @@
-#line 2 "./../scripts/scanner.l"
 #include "dhcp_parser.h"
 
 /*
@@ -16,17 +15,14 @@ DHCP_Scanner_lex (YYSTYPE* yylval_param,     \
                   DHCP_ParserDriver* driver, \
                   yyscan_t yyscanner)
 // ... and declare it for the parser's sake
-YY_DECL;
+extern YY_DECL;
 
-void DHCP_Scanner_set_column (int, yyscan_t);
+extern int DHCP_Scanner_reset (yyscan_t);
+extern void DHCP_Scanner_set_column (int, yyscan_t);
 
 //using namespace yy;
 //#define YYLTYPE DHCP_Parser::location_type
 //#define YYSTYPE DHCP_Parser::semantic_type
-
-
-
-#line 30 "dhcp_scanner.cpp"
 
 #define  YY_INT_ALIGNED long int
 
@@ -52,7 +48,7 @@ void DHCP_Scanner_set_column (int, yyscan_t);
 /* %endif */
 
 /* %if-c-only */
-    
+
 /* %endif */
 
 /* %if-c-only */
@@ -84,7 +80,7 @@ void DHCP_Scanner_set_column (int, yyscan_t);
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
- * if you want the limit (max/min) macros for int types. 
+ * if you want the limit (max/min) macros for int types.
  */
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
@@ -101,7 +97,7 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t; 
+typedef unsigned char flex_uint8_t;
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
 
@@ -266,7 +262,7 @@ typedef size_t yy_size_t;
 
     /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
      *       access to the local variable yy_act. Since yyless() is a macro, it would break
-     *       existing scanners that call yyless() from OUTSIDE DHCP_Scanner_lex. 
+     *       existing scanners that call yyless() from OUTSIDE DHCP_Scanner_lex.
      *       One obvious solution it to make yy_act a global. I tried that, and saw
      *       a 5% performance hit in a non-yylineno scanner, because yy_act is
      *       normally declared as a register variable-- so it is not worth it.
@@ -285,14 +281,14 @@ typedef size_t yy_size_t;
                     if ( *p == '\n' )\
                         --yylineno;\
             }while(0)
-    
+
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
 	do \
 		{ \
 		/* Undo effects of setting up yytext. */ \
-        int yyless_macro_arg = (n); \
-        YY_LESS_LINENO(yyless_macro_arg);\
+				int yyless_macro_arg = (n); \
+				YY_LESS_LINENO(yyless_macro_arg);\
 		*yy_cp = yyg->yy_hold_char; \
 		YY_RESTORE_YY_MORE_OFFSET \
 		yyg->yy_c_buf_p = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
@@ -347,7 +343,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -434,9 +430,9 @@ void DHCP_Scanner_free (void * ,yyscan_t yyscanner );
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        DHCP_Scanner_ensure_buffer_stack (yyscanner); \
+				DHCP_Scanner_ensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            DHCP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+						DHCP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
@@ -444,9 +440,9 @@ void DHCP_Scanner_free (void * ,yyscan_t yyscanner );
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        DHCP_Scanner_ensure_buffer_stack (yyscanner); \
+				DHCP_Scanner_ensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            DHCP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+						DHCP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
@@ -9456,7 +9452,7 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
  * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
-	yyg->yytext_ptr = yy_bp; \
+  yyg->yytext_ptr = yy_bp; \
 /* %% [2.0] code to fiddle yytext and yyleng for yymore() goes here \ */\
 	yyleng = (size_t) (yy_cp - yy_bp); \
 	yyg->yy_hold_char = *yy_cp; \
@@ -9468,7 +9464,7 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
 #define YY_NUM_RULES 21
 #define YY_END_OF_BUFFER 22
 /* This struct is not used in this scanner,
-   but its presence is necessary. */
+	 but its presence is necessary. */
 struct yy_trans_info
 	{
 	flex_int32_t yy_verify;
@@ -9512,7 +9508,7 @@ static yyconst flex_int32_t yy_accept[284] =
 /* Table of booleans, true if rule could match eol. */
 static yyconst flex_int32_t yy_rule_can_match_eol[22] =
     {   0,
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 0,     };
 
 static yyconst yy_state_type yy_NUL_trans[284] =
@@ -9552,8 +9548,8 @@ static yyconst yy_state_type yy_NUL_trans[284] =
 
 static yyconst flex_int32_t yy_rule_linenum[21] =
     {   0,
-      118,  124,  130,  141,  152,  163,  174,  185,  196,  207,
-      218,  229,  240,  251,  261,  275,  289,  301,  314,  332
+      119,  125,  131,  142,  153,  164,  175,  186,  197,  208,
+      219,  230,  241,  252,  262,  276,  290,  302,  315,  345
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -9695,9 +9691,9 @@ static int yy_init_globals (yyscan_t yyscanner );
     /* This must go here because YYSTYPE and YYLTYPE are included
      * from bison output in section 1.*/
     #    define yylval yyg->yylval_r
-    
+
     #    define yylloc yyg->yylloc_r
-    
+
 int DHCP_Scanner_lex_init (yyscan_t* scanner);
 
 int DHCP_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
@@ -9746,9 +9742,9 @@ YYSTYPE * DHCP_Scanner_get_lval (yyscan_t yyscanner );
 void DHCP_Scanner_set_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
 
        YYLTYPE *DHCP_Scanner_get_lloc (yyscan_t yyscanner );
-    
+
         void DHCP_Scanner_set_lloc (YYLTYPE * yylloc_param ,yyscan_t yyscanner );
-    
+
 /* %endif */
 
 /* Macros after this point can all be overridden by user definitions in
@@ -9766,7 +9762,7 @@ extern int DHCP_Scanner_wrap (yyscan_t yyscanner );
 /* %not-for-header */
 
     static void yyunput (int c,char *buf_ptr  ,yyscan_t yyscanner);
-    
+
 /* %ok-for-header */
 
 /* %endif */
@@ -9908,7 +9904,7 @@ extern int DHCP_Scanner_lex \
 
 /* %% [6.0] YY_RULE_SETUP definition goes here */
 #define YY_RULE_SETUP \
-	YY_USER_ACTION
+  YY_USER_ACTION
 
 /* %not-for-header */
 
@@ -9919,11 +9915,11 @@ YY_DECL
 	register yy_state_type yy_current_state;
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-    yylval = yylval_param;
+		yylval = yylval_param;
 
-    yylloc = yylloc_param;
+		yylloc = yylloc_param;
 
 	if ( !yyg->yy_init )
 		{
@@ -10010,12 +10006,12 @@ yy_find_action:
 			yy_size_t yyl;
 			for ( yyl = 0; yyl < yyleng; ++yyl )
 				if ( yytext[yyl] == '\n' )
-					   
+
     do{ yylineno++;
         yycolumn=0;
     }while(0)
 ;
-			}
+      }
 
 do_action:	/* This label is used only to access EOF actions. */
 
@@ -10026,10 +10022,10 @@ do_action:	/* This label is used only to access EOF actions. */
 				fprintf( stderr, "--scanner backing up\n" );
 			else if ( yy_act < 21 )
 				fprintf( stderr, "--accepting rule at line %ld (\"%s\")\n",
-				         (long)yy_rule_linenum[yy_act], yytext );
+								 (long)yy_rule_linenum[yy_act], yytext );
 			else if ( yy_act == 21 )
 				fprintf( stderr, "--accepting default rule (\"%s\")\n",
-				         yytext );
+								 yytext );
 			else if ( yy_act == 22 )
 				fprintf( stderr, "--(end of buffer or a NUL)\n" );
 			else
@@ -10053,7 +10049,7 @@ YY_RULE_SETUP
                              BEGIN (header);
                              yycolumn -= yyleng;
                              /* yymore (); */ yyless (0); }
-	YY_BREAK
+  YY_BREAK
 // end <INITIAL>
 
 case 2:
@@ -10063,7 +10059,7 @@ YY_RULE_SETUP
                              BEGIN (op);
                              yycolumn -= yyleng;
                              /* yymore (); */ yyless (0); }
-	YY_BREAK
+  YY_BREAK
 // end <header>
 
 case 3:
@@ -10078,7 +10074,7 @@ YY_RULE_SETUP
                              ACE_ASSERT (yylval->ival);
                              return yytokentype::OP;
                              /* return yy::DHCP_Parser::token::OP; */ }
-	YY_BREAK
+  YY_BREAK
 // end <op>
 
 case 4:
@@ -10093,7 +10089,7 @@ YY_RULE_SETUP
                              ACE_ASSERT (yylval->ival);
                              return yytokentype::HTYPE;
                              /* return yy::DHCP_Parser::token::VERSION; */ }
-	YY_BREAK
+  YY_BREAK
 // end <version>
 
 case 5:
@@ -10108,7 +10104,7 @@ YY_RULE_SETUP
                              ACE_ASSERT (yylval->ival);
                              return yytokentype::HLEN;
                              /* return yy::DHCP_Parser::token::HEADER; */ }
-	YY_BREAK
+  YY_BREAK
 // end <hlen>
 
 case 6:
@@ -10123,7 +10119,7 @@ YY_RULE_SETUP
                              //ACE_ASSERT (yylval->ival);
                              return yytokentype::HOPS;
                              /* return yy::DHCP_Parser::token::VERSION; */ }
-	YY_BREAK
+  YY_BREAK
 // end <hops>
 
 case 7:
@@ -10138,7 +10134,7 @@ YY_RULE_SETUP
                              ACE_ASSERT (yylval->ival);
                              return yytokentype::XID;
                              /* return yy::DHCP_Parser::token::STATUS; */ }
-	YY_BREAK
+  YY_BREAK
 // end <xid>
 
 case 8:
@@ -10153,7 +10149,7 @@ YY_RULE_SETUP
                              //ACE_ASSERT (yylval->ival);
                              return yytokentype::SECS;
                              /* return yy::DHCP_Parser::token::REASON; */ }
-	YY_BREAK
+  YY_BREAK
 // end <secs>
 
 case 9:
@@ -10168,7 +10164,7 @@ YY_RULE_SETUP
                              //ACE_ASSERT (yylval->ival);
                              return yytokentype::FLAGS;
                              /* return yy::DHCP_Parser::token::HEADER; */ }
-	YY_BREAK
+  YY_BREAK
 // end <flags>
 
 case 10:
@@ -10180,10 +10176,10 @@ YY_RULE_SETUP
                              yylval->ival =
                                  *reinterpret_cast<unsigned int*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::CIADDR;
                              /* return yy::DHCP_Parser::token::BODY; */ }
-	YY_BREAK
+  YY_BREAK
 // end <ciaddr>
 
 case 11:
@@ -10198,7 +10194,7 @@ YY_RULE_SETUP
                              //ACE_ASSERT (yylval->ival);
                              return yytokentype::YIADDR;
                              /* return yy::DHCP_Parser::token::BODY; */ }
-	YY_BREAK
+  YY_BREAK
 // end <yiaddr>
 
 case 12:
@@ -10210,10 +10206,10 @@ YY_RULE_SETUP
                              yylval->ival =
                                  *reinterpret_cast<unsigned int*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::SIADDR;
                              /* return yy::DHCP_Parser::token::BODY; */ }
-	YY_BREAK
+  YY_BREAK
 // end <siaddr>
 
 case 13:
@@ -10225,10 +10221,10 @@ YY_RULE_SETUP
                              yylval->ival =
                                  *reinterpret_cast<unsigned int*> (yytext);
                              /* *TODO*: error handling */
-                             ACE_ASSERT (yylval->ival);
+                             //ACE_ASSERT (yylval->ival);
                              return yytokentype::GIADDR;
                              /* return yy::DHCP_Parser::token::BODY; */ }
-	YY_BREAK
+  YY_BREAK
 // end <giaddr>
 
 case 14:
@@ -10242,7 +10238,7 @@ YY_RULE_SETUP
                              /* *TODO*: error handling */
                              return yytokentype::CHADDR;
                              /* return yy::DHCP_Parser::token::BODY; */ }
-	YY_BREAK
+  YY_BREAK
 // end <chaddr>
 
 case 15:
@@ -10260,7 +10256,7 @@ YY_RULE_SETUP
                              *yylval->sval = yytext;
                              return yytokentype::SNAME;
                              /* return yy::DHCP_Parser::token::BODY; */ }
-	YY_BREAK
+  YY_BREAK
 // end <sname>
 
 case 16:
@@ -10278,7 +10274,7 @@ YY_RULE_SETUP
                              *yylval->sval = yytext;
                              return yytokentype::FILE_;
                              /* return yy::DHCP_Parser::token::BODY; */ }
-	YY_BREAK
+  YY_BREAK
 // end <file_>
 
 case 17:
@@ -10294,7 +10290,7 @@ YY_RULE_SETUP
                              ACE_ASSERT (yylval->ival);
                              return yytokentype::COOKIE;
                              /* return yy::DHCP_Parser::token::BODY; */ }
-	YY_BREAK
+  YY_BREAK
 // end <cookie>
 
 case 18:
@@ -10311,7 +10307,7 @@ YY_RULE_SETUP
                              BEGIN (option_length);
                              return yytokentype::OPTION_TAG;
                              /* return yy::DHCP_Parser::token::BODY; */ }
-	YY_BREAK
+  YY_BREAK
 // end <option_tag>
 
 case 19:
@@ -10322,18 +10318,30 @@ YY_RULE_SETUP
                              option_size =
                                *reinterpret_cast<unsigned char*> (yytext);
 
-                             /* undo the effects of YY_DO_BEFORE_ACTION */                             *yy_cp = yyg->yy_hold_char;
+                             /* undo the effects of YY_DO_BEFORE_ACTION */                             *yy_cp = yyg->yy_hold_char;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (driver->fragment_->rd_ptr (), option_size);
 
-                             // skip over value bytes                             yyg->yy_c_buf_p += (yyleng + option_size);                             yyg->yy_hold_char = *yyg->yy_c_buf_p;//                             YY_FLUSH_BUFFER; // --> refill scan buffer//                             char c;//                             for (unsigned int i = 0;//                                  i <= option_size;//                                  ++i)//                               c = yyinput (yyscanner);//                             ACE_UNUSED_ARG (c);                             driver->fragment_->rd_ptr (option_size);                             driver->offset_ += option_size;
+                             // skip over value bytes
+                             //yyg->yy_c_buf_p += option_size;
+                             //yyg->yy_hold_char = *yyg->yy_c_buf_p;
+                             //YY_FLUSH_BUFFER;
+                             // --> refill scan buffer
+                             char c;
+                             for (unsigned int i = 0;
+                                  i < option_size;
+                                  ++i)
+                               c = yyinput (yyscanner);
+                             ACE_UNUSED_ARG (c);
+                             driver->fragment_->rd_ptr (option_size);
+                             driver->offset_ += option_size;
                              BEGIN (option_tag);
                              return yytokentype::OPTION_VALUE;
                              /* return yy::DHCP_Parser::token::BODY; */ }
-	YY_BREAK
+  YY_BREAK
 // end <option_length>
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(header):
@@ -10355,7 +10363,7 @@ case YY_STATE_EOF(cookie):
 case YY_STATE_EOF(option_tag):
 case YY_STATE_EOF(option_length):
 { yyterminate(); }
-	YY_BREAK
+  YY_BREAK
 case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
@@ -10372,7 +10380,7 @@ YY_RULE_SETUP
                              error_message += ACE_TEXT_ALWAYS_CHAR ("\", aborting");
                              driver->error (*yylloc, error_message);
                              yyterminate(); }
-	YY_BREAK
+  YY_BREAK
 case 21:
 YY_RULE_SETUP
 YY_FATAL_ERROR( "flex scanner jammed" );
@@ -10530,7 +10538,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	register char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
 	register char *source = yyg->yytext_ptr;
 	register int number_to_move, i;
@@ -10666,14 +10674,14 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c-only */
 /* %not-for-header */
 
-    static yy_state_type yy_get_previous_state (yyscan_t yyscanner)
+		static yy_state_type yy_get_previous_state (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
 	register yy_state_type yy_current_state;
 	register char *yy_cp;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 /* %% [15.0] code to get the start state into yy_current_state goes here */
 	yy_current_state = yyg->yy_start;
@@ -10708,10 +10716,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-	register int yy_is_jam;
+  register int yy_is_jam;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner; /* This var may be unused depending upon options. */
 /* %% [17.0] code to find the next state, and perhaps do backing up, goes here */
-	register char *yy_cp = yyg->yy_c_buf_p;
+  register char *yy_cp = yyg->yy_c_buf_p;
 
 	yy_current_state = yy_NUL_trans[yy_current_state];
 	yy_is_jam = (yy_current_state == 0);
@@ -10731,12 +10739,12 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 /* %if-c-only */
 
-    static void yyunput (int c, register char * yy_bp , yyscan_t yyscanner)
+		static void yyunput (int c, register char * yy_bp , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
-	register char *yy_cp;
+  register char *yy_cp;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
     yy_cp = yyg->yy_c_buf_p;
@@ -10793,10 +10801,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-	int c;
+  int c;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-	*yyg->yy_c_buf_p = yyg->yy_hold_char;
+  *yyg->yy_c_buf_p = yyg->yy_hold_char;
 
 	if ( *yyg->yy_c_buf_p == YY_END_OF_BUFFER_CHAR )
 		{
@@ -10858,13 +10866,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 /* %% [19.0] update BOL and yylineno */
 	if ( c == '\n' )
-		   
+
     do{ yylineno++;
         yycolumn=0;
     }while(0)
 ;
 
-	return c;
+  return c;
 }
 /* %if-c-only */
 #endif	/* ifndef YY_NO_INPUT */
@@ -10881,13 +10889,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-	if ( ! YY_CURRENT_BUFFER ){
+  if ( ! YY_CURRENT_BUFFER ){
         DHCP_Scanner_ensure_buffer_stack (yyscanner);
-		YY_CURRENT_BUFFER_LVALUE =
+    YY_CURRENT_BUFFER_LVALUE =
             DHCP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
-	}
+  }
 
 	DHCP_Scanner__init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
 	DHCP_Scanner__load_buffer_state(yyscanner );
@@ -10903,13 +10911,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	/* TODO. We should be able to replace this entire function body
 	 * with
 	 *		DHCP_Scanner_pop_buffer_state();
 	 *		DHCP_Scanner_push_buffer_state(new_buffer);
-     */
+		 */
 	DHCP_Scanner_ensure_buffer_stack (yyscanner);
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
@@ -10939,7 +10947,7 @@ static void DHCP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
 	yyg->yytext_ptr = yyg->yy_c_buf_p = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
 	yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
@@ -10958,8 +10966,8 @@ static void DHCP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-	YY_BUFFER_STATE b;
-    
+  YY_BUFFER_STATE b;
+
 	b = (YY_BUFFER_STATE) DHCP_Scanner_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
 	if ( ! b )
 		YY_FATAL_ERROR( "out of dynamic memory in DHCP_Scanner__create_buffer()" );
@@ -10990,7 +10998,7 @@ static void DHCP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if ( ! b )
 		return;
@@ -11015,10 +11023,10 @@ static void DHCP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %endif */
 
 {
-	int oerrno = errno;
+  int oerrno = errno;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-	DHCP_Scanner__flush_buffer(b ,yyscanner);
+  DHCP_Scanner__flush_buffer(b ,yyscanner);
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
@@ -11035,11 +11043,11 @@ static void DHCP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c-only */
 
         b->yy_is_interactive = 0;
-    
+
 /* %endif */
 /* %if-c++-only */
 /* %endif */
-	errno = oerrno;
+  errno = oerrno;
 }
 
 /** Discard all buffered characters. On the next scan, YY_INPUT will be called.
@@ -11052,7 +11060,7 @@ static void DHCP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if ( ! b )
 		return;
 
@@ -11087,7 +11095,7 @@ void DHCP_Scanner_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yysca
 /* %if-c++-only */
 /* %endif */
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (new_buffer == NULL)
 		return;
 
@@ -11124,7 +11132,7 @@ void DHCP_Scanner_pop_buffer_state (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (!YY_CURRENT_BUFFER)
 		return;
 
@@ -11150,24 +11158,24 @@ static void DHCP_Scanner_ensure_buffer_stack (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-	yy_size_t num_to_alloc;
+  yy_size_t num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-	if (!yyg->yy_buffer_stack) {
+  if (!yyg->yy_buffer_stack) {
 
 		/* First allocation is just for 2 elements, since we don't know if this
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
-         */
+				 */
 		num_to_alloc = 1;
 		yyg->yy_buffer_stack = (struct yy_buffer_state**)DHCP_Scanner_alloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
 			YY_FATAL_ERROR( "out of dynamic memory in DHCP_Scanner_ensure_buffer_stack()" );
-								  
+
 		memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-				
+
 		yyg->yy_buffer_stack_max = num_to_alloc;
 		yyg->yy_buffer_stack_top = 0;
 		return;
@@ -11198,15 +11206,15 @@ static void DHCP_Scanner_ensure_buffer_stack (yyscan_t yyscanner)
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
  * @param yyscanner The scanner object.
- * @return the newly allocated buffer state object. 
+ * @return the newly allocated buffer state object.
  */
 YY_BUFFER_STATE DHCP_Scanner__scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
-	YY_BUFFER_STATE b;
-    
+  YY_BUFFER_STATE b;
+
 	if ( size < 2 ||
-	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
-	     base[size-1] != YY_END_OF_BUFFER_CHAR )
+			 base[size-2] != YY_END_OF_BUFFER_CHAR ||
+			 base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
 		return 0;
 
@@ -11241,8 +11249,8 @@ YY_BUFFER_STATE DHCP_Scanner__scan_buffer  (char * base, yy_size_t  size , yysca
  */
 YY_BUFFER_STATE DHCP_Scanner__scan_string (yyconst char * yystr , yyscan_t yyscanner)
 {
-    
-	return DHCP_Scanner__scan_bytes(yystr,strlen(yystr) ,yyscanner);
+
+  return DHCP_Scanner__scan_bytes(yystr,strlen(yystr) ,yyscanner);
 }
 /* %endif */
 
@@ -11260,7 +11268,7 @@ YY_BUFFER_STATE DHCP_Scanner__scan_bytes  (yyconst char * yybytes, yy_size_t  _y
 	char *buf;
 	yy_size_t n;
 	yy_size_t i;
-    
+
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
 	buf = (char *) DHCP_Scanner_alloc(n ,yyscanner );
@@ -11292,7 +11300,7 @@ YY_BUFFER_STATE DHCP_Scanner__scan_bytes  (yyconst char * yybytes, yy_size_t  _y
 /* %if-c-only */
 static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 {
-    	(void) fprintf( stderr, "%s\n", msg );
+			(void) fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 /* %endif */
@@ -11306,8 +11314,8 @@ static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 	do \
 		{ \
 		/* Undo effects of setting up yytext. */ \
-        int yyless_macro_arg = (n); \
-        YY_LESS_LINENO(yyless_macro_arg);\
+				int yyless_macro_arg = (n); \
+				YY_LESS_LINENO(yyless_macro_arg);\
 		yytext[yyleng] = yyg->yy_hold_char; \
 		yyg->yy_c_buf_p = yytext + yyless_macro_arg; \
 		yyg->yy_hold_char = *yyg->yy_c_buf_p; \
@@ -11338,10 +11346,10 @@ YY_EXTRA_TYPE DHCP_Scanner_get_extra  (yyscan_t yyscanner)
 int DHCP_Scanner_get_lineno  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    
+
         if (! YY_CURRENT_BUFFER)
             return 0;
-    
+
     return yylineno;
 }
 
@@ -11351,10 +11359,10 @@ int DHCP_Scanner_get_lineno  (yyscan_t yyscanner)
 int DHCP_Scanner_get_column  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    
+
         if (! YY_CURRENT_BUFFER)
             return 0;
-    
+
     return yycolumn;
 }
 
@@ -11420,7 +11428,7 @@ void DHCP_Scanner_set_lineno (int  line_number , yyscan_t yyscanner)
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
            YY_FATAL_ERROR( "DHCP_Scanner_set_lineno called with no buffer" );
-    
+
     yylineno = line_number;
 }
 
@@ -11435,7 +11443,7 @@ void DHCP_Scanner_set_column (int  column_no , yyscan_t yyscanner)
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
            YY_FATAL_ERROR( "DHCP_Scanner_set_column called with no buffer" );
-    
+
     yycolumn = column_no;
 }
 
@@ -11493,13 +11501,13 @@ YYLTYPE *DHCP_Scanner_get_lloc  (yyscan_t yyscanner)
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yylloc;
 }
-    
+
 void DHCP_Scanner_set_lloc (YYLTYPE *  yylloc_param , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yylloc = yylloc_param;
 }
-    
+
 /* %endif */
 
 /* User-visible API */
@@ -11549,20 +11557,20 @@ int DHCP_Scanner_lex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_g
         errno = EINVAL;
         return 1;
     }
-	
-    *ptr_yy_globals = (yyscan_t) DHCP_Scanner_alloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
-	
+
+		*ptr_yy_globals = (yyscan_t) DHCP_Scanner_alloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
+
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
         return 1;
     }
-    
+
     /* By setting to 0xAA, we expose bugs in
     yy_init_globals. Leave at 0x00 for releases. */
     memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
-    
+
     DHCP_Scanner_set_extra (yy_user_defined, *ptr_yy_globals);
-    
+
     return yy_init_globals ( *ptr_yy_globals );
 }
 
@@ -11609,7 +11617,7 @@ int DHCP_Scanner_lex_destroy  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-    /* Pop the buffer stack, destroying each element. */
+		/* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
 		DHCP_Scanner__delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
 		YY_CURRENT_BUFFER_LVALUE = NULL;
@@ -11690,6 +11698,22 @@ void DHCP_Scanner_free (void * ptr , yyscan_t yyscanner)
 
 /* %ok-for-header */
 
+int
+DHCP_Scanner_reset (yyscan_t yyscanner)
+{
+  NETWORK_TRACE (ACE_TEXT ("::DHCP_Scanner_reset"));
+
+  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
+  DHCP_ParserDriver* driver = DHCP_Scanner_get_extra (yyscanner);
+
+  // sanity check(s)
+  ACE_ASSERT (driver);
+  ACE_ASSERT (driver->fragment_);
+
+  BEGIN (INITIAL);
+
+  return 0;
+}
 #ifdef __cplusplus
 extern "C"
 {
@@ -11702,48 +11726,12 @@ DHCP_Scanner_wrap (yyscan_t yyscanner)
   struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
   DHCP_ParserDriver* driver = DHCP_Scanner_get_extra (yyscanner);
 
-  // sanity check(s)
-  ACE_ASSERT (driver);
-  if (driver->finished_)
-    return 1; // done
-  ACE_ASSERT (driver->fragment_);
-
-  // *NOTE*: there is more data
-  // 1. gobble/save the rest
-  // 2. switch buffers
-  // 3. unput the rest
-  // 4. continue scanning
-
-  // step1
-  std::string the_rest;
-  the_rest.append (yytext, yyleng);
-//  for (char c = yyinput (yyscanner);
-//       c != EOF;
-//       c = yyinput (yyscanner));
-  yyg->yy_c_buf_p += yyleng;
-  yyg->yy_hold_char = *yyg->yy_c_buf_p;
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("the rest: \"%s\"\n"),
-              ACE_TEXT (the_rest.c_str ())));
-
-  // step2
-  if (!driver->switchBuffer ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to DHCP_ParserDriver::switchBuffer() [remaining data was: \"%s\"], aborting\n"),
-                ACE_TEXT (the_rest.c_str ())));
-    return 1;
-  } // end IF
-
-  // step3
-  for (std::string::reverse_iterator iterator = the_rest.rbegin ();
-       iterator != the_rest.rend ();
-       ++iterator)
-    unput (*iterator);
-
-  // step4
-  // yymore ();
-  return 0;
+//  // sanity check(s)
+//  ACE_ASSERT (driver);
+//  ACE_ASSERT (driver->fragment_);
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (0);
+  ACE_NOTREACHED (return 0;)
 }
 #ifdef __cplusplus
 }
