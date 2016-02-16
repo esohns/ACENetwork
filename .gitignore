@@ -92,6 +92,7 @@ po/remove-potcdate.sin
 
 build/
 cmake/
+cmake2/
 
 # kdevelop
 .kdev4/

@@ -452,6 +452,9 @@ void DHCP_Scanner_free (void * ,yyscan_t yyscanner );
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
 
+#define DHCP_Scanner_wrap(yyscanner) 1
+#define YY_SKIP_YYWRAP
+
 #define FLEX_DEBUG
 
 typedef unsigned char YY_CHAR;
@@ -11714,26 +11717,25 @@ DHCP_Scanner_reset (yyscan_t yyscanner)
 
   return 0;
 }
-#ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
-int
-DHCP_Scanner_wrap (yyscan_t yyscanner)
-{
-  NETWORK_TRACE (ACE_TEXT ("::DHCP_Scanner_wrap"));
+//#ifdef __cplusplus
+//extern "C"
+//{
+//#endif /* __cplusplus */
+//int
+//DHCP_Scanner_wrap (yyscan_t yyscanner)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("::DHCP_Scanner_wrap"));
 
-  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
-  DHCP_ParserDriver* driver = DHCP_Scanner_get_extra (yyscanner);
+//  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
+//  DHCP_ParserDriver* driver = DHCP_Scanner_get_extra (yyscanner);
 
 //  // sanity check(s)
 //  ACE_ASSERT (driver);
 //  ACE_ASSERT (driver->fragment_);
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (0);
-  ACE_NOTREACHED (return 0;)
-}
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+
+//  return 1; // done
+//}
+//#ifdef __cplusplus
+//}
+//#endif /* __cplusplus */
 

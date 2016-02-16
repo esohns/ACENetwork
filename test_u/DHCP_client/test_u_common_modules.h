@@ -34,7 +34,7 @@
 
 #include "stream_module_io.h"
 
-#include "net_connection_manager.h"
+//#include "net_connection_manager.h"
 
 #include "dhcp_common.h"
 #include "dhcp_configuration.h"
@@ -45,16 +45,17 @@
 //#include "dhcp_stream_common.h"
 
 #include "test_u_common.h"
+#include "test_u_connection_common.h"
 
 // forward declarations
 class Test_U_SessionMessage;
 class Test_U_Message;
-typedef Net_Connection_Manager_T<ACE_INET_Addr,
-                                 Test_U_Configuration,
-                                 Test_U_ConnectionState,
-                                 Test_U_RuntimeStatistic_t,
-                                 /////////
-                                 Test_U_UserData> Test_U_ConnectionManager_t;
+//typedef Net_Connection_Manager_T<ACE_INET_Addr,
+//                                 Test_U_Configuration,
+//                                 Test_U_ConnectionState,
+//                                 Test_U_RuntimeStatistic_t,
+//                                 /////////
+//                                 Test_U_UserData> Test_U_ConnectionManager_t;
 
 // declare module(s)
 typedef Stream_Module_Net_IOWriter_T<ACE_SYNCH_MUTEX,
@@ -91,7 +92,10 @@ typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Test_U_SessionMessage,
                                Test_U_Message,
                                ///////////
-                               Test_U_StreamModuleHandlerConfiguration> Test_U_Module_DHCPDiscover;
+                               Test_U_StreamModuleHandlerConfiguration,
+                               ///////////
+                               Test_U_ConnectionManager_t,
+                               Test_U_OutboundConnector_t> Test_U_Module_DHCPDiscover;
 typedef DHCP_Module_DiscoverH_T<ACE_SYNCH_MUTEX,
                                 ACE_MT_SYNCH,
                                 Common_TimePolicy_t,

@@ -68,7 +68,8 @@ DHCP_Module_Streamer_T<TaskSynchType,
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Streamer_T::handleDataMessage"));
 
   int result = -1;
-  unsigned short flags = 0;
+  unsigned short short_s = 0;
+  unsigned int int_i = 0;
   char buffer[DHCP_SNAME_SIZE];
   char buffer_2[DHCP_FILE_SIZE];
   unsigned int magic_cookie =
@@ -117,46 +118,64 @@ DHCP_Module_Streamer_T<TaskSynchType,
   if (result == -1)
     goto error;
   //
+  int_i =
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (data_r.xid)
+                                             : data_r.xid);
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&data_r.xid),
+    message_inout->copy (reinterpret_cast<const char*> (&int_i),
                          4);
   if (result == -1)
     goto error;
   //
+  short_s =
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_WORD (data_r.secs)
+                                             : data_r.secs);
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&data_r.secs),
+    message_inout->copy (reinterpret_cast<const char*> (&short_s),
                          2);
   if (result == -1)
     goto error;
-  flags =
+  short_s =
       ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_WORD (data_r.flags)
                                              : data_r.flags);
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&flags),
+    message_inout->copy (reinterpret_cast<const char*> (&short_s),
                          2);
   if (result == -1)
     goto error;
   //
+  int_i =
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (data_r.ciaddr)
+                                             : data_r.ciaddr);
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&data_r.ciaddr),
+    message_inout->copy (reinterpret_cast<const char*> (&int_i),
                          4);
   if (result == -1)
     goto error;
   //
+  int_i =
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (data_r.yiaddr)
+                                             : data_r.yiaddr);
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&data_r.yiaddr),
+    message_inout->copy (reinterpret_cast<const char*> (&int_i),
                          4);
   if (result == -1)
     goto error;
   //
+  int_i =
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (data_r.siaddr)
+                                             : data_r.siaddr);
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&data_r.siaddr),
+    message_inout->copy (reinterpret_cast<const char*> (&int_i),
                          4);
   if (result == -1)
     goto error;
   //
+  int_i =
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (data_r.giaddr)
+                                             : data_r.giaddr);
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&data_r.giaddr),
+    message_inout->copy (reinterpret_cast<const char*> (&int_i),
                          4);
   if (result == -1)
     goto error;

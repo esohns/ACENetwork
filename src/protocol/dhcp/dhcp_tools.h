@@ -43,6 +43,7 @@ class NET_PROTOCOL_DHCP_Export DHCP_Tools
   static DHCP_OptionFieldType_t Option2FieldType (DHCP_Option_t);
 
   static bool isRequest (const DHCP_Record&);
+  static DHCP_MessageType_t type (const DHCP_Record&);
 
   static unsigned int generateXID ();
 

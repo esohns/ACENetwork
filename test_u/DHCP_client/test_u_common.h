@@ -113,6 +113,8 @@ struct Test_U_StreamSessionData
    , connectionState (NULL)
    , targetFileName ()
    , userData (NULL)
+   , timeStamp (ACE_Time_Value::zero)
+   , xid (0)
   {};
   inline Test_U_StreamSessionData& operator= (Test_U_StreamSessionData& rhs_in)
   {
@@ -129,6 +131,9 @@ struct Test_U_StreamSessionData
   DHCP_ConnectionState* connectionState;
   std::string           targetFileName; // file writer module
   Test_U_UserData*      userData;
+
+  ACE_Time_Value        timeStamp; // lease timeout
+  unsigned int          xid;       // session ID
 };
 typedef Stream_SessionData_T<Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 

@@ -31,7 +31,10 @@ template <typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          typename ConfigurationType>
+          typename ConfigurationType,
+          ///////////////////////////////
+          typename ConnectionManagerType,
+          typename ConnectorType>
 class DHCP_Module_Discover_T
  : public Stream_TaskBaseSynch_T<TimePolicyType,
                                  SessionMessageType,
@@ -64,7 +67,11 @@ class DHCP_Module_Discover_T
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T (const DHCP_Module_Discover_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T& operator= (const DHCP_Module_Discover_T&))
 
+  // helper methods
+  ProtocolMessageType* allocateMessage (unsigned int); // (requested) size
+
   bool                                         initialized_;
+  bool                                         sendRequestOnOffer_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -168,6 +175,7 @@ class DHCP_Module_DiscoverH_T
   long               statisticCollectHandlerID_;
 
   bool               initialized_;
+  bool               sendRequestOnOffer_;
 };
 
 // include template implementation

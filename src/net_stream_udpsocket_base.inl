@@ -691,10 +691,6 @@ Net_StreamUDPSocketBase_T<HandlerType,
                              inherited2::configuration_->socketConfiguration.address, // peer address
                              0);//,                                                   // flags
                              //NULL);                                                 // timeout
-//      inherited::peer_.send (currentWriteBuffer_->rd_ptr (), // data
-//                             currentWriteBuffer_->length (), // bytes to send
-//                             0,                              // flags
-//                             NULL);                          // timeout
   switch (bytes_sent)
   {
     case -1:
@@ -709,8 +705,21 @@ Net_StreamUDPSocketBase_T<HandlerType,
           // -------------------------------------------------------------------
           (error != ENOTSOCK)     &&
           (error != EBADF))          // <-- connection abort()ed locally
+      {
+        ACE_TCHAR buffer[BUFSIZ];
+        ACE_OS::memset (buffer, 0, sizeof (buffer));
+        result =
+            inherited2::configuration_->socketConfiguration.address.addr_to_string (buffer,
+                                                                                    sizeof (buffer),
+                                                                                    1);
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Stream::send(): \"%m\", aborting\n")));
+                    ACE_TEXT ("%t: failed to ACE_SOCK_Stream::send(\"%s\") (handle was: %u): \"%m\", aborting\n"),
+                    buffer,
+                    inherited::peer_.get_handle ()));
+      } // end IF
 
       // clean up
       currentWriteBuffer_->release ();
@@ -722,9 +731,9 @@ Net_StreamUDPSocketBase_T<HandlerType,
       // *** GOOD CASES ***
     case 0:
     {
-      //       ACE_DEBUG ((LM_DEBUG,
-      //                   ACE_TEXT ("[%u]: socket was closed by the peer...\n"),
-      //                   handle_in));
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("[%u]: socket was closed...\n"),
+//                  inherited::peer_.get_handle ()));
 
       // clean up
       currentWriteBuffer_->release ();
@@ -735,10 +744,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
     }
     default:
     {
-      //       ACE_DEBUG ((LM_DEBUG,
-      //                  ACE_TEXT ("[%u]: sent %u bytes...\n"),
-      //                  handle_in,
-      //                  bytes_sent));
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("%t: sent %u bytes (handle was: %u)...\n"),
+//                  bytes_sent,
+//                  inherited::peer_.get_handle ()));
 
       // finished with this buffer ?
       currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));

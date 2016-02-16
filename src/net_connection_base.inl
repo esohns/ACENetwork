@@ -240,7 +240,7 @@ Net_ConnectionBase_T<AddressType,
                 manager_->count ()));
 #else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("registered connection [0x%@/%d]: %s <--> %s (total: %d)\n"),
+                ACE_TEXT ("registered connection [%@/%d]: %s <--> %s (total: %d)\n"),
                 this, handle,
                 ACE_TEXT (local_address_string.c_str ()),
                 buffer,

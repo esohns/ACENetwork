@@ -96,9 +96,11 @@ struct DHCP_ProtocolConfiguration
 {
   inline DHCP_ProtocolConfiguration ()
    : requestBroadcastReplies (DHCP_DEFAULT_FLAGS_BROADCAST)
+   , sendRequestOnOffer (false)
   {};
 
   bool requestBroadcastReplies;
+  bool sendRequestOnOffer;
 };
 
 struct DHCP_StreamConfiguration;

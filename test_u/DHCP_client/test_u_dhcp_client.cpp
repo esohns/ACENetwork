@@ -159,6 +159,10 @@ do_printUsage (const std::string& programName_in)
             << NET_EVENT_USE_THREAD_POOL
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-q          : send request on offer [")
+            << TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r          : use reactor [")
             << NET_EVENT_USE_REACTOR
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -193,6 +197,7 @@ do_processArguments (int argc_in,
                      std::string& interface_out,
                      bool& useLoopback_out,
                      bool& useThreadPool_out,
+                     bool& sendRequestOnOffer_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
@@ -234,6 +239,7 @@ do_processArguments (int argc_in,
   interface_out = ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT);
   useLoopback_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
+  sendRequestOnOffer_out = TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER;
   useReactor_out = NET_EVENT_USE_REACTOR;
   statisticReportingInterval_out = STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
@@ -243,7 +249,7 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("bde:f::g::ln::oprs:tvx:"),
+                              ACE_TEXT ("bde:f::g::ln::opqrs:tvx:"),
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -310,6 +316,11 @@ do_processArguments (int argc_in,
       case 'p':
       {
         useThreadPool_out = true;
+        break;
+      }
+      case 'q':
+      {
+        sendRequestOnOffer_out = true;
         break;
       }
       case 'r':
@@ -457,6 +468,7 @@ do_work (bool requestBroadcastReplies_in,
          const std::string& interface_in,
          bool useLoopback_in,
          bool useThreadPool_in,
+         bool sendRequestOnOffer_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
@@ -473,29 +485,30 @@ do_work (bool requestBroadcastReplies_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #if defined (DEBUG)
-  Common_Tools::printCapabilities ();
-  if (!Common_Tools::setCapability (CAP_NET_BIND_SERVICE))
-  {
-    char* capability_name_string_p = ::cap_to_name (CAP_NET_BIND_SERVICE);
-    if (!capability_name_string_p)
+//  Common_Tools::printCapabilities ();
+  if (!Common_Tools::hasCapability (CAP_NET_BIND_SERVICE))
+    if (!Common_Tools::setCapability (CAP_NET_BIND_SERVICE))
+    {
+      char* capability_name_string_p = ::cap_to_name (CAP_NET_BIND_SERVICE);
+      if (!capability_name_string_p)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ::cap_to_name(%d): \"%m\", continuing\n"),
+                    CAP_NET_BIND_SERVICE));
+
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ::cap_to_name(%d): \"%m\", continuing\n"),
-                  CAP_NET_BIND_SERVICE));
+                  ACE_TEXT ("failed to Common_Tools::setCapability(\"%s\"): \"%m\", returning\n"),
+                  ACE_TEXT (capability_name_string_p)));
 
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::setCapability(\"%s\"): \"%m\", returning\n"),
-                ACE_TEXT (capability_name_string_p)));
-
-    // clean up
-    result = ::cap_free (capability_name_string_p);
-    if (result == -1)
+      // clean up
+      result = ::cap_free (capability_name_string_p);
+      if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::cap_free(): \"%m\", continuing\n")));
 
-    return;
-  } // end IF
+      return;
+    } // end IF
   ACE_ASSERT (Common_Tools::hasCapability (CAP_NET_BIND_SERVICE));
-  Common_Tools::printPriviledges ();
+//  Common_Tools::printPriviledges ();
 #endif
 #endif
 
@@ -597,6 +610,8 @@ do_work (bool requestBroadcastReplies_in,
   configuration.moduleConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
 
+  configuration.moduleHandlerConfiguration_2.protocolConfiguration =
+    &configuration.protocolConfiguration;
   configuration.moduleHandlerConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
   configuration.moduleHandlerConfiguration_2.configuration = &configuration;
@@ -615,6 +630,8 @@ do_work (bool requestBroadcastReplies_in,
   // ********************** protocol configuration data ************************
   configuration.protocolConfiguration.requestBroadcastReplies =
       requestBroadcastReplies_in;
+  configuration.protocolConfiguration.sendRequestOnOffer =
+      sendRequestOnOffer_in;
 
   // ********************* listener configuration data ************************
   if (useLoopback_in)
@@ -646,6 +663,20 @@ do_work (bool requestBroadcastReplies_in,
                 ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
     return;
   } // end IF
+
+  if (requestBroadcastReplies_in)
+  {
+    result =
+      configuration.listenerConfiguration.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                       static_cast<ACE_UINT32> (INADDR_NONE));
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
+      return;
+    } // end IF
+  } // end IF
+
   configuration.listenerConfiguration.connectionManager =
     connection_manager_p;
   configuration.listenerConfiguration.messageAllocator = &message_allocator;
@@ -1062,10 +1093,25 @@ allocate:
     message_p->initialize (DHCP_record,
                            NULL);
 
+    Test_U_ISocketConnection_t* isocket_connection_p =
+      dynamic_cast<Test_U_ISocketConnection_t*> (configuration.moduleHandlerConfiguration_2.connection);
+    ACE_ASSERT (isocket_connection_p);
+
     Test_U_ConnectionState& state_r =
-      const_cast<Test_U_ConnectionState&> (configuration.moduleHandlerConfiguration_2.connection->state ());
+        const_cast<Test_U_ConnectionState&> (isocket_connection_p->state ());
     state_r.timeStamp = COMMON_TIME_NOW;
     state_r.xid = DHCP_record.xid;
+
+    Test_U_ConnectionStream& stream_r =
+        const_cast<Test_U_ConnectionStream&> (isocket_connection_p->stream ());
+    const Test_U_StreamSessionData_t* session_data_container_p =
+        stream_r.get ();
+    ACE_ASSERT (session_data_container_p);
+    Test_U_StreamSessionData& session_data_r =
+        const_cast<Test_U_StreamSessionData&> (session_data_container_p->get ());
+    session_data_r.timeStamp = state_r.timeStamp;
+    session_data_r.xid = DHCP_record.xid;
+
     isocket_connection_p->send (message_p);
   } // end IF
 
@@ -1276,6 +1322,8 @@ ACE_TMAIN (int argc_in,
   std::string interface;
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   bool use_thread_pool = NET_EVENT_USE_THREAD_POOL;
+  bool send_request_on_offer =
+      TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER;
   bool use_reactor = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval =
     STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
@@ -1296,6 +1344,7 @@ ACE_TMAIN (int argc_in,
                             interface,
                             use_loopback,
                             use_thread_pool,
+                            send_request_on_offer,
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
@@ -1537,6 +1586,7 @@ ACE_TMAIN (int argc_in,
            interface,
            use_loopback,
            use_thread_pool,
+           send_request_on_offer,
            use_reactor,
            statistic_reporting_interval,
            number_of_dispatch_threads,

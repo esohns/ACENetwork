@@ -62,8 +62,10 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << record_in.xid;
+  converter << ACE_TEXT_ALWAYS_CHAR (" (0x");
+  converter << std::hex << record_in.xid << std::dec;
   string_buffer += converter.str ();
-  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("secs: \t");
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
@@ -113,7 +115,12 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
     field_type =
       DHCP_Tools::Option2FieldType (option_type);
     string_buffer += DHCP_Tools::Option2String (option_type);
-    string_buffer += ACE_TEXT_ALWAYS_CHAR (": \t");
+    string_buffer += ACE_TEXT_ALWAYS_CHAR (" (");
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter << option_type;
+    string_buffer += converter.str ();
+    string_buffer += ACE_TEXT_ALWAYS_CHAR ("): \t");
     switch (field_type)
     {
       case DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESS:
@@ -135,11 +142,19 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
             string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
             converter.str (ACE_TEXT_ALWAYS_CHAR (""));
             converter.clear ();
+            converter << ACE_TEXT_ALWAYS_CHAR ("\t#");
             converter << (i + 1);
             string_buffer += converter.str ();
             string_buffer += ACE_TEXT_ALWAYS_CHAR (": ");
             string_buffer += Net_Common_Tools::IPAddress2String (0, ip_address);
           } // end FOR
+        break;
+      }
+      case DHCP_Codes::DHCP_OPTION_FIELDTYPE_STRING:
+      {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"");
+        string_buffer += (*iterator).second.c_str ();
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"");
         break;
       }
       case DHCP_Codes::DHCP_OPTION_FIELDTYPE_INTEGER:
@@ -233,7 +248,21 @@ DHCP_Tools::Option2String (DHCP_Option_t option_in)
   switch (option_in)
   {
     case DHCP_Codes::DHCP_OPTION_SUBNETMASK:
-      result = ACE_TEXT_ALWAYS_CHAR ("DHCP_OPTION_SUBNETMASK"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("SUBNETMASK"); break;
+    case DHCP_Codes::DHCP_OPTION_TIMEOFFSET:
+      result = ACE_TEXT_ALWAYS_CHAR ("TIMEOFFSET"); break;
+    case DHCP_Codes::DHCP_OPTION_GATEWAY:
+      result = ACE_TEXT_ALWAYS_CHAR ("GATEWAY"); break;
+    case DHCP_Codes::DHCP_OPTION_DOMAINNAMESERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("DOMAINNAMESERVER"); break;
+    case DHCP_Codes::DHCP_OPTION_HOSTNAME:
+      result = ACE_TEXT_ALWAYS_CHAR ("HOSTNAME"); break;
+    case DHCP_Codes::DHCP_OPTION_IP_MTU:
+      result = ACE_TEXT_ALWAYS_CHAR ("IP_MTU"); break;
+    case DHCP_Codes::DHCP_OPTION_IP_BROADCASTADDRESS:
+      result = ACE_TEXT_ALWAYS_CHAR ("IP_BROADCASTADDRESS"); break;
+    case DHCP_Codes::DHCP_OPTION_VENDORSPECIFICINFORMATION:
+      result = ACE_TEXT_ALWAYS_CHAR ("VENDORSPECIFICINFORMATION"); break;
     case DHCP_Codes::DHCP_OPTION_DHCP_IPADDRESSLEASETIME:
       result = ACE_TEXT_ALWAYS_CHAR ("DHCP_IPADDRESSLEASETIME"); break;
     case DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE:
@@ -301,6 +330,20 @@ DHCP_Tools::Option2FieldType (DHCP_Option_t option_in)
   {
     case DHCP_Codes::DHCP_OPTION_SUBNETMASK:
       return DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESS;
+    case DHCP_Codes::DHCP_OPTION_TIMEOFFSET:
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_INTEGER;
+    case DHCP_Codes::DHCP_OPTION_GATEWAY:
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESS;
+    case DHCP_Codes::DHCP_OPTION_DOMAINNAMESERVER:
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESS;
+    case DHCP_Codes::DHCP_OPTION_HOSTNAME:
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_STRING;
+    case DHCP_Codes::DHCP_OPTION_IP_MTU:
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_INTEGER;
+    case DHCP_Codes::DHCP_OPTION_IP_BROADCASTADDRESS:
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESS;
+    case DHCP_Codes::DHCP_OPTION_VENDORSPECIFICINFORMATION:
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_STRING;
     case DHCP_Codes::DHCP_OPTION_DHCP_IPADDRESSLEASETIME:
       return DHCP_Codes::DHCP_OPTION_FIELDTYPE_INTEGER;
     case DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE:
@@ -325,6 +368,22 @@ DHCP_Tools::isRequest (const DHCP_Record& record_in)
   NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::isRequest"));
 
   return (record_in.op == DHCP_Codes::DHCP_OP_REQUEST);
+}
+DHCP_MessageType_t
+DHCP_Tools::type (const DHCP_Record& record_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::type"));
+
+  // initialize result
+  DHCP_MessageType_t result = DHCP_Codes::DHCP_MESSAGE_INVALID;
+
+  DHCP_OptionsIterator_t iterator =
+      record_in.options.find (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE);
+  ACE_ASSERT (iterator != record_in.options.end ());
+  result =
+      static_cast<DHCP_MessageType_t> (*reinterpret_cast<const unsigned char*> ((*iterator).second.c_str ()));
+
+  return result;
 }
 
 unsigned int

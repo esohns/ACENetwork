@@ -52,7 +52,7 @@ extern void DHCP_Scanner_set_column (int, yyscan_t);
 %}
 
 %option header-file="dhcp_scanner.h" outfile="dhcp_scanner.cpp"
-%option batch 8bit nodefault never-interactive nostdinit yylineno yywrap
+%option batch 8bit nodefault never-interactive nostdinit yylineno noyywrap
 /* %option c++ yyclass="DHCP_Scanner" */
 /* %option ansi-definitions ansi-prototypes bison-bridge */
 /* *NOTE*: the 'line' directives confuse gdb */
@@ -373,25 +373,24 @@ DHCP_Scanner_reset (yyscan_t yyscanner)
 
   return 0;
 }
-#ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
-int
-DHCP_Scanner_wrap (yyscan_t yyscanner)
-{
-  NETWORK_TRACE (ACE_TEXT ("::DHCP_Scanner_wrap"));
+//#ifdef __cplusplus
+//extern "C"
+//{
+//#endif /* __cplusplus */
+//int
+//DHCP_Scanner_wrap (yyscan_t yyscanner)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("::DHCP_Scanner_wrap"));
 
-  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
-  DHCP_ParserDriver* driver = DHCP_Scanner_get_extra (yyscanner);
+//  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
+//  DHCP_ParserDriver* driver = DHCP_Scanner_get_extra (yyscanner);
 
 //  // sanity check(s)
 //  ACE_ASSERT (driver);
 //  ACE_ASSERT (driver->fragment_);
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (0);
-  ACE_NOTREACHED (return 0;)
-}
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+
+//  return 1; // done
+//}
+//#ifdef __cplusplus
+//}
+//#endif /* __cplusplus */

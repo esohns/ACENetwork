@@ -129,7 +129,7 @@ DHCP_Message_T<AllocatorConfigurationType>::dump_state () const
               inherited::total_length (),
               ACE_TEXT (info.c_str ())));
   ACE_DEBUG ((LM_INFO,
-              ACE_TEXT ("%s"),
+              ACE_TEXT ("\n%s"),
               ACE_TEXT (DHCP_Tools::dump (inherited::data_).c_str ())));
 }
 

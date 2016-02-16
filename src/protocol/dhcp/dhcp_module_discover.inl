@@ -23,6 +23,7 @@
 
 #include "common_timer_manager_common.h"
 
+#include "net_common_tools.h"
 #include "net_macros.h"
 
 #include "dhcp_common.h"
@@ -33,16 +34,21 @@ template <typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          typename ConfigurationType>
+          typename ConfigurationType,
+          typename ConnectionManagerType,
+          typename ConnectorType>
 DHCP_Module_Discover_T<TaskSynchType,
                        TimePolicyType,
                        SessionMessageType,
                        ProtocolMessageType,
-                       ConfigurationType>::DHCP_Module_Discover_T ()
+                       ConfigurationType,
+                       ConnectionManagerType,
+                       ConnectorType>::DHCP_Module_Discover_T ()
  : inherited ()
  , configuration_ (NULL)
  , sessionData_ (NULL)
  , initialized_ (false)
+ , sendRequestOnOffer_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::DHCP_Module_Discover_T"));
 
@@ -52,12 +58,16 @@ template <typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          typename ConfigurationType>
+          typename ConfigurationType,
+          typename ConnectionManagerType,
+          typename ConnectorType>
 DHCP_Module_Discover_T<TaskSynchType,
                        TimePolicyType,
                        SessionMessageType,
                        ProtocolMessageType,
-                       ConfigurationType>::~DHCP_Module_Discover_T ()
+                       ConfigurationType,
+                       ConnectionManagerType,
+                       ConnectorType>::~DHCP_Module_Discover_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::~DHCP_Module_Discover_T"));
 
@@ -69,13 +79,17 @@ template <typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          typename ConfigurationType>
+          typename ConfigurationType,
+          typename ConnectionManagerType,
+          typename ConnectorType>
 const ConfigurationType&
 DHCP_Module_Discover_T<TaskSynchType,
                        TimePolicyType,
                        SessionMessageType,
                        ProtocolMessageType,
-                       ConfigurationType>::get () const
+                       ConfigurationType,
+                       ConnectionManagerType,
+                       ConnectorType>::get () const
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::get"));
 
@@ -87,18 +101,22 @@ template <typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          typename ConfigurationType>
+          typename ConfigurationType,
+          typename ConnectionManagerType,
+          typename ConnectorType>
 bool
 DHCP_Module_Discover_T<TaskSynchType,
                        TimePolicyType,
                        SessionMessageType,
                        ProtocolMessageType,
-                       ConfigurationType>::initialize (const ConfigurationType& configuration_in)
+                       ConfigurationType,
+                       ConnectionManagerType,
+                       ConnectorType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::initialize"));
 
   // sanity check(s)
-  ACE_ASSERT (configuration_in.streamConfiguration);
+  ACE_ASSERT (configuration_in.protocolConfiguration);
 
   if (initialized_)
   {
@@ -117,6 +135,9 @@ DHCP_Module_Discover_T<TaskSynchType,
   } // end IF
 
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
+  // *TODO*: remove type inference
+  sendRequestOnOffer_ =
+      configuration_in.protocolConfiguration->sendRequestOnOffer;
   initialized_ = true;
 
   return initialized_;
@@ -126,33 +147,132 @@ template <typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          typename ConfigurationType>
+          typename ConfigurationType,
+          typename ConnectionManagerType,
+          typename ConnectorType>
 void
 DHCP_Module_Discover_T<TaskSynchType,
                        TimePolicyType,
                        SessionMessageType,
                        ProtocolMessageType,
-                       ConfigurationType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                              bool& passMessageDownstream_out)
+                       ConfigurationType,
+                       ConnectionManagerType,
+                       ConnectorType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                                                          bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::handleDataMessage"));
 
-  ACE_UNUSED_ARG (message_inout);
   ACE_UNUSED_ARG (passMessageDownstream_out);
+
+  // sanity check(s)
+  ACE_ASSERT (message_inout->isInitialized ());
+  ACE_ASSERT (sessionData_);
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->connection);
+  ACE_ASSERT (configuration_->protocolConfiguration);
+  ACE_ASSERT (configuration_->socketConfiguration);
+  ACE_ASSERT (configuration_->socketHandlerConfiguration);
+
+  const typename ProtocolMessageType::DATA_T& data_r = message_inout->get ();
+  if  (!sendRequestOnOffer_ ||
+       (DHCP_Tools::type (data_r) != DHCP_Codes::DHCP_MESSAGE_OFFER))
+    return; // done
+
+  // sanity check(s)
+  const typename SessionMessageType::SESSION_DATA_T::DATA_T& data_2 =
+      sessionData_->get ();
+  if (data_r.xid != data_2.xid)
+    return; // done
+
+  ProtocolMessageType* message_p =
+      allocateMessage (configuration_->socketHandlerConfiguration->PDUSize);
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to DHCP_Module_Discover_T::allocateMessage(%u): \"%m\", returning\n"),
+                configuration_->socketHandlerConfiguration->PDUSize));
+    return;
+  } // end IF
+  DHCP_Record DHCP_record;
+  DHCP_record.op = DHCP_Codes::DHCP_OP_REQUEST;
+  DHCP_record.htype = DHCP_FRAME_HTYPE;
+  DHCP_record.hlen = DHCP_FRAME_HLEN;
+  DHCP_record.xid = data_r.xid;
+  DHCP_record.secs = data_r.secs;
+  if (configuration_->protocolConfiguration->requestBroadcastReplies)
+    DHCP_record.flags = DHCP_FLAGS_BROADCAST;
+  if (!Net_Common_Tools::interface2MACAddress (configuration_->socketConfiguration->networkInterface,
+                                               DHCP_record.chaddr))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interface2MACAddress(), returning\n")));
+
+    // clean up
+    message_p->release ();
+
+    return;
+  } // end IF
+  std::string buffer;
+  buffer.append (reinterpret_cast<const char*> (&data_r.yiaddr), 4);
+  DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_REQUESTEDIPADDRESS,
+                                              buffer));
+  //     *TODO*: support optional options:
+  //             - 'overload'            (52)
+  DHCP_OptionsIterator_t iterator =
+      data_r.options.find (DHCP_Codes::DHCP_OPTION_DHCP_IPADDRESSLEASETIME);
+  ACE_ASSERT (iterator != data_r.options.end ());
+  DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_IPADDRESSLEASETIME,
+                                              (*iterator).second));
+  DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE,
+                                              std::string (1,
+                                                           static_cast<char> (DHCP_Codes::DHCP_MESSAGE_REQUEST))));
+  iterator =
+      data_r.options.find (DHCP_Codes::DHCP_OPTION_DHCP_SERVERIDENTIFIER);
+  ACE_ASSERT (iterator != data_r.options.end ());
+  DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_SERVERIDENTIFIER,
+                                              (*iterator).second));
+  //         - 'parameter request list'  (55) [include in all subsequent messages]
+  //         - 'message'                 (56)
+  //         - 'maximum message size'    (57)
+  //         - 'vendor class identifier' (60)
+  //         - 'client identifier'       (61)
+  // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
+  //  message_p->initialize (message_data_container_p,
+  message_p->initialize (DHCP_record,
+                         NULL);
+
+  typename ConnectorType::ISOCKET_CONNECTION_T* isocket_connection_p =
+    dynamic_cast<typename ConnectorType::ISOCKET_CONNECTION_T*> (configuration_->connection);
+  if (!isocket_connection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<Net_ISocketConnection_T> (%@): \"%m\", returning\n"),
+                configuration_->connection));
+
+    // clean up
+    message_p->release ();
+
+    return;
+  } // end IF
+  isocket_connection_p->send (message_p);
 }
 
 template <typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          typename ConfigurationType>
+          typename ConfigurationType,
+          typename ConnectionManagerType,
+          typename ConnectorType>
 void
 DHCP_Module_Discover_T<TaskSynchType,
                        TimePolicyType,
                        SessionMessageType,
                        ProtocolMessageType,
-                       ConfigurationType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                 bool& passMessageDownstream_out)
+                       ConfigurationType,
+                       ConnectionManagerType,
+                       ConnectorType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                             bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::handleSessionMessage"));
 
@@ -188,6 +308,75 @@ DHCP_Module_Discover_T<TaskSynchType,
   } // end SWITCH
 }
 
+template <typename TaskSynchType,
+          typename TimePolicyType,
+          typename SessionMessageType,
+          typename ProtocolMessageType,
+          typename ConfigurationType,
+          typename ConnectionManagerType,
+          typename ConnectorType>
+ProtocolMessageType*
+DHCP_Module_Discover_T<TaskSynchType,
+                       TimePolicyType,
+                       SessionMessageType,
+                       ProtocolMessageType,
+                       ConfigurationType,
+                       ConnectionManagerType,
+                       ConnectorType>::allocateMessage (unsigned int requestedSize_in)
+{
+  STREAM_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::allocateMessage"));
+
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->streamConfiguration);
+
+  // initialize return value(s)
+  ProtocolMessageType* message_p = NULL;
+
+  // *TODO*: remove type inference
+  if (configuration_->streamConfiguration->messageAllocator)
+  {
+allocate:
+    try
+    {
+      // *TODO*: remove type inference
+      message_p =
+          static_cast<ProtocolMessageType*> (configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), continuing\n"),
+                  requestedSize_in));
+      message_p = NULL;
+    }
+
+    // keep retrying ?
+    if (!message_p &&
+        !configuration_->streamConfiguration->messageAllocator->block ())
+      goto allocate;
+  } // end IF
+  else
+    ACE_NEW_NORETURN (message_p,
+                      ProtocolMessageType (requestedSize_in));
+  if (!message_p)
+  {
+    if (configuration_->streamConfiguration->messageAllocator)
+    {
+      if (configuration_->streamConfiguration->messageAllocator->block ())
+        ACE_DEBUG ((LM_CRITICAL,
+                    ACE_TEXT ("failed to allocate ProtocolMessageType(%u): \"%m\", aborting\n"),
+                    requestedSize_in));
+    } // end IF
+    else
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate ProtocolMessageType(%u): \"%m\", aborting\n"),
+                  requestedSize_in));
+  } // end IF
+
+  return message_p;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename LockType,
@@ -201,15 +390,15 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 DHCP_Module_DiscoverH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::DHCP_Module_DiscoverH_T ()
+                        TaskSynchType,
+                        TimePolicyType,
+                        SessionMessageType,
+                        ProtocolMessageType,
+                        ConfigurationType,
+                        StreamStateType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        StatisticContainerType>::DHCP_Module_DiscoverH_T ()
  : inherited (NULL,  // lock handle
               // *NOTE*: the current (pull-)parser needs to be active because
               //         yyparse() will not return until the entity has been
@@ -225,6 +414,7 @@ DHCP_Module_DiscoverH_T<LockType,
                              false)
  , statisticCollectHandlerID_ (-1)
  , initialized_ (false)
+ , sendRequestOnOffer_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::DHCP_Module_DiscoverH_T"));
 
@@ -241,15 +431,15 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 DHCP_Module_DiscoverH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::~DHCP_Module_DiscoverH_T ()
+                        TaskSynchType,
+                        TimePolicyType,
+                        SessionMessageType,
+                        ProtocolMessageType,
+                        ConfigurationType,
+                        StreamStateType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        StatisticContainerType>::~DHCP_Module_DiscoverH_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::~DHCP_Module_DiscoverH_T"));
 
@@ -277,15 +467,15 @@ template <typename LockType,
           typename StatisticContainerType>
 bool
 DHCP_Module_DiscoverH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
+                        TaskSynchType,
+                        TimePolicyType,
+                        SessionMessageType,
+                        ProtocolMessageType,
+                        ConfigurationType,
+                        StreamStateType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::initialize"));
 
@@ -314,7 +504,7 @@ DHCP_Module_DiscoverH_T<LockType,
 
   if (configuration_in.streamConfiguration->statisticReportingInterval)
   {
-    // schedule regular statistics collection...
+    // schedule regular statistic collection
     ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION_INTERVAL, 0);
     ACE_ASSERT (statisticCollectHandlerID_ == -1);
     ACE_Event_Handler* handler_p = &statisticCollectHandler_;
@@ -361,16 +551,16 @@ template <typename LockType,
           typename StatisticContainerType>
 void
 DHCP_Module_DiscoverH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                                 bool& passMessageDownstream_out)
+                        TaskSynchType,
+                        TimePolicyType,
+                        SessionMessageType,
+                        ProtocolMessageType,
+                        ConfigurationType,
+                        StreamStateType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        StatisticContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                                                                    bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::handleDataMessage"));
 
@@ -390,16 +580,16 @@ template <typename LockType,
           typename StatisticContainerType>
 void
 DHCP_Module_DiscoverH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                    bool& passMessageDownstream_out)
+                        TaskSynchType,
+                        TimePolicyType,
+                        SessionMessageType,
+                        ProtocolMessageType,
+                        ConfigurationType,
+                        StreamStateType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                       bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::handleSessionMessage"));
 
@@ -446,15 +636,15 @@ template <typename LockType,
           typename StatisticContainerType>
 bool
 DHCP_Module_DiscoverH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::collect (StatisticContainerType& data_out)
+                        TaskSynchType,
+                        TimePolicyType,
+                        SessionMessageType,
+                        ProtocolMessageType,
+                        ConfigurationType,
+                        StreamStateType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::collect"));
 
@@ -489,15 +679,15 @@ template <typename LockType,
           typename StatisticContainerType>
 void
 DHCP_Module_DiscoverH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::report () const
+                        TaskSynchType,
+                        TimePolicyType,
+                        SessionMessageType,
+                        ProtocolMessageType,
+                        ConfigurationType,
+                        StreamStateType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        StatisticContainerType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::report"));
 
@@ -521,15 +711,15 @@ template <typename LockType,
           typename StatisticContainerType>
 bool
 DHCP_Module_DiscoverH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
+                        TaskSynchType,
+                        TimePolicyType,
+                        SessionMessageType,
+                        ProtocolMessageType,
+                        ConfigurationType,
+                        StreamStateType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        StatisticContainerType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::putStatisticMessage"));
 

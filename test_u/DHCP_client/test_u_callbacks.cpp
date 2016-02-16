@@ -388,7 +388,15 @@ idle_initialize_UI_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_BROADCAST_NAME)));
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                DHCP_DEFAULT_FLAGS_BROADCAST);
+                                data_p->configuration->protocolConfiguration.requestBroadcastReplies);
+  check_button_p =
+      //GTK_TEXT_VIEW (glade_xml_get_widget ((*iterator).second.second,
+      //                                     ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TEXTVIEW_NAME)));
+      GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_REQUEST_NAME)));
+  ACE_ASSERT (check_button_p);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
+                                data_p->configuration->protocolConfiguration.sendRequestOnOffer);
   check_button_p =
     GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_ASYNCH_NAME)));
@@ -590,6 +598,16 @@ idle_initialize_UI_cb (gpointer userData_in)
       g_signal_connect (object_p,
                         ACE_TEXT_ALWAYS_CHAR ("toggled"),
                         G_CALLBACK (checkbutton_broadcast_toggled_cb),
+                        userData_in);
+  ACE_ASSERT (result_2);
+  object_p =
+      gtk_builder_get_object ((*iterator).second.second,
+                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_REQUEST_NAME));
+  ACE_ASSERT (object_p);
+  result_2 =
+      g_signal_connect (object_p,
+                        ACE_TEXT_ALWAYS_CHAR ("toggled"),
+                        G_CALLBACK (checkbutton_request_toggled_cb),
                         userData_in);
   ACE_ASSERT (result_2);
 
@@ -1141,6 +1159,7 @@ action_send_activate_cb (GtkAction* action_in,
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->configuration->handle != ACE_INVALID_HANDLE);
   ACE_ASSERT (data_p->configuration->streamConfiguration.messageAllocator);
   ACE_ASSERT (data_p->configuration->moduleHandlerConfiguration_2.connection);
   //ACE_ASSERT (iterator != data_p->gladeXML.end ());
@@ -1189,14 +1208,6 @@ action_send_activate_cb (GtkAction* action_in,
     static_cast<unsigned short> (gtk_spin_button_get_value_as_int (spin_button_p));
   data_p->configuration->socketConfiguration.address.set_port_number (port_number,
                                                                       1);
-
-  // retrieve broadcast flag
-  GtkCheckButton* check_button_p =
-    //GTK_TEXT_VIEW (glade_xml_get_widget ((*iterator).second.second,
-    //                                     ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TEXTVIEW_NAME)));
-    GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_BROADCAST_NAME)));
-  ACE_ASSERT (check_button_p);
 
   // retrieve buffer
   spin_button_p =
@@ -1296,14 +1307,34 @@ allocate:
 //  message_p->initialize (message_data_container_p,
   message_p->initialize (DHCP_record,
                          NULL);
+
   Test_U_ISocketConnection_t* isocket_connection_p =
     dynamic_cast<Test_U_ISocketConnection_t*> (data_p->configuration->moduleHandlerConfiguration_2.connection);
   ACE_ASSERT (isocket_connection_p);
 
+  Test_U_IConnectionManager_t* iconnection_manager_p =
+    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (iconnection_manager_p);
+  Test_U_IConnection_t* iconnection_p =
+      iconnection_manager_p->get (data_p->configuration->handle);
+  ACE_ASSERT (iconnection_p);
+  Test_U_ISocketConnection_t* isocket_connection_2 =
+    dynamic_cast<Test_U_ISocketConnection_t*> (iconnection_p);
+  ACE_ASSERT (isocket_connection_2);
   Test_U_ConnectionState& state_r =
-    const_cast<Test_U_ConnectionState&> (data_p->configuration->moduleHandlerConfiguration_2.connection->state ());
+      const_cast<Test_U_ConnectionState&> (isocket_connection_2->state ());
   state_r.timeStamp = COMMON_TIME_NOW;
   state_r.xid = DHCP_record.xid;
+
+  Test_U_ConnectionStream& stream_r =
+      const_cast<Test_U_ConnectionStream&> (isocket_connection_2->stream ());
+  const Test_U_StreamSessionData_t* session_data_container_p = stream_r.get ();
+  ACE_ASSERT (session_data_container_p);
+  Test_U_StreamSessionData& session_data_r =
+      const_cast<Test_U_StreamSessionData&> (session_data_container_p->get ());
+  session_data_r.timeStamp = state_r.timeStamp;
+  session_data_r.xid = DHCP_record.xid;
+
   isocket_connection_p->send (message_p);
 
   return;
@@ -1388,6 +1419,22 @@ checkbutton_broadcast_toggled_cb (GtkCheckButton* checkButton_in,
   data_p->configuration->protocolConfiguration.requestBroadcastReplies =
       gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (checkButton_in));
 }
+void
+checkbutton_request_toggled_cb (GtkCheckButton* checkButton_in,
+                                gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::checkbutton_request_toggled_cb"));
+
+  Test_U_DHCPClient_GTK_CBData* data_p =
+      static_cast<Test_U_DHCPClient_GTK_CBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+
+  data_p->configuration->protocolConfiguration.sendRequestOnOffer =
+      gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (checkButton_in));
+}
 
 void
 toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
@@ -1437,7 +1484,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 //  ACE_ASSERT (image_p);
 //  gtk_button_set_image (GTK_BUTTON (toggle_button_p), GTK_WIDGET (image_p));
   gtk_action_set_stock_id (GTK_ACTION (toggleAction_in),
-                           (start_listening ? GTK_STOCK_DISCONNECT 
+                           (start_listening ? GTK_STOCK_DISCONNECT
                                             : GTK_STOCK_CONNECT));
 
   bool failed = true;
@@ -1488,6 +1535,19 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
       return;
+    } // end IF
+
+    if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
+    {
+      result =
+        data_p->configuration->listenerConfiguration.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                                  static_cast<ACE_UINT32> (INADDR_NONE));
+      if (result == -1)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
+        return;
+      } // end IF
     } // end IF
 
     bool handle_connection_manager = false;

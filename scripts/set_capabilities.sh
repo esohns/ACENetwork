@@ -5,7 +5,7 @@
 # *NOTE*: it is neither portable nor particularly stable !
 # parameters:   - $1 [BUILD] {"debug" || "debug_tracing" || "release" || ...}
 # return value: - 0 success, 1 failure
-[ "root" != "$USER" ] && exec sudo $0 "$@"
+[ "root" != "$USER" ] && exec gksudo $0 "$@"
 
 echo "starting..."
 

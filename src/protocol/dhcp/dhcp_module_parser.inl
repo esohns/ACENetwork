@@ -160,6 +160,7 @@ DHCP_Module_Parser_T<TimePolicyType,
                 message_inout->getID ()));
     return;
   } // end IF
+  message_inout->rd_ptr (message_inout->base ());
   message_inout->initialize (*record_p,
                              NULL);
   isDriverInitialized_ = false;

@@ -54,6 +54,7 @@
 #define TEST_U_UI_GTK_BUTTON_QUIT_NAME                    "quit"
 #define TEST_U_UI_GTK_CHECKBUTTON_ASYNCH_NAME             "checkbutton_asynch"
 #define TEST_U_UI_GTK_CHECKBUTTON_BROADCAST_NAME          "checkbutton_broadcast"
+#define TEST_U_UI_GTK_CHECKBUTTON_REQUEST_NAME            "checkbutton_request"
 #define TEST_U_UI_GTK_CHECKBUTTON_LOOPBACK_NAME           "checkbutton_loopback"
 #define TEST_U_UI_GTK_COMBOBOX_INTERFACE_NAME             "combobox_interface"
 #define TEST_U_UI_GTK_DIALOG_ABOUT_NAME                   "dialog_about"
@@ -87,5 +88,8 @@
 #define TEST_U_UI_GTK_STATUSBAR_CONTEXT_DESCRIPTION       "Stream::main"
 
 //---------------------------------------
+
+// send DHCPREQUEST on DHCPOFFER ?
+#define TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER         false
 
 #endif

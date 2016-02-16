@@ -311,6 +311,9 @@ void DHCP_Scanner_free (void * ,yyscan_t yyscanner );
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
 
+#define DHCP_Scanner_wrap(yyscanner) 1
+#define YY_SKIP_YYWRAP
+
 #define FLEX_DEBUG
 
 #define yytext_ptr yytext_r
@@ -514,6 +517,6 @@ extern int DHCP_Scanner_lex \
 #undef YY_DECL
 #endif
 
-#line 518 "dhcp_scanner.h"
+#line 521 "dhcp_scanner.h"
 #undef DHCP_Scanner_IN_HEADER
 #endif /* DHCP_Scanner_HEADER_H */
