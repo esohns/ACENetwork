@@ -40,7 +40,7 @@ class Test_U_Module_EventHandler
 
                                          Test_U_StreamModuleHandlerConfiguration,
 
-                                         Test_U_StreamSessionData>
+                                         Test_U_StreamSessionData_t>
 {
  public:
   Test_U_Module_EventHandler ();
@@ -55,7 +55,7 @@ class Test_U_Module_EventHandler
 
                                          Test_U_StreamModuleHandlerConfiguration,
 
-                                         Test_U_StreamSessionData> inherited;
+                                         Test_U_StreamSessionData_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler (const Test_U_Module_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler& operator= (const Test_U_Module_EventHandler&))

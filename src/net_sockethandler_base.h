@@ -38,8 +38,8 @@ class Net_SocketHandlerBase_T
  protected:
   Net_SocketHandlerBase_T ();
 
-  ConfigurationType configuration_;
-  bool              isInitialized_;
+  ConfigurationType* configuration_;
+  bool               isInitialized_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase_T (const Net_SocketHandlerBase_T&))

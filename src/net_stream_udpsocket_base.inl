@@ -18,6 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include <linux/errqueue.h>
+#include <netinet/ip_icmp.h>
+#endif
+
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 #include "ace/Svc_Handler.h"
@@ -720,6 +726,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
                     buffer,
                     inherited::peer_.get_handle ()));
       } // end IF
+#if defined (ACE_LINUX)
+      if (inherited::errorQueue_)
+        processErrorQueue ();
+#endif
 
       // clean up
       currentWriteBuffer_->release ();
@@ -728,7 +738,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
       result = -1;
       goto clean;
     }
-      // *** GOOD CASES ***
+    // *** GOOD CASES ***
     case 0:
     {
 //      ACE_DEBUG ((LM_DEBUG,
@@ -1314,6 +1324,137 @@ allocate:
 
   return message_block_p;
 }
+
+#if defined (ACE_LINUX)
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType,
+          typename HandlerConfigurationType>
+void
+Net_StreamUDPSocketBase_T<HandlerType,
+                          AddressType,
+                          ConfigurationType,
+                          StateType,
+                          StatisticContainerType,
+                          StreamType,
+                          UserDataType,
+                          ModuleConfigurationType,
+                          ModuleHandlerConfigurationType,
+                          HandlerConfigurationType>::processErrorQueue ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::processErrorQueue"));
+
+  ssize_t result = -1;
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  struct iovec iovec_a[1];
+  iovec_a[0].iov_base = buffer;
+  iovec_a[0].iov_len = sizeof (buffer);
+  AddressType socket_address;
+  ACE_TCHAR buffer_2[BUFSIZ];
+  ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
+//  result = inherited::peer_.recv (iovec_a, 1,
+//                                  socket_address,
+//                                  MSG_ERRQUEUE);
+
+  struct msghdr msghdr_s;
+  msghdr_s.msg_iov = iovec_a;
+  msghdr_s.msg_iovlen = 1;
+#if defined (ACE_HAS_SOCKADDR_MSG_NAME)
+  msghdr_s.msg_name =
+      static_cast<struct sockaddr*> (socket_address.get_addr ());
+#else
+  msghdr_s.msg_name = static_cast<char*> (socket_address.get_addr ());
+#endif /* ACE_HAS_SOCKADDR_MSG_NAME */
+  msghdr_s.msg_namelen = socket_address.get_addr_size ();
+
+#if defined (ACE_HAS_4_4BSD_SENDMSG_RECVMSG)
+  msghdr_s.msg_control = buffer_2;
+  msghdr_s.msg_controllen = sizeof (buffer_2);
+#elif !defined ACE_LACKS_SENDMSG
+  msghdr_s.msg_accrights = 0;
+  msghdr_s.msg_accrightslen = 0;
+#endif /* ACE_HAS_4_4BSD_SENDMSG_RECVMSG */
+
+  result = ACE_OS::recvmsg (inherited::peer_.get_handle (),
+                            &msghdr_s,
+                            MSG_ERRQUEUE | MSG_WAITALL);
+  if (result == -1)
+  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("%t: failed to ACE_SOCK_Dgram::recv(%d,MSG_ERRQUEUE): \"%m\", returning\n"),
+//                inherited::peer_.get_handle ()));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%t: failed to ACE_OS::recvmsg(%d,MSG_ERRQUEUE): \"%m\", returning\n"),
+                inherited::peer_.get_handle ()));
+    return;
+  } // end IF
+  socket_address.set_size (msghdr_s.msg_namelen);
+  socket_address.set_type (static_cast<struct sockaddr_in*> (socket_address.get_addr ())->sin_family);
+
+  struct sock_extended_err* sock_err_p = NULL;
+  for (struct cmsghdr* cmsghdr_p = CMSG_FIRSTHDR (&msghdr_s);
+       cmsghdr_p;
+       cmsghdr_p = CMSG_NXTHDR (&msghdr_s, cmsghdr_p))
+  {
+    if ((cmsghdr_p->cmsg_level != SOL_IP) || // IPPROTO_IP
+        (cmsghdr_p->cmsg_type  != IP_RECVERR))
+      continue;
+
+    sock_err_p =
+        reinterpret_cast<struct sock_extended_err*> (CMSG_DATA (cmsghdr_p));
+    if (!sock_err_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%t: failed to retrieve socket error: \"%m\", continuing\n"),
+                  inherited::peer_.get_handle ()));
+      continue;
+    } // end IF
+
+    switch (sock_err_p->ee_origin)
+    {
+      case SO_EE_ORIGIN_NONE:
+        break;
+      case SO_EE_ORIGIN_LOCAL:
+        break;
+      case SO_EE_ORIGIN_ICMP:
+      {
+        switch (sock_err_p->ee_type)
+        {
+          case ICMP_NET_UNREACH:
+            break;
+          case ICMP_HOST_UNREACH:
+            break;
+          default:
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("%t: invalid/unknown ICMP error (was: %d), continuing\n"),
+                        sock_err_p->ee_type));
+            break;
+          }
+        } // end SWITCH
+        break;
+      }
+      case SO_EE_ORIGIN_ICMP6:
+        break;
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%t: invalid/unknown error origin (was: %d), continuing\n"),
+                    sock_err_p->ee_origin));
+        break;
+      }
+    } // end SWITCH
+  } // end FOR
+}
+#endif
 
 /////////////////////////////////////////
 

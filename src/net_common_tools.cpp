@@ -945,84 +945,280 @@ Net_Common_Tools::getHostname (std::string& hostname_out)
 }
 
 bool
+Net_Common_Tools::setPathMTUDiscovery (ACE_HANDLE handle_in,
+                                       int option_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setPathMTUDiscovery"));
+
+  // sanity check(s)
+  ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
+
+  int result = -1;
+
+  int optval = option_in;
+  int optlen = sizeof (optval);
+  result = ACE_OS::setsockopt (handle_in,
+                               IPPROTO_IP,
+                               IP_MTU_DISCOVER,
+                               reinterpret_cast<const char*> (&optval),
+                               optlen);
+  if (result)
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,%s,%d): \"%m\", aborting\n"),
+                handle_in,
+                ACE_TEXT ("IP_MTU_DISCOVER"),
+                option_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::setsockopt(%d,%s,%d): \"%m\", aborting\n"),
+                handle_in,
+                ACE_TEXT ("IP_MTU_DISCOVER"),
+                option_in));
+#endif
+    return false;
+  } // end IF
+
+  return true;
+}
+
+bool
+Net_Common_Tools::getPathMTU (const ACE_INET_Addr& destinationAddress_in,
+                              unsigned int& MTU_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getPathMTU"));
+
+  // initialize return value(s)
+  bool result = false;
+  MTU_out = 0;
+
+  // sanity check(s)
+  ACE_ASSERT (destinationAddress_in.get_addr_size () ==
+              sizeof (struct sockaddr));
+
+  ACE_HANDLE socket_handle = ACE_OS::socket (ACE_ADDRESS_FAMILY_INET,
+                                             SOCK_DGRAM,
+                                             0);
+  if (socket_handle == ACE_INVALID_HANDLE)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(%d,%d,%d): \"%m\", aborting\n"),
+                ACE_ADDRESS_FAMILY_INET, SOCK_DGRAM, 0));
+    return false;
+  } // end IF
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  int result_2 = destinationAddress_in.addr_to_string (buffer,
+                                                       sizeof (buffer),
+                                                       1);
+  if (result_2 == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+
+  bool do_disassociate = false;
+  struct sockaddr* sockaddr_p =
+      reinterpret_cast<struct sockaddr*> (destinationAddress_in.get_addr ());
+  result_2 = ACE_OS::connect (socket_handle,
+                              sockaddr_p,
+                              destinationAddress_in.get_addr_size ());
+  if (result_2 == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::connect(%d,%s): \"%m\", aborting\n"),
+                socket_handle,
+                buffer));
+    return false;
+  } // end IF
+  do_disassociate = true;
+
+  // *NOTE*: IP_MTU works only on connect()ed sockets (see man 7 ip)
+  int optval = 0;
+  int optlen = sizeof (optval);
+  result = ACE_OS::getsockopt (socket_handle,
+                               IPPROTO_IP,
+                               IP_MTU,
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result)
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,%s): \"%m\", aborting\n"),
+                socket_handle,
+                ACE_TEXT ("IP_MTU")));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, %s): \"%m\", aborting\n"),
+                socket_handle,
+                ACE_TEXT ("IP_MTU")));
+#endif
+    goto close;
+  } // end IF
+  result = true;
+
+  MTU_out = optval;
+
+close:
+  if (do_disassociate)
+  {
+    // *NOTE*: see man connect(2)
+    struct sockaddr socket_address = *sockaddr_p;
+    socket_address.sa_family = AF_UNSPEC;
+    result_2 = ACE_OS::connect (socket_handle,
+                                &socket_address,
+                                sizeof (socket_address));
+    if (result_2 == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::connect(%d,%s): \"%m\", continuing\n"),
+                  socket_handle,
+                  buffer));
+  } // end IF
+
+  return result;
+}
+
+unsigned int
+Net_Common_Tools::getMTU (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getMTU"));
+
+  int result = -1;
+
+  int optval = 0;
+  int optlen = sizeof (optval);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = ACE_OS::getsockopt (handle_in,
+                               SOL_SOCKET,
+                               SO_MAX_MSG_SIZE,
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,SO_MAX_MSG_SIZE): \"%m\", aborting\n"),
+                handle_in));
+    return 0;
+  } // end IF
+#else
+  // *NOTE*: IP_MTU works only on connect()ed sockets (see man 7 ip)
+  result = ACE_OS::getsockopt (handle_in,
+                               IPPROTO_IP,
+                               IP_MTU,
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result)
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,IP_MTU): \"%m\", aborting\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,IP_MTU): \"%m\", aborting\n"),
+                handle_in));
+#endif
+    return 0;
+  } // end IF
+#endif
+
+  return static_cast<unsigned int> (optval);
+}
+
+bool
 Net_Common_Tools::setSocketBuffer (ACE_HANDLE handle_in,
                                    int optname_in,
                                    int size_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setSocketBuffer"));
 
-  // sanity check
+  // sanity check(s)
   if ((optname_in != SO_RCVBUF) &&
       (optname_in != SO_SNDBUF))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("invalid socket option (was: %d), aborting\n"),
-                optname_in));
-    return false;
-  } // end IF
-
-  int optval = size_in;
-  int optlen = sizeof (optval);
-  if (ACE_OS::setsockopt (handle_in,
-                          SOL_SOCKET,
-                          optname_in,
-                          reinterpret_cast<const char*> (&optval),
-                          optlen))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@, %s): \"%m\", aborting\n"),
+                ACE_TEXT ("0x%@: invalid socket option (was: %d), aborting\n"),
+                handle_in,
+                optname_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%d: invalid socket option (was: %d), aborting\n"),
+                handle_in,
+                optname_in));
+#endif
+    return false;
+  } // end IF
+
+  int result = -1;
+
+  int optval = size_in;
+  int optlen = sizeof (optval);
+  result = ACE_OS::setsockopt (handle_in,
+                               SOL_SOCKET,
+                               optname_in,
+                               reinterpret_cast<const char*> (&optval),
+                               optlen);
+  if (result)
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,%s): \"%m\", aborting\n"),
                 handle_in,
                 ((optname_in == SO_SNDBUF) ? ACE_TEXT ("SO_SNDBUF")
                                            : ACE_TEXT ("SO_RCVBUF"))));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(%d, %s): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::setsockopt(%d,%s): \"%m\", aborting\n"),
                 handle_in,
                 ((optname_in == SO_SNDBUF) ? ACE_TEXT ("SO_SNDBUF")
                                            : ACE_TEXT ("SO_RCVBUF"))));
 #endif
-
     return false;
   } // end IF
 
   // validate result
   optval = 0;
-  if (ACE_OS::getsockopt (handle_in,
-                          SOL_SOCKET,
-                          optname_in,
-                          reinterpret_cast<char*> (&optval),
-                          &optlen))
+  result = ACE_OS::getsockopt (handle_in,
+                               SOL_SOCKET,
+                               optname_in,
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result)
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@, %s): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,%s): \"%m\", aborting\n"),
                 handle_in,
                 ((optname_in == SO_SNDBUF) ? ACE_TEXT ("SO_SNDBUF")
                                            : ACE_TEXT ("SO_RCVBUF"))));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, %s): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,%s): \"%m\", aborting\n"),
                 handle_in,
                 ((optname_in == SO_SNDBUF) ? ACE_TEXT ("SO_SNDBUF")
                                            : ACE_TEXT ("SO_RCVBUF"))));
 #endif
-
     return false;
   } // end IF
 
   if (optval != size_in)
   {
-    // *NOTE*: for some reason, Linux will actually set TWICE the size value...
+    // *NOTE*: for some reason, Linux will actually set TWICE the size value
     if (Common_Tools::isLinux () && (optval == (size_in * 2)))
       return true;
 
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("ACE_OS::getsockopt(0x%@, %s) returned %d (expected: %d), aborting\n"),
+                ACE_TEXT ("ACE_OS::getsockopt(0x%@,%s) returned %d (expected: %d), aborting\n"),
                 handle_in,
                 ((optname_in == SO_SNDBUF) ? ACE_TEXT ("SO_SNDBUF")
                                            : ACE_TEXT ("SO_RCVBUF")),
@@ -1030,14 +1226,13 @@ Net_Common_Tools::setSocketBuffer (ACE_HANDLE handle_in,
                 size_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("ACE_OS::getsockopt(%d, %s) returned %d (expected: %d), aborting\n"),
+                ACE_TEXT ("ACE_OS::getsockopt(%d,%s) returned %d (expected: %d), aborting\n"),
                 handle_in,
                 ((optname_in == SO_SNDBUF) ? ACE_TEXT ("SO_SNDBUF")
                                            : ACE_TEXT ("SO_RCVBUF")),
                 optval,
                 size_in));
 #endif
-
     return false;
   } // end IF
 
@@ -1056,25 +1251,26 @@ Net_Common_Tools::getNoDelay (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getNoDelay"));
 
+  int result = -1;
   int optval = 0;
   int optlen = sizeof (optval);
-  if (ACE_OS::getsockopt (handle_in,
-                          IPPROTO_TCP,
-                          TCP_NODELAY,
-                          reinterpret_cast<char*> (&optval),
-                          &optlen))
+  result = ACE_OS::getsockopt (handle_in,
+                               IPPROTO_TCP,
+                               TCP_NODELAY,
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result)
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%@, TCP_NODELAY): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,TCP_NODELAY): \"%m\", aborting\n"),
                 handle_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, TCP_NODELAY): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,TCP_NODELAY): \"%m\", aborting\n"),
                 handle_in));
 #endif
-
     return false;
   } // end IF
 
@@ -1087,52 +1283,53 @@ Net_Common_Tools::setNoDelay (ACE_HANDLE handle_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setNoDelay"));
 
+  int result = -1;
   int optval = (noDelay_in ? 1 : 0);
   int optlen = sizeof (optval);
-  if (ACE_OS::setsockopt (handle_in,
-                          IPPROTO_TCP,
-                          TCP_NODELAY,
-                          reinterpret_cast<const char*> (&optval),
-                          optlen))
+  result = ACE_OS::setsockopt (handle_in,
+                               IPPROTO_TCP,
+                               TCP_NODELAY,
+                               reinterpret_cast<const char*> (&optval),
+                               optlen);
+  if (result)
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@, TCP_NODELAY): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,TCP_NODELAY): \"%m\", aborting\n"),
                 handle_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(%d, TCP_NODELAY): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::setsockopt(%d,TCP_NODELAY): \"%m\", aborting\n"),
                 handle_in));
 #endif
-
     return false;
   } // end IF
 
   // validate result
   optval = 0;
-  if (ACE_OS::getsockopt (handle_in,
-                          IPPROTO_TCP,
-                          TCP_NODELAY,
-                          reinterpret_cast<char*> (&optval),
-                          &optlen))
+  result = ACE_OS::getsockopt (handle_in,
+                               IPPROTO_TCP,
+                               TCP_NODELAY,
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result)
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%@, TCP_NODELAY): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,TCP_NODELAY): \"%m\", aborting\n"),
                 handle_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, TCP_NODELAY): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,TCP_NODELAY): \"%m\", aborting\n"),
                 handle_in));
 #endif
-
     return false;
   } // end IF
 
   //ACE_DEBUG((LM_DEBUG,
-  //           ACE_TEXT("setsockopt(%d, TCP_NODELAY): %s\n"),
+  //           ACE_TEXT("setsockopt(%d,TCP_NODELAY): %s\n"),
   //           handle_in,
   //           (noDelay_in ? ((optval == 1) ? "on" : "off")
   //                       : ((optval == 0) ? "off" : "on"))));
@@ -1146,52 +1343,53 @@ Net_Common_Tools::setKeepAlive (ACE_HANDLE handle_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setKeepAlive"));
 
+  int result = -1;
   int optval = (keepAlive_in ? 1 : 0);
   int optlen = sizeof (optval);
-  if (ACE_OS::setsockopt (handle_in,
-                          SOL_SOCKET,
-                          SO_KEEPALIVE,
-                          reinterpret_cast<const char*> (&optval),
-                          optlen))
+  result = ACE_OS::setsockopt (handle_in,
+                               SOL_SOCKET,
+                               SO_KEEPALIVE,
+                               reinterpret_cast<const char*> (&optval),
+                               optlen);
+  if (result)
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@, SO_KEEPALIVE): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_KEEPALIVE): \"%m\", aborting\n"),
                 handle_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(%d, SO_KEEPALIVE): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::setsockopt(%d,SO_KEEPALIVE): \"%m\", aborting\n"),
                 handle_in));
 #endif
-
     return false;
   } // end IF
 
   // validate result
   optval = 0;
-  if (ACE_OS::getsockopt (handle_in,
-                          SOL_SOCKET,
-                          SO_KEEPALIVE,
-                          reinterpret_cast<char*> (&optval),
-                          &optlen))
+  result = ACE_OS::getsockopt (handle_in,
+                               SOL_SOCKET,
+                               SO_KEEPALIVE,
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result)
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%@, SO_KEEPALIVE): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,SO_KEEPALIVE): \"%m\", aborting\n"),
                 handle_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, SO_KEEPALIVE): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,SO_KEEPALIVE): \"%m\", aborting\n"),
                 handle_in));
 #endif
-
     return false;
   } // end IF
 
   //ACE_DEBUG((LM_DEBUG,
-  //           ACE_TEXT("setsockopt(%d, SO_KEEPALIVE): %s\n"),
+  //           ACE_TEXT("setsockopt(%d,SO_KEEPALIVE): %s\n"),
   //           handle_in,
   //           (keepAlive_in ? ((optval == 1) ? "on" : "off")
   //                         : ((optval == 0) ? "off" : "on"))));
@@ -1215,16 +1413,16 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
                                SO_LINGER,
                                reinterpret_cast<char*> (&optval),
                                &optlen);
-  if (result == -1)
+  if (result)
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%@, SO_LINGER): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,SO_LINGER): \"%m\", aborting\n"),
                 handle_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, SO_LINGER): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,SO_LINGER): \"%m\", aborting\n"),
                 handle_in));
 #endif
     return false;
@@ -1238,27 +1436,59 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
                                SO_LINGER,
                                reinterpret_cast<const char*> (&optval),
                                optlen);
-  if (result == -1)
+  if (result)
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@, SO_LINGER): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_LINGER): \"%m\", aborting\n"),
                 handle_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(%d, SO_LINGER): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::setsockopt(%d,SO_LINGER): \"%m\", aborting\n"),
                 handle_in));
 #endif
     return false;
   } // end IF
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("setsockopt(%d, SO_LINGER): %s (%d second(s))\n"),
+//              ACE_TEXT ("setsockopt(%d,SO_LINGER): %s (%d second(s))\n"),
 //              handle_in,
 //              (optval.l_onoff ? ACE_TEXT ("on") : ACE_TEXT ("off")),
 //              optval.l_linger));
 
   return (result == 0);
+}
+
+bool
+Net_Common_Tools::enableErrorQueue (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::enableErrorQueue"));
+
+  int result = -1;
+
+  int optval = 1;
+  int optlen = sizeof (optval);
+  result = ACE_OS::setsockopt (handle_in,
+                               IPPROTO_IP,
+                               IP_RECVERR,
+                               reinterpret_cast<char*> (&optval),
+                               optlen);
+  if (result)
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,IP_RECVERR): \"%m\", aborting\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::setsockopt(%d,IP_RECVERR): \"%m\", aborting\n"),
+                handle_in));
+#endif
+    return false;
+  } // end IF
+
+  return true;
 }
 
 int
@@ -1274,16 +1504,16 @@ Net_Common_Tools::getProtocol (ACE_HANDLE handle_in)
                                SO_TYPE, // SO_STYLE
                                reinterpret_cast<char*> (&optval),
                                &optlen);
-  if (result == -1)
+  if (result)
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%@, SO_TYPE): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,SO_TYPE): \"%m\", aborting\n"),
                 handle_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%d, SO_TYPE): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,SO_TYPE): \"%m\", aborting\n"),
                 handle_in));
 #endif
     return -1;
@@ -1330,53 +1560,6 @@ Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
   return true;
 }
 #endif
-
-unsigned int
-Net_Common_Tools::getMaxMsgSize (ACE_HANDLE handle_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getMaxMsgSize"));
-
-  int result = -1;
-  int optval = 0;
-  int optlen = sizeof (optval);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  result = ACE_OS::getsockopt (handle_in,
-                               SOL_SOCKET,
-                               SO_MAX_MSG_SIZE,
-                               reinterpret_cast<char*> (&optval),
-                               &optlen);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,SO_MAX_MSG_SIZE): \"%m\", aborting\n"),
-                handle_in));
-    return 0;
-  } // end IF
-#else
-  // *NOTE*: IP_MTU works only on connect()ed sockets (see man 7 ip)
-  result = ACE_OS::getsockopt (handle_in,
-                               IPPROTO_IP,
-                               IP_MTU,
-                               reinterpret_cast<char*> (&optval),
-                               &optlen);
-  if (result == -1)
-  {
-    // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,IP_MTU): \"%m\", aborting\n"),
-                handle_in));
-#else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,IP_MTU): \"%m\", aborting\n"),
-                handle_in));
-#endif
-    return 0;
-  } // end IF
-#endif
-
-  return static_cast<unsigned int> (optval);
-}
 
 //Net_IInetConnectionManager_t*
 //Net_Common_Tools::getConnectionManager ()

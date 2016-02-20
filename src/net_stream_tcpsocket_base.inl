@@ -619,17 +619,13 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   if (currentWriteBuffer_ == NULL)
   {
-    // send next data chunk from the stream...
+    // send next data chunk from the stream
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
     //                   been notified to the reactor
     if (!inherited2::configuration_->streamConfiguration.useThreadPerConnection)
-      result =
-          stream_.get (currentWriteBuffer_,
-                       const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
+      result = stream_.get (currentWriteBuffer_, NULL);
     else
-      result =
-          inherited::getq (currentWriteBuffer_,
-                           const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
+      result = inherited::getq (currentWriteBuffer_, NULL);
     if (result == -1)
     {
       // *NOTE*: a number of issues can occur here:
@@ -840,8 +836,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
       //stream_.stop (false, // wait for completion
       //              true); // lock ?
       //stream_.flush (true); // flush upstream (if any)
-      stream_.waitForCompletion (true,  // wait for worker(s) (if any)
-                                 true); // wait for upstream (if any)
+      stream_.waitForCompletion (true,   // wait for worker(s) (if any)
+                                 false); // wait for upstream (if any)
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
@@ -905,6 +901,18 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // step4: deregister with the connection manager (if any)
   if (deregister)
     inherited2::deregister ();
+
+//  // step5: clean up
+//  if (currentReadBuffer_)
+//  {
+//    currentReadBuffer_->release ();
+//    currentReadBuffer_ = NULL;
+//  } // end IF
+//  if (currentWriteBuffer_)
+//  {
+//    currentWriteBuffer_->release ();
+//    currentWriteBuffer_ = NULL;
+//  } // end IF
 
   return result;
 }
@@ -1191,7 +1199,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // step1: wait for the stream to flush
   //        --> all data has been dispatched (here: to the reactor/kernel)
   stream_.waitForCompletion (waitForThreads_in,
-                             true);             // wait for upstream ?
+                             false);            // wait for upstream ?
 
   // *TODO*: different platforms may implement methods by which successful
   //         placing of the data onto the wire can be established

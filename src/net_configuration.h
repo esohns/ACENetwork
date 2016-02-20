@@ -21,11 +21,9 @@
 #ifndef NET_CONFIGURATION_H
 #define NET_CONFIGURATION_H
 
+#include <string>
+
 #include "ace/INET_Addr.h"
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#include "ace/Netlink_Addr.h"
-#endif
 #include "ace/Time_Value.h"
 
 #include "net_defines.h"
@@ -41,23 +39,24 @@ class Stream_IAllocator;
 struct Net_SocketConfiguration
 {
   inline Net_SocketConfiguration ()
-   : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
+   : address (static_cast<u_short> (0),
+              static_cast<ACE_UINT32> (INADDR_ANY))
+   , bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
+   , connect (NET_SOCKET_DEFAULT_UDP_CONNECT)
+   , interface ()
    , linger (NET_SOCKET_DEFAULT_LINGER)
- #if defined (ACE_WIN32) || defined (ACE_WIN64)
- #else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
    , netlinkAddress ()
    , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
- #endif
-   , address (static_cast<u_short> (0),
-              static_cast<ACE_UINT32> (INADDR_ANY))
-   , networkInterface ()
+#endif
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
    , writeOnly (false)
   {
     int result = -1;
     if (useLoopBackDevice)
     {
-      result = address.set (static_cast<u_short> (0),
+      result = address.set (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
                             INADDR_LOOPBACK,
                             1,
                             0);
@@ -67,7 +66,10 @@ struct Net_SocketConfiguration
     } // end IF
   };
 
+  ACE_INET_Addr    address;
   int              bufferSize; // socket buffer size (I/O)
+  bool             connect; // UDP
+  std::string      interface; // NIC identifier
   bool             linger;
   // *TODO*: remove address information (pass as AddressType in open() instead)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -75,32 +77,52 @@ struct Net_SocketConfiguration
   Net_Netlink_Addr netlinkAddress;
   int              netlinkProtocol;
 #endif
-  ACE_INET_Addr    address;
-  std::string      networkInterface;
   bool             useLoopBackDevice;
   bool             writeOnly; // UDP
+};
+
+struct Net_SocketHandlerConfiguration;
+struct Net_ListenerConfiguration
+{
+  inline Net_ListenerConfiguration ()
+   : address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
+              static_cast<ACE_UINT32> (INADDR_ANY))
+   , addressFamily (ACE_ADDRESS_FAMILY_INET)
+//   , connectionManager (NULL)
+   , socketHandlerConfiguration (NULL)
+//   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
+  {};
+
+  ACE_INET_Addr                   address;
+  int                             addressFamily;
+//  Net_IInetConnectionManager_t*   connectionManager;
+  Net_SocketHandlerConfiguration* socketHandlerConfiguration;
+//  bool                            useLoopBackDevice;
 };
 
 struct Net_SocketHandlerConfiguration
 {
   inline Net_SocketHandlerConfiguration ()
-   : messageAllocator (NULL)
+   : listenerConfiguration (NULL)
+   , messageAllocator (NULL)
    , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , socketConfiguration (NULL)
-   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0)
+   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
+                                 0)
    //////////////////////////////////////
    , userData (NULL)
   {};
 
-  Stream_IAllocator*       messageAllocator;
-  // *NOTE*: applies to the corresponding protocol datagram, if it has fixed
-  //         size; otherwise, this is the size of the individual (amorphuous)
+  Net_ListenerConfiguration* listenerConfiguration;
+  Stream_IAllocator*         messageAllocator;
+  // *NOTE*: applies to the corresponding protocol, if it has fixed size
+  //         datagrams; otherwise, this is the size of the individual (opaque)
   //         stream buffers
-  unsigned int             PDUSize; // package data unit size
-  Net_SocketConfiguration* socketConfiguration;
-  ACE_Time_Value           statisticReportingInterval; // [ACE_Time_Value::zero: off]
+  unsigned int               PDUSize; // package data unit size
+  Net_SocketConfiguration*   socketConfiguration;
+  ACE_Time_Value             statisticReportingInterval; // [ACE_Time_Value::zero: off]
 
-  Net_UserData*            userData;
+  Net_UserData*              userData;
 };
 
 #endif

@@ -86,7 +86,8 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   ACE_Proactor* proactor_p = NULL;
 
   // sanity checks
-  ACE_ASSERT (inherited::configuration_.socketConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->socketConfiguration);
   ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -105,37 +106,58 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 
   // step1: tweak socket
   // *TODO*: remove type inference
-  if (inherited::configuration_.socketConfiguration->bufferSize)
+  if (inherited::configuration_->socketConfiguration->bufferSize)
   {
     if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                             SO_RCVBUF,
-                                            inherited::configuration_.socketConfiguration->bufferSize))
+                                            inherited::configuration_->socketConfiguration->bufferSize))
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_RCVBUF,%u) (handle was: %d), aborting\n"),
-                  inherited::configuration_.socketConfiguration->bufferSize,
-                  handle_in));
-      goto close;
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
+                  handle_in,
+                  inherited::configuration_->socketConfiguration->bufferSize));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
+                  handle_in,
+                  inherited::configuration_->socketConfiguration->bufferSize));
+#endif
     } // end IF
     if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                             SO_SNDBUF,
-                                            inherited::configuration_.socketConfiguration->bufferSize))
+                                            inherited::configuration_->socketConfiguration->bufferSize))
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_SNDBUF,%u) (handle was: %d), aborting\n"),
-                  inherited::configuration_.socketConfiguration->bufferSize,
-                  handle_in));
-      goto close;
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_SNDBUF,%u), continuing\n"),
+                  handle_in,
+                  inherited::configuration_->socketConfiguration->bufferSize));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
+                  handle_in,
+                  inherited::configuration_->socketConfiguration->bufferSize));
+#endif
     } // end IF
   } // end IF
+
   if (!Net_Common_Tools::setNoDelay (handle_in,
                                      NET_SOCKET_DEFAULT_TCP_NODELAY))
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(0x%@,%s), aborting\n"),
+                  handle_,
+                  (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
+                                                  : ACE_TEXT ("false"))));
+#else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%d,%s), aborting\n"),
+                handle_in,
                 (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
-                                                : ACE_TEXT ("false")),
-                handle_in));
+                                                : ACE_TEXT ("false"))));
+#endif
     goto close;
   } // end IF
   if (!Net_Common_Tools::setKeepAlive (handle_in,
@@ -143,24 +165,44 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   {
     error = ACE_OS::last_error ();
     if (error != ENOTSOCK) // <-- socket has been closed asynchronously
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(0x%@,%s), aborting\n"),
+                  handle_in,
                   (NET_SOCKET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true")
-                                                    : ACE_TEXT ("false")),
-                  handle_in));
+                                                    : ACE_TEXT ("false"))));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%d,%s), aborting\n"),
+                  handle_in,
+                  (NET_SOCKET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true")
+                                                    : ACE_TEXT ("false"))));
+#endif
+    } // end IF
     goto close;
   } // end IF
   if (!Net_Common_Tools::setLinger (handle_in,
-                                    inherited::configuration_.socketConfiguration->linger,
+                                    inherited::configuration_->socketConfiguration->linger,
                                     std::numeric_limits<unsigned short>::max ()))
   {
     error = ACE_OS::last_error ();
     if (error != ENOTSOCK) // <-- socket has been closed asynchronously
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                  (inherited::configuration_.socketConfiguration->linger ? ACE_TEXT ("true")
-                                                                         : ACE_TEXT ("false")),
-                  handle_in));
+                  ACE_TEXT ("failed to Net_Common_Tools::setLinger(0x%@,%s,-1), aborting\n"),
+                  handle_in,
+                  (inherited::configuration_->socketConfiguration->linger ? ACE_TEXT ("true")
+                                                                         : ACE_TEXT ("false"))));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), aborting\n"),
+                  handle_in,
+                  (inherited::configuration_->socketConfiguration->linger ? ACE_TEXT ("true")
+                                                                         : ACE_TEXT ("false"))));
+#endif
+    } // end IF
     goto close;
   } // end IF
 
@@ -188,9 +230,15 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                               proactor_p); // proactor
   if (result == -1)
   {
-    ACE_ERROR ((LM_ERROR,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Read_Stream::open(0x%@): \"%m\", aborting\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Read_Stream::open(%d): \"%m\", aborting\n"),
                 handle_in));
+#endif
     goto close;
   } // end IF
   result = outputStream_.open (*this,        // event handler
@@ -205,7 +253,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Write_Stream::open(%d): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_Asynch_Write_Stream::open(0x%@): \"%m\", aborting\n"),
                 handle_in));
 #else
     ACE_ERROR ((LM_ERROR,
@@ -221,8 +269,19 @@ close:
   result = handle_close (handle_in,
                          ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(): \"%m\", continuing\n")));
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                handle_in,
+                ACE_Event_Handler::ALL_EVENTS_MASK));
+#else
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
+                handle_in,
+                ACE_Event_Handler::ALL_EVENTS_MASK));
+#endif
+  } // end IF
 }
 
 template <typename ConfigurationType>
@@ -324,16 +383,23 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (void)
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::notify"));
 
   int result = -1;
-
   ACE_HANDLE handle = inherited2::handle ();
+
   try
   {
     result = handle_output (handle);
   }
   catch (...)
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_AsynchTCPSocketHandler_T::handle_output(), continuing\n")));
+                ACE_TEXT ("caught exception in Net_AsynchTCPSocketHandler_T::handle_output(0x%@): \"%m\", continuing\n"),
+                handle));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_AsynchTCPSocketHandler_T::handle_output(%d): \"%m\", continuing\n"),
+                handle));
+#endif
     result = -1;
   }
   if (result == -1)
@@ -343,8 +409,15 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (void)
     if ((error != ENOTSOCK)   && // 10038, happens on Win32
         (error != ECONNRESET) && // 10054, happens on Win32
         (error != ENOTCONN))     // 10057, happens on Win32
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(): \"%m\", aborting\n")));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(0x%@): \"%m\", continuing\n").
+                handle));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(%d): \"%m\", continuing\n"),
+                handle));
+#endif
   } // end IF
 
   return result;
@@ -374,13 +447,16 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::allocateMessage (unsigned int r
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
-  if (inherited::configuration_.messageAllocator)
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+
+  if (inherited::configuration_->messageAllocator)
   {
 allocate:
     try
     {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited::configuration_.messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (inherited::configuration_->messageAllocator->malloc (requestedSize_in));
     }
     catch (...)
     {
@@ -391,7 +467,7 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !inherited::configuration_.messageAllocator->block ())
+        !inherited::configuration_->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
@@ -409,9 +485,9 @@ allocate:
                                          NULL));
   if (!message_block_p)
   {
-    if (inherited::configuration_.messageAllocator)
+    if (inherited::configuration_->messageAllocator)
     {
-      if (inherited::configuration_.messageAllocator->block ())
+      if (inherited::configuration_->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     } // end IF
@@ -450,7 +526,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
+                  ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", continuing\n"),
                   result_in.handle (),
                   ACE::sock_error (static_cast<int> (error))));
 #else
@@ -477,7 +553,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
           (error != ECONNRESET))                // 104/10054: reset by peer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
+                    ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", continuing\n"),
                     result_in.handle (),
                     ACE::sock_error (static_cast<int> (error))));
 #else
@@ -497,11 +573,19 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
       // *TODO*: handle short writes (more) gracefully
       if (result_in.bytes_to_write () != bytes_transferred)
       {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("stream (0x%@): sent %u/%u byte(s) only, continuing\n"),
+                    result_in.handle (),
+                    bytes_transferred,
+                    result_in.bytes_to_write ()));
+#else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("stream (%d): sent %u/%u byte(s) only, continuing\n"),
                     result_in.handle (),
                     bytes_transferred,
                     result_in.bytes_to_write ()));
+#endif
         close = true;
       } // end IF
 
@@ -514,7 +598,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
 
   if (close)
   {
-    result = handle_close (inherited2::handle (),
+    result = handle_close (result_in.handle (),
                            ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result == -1)
     {
@@ -523,15 +607,21 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
       if ((error != ENOENT)          && // 2  : *TODO*
           (error != ENOMEM)          && // 12 : [server: local close()] *TODO*: ?
           (error != ERROR_IO_PENDING))  // 997:
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                    result_in.handle (),
+                    ACE_Event_Handler::ALL_EVENTS_MASK));
 #else
       if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
       if ((error != ENOENT)     && // 2  : *TODO*
           (error != EBADF)      && // 9  : Linux [client: local close()]
           (error != EPIPE)      && // 32 : Linux [client: remote close()]
           (error != EINPROGRESS))  // 115: happens on Linux
-#endif
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
+                    ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
+                    result_in.handle (),
+                    ACE_Event_Handler::ALL_EVENTS_MASK));
+#endif
     } // end IF
   } // end IF
 
@@ -546,14 +636,17 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read_stream ()
 
   int result = -1;
 
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+
   // allocate a data buffer
   ACE_Message_Block* message_block_p =
-      allocateMessage (inherited::configuration_.PDUSize);
+      allocateMessage (inherited::configuration_->PDUSize);
   if (!message_block_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::allocateMessage(%u), aborting\n"),
-                inherited::configuration_.PDUSize));
+                inherited::configuration_->PDUSize));
     return false;
   } // end IF
 
@@ -563,14 +656,14 @@ receive:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result =
     inputStream_.readv (*message_block_p,                     // buffer
-                        inherited::configuration_.PDUSize,    // bytes to read
+                        inherited::configuration_->PDUSize,   // bytes to read
                         NULL,                                 // ACT
                         0,                                    // priority
                         COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
 #else
   result =
     inputStream_.read (*message_block_p,                     // buffer
-                       inherited::configuration_.PDUSize,    // bytes to read
+                       inherited::configuration_->PDUSize,   // bytes to read
                        NULL,                                 // ACT
                        0,                                    // priority
                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
@@ -592,7 +685,7 @@ receive:
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Read_Stream::readv(%u): \"%m\", aborting\n"),
-                  inherited::configuration_.PDUSize));
+                  inherited::configuration_->PDUSize));
 
     // clean up
     message_block_p->release ();

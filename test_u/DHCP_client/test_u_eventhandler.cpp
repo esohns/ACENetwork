@@ -46,14 +46,17 @@ Test_U_EventHandler::~Test_U_EventHandler ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::~Test_U_EventHandler"));
 
+  if (sessionData_)
+    sessionData_->decrease ();
 }
 
 void
-Test_U_EventHandler::start (const Test_U_StreamSessionData& sessionData_in)
+Test_U_EventHandler::start (const Test_U_StreamSessionData_t& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::start"));
 
-  sessionData_ = &sessionData_in;
+  sessionData_ = &const_cast<Test_U_StreamSessionData_t&> (sessionData_in);
+  sessionData_->increase ();
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -81,18 +84,19 @@ Test_U_EventHandler::notify (const Test_U_Message& message_in)
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-  ACE_ASSERT (sessionData_);
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->lock);
 
   CBData_->progressData.transferred += message_in.total_length ();
-
   CBData_->eventStack.push_back (TEST_U_GTKEVENT_DATA);
 }
 void
 Test_U_EventHandler::notify (const Test_U_SessionMessage& sessionMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
+
+  int result = -1;
+  Test_U_StreamSessionData* session_data_p = NULL;
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -104,14 +108,30 @@ Test_U_EventHandler::notify (const Test_U_SessionMessage& sessionMessage_in)
   {
     case STREAM_SESSION_STATISTIC:
     {
+      // sanity check(s)
+      if (!sessionData_)
+        goto continue_;
+
+      session_data_p =
+          &const_cast<Test_U_StreamSessionData&> (sessionData_->get ());
+      if (session_data_p->lock)
+      {
+        result = session_data_p->lock->acquire ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
+      } // end IF
+      CBData_->progressData.statistic = session_data_p->currentStatistic;
+      if (session_data_p->lock)
+      {
+        result = session_data_p->lock->release ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
+      } // end IF
+
+continue_:
       event = TEST_U_GTKEVENT_STATISTIC;
-
-      const Test_U_StreamSessionData_t& session_data_container_r =
-        sessionMessage_in.get ();
-      const Test_U_StreamSessionData& session_data_r =
-        session_data_container_r.get ();
-      CBData_->progressData.statistic = session_data_r.currentStatistic;
-
       break;
     }
     default:
@@ -146,4 +166,10 @@ Test_U_EventHandler::end ()
     return;
   } // end IF
   CBData_->eventSourceIds.insert (event_source_id);
+
+  if (sessionData_)
+  {
+    sessionData_->decrease ();
+    sessionData_ = NULL;
+  } // end IF
 }

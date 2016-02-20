@@ -114,27 +114,4 @@ struct Net_Configuration
   Net_UserData                   userData;
 };
 
-struct Net_ListenerConfiguration
-{
-  inline Net_ListenerConfiguration ()
-   : address (NET_SERVER_DEFAULT_LISTENING_PORT,
-              static_cast<ACE_UINT32> (INADDR_ANY))
-   , addressFamily (ACE_ADDRESS_FAMILY_INET)
-   , connectionManager (NULL)
-   , messageAllocator (NULL)
-   , socketHandlerConfiguration (NULL)
-   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
-                                 0)
-   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
-  {};
-
-  ACE_INET_Addr                   address;
-  int                             addressFamily;
-  Net_IInetConnectionManager_t*   connectionManager;
-  Stream_IAllocator*              messageAllocator;
-  Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  ACE_Time_Value                  statisticReportingInterval; // [ACE_Time_Value::zero: off]
-  bool                            useLoopBackDevice;
-};
-
 #endif

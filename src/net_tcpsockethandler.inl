@@ -109,23 +109,36 @@ Net_TCPSocketHandler_T<ConfigurationType>::open (void* arg_in)
                                             SO_RCVBUF,
                                             configuration_p->socketConfiguration->bufferSize))
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_RCVBUF,%u) (handle was: %d), aborting\n"),
-                  configuration_p->socketConfiguration->bufferSize,
-                  handle));
-      return -1;
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
+                  handle,
+                  configuration_p->socketConfiguration->bufferSize));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
+                  handle,
+                  configuration_p->socketConfiguration->bufferSize));
+#endif
     } // end IF
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_SNDBUF,
                                             configuration_p->socketConfiguration->bufferSize))
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(SO_SNDBUF,%u) (handle was: %d), aborting\n"),
-                  configuration_p->socketConfiguration->bufferSize,
-                  handle));
-      return -1;
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
+                  handle,
+                  configuration_p->socketConfiguration->bufferSize));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
+                  handle,
+                  configuration_p->socketConfiguration->bufferSize));
+#endif
     } // end IF
   } // end IF
+
   if (!Net_Common_Tools::setNoDelay (handle,
                                      NET_SOCKET_DEFAULT_TCP_NODELAY))
   {

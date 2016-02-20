@@ -24,14 +24,25 @@
 #include "common_istatistic.h"
 
 #include "net_common.h"
+#include "net_configuration.h"
+#include "net_iconnectionmanager.h"
 #include "net_ilistener.h"
 
-#include "test_u_configuration.h"
+//#include "test_u_configuration.h"
 //#include "test_u_stream_common.h"
 
 typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Net_Server_StatisticReportingHandler_t;
 
-typedef Net_IListener_T<Net_ListenerConfiguration,
+// forward declarations
+struct Net_Configuration;
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                 Net_Configuration,
+                                 Net_ConnectionState,
+                                 Net_RuntimeStatistic_t,
+                                 ////////
+                                 Net_UserData> Net_IInetConnectionManager_t;
+struct Net_Server_ListenerConfiguration;
+typedef Net_IListener_T<Net_Server_ListenerConfiguration,
                         Net_SocketHandlerConfiguration> Net_IListener_t;
 
 /////////////////////////////////////////
@@ -41,6 +52,19 @@ struct Net_Server_SignalHandlerConfiguration
   Net_IListener_t*                        listener;
   Net_Server_StatisticReportingHandler_t* statisticReportingHandler;
   long                                    statisticReportingTimerID;
+};
+
+struct Net_Server_ListenerConfiguration
+ : Net_ListenerConfiguration
+{
+  inline Net_Server_ListenerConfiguration ()
+   : Net_ListenerConfiguration ()
+   , connectionManager (NULL)
+//   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
+  {};
+
+  Net_IInetConnectionManager_t* connectionManager;
+//  bool                            useLoopBackDevice;
 };
 
 struct Net_Server_Configuration
@@ -54,7 +78,8 @@ struct Net_Server_Configuration
   {};
 
   Net_IListener_t*                      listener;
-  Net_ListenerConfiguration             listenerConfiguration;
+  Net_Server_ListenerConfiguration      listenerConfiguration;
+
   Net_Server_SignalHandlerConfiguration signalHandlerConfiguration;
 };
 

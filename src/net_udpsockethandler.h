@@ -85,6 +85,9 @@ class Net_UDPSocketHandler_T
   Net_UDPSocketHandler_T ();
   virtual ~Net_UDPSocketHandler_T ();
 
+#if defined (ACE_LINUX)
+  bool                              errorQueue_;
+#endif
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:

@@ -64,7 +64,8 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   int result = -1;
 
   // sanity check(s)
-  ACE_ASSERT (inherited::configuration_.socketConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->socketConfiguration);
 
   // step0: initialize base class
   ACE_Proactor* proactor_p = ACE_Proactor::instance ();
@@ -73,81 +74,84 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   if (handle_in != ACE_INVALID_HANDLE)
     inherited2::handle (handle_in);
 
-  ACE_HANDLE handle =
-    ((handle_in != ACE_INVALID_HANDLE) ? handle_in
-                                       : inherited2::handle ());
-  writeOnly_ = inherited::configuration_.socketConfiguration->writeOnly;
+  writeOnly_ = inherited::configuration_->socketConfiguration->writeOnly;
   if (!writeOnly_)
   {
     // step1: tweak socket
-    if (inherited::configuration_.socketConfiguration->bufferSize)
-      if (!Net_Common_Tools::setSocketBuffer (handle,
+    if (inherited::configuration_->socketConfiguration->bufferSize)
+      if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                               SO_RCVBUF,
-                                              inherited::configuration_.socketConfiguration->bufferSize))
+                                              inherited::configuration_->socketConfiguration->bufferSize))
       {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%u) (handle was: %d), aborting\n"),
-                    inherited::configuration_.socketConfiguration->bufferSize,
-                    handle));
-
-        // clean up
-        handle_close (handle,
-                      ACE_Event_Handler::ALL_EVENTS_MASK);
-
-        return;
+                    ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
+                    handle_in,
+                    inherited::configuration_->socketConfiguration->bufferSize));
+#else
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
+                    handle_in,
+                    inherited::configuration_->socketConfiguration->bufferSize));
+#endif
       } // end IF
+
+    // *PORTABILITY*: (currently,) MS Windows (TM) UDP sockets do not support
+    //                SO_LINGER
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-    if (!Net_Common_Tools::setLinger (handle,
-                                      inherited::configuration_.socketConfiguration->linger,
+    if (!Net_Common_Tools::setLinger (handle_in,
+                                      inherited::configuration_->socketConfiguration->linger,
                                       -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                  (inherited::configuration_.socketConfiguration->linger ? ACE_TEXT ("true")
-                                                                         : ACE_TEXT ("false")),
-                  handle));
-
-      // clean up
-      handle_close (handle,
-                    ACE_Event_Handler::ALL_EVENTS_MASK);
-
+                  ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), aborting\n"),
+                  handle_in,
+                  (inherited::configuration_->socketConfiguration->linger ? ACE_TEXT ("true")
+                                                                          : ACE_TEXT ("false"))));
       return;
     } // end IF
 #endif
 
     // step2: initialize input stream
     result = inputStream_.open (*this,
-                                handle,
+                                handle_in,
                                 NULL,
                                 proactor_p);
     if (result == -1)
     {
-      ACE_ERROR ((LM_ERROR,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize input stream (handle was: 0x%@), aborting\n"),
+                  handle_in));
+#else
+      ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize input stream (handle was: %d), aborting\n"),
-                  handle));
-
-      // clean up
-      handle_close (handle,
-                    ACE_Event_Handler::ALL_EVENTS_MASK);
-
+                  handle_in));
+#endif
       return;
     } // end IF
   } // end IF
 
   // step3: initialize output stream
   result = outputStream_.open (*this,
-                               handle,
+                               handle_in,
                                NULL,
                                proactor_p);
   if (result == -1)
   {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to initialize output stream (handle was: %d), aborting\n"),
-                handle));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize output stream (handle was: 0x%@), aborting\n"),
+                  handle_in));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize output stream (handle was: %d), aborting\n"),
+                  handle_in));
+#endif
 
     // clean up
-    handle_close (handle,
+    handle_close (handle_in,
                   ACE_Event_Handler::ALL_EVENTS_MASK);
 
     return;
@@ -224,21 +228,42 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_wakeup ()
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::handle_wakeup"));
 
   int result = -1;
+  ACE_HANDLE handle = inherited2::handle ();
 
   try
   {
-    result = handle_close (inherited2::handle (),
+    result = handle_close (handle,
                            ACE_Event_Handler::ALL_EVENTS_MASK);
   }
   catch (...)
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler_T::handle_close(): \"%m\", continuing\n")));
+                ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                handle,
+                ACE_Event_Handler::ALL_EVENTS_MASK));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
+                handle,
+                ACE_Event_Handler::ALL_EVENTS_MASK));
+#endif
     result = -1;
   }
   if (result == -1)
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                handle,
+                ACE_Event_Handler::ALL_EVENTS_MASK));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
+                handle,
+                ACE_Event_Handler::ALL_EVENTS_MASK));
+#endif
+  } // end IF
 }
 
 template <typename ConfigurationType>
@@ -248,27 +273,53 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::notify (void)
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::notify"));
 
   int result = -1;
+  ACE_HANDLE handle = inherited2::handle ();
 
   try
   {
-    result = handle_output (inherited2::handle ());
+    result = handle_output (handle);
   }
   catch (...)
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler_T::handle_output(): \"%m\", continuing\n")));
+                ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler_T::handle_output(0x%@): \"%m\", continuing\n"),
+                handle));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler_T::handle_output(%d): \"%m\", continuing\n"),
+                handle));
+#endif
     result = -1;
   }
   if (result == -1)
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_output(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_output(0x%@): \"%m\", continuing\n").
+                handle));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_output(%d): \"%m\", continuing\n"),
+                handle));
+#endif
 
-    int result_2 = handle_close (inherited2::handle (),
+    int result_2 = handle_close (handle,
                                  ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result_2 == -1)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                  handle,
+                  ACE_Event_Handler::ALL_EVENTS_MASK));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
+                  handle,
+                  ACE_Event_Handler::ALL_EVENTS_MASK));
+#endif
+    } // end IF
   } // end IF
 
   return result;
@@ -298,14 +349,17 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::initiate_read_dgram ()
   ssize_t result = -1;
   size_t bytes_to_read = 0;
 
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+
   // step1: allocate a data buffer
   ACE_Message_Block* message_block_p =
-      allocateMessage (inherited::configuration_.PDUSize);
+      allocateMessage (inherited::configuration_->PDUSize);
   if (!message_block_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::allocateMessage(%u), aborting\n"),
-                inherited::configuration_.PDUSize));
+                inherited::configuration_->PDUSize));
     return false;
   } // end IF
 
@@ -399,7 +453,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
                     ACE::sock_error (static_cast<int> (error))));
 #else
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to write to output stream (handle was: %d): \"%s\", aborting\n"),
+                    ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
                     result_in.handle (),
                     ACE_TEXT (ACE_OS::strerror (error))));
 #endif
@@ -414,11 +468,19 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
       // *TODO*: handle short writes (more) gracefully
       if (result_in.bytes_to_write () != bytes_transferred)
       {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("stream (%d): sent %u/%u byte(s) only, aborting"),
+                    ACE_TEXT ("stream (0x%@): sent %u/%u byte(s) only, aborting\n"),
                     result_in.handle (),
                     bytes_transferred,
                     result_in.bytes_to_write ()));
+#else
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("stream (%d): sent %u/%u byte(s) only, aborting\n"),
+                    result_in.handle (),
+                    bytes_transferred,
+                    result_in.bytes_to_write ()));
+#endif
         close = true;
       } // end IF
 
@@ -433,11 +495,22 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
 
   if (close)
   {
-    result = handle_close (inherited2::handle (),
+    result = handle_close (result_in.handle (),
                            ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result == -1)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                  result_in.handle (),
+                  ACE_Event_Handler::ALL_EVENTS_MASK));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
+                  result_in.handle (),
+                  ACE_Event_Handler::ALL_EVENTS_MASK));
+#endif
+    } // end IF
   } // end IF
 
   counter_.decrease ();
@@ -452,13 +525,16 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::allocateMessage (unsigned int r
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
-  if (inherited::configuration_.messageAllocator)
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+
+  if (inherited::configuration_->messageAllocator)
   {
 allocate:
     try
     {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited::configuration_.messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (inherited::configuration_->messageAllocator->malloc (requestedSize_in));
     }
     catch (...)
     {
@@ -469,7 +545,7 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !inherited::configuration_.messageAllocator->block ())
+        !inherited::configuration_->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
@@ -487,9 +563,9 @@ allocate:
                       NULL));
   if (!message_block_p)
   {
-    if (inherited::configuration_.messageAllocator)
+    if (inherited::configuration_->messageAllocator)
     {
-      if (inherited::configuration_.messageAllocator->block ())
+      if (inherited::configuration_->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     } // end IF

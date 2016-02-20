@@ -30,16 +30,14 @@
 #include "test_u_session_message.h"
 
 class Test_U_EventHandler
- : public Common_INotify_T<Test_U_StreamSessionData,
-                           Test_U_Message,
-                           Test_U_SessionMessage>
+ : public Test_U_IStreamNotify_t
 {
  public:
   Test_U_EventHandler (Test_U_GTK_CBData*); // GTK state
   virtual ~Test_U_EventHandler ();
 
   // implement Common_INotify_T
-  virtual void start (const Test_U_StreamSessionData&);
+  virtual void start (const Test_U_StreamSessionData_t&);
   virtual void notify (const Test_U_Message&);
   virtual void notify (const Test_U_SessionMessage&);
   virtual void end ();
@@ -49,8 +47,8 @@ class Test_U_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator= (const Test_U_EventHandler&))
 
-  Test_U_GTK_CBData*              CBData_;
-  const Test_U_StreamSessionData* sessionData_;
+  Test_U_GTK_CBData*          CBData_;
+  Test_U_StreamSessionData_t* sessionData_;
 };
 
 #endif

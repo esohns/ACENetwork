@@ -139,6 +139,9 @@ class Net_StreamUDPSocketBase_T
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
+#if defined (ACE_LINUX)
+  void processErrorQueue ();
+#endif
 
   ACE_Message_Block* currentWriteBuffer_;
   ACE_SYNCH_MUTEX    sendLock_;
@@ -290,6 +293,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  void processErrorQueue ();
 
  private:
   typedef Net_NetlinkSocketHandler_T<HandlerConfigurationType> inherited;

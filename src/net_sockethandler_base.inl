@@ -24,12 +24,11 @@
 
 template <typename ConfigurationType>
 Net_SocketHandlerBase_T<ConfigurationType>::Net_SocketHandlerBase_T ()
- : configuration_ ()
+ : configuration_ (NULL)
  , isInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase_T::Net_SocketHandlerBase_T"));
 
-//  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
 template <typename ConfigurationType>
@@ -45,7 +44,7 @@ Net_SocketHandlerBase_T<ConfigurationType>::initialize (const ConfigurationType&
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase_T::initialize"));
 
-  configuration_ = configuration_in;
+  configuration_ = &const_cast<ConfigurationType&> (configuration_in);
   isInitialized_ = true;
 
   return true;

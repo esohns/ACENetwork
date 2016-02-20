@@ -52,9 +52,23 @@ class Net_Export Net_Common_Tools
   static bool getAddress (std::string&,  // host name
                           std::string&); // dotted-decimal
   static bool getHostname (std::string&); // return value: hostname
+
+  // --- socket options ---
+  // MTU
+  // *NOTE*: configures packet fragmentation to support sending datagrams
+  //         larger than the Path MTU (see: man ip(7))
+  static bool setPathMTUDiscovery (ACE_HANDLE, // socket handle
+                                   int);       // option
+  static bool getPathMTU (const ACE_INET_Addr&, // destination address
+                          unsigned int&);       // return value: (initial) path MTU
+  // *NOTE*: applies to (connect()ed) UDP sockets (see also: SO_MAX_MSG_SIZE)
+  static unsigned int getMTU (ACE_HANDLE); // socket handle
+
+  // buffers
   static bool setSocketBuffer (ACE_HANDLE, // socket handle
                                int,        // option (SO_RCVBUF || SO_SNDBUF)
                                int);       // size (bytes)
+
   // *NOTE*: toggle Nagle's algorithm
   static bool getNoDelay (ACE_HANDLE); // socket handle
   static bool setNoDelay (ACE_HANDLE, // socket handle
@@ -66,15 +80,13 @@ class Net_Export Net_Common_Tools
                          unsigned short = std::numeric_limits<unsigned short>::max ()); // seconds {0     --> send RST on close,
                                                                                         //          65535 --> reuse default/current value}
 
+  static bool enableErrorQueue (ACE_HANDLE); // socket handle
   static int getProtocol (ACE_HANDLE); // socket handle
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // *NOTE*: applies to TCP sockets (see also: SO_MAX_MSG_SIZE)
   static bool setLoopBackFastPath (ACE_HANDLE); // socket handle
 #endif
-
-  // *NOTE*: applies to UDP sockets (see also: SO_MAX_MSG_SIZE)
-  static unsigned int getMaxMsgSize (ACE_HANDLE); // socket handle
 
 //  static Net_IInetConnectionManager_t* getConnectionManager ();
 

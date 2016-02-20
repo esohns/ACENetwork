@@ -58,10 +58,14 @@
 #define NET_PROTOCOL_DEFAULT_NETLINK_GROUP              1
 
 // socket
-#define NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE          ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+#if defined (ACE_LINUX)
+#define NET_SOCKET_DEFAULT_ERRORQUEUE                   true  // IP_RECVERR
+#endif
 #define NET_SOCKET_DEFAULT_LINGER                       true  // SO_LINGER
+#define NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE          ACE_DEFAULT_MAX_SOCKET_BUFSIZ
 #define NET_SOCKET_DEFAULT_TCP_NODELAY                  true  // SO_NODELAY
 #define NET_SOCKET_DEFAULT_TCP_KEEPALIVE                false // SO_KEEPALIVE
+#define NET_SOCKET_DEFAULT_UDP_CONNECT                  true
 
 // connection / handler
 #define NET_CONNECTION_MAXIMUM_NUMBER_OF_OPEN           10
