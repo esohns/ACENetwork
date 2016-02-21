@@ -43,7 +43,7 @@ struct Net_SocketConfiguration
               static_cast<ACE_UINT32> (INADDR_ANY))
    , bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
    , connect (NET_SOCKET_DEFAULT_UDP_CONNECT)
-   , interface ()
+   , device (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT))
    , linger (NET_SOCKET_DEFAULT_LINGER)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -69,7 +69,7 @@ struct Net_SocketConfiguration
   ACE_INET_Addr    address;
   int              bufferSize; // socket buffer size (I/O)
   bool             connect; // UDP
-  std::string      interface; // NIC identifier
+  std::string      device; // NIC identifier
   bool             linger;
   // *TODO*: remove address information (pass as AddressType in open() instead)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

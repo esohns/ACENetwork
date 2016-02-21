@@ -55,12 +55,15 @@ class Net_Export Net_Common_Tools
 
   // --- socket options ---
   // MTU
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   // *NOTE*: configures packet fragmentation to support sending datagrams
   //         larger than the Path MTU (see: man ip(7))
   static bool setPathMTUDiscovery (ACE_HANDLE, // socket handle
                                    int);       // option
   static bool getPathMTU (const ACE_INET_Addr&, // destination address
                           unsigned int&);       // return value: (initial) path MTU
+#endif
   // *NOTE*: applies to (connect()ed) UDP sockets (see also: SO_MAX_MSG_SIZE)
   static unsigned int getMTU (ACE_HANDLE); // socket handle
 
@@ -80,7 +83,9 @@ class Net_Export Net_Common_Tools
                          unsigned short = std::numeric_limits<unsigned short>::max ()); // seconds {0     --> send RST on close,
                                                                                         //          65535 --> reuse default/current value}
 
+#if defined (ACE_LINUX)
   static bool enableErrorQueue (ACE_HANDLE); // socket handle
+#endif
   static int getProtocol (ACE_HANDLE); // socket handle
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

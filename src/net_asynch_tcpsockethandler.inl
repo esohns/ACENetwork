@@ -35,6 +35,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , inherited2 ()
  , inherited3 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
+ , buffer_ (NULL)
  , counter_ (0) // initial count
  , inputStream_ ()
  , outputStream_ ()
@@ -70,6 +71,9 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::~Net_AsynchTCPSocketHandler_T (
                   writeHandle_));
   } // end IF
 #endif
+
+  if (buffer_)
+    buffer_->release ();
 }
 
 template <typename ConfigurationType>
@@ -410,13 +414,13 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (void)
         (error != ECONNRESET) && // 10054, happens on Win32
         (error != ENOTCONN))     // 10057, happens on Win32
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(0x%@): \"%m\", continuing\n").
-                handle));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(0x%@): \"%m\", continuing\n"),
+                  handle));
 #else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(%d): \"%m\", continuing\n"),
-                handle));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(%d): \"%m\", continuing\n"),
+                  handle));
 #endif
   } // end IF
 
@@ -506,16 +510,17 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::handle_write_stream"));
 
   int result = -1;
-  bool close = false;
-  size_t bytes_transferred = result_in.bytes_transferred ();
-  unsigned long error = 0;
 
-  // sanity check
-  result = result_in.success ();
-  if (result == 0)
+  size_t bytes_transferred = result_in.bytes_transferred ();
+  bool close = false;
+  unsigned long error = result_in.error ();
+  ACE_Message_Block* message_block_p = &result_in.message_block ();
+
+  // sanity check(s)
+  ACE_ASSERT (message_block_p == buffer_);
+  if (result_in.success () == 0)
   {
     // connection closed/reset (by peer) ? --> not an error
-    error = result_in.error ();
     if ((error != EBADF)                   && // 9  : Linux: local close()
         (error != EPIPE)                   && // 32 : Linux: remote close()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -542,8 +547,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
     case -1:
     case 0:
     {
-      // connection closed/reset (by peer) ? --> not an error
-      error = result_in.error ();
+      // connection closed/reset (by peer) ? --> not an error    
       if ((error != EBADF)                   && // 9:   Linux [client: local close()]
           (error != EPIPE)                   && // 32 : Linux [client: remote close()]
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -562,61 +566,66 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
                     result_in.handle (),
                     ACE_TEXT (ACE_OS::strerror (error))));
 #endif
-
       close = true;
-
-      break;
+      goto release;
     }
     // *** GOOD CASES ***
     default:
     {
-      // *TODO*: handle short writes (more) gracefully
-      if (result_in.bytes_to_write () != bytes_transferred)
+      // finished with this buffer ?
+      message_block_p->rd_ptr (bytes_transferred);
+      if (message_block_p->length () > 0)
       {
+        // --> reschedule
+        result = handle_output (result_in.handle ());
+        if (result == -1)
+        {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("stream (0x%@): sent %u/%u byte(s) only, continuing\n"),
-                    result_in.handle (),
-                    bytes_transferred,
-                    result_in.bytes_to_write ()));
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(0x%@): \"%m\", aborting\n"),
+                      result_in.handle ()));
 #else
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("stream (%d): sent %u/%u byte(s) only, continuing\n"),
-                    result_in.handle (),
-                    bytes_transferred,
-                    result_in.bytes_to_write ()));
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(%d): \"%m\", aborting\n"),
+                      result_in.handle ()));
 #endif
-        close = true;
+          close = true;
+          goto release;
+        } // end IF
+
+        goto continue_; // done
       } // end IF
 
       break;
     }
   } // end SWITCH
 
-  // clean up
-  result_in.message_block ().release ();
+release:
+  message_block_p->release ();
+  buffer_ = NULL;
 
+continue_:
   if (close)
   {
     result = handle_close (result_in.handle (),
                            ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result == -1)
     {
-      int error = ACE_OS::last_error ();
+      int error_2 = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if ((error != ENOENT)          && // 2  : *TODO*
-          (error != ENOMEM)          && // 12 : [server: local close()] *TODO*: ?
-          (error != ERROR_IO_PENDING))  // 997:
+      if ((error_2 != ENOENT)          && // 2  : *TODO*
+          (error_2 != ENOMEM)          && // 12 : [server: local close()] *TODO*: ?
+          (error_2 != ERROR_IO_PENDING))  // 997:
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
                     result_in.handle (),
                     ACE_Event_Handler::ALL_EVENTS_MASK));
 #else
-      if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
-      if ((error != ENOENT)     && // 2  : *TODO*
-          (error != EBADF)      && // 9  : Linux [client: local close()]
-          (error != EPIPE)      && // 32 : Linux [client: remote close()]
-          (error != EINPROGRESS))  // 115: happens on Linux
+      //if (error_2 == EINPROGRESS) result = 0; // --> AIO_CANCELED
+      if ((error_2 != ENOENT)     && // 2  : *TODO*
+          (error_2 != EBADF)      && // 9  : Linux [client: local close()]
+          (error_2 != EPIPE)      && // 32 : Linux [client: remote close()]
+          (error_2 != EINPROGRESS))  // 115: happens on Linux
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
                     result_in.handle (),

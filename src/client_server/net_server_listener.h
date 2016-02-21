@@ -117,11 +117,11 @@ class Net_Server_Listener_T
   // implement (part of) Common_IControl_T
   virtual void initialize ();
 
-  ConfigurationType        configuration_;
-  HandlerConfigurationType handlerConfiguration_;
-  bool                     isInitialized_;
-  bool                     isListening_;
-  bool                     isOpen_;
+  ConfigurationType*        configuration_;
+  HandlerConfigurationType* handlerConfiguration_;
+  bool                      isInitialized_;
+  bool                      isListening_;
+  bool                      isOpen_;
 };
 
 // include template implementation

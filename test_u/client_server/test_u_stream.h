@@ -65,7 +65,9 @@ class Net_Stream
   virtual ~Net_Stream ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Net_StreamConfiguration&); // configuration
+  virtual bool initialize (const Net_StreamConfiguration&, // configuration
+                           bool = true,                    // setup pipeline ?
+                           bool = true);                   // reset session data ?
 
   // *TODO*: re-consider this API
   void ping ();

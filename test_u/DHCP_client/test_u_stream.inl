@@ -45,19 +45,14 @@ Test_U_Stream_T<ConnectorType>::Test_U_Stream_T ()
   // *NOTE*: one problem is that all modules which have NOT enqueued onto the
   //         stream (e.g. because initialize() failed...) need to be explicitly
   //         close()d
-  inherited::availableModules_.push_front (&DHCPDiscover_);
-  inherited::availableModules_.push_front (&runtimeStatistic_);
-  inherited::availableModules_.push_front (&marshal_);
-  inherited::availableModules_.push_front (&netTarget_);
+  inherited::modules_.push_front (&DHCPDiscover_);
+  inherited::modules_.push_front (&runtimeStatistic_);
+  inherited::modules_.push_front (&marshal_);
+  inherited::modules_.push_front (&netTarget_);
 
   // *TODO* fix ACE bug: modules should initialize their "next" member to NULL
-  //inherited::MODULE_T* module_p = NULL;
-  //for (ACE_DLList_Iterator<inherited::MODULE_T> iterator (inherited::availableModules_);
-  //     iterator.next (module_p);
-  //     iterator.advance ())
-  //  module_p->next (NULL);
-  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::availableModules_.begin ();
-       iterator != inherited::availableModules_.end ();
+  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::modules_.begin ();
+       iterator != inherited::modules_.end ();
        iterator++)
      (*iterator)->next (NULL);
 }
@@ -85,7 +80,9 @@ Test_U_Stream_T<ConnectorType>::ping ()
 
 template <typename ConnectorType>
 bool
-Test_U_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& configuration_in)
+Test_U_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& configuration_in,
+                                            bool setupPipeline_in,
+                                            bool resetSessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::initialize"));
 
@@ -141,7 +138,9 @@ Test_U_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& co
   } // end IF
 
   // allocate a new session state, reset stream
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              false,
+                              resetSessionData_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
@@ -238,14 +237,7 @@ Test_U_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& co
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    result = inherited::push (configuration_in.module);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
+    inherited::modules_.push_front (configuration_in.module);
   } // end IF
 
   // ---------------------------------------------------------------------------
@@ -271,14 +263,6 @@ Test_U_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& co
                 netTarget_.name ()));
     goto failed;
   } // end IF
-  result = inherited::push (&netTarget_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                netTarget_.name ()));
-    goto failed;
-  } // end IF
 
   // ******************* Marshal ************************
   marshal_.initialize (*configuration_in.moduleConfiguration);
@@ -294,14 +278,6 @@ Test_U_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& co
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                marshal_.name ()));
-    goto failed;
-  } // end IF
-  result = inherited::push (&marshal_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
                 marshal_.name ()));
     goto failed;
   } // end IF
@@ -322,14 +298,6 @@ Test_U_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& co
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                runtimeStatistic_.name ()));
-    goto failed;
-  } // end IF
-  result = inherited::push (&runtimeStatistic_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
                 runtimeStatistic_.name ()));
     goto failed;
   } // end IF
@@ -363,14 +331,14 @@ Test_U_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& co
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
   DHCPDiscover_.arg (inherited::sessionData_);
-  result = inherited::push (&DHCPDiscover_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                DHCPDiscover_.name ()));
-    goto failed;
-  } // end IF
+
+  if (setupPipeline_in)
+    if (!inherited::setup ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to setup pipeline, aborting\n")));
+      return false;
+    } // end IF
 
   // -------------------------------------------------------------
 

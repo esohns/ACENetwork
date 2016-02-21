@@ -944,6 +944,8 @@ Net_Common_Tools::getHostname (std::string& hostname_out)
   return !hostname_out.empty ();
 }
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 bool
 Net_Common_Tools::setPathMTUDiscovery (ACE_HANDLE handle_in,
                                        int option_in)
@@ -964,20 +966,11 @@ Net_Common_Tools::setPathMTUDiscovery (ACE_HANDLE handle_in,
                                optlen);
   if (result)
   {
-    // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,%s,%d): \"%m\", aborting\n"),
-                handle_in,
-                ACE_TEXT ("IP_MTU_DISCOVER"),
-                option_in));
-#else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::setsockopt(%d,%s,%d): \"%m\", aborting\n"),
                 handle_in,
                 ACE_TEXT ("IP_MTU_DISCOVER"),
                 option_in));
-#endif
     return false;
   } // end IF
 
@@ -1044,18 +1037,10 @@ Net_Common_Tools::getPathMTU (const ACE_INET_Addr& destinationAddress_in,
                                &optlen);
   if (result)
   {
-    // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,%s): \"%m\", aborting\n"),
-                socket_handle,
-                ACE_TEXT ("IP_MTU")));
-#else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::getsockopt(%d, %s): \"%m\", aborting\n"),
                 socket_handle,
                 ACE_TEXT ("IP_MTU")));
-#endif
     goto close;
   } // end IF
   result = true;
@@ -1080,6 +1065,7 @@ close:
 
   return result;
 }
+#endif
 
 unsigned int
 Net_Common_Tools::getMTU (ACE_HANDLE handle_in)
@@ -1459,6 +1445,7 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
   return (result == 0);
 }
 
+#if defined (ACE_LINUX)
 bool
 Net_Common_Tools::enableErrorQueue (ACE_HANDLE handle_in)
 {
@@ -1475,21 +1462,15 @@ Net_Common_Tools::enableErrorQueue (ACE_HANDLE handle_in)
                                optlen);
   if (result)
   {
-    // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,IP_RECVERR): \"%m\", aborting\n"),
-                handle_in));
-#else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::setsockopt(%d,IP_RECVERR): \"%m\", aborting\n"),
                 handle_in));
-#endif
     return false;
   } // end IF
 
   return true;
 }
+#endif
 
 int
 Net_Common_Tools::getProtocol (ACE_HANDLE handle_in)

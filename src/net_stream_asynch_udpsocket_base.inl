@@ -53,7 +53,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                                                                             const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited4 (interfaceHandle_in,
                statisticCollectionInterval_in)
-// , buffer_ (NULL)
  , stream_ (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
@@ -85,8 +84,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
 
-//  if (buffer_)
-//    buffer_->release ();
 }
 
 template <typename HandlerType,
@@ -360,38 +357,30 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   ACE_ASSERT (inherited4::configuration_);
 
   int result = -1;
-  ACE_Message_Block* message_block_p = NULL;
-  size_t bytes_to_send = 0;
-  ssize_t result_2 = -1;
+  Stream_Base_t* stream_p = (stream_.upStream () ? stream_.upStream ()
+                                                 : &stream_);
 
-//  if (!buffer_)
-//  {
-    // send next data chunk from the stream...
-    // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
+  if (!inherited::buffer_)
+  {
+    // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
     //                   been notified
-//    result = stream_.get (buffer_,
-    result = stream_.get (message_block_p,
-                          &const_cast<ACE_Time_Value&> (ACE_Time_Value::zero));
+    result = stream_p->get (inherited::buffer_, NULL);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
       return -1;
     } // end IF
-//  } // end IF
-//  ACE_ASSERT (buffer_);
-  ACE_ASSERT (message_block_p);
+  } // end IF
+  ACE_ASSERT (inherited::buffer_);
 
   // start (asynchronous) write
   this->increase ();
   inherited::counter_.increase ();
-  //  bytes_to_send = buffer_->length ();
-  bytes_to_send = message_block_p->length ();
-  int error = 0;
+  size_t bytes_to_send = inherited::buffer_->length ();
 send:
-  result_2 =
-//      inherited::outputStream_.send (buffer_,                                             // data
-    inherited::outputStream_.send (message_block_p,                                         // data
+  ssize_t result_2 =
+    inherited::outputStream_.send (inherited::buffer_,                                      // data
                                    bytes_to_send,                                           // #bytes to send
                                    0,                                                       // flags
                                    inherited4::configuration_->socketConfiguration.address, // remote address (ignored)
@@ -400,18 +389,17 @@ send:
                                    COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                    // signal
   if (result_2 == -1)
   {
-    error = ACE_OS::last_error ();
+    int error = ACE_OS::last_error ();
     // *WARNING*: this could fail on multi-threaded proactors
     if (error == EAGAIN) goto send; // 11: happens on Linux
 
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
-                message_block_p->length ()));
+                inherited::buffer_->length ()));
 
     // clean up
-//    buffer_->release ();
-//    buffer_ = NULL;
-    message_block_p->release ();
+    inherited::buffer_->release ();
+    inherited::buffer_ = NULL;
     this->decrease ();
     inherited::counter_.decrease ();
 

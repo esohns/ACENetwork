@@ -730,43 +730,15 @@ Net_StreamTCPSocketBase_T<HandlerType,
     }
     default:
     {
-      // finished with this buffer ?
-      //if (bytes_sent != currentWriteBuffer_->total_length ())
-      if (bytes_sent != static_cast<ssize_t> (currentWriteBuffer_->length ()))
-      {
-        //ACE_DEBUG ((LM_DEBUG,
-        //            ACE_TEXT ("[%u]: sent %u/%u bytes...\n"),
-        //            handle_in,
-        //            bytes_sent, currentWriteBuffer_->total_length ()));
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("[%u]: sent %u/%u bytes...\n"),
-                    handle_in,
-                    bytes_sent, currentWriteBuffer_->length ()));
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("%t: sent %u bytes (handle was: %u)...\n"),
+//                  bytes_sent,
+//                  inherited::peer_.get_handle ()));
 
-        //// adjust rd_ptr and release sent parts
-        //unsigned int remaining_offset = bytes_sent;
-        //unsigned int offset = 0;
-        //ACE_Message_Block* message_block_p = NULL;
-        //while (remaining_offset)
-        //{
-        //  offset =
-        //    (remaining_offset < currentWriteBuffer_->length () ? remaining_offset
-        //                                                       : currentWriteBuffer_->length ());
-        //  currentWriteBuffer_->rd_ptr (offset);
-        //  if (currentWriteBuffer_->length () == 0)
-        //  {
-        //    message_block_p = currentWriteBuffer_;
-        //    currentWriteBuffer_ = currentWriteBuffer_->cont ();
-        //    if (currentWriteBuffer_)
-        //      currentWriteBuffer_ = currentWriteBuffer_->duplicate ();
-        //    message_block_p->release ();
-        //  } // end IF
-        //  remaining_offset -= offset;
-        //} // end WHILE
-        currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
-        ACE_ASSERT (currentWriteBuffer_);
-        break; // --> there's more data
-      } // end IF
+      // finished with this buffer ?
+      currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
+      if (currentWriteBuffer_->length () > 0)
+        break; // there's more data
 
       // clean up
       currentWriteBuffer_->release ();

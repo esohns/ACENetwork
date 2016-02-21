@@ -48,23 +48,14 @@ Net_Stream::Net_Stream (const std::string& name_in)
   // *NOTE*: one problem is that all modules which have NOT enqueued onto the
   //         stream (e.g. because initialize() failed...) need to be explicitly
   //         close()d
-  inherited::availableModules_.push_front (&socketHandler_);
-  inherited::availableModules_.push_front (&headerParser_);
-  inherited::availableModules_.push_front (&runtimeStatistic_);
-  inherited::availableModules_.push_front (&protocolHandler_);
-  //inherited::availableModules_.insert_tail (&socketHandler_);
-  //inherited::availableModules_.insert_tail (&headerParser_);
-  //inherited::availableModules_.insert_tail (&runtimeStatistic_);
-  //inherited::availableModules_.insert_tail (&protocolHandler_);
+  inherited::modules_.push_front (&socketHandler_);
+  inherited::modules_.push_front (&headerParser_);
+  inherited::modules_.push_front (&runtimeStatistic_);
+  inherited::modules_.push_front (&protocolHandler_);
 
   // *TODO* fix ACE bug: modules should initialize their "next" member to NULL
-  //inherited::MODULE_T* module_p = NULL;
-  //for (ACE_DLList_Iterator<inherited::MODULE_T> iterator (inherited::availableModules_);
-  //     iterator.next (module_p);
-  //     iterator.advance ())
-  //  module_p->next (NULL);
-  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::availableModules_.begin ();
-       iterator != inherited::availableModules_.end ();
+  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::modules_.begin ();
+       iterator != inherited::modules_.end ();
        iterator++)
      (*iterator)->next (NULL);
 }
@@ -78,7 +69,9 @@ Net_Stream::~Net_Stream ()
 }
 
 bool
-Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
+Net_Stream::initialize (const Net_StreamConfiguration& configuration_in,
+                        bool setupPipeline_in,
+                        bool resetSessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::initialize"));
 
@@ -87,7 +80,9 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
   ACE_ASSERT (!inherited::isInitialized_);
 
   // allocate a new session state, reset stream
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              false,
+                              resetSessionData_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_Base_T::initialize(), aborting\n")));
@@ -177,14 +172,7 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    result = inherited::push (configuration_in.module);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
+    inherited::modules_.push_front (configuration_in.module);
   } // end IF
 
   // ---------------------------------------------------------------------------
@@ -209,14 +197,6 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
                 protocolHandler_.name ()));
     return false;
   } // end IF
-  result = inherited::push (&protocolHandler_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                protocolHandler_.name ()));
-    return false;
-  } // end IF
 
   // ******************* Runtime Statistics ************************
   runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
@@ -238,14 +218,6 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
                 runtimeStatistic_.name ()));
     return false;
   } // end IF
-  result = inherited::push (&runtimeStatistic_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (runtimeStatistic_.name ())));
-    return false;
-  } // end IF
 
   // ******************* Header Parser ************************
   headerParser_.initialize (*configuration_in.moduleConfiguration);
@@ -261,14 +233,6 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                headerParser_.name ()));
-    return false;
-  } // end IF
-  result = inherited::push (&headerParser_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
                 headerParser_.name ()));
     return false;
   } // end IF
@@ -302,14 +266,14 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
   socketHandler_.arg (inherited::sessionData_);
-  result = inherited::push (&socketHandler_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (socketHandler_.name ())));
-    return false;
-  } // end IF
+
+  if (setupPipeline_in)
+    if (!inherited::setup ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to setup pipeline, aborting\n")));
+      return false;
+    } // end IF
 
   // -------------------------------------------------------------
 
@@ -318,7 +282,6 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in)
 
   // OK: all went well
   inherited::isInitialized_ = true;
-  //inherited::dump_state ();
 
   return true;
 }

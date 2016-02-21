@@ -580,7 +580,7 @@ do_work (bool requestBroadcastReplies_in,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
     return;
   } // end IF
-  configuration.socketConfiguration.networkInterface = interface_in;
+  configuration.socketConfiguration.device = interface_in;
   configuration.socketConfiguration.useLoopBackDevice = useLoopback_in;
   configuration.socketConfiguration.writeOnly = true;
   // ******************** socket handler configuration data *******************
@@ -1064,7 +1064,7 @@ allocate:
     DHCP_record.xid = DHCP_Tools::generateXID ();
     if (configuration.protocolConfiguration.requestBroadcastReplies)
       DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-    if (!Net_Common_Tools::interface2MACAddress (configuration.socketConfiguration.networkInterface,
+    if (!Net_Common_Tools::interface2MACAddress (configuration.socketConfiguration.device,
                                                  DHCP_record.chaddr))
     {
       ACE_DEBUG ((LM_ERROR,

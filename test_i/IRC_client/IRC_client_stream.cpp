@@ -53,8 +53,8 @@ IRC_Client_Stream::IRC_Client_Stream (const std::string& name_in)
   //     iterator.next (module_p);
   //     iterator.advance ())
   //  module_p->next (NULL);
-  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::availableModules_.begin ();
-       iterator != inherited::availableModules_.end ();
+  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::modules_.begin ();
+       iterator != inherited::modules_.end ();
        iterator++)
     (*iterator)->next (NULL);
 }
@@ -68,7 +68,9 @@ IRC_Client_Stream::~IRC_Client_Stream ()
 }
 
 bool
-IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configuration_in)
+IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configuration_in,
+                               bool setupPipeline_in,
+                               bool resetSessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::initialize"));
 
@@ -77,7 +79,9 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   ACE_ASSERT (!isRunning ());
 
   // allocate a new session state, reset stream
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              false,
+                              resetSessionData_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_Base_T::initialize(), aborting\n")));
@@ -163,14 +167,7 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    result = inherited::push (configuration_in.module);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
+    inherited::modules_.push_front (configuration_in.module);
   } // end IF
 
   // ---------------------------------------------------------------------------
@@ -189,16 +186,6 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   //{
   //  ACE_DEBUG ((LM_ERROR,
   //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              runtimeStatistic_.name ()));
-  //  return false;
-  //} // end IF
-
-  //// enqueue the module...
-  //result = inherited::push (&runtimeStatistic_);
-  //if (result == -1)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
   //              runtimeStatistic_.name ()));
   //  return false;
   //} // end IF
@@ -222,15 +209,6 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
 //                handler_.name()));
 //     return false;
 //   } // end IF
-//
-//   // enqueue the module...
-//   if (inherited::push(&handler_))
-//   {
-//     ACE_DEBUG((LM_ERROR,
-//                ACE_TEXT("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-//                handler_.name()));
-//     return false;
-//   } // end IF
 
   //// ******************* Parser ************************
   //IRC_Module_Parser* parser_impl_p =
@@ -248,16 +226,6 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   //{
   //  ACE_DEBUG ((LM_ERROR,
   //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              parser_.name ()));
-  //  return false;
-  //} // end IF
-
-  //// enqueue the module...
-  //result = inherited::push (&parser_);
-  //if (result == -1)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
   //              parser_.name ()));
   //  return false;
   //} // end IF
@@ -291,14 +259,14 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   ////         --> set the argument that is passed along (head module expects a
   ////             handle to the session data)
   //marshal_.arg (inherited::sessionData_);
-  //result = inherited::push (&marshal_);
-  //if (result == -1)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-  //              marshal_.name ()));
-  //  return false;
-  //} // end IF
+
+  if (setupPipeline_in)
+    if (!inherited::setup ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to setup pipeline, aborting\n")));
+      return false;
+    } // end IF
 
   // set (session) message allocator
   // *TODO*: clean this up ! --> sanity check
@@ -306,7 +274,6 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   inherited::allocator_ = configuration_in.messageAllocator;
 
   inherited::isInitialized_ = true;
-//   inherited::dump_state();
 
   return true;
 }

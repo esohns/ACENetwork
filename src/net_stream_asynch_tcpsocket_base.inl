@@ -148,7 +148,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 #else
     static_cast<size_t> (handle_in); // (== socket handle)
 #endif
-  if (!stream_.initialize (inherited3::configuration_->streamConfiguration))
+  if (!stream_.initialize (inherited3::configuration_->streamConfiguration,
+                           true,
+                           true))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -282,41 +284,39 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
-  ACE_Message_Block* message_block_p = NULL;
   Stream_Base_t* stream_p = (stream_.upStream () ? stream_.upStream ()
                                                  : &stream_);
-//  if (buffer_ == NULL)
-//  {
-  // send next data chunk from the stream...
-  // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
-  // been notified
-//  result = stream_.get (buffer_, &ACE_Time_Value::zero);
-  result = stream_p->get (message_block_p,
-                          &const_cast<ACE_Time_Value&> (ACE_Time_Value::zero));
-  if (result == -1)
+
+  if (!inherited::buffer_)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
-    return -1;
+    // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
+    //                   been notified
+    result = stream_p->get (inherited::buffer_, NULL);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
+      return -1;
+    } // end IF
   } // end IF
+  ACE_ASSERT (inherited::buffer_);
 
   // start (asynchronous) write
   this->increase ();
   inherited::counter_.increase ();
-  // *NOTE*: this is a fire-and-forget API for message_block
   int error = 0;
 send:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result =
-    inherited::outputStream_.writev (*message_block_p,                     // data
-                                     message_block_p->length (),           // bytes to write
+    inherited::outputStream_.writev (*inherited::buffer_,                  // data
+                                     inherited::buffer_->length (),        // bytes to write
                                      NULL,                                 // ACT
                                      0,                                    // priority
                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
 #else
   result =
-    inherited::outputStream_.write (*message_block_p,                     // data
-                                    message_block_p->length (),           // bytes to write
+    inherited::outputStream_.write (*inherited::buffer_,                  // data
+                                    inherited::buffer_->length (),        // bytes to write
                                     NULL,                                 // ACT
                                     0,                                    // priority
                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
@@ -331,11 +331,11 @@ send:
         (error != ENOTCONN))     // 10057: happens on Win32
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Stream::writev(%u): \"%m\", aborting\n"),
-//               buffer_->size ()));
-                  message_block_p->length ()));
+                  inherited::buffer_->length ()));
 
     // clean up
-    message_block_p->release ();
+    inherited::buffer_->release ();
+    inherited::buffer_ = NULL;
     this->decrease ();
     inherited::counter_.decrease ();
 

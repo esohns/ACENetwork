@@ -28,13 +28,12 @@
 #include "net_iconnectionmanager.h"
 #include "net_ilistener.h"
 
-//#include "test_u_configuration.h"
+#include "test_u_configuration.h"
 //#include "test_u_stream_common.h"
 
 typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Net_Server_StatisticReportingHandler_t;
 
 // forward declarations
-struct Net_Configuration;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,

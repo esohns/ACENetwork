@@ -728,12 +728,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                                                  1);
   configuration.listenerConfiguration.connectionManager =
     NET_CONNECTIONMANAGER_SINGLETON::instance ();
-  configuration.listenerConfiguration.messageAllocator = &message_allocator;
   configuration.listenerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
-  configuration.listenerConfiguration.statisticReportingInterval =
-    statisticReportingInterval_in;
-  configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
+  //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
 
   if (!CBData_in.serverConfiguration->listener->initialize (configuration.listenerConfiguration))
   {

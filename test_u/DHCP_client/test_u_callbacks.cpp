@@ -676,7 +676,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     gtk_tree_model_iter_n_children (GTK_TREE_MODEL (list_store_p), NULL);
   if (n_rows)
   {
-    if (data_p->configuration->socketConfiguration.networkInterface.empty ())
+    if (data_p->configuration->socketConfiguration.device.empty ())
       gtk_combo_box_set_active (combo_box_p, 0);
     else
     {
@@ -700,7 +700,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   0, &value);
   #endif
         ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
-        if (ACE_OS::strcmp (data_p->configuration->socketConfiguration.networkInterface.c_str (),
+        if (ACE_OS::strcmp (data_p->configuration->socketConfiguration.device.c_str (),
                             g_value_get_string (&value)) == 0)
         {
           // clean up
@@ -1280,7 +1280,7 @@ allocate:
   DHCP_record.xid = DHCP_Tools::generateXID ();
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interface2MACAddress (data_p->configuration->socketConfiguration.networkInterface,
+  if (!Net_Common_Tools::interface2MACAddress (data_p->configuration->socketConfiguration.device,
                                                DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,

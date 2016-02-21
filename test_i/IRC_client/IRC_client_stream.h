@@ -55,7 +55,9 @@ class IRC_Client_Stream
   virtual ~IRC_Client_Stream ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const IRC_Client_StreamConfiguration&); // configuration
+  virtual bool initialize (const IRC_Client_StreamConfiguration&, // configuration
+                           bool = true,                           // setup pipeline ?
+                           bool = true);                          // reset session data ?
 
   //// implement Common_IStatistic_T
   //// *NOTE*: delegate this to rntimeStatistic_

@@ -309,25 +309,21 @@ Net_UDPSocketHandler_T<SocketType,
   } // end IF
 #endif
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   // *NOTE*: (on Linux), packet fragmentation is off by default, so sendto()-ing
   //         datagrams larger than MTU will trigger errno EMSGSIZE (90)
   //         --> enable packet fragmentation
   if (!Net_Common_Tools::setPathMTUDiscovery (handle,
                                               IP_PMTUDISC_WANT))
   {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setPathMTUDiscovery(0x%@,%d), aborting\n"),
-                handle,
-                IP_PMTUDISC_WANT));
-#else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::disablePathMTUDiscovery(%d,%d), aborting\n"),
                 handle,
                 IP_PMTUDISC_WANT));
-#endif
     goto error;
   } // end IF
+#endif
 
 #if defined (ACE_LINUX)
   if (errorQueue_)

@@ -201,7 +201,7 @@ DHCP_Module_Discover_T<TaskSynchType,
   DHCP_record.secs = data_r.secs;
   if (configuration_->protocolConfiguration->requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interface2MACAddress (configuration_->socketConfiguration->networkInterface,
+  if (!Net_Common_Tools::interface2MACAddress (configuration_->socketConfiguration->device,
                                                DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,

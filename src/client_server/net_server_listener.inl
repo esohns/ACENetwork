@@ -45,8 +45,8 @@ Net_Server_Listener_T<HandlerType,
                       UserDataType>::Net_Server_Listener_T ()
  : inherited (NULL, // use global (default) reactor
               1)    // always accept ALL pending connections
- , configuration_ ()
- , handlerConfiguration_ ()
+ , configuration_ (NULL)
+ , handlerConfiguration_ (NULL)
  , isInitialized_ (false)
  , isListening_ (false)
  , isOpen_ (false)
@@ -218,15 +218,19 @@ Net_Server_Listener_T<HandlerType,
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   // *TODO*: remove type inferences
-  if (configuration_.useLoopBackDevice)
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (handlerConfiguration_);
+  ACE_ASSERT (handlerConfiguration_->socketConfiguration);
+  if (handlerConfiguration_->socketConfiguration->useLoopBackDevice)
   {
     result =
-        configuration_.address.set (configuration_.address.get_port_number (), // port
-                                    // *PORTABILITY*: needed to disambiguate this under Windows :-(
-                                    // *TODO*: bind to specific interface/address ?
-                                    ACE_LOCALHOST,                             // hostname
-                                    1,                                         // encode ?
-                                    AF_INET);                                  // address family
+      configuration_->address.set (configuration_->address.get_port_number (), // port
+                                   // *PORTABILITY*: disambiguate this under Windows
+                                   // *TODO*: bind to specific interface/address ?
+                                   ACE_LOCALHOST,                              // hostname
+                                   1,                                          // encode ?
+                                   AF_INET);                                   // address family
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -234,14 +238,14 @@ Net_Server_Listener_T<HandlerType,
       return;
     } // end IF
   } // end IF
-  result = configuration_.address.addr_to_string (buffer,
-                                                  sizeof (buffer),
-                                                  1);
+  result = configuration_->address.addr_to_string (buffer,
+                                                   sizeof (buffer),
+                                                   1);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
   result =
-    inherited::open (configuration_.address,   // local address
+    inherited::open (configuration_->address,  // local address
                      ACE_Reactor::instance (), // corresp. reactor
                      ACE_NONBLOCK,             // flags (use non-blocking sockets !)
                      //0,                        // flags (default is blocking sockets)
@@ -368,7 +372,10 @@ Net_Server_Listener_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::get"));
 
-  return handlerConfiguration_;
+  // sanity check(s)
+  ACE_ASSERT (handlerConfiguration_);
+
+  return *handlerConfiguration_;
 }
 
 //template <typename HandlerType,
@@ -440,8 +447,8 @@ Net_Server_Listener_T<HandlerType,
   // sanity check(s)
   ACE_ASSERT (configuration_in.socketHandlerConfiguration);
 
-  configuration_ = configuration_in;
-  handlerConfiguration_ = *configuration_in.socketHandlerConfiguration;
+  configuration_ = &const_cast<ConfigurationType&> (configuration_in);
+  handlerConfiguration_ = configuration_in.socketHandlerConfiguration;
   isInitialized_ = true;
 
   return true;
@@ -509,14 +516,14 @@ Net_Server_Listener_T<HandlerType,
   handler_out = NULL;
 
   // sanity check(s)
-  // *TODO*: remove type inference
-  ACE_ASSERT (configuration_.socketHandlerConfiguration);
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (handlerConfiguration_);
 
   // default behavior
-  // *TODO*: remove type inference
+  // *TODO*: remove type inferences
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (configuration_.connectionManager,
-                                 configuration_.socketHandlerConfiguration->statisticReportingInterval));
+                    HandlerType (configuration_->connectionManager,
+                                 handlerConfiguration_->statisticReportingInterval));
   if (!handler_out)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

@@ -65,7 +65,9 @@ class Test_U_Stream
   virtual ~Test_U_Stream ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Test_U_StreamConfiguration&); // configuration
+  virtual bool initialize (const Test_U_StreamConfiguration&, // configuration
+                           bool = true,                       // setup pipeline ?
+                           bool = true);                      // reset session data ?
 
   // *TODO*: re-consider this API
   void ping ();

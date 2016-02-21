@@ -80,7 +80,9 @@ class IRC_Stream_T
   virtual ~IRC_Stream_T ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const ConfigurationType&); // configuration
+  virtual bool initialize (const ConfigurationType&, // configuration
+                           bool = true,              // setup pipeline ?
+                           bool = true);             // reset session data ?
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to rntimeStatistic_

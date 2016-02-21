@@ -20,8 +20,6 @@
 
 #include "ace/Log_Msg.h"
 
-//#include "stream_common.h"
-
 #include "net_macros.h"
 
 template <typename StreamStateType,
@@ -61,18 +59,13 @@ IRC_Stream_T<StreamStateType,
   // *NOTE*: one problem is that we need to explicitly close() all
   // modules which we have NOT enqueued onto the stream (e.g. because init()
   // failed...)
-  inherited::availableModules_.push_front (&marshal_);
-  inherited::availableModules_.push_front (&parser_);
-  inherited::availableModules_.push_front (&runtimeStatistic_);
+  inherited::modules_.push_front (&marshal_);
+  inherited::modules_.push_front (&parser_);
+  inherited::modules_.push_front (&runtimeStatistic_);
 
   // *TODO*: fix ACE bug: modules should initialize their "next" member to NULL
-  //inherited::MODULE_T* module_p = NULL;
-  //for (ACE_DLList_Iterator<inherited::MODULE_T> iterator (inherited::availableModules_);
-  //     iterator.next (module_p);
-  //     iterator.advance ())
-  //  module_p->next (NULL);
-  for (typename inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::availableModules_.begin ();
-       iterator != inherited::availableModules_.end ();
+  for (typename inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::modules_.begin ();
+       iterator != inherited::modules_.end ();
        iterator++)
     (*iterator)->next (NULL);
 }
@@ -116,7 +109,9 @@ IRC_Stream_T<StreamStateType,
              SessionDataType,
              SessionDataContainerType,
              SessionMessageType,
-             ProtocolMessageType>::initialize (const ConfigurationType& configuration_in)
+             ProtocolMessageType>::initialize (const ConfigurationType& configuration_in,
+                                               bool setupPipeline_in,
+                                               bool resetSessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::initialize"));
 
@@ -127,7 +122,9 @@ IRC_Stream_T<StreamStateType,
   ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
 
   // allocate a new session state, reset stream
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              false,
+                              resetSessionData_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_Base_T::initialize(), aborting\n")));
@@ -213,14 +210,7 @@ IRC_Stream_T<StreamStateType,
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    result = inherited::push (configuration_in.module);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
+    inherited::modules_.push_front (configuration_in.module);
   } // end IF
 
   // ---------------------------------------------------------------------------
@@ -245,16 +235,6 @@ IRC_Stream_T<StreamStateType,
     return false;
   } // end IF
 
-  // enqueue the module...
-  result = inherited::push (&runtimeStatistic_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-                runtimeStatistic_.name ()));
-    return false;
-  } // end IF
-
 //   // ******************* Handler ************************
 //   IRC_Module_Handler* handler_impl = NULL;
 //   handler_impl = dynamic_cast<IRC_Module_Handler*> (handler_.writer ());
@@ -271,15 +251,6 @@ IRC_Stream_T<StreamStateType,
 //   {
 //     ACE_DEBUG ((LM_ERROR,
 //                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-//                 handler_.name ()));
-//     return false;
-//   } // end IF
-//
-//   // enqueue the module...
-//   if (inherited::push (&handler_))
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
 //                 handler_.name ()));
 //     return false;
 //   } // end IF
@@ -301,16 +272,6 @@ IRC_Stream_T<StreamStateType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                parser_.name ()));
-    return false;
-  } // end IF
-
-  // enqueue the module...
-  result = inherited::push (&parser_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
                 parser_.name ()));
     return false;
   } // end IF
@@ -345,14 +306,14 @@ IRC_Stream_T<StreamStateType,
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
   marshal_.arg (inherited::sessionData_);
-  result = inherited::push (&marshal_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-                marshal_.name ()));
-    return false;
-  } // end IF
+
+  if (setupPipeline_in)
+    if (!inherited::setup ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to setup pipeline, aborting\n")));
+      return false;
+    } // end IF
 
   // set (session) message allocator
   // *TODO*: clean this up ! --> sanity check
@@ -360,7 +321,6 @@ IRC_Stream_T<StreamStateType,
   inherited::allocator_ = configuration_in.messageAllocator;
 
   inherited::isInitialized_ = true;
-//   inherited::dump_state();
 
   return true;
 }

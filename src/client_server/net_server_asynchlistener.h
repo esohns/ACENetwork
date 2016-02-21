@@ -136,10 +136,10 @@ class Net_Server_AsynchListener_T
 //  virtual void handle_accept(const ACE_Asynch_Accept::Result&); // result
 
   //int                      addressFamily_;
-  ConfigurationType        configuration_;
-  HandlerConfigurationType handlerConfiguration_;
-  bool                     isInitialized_;
-  bool                     isListening_;
+  ConfigurationType*        configuration_;
+  HandlerConfigurationType* handlerConfiguration_;
+  bool                      isInitialized_;
+  bool                      isListening_;
 };
 
 // include template implementation
