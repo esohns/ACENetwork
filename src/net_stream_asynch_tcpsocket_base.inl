@@ -325,10 +325,10 @@ send:
   {
     error = ACE_OS::last_error ();
     // *WARNING*: this could fail on multi-threaded proactors
-    if (error == EAGAIN) goto send; // 11: happens on Linux
-    if ((error != ENOTSOCK)   && // 10038: happens on Win32
-        (error != ECONNRESET) && // 10054: happens on Win32
-        (error != ENOTCONN))     // 10057: happens on Win32
+    if (error == EAGAIN) goto send; // 11   : happens on Linux
+    if ((error != ENOTSOCK)   &&    // 10038: happens on Win32
+        (error != ECONNRESET) &&    // 10054: happens on Win32
+        (error != ENOTCONN))        // 10057: happens on Win32
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Stream::writev(%u): \"%m\", aborting\n"),
                   inherited::buffer_->length ()));
@@ -340,6 +340,18 @@ send:
     inherited::counter_.decrease ();
 
     return -1;
+  } // end IF
+  else if (result == 0)
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("0x%@: socket was closed by the peer\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%d: socket was closed by the peer\n"),
+                handle_in));
+#endif
   } // end IF
 
   return 0;
@@ -370,35 +382,25 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   int result = -1;
 
-  // step1: stop(, flush) and wait for all workers within the stream (if any)
+  // *IMPORTANT NOTE*: when control reaches here, the socket handle has already
+  //                   gone away, i.e. no new data will be accepted by the
+  //                   kernel
+  //                   --> finish processing, flush all remaining outbound data
+  //                       and wait for all workers within the stream
+  //                   [--> cancel any pending operations]
+
+  // step1: shut down the processing stream
   stream_.finished (true);
-//  stream_.stop (false, // wait for completion
-//                true); // lock ?
-  //if (mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) // some error occurred
-  //  stream_.flush (true); // flush upstream (if any)
-  stream_.waitForCompletion (true, // wait for worker(s) (if any)
+  stream_.flush (false, // do not flush inbound data
+                 true); // flush upstream (if any)
+  stream_.waitForCompletion (true,  // wait for worker(s) (if any)
                              true); // wait for upstream (if any)
 
-  // step2: purge any pending writes ?
-  Stream_Iterator_t iterator (stream_);
-  const Stream_Module_t* module_p = NULL;
-  result = iterator.next (module_p);
-  if (result == 1)
-  {
-    ACE_ASSERT (module_p);
-    Stream_Task_t* task_p =
-        const_cast<Stream_Module_t*> (module_p)->reader ();
-    ACE_ASSERT (task_p);
-    result = task_p->flush (ACE_Task_Flags::ACE_FLUSHALL);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Task_T::flush(): \"%m\", continuing\n")));
-    if (result > 0)
-      ACE_DEBUG ((LM_WARNING,
-                  ACE_TEXT ("flushed %d messages...\n")));
-  } // end IF
+  // *NOTE*: pending socket operations are notified by the kernel and will
+  //         return automatically
+  // *TODO*: consider cancel()ling pending write operations
 
-  // step3: invoke base-class maintenance
+  // step2: invoke base-class maintenance
   result = inherited::handle_close (handle_in,
                                     mask_in);
   if (result == -1)
@@ -420,7 +422,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                   ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
   } // end IF
 
-  // step4: deregister with the connection manager (if any)
+  // step3: deregister with the connection manager (if any)
   if (inherited3::isRegistered_)
     inherited3::deregister ();
 
@@ -897,9 +899,16 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     // *** GOOD CASES ***
     case 0:
     {
-//       ACE_DEBUG ((LM_DEBUG,
-//                   ACE_TEXT ("[%u]: socket was closed...\n"),
-//                   handle_));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("0x%@: socket was closed by the peer\n"),
+                  handle_));
+#else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%d: socket was closed by the peer\n"),
+                  handle_));
+#endif
+
       break;
     }
     default:

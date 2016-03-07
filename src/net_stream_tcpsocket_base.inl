@@ -516,9 +516,15 @@ Net_StreamTCPSocketBase_T<HandlerType,
     // *** GOOD CASES ***
     case 0:
     {
-//       ACE_DEBUG ((LM_DEBUG,
-//                   ACE_TEXT ("[%d]: socket was closed by the peer...\n"),
-//                   handle_in));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("0x%@: socket was closed by the peer\n"),
+                  handle_in));
+#else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%d: socket was closed by the peer\n"),
+                  handle_in));
+#endif
 
       // clean up
       currentReadBuffer_->release ();
@@ -712,9 +718,15 @@ Net_StreamTCPSocketBase_T<HandlerType,
     // *** GOOD CASES ***
     case 0:
     {
-//       ACE_DEBUG ((LM_DEBUG,
-//                   ACE_TEXT ("[%u]: socket was closed by the peer...\n"),
-//                   handle_in));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("0x%@: socket was closed by the peer\n"),
+                  handle_in));
+#else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%d: socket was closed by the peer\n"),
+                  handle_in));
+#endif
 
       // clean up
       currentWriteBuffer_->release ();

@@ -545,27 +545,42 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
   switch (bytes_transferred)
   {
     case -1:
-    case 0:
     {
       // connection closed/reset (by peer) ? --> not an error    
-      if ((error != EBADF)                   && // 9:   Linux [client: local close()]
-          (error != EPIPE)                   && // 32 : Linux [client: remote close()]
+      if ((error != EBADF)                   && // 9        : Linux [client: local close()]
+          (error != EPIPE)                   && // 32       : Linux [client: remote close()]
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-          (error != ERROR_NETNAME_DELETED)   && // 64:  Win32: local close()
-          (error != ERROR_OPERATION_ABORTED) && // 995: Win32: local close()
+          (error != ERROR_NETNAME_DELETED)   && // 64       : Win32: local close()
+          (error != ERROR_OPERATION_ABORTED) && // 995      : Win32: local close()
 #endif
           (error != ECONNRESET))                // 104/10054: reset by peer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", continuing\n"),
-                    result_in.handle (),
-                    ACE::sock_error (static_cast<int> (error))));
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", continuing\n"),
+                        result_in.handle (),
+                        ACE::sock_error (static_cast<int> (error))));
 #else
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
-                    result_in.handle (),
-                    ACE_TEXT (ACE_OS::strerror (error))));
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
+                        result_in.handle (),
+                        ACE_TEXT (ACE_OS::strerror (error))));
 #endif
+    }
+    case 0:
+    {
+      if (bytes_transferred == 0)
+      {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("0x%@: socket was closed by the peer\n"),
+                    result_in.handle ()));
+#else
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("%d: socket was closed by the peer\n"),
+                    result_in.handle ()));
+#endif
+      } // end IF
+
       close = true;
       goto release;
     }
