@@ -180,7 +180,7 @@ do_processArguments (const int& argc_in,
                      unsigned int& maximumNumberOfConnections_out,
                      std::string& UIFile_out,
                      bool& useThreadPool_out,
-                     unsigned int& clientPingInterval_out,
+                     ACE_Time_Value& pingInterval_out,
                      //unsigned int& keepAliveTimeout_out,
                      bool& logToFile_out,
                      bool& useUDP_out,
@@ -214,8 +214,8 @@ do_processArguments (const int& argc_in,
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
   useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
-  clientPingInterval_out =
-    NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
+  pingInterval_out.set (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL / 1000,
+                        (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
   logToFile_out = false;
   useUDP_out = false;
@@ -265,10 +265,13 @@ do_processArguments (const int& argc_in,
       }
       case 'i':
       {
+        unsigned int ping_interval = 0;
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter << argumentParser.opt_arg ();
-        converter >> clientPingInterval_out;
+        converter >> ping_interval;
+        pingInterval_out.set (ping_interval / 1000,
+                              (ping_interval % 1000) * 1000);
         break;
       }
 //      case 'k':
@@ -450,7 +453,7 @@ void
 do_work (unsigned int maximumNumberOfConnections_in,
          const std::string& UIDefinitionFile_in,
          bool useThreadPool_in,
-         unsigned int pingInterval_in,
+         const ACE_Time_Value& pingInterval_in,
          //unsigned int keepAliveTimeout_in,
          bool useUDP_in,
          const std::string& networkInterface_in,
@@ -495,7 +498,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                                   true);                   // block ?
 
   // ******************** protocol configuration data **************************
-  configuration.protocolConfiguration.peerPingInterval = pingInterval_in;
+  configuration.protocolConfiguration.pingInterval = pingInterval_in;
   // ********************** stream configuration data **************************
   configuration.streamConfiguration.cloneModule = !(UIDefinitionFile_in.empty ());
   configuration.streamConfiguration.messageAllocator = &message_allocator;
@@ -640,6 +643,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
     CBData_in.userData = &CBData_in;
 
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
+    result = ACE_OS::sleep (ACE_Time_Value (1, 0));
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
     if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -939,7 +946,8 @@ ACE_TMAIN (int argc_in,
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
   bool use_thread_pool = NET_EVENT_USE_THREAD_POOL;
-  unsigned int ping_interval = NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL;
+  ACE_Time_Value ping_interval (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL / 1000,
+                                (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
   bool log_to_file = false;
   bool use_udp = false;
@@ -1038,9 +1046,8 @@ ACE_TMAIN (int argc_in,
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
-    Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME),
-                                                 ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX));
-                                                 //ACE::basename (argv_in[0]));
+        Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME),
+                                                     ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX));
   if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]),    // program name
                                         log_file_name,                 // log file name
                                         true,                          // log to syslog ?

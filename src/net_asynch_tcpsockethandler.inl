@@ -35,7 +35,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , inherited2 ()
  , inherited3 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
- , buffer_ (NULL)
+// , buffer_ (NULL)
  , counter_ (0) // initial count
  , inputStream_ ()
  , outputStream_ ()
@@ -72,8 +72,8 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::~Net_AsynchTCPSocketHandler_T (
   } // end IF
 #endif
 
-  if (buffer_)
-    buffer_->release ();
+//  if (buffer_)
+//    buffer_->release ();
 }
 
 template <typename ConfigurationType>
@@ -517,7 +517,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
   ACE_Message_Block* message_block_p = &result_in.message_block ();
 
   // sanity check(s)
-  ACE_ASSERT (message_block_p == buffer_);
+//  ACE_ASSERT (message_block_p == buffer_);
   if (result_in.success () == 0)
   {
     // connection closed/reset (by peer) ? --> not an error
@@ -546,7 +546,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
   {
     case -1:
     {
-      // connection closed/reset (by peer) ? --> not an error    
+      // connection closed/reset (by peer) ? --> not an error
       if ((error != EBADF)                   && // 9        : Linux [client: local close()]
           (error != EPIPE)                   && // 32       : Linux [client: remote close()]
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -588,10 +588,15 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
     default:
     {
       // finished with this buffer ?
-      message_block_p->rd_ptr (bytes_transferred);
       if (message_block_p->length () > 0)
       {
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("partial write (%u/%u bytes)...\n"),
+                    bytes_transferred, bytes_transferred + message_block_p->length ()));
+
         // --> reschedule
+        // *TODO*: put the buffer back into the queue. This will not work if
+        //         other buffers have been scheduled in the meantime...
         result = handle_output (result_in.handle ());
         if (result == -1)
         {
@@ -617,7 +622,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
 
 release:
   message_block_p->release ();
-  buffer_ = NULL;
+//  buffer_ = NULL;
 
 continue_:
   if (close)

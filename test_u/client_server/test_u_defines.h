@@ -31,6 +31,7 @@
 #define NET_UI_GTKEVENT_RESOLUTION                      200 // ms --> 5 FPS
 #define NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME       "spinbutton_connections"
 #define NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME          "spinbutton_messages"
+#define NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME         "spinbutton_ping_interval"
 #define NET_UI_GTK_TEXTVIEW_NAME                        "textview"
 #define NET_UI_GTK_ADJUSTMENT_NAME                      "scrolledwindow_vadjustment"
 #define NET_UI_GTK_SCROLLMARK_NAME                      "insert"
@@ -51,7 +52,7 @@
 #define NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS         0
 #define NET_CLIENT_DEF_SERVER_HOSTNAME                  ACE_LOCALHOST
 #define NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL          0
-#define NET_CLIENT_DEF_SERVER_PING_INTERVAL             0 // ms {0 --> OFF}
+#define NET_CLIENT_DEF_SERVER_PING_INTERVAL             0 // ms {0: OFF}
 #define NET_CLIENT_DEF_SERVER_TEST_INTERVAL             20 // ms
 #define NET_CLIENT_DEF_SERVER_STRESS_INTERVAL           1 // ms
 

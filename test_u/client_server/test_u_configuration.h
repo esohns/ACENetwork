@@ -49,16 +49,16 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 struct Net_ProtocolConfiguration
 {
   inline Net_ProtocolConfiguration ()
-   : bufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
-   , peerPingInterval (0)
+   : PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
+   , pingInterval (ACE_Time_Value::zero)
    , pingAutoAnswer (true)
    , printPongMessages (true)
   {};
 
-  int          bufferSize; // pdu size (if fixed)
-  unsigned int peerPingInterval; // ms [0: off]
-  bool         pingAutoAnswer;
-  bool         printPongMessages;
+  unsigned int   PDUSize; // pdu size (if fixed)
+  ACE_Time_Value pingInterval; // {0: off}
+  bool           pingAutoAnswer;
+  bool           printPongMessages;
 };
 
 struct Net_ModuleHandlerConfiguration

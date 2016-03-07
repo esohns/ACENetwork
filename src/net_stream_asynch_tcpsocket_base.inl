@@ -287,19 +287,22 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   Stream_Base_t* stream_p = (stream_.upStream () ? stream_.upStream ()
                                                  : &stream_);
 
-  if (!inherited::buffer_)
-  {
+  ACE_Message_Block* message_block_p = NULL;
+//  if (!inherited::buffer_)
+//  {
     // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
     //                   been notified
-    result = stream_p->get (inherited::buffer_, NULL);
+//    result = stream_p->get (inherited::buffer_, NULL);
+    result = stream_p->get (message_block_p, NULL);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
       return -1;
     } // end IF
-  } // end IF
-  ACE_ASSERT (inherited::buffer_);
+//  } // end IF
+//  ACE_ASSERT (inherited::buffer_);
+    ACE_ASSERT (message_block_p);
 
   // start (asynchronous) write
   this->increase ();
@@ -308,18 +311,22 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 send:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result =
-    inherited::outputStream_.writev (*inherited::buffer_,                  // data
-                                     inherited::buffer_->length (),        // bytes to write
-                                     NULL,                                 // ACT
-                                     0,                                    // priority
-                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
+//    inherited::outputStream_.writev (*inherited::buffer_,                  // data
+//                                     inherited::buffer_->length (),        // bytes to write
+      inherited::outputStream_.writev (*message_block_p,                     // data
+                                       message_block_p->length (),           // bytes to write
+                                       NULL,                                 // ACT
+                                       0,                                    // priority
+                                       COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
 #else
   result =
-    inherited::outputStream_.write (*inherited::buffer_,                  // data
-                                    inherited::buffer_->length (),        // bytes to write
-                                    NULL,                                 // ACT
-                                    0,                                    // priority
-                                    COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
+//    inherited::outputStream_.write (*inherited::buffer_,                  // data
+//                                    inherited::buffer_->length (),        // bytes to write
+      inherited::outputStream_.write (*message_block_p,                     // data
+                                      message_block_p->length (),           // bytes to write
+                                      NULL,                                 // ACT
+                                      0,                                    // priority
+                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
 #endif
   if (result == -1)
   {
@@ -331,30 +338,30 @@ send:
         (error != ENOTCONN))        // 10057: happens on Win32
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Stream::writev(%u): \"%m\", aborting\n"),
-                  inherited::buffer_->length ()));
+//                  inherited::buffer_->length ()));
+                  message_block_p->length ()));
 
     // clean up
-    inherited::buffer_->release ();
-    inherited::buffer_ = NULL;
+//    inherited::buffer_->release ();
+//    inherited::buffer_ = NULL;
+    message_block_p->release ();
     this->decrease ();
     inherited::counter_.decrease ();
-
-    return -1;
   } // end IF
-  else if (result == 0)
-  {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: socket was closed by the peer\n"),
-                handle_in));
-#else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: socket was closed by the peer\n"),
-                handle_in));
-#endif
-  } // end IF
+//  else if (result == 0)
+//  {
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("0x%@: socket was closed by the peer\n"),
+//                handle_in));
+//#else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("%d: socket was closed by the peer\n"),
+//                handle_in));
+//#endif
+//  } // end IF
 
-  return 0;
+  return result;
 }
 
 template <typename HandlerType,
@@ -902,11 +909,11 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("0x%@: socket was closed by the peer\n"),
-                  handle_));
+                  result_in.handle ()));
 #else
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%d: socket was closed by the peer\n"),
-                  handle_));
+                  result_in.handle ()));
 #endif
 
       break;
@@ -954,7 +961,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
 close:
   result =
-      handle_close (inherited::handle (),
+      handle_close (result_in.handle (),
                     ((result_in.bytes_transferred () == 0) ? ACE_Event_Handler::READ_MASK // peer closed the connection
                                                            : ACE_Event_Handler::ALL_EVENTS_MASK));
   if (result == -1)

@@ -65,7 +65,7 @@ class Net_AsynchTCPSocketHandler_T
 
   virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 
-  ACE_Message_Block*          buffer_;
+//  ACE_Message_Block*          buffer_;
   // the number of open write (i.e. send) requests
   Common_ReferenceCounterBase counter_;
   ACE_Asynch_Read_Stream      inputStream_;

@@ -71,6 +71,9 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::handleSignal"));
 
   int result = -1;
+  Net_IInetConnectionManager_t* iconnection_manager_p =
+      NET_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (iconnection_manager_p);
 
   bool shutdown = false;
   bool report = false;
@@ -182,16 +185,14 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
       configuration_.statisticReportingTimerID = -1;
     } // end IF
 
-    // step4: stop/abort(/wait) for connections
-    NET_CONNECTIONMANAGER_SINGLETON::instance ()->stop ();
-    NET_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
+    // step4: stop accepting connections, abort open connections
+    iconnection_manager_p->stop (false, true);
+    iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
     Common_Tools::finalizeEventDispatch (useReactor_,  // stop reactor ?
                                          !useReactor_, // stop proactor ?
                                          -1);          // group ID (--> don't block)
-
-    // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF
 
   return true;

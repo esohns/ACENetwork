@@ -64,6 +64,9 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::handleSignal"));
 
   int result = -1;
+  Net_IInetConnectionManager_t* iconnection_manager_p =
+      NET_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (iconnection_manager_p);
 
   bool abort = false;
   bool connect = false;
@@ -124,7 +127,7 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
 
   // abort ?
   if (abort)
-    NET_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
+    iconnection_manager_p->abortLeastRecent ();
 
   // connect ?
   if (connect && configuration_.connector)
@@ -209,12 +212,14 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
       }
     } // end IF
 
-    // step4: stop reactor (&& proactor, if applicable)
+    // step4: stop accepting connections, abort open connections
+    iconnection_manager_p->stop (false, true);
+    iconnection_manager_p->abort ();
+
+    // step5: stop reactor (&& proactor, if applicable)
     Common_Tools::finalizeEventDispatch (true,         // stop reactor ?
                                          !useReactor_, // stop proactor ?
                                          -1);          // group ID (--> don't block !)
-
-    // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF
 
   return true;

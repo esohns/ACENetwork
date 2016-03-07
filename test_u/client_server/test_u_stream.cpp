@@ -105,32 +105,6 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in,
   session_data_r.sessionID = configuration_in.sessionID;
 
   int result = -1;
-  inherited::MODULE_T* module_p = NULL;
-  if (configuration_in.notificationStrategy)
-  {
-    module_p = inherited::head ();
-    if (!module_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("no head module found, aborting\n")));
-      return false;
-    } // end IF
-    inherited::TASK_T* task_p = module_p->reader ();
-    if (!task_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("no head module reader task found, aborting\n")));
-      return false;
-    } // end IF
-    inherited::QUEUE_T* queue_p = task_p->msg_queue ();
-    if (!queue_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("no head module reader task queue found, aborting\n")));
-      return false;
-    } // end IF
-    queue_p->notification_strategy (configuration_in.notificationStrategy);
-  } // end IF
 //  configuration_in.moduleConfiguration.streamState = &state_;
 
   // ---------------------------------------------------------------------------
@@ -146,7 +120,7 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in,
     return false;
   } // end IF
   if (!protocolHandler_impl_p->initialize (configuration_in.messageAllocator,
-                                           configuration_in.protocolConfiguration->peerPingInterval,
+                                           configuration_in.protocolConfiguration->pingInterval,
                                            configuration_in.protocolConfiguration->pingAutoAnswer,
                                            configuration_in.protocolConfiguration->printPongMessages)) // print ('.') for received "pong"s...
   {
@@ -226,7 +200,7 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in,
   socketHandler_.arg (inherited::sessionData_);
 
   if (setupPipeline_in)
-    if (!inherited::setup ())
+    if (!inherited::setup (configuration_in.notificationStrategy))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to setup pipeline, aborting\n")));

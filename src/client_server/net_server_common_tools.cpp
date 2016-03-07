@@ -75,16 +75,51 @@ Net_Server_Common_Tools::getNextLogFileName (const std::string& packageName_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Common_Tools::getNextLogFileName"));
 
-  std::string result;
-  int result_2 = -1;
-
   // sanity check(s)
   ACE_ASSERT (!programName_in.empty ());
 
-  std::string directory = Common_File_Tools::getLogDirectory (packageName_in);
+  std::string result;
+  int result_2 = -1;
+  std::string directory;
+  unsigned int fallback_level = 0;
+
+fallback:
+  directory = Common_File_Tools::getLogDirectory (packageName_in,
+                                                  fallback_level);
+  if (directory.empty ())
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to Common_File_Tools::getLogDirectory(\"%s\",%d), falling back\n"),
+                ACE_TEXT (packageName_in.c_str ()),
+                fallback_level));
+
+    directory = Common_File_Tools::getWorkingDirectory ();
+    if (directory.empty ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_File_Tools::getWorkingDirectory(), aborting\n")));
+      return std::string ();
+    } // end IF
+    std::string filename = Common_File_Tools::getTempFilename (programName_in);
+    if (filename.empty ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_File_Tools::getTempFilename(\"%s\"), aborting\n"),
+                  ACE_TEXT (programName_in.c_str ())));
+      return result;
+    } // end IF
+    result = directory;
+    result += ACE_DIRECTORY_SEPARATOR_STR;
+    result +=
+        ACE_TEXT_ALWAYS_CHAR (ACE::basename (filename.c_str (),
+                                             ACE_DIRECTORY_SEPARATOR_CHAR));
+    result += COMMON_LOG_FILENAME_SUFFIX;
+
+    return result;
+  } // end IF
 
   // sanity check(s): log directory exists ?
-  // No ? --> try to create it then !
+  // --> (try to) create it
   if (!Common_File_Tools::isDirectory (directory))
   {
     if (!Common_File_Tools::createDirectory (directory))
@@ -100,10 +135,10 @@ Net_Server_Common_Tools::getNextLogFileName (const std::string& packageName_in,
   } // end IF
 
   // assemble correct log file name
-  result += programName_in;
+  result = programName_in;
   result += COMMON_LOG_FILENAME_SUFFIX;
 
-  // retrieve all existing logs and sort them alphabetically...
+  // retrieve all existing logs and sort them alphabetically
   ACE_Dirent_Selector entries;
   result_2 = entries.open (ACE_TEXT (directory.c_str ()),
                            &Net_Server_Common_Tools::selector,
@@ -145,11 +180,11 @@ Net_Server_Common_Tools::getNextLogFileName (const std::string& packageName_in,
     {
       found_current = true;
 
-      // skip this one for now
+      // skip this one for now (see below)
       continue;
     } // end IF
 
-    // scan number...
+    // extract number...
     try
     {
       // *TODO*: do this in C++...
@@ -248,8 +283,8 @@ Net_Server_Common_Tools::getNextLogFileName (const std::string& packageName_in,
     // *NOTE*: last parameter affects Win32 behaviour only
     //         see ace/OS_NS_stdio.inl
     result_2 = ACE_OS::rename (result.c_str (),
-                             new_FQ_file_name.c_str (),
-                             -1);
+                               new_FQ_file_name.c_str (),
+                               -1);
     if (result_2)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -262,6 +297,25 @@ Net_Server_Common_Tools::getNextLogFileName (const std::string& packageName_in,
                 ACE_TEXT ("renamed file \"%s\" to \"%s\"...\n"),
                 ACE_TEXT (result.c_str ()),
                 ACE_TEXT (new_FQ_file_name.c_str ())));
+  } // end IF
+
+  // sanity check(s)
+  if (!Common_File_Tools::create (result))
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to Common_File_Tools::create(\"%s\"), falling back\n"),
+                ACE_TEXT (result.c_str ())));
+
+    ++fallback_level;
+
+    goto fallback;
+  } // end IF
+  if (!Common_File_Tools::deleteFile (result))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_File_Tools::deleteFile(\"%s\"), aborting\n"),
+                ACE_TEXT (result.c_str ())));
+    return std::string ();
   } // end IF
 
   return result;

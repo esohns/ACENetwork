@@ -38,7 +38,7 @@ Net_Module_ProtocolHandler::Net_Module_ProtocolHandler ()
  : inherited ()
  , pingHandler_ (this,  // dispatch ourselves
                  false) // ping peer at regular intervals...
- , pingInterval_ (0) // [0: --> OFF]
+ , pingInterval_ (ACE_Time_Value::zero) // [0: --> OFF]
  , pingTimerID_ (-1)
  , allocator_ (NULL)
  , automaticPong_ (true)
@@ -79,7 +79,7 @@ Net_Module_ProtocolHandler::~Net_Module_ProtocolHandler ()
 
 bool
 Net_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
-                                        unsigned int pingInterval_in,
+                                        const ACE_Time_Value& pingInterval_in,
                                         bool autoAnswerPings_in,
                                         bool printPongDot_in)
 {
@@ -109,7 +109,7 @@ Net_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
       //              pingTimerID_));
       pingTimerID_ = -1;
     } // end IF
-    pingInterval_ = 0;
+    pingInterval_ = ACE_Time_Value::zero;
 
     allocator_ = NULL;
     automaticPong_ = true;
@@ -243,18 +243,16 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
           session_data_container_r.get ();
       sessionID_ = session_data_r.sessionID;
 
-      if (pingInterval_)
+      if (pingInterval_ != ACE_Time_Value::zero)
       {
-        // schedule ourselves...
-        ACE_Time_Value interval ((pingInterval_ / 1000),
-                                 ((pingInterval_ % 1000) * 1000));
+        // schedule ping interval timer...
         ACE_ASSERT (pingTimerID_ == -1);
         ACE_Event_Handler* handler_p = &pingHandler_;
         pingTimerID_ =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
-                                                                      NULL,                       // ACT
-                                                                      COMMON_TIME_NOW + interval, // first wakeup time
-                                                                      interval);                  // interval
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                       // event handler
+                                                                      NULL,                            // ACT
+                                                                      COMMON_TIME_NOW + pingInterval_, // first wakeup time
+                                                                      pingInterval_);                  // interval
         if (pingTimerID_ == -1)
         {
            ACE_DEBUG ((LM_ERROR,
@@ -266,7 +264,7 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
                     ACE_TEXT ("session %u: scheduled \"ping\" timer (id: %d), interval: %#T...\n"),
                     sessionID_,
                     pingTimerID_,
-                    &interval));
+                    &pingInterval_));
       } // end IF
 
       break;

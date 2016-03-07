@@ -91,22 +91,22 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 //  ACE_ASSERT (about_dialog_p);
 
   // step2: initialize info view
-  GtkSpinButton* spinbutton_p =
+  GtkSpinButton* spin_button_p =
     //GTK_SPIN_BUTTON (glade_xml_get_widget ((*iterator).second.second,
     //                                       ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
-  ACE_ASSERT (spinbutton_p);
-  gtk_spin_button_set_range (spinbutton_p,
+  ACE_ASSERT (spin_button_p);
+  gtk_spin_button_set_range (spin_button_p,
                              0.0,
                              std::numeric_limits<double>::max ());
-  spinbutton_p =
+  spin_button_p =
     //GTK_SPIN_BUTTON (glade_xml_get_widget ((*iterator).second.second,
     //                                       ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME)));
-  ACE_ASSERT (spinbutton_p);
-  gtk_spin_button_set_range (spinbutton_p,
+  ACE_ASSERT (spin_button_p);
+  gtk_spin_button_set_range (spin_button_p,
                              0.0,
                              std::numeric_limits<double>::max ());
 
@@ -140,6 +140,20 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                                                radio_button_name.c_str ()));
   ACE_ASSERT (togglebutton_p);
   gtk_toggle_button_set_active (togglebutton_p, TRUE);
+
+  spin_button_p =
+      //GTK_SPIN_BUTTON (glade_xml_get_widget ((*iterator).second.second,
+      //                                       ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME)));
+      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME)));
+  ACE_ASSERT (spin_button_p);
+  gtk_spin_button_set_range (spin_button_p,
+                             0.0,
+                             std::numeric_limits<double>::max ());
+  unsigned int ping_interval =
+      data_p->clientConfiguration->protocolConfiguration.pingInterval.msec ();
+  gtk_spin_button_set_value (spin_button_p,
+                             static_cast<gdouble> (ping_interval));
 
   // step4: initialize text view, setup auto-scrolling
   GtkTextView* view_p =
@@ -334,6 +348,18 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                         G_CALLBACK (radiobutton_mode_toggled_cb),
                         userData_in);
   ACE_ASSERT (result);
+
+  object_p =
+      gtk_builder_get_object ((*iterator).second.second,
+                              ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME));
+  ACE_ASSERT (object_p);
+  result =
+      g_signal_connect (object_p,
+                        ACE_TEXT_ALWAYS_CHAR ("value-changed"),
+                        G_CALLBACK (spinbutton_ping_interval_value_changed_cb),
+                        userData_in);
+  ACE_ASSERT (result);
+
   //-------------------------------------
   object_p =
       gtk_builder_get_object ((*iterator).second.second,
@@ -398,6 +424,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->serverConfiguration);
 
   //Common_UI_GladeXMLsIterator_t iterator =
   //  data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -430,15 +457,29 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 //  ACE_ASSERT (about_dialog_p);
 
   // step2: initialize info view
-  GtkSpinButton* spinbutton_p =
+  GtkSpinButton* spin_button_p =
     //GTK_SPIN_BUTTON (glade_xml_get_widget ((*iterator).second.second,
     //                                       ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
-  ACE_ASSERT (spinbutton_p);
-  gtk_spin_button_set_range (spinbutton_p,
+  ACE_ASSERT (spin_button_p);
+  gtk_spin_button_set_range (spin_button_p,
                              0.0,
                              std::numeric_limits<double>::max ());
+
+  spin_button_p =
+      //GTK_SPIN_BUTTON (glade_xml_get_widget ((*iterator).second.second,
+      //                                       ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME)));
+      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME)));
+  ACE_ASSERT (spin_button_p);
+  gtk_spin_button_set_range (spin_button_p,
+                             0.0,
+                             std::numeric_limits<double>::max ());
+  unsigned int ping_interval =
+      data_p->serverConfiguration->protocolConfiguration.pingInterval.msec ();
+  gtk_spin_button_set_value (spin_button_p,
+                             static_cast<gdouble> (ping_interval));
 
   // step3: initialize text view, setup auto-scrolling
   GtkTextView* view_p =
@@ -598,6 +639,19 @@ idle_initialize_server_UI_cb (gpointer userData_in)
                         G_CALLBACK (button_report_clicked_cb),
                         userData_in);
   ACE_ASSERT (result);
+
+  object_p =
+      gtk_builder_get_object ((*iterator).second.second,
+                              ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME));
+  ACE_ASSERT (object_p);
+  result =
+      g_signal_connect (object_p,
+                        ACE_TEXT_ALWAYS_CHAR ("value-changed"),
+                        G_CALLBACK (spinbutton_ping_interval_value_changed_cb),
+                        userData_in);
+  ACE_ASSERT (result);
+
+  // -------------------------------------
 
   object_p =
     gtk_builder_get_object ((*iterator).second.second,
@@ -1325,6 +1379,36 @@ button_report_clicked_cb (GtkWidget* widget_in,
 }
 
 // -----------------------------------------------------------------------------
+
+G_MODULE_EXPORT gint
+spinbutton_ping_interval_value_changed_cb (GtkWidget* widget_in,
+                                           gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::spinbutton_ping_interval_value_changed_cb"));
+
+  Net_GTK_CBData* data_p = static_cast<Net_GTK_CBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+//  ACE_ASSERT (data_p->clientConfiguration);
+//  ACE_ASSERT (data_p->serverConfiguration);
+
+//  Common_UI_GladeXMLsIterator_t iterator =
+//    data_p->gladeXML.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+//  // sanity check(s)
+//  ACE_ASSERT (iterator != data_p->gladeXML.end ());
+  GtkSpinButton* spin_button_p = GTK_SPIN_BUTTON (widget_in);
+  ACE_ASSERT (spin_button_p);
+
+  gint value =
+      gtk_spin_button_get_value_as_int (spin_button_p);
+  if (data_p->clientConfiguration)
+    data_p->clientConfiguration->protocolConfiguration.pingInterval.set_msec (value);
+  else
+    data_p->serverConfiguration->protocolConfiguration.pingInterval.set_msec (value);
+
+  return FALSE;
+} // spinbutton_ping_interval_value_changed_cb
 
 G_MODULE_EXPORT gint
 button_clear_clicked_cb (GtkWidget* widget_in,

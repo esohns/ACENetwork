@@ -154,9 +154,9 @@ do_printUsage (const std::string& programName_in)
             << NET_EVENT_USE_REACTOR
             << ACE_TEXT ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-s           : server ping interval (ms) [")
+  std::cout << ACE_TEXT ("-s           : ping interval (ms) [")
             << NET_CLIENT_DEF_SERVER_PING_INTERVAL
-            << ACE_TEXT ("] {0 --> OFF}")
+            << ACE_TEXT ("] {0: OFF}")
             << std::endl;
   std::cout << ACE_TEXT ("-t           : trace information [")
             << false
@@ -192,7 +192,7 @@ do_processArguments (int argc_in,
                      std::string& serverHostname_out,
                      unsigned short& serverPortNumber_out,
                      bool& useReactor_out,
-                     unsigned int& serverPingInterval_out,
+                     ACE_Time_Value& pingInterval_out,
                      bool& traceInformation_out,
                      bool& useUDP_out,
                      bool& printVersionAndExit_out,
@@ -225,7 +225,8 @@ do_processArguments (int argc_in,
   serverHostname_out = NET_CLIENT_DEF_SERVER_HOSTNAME;
   serverPortNumber_out = NET_SERVER_DEFAULT_LISTENING_PORT;
   useReactor_out = NET_EVENT_USE_REACTOR;
-  serverPingInterval_out = NET_CLIENT_DEF_SERVER_PING_INTERVAL;
+  pingInterval_out.set (NET_CLIENT_DEF_SERVER_PING_INTERVAL / 1000,
+                        (NET_CLIENT_DEF_SERVER_PING_INTERVAL % 1000) * 1000);
   traceInformation_out = false;
   useUDP_out = false;
   printVersionAndExit_out = false;
@@ -235,10 +236,10 @@ do_processArguments (int argc_in,
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
                               ACE_TEXT ("ac:g::hi:ln:p:rs:tuvx:y"),
-                              1,                          // skip command name
-                              1,                          // report parsing errors
-                              ACE_Get_Opt::PERMUTE_ARGS,  // ordering
-                              0);                         // for now, don't use long options
+                              1,                         // skip command name
+                              1,                         // report parsing errors
+                              ACE_Get_Opt::PERMUTE_ARGS, // ordering
+                              0);                        // for now, don't use long options
 
   int option = 0;
   std::stringstream converter;
@@ -306,10 +307,13 @@ do_processArguments (int argc_in,
       }
       case 's':
       {
+        unsigned int ping_interval = 0;
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter << argumentParser.opt_arg ();
-        converter >> serverPingInterval_out;
+        converter >> ping_interval;
+        pingInterval_out.set (ping_interval / 1000,
+                              (ping_interval % 1000) * 1000);
         break;
       }
       case 't':
@@ -455,7 +459,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
          const std::string& serverHostname_in,
          unsigned short serverPortNumber_in,
          bool useReactor_in,
-         unsigned int serverPingInterval_in,
+         const ACE_Time_Value& pingInterval_in,
          unsigned int numberOfDispatchThreads_in,
          bool useUDP_in,
          Net_GTK_CBData& CBData_in,
@@ -496,9 +500,9 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                                                   &heap_allocator,         // heap allocator handle
                                                   true);                   // block ?
   // ********************* protocol configuration data *************************
-  configuration.protocolConfiguration.peerPingInterval =
-    ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? 0
-                                                                 : serverPingInterval_in);
+  configuration.protocolConfiguration.pingInterval =
+    ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? ACE_Time_Value::zero
+                                                                 : pingInterval_in);
   configuration.protocolConfiguration.printPongMessages =
     UIDefinitionFile_in.empty ();
   // ********************** stream configuration data **************************
@@ -676,6 +680,10 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     CBData_in.userData = &CBData_in;
 
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
+    result = ACE_OS::sleep (ACE_Time_Value (1, 0));
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
     if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -708,9 +716,6 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
   // step1b: initialize worker(s)
   int group_id = -1;
-  // *NOTE*: this variable needs to stay on the working stack, it's passed to
-  //         the worker(s) (if any)
-  bool use_reactor = useReactor_in;
   if (!Common_Tools::startEventDispatch (thread_data,
                                          group_id))
   {
@@ -965,8 +970,8 @@ ACE_TMAIN (int argc_in,
   unsigned short server_port_number =
    NET_SERVER_DEFAULT_LISTENING_PORT;
   bool use_reactor = NET_EVENT_USE_REACTOR;
-  unsigned int server_ping_interval =
-   NET_CLIENT_DEF_SERVER_PING_INTERVAL;
+  ACE_Time_Value ping_interval (NET_CLIENT_DEF_SERVER_PING_INTERVAL / 1000,
+                                (NET_CLIENT_DEF_SERVER_PING_INTERVAL % 1000) * 1000);
   bool trace_information = false;
   bool use_UDP = false;
   bool print_version_and_exit = false;
@@ -986,7 +991,7 @@ ACE_TMAIN (int argc_in,
                             server_hostname,
                             server_port_number,
                             use_reactor,
-                            server_ping_interval,
+                            ping_interval,
                             trace_information,
                             use_UDP,
                             print_version_and_exit,
@@ -1017,7 +1022,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
   if ((!UI_file.empty () && !Common_File_Tools::isReadable (UI_file))       ||
       (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool) ||
-      (run_stress_test && ((server_ping_interval != 0) ||
+      (run_stress_test && ((ping_interval != ACE_Time_Value::zero) ||
                            (connection_interval != 0)))                     ||
       (alternating_mode && run_stress_test))
   {
@@ -1212,7 +1217,7 @@ ACE_TMAIN (int argc_in,
            server_hostname,
            server_port_number,
            use_reactor,
-           server_ping_interval,
+           ping_interval,
            number_of_dispatch_threads,
            use_UDP,
            gtk_cb_user_data,

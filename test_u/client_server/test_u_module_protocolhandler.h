@@ -48,10 +48,10 @@ class Net_Module_ProtocolHandler
   virtual ~Net_Module_ProtocolHandler ();
 
   // initialization
-  bool initialize (Stream_IAllocator*,  // message allocator
-                   unsigned int = 0, // peer "ping" interval (ms) [0 --> OFF]
-                   bool = true,      // automatically reply to "ping" messages (auto-"pong")
-                   bool = false);    // print dot ('.') for every received "pong" to stdlog
+  bool initialize (Stream_IAllocator*,                           // allocator
+                   const ACE_Time_Value& = ACE_Time_Value::zero, // "ping" interval {0: OFF}
+                   bool = true,                                  // auto-"pong" ?
+                   bool = false);                                // '.' to stdout for every received "pong" ?
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Net_Message*&, // data message handle
@@ -78,7 +78,7 @@ class Net_Module_ProtocolHandler
 
   // timer
   Common_TimerHandler pingHandler_;
-  unsigned int        pingInterval_;
+  ACE_Time_Value      pingInterval_;
   long                pingTimerID_;
 
   Stream_IAllocator*  allocator_;
