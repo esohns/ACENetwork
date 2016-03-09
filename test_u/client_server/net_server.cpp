@@ -1039,6 +1039,7 @@ ACE_TMAIN (int argc_in,
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
                                          // is off
+  gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
 
   // step1d: initialize logging and/or tracing
   Common_Logger logger (&gtk_cb_user_data.logStack,

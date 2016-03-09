@@ -21,6 +21,7 @@
 
 #include "net_server_common_tools.h"
 
+#include "ace/ACE.h"
 #include "ace/Dirent_Selector.h"
 #include "ace/Log_Msg.h"
 
@@ -111,7 +112,7 @@ fallback:
     result = directory;
     result += ACE_DIRECTORY_SEPARATOR_STR;
     result +=
-        ACE_TEXT_ALWAYS_CHAR (ACE::basename (filename.c_str (),
+        ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (filename.c_str ()),
                                              ACE_DIRECTORY_SEPARATOR_CHAR));
     result += COMMON_LOG_FILENAME_SUFFIX;
 
@@ -175,8 +176,9 @@ fallback:
        i--)
   {
     // perform "special treatment" if "<PREFIX><SUFFIX>" found
-    if (ACE_OS::strcmp (entries[i]->d_name,
-                        result.c_str ()) == 0)
+    result_2 = ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR (entries[i]->d_name),
+                               result.c_str ());
+    if (result_2 == 0)
     {
       found_current = true;
 

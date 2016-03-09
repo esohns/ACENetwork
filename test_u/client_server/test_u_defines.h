@@ -29,8 +29,10 @@
 #define NET_UI_GTK_UI_FILE_DIRECTORY                    "etc"
 
 #define NET_UI_GTKEVENT_RESOLUTION                      200 // ms --> 5 FPS
+#define NET_UI_GTK_PROGRESSBAR_NAME                     "progressbar"
 #define NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME       "spinbutton_connections"
 #define NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME          "spinbutton_messages"
+#define NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME   "spinbutton_session_messages"
 #define NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME         "spinbutton_ping_interval"
 #define NET_UI_GTK_TEXTVIEW_NAME                        "textview"
 #define NET_UI_GTK_ADJUSTMENT_NAME                      "scrolledwindow_vadjustment"
@@ -71,6 +73,10 @@
 #define NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_LABEL      "normal"
 #define NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_LABEL "alternating"
 #define NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_LABEL      "stress"
+
+// GTK progress/status bar
+#define NET_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL          27 // ms (?)
+#define NET_UI_GTK_STATUSBAR_CONTEXT_DESCRIPTION        "Network::main"
 
 // define behaviour
 #define NET_CLIENT_U_TEST_CONNECT_PROBABILITY           0.5F // 50%

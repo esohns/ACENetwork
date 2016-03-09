@@ -61,6 +61,23 @@ enum Net_GTK_Event
 typedef std::deque<Net_GTK_Event> Net_GTK_Events_t;
 typedef Net_GTK_Events_t::const_iterator Net_GTK_EventsIterator_t;
 
+struct Net_GTK_ProgressData
+{
+  inline Net_GTK_ProgressData ()
+   : /*cursorType (GDK_LAST_CURSOR)
+   ,*/ GTKState (NULL)
+   , statistic ()
+   , transferred (0)
+   , size (0)
+  {};
+
+  //GdkCursorType       cursorType;
+  Common_UI_GTKState* GTKState;
+  Stream_Statistic    statistic;
+  size_t              transferred; // bytes
+  size_t              size; // bytes
+};
+
 struct Net_GTK_CBData
  : Common_UI_GTKState
 {
@@ -70,6 +87,8 @@ struct Net_GTK_CBData
    , clientConfiguration (NULL)
    , eventStack ()
    , logStack ()
+   , progressData ()
+   , progressEventSourceID (0)
    , serverConfiguration (NULL)
    , stackLock ()
    , subscribers ()
@@ -80,6 +99,8 @@ struct Net_GTK_CBData
   Net_Client_Configuration*  clientConfiguration;
   Net_GTK_Events_t           eventStack;
   Common_MessageStack_t      logStack;
+  Net_GTK_ProgressData       progressData;
+  guint                      progressEventSourceID;
   Net_Server_Configuration*  serverConfiguration;
   ACE_SYNCH_RECURSIVE_MUTEX  stackLock;
   Net_Subscribers_t          subscribers;

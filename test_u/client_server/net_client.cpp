@@ -1066,6 +1066,7 @@ ACE_TMAIN (int argc_in,
     action_mode = Net_Client_TimeoutHandler::ACTION_STRESS;
 
   Net_GTK_CBData gtk_cb_user_data;
+  gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
   // step1d: initialize logging and/or tracing
   Common_Logger logger (&gtk_cb_user_data.logStack,
                         &gtk_cb_user_data.lock);

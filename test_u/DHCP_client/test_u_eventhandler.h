@@ -37,7 +37,7 @@ class Test_U_EventHandler
   virtual ~Test_U_EventHandler ();
 
   // implement Common_INotify_T
-  virtual void start (const Test_U_StreamSessionData_t&);
+  virtual void start (const Test_U_StreamSessionData&);
   virtual void notify (const Test_U_Message&);
   virtual void notify (const Test_U_SessionMessage&);
   virtual void end ();
@@ -47,8 +47,8 @@ class Test_U_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator= (const Test_U_EventHandler&))
 
-  Test_U_GTK_CBData*          CBData_;
-  Test_U_StreamSessionData_t* sessionData_;
+  Test_U_GTK_CBData*        CBData_;
+  Test_U_StreamSessionData* sessionData_;
 };
 
 #endif
