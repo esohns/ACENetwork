@@ -55,16 +55,11 @@ IRC_Module_Bisector_T<LockType,
               false, // inactive by default
               false, // DON'T auto-start !
               false) // do not run the svc() routine on start
- , statisticCollectHandler_ (ACTION_COLLECT,
-                             this,
-                             false)
- , statisticCollectHandlerID_ (-1)
  , bufferState_ (NULL)
  , context_ (NULL)
  , numberOfFrames_ (0)
  , buffer_ (NULL)
  , messageLength_ (0)
- , isInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::IRC_Module_Bisector_T"));
 
@@ -100,17 +95,6 @@ IRC_Module_Bisector_T<LockType,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::~IRC_Module_Bisector_T"));
 
-  // clean up timer if necessary
-  if (statisticCollectHandlerID_ != -1)
-  {
-    int result =
-     COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statisticCollectHandlerID_);
-    if (result <= 0)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                  statisticCollectHandlerID_));
-  } // end IF
-
   // fini scanner context
   if (context_)
     IRC_Bisector_lex_destroy (context_);
@@ -144,25 +128,16 @@ IRC_Module_Bisector_T<LockType,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::initialize"));
 
+  bool result = false;
+
   // sanity check(s)
   ACE_ASSERT (configuration_in.streamConfiguration);
 
-  if (isInitialized_)
+  if (inherited::initialized_)
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
 
-    // clean up
-    if (statisticCollectHandlerID_ != -1)
-    {
-      int result =
-       COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (statisticCollectHandlerID_);
-      if (result <= 0)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                    statisticCollectHandlerID_));
-      statisticCollectHandlerID_ = -1;
-    } // end IF
     numberOfFrames_ = 0;
     if (bufferState_)
     {
@@ -175,32 +150,7 @@ IRC_Module_Bisector_T<LockType,
     buffer_ = NULL;
     messageLength_ = 0;
 //     currentBufferIsResized_ = false;
-    isInitialized_ = false;
   } // end IF
-
-  if (configuration_in.streamConfiguration->statisticReportingInterval != ACE_Time_Value::zero)
-  {
-    // schedule regular statistic collection
-    ACE_ASSERT (statisticCollectHandlerID_ == -1);
-    ACE_Event_Handler* handler_p = &statisticCollectHandler_;
-    statisticCollectHandlerID_ =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule (handler_p,                                                                          // event handler
-                                                            NULL,                                                                               // act
-                                                            COMMON_TIME_NOW + configuration_in.streamConfiguration->statisticReportingInterval, // first wakeup time
-                                                            configuration_in.streamConfiguration->statisticReportingInterval);                  // interval
-    if (statisticCollectHandlerID_ == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Timer_Manager::schedule(): \"%m\", aborting\n")));
-      return false;
-    } // end IF
-//     ACE_DEBUG ((LM_DEBUG,
-//                 ACE_TEXT ("scheduled statistics collecting timer (ID: %d, interval: %#T)...\n"),
-//                 statisticCollectHandlerID_,
-//                 configuration_in.streamConfiguration->statisticReportingInterval));
-  } // end IF
-
-  // *NOTE*: need to clean up timer beyond this point !
 
   //// initialize scanner context
   //if (IRC_Bisectlex_init_extra (&numberOfFrames_, // extra data
@@ -218,15 +168,15 @@ IRC_Module_Bisector_T<LockType,
   IRC_Bisector_set_debug ((configuration_in.traceScanning ? 1 : 0),
                           context_);
 
-  isInitialized_ = inherited::initialize (configuration_in);
-  if (!isInitialized_)
+  result = inherited::initialize (configuration_in);
+  if (!result)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
     return false;
   } // end IF
 
-  return true;
+  return result;
 }
 
 template <typename LockType,
@@ -262,8 +212,7 @@ IRC_Module_Bisector_T<LockType,
   passMessageDownstream_out = false;
 
   // sanity check(s)
-  ACE_ASSERT (message_inout);
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (inherited::initialized_);
 
   // perhaps part of this message has already been received ?
   if (buffer_)
@@ -494,7 +443,7 @@ IRC_Module_Bisector_T<LockType,
 
   // sanity check(s)
   ACE_ASSERT (message_inout);
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (inherited::initialized_);
 
   switch (message_inout->type ())
   {
@@ -549,7 +498,7 @@ IRC_Module_Bisector_T<LockType,
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::collect"));
 
   // sanity check(s)
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (inherited::initialized_);
 
   // step1: initialize info container POD
   data_out.bytes = 0.0;
@@ -560,7 +509,7 @@ IRC_Module_Bisector_T<LockType,
   // *NOTE*: information is collected by the statistic module (if any)
 
   // step1: send the container downstream
-  if (!putStatisticMessage (data_out)) // data container
+  if (!inherited::putStatisticMessage (data_out)) // data container
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to putStatisticMessage(SESSION_STATISTICS), aborting\n")));
@@ -570,107 +519,101 @@ IRC_Module_Bisector_T<LockType,
   return true;
 }
 
-template <typename LockType,
-          typename TaskSynchType,
-          typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType>
-void
-IRC_Module_Bisector_T<LockType,
-                      TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType,
-                      ConfigurationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::report"));
+//template <typename LockType,
+//          typename TaskSynchType,
+//          typename TimePolicyType,
+//          typename SessionMessageType,
+//          typename ProtocolMessageType,
+//          typename ConfigurationType,
+//          typename StreamStateType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename StatisticContainerType>
+//void
+//IRC_Module_Bisector_T<LockType,
+//                      TaskSynchType,
+//                      TimePolicyType,
+//                      SessionMessageType,
+//                      ProtocolMessageType,
+//                      ConfigurationType,
+//                      StreamStateType,
+//                      SessionDataType,
+//                      SessionDataContainerType,
+//                      StatisticContainerType>::report () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::report"));
+//
+//  ACE_ASSERT (false);
+//  ACE_NOTSUP;
+//  ACE_NOTREACHED (return);
+//}
 
-  // sanity check(s)
-  ACE_ASSERT (isInitialized_);
-
-  // *TODO*: support (local) reporting here as well ?
-  //         --> leave this to any downstream modules...
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return);
-}
-
-template <typename LockType,
-          typename TaskSynchType,
-          typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType>
-bool
-IRC_Module_Bisector_T<LockType,
-                      TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType,
-                      ConfigurationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::putStatisticMessage"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->streamConfiguration);
-
-//  // step1: initialize session data
-//  IRC_StreamSessionData* session_data_p = NULL;
-//  ACE_NEW_NORETURN (session_data_p,
-//                    IRC_StreamSessionData ());
-//  if (!session_data_p)
-//  {
-//    ACE_DEBUG ((LM_CRITICAL,
-//                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//    return false;
-//  } // end IF
-//  //ACE_OS::memset (data_p, 0, sizeof (IRC_SessionData));
-  SessionDataType& session_data_r =
-      const_cast<SessionDataType&> (inherited::sessionData_->get ());
-  session_data_r.currentStatistic = statisticData_in;
-
-//  // step2: allocate session data container
-//  IRC_StreamSessionData_t* session_data_container_p = NULL;
-//  // *NOTE*: fire-and-forget stream_session_data_p
-//  ACE_NEW_NORETURN (session_data_container_p,
-//                    IRC_StreamSessionData_t (stream_session_data_p,
-//                                                    true));
-//  if (!session_data_container_p)
-//  {
-//    ACE_DEBUG ((LM_CRITICAL,
-//                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-
-//    // clean up
-//    delete stream_session_data_p;
-
-//    return false;
-//  } // end IF
-
-  // step3: send the data downstream...
-  // *NOTE*: fire-and-forget session_data_container_p
-  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
-                                       *inherited::sessionData_,
-                                       inherited::configuration_->streamConfiguration->messageAllocator);
-}
+//template <typename LockType,
+//          typename TaskSynchType,
+//          typename TimePolicyType,
+//          typename SessionMessageType,
+//          typename ProtocolMessageType,
+//          typename ConfigurationType,
+//          typename StreamStateType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename StatisticContainerType>
+//bool
+//IRC_Module_Bisector_T<LockType,
+//                      TaskSynchType,
+//                      TimePolicyType,
+//                      SessionMessageType,
+//                      ProtocolMessageType,
+//                      ConfigurationType,
+//                      StreamStateType,
+//                      SessionDataType,
+//                      SessionDataContainerType,
+//                      StatisticContainerType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::putStatisticMessage"));
+//
+//  // sanity check(s)
+//  ACE_ASSERT (inherited::configuration_);
+//  ACE_ASSERT (inherited::configuration_->streamConfiguration);
+//
+////  // step1: initialize session data
+////  IRC_StreamSessionData* session_data_p = NULL;
+////  ACE_NEW_NORETURN (session_data_p,
+////                    IRC_StreamSessionData ());
+////  if (!session_data_p)
+////  {
+////    ACE_DEBUG ((LM_CRITICAL,
+////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+////    return false;
+////  } // end IF
+////  //ACE_OS::memset (data_p, 0, sizeof (IRC_SessionData));
+//  SessionDataType& session_data_r =
+//      const_cast<SessionDataType&> (inherited::sessionData_->get ());
+//  session_data_r.currentStatistic = statisticData_in;
+//
+////  // step2: allocate session data container
+////  IRC_StreamSessionData_t* session_data_container_p = NULL;
+////  // *NOTE*: fire-and-forget stream_session_data_p
+////  ACE_NEW_NORETURN (session_data_container_p,
+////                    IRC_StreamSessionData_t (stream_session_data_p,
+////                                                    true));
+////  if (!session_data_container_p)
+////  {
+////    ACE_DEBUG ((LM_CRITICAL,
+////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+//
+////    // clean up
+////    delete stream_session_data_p;
+//
+////    return false;
+////  } // end IF
+//
+//  // step3: send the data downstream...
+//  // *NOTE*: fire-and-forget session_data_container_p
+//  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
+//                                       *inherited::sessionData_,
+//                                       inherited::configuration_->streamConfiguration->messageAllocator);
+//}
 
 template <typename LockType,
           typename TaskSynchType,

@@ -23,8 +23,6 @@
 
 #include "ace/Global_Macros.h"
 
-#include "common_istatistic.h"
-
 #include "stream_headmoduletask_base.h"
 #include "stream_streammodule_base.h"
 
@@ -57,21 +55,20 @@ template <typename LockType,
           typename StatisticContainerType>
 class IRC_Module_Bisector_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ///
+                                      ////
                                       TaskSynchType,
                                       TimePolicyType,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ///
+                                      ////
                                       ConfigurationType,
-                                      ///
+                                      ////
                                       StreamStateType,
-                                      ///
+                                      ////
                                       SessionDataType,
-                                      SessionDataContainerType>
-   // implement this to have a generic (timed) event handler to trigger
-   // periodic statistic collection
- , public Common_IStatistic_T<StatisticContainerType>
+                                      SessionDataContainerType,
+                                      ////
+                                      StatisticContainerType>
 {
  public:
   IRC_Module_Bisector_T ();
@@ -80,18 +77,15 @@ class IRC_Module_Bisector_T
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
   using Stream_HeadModuleTaskBase_T<LockType,
-                                    /////
                                     TaskSynchType,
                                     TimePolicyType,
                                     SessionMessageType,
                                     ProtocolMessageType,
-                                    /////
                                     ConfigurationType,
-                                    /////
                                     StreamStateType,
-                                    /////
                                     SessionDataType,
-                                    SessionDataContainerType>::initialize;
+                                    SessionDataContainerType,
+                                    StatisticContainerType>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&);
@@ -107,41 +101,38 @@ class IRC_Module_Bisector_T
   // implement Common_IStatistic
   // *NOTE*: this reuses the interface to implement timer-based data collection
   virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
-  virtual void report () const;
+  //virtual void report () const;
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ///
+                                      ////
                                       TaskSynchType,
                                       TimePolicyType,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ///
+                                      ////
                                       ConfigurationType,
-                                      ///
+                                      ////
                                       StreamStateType,
-                                      ///
+                                      ////
                                       SessionDataType,
-                                      SessionDataContainerType> inherited;
+                                      SessionDataContainerType,
+                                      ////
+                                      StatisticContainerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Bisector_T (const IRC_Module_Bisector_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Bisector_T& operator= (const IRC_Module_Bisector_T&))
 
   // convenience types
-  typedef Stream_StatisticHandler_Reactor_T<StatisticContainerType> STATISTICHANDLER_T;
   //typedef IRC_Client_SessionData SESSIONDATA_T;
 
-  // helper methods
-  bool putStatisticMessage (const StatisticContainerType&) const;
+  //// helper methods
+  //bool putStatisticMessage (const StatisticContainerType&) const;
 
   // helper methods (to drive the scanner)
   bool scan_begin (char*,   // base address
                    size_t); // length of data block
   void scan_end ();
-
-  // timer
-  STATISTICHANDLER_T statisticCollectHandler_;
-  long               statisticCollectHandlerID_;
 
   // scanner
   YY_BUFFER_STATE    bufferState_;
@@ -151,8 +142,6 @@ class IRC_Module_Bisector_T
   // message buffer(s)
   ACE_Message_Block* buffer_; // <-- continuation chain
   unsigned int       messageLength_;
-
-  bool               isInitialized_;
 };
 
 // include template implementation

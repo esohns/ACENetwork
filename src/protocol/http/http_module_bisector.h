@@ -23,8 +23,6 @@
 
 #include "ace/Global_Macros.h"
 
-#include "common_istatistic.h"
-
 #include "stream_headmoduletask_base.h"
 
 //// define/declare the lexer's prototype (see HTTP_bisector.h)
@@ -56,21 +54,20 @@ template <typename LockType,
           typename StatisticContainerType>
 class HTTP_Module_Bisector_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ///
+                                      ////
                                       TaskSynchType,
                                       TimePolicyType,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ///
+                                      ////
                                       ConfigurationType,
-                                      ///
+                                      ////
                                       StreamStateType,
-                                      ///
+                                      ////
                                       SessionDataType,
-                                      SessionDataContainerType>
-   // implement this to have a generic (timed) event handler to trigger
-   // periodic statistic collection
- , public Common_IStatistic_T<StatisticContainerType>
+                                      SessionDataContainerType,
+                                      ////
+                                      StatisticContainerType>
 {
  public:
   HTTP_Module_Bisector_T ();
@@ -97,41 +94,38 @@ class HTTP_Module_Bisector_T
   // implement Common_IStatistic
   // *NOTE*: this reuses the interface to implement timer-based data collection
   virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
-  virtual void report () const;
+  //virtual void report () const;
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ///
+                                      ////
                                       TaskSynchType,
                                       TimePolicyType,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ///
+                                      ////
                                       ConfigurationType,
-                                      ///
+                                      ////
                                       StreamStateType,
-                                      ///
+                                      ////
                                       SessionDataType,
-                                      SessionDataContainerType> inherited;
+                                      SessionDataContainerType,
+                                      ////
+                                      StatisticContainerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T (const HTTP_Module_Bisector_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T& operator= (const HTTP_Module_Bisector_T&))
 
   // convenience types
-  typedef Stream_StatisticHandler_Reactor_T<StatisticContainerType> STATISTICHANDLER_T;
   //typedef HTTP_Client_SessionData SESSIONDATA_T;
 
-  // helper methods
-  bool putStatisticMessage (const StatisticContainerType&) const;
+  //// helper methods
+  //bool putStatisticMessage (const StatisticContainerType&) const;
 
   // helper methods (to drive the scanner)
   bool scan_begin (char*,   // base address
                    size_t); // length of data block
   void scan_end ();
-
-  // timer
-  STATISTICHANDLER_T statisticCollectHandler_;
-  long               statisticCollectHandlerID_;
 
   // scanner
   YY_BUFFER_STATE    bufferState_;
@@ -141,8 +135,6 @@ class HTTP_Module_Bisector_T
   // message buffer(s)
   ACE_Message_Block* buffer_; // <-- continuation chain
   unsigned int       messageLength_;
-
-  bool               isInitialized_;
 };
 
 // include template implementation

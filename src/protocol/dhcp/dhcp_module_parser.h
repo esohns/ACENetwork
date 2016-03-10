@@ -23,8 +23,6 @@
 
 #include "ace/Global_Macros.h"
 
-#include "common_istatistic.h"
-
 #include "stream_headmoduletask_base.h"
 #include "stream_statistichandler.h"
 #include "stream_task_base_synch.h"
@@ -101,21 +99,20 @@ template <typename LockType,
           typename StatisticContainerType>
 class DHCP_Module_ParserH_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ///
+                                      ////
                                       TaskSynchType,
                                       TimePolicyType,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ///
+                                      ////
                                       ConfigurationType,
-                                      ///
+                                      ////
                                       StreamStateType,
-                                      ///
+                                      ////
                                       SessionDataType,
-                                      SessionDataContainerType>
-// implement this to have a generic (timed) event handler to trigger
-// periodic statistic collection
- , public Common_IStatistic_T<StatisticContainerType>
+                                      SessionDataContainerType,
+                                      ////
+                                      StatisticContainerType>
 {
  public:
   DHCP_Module_ParserH_T ();
@@ -124,18 +121,15 @@ class DHCP_Module_ParserH_T
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
   using Stream_HeadModuleTaskBase_T<LockType,
-                                    /////
                                     TaskSynchType,
                                     TimePolicyType,
                                     SessionMessageType,
                                     ProtocolMessageType,
-                                    /////
                                     ConfigurationType,
-                                    /////
                                     StreamStateType,
-                                    /////
                                     SessionDataType,
-                                    SessionDataContainerType>::initialize;
+                                    SessionDataContainerType,
+                                    StatisticContainerType>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&);
@@ -151,22 +145,24 @@ class DHCP_Module_ParserH_T
   // implement Common_IStatistic
   // *NOTE*: this reuses the interface to implement timer-based data collection
   virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
-  virtual void report () const;
+  //virtual void report () const;
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ///
+                                      ////
                                       TaskSynchType,
                                       TimePolicyType,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ///
+                                      ////
                                       ConfigurationType,
-                                      ///
+                                      ////
                                       StreamStateType,
-                                      ///
+                                      ////
                                       SessionDataType,
-                                      SessionDataContainerType> inherited;
+                                      SessionDataContainerType,
+                                      ////
+                                      StatisticContainerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T (const DHCP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T& operator= (const DHCP_Module_ParserH_T&))
@@ -178,19 +174,13 @@ class DHCP_Module_ParserH_T
 //  typedef typename ProtocolMessageType::DATA_T::DATA_T DATA_T;
 
   // helper methods
-  bool putStatisticMessage (const StatisticContainerType&) const;
-
-  // timer
-  STATISTICHANDLER_T statisticCollectHandler_;
-  long               statisticCollectHandlerID_;
+  //bool putStatisticMessage (const StatisticContainerType&) const;
 
   // driver
   bool               debugScanner_;
   bool               debugParser_;
   DHCP_ParserDriver  driver_;
   bool               isDriverInitialized_;
-
-  bool               initialized_;
 };
 
 // include template implementation

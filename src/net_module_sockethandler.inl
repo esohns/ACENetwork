@@ -52,11 +52,6 @@ Net_Module_SocketHandler_T<LockType,
  , currentBuffer_ (NULL)
  , currentMessage_ (NULL)
  , currentMessageLength_ (0)
- , isInitialized_ (false)
- , statisticCollectionHandler_ (ACTION_COLLECT,
-                                this,
-                                false)
- , timerID_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::Net_Module_SocketHandler_T"));
 
@@ -82,24 +77,6 @@ Net_Module_SocketHandler_T<LockType,
                            ProtocolHeaderType>::~Net_Module_SocketHandler_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::~Net_Module_SocketHandler_T"));
-
-  int result = -1;
-
-  if (timerID_ != -1)
-  {
-    const void* act_p = NULL;
-    result =
-        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
-                                                                  &act_p);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                  timerID_));
-    else
-      ACE_DEBUG ((LM_WARNING, // this should happen in END_SESSION
-                  ACE_TEXT ("cancelled timer (ID: %d)\n"),
-                  timerID_));
-  } // end IF
 
   if (currentMessage_)
     currentMessage_->release ();
@@ -127,40 +104,26 @@ Net_Module_SocketHandler_T<LockType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::initialize"));
 
-  int result = -1;
+  bool result = false;
 
-  if (isInitialized_)
+  if (inherited::initialized_)
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
 
-    // clean up
-    if (timerID_ != -1)
-    {
-      const void* act_p = NULL;
-      result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
-                                                                    &act_p);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                    timerID_));
-    } // end IF
-    timerID_ = -1;
     currentMessageLength_ = 0;
     if (currentMessage_)
       currentMessage_->release ();
     currentMessage_ = NULL;
     currentBuffer_ = NULL;
-    isInitialized_ = false;
   } // end IF
 
-  isInitialized_ = inherited::initialize (configuration_in);
-  if (!isInitialized_)
+  result = inherited::initialize (configuration_in);
+  if (!result)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
 
-  return isInitialized_;
+  return result;
 }
 
 template <typename LockType,
@@ -192,8 +155,7 @@ Net_Module_SocketHandler_T<LockType,
   passMessageDownstream_out = false;
 
   // sanity check(s)
-  ACE_ASSERT (message_inout);
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (inherited::initialized_);
 
   // perhaps part of this message has already arrived ?
   if (currentBuffer_)
@@ -256,8 +218,7 @@ Net_Module_SocketHandler_T<LockType,
   // *TODO*: remove type inference
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->streamConfiguration);
-  ACE_ASSERT (message_inout);
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (inherited::initialized_);
 
   switch (message_inout->type ())
   {
@@ -267,14 +228,14 @@ Net_Module_SocketHandler_T<LockType,
       {
         // schedule regular statistics collection...
         ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION_INTERVAL, 0);
-        ACE_ASSERT (timerID_ == -1);
-        ACE_Event_Handler* handler_p = &statisticCollectionHandler_;
-        timerID_ =
+        ACE_ASSERT (inherited::timerID_ == -1);
+        ACE_Event_Handler* handler_p = &(inherited::statisticCollectionHandler_);
+        inherited::timerID_ =
             COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
                                                                         NULL,                       // argument
                                                                         COMMON_TIME_NOW + interval, // first wakeup time
                                                                         interval);                  // interval
-        if (timerID_ == -1)
+        if (inherited::timerID_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(): \"%m\", aborting\n")));
@@ -293,17 +254,17 @@ Net_Module_SocketHandler_T<LockType,
     }
     case STREAM_SESSION_END:
     {
-      if (timerID_ != -1)
+      if (inherited::timerID_ != -1)
       {
         const void* act_p = NULL;
         result =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
+            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (inherited::timerID_,
                                                                       &act_p);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                      timerID_));
-        timerID_ = -1;
+                      inherited::timerID_));
+        inherited::timerID_ = -1;
       } // end IF
 
       break;
@@ -336,7 +297,7 @@ Net_Module_SocketHandler_T<LockType,
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::collect"));
 
   // sanity check(s)
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (inherited::initialized_);
 
   // step0: initialize container
 //  data_out.dataMessages = 0;
@@ -348,7 +309,7 @@ Net_Module_SocketHandler_T<LockType,
   //         (and propagate it downstream ?)
 
   // step1: send the container downstream
-  if (!putStatisticMessage (data_out)) // data container
+  if (!inherited::putStatisticMessage (data_out)) // data container
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Module_SocketHandler_T::putStatisticMessage(), aborting\n")));
@@ -358,33 +319,32 @@ Net_Module_SocketHandler_T<LockType,
   return true;
 }
 
-template <typename LockType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename ProtocolHeaderType>
-void
-Net_Module_SocketHandler_T<LockType,
-                           SessionMessageType,
-                           ProtocolMessageType,
-                           ConfigurationType,
-                           StreamStateType,
-                           SessionDataType,
-                           SessionDataContainerType,
-                           StatisticContainerType,
-                           ProtocolHeaderType>::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::report"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
+//template <typename LockType,
+//          typename SessionMessageType,
+//          typename ProtocolMessageType,
+//          typename ConfigurationType,
+//          typename StreamStateType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename StatisticContainerType,
+//          typename ProtocolHeaderType>
+//void
+//Net_Module_SocketHandler_T<LockType,
+//                           SessionMessageType,
+//                           ProtocolMessageType,
+//                           ConfigurationType,
+//                           StreamStateType,
+//                           SessionDataType,
+//                           SessionDataContainerType,
+//                           StatisticContainerType,
+//                           ProtocolHeaderType>::report () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::report"));
+//
+//  ACE_ASSERT (false);
+//  ACE_NOTSUP;
+//  ACE_NOTREACHED (return;)
+//}
 
 template <typename LockType,
           typename SessionMessageType,
@@ -562,61 +522,61 @@ Net_Module_SocketHandler_T<LockType,
 //   return message_out;
 // }
 
-template <typename LockType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename ProtocolHeaderType>
-bool
-Net_Module_SocketHandler_T<LockType,
-                           SessionMessageType,
-                           ProtocolMessageType,
-                           ConfigurationType,
-                           StreamStateType,
-                           SessionDataType,
-                           SessionDataContainerType,
-                           StatisticContainerType,
-                           ProtocolHeaderType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::putStatisticMessage"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
-  // *TODO*: remove type inferences
-  ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->streamConfiguration);
-
-  // step1: update session state
-  // *TODO*: remove type inferences
-  SessionDataType& session_data_r =
-      const_cast<SessionDataType&> (inherited::sessionData_->get ());
-  session_data_r.currentStatistic = statisticData_in;
-
-  // *TODO*: attach stream state information to the session data
-
-//  // step2: create session data object container
-//  SessionDataContainerType* session_data_p = NULL;
-//  ACE_NEW_NORETURN (session_data_p,
-//                    SessionDataContainerType (inherited::sessionData_,
-//                                              false));
-//  if (!session_data_p)
-//  {
-//    ACE_DEBUG ((LM_CRITICAL,
-//                ACE_TEXT ("failed to allocate SessionDataContainerType: \"%m\", aborting\n")));
-//    return false;
-//  } // end IF
-
-  // step3: send the statistic data downstream
-  // *NOTE*: fire-and-forget session_data_p here
-  // *TODO*: remove type inference
-  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
-                                       *inherited::sessionData_,
-                                       inherited::configuration_->streamConfiguration->messageAllocator);
-}
+//template <typename LockType,
+//          typename SessionMessageType,
+//          typename ProtocolMessageType,
+//          typename ConfigurationType,
+//          typename StreamStateType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename StatisticContainerType,
+//          typename ProtocolHeaderType>
+//bool
+//Net_Module_SocketHandler_T<LockType,
+//                           SessionMessageType,
+//                           ProtocolMessageType,
+//                           ConfigurationType,
+//                           StreamStateType,
+//                           SessionDataType,
+//                           SessionDataContainerType,
+//                           StatisticContainerType,
+//                           ProtocolHeaderType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::putStatisticMessage"));
+//
+//  // sanity check(s)
+//  ACE_ASSERT (inherited::sessionData_);
+//  // *TODO*: remove type inferences
+//  ACE_ASSERT (inherited::configuration_);
+//  ACE_ASSERT (inherited::configuration_->streamConfiguration);
+//
+//  // step1: update session state
+//  // *TODO*: remove type inferences
+//  SessionDataType& session_data_r =
+//      const_cast<SessionDataType&> (inherited::sessionData_->get ());
+//  session_data_r.currentStatistic = statisticData_in;
+//
+//  // *TODO*: attach stream state information to the session data
+//
+////  // step2: create session data object container
+////  SessionDataContainerType* session_data_p = NULL;
+////  ACE_NEW_NORETURN (session_data_p,
+////                    SessionDataContainerType (inherited::sessionData_,
+////                                              false));
+////  if (!session_data_p)
+////  {
+////    ACE_DEBUG ((LM_CRITICAL,
+////                ACE_TEXT ("failed to allocate SessionDataContainerType: \"%m\", aborting\n")));
+////    return false;
+////  } // end IF
+//
+//  // step3: send the statistic data downstream
+//  // *NOTE*: fire-and-forget session_data_p here
+//  // *TODO*: remove type inference
+//  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
+//                                       *inherited::sessionData_,
+//                                       inherited::configuration_->streamConfiguration->messageAllocator);
+//}
 
 /////////////////////////////////////////
 
@@ -638,11 +598,6 @@ Net_Module_UDPSocketHandler_T<LockType,
                               StatisticContainerType>::Net_Module_UDPSocketHandler_T ()
  : inherited (false, // inactive by default
               false) // DON'T auto-start !
- , isInitialized_ (false)
- , statisticCollectionHandler_ (ACTION_COLLECT,
-                                this,
-                                false)
- , timerID_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::Net_Module_UDPSocketHandler_T"));
 
@@ -667,23 +622,6 @@ Net_Module_UDPSocketHandler_T<LockType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::~Net_Module_UDPSocketHandler_T"));
 
-  // clean up timer if necessary
-  if (timerID_ != -1)
-  {
-    const void* act = NULL;
-    int result = -1;
-    result =
-        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
-                                                                  &act);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                  timerID_));
-    else
-      ACE_DEBUG ((LM_WARNING,
-                  ACE_TEXT ("cancelled timer (ID: %d)\n"),
-                  timerID_));
-  } // end IF
 }
 
 template <typename LockType,
@@ -706,34 +644,20 @@ Net_Module_UDPSocketHandler_T<LockType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::initialize"));
 
-  if (isInitialized_)
+  bool result = false;
+
+  if (inherited::initialized_)
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
-
-    // clean up
-    if (timerID_ != -1)
-    {
-      const void* act_p = NULL;
-      int result = -1;
-      result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
-                                                                    &act_p);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                    timerID_));
-    } // end IF
-    timerID_ = -1;
-    isInitialized_ = false;
   } // end IF
 
-  isInitialized_ = inherited::initialize (configuration_in);
-  if (!isInitialized_)
+  result = inherited::initialize (configuration_in);
+  if (!result)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
 
-  return isInitialized_;
+  return result;
 }
 
 //template <typename StreamStateType,
@@ -815,8 +739,7 @@ Net_Module_UDPSocketHandler_T<LockType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_.streamConfiguration);
-  ACE_ASSERT (message_inout);
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (inherited::initialized_);
 
   switch (message_inout->getType ())
   {
@@ -826,14 +749,14 @@ Net_Module_UDPSocketHandler_T<LockType,
       {
         // schedule regular statistics collection...
         ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION_INTERVAL, 0);
-        ACE_ASSERT (timerID_ == -1);
-        ACE_Event_Handler* handler_p = &statisticCollectionHandler_;
-        timerID_ =
+        ACE_ASSERT (inherited::timerID_ == -1);
+        ACE_Event_Handler* handler_p = &(inherited::statisticCollectionHandler_);
+        inherited::timerID_ =
             COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
                                                                         NULL,                       // argument
                                                                         COMMON_TIME_NOW + interval, // first wakeup time
                                                                         interval);                  // interval
-        if (timerID_ == -1)
+        if (inherited::timerID_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(): \"%m\", returning\n")));
@@ -852,18 +775,18 @@ Net_Module_UDPSocketHandler_T<LockType,
     }
     case STREAM_SESSION_END:
     {
-      if (timerID_ != -1)
+      if (inherited::timerID_ != -1)
       {
         int result = -1;
         const void* act_p = NULL;
         result =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerID_,
+            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (inherited::timerID_,
                                                                       &act_p);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                      timerID_));
-        timerID_ = -1;
+                      inherited::timerID_));
+        inherited::timerID_ = -1;
       } // end IF
 
       break;
@@ -894,7 +817,7 @@ Net_Module_UDPSocketHandler_T<LockType,
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::collect"));
 
   // sanity check(s)
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (inherited::initialized_);
 
   // step0: initialize container
   ACE_OS::memset (&data_out, 0, sizeof (data_out));
@@ -903,8 +826,8 @@ Net_Module_UDPSocketHandler_T<LockType,
   //         (and propagate it downstream ?)
 
   // step1: send the container downstream
-  if (!putStatisticsMessage (data_out,               // data container
-                             COMMON_TIME_NOW)) // timestamp
+  if (!inherited::putStatisticsMessage (data_out,               // data container
+                                        COMMON_TIME_NOW)) // timestamp
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to putSessionMessage(SESSION_STATISTICS), aborting\n")));
@@ -914,31 +837,30 @@ Net_Module_UDPSocketHandler_T<LockType,
   return true;
 }
 
-template <typename LockType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType>
-void
-Net_Module_UDPSocketHandler_T<LockType,
-                              SessionMessageType,
-                              ProtocolMessageType,
-                              ConfigurationType,
-                              StreamStateType,
-                              SessionDataType,
-                              SessionDataContainerType,
-                              StatisticContainerType>::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::report"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
+//template <typename LockType,
+//          typename SessionMessageType,
+//          typename ProtocolMessageType,
+//          typename ConfigurationType,
+//          typename StreamStateType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename StatisticContainerType>
+//void
+//Net_Module_UDPSocketHandler_T<LockType,
+//                              SessionMessageType,
+//                              ProtocolMessageType,
+//                              ConfigurationType,
+//                              StreamStateType,
+//                              SessionDataType,
+//                              SessionDataContainerType,
+//                              StatisticContainerType>::report () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::report"));
+//
+//  ACE_ASSERT (false);
+//  ACE_NOTSUP;
+//  ACE_NOTREACHED (return;)
+//}
 
 //template <typename StreamStateType,
 //          typename SessionDataType,          // session data
@@ -973,47 +895,47 @@ Net_Module_UDPSocketHandler_T<LockType,
 //   return message_out;
 // }
 
-template <typename LockType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType>
-bool
-Net_Module_UDPSocketHandler_T<LockType,
-                              SessionMessageType,
-                              ProtocolMessageType,
-                              ConfigurationType,
-                              StreamStateType,
-                              SessionDataType,
-                              SessionDataContainerType,
-                              StatisticContainerType>::putStatisticsMessage (const StatisticContainerType& statistic_in) const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::putStatisticsMessage"));
-
-  // step1: initialize information object
-  inherited::state_->sessionData.currentStatistic = statistic_in;
-
-  // *TODO*: attach stream state information to the session data
-
-  // step2: create session data object container
-  SessionDataContainerType* session_data_p = NULL;
-  ACE_NEW_NORETURN (session_data_p,
-                    SessionDataContainerType (inherited::sessionData_,
-                                              false));
-  if (!session_data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate SessionDataContainerType: \"%m\", aborting\n")));
-    return false;
-  } // end IF
-
-  // step3: send the data downstream
-  // *NOTE*: this is a "fire-and-forget" API, so don't worry about
-  //         session_data_p
-  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
-                                       session_data_p,
-                                       inherited::allocator_);
-}
+//template <typename LockType,
+//          typename SessionMessageType,
+//          typename ProtocolMessageType,
+//          typename ConfigurationType,
+//          typename StreamStateType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename StatisticContainerType>
+//bool
+//Net_Module_UDPSocketHandler_T<LockType,
+//                              SessionMessageType,
+//                              ProtocolMessageType,
+//                              ConfigurationType,
+//                              StreamStateType,
+//                              SessionDataType,
+//                              SessionDataContainerType,
+//                              StatisticContainerType>::putStatisticsMessage (const StatisticContainerType& statistic_in) const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::putStatisticsMessage"));
+//
+//  // step1: initialize information object
+//  inherited::state_->sessionData.currentStatistic = statistic_in;
+//
+//  // *TODO*: attach stream state information to the session data
+//
+//  // step2: create session data object container
+//  SessionDataContainerType* session_data_p = NULL;
+//  ACE_NEW_NORETURN (session_data_p,
+//                    SessionDataContainerType (inherited::sessionData_,
+//                                              false));
+//  if (!session_data_p)
+//  {
+//    ACE_DEBUG ((LM_CRITICAL,
+//                ACE_TEXT ("failed to allocate SessionDataContainerType: \"%m\", aborting\n")));
+//    return false;
+//  } // end IF
+//
+//  // step3: send the data downstream
+//  // *NOTE*: this is a "fire-and-forget" API, so don't worry about
+//  //         session_data_p
+//  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
+//                                       session_data_p,
+//                                       inherited::allocator_);
+//}

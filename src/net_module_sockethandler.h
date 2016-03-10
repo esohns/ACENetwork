@@ -24,7 +24,6 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common_istatistic.h"
 #include "common_time_common.h"
 
 #include "stream_common.h"
@@ -50,19 +49,20 @@ template <typename LockType,                 // connection stream state machine 
           typename ProtocolHeaderType>
 class Net_Module_SocketHandler_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ///
+                                      ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ///
+                                      ////
                                       ConfigurationType,
-                                      ///
+                                      ////
                                       StreamStateType,
-                                      ///
+                                      ////
                                       SessionDataType,
-                                      SessionDataContainerType>
- , public Common_IStatistic_T<StatisticContainerType>
+                                      SessionDataContainerType,
+                                      ////
+                                      StatisticContainerType>
 {
  public:
   Net_Module_SocketHandler_T ();
@@ -79,7 +79,8 @@ class Net_Module_SocketHandler_T
                                     ConfigurationType,
                                     StreamStateType,
                                     SessionDataType,
-                                    SessionDataContainerType>::initialize;
+                                    SessionDataContainerType,
+                                    StatisticContainerType>::initialize;
   using Stream_StateMachine_Control_T<LockType>::initialize;
 #endif
 
@@ -97,24 +98,26 @@ class Net_Module_SocketHandler_T
                                      bool&);               // return value: pass message downstream ?
 
   // implement Common_IStatistic
-  // *NOTE*: implements regular (timer-based) statistics collection
+  // *NOTE*: implements regular (timer-based) statistic collection
   virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
-  virtual void report () const;
+  //virtual void report () const;
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ///
+                                      ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ///
+                                      ////
                                       ConfigurationType,
-                                      ///
+                                      ////
                                       StreamStateType,
-                                      ///
+                                      ////
                                       SessionDataType,
-                                      SessionDataContainerType> inherited;
+                                      SessionDataContainerType,
+                                      ////
+                                      StatisticContainerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Module_SocketHandler_T (const Net_Module_SocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Module_SocketHandler_T& operator= (const Net_Module_SocketHandler_T&))
@@ -125,15 +128,9 @@ class Net_Module_SocketHandler_T
   bool putStatisticMessage (const StatisticContainerType&) const; // statistics info
 
   // protocol
-  ProtocolMessageType*              currentBuffer_;
-  ProtocolMessageType*              currentMessage_;
-  unsigned int                      currentMessageLength_;
-
-  bool                              isInitialized_;
-
-  // timer
-  Stream_StatisticHandler_Reactor_t statisticCollectionHandler_;
-  long                              timerID_;
+  ProtocolMessageType* currentBuffer_;
+  ProtocolMessageType* currentMessage_;
+  unsigned int         currentMessageLength_;
 };
 
 /////////////////////////////////////////
@@ -153,19 +150,20 @@ template <typename LockType,
           typename StatisticContainerType>
 class Net_Module_UDPSocketHandler_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ///
+                                      ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ///
+                                      ////
                                       ConfigurationType,
-                                      ///
+                                      ////
                                       StreamStateType,
-                                      ///
+                                      ////
                                       SessionDataType,
-                                      SessionDataContainerType>
- , public Common_IStatistic_T<StatisticContainerType>
+                                      SessionDataContainerType,
+                                      ////
+                                      StatisticContainerType>
 {
  public:
   Net_Module_UDPSocketHandler_T ();
@@ -185,36 +183,32 @@ class Net_Module_UDPSocketHandler_T
                                      bool&);               // return value: pass message downstream ?
 
   // implement Common_IStatistic
-  // *NOTE*: implements regular (timer-based) statistics collection
+  // *NOTE*: implements regular (timer-based) statistic collection
   virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
-  virtual void report () const;
+  //virtual void report () const;
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ///
+                                      ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ///
+                                      ////
                                       ConfigurationType,
-                                      ///
+                                      ////
                                       StreamStateType,
-                                      ///
+                                      ////
                                       SessionDataType,
-                                      SessionDataContainerType> inherited;
+                                      SessionDataContainerType,
+                                      ////
+                                      StatisticContainerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T (const Net_Module_UDPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T& operator= (const Net_Module_UDPSocketHandler_T&))
 
-  // helper methods
-  bool putStatisticsMessage (const StatisticContainerType&) const; // statistics info
-
-  bool                              isInitialized_;
-
-  // timer
-  Stream_StatisticHandler_Reactor_t statisticCollectionHandler_;
-  long                              timerID_;
+  //// helper methods
+  //bool putStatisticsMessage (const StatisticContainerType&) const; // statistics info
 };
 
 // include template implementation
