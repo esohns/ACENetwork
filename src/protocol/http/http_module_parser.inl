@@ -694,7 +694,7 @@ HTTP_Module_ParserH_T<LockType,
 //     message->dump_state();
 
     // step1: get a new message buffer
-    message_p = allocateMessage (HTTP_BUFFER_SIZE);
+    message_p = inherited::allocateMessage (HTTP_BUFFER_SIZE);
     if (!message_p)
     {
       ACE_DEBUG ((LM_ERROR,

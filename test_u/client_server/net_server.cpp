@@ -677,9 +677,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // step4b: initialize worker(s)
   int group_id = -1;
-  // *NOTE*: this variable needs to stay on the working stack, it's passed to
-  //         the worker(s) (if any)
-  bool use_reactor = useReactor_in;
   if (!Common_Tools::startEventDispatch (thread_data,
                                          group_id))
   {

@@ -151,7 +151,6 @@ HTTP_Module_Bisector_T<LockType,
     buffer_ = NULL;
     messageLength_ = 0;
 //     currentBufferIsResized_ = false;
-    isInitialized_ = false;
   } // end IF
 
   // *NOTE*: need to clean up timer beyond this point !

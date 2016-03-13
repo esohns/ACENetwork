@@ -226,8 +226,8 @@ Net_Module_SocketHandler_T<LockType,
     {
       if (inherited::configuration_->streamConfiguration->statisticReportingInterval)
       {
-        // schedule regular statistics collection...
-        ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION_INTERVAL, 0);
+        // schedule regular statistic collection
+        ACE_Time_Value interval (STREAM_DEFAULT_STATISTIC_COLLECTION_INTERVAL, 0);
         ACE_ASSERT (inherited::timerID_ == -1);
         ACE_Event_Handler* handler_p = &(inherited::statisticCollectionHandler_);
         inherited::timerID_ =
@@ -241,10 +241,10 @@ Net_Module_SocketHandler_T<LockType,
                       ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(): \"%m\", aborting\n")));
           return;
         } // end IF
-        //        ACE_DEBUG ((LM_DEBUG,
-        //                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for interval %#T...\n"),
-        //                    timerID_,
-        //                    &interval));
+//        ACE_DEBUG ((LM_DEBUG,
+//                    ACE_TEXT ("scheduled statistic collecting timer (ID: %d) for interval %#T...\n"),
+//                    timerID_,
+//                    &interval));
       } // end IF
 
 //      // start profile timer...
@@ -748,9 +748,11 @@ Net_Module_UDPSocketHandler_T<LockType,
       if (inherited::configuration_.streamConfiguration->statisticReportingInterval)
       {
         // schedule regular statistics collection...
-        ACE_Time_Value interval (STREAM_STATISTIC_COLLECTION_INTERVAL, 0);
+        ACE_Time_Value interval (STREAM_DEFAULT_STATISTIC_COLLECTION_INTERVAL,
+                                 0);
         ACE_ASSERT (inherited::timerID_ == -1);
-        ACE_Event_Handler* handler_p = &(inherited::statisticCollectionHandler_);
+        ACE_Event_Handler* handler_p =
+            &(inherited::statisticCollectionHandler_);
         inherited::timerID_ =
             COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
                                                                         NULL,                       // argument

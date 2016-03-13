@@ -106,7 +106,7 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
       const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
   session_data_r.sessionID = configuration_in.sessionID;
 
-  int result = -1;
+//  int result = -1;
   inherited::MODULE_T* module_p = NULL;
   if (configuration_in.notificationStrategy)
   {
