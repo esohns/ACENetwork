@@ -640,7 +640,7 @@ idle_update_progress_client_cb (gpointer userData_in)
   // synch access
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
 
-  int result = -1;
+//  int result = -1;
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
