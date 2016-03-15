@@ -689,12 +689,12 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::waitForCompletion"));
 
-  // step1: wait for the stream to flush
-  stream_.waitForCompletion (waitForThreads_in,
+  // step1: wait until the stream becomes idle
+  stream_.waitForCompletion (false,
                              false); // don't wait for upstream modules
   //        --> stream data has been processed
 
-  // step2: wait for the asynchronous operations to complete
+  // step2: wait for any asynchronous operations to complete
   if (inherited3::state_.status == NET_CONNECTION_STATUS_OK)
     inherited::counter_.wait (0);
   //        --> all data has been dispatched to the kernel (socket)
@@ -711,6 +711,12 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     Net_Common_Tools::setNoDelay (handle, no_delay);
   } // end IF
 #endif
+
+  // step3: wait for stream processing to complete ?
+  if (waitForThreads_in)
+    stream_.waitForCompletion (true,
+                               false); // don't wait for upstream modules
+    // --> stream processing has finished
 }
 
 template <typename HandlerType,

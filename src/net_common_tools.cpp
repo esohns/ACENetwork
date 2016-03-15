@@ -1203,7 +1203,7 @@ Net_Common_Tools::setSocketBuffer (ACE_HANDLE handle_in,
 
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
+    ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("ACE_OS::getsockopt(0x%@,%s) returned %d (expected: %d), aborting\n"),
                 handle_in,
                 ((optname_in == SO_SNDBUF) ? ACE_TEXT ("SO_SNDBUF")
@@ -1211,7 +1211,7 @@ Net_Common_Tools::setSocketBuffer (ACE_HANDLE handle_in,
                 optval,
                 size_in));
 #else
-    ACE_DEBUG ((LM_ERROR,
+    ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("ACE_OS::getsockopt(%d,%s) returned %d (expected: %d), aborting\n"),
                 handle_in,
                 ((optname_in == SO_SNDBUF) ? ACE_TEXT ("SO_SNDBUF")
