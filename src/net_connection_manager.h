@@ -92,8 +92,11 @@ class Net_Connection_Manager_T
   virtual bool registerc (ICONNECTION_T*); // connection handle
   virtual bool deregister (ICONNECTION_T*); // connection handle
 
-  virtual void abort ();
-  virtual unsigned int count () const;
+  virtual void abort (bool = false); // wait for completion ? (see wait())
+  virtual unsigned int count () const; // return value: # of connections
+  // *IMPORTANT NOTE*: this API really makes sense only AFTER stop() has been
+  //                   invoked, i.e. when new connections will be rejected;
+  //                   otherwise this may block indefinetly
   virtual void wait () const;
 
   // ---------------------------------------------------------------------------

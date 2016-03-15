@@ -696,21 +696,23 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // step2: wait for any asynchronous operations to complete
   if (inherited3::state_.status == NET_CONNECTION_STATUS_OK)
-    inherited::counter_.wait (0);
-  //        --> all data has been dispatched to the kernel (socket)
-
-  // *TODO*: different platforms may implement methods by which successful
-  //         placing of the data onto the wire can be established
-  //         (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
-#if defined (ACE_LINUX)
-  ACE_HANDLE handle = inherited::handle ();
-  if (handle != ACE_INVALID_HANDLE)
   {
-    bool no_delay = Net_Common_Tools::getNoDelay (handle);
-    Net_Common_Tools::setNoDelay (handle, true);
-    Net_Common_Tools::setNoDelay (handle, no_delay);
-  } // end IF
+    inherited::counter_.wait (0);
+    // --> all data has been dispatched to the kernel (socket)
+
+    // *TODO*: different platforms may implement methods by which successful
+    //         placing of the data onto the wire can be established
+    //         (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
+#if defined (ACE_LINUX)
+    ACE_HANDLE handle = inherited::handle ();
+    if (handle != ACE_INVALID_HANDLE)
+    {
+      bool no_delay = Net_Common_Tools::getNoDelay (handle);
+      Net_Common_Tools::setNoDelay (handle, true);
+      Net_Common_Tools::setNoDelay (handle, no_delay);
+    } // end IF
 #endif
+  } // end IF
 
   // step3: wait for stream processing to complete ?
   if (waitForThreads_in)

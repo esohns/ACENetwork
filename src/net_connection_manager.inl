@@ -573,58 +573,73 @@ Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::abort ()
+                         UserDataType>::abort (bool waitForCompletion_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abort"));
 
-  int result = -1;
-  unsigned int closed_connections = 0;
+  bool is_first = true;
   ICONNECTION_T* connection_p = NULL;
+  CONNECTION_CONTAINER_T connections;
 
-  {
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
-
-    closed_connections = connections_.size ();
-  } // end lock scope
-
-  // *WARNING*: when using single-threaded reactors, close()ing connections
-  //            inside the lock scope may lead to deadlock
 begin:
+  // step1: gather a set of open connection handles
   {
     ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
-    if (connections_.is_empty () == 1)
-      goto done;
+    for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
+         iterator.next (connection_p);
+         iterator.advance ())
+    {
+      ACE_ASSERT (connection_p);
 
-    result = connections_.get (connection_p, 0);
-    if (result == -1)
+      connection_p->increase ();
+
+      if (!connections.insert_tail (connection_p))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_DLList::insert_tail(): \"%m\", returning\n")));
+
+        connection_p->decrease ();
+
+        return;
+      } // end IF
+    } // end FOR
+  } // end lock scope
+  if (connections.is_empty () == 1)
+    return;
+
+  // step2: close all connections
+  connection_p = NULL;
+  for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections);
+       iterator.next (connection_p);
+       iterator.advance ())
+  {
+    ACE_ASSERT (connection_p);
+
+    try
+    {
+      connection_p->close ();
+    }
+    catch (...)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_DLList::get(0): \"%m\", returning\n")));
-      return;
-    } // end IF
-    ACE_ASSERT (connection_p);
-    connection_p->increase ();
-  } // end lock scope
+                  ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
+    }
 
-  ACE_ASSERT (connection_p);
-  try
+    connection_p->decrease ();
+  } // end FOR
+  if (is_first)
   {
-    connection_p->close ();
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
-  }
-  connection_p->decrease ();
-  goto begin;
+    is_first = false;
 
-done:
-  if (closed_connections)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("closed %u connection(s)\n"),
-                closed_connections));
+    if (connections.size ())
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("closed %u connection(s)\n"),
+                  connections.size ()));
+  } // end IF
+
+  if (waitForCompletion_in)
+    goto begin;
 }
 
 template <typename AddressType,
