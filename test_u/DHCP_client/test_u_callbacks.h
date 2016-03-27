@@ -53,7 +53,9 @@ extern "C"
 {
 #endif /* __cplusplus */
 // callbacks
-G_MODULE_EXPORT void action_send_activate_cb (GtkAction*, gpointer);
+G_MODULE_EXPORT void action_discover_activate_cb (GtkAction*, gpointer);
+G_MODULE_EXPORT void action_request_activate_cb (GtkAction*, gpointer);
+G_MODULE_EXPORT void action_release_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void action_report_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void checkbutton_broadcast_toggled_cb (GtkCheckButton*, gpointer);
 G_MODULE_EXPORT void checkbutton_request_toggled_cb (GtkCheckButton*, gpointer);

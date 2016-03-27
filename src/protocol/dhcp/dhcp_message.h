@@ -66,23 +66,6 @@ class DHCP_Message_T
   // implement Common_IDumpState
   virtual void dump_state () const;
 
-  // "normalize" the data in this message (fragment) by:
-  // 1. aligning the rd_ptr with base() --> ACE_Message_Block::crunch()/::memmove()
-  // *WARNING*: if we share buffers, this may well clobber data referenced by
-  // preceding messages THAT MAY STILL BE IN USE DOWNSTREAM
-  // --> safe only IFF stream processing is single-threaded !
-  // --> still, we make a "best-effort", simply to reduce fragmentation...
-  // 2. COPYING all bits from any continuation(s) into our buffer (until
-  //    capacity() has been reached)
-  // 3. adjusting the write pointer accordingly
-  // 4. releasing obsoleted continuations
-  // --> *NOTE*: IF this is done CONSISTENTLY, AND:
-  // - our buffer has capacity for a FULL message (i.e. maximum allowed size)
-  // - our peer keeps to the standard and doesn't send oversized messages (!)
-  // --> THEN this measure ensures that EVERY single buffer contains a CONTIGUOUS
-  //     and COMPLETE message...
-  void crunch ();
-
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
   // *NOTE*: this uses our allocator (if any) to create a new message

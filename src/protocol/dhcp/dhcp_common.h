@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 
+#include "ace/INET_Addr.h"
 #include "ace/OS.h"
 #include "ace/Time_Value.h"
 
@@ -121,6 +122,8 @@ struct DHCP_ConnectionState
    : Net_ConnectionState ()
    , configuration (NULL)
    , userData (NULL)
+   , serverAddress (static_cast<u_short> (0),
+                    static_cast<ACE_UINT32> (INADDR_NONE))
    , timeStamp (ACE_Time_Value::zero)
    , xid (0)
   {};
@@ -128,6 +131,7 @@ struct DHCP_ConnectionState
   DHCP_Configuration*   configuration;
   DHCP_Stream_UserData* userData;
 
+  ACE_INET_Addr         serverAddress;
   ACE_Time_Value        timeStamp; // lease timeout
   unsigned int          xid;       // session ID
 };

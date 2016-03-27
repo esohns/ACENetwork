@@ -38,6 +38,9 @@ class DHCP_Codes
   enum OptionFieldType
   {
     DHCP_OPTION_FIELDTYPE_ADDRESS = 0,
+    // *TODO*: extract this idea from libACEStream  (i.e. Stream_MessageBase_T)
+    //         and add it libACENetwork
+    DHCP_OPTION_FIELDTYPE_COMMAND, // reserved: option DHCP_MESSAGETYPE (53)
     DHCP_OPTION_FIELDTYPE_INTEGER,
     DHCP_OPTION_FIELDTYPE_STRING,
     /////////////////////////////////////

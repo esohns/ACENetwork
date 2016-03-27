@@ -29,6 +29,7 @@
 #include <set>
 #include <string>
 
+#include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
@@ -113,6 +114,8 @@ struct Test_U_StreamSessionData
    , connectionState (NULL)
    , targetFileName ()
    , userData (NULL)
+   , serverAddress (static_cast<u_short> (0),
+                    static_cast<ACE_UINT32> (INADDR_NONE))
    , timeStamp (ACE_Time_Value::zero)
    , xid (0)
   {};
@@ -120,7 +123,8 @@ struct Test_U_StreamSessionData
   {
     Stream_SessionData::operator= (rhs_in);
 
-    connectionState = (connectionState ? connectionState : rhs_in.connectionState);
+    connectionState =
+        (connectionState ? connectionState : rhs_in.connectionState);
     targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
                                               : targetFileName);
     userData = (userData ? userData : rhs_in.userData);
@@ -132,6 +136,7 @@ struct Test_U_StreamSessionData
   std::string           targetFileName; // file writer module
   Test_U_UserData*      userData;
 
+  ACE_INET_Addr         serverAddress;
   ACE_Time_Value        timeStamp; // lease timeout
   unsigned int          xid;       // session ID
 };
@@ -220,10 +225,10 @@ struct Test_U_StreamModuleHandlerConfiguration
 typedef DHCP_ProtocolConfiguration Test_U_ProtocolConfiguration_t;
 
 struct Test_U_ListenerConfiguration
+ : Net_ListenerConfiguration
 {
   inline Test_U_ListenerConfiguration ()
-   : address (DHCP_DEFAULT_CLIENT_PORT, static_cast<ACE_UINT32> (INADDR_ANY))
-   , addressFamily (ACE_ADDRESS_FAMILY_INET)
+   : Net_ListenerConfiguration ()
    , connectionManager (NULL)
    , messageAllocator (NULL)
    , networkInterface ()
@@ -231,10 +236,16 @@ struct Test_U_ListenerConfiguration
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
                                  0)
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
-  {};
+  {
+    int result = address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                              static_cast<ACE_UINT32> (INADDR_ANY),
+                              1,
+                              0);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+  };
 
-  ACE_INET_Addr                      address;
-  int                                addressFamily;
   Test_U_IConnectionManager_t*       connectionManager;
   Stream_IAllocator*                 messageAllocator;
   std::string                        networkInterface;

@@ -150,6 +150,13 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
           } // end FOR
         break;
       }
+      case DHCP_Codes::DHCP_OPTION_FIELDTYPE_COMMAND:
+      {
+        DHCP_Codes::MessageType message_type =
+            static_cast<DHCP_Codes::MessageType> (*reinterpret_cast<const unsigned char*> ((*iterator).second.c_str ()));
+        string_buffer += DHCP_Tools::MessageType2String (message_type);
+        break;
+      }
       case DHCP_Codes::DHCP_OPTION_FIELDTYPE_STRING:
       {
         string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"");
@@ -294,8 +301,42 @@ DHCP_Tools::MessageType2String (DHCP_MessageType_t type_in)
       result = ACE_TEXT_ALWAYS_CHAR ("DISCOVER"); break;
     case DHCP_Codes::DHCP_MESSAGE_OFFER:
       result = ACE_TEXT_ALWAYS_CHAR ("OFFER"); break;
-//    case DHCP_Codes::DHCP_METHOD_HEAD:
-//      result = ACE_TEXT_ALWAYS_CHAR ("HEAD"); break;
+    case DHCP_Codes::DHCP_MESSAGE_REQUEST:
+      result = ACE_TEXT_ALWAYS_CHAR ("REQUEST"); break;
+    case DHCP_Codes::DHCP_MESSAGE_DECLINE:
+      result = ACE_TEXT_ALWAYS_CHAR ("DECLINE"); break;
+    case DHCP_Codes::DHCP_MESSAGE_ACK:
+      result = ACE_TEXT_ALWAYS_CHAR ("ACK"); break;
+    case DHCP_Codes::DHCP_MESSAGE_NAK:
+      result = ACE_TEXT_ALWAYS_CHAR ("NAK"); break;
+    case DHCP_Codes::DHCP_MESSAGE_RELEASE:
+      result = ACE_TEXT_ALWAYS_CHAR ("RELEASE"); break;
+    case DHCP_Codes::DHCP_MESSAGE_INFORM:
+      result = ACE_TEXT_ALWAYS_CHAR ("INFORM"); break;
+    //
+    case DHCP_Codes::DHCP_MESSAGE_FORCERENEW:
+      result = ACE_TEXT_ALWAYS_CHAR ("FORCERENEW"); break;
+    //
+    case DHCP_Codes::DHCP_MESSAGE_LEASEQUERY:
+      result = ACE_TEXT_ALWAYS_CHAR ("LEASEQUERY"); break;
+    case DHCP_Codes::DHCP_MESSAGE_LEASEUNASSIGNED:
+      result = ACE_TEXT_ALWAYS_CHAR ("LEASEUNASSIGNED"); break;
+    case DHCP_Codes::DHCP_MESSAGE_LEASEUNKNOWN:
+      result = ACE_TEXT_ALWAYS_CHAR ("LEASEUNKNOWN"); break;
+    case DHCP_Codes::DHCP_MESSAGE_LEASEACTIVE:
+      result = ACE_TEXT_ALWAYS_CHAR ("LEASEACTIVE"); break;
+    //
+    case DHCP_Codes::DHCP_MESSAGE_BULKLEASEQUERY:
+      result = ACE_TEXT_ALWAYS_CHAR ("BULKLEASEQUERY"); break;
+    case DHCP_Codes::DHCP_MESSAGE_LEASEQUERYDONE:
+      result = ACE_TEXT_ALWAYS_CHAR ("LEASEQUERYDONE"); break;
+    //
+    case DHCP_Codes::DHCP_MESSAGE_ACTIVELEASEQUERY:
+      result = ACE_TEXT_ALWAYS_CHAR ("ACTIVELEASEQUERY"); break;
+    case DHCP_Codes::DHCP_MESSAGE_LEASEQUERYSTATUS:
+      result = ACE_TEXT_ALWAYS_CHAR ("LEASEQUERYSTATUS"); break;
+    case DHCP_Codes::DHCP_MESSAGE_TLS:
+      result = ACE_TEXT_ALWAYS_CHAR ("TLS"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -347,7 +388,7 @@ DHCP_Tools::Option2FieldType (DHCP_Option_t option_in)
     case DHCP_Codes::DHCP_OPTION_DHCP_IPADDRESSLEASETIME:
       return DHCP_Codes::DHCP_OPTION_FIELDTYPE_INTEGER;
     case DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE:
-      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_INTEGER;
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_COMMAND;
     case DHCP_Codes::DHCP_OPTION_DHCP_SERVERIDENTIFIER:
       return DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESS;
     default:

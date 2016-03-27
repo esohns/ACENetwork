@@ -43,13 +43,13 @@ struct Net_SocketConfiguration
               static_cast<ACE_UINT32> (INADDR_ANY))
    , bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
    , connect (NET_SOCKET_DEFAULT_UDP_CONNECT)
-   , device (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT))
    , linger (NET_SOCKET_DEFAULT_LINGER)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
    , netlinkAddress ()
    , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
 #endif
+   , networkInterface (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT))
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
    , writeOnly (false)
   {
@@ -57,7 +57,7 @@ struct Net_SocketConfiguration
     if (useLoopBackDevice)
     {
       result = address.set (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
-                            INADDR_LOOPBACK,
+                            static_cast<ACE_UINT32> (INADDR_LOOPBACK),
                             1,
                             0);
       if (result == -1)
@@ -69,7 +69,6 @@ struct Net_SocketConfiguration
   ACE_INET_Addr    address;
   int              bufferSize; // socket buffer size (I/O)
   bool             connect; // UDP
-  std::string      device; // NIC identifier
   bool             linger;
   // *TODO*: remove address information (pass as AddressType in open() instead)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -77,6 +76,7 @@ struct Net_SocketConfiguration
   Net_Netlink_Addr netlinkAddress;
   int              netlinkProtocol;
 #endif
+  std::string      networkInterface; // NIC identifier
   bool             useLoopBackDevice;
   bool             writeOnly; // UDP
 };

@@ -179,11 +179,24 @@ DHCP_Module_Discover_T<TaskSynchType,
        (DHCP_Tools::type (data_r) != DHCP_Codes::DHCP_MESSAGE_OFFER))
     return; // done
 
+  typename SessionMessageType::SESSION_DATA_T::DATA_T& data_2 =
+    const_cast<typename SessionMessageType::SESSION_DATA_T::DATA_T&> (sessionData_->get ());
+
   // sanity check(s)
-  const typename SessionMessageType::SESSION_DATA_T::DATA_T& data_2 =
-      sessionData_->get ();
   if (data_r.xid != data_2.xid)
     return; // done
+
+  int result =
+      data_2.serverAddress.set (static_cast<u_short> (0),
+                                static_cast<ACE_UINT32> (data_r.siaddr),
+                                1,
+                                0);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+    return;
+  } // end IF
 
   ProtocolMessageType* message_p =
       allocateMessage (configuration_->socketHandlerConfiguration->PDUSize);
@@ -202,7 +215,7 @@ DHCP_Module_Discover_T<TaskSynchType,
   DHCP_record.secs = data_r.secs;
   if (configuration_->protocolConfiguration->requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interface2MACAddress (configuration_->socketConfiguration->device,
+  if (!Net_Common_Tools::interface2MACAddress (configuration_->socketConfiguration->networkInterface,
                                                DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -217,8 +230,8 @@ DHCP_Module_Discover_T<TaskSynchType,
   buffer.append (reinterpret_cast<const char*> (&data_r.yiaddr), 4);
   DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_REQUESTEDIPADDRESS,
                                               buffer));
-  //     *TODO*: support optional options:
-  //             - 'overload'            (52)
+  // *TODO*: support optional options:
+  //         - 'overload'                (52)
   DHCP_OptionsIterator_t iterator =
       data_r.options.find (DHCP_Codes::DHCP_OPTION_DHCP_IPADDRESSLEASETIME);
   ACE_ASSERT (iterator != data_r.options.end ());

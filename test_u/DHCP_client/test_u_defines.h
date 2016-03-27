@@ -43,14 +43,16 @@
 //---------------------------------------
 
 #define TEST_U_UI_GTKEVENT_RESOLUTION                     200 // ms --> 5 FPS
+#define TEST_U_UI_GTK_ACTION_DISCOVER_NAME                "action_discover"
+#define TEST_U_UI_GTK_ACTION_REQUEST_NAME                 "action_request"
+#define TEST_U_UI_GTK_ACTION_RELEASE_NAME                 "action_release"
 #define TEST_U_UI_GTK_ACTION_REPORT_NAME                  "action_report"
-#define TEST_U_UI_GTK_ACTION_SEND_NAME                    "action_send"
 #define TEST_U_UI_GTK_ADJUSTMENT_NAME                     "scrolledwindow_vadjustment"
 #define TEST_U_UI_GTK_BUTTONBOX_ACTIONS_NAME              "vbuttonbox"
 #define TEST_U_UI_GTK_BUTTON_ABOUT_NAME                   "about"
 #define TEST_U_UI_GTK_BUTTON_CLEAR_NAME                   "clear"
-#define TEST_U_UI_GTK_BUTTON_REPORT_NAME                  "report"
-//#define TEST_U_UI_GTK_BUTTON_SEND_NAME                "send"
+//#define TEST_U_UI_GTK_BUTTON_REPORT_NAME                  "report"
+//#define TEST_U_UI_GTK_BUTTON_SEND_NAME                    "send"
 #define TEST_U_UI_GTK_BUTTON_QUIT_NAME                    "quit"
 #define TEST_U_UI_GTK_CHECKBUTTON_ASYNCH_NAME             "checkbutton_asynch"
 #define TEST_U_UI_GTK_CHECKBUTTON_BROADCAST_NAME          "checkbutton_broadcast"

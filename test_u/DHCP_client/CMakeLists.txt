@@ -180,7 +180,7 @@ set (${PROJECT_NAME}_DHCPClient_EXE_CFG
 
 #string (TOLOWER "${PROJECT_NAME}_DHCPClient" EXECUTABLE)
 set (EXECUTABLE DHCP_client)
-add_executable (${EXECUTABLE} ${ACENetwork_DHCPClient_EXE_SRCS})
+add_executable (${EXECUTABLE} ${ACENetwork_DHCPClient_EXE_SRCS} etc/test_u.glade)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 #add_dependencies (${PROJECT_NAME} Common)
@@ -218,7 +218,45 @@ install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
-if (UNIX)
+if (WIN32)
+ get_filename_component (ACE_LIB_PATH ${ACE_LIBRARY}
+                         DIRECTORY)
+ set (ACE_DLL_FILE ACE${LIB_FILE_SUFFIX}.dll)
+ set (ACE_DLL_FQPATH ${ACE_LIB_PATH}/${ACE_DLL_FILE})
+ install (FILES ${ACE_DLL_FQPATH}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libatk-1.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/freetype6.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/intl.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libcairo-2.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libfontconfig-1.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgio-2.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libglib-2.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgmodule-2.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgobject-2.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgthread-2.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgdk_pixbuf-2.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgdk-win32-2.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgtk-win32-2.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpango-1.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpangocairo-1.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpangoft2-1.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpangowin32-1.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpng14-14.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/zlib1.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../libglade/bin/libglade-2.0-0.dll
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../libxml2-2.9.1/.libs/libxml2-2.dll
+                H:/software/Development/dll/libgcc_s_dw2-1.dll
+                H:/software/Development/dll/libexpat-1.dll
+                H:/software/Development/dll/libiconv-2.dll
+                ${Common_DIR}/src/Debug/Common.dll
+                ${Common_DIR}/src/ui/Debug/CommonUI.dll
+                ${ACEStream_DIR}/src/Debug/ACEStream.dll
+                ${ACENetwork_DIR}/src/Debug/ACENetwork.dll
+                ${ACENetwork_DIR}/src/protocol/dhcp/Debug/ACENetwork_Protocol_DHCP.dll
+          DESTINATION bin COMPONENT bin)
  install (FILES ${PROJECT_NAME}_DHCPClient_EXE_CFG
-          DESTINATION etc/libACENetwork/${EXECUTABLE} COMPONENT config)
+          DESTINATION share/lib${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
+elseif (UNIX)
+ install (FILES ${PROJECT_NAME}_DHCPClient_EXE_CFG
+          DESTINATION $ENV{APPDATA}/lib${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 endif ()

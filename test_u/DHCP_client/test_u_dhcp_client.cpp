@@ -465,7 +465,7 @@ do_work (bool requestBroadcastReplies_in,
          bool debugParser_in,
          const std::string& fileName_in,
          const std::string& UIDefinitionFileName_in,
-         const std::string& interface_in,
+         const std::string& networkInterface_in,
          bool useLoopback_in,
          bool useThreadPool_in,
          bool sendRequestOnOffer_in,
@@ -580,10 +580,12 @@ do_work (bool requestBroadcastReplies_in,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
     return;
   } // end IF
-  configuration.socketConfiguration.device = interface_in;
+  configuration.socketConfiguration.networkInterface = networkInterface_in;
   configuration.socketConfiguration.useLoopBackDevice = useLoopback_in;
   configuration.socketConfiguration.writeOnly = true;
   // ******************** socket handler configuration data *******************
+  configuration.socketHandlerConfiguration.listenerConfiguration =
+    &configuration.listenerConfiguration;
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
   configuration.socketHandlerConfiguration.socketConfiguration =
@@ -640,9 +642,9 @@ do_work (bool requestBroadcastReplies_in,
                                                          ACE_LOCALHOST,
                                                          1,
                                                          ACE_ADDRESS_FAMILY_INET);
-  else if (!interface_in.empty ())
+  else if (!networkInterface_in.empty ())
   {
-    if (!Net_Common_Tools::interface2IPAddress (interface_in,
+    if (!Net_Common_Tools::interface2IPAddress (networkInterface_in,
                                                 configuration.listenerConfiguration.address))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1064,7 +1066,7 @@ allocate:
     DHCP_record.xid = DHCP_Tools::generateXID ();
     if (configuration.protocolConfiguration.requestBroadcastReplies)
       DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-    if (!Net_Common_Tools::interface2MACAddress (configuration.socketConfiguration.device,
+    if (!Net_Common_Tools::interface2MACAddress (configuration.socketConfiguration.networkInterface,
                                                  DHCP_record.chaddr))
     {
       ACE_DEBUG ((LM_ERROR,
