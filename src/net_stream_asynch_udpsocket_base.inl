@@ -124,10 +124,10 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 #endif
   bool handle_manager = false;
   bool handle_socket = false;
-  // *TODO*: remove type inferences
-  const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
-      NULL;
-  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
+  //// *TODO*: remove type inferences
+  //const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
+  //    NULL;
+  //const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
   // step1: open socket ?
   // *NOTE*: even when this is a write-only connection
@@ -224,12 +224,12 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
     goto error;
   } // end IF
-  session_data_container_p = stream_.get ();
-  ACE_ASSERT (session_data_container_p);
-  session_data_p = &session_data_container_p->get ();
-  // *TODO*: remove type inferences
-  const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
-      &const_cast<StateType&> (inherited4::state ());
+  //session_data_container_p = stream_.get ();
+  //ACE_ASSERT (session_data_container_p);
+  //session_data_p = &session_data_container_p->get ();
+  //// *TODO*: remove type inferences
+  //const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
+  //    &const_cast<StateType&> (inherited4::state ());
   //stream_.dump_state ();
 
   // step3e: start stream

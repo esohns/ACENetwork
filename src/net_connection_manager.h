@@ -70,6 +70,13 @@ class Net_Connection_Manager_T
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
+  typedef ACE_Singleton<Net_Connection_Manager_T<AddressType,
+                                                 ConfigurationType,
+                                                 StateType,
+                                                 StatisticContainerType,
+
+                                                 UserDataType>,
+                        ACE_SYNCH_MUTEX> SINGLETON_T;
 
   // configuration / initialization
   void initialize (unsigned int); // maximum number of concurrent connections
@@ -87,7 +94,8 @@ class Net_Connection_Manager_T
 
   virtual ICONNECTION_T* operator[] (unsigned int) const; // index
   virtual ICONNECTION_T* get (ACE_HANDLE) const; // socket handle
-  virtual ICONNECTION_T* get (const AddressType&) const; // peer address
+  virtual ICONNECTION_T* get (const AddressType&, // address
+                              bool = true) const; // peer ?
 
   virtual bool registerc (ICONNECTION_T*); // connection handle
   virtual bool deregister (ICONNECTION_T*); // connection handle

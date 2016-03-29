@@ -20,12 +20,15 @@
 
 #include <string>
 
+#include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
 #include "common_timer_manager_common.h"
 
 #include "net_common_tools.h"
 #include "net_macros.h"
+
+#include "net_client_defines.h"
 
 #include "dhcp_common.h"
 #include "dhcp_defines.h"
@@ -48,7 +51,9 @@ DHCP_Module_Discover_T<TaskSynchType,
  : inherited ()
  , configuration_ (NULL)
  , sessionData_ (NULL)
+ , connectionHandle_ (ACE_INVALID_HANDLE)
  , initialized_ (false)
+ , isSessionConnection_ (false)
  , sendRequestOnOffer_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::DHCP_Module_Discover_T"));
@@ -72,8 +77,42 @@ DHCP_Module_Discover_T<TaskSynchType,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::~DHCP_Module_Discover_T"));
 
-  if (sessionData_)
-    sessionData_->decrease ();
+  typename SessionMessageType::SESSION_DATA_T::DATA_T* session_data_p = NULL;
+
+  if (!sessionData_)
+    goto continue_;
+
+  session_data_p =
+      &const_cast<typename SessionMessageType::SESSION_DATA_T::DATA_T&> (sessionData_->get ());
+
+  if (!session_data_p->connection)
+    goto continue_2;
+
+  if (connectionHandle_ != ACE_INVALID_HANDLE)
+  {
+    session_data_p->connection->close ();
+    session_data_p->connection->decrease ();
+    session_data_p->connection = NULL;
+  } // end IF
+  else
+  {
+    if (isSessionConnection_)
+    {
+      session_data_p->connection->decrease ();
+    } // end ELSE IF
+    else
+      session_data_p->connection = NULL;
+  } // end ELSE
+
+continue_2:
+  sessionData_->decrease ();
+
+continue_:
+  // *NOTE*: some compilers do not accept trailing jump labels
+  // *TODO*: is this a non-conformity or simply not standard-compliant ?
+  return;
+
+  ACE_NOTREACHED (return;)
 }
 
 template <typename TaskSynchType,
@@ -169,7 +208,7 @@ DHCP_Module_Discover_T<TaskSynchType,
   ACE_ASSERT (message_inout->isInitialized ());
   ACE_ASSERT (sessionData_);
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->connection);
+  //ACE_ASSERT (configuration_->connection);
   ACE_ASSERT (configuration_->protocolConfiguration);
   ACE_ASSERT (configuration_->socketConfiguration);
   ACE_ASSERT (configuration_->socketHandlerConfiguration);
@@ -294,20 +333,338 @@ DHCP_Module_Discover_T<TaskSynchType,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
-  ACE_ASSERT (message_inout);
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (initialized_);
 
   switch (message_inout->type ())
   {
     case STREAM_SESSION_BEGIN:
     {
+      // sanity check(s)
       ACE_ASSERT (!sessionData_);
+      ACE_ASSERT (connectionHandle_ == ACE_INVALID_HANDLE);
+
+      // step1: retain a handle to the session data
       sessionData_ =
         &const_cast<typename SessionMessageType::SESSION_DATA_T&> (message_inout->get ());
       sessionData_->increase ();
+      typename SessionMessageType::SESSION_DATA_T::DATA_T& session_data_r =
+        const_cast<typename SessionMessageType::SESSION_DATA_T::DATA_T&> (sessionData_->get ());
+
+      // step2: setup a (UDP) connection ?
+      int result = -1;
+      ACE_TCHAR buffer[BUFSIZ];
+      ConnectionManagerType* connection_manager_p = NULL;
+      bool clone_module, delete_module;
+      typename ConnectorType::STREAM_T::MODULE_T* module_p = NULL;
+      bool reset_configuration = false;
+      typename ConnectorType::ICONNECTOR_T* iconnector_p = NULL;
+      typename ConnectorType::ISOCKET_CONNECTION_T* isocket_connection_p = NULL;
+      ACE_Time_Value deadline = ACE_Time_Value::zero;
+      ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
+      Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
+
+      connection_manager_p =
+        ConnectionManagerType::SINGLETON_T::instance ();
+      ACE_ASSERT (connection_manager_p);
+
+      // *TODO*: remove type inferences
+      if (configuration_->connection)
+      {
+        // sanity check(s)
+        ACE_ASSERT (!session_data_r.connection);
+
+        session_data_r.connection = configuration_->connection;
+
+        goto continue_;
+      } // end IF
+      else if (session_data_r.connection)
+      {
+        session_data_r.connection->increase ();
+
+        isSessionConnection_ = true;
+
+        goto continue_;
+      } // end ELSE IF
+      else
+      {
+        // sanity check(s)
+        ACE_ASSERT (configuration_->streamConfiguration);
+
+        // *NOTE*: this means that this module is part of a connection
+        //         processing stream
+        //         --> grab a handle to the connection
+        // *IMPORTANT NOTE*: Note how this can work only as long as at least
+        //                   one upstream (or this) module operates
+        //                   asynchronously
+        // *TODO*: Note how the session ID is being reused for a particular
+        //         purpose (in this case, to hold the socket handle of the
+        //         connection). This will not work in some scenarios (e.g.
+        //         when a connection handles several consecutive sessions,
+        //         and/or each session needs a reference to its' own specific
+        //         and/or 'unique' ID...)
+        if (configuration_->streamConfiguration->sessionID)
+        {
+          // *NOTE*: this may have to wait for the connection to finish
+          //         initializing
+          // *TODO*: avoid tight loop here
+          deadline = COMMON_TIME_NOW + timeout;
+          do
+          {
+            if (!session_data_r.connection)
+              session_data_r.connection =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+              connection_manager_p->get (reinterpret_cast<ACE_HANDLE> (configuration_->streamConfiguration->sessionID));
+#else
+              connection_manager_p->get (static_cast<ACE_HANDLE> (configuration_->streamConfiguration->sessionID));
+#endif
+            if (!session_data_r.connection)
+              continue;
+
+            status = session_data_r.connection->status ();
+            if (status == NET_CONNECTION_STATUS_OK) break;
+          } while (COMMON_TIME_NOW < deadline);
+          if (!session_data_r.connection)
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to retrieve connection handle (handle was: %u), aborting\n"),
+                        configuration_->streamConfiguration->sessionID));
+            goto error;
+          } // end IF
+
+          goto continue_;
+        } // end IF
+      } // end ELSE
+
+      // step2a: setup the connection configuration
+      // step2aa: setup the socket configuration
+      // *TODO*: remove type inferences
+      // sanity check(s)
+      ACE_ASSERT (configuration_->socketConfiguration);
+
+      configuration_->socketConfiguration->writeOnly = true;
+
+      // step2ab: setup the connection manager
+      // *NOTE*: the stream configuration may contain a module handle that is
+      //         meant to be the final module of 'this' processing stream. As
+      //         the (possibly external) DHCP connection probably (!) is
+      //         oblivious of 'this' pipeline, the connection probably (!)
+      //         should not enqueue that same module again
+      //         --> temporarily 'hide' the module handle, if any
+      // *TODO*: this 'measure' diminishes the generic utility of this module
+      //         --> to be removed ASAP
+      // *TODO*: remove type inferences
+      // sanity check(s)
+      ACE_ASSERT (configuration_->socketHandlerConfiguration);
+      ACE_ASSERT (configuration_->streamConfiguration);
+
+      // *TODO*: remove type inferences
+      clone_module = configuration_->streamConfiguration->cloneModule;
+      delete_module = configuration_->streamConfiguration->deleteModule;
+      module_p = configuration_->streamConfiguration->module;
+      configuration_->streamConfiguration->cloneModule = false;
+      configuration_->streamConfiguration->deleteModule = false;
+      configuration_->streamConfiguration->module = NULL;
+      reset_configuration = true;
+
+      //connection_manager_p->set (*configuration_,
+      //                           configuration_->userData);
+
+      ACE_OS::memset (buffer, 0, sizeof (buffer));
+      result =
+        configuration_->socketConfiguration->address.addr_to_string (buffer,
+                                                                     sizeof (buffer),
+                                                                     1);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string: \"%m\", continuing\n")));
+
+      ACE_NEW_NORETURN (iconnector_p,
+                        ConnectorType (connection_manager_p,
+                                       configuration_->socketHandlerConfiguration->statisticReportingInterval));
+      if (!iconnector_p)
+      {
+        ACE_DEBUG ((LM_CRITICAL,
+                    ACE_TEXT ("failed to allocate memory, aborting\n")));
+        goto error;
+      } // end IF
+      if (!iconnector_p->initialize (*(configuration_->socketHandlerConfiguration)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to initialize connector, aborting\n")));
+        goto error;
+      } // end IF
+      connectionHandle_ =
+        iconnector_p->connect (configuration_->socketConfiguration->address);
+      if (connectionHandle_ == ACE_INVALID_HANDLE)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to connect to \"%s\", aborting\n"),
+                    inherited::mod_->name (),
+                    buffer));
+        goto error;
+      } // end IF
+      if (iconnector_p->useReactor ())
+        session_data_r.connection =
+            connection_manager_p->get (connectionHandle_);
+      else
+      {
+        // step2b: wait for the connection to register with the manager
+        // *TODO*: avoid tight loop here
+        deadline = (COMMON_TIME_NOW +
+                    ACE_Time_Value (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT,
+                                    0));
+        //result = ACE_OS::sleep (timeout);
+        //if (result == -1)
+        //  ACE_DEBUG ((LM_ERROR,
+        //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+        //              &timeout));
+        do
+        {
+          session_data_r.connection =
+            connection_manager_p->get (configuration_->socketConfiguration->address);
+          if (session_data_r.connection) break;
+        } while (COMMON_TIME_NOW < deadline);
+      } // end IF
+      if (!session_data_r.connection)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to connect to \"%s\", aborting\n"),
+                    inherited::mod_->name (),
+                    buffer));
+        goto error;
+      } // end IF
+      // step2c: wait for the connection to finish initializing
+      // *TODO*: avoid tight loop here
+      deadline = COMMON_TIME_NOW + timeout;
+      do
+      {
+        status = session_data_r.connection->status ();
+        if (status == NET_CONNECTION_STATUS_OK) break;
+      } while (COMMON_TIME_NOW < deadline);
+      if (status != NET_CONNECTION_STATUS_OK)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to initialize connection to \"%s\" (status was: %d), aborting\n"),
+                    buffer,
+                    status));
+        goto error;
+      } // end IF
+      // step2d: wait for the connection stream to finish initializing
+      // *TODO*: if the connection processing stream includes (an instance of)
+      //         this module, this will always time out
+      isocket_connection_p =
+        dynamic_cast<typename ConnectorType::ISOCKET_CONNECTION_T*> (session_data_r.connection);
+      if (!isocket_connection_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to dynamic_cast<ConnectorType::ISOCKET_CONNECTION_T>(0x%@), aborting\n"),
+                    inherited::mod_->name (),
+                    session_data_r.connection));
+        goto error;
+      } // end IF
+      isocket_connection_p->wait (STREAM_STATE_RUNNING,
+                                  NULL); // <-- block
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: connected to \"%s\" (id: %d)...\n"),
+                  inherited::mod_->name (),
+                  session_data_r.connection->id (),
+                  buffer));
+
+      // step2e: reset the connection configuration
+      configuration_->socketConfiguration->writeOnly = false;
+
+      configuration_->streamConfiguration->cloneModule = clone_module;
+      configuration_->streamConfiguration->deleteModule = delete_module;
+      configuration_->streamConfiguration->module = module_p;
+
+      //connection_manager_p->set (*configuration_,
+      //                           configuration_->userData);
+
+      // clean up
+      if (iconnector_p)
+        delete iconnector_p;
+
+continue_:
+      break;
+
+error:
+      session_data_r.aborted = true;
+
+      if (reset_configuration)
+      {
+        configuration_->socketConfiguration->writeOnly = false;
+
+        configuration_->streamConfiguration->cloneModule = clone_module;
+        configuration_->streamConfiguration->deleteModule = delete_module;
+        configuration_->streamConfiguration->module = module_p;
+
+        //connection_manager_p->set (*configuration_,
+        //                           configuration_->userData);
+      } // end IF
+
+      if (!session_data_r.connection)
+        goto continue_2;
+
+      if (connectionHandle_ != ACE_INVALID_HANDLE)
+      {
+        session_data_r.connection->close ();
+        session_data_r.connection->decrease ();
+        session_data_r.connection = NULL;
+
+        connectionHandle_ = ACE_INVALID_HANDLE;
+      } // end IF
+      else
+      {
+        if (isSessionConnection_)
+        {
+          session_data_r.connection->decrease ();
+
+          isSessionConnection_ = false;
+        } // end ELSE IF
+        else
+          session_data_r.connection = NULL;
+      } // end ELSE
+
+continue_2:
+      // clean up
+      if (iconnector_p)
+        delete iconnector_p;
+
       break;
     }
     case STREAM_SESSION_END:
     {
+      // sanity check(s)
+      ACE_ASSERT (sessionData_);
+
+      typename SessionMessageType::SESSION_DATA_T::DATA_T& session_data_r =
+        const_cast<typename SessionMessageType::SESSION_DATA_T::DATA_T&> (sessionData_->get ());
+
+      if (!session_data_r.connection)
+        goto continue_3;
+
+      if (connectionHandle_ != ACE_INVALID_HANDLE)
+      {
+        session_data_r.connection->close ();
+        session_data_r.connection->decrease ();
+        session_data_r.connection = NULL;
+
+        connectionHandle_ = ACE_INVALID_HANDLE;
+      } // end IF
+      else
+      {
+        if (isSessionConnection_)
+        {
+          session_data_r.connection->decrease ();
+
+          isSessionConnection_ = false;
+        } // end ELSE IF
+        else
+          session_data_r.connection = NULL;
+      } // end ELSE
+
+continue_3:
       // clean up
       if (sessionData_)
       {

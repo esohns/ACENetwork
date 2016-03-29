@@ -25,7 +25,7 @@
 
 #include "stream_headmoduletask_base.h"
 #include "stream_statistichandler.h"
-#include "stream_task_base_synch.h"
+#include "stream_task_base_asynch.h"
 
 template <typename TaskSynchType,
           typename TimePolicyType,
@@ -36,9 +36,9 @@ template <typename TaskSynchType,
           typename ConnectionManagerType,
           typename ConnectorType>
 class DHCP_Module_Discover_T
- : public Stream_TaskBaseSynch_T<TimePolicyType,
-                                 SessionMessageType,
-                                 ProtocolMessageType>
+ : public Stream_TaskBaseAsynch_T<TimePolicyType,
+                                  SessionMessageType,
+                                  ProtocolMessageType>
  , public Stream_IModuleHandler_T<ConfigurationType>
 {
  public:
@@ -60,9 +60,9 @@ class DHCP_Module_Discover_T
   typename SessionMessageType::SESSION_DATA_T* sessionData_;
 
  private:
-  typedef Stream_TaskBaseSynch_T<TimePolicyType,
-                                 SessionMessageType,
-                                 ProtocolMessageType> inherited;
+  typedef Stream_TaskBaseAsynch_T<TimePolicyType,
+                                  SessionMessageType,
+                                  ProtocolMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T (const DHCP_Module_Discover_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T& operator= (const DHCP_Module_Discover_T&))
@@ -70,7 +70,9 @@ class DHCP_Module_Discover_T
   // helper methods
   ProtocolMessageType* allocateMessage (unsigned int); // (requested) size
 
+  ACE_HANDLE                                   connectionHandle_;
   bool                                         initialized_;
+  bool                                         isSessionConnection_;
   bool                                         sendRequestOnOffer_;
 };
 

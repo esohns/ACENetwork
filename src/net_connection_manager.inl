@@ -289,7 +289,8 @@ Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::get (const AddressType& peerAddress_in) const
+                         UserDataType>::get (const AddressType& address_in,
+                                             bool isPeerAddress_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
@@ -307,7 +308,8 @@ Net_Connection_Manager_T<AddressType,
       connection_p->info (handle,
                           local_address,
                           peer_address);
-      if (peer_address == peerAddress_in)
+      if ((isPeerAddress_in && (peer_address == address_in)) ||
+          (!isPeerAddress_in && (local_address == address_in)))
         break;
 
       connection_p = NULL;
@@ -318,9 +320,9 @@ Net_Connection_Manager_T<AddressType,
     //{
     //  ACE_TCHAR buffer[BUFSIZ];
     //  ACE_OS::memset (buffer, 0, sizeof (buffer));
-    //  int result_2 = peerAddress_in.addr_to_string (buffer,
-    //                                                sizeof (buffer),
-    //                                                1);
+    //  int result_2 = address_in.addr_to_string (buffer,
+    //                                            sizeof (buffer),
+    //                                            1);
     //  if (result_2 == -1)
     //    ACE_DEBUG ((LM_ERROR,
     //                ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));

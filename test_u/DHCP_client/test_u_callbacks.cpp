@@ -71,7 +71,7 @@ load_network_interfaces (GtkListStore* listStore_in)
 
   GtkTreeIter iterator;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  PIP_ADAPTER_INFO ip_adapter_info_p = NULL;
+  struct _IP_ADAPTER_INFO* ip_adapter_info_p = NULL;
   ULONG buffer_length = 0;
   ULONG result_2 = GetAdaptersInfo (ip_adapter_info_p, &buffer_length);
   if (result_2 != ERROR_BUFFER_OVERFLOW)
@@ -83,7 +83,7 @@ load_network_interfaces (GtkListStore* listStore_in)
   } // end IF
   ACE_ASSERT (buffer_length);
   ip_adapter_info_p =
-    static_cast<PIP_ADAPTER_INFO> (ACE_MALLOC_FUNC (buffer_length));
+    static_cast<struct _IP_ADAPTER_INFO*> (ACE_MALLOC_FUNC (buffer_length));
   if (!ip_adapter_info_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -105,7 +105,7 @@ load_network_interfaces (GtkListStore* listStore_in)
     return false;
   } // end IF
 
-  PIP_ADAPTER_INFO ip_adapter_info_2 = ip_adapter_info_p;
+  struct _IP_ADAPTER_INFO* ip_adapter_info_2 = ip_adapter_info_p;
   do
   {
     //ACE_DEBUG ((LM_DEBUG,
@@ -115,7 +115,7 @@ load_network_interfaces (GtkListStore* listStore_in)
 
     gtk_list_store_append (listStore_in, &iterator);
     gtk_list_store_set (listStore_in, &iterator,
-                        0, ip_adapter_info_2->Description,
+                        0, Common_UI_Tools::Locale2UTF8 (ip_adapter_info_2->Description),
                         1, ip_adapter_info_2->AdapterName,
                         -1);
 
@@ -396,11 +396,11 @@ idle_initialize_UI_cb (gpointer userData_in)
   } // end lock scope
 
   // step6: disable some functions ?
-  //GtkAction* action_p =
-  //  GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
-  //                                      ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_SEND_NAME)));
-  //ACE_ASSERT (action_p);
-  //gtk_action_set_sensitive (action_p, FALSE);
+  GtkAction* action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_REQUEST_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, FALSE);
 
   // step6: (auto-)connect signals/slots
   // *NOTE*: glade_xml_signal_autoconnect does not work reliably
@@ -1028,7 +1028,7 @@ action_discover_activate_cb (GtkAction* action_in,
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->handle != ACE_INVALID_HANDLE);
   ACE_ASSERT (data_p->configuration->streamConfiguration.messageAllocator);
-  ACE_ASSERT (data_p->configuration->moduleHandlerConfiguration_2.connection);
+  ACE_ASSERT (data_p->connection);
   ACE_ASSERT (iterator != data_p->builders.end ());
 
   //gtk_action_set_sensitive (action_in, FALSE);
@@ -1184,7 +1184,7 @@ allocate:
   session_data_r.xid = DHCP_record.xid;
 
   Test_U_ISocketConnection_t* isocket_connection_p =
-    dynamic_cast<Test_U_ISocketConnection_t*> (data_p->configuration->moduleHandlerConfiguration_2.connection);
+    dynamic_cast<Test_U_ISocketConnection_t*> (data_p->connection);
   ACE_ASSERT (isocket_connection_p);
   isocket_connection_p->send (message_p);
 
@@ -1214,7 +1214,7 @@ action_request_activate_cb (GtkAction* action_in,
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->handle != ACE_INVALID_HANDLE);
   ACE_ASSERT (data_p->configuration->streamConfiguration.messageAllocator);
-  ACE_ASSERT (data_p->configuration->moduleHandlerConfiguration_2.connection);
+  ACE_ASSERT (data_p->connection);
   ACE_ASSERT (iterator != data_p->builders.end ());
 
 allocate:
@@ -1259,7 +1259,7 @@ allocate:
                          NULL);
 
   Test_U_ISocketConnection_t* isocket_connection_p =
-    dynamic_cast<Test_U_ISocketConnection_t*> (data_p->configuration->moduleHandlerConfiguration_2.connection);
+    dynamic_cast<Test_U_ISocketConnection_t*> (data_p->connection);
   ACE_ASSERT (isocket_connection_p);
   isocket_connection_p->send (message_p);
 
@@ -1288,7 +1288,7 @@ action_release_activate_cb (GtkAction* action_in,
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->handle != ACE_INVALID_HANDLE);
   ACE_ASSERT (data_p->configuration->streamConfiguration.messageAllocator);
-  ACE_ASSERT (data_p->configuration->moduleHandlerConfiguration_2.connection);
+  ACE_ASSERT (data_p->connection);
   ACE_ASSERT (iterator != data_p->builders.end ());
 
 allocate:
@@ -1361,7 +1361,7 @@ allocate:
                          NULL);
 
   Test_U_ISocketConnection_t* isocket_connection_p =
-    dynamic_cast<Test_U_ISocketConnection_t*> (data_p->configuration->moduleHandlerConfiguration_2.connection);
+    dynamic_cast<Test_U_ISocketConnection_t*> (data_p->connection);
   ACE_ASSERT (isocket_connection_p);
   isocket_connection_p->send (message_p);
 
@@ -1644,7 +1644,8 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       do
       {
         iconnection_p =
-            connection_manager_p->get (data_p->configuration->listenerConfiguration.address);
+            connection_manager_p->get (data_p->configuration->listenerConfiguration.address,
+                                       false);
         if (iconnection_p)
         {
           data_p->configuration->handle =
@@ -1657,6 +1658,11 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
           break;
         } // end IF
       } while (COMMON_TIME_NOW < deadline);
+      if (!iconnection_p)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to connect to \"%s\" (timed out at: %#T), continuing\n"),
+                    ACE_TEXT (buffer),
+                    &timeout));
     } // end IF
     if (data_p->configuration->handle == ACE_INVALID_HANDLE)
     {

@@ -123,7 +123,7 @@ struct DHCP_ConnectionState
    , configuration (NULL)
    , userData (NULL)
    , serverAddress (static_cast<u_short> (0),
-                    static_cast<ACE_UINT32> (INADDR_NONE))
+                    static_cast<ACE_UINT32> (INADDR_ANY))
    , timeStamp (ACE_Time_Value::zero)
    , xid (0)
   {};

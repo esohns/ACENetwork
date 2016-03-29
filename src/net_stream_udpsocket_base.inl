@@ -123,9 +123,9 @@ Net_StreamUDPSocketBase_T<HandlerType,
   bool handle_manager = false;
   bool handle_reactor = false;
   bool handle_socket = false;
-  const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
-    NULL;
-  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
+  //const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
+  //  NULL;
+  //const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   ACE_Reactor* reactor_p = inherited::reactor ();
   ACE_ASSERT (reactor_p);
 
@@ -189,12 +189,16 @@ Net_StreamUDPSocketBase_T<HandlerType,
     &(inherited::notificationStrategy_);
 
   // step3c: initialize stream
+  // *TODO*: Note how the session ID is simply set to the socket handle. This
+  //         may not work in some scenarios (e.g. when a connection handles
+  //         several consecutive sessions, and/or each session needs a reference
+  //         to its' own specific and/or 'unique' ID...)
   // *TODO*: remove type inferences
   configuration_p->streamConfiguration.sessionID =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    reinterpret_cast<size_t> (inherited::get_handle ()); // (== socket handle)
+    reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #else
-    static_cast<size_t> (inherited::get_handle ()); // (== socket handle)
+    static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #endif
   if (!stream_.initialize (configuration_p->streamConfiguration))
   {
@@ -202,12 +206,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
     goto error;
   } // end IF
-  session_data_container_p = stream_.get ();
-  ACE_ASSERT (session_data_container_p);
-  session_data_p = &session_data_container_p->get ();
-  // *TODO*: remove type inferences
-  const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
-    &const_cast<StateType&> (inherited2::state ());
+  //session_data_container_p = stream_.get ();
+  //ACE_ASSERT (session_data_container_p);
+  //session_data_p = &session_data_container_p->get ();
+  //// *TODO*: remove type inferences
+  //const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
+  //  &const_cast<StateType&> (inherited2::state ());
   //stream_.dump_state ();
 
   // step3d: start stream

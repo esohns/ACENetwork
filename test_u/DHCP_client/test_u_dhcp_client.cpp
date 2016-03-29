@@ -547,10 +547,10 @@ do_work (bool requestBroadcastReplies_in,
   Test_U_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
                                                    NULL,
                                                    true);
-  Test_U_Stream_t stream;
-  Test_U_AsynchStream_t asynch_stream;
-  Test_U_StreamBase_t* stream_p = &stream;
-  if (!useReactor_in) stream_p = &asynch_stream;
+  //Test_U_Stream_t stream;
+  //Test_U_AsynchStream_t asynch_stream;
+  //Test_U_StreamBase_t* stream_p = &stream;
+  //if (!useReactor_in) stream_p = &asynch_stream;
   Test_U_Module_EventHandler* event_handler_p =
       dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
@@ -601,33 +601,33 @@ do_work (bool requestBroadcastReplies_in,
     (!UIDefinitionFileName_in.empty () ? &event_handler
                                        : NULL);
   configuration.streamConfiguration.moduleConfiguration =
-    &configuration.moduleConfiguration_2;
+    &configuration.moduleConfiguration;
   configuration.streamConfiguration.moduleHandlerConfiguration =
-    &configuration.moduleHandlerConfiguration_2;
+    &configuration.moduleHandlerConfiguration;
   configuration.streamConfiguration.printFinalReport = true;
   configuration.streamConfiguration.statisticReportingInterval =
       statisticReportingInterval_in;
 
   // ********************** module configuration data **************************
-  configuration.moduleConfiguration_2.streamConfiguration =
+  configuration.moduleConfiguration.streamConfiguration =
     &configuration.streamConfiguration;
 
-  configuration.moduleHandlerConfiguration_2.protocolConfiguration =
+  configuration.moduleHandlerConfiguration.protocolConfiguration =
     &configuration.protocolConfiguration;
-  configuration.moduleHandlerConfiguration_2.streamConfiguration =
+  configuration.moduleHandlerConfiguration.streamConfiguration =
     &configuration.streamConfiguration;
-  configuration.moduleHandlerConfiguration_2.configuration = &configuration;
-  configuration.moduleHandlerConfiguration_2.connectionManager =
-    connection_manager_p;
-  configuration.moduleHandlerConfiguration_2.traceParsing = debugParser_in;
+  configuration.moduleHandlerConfiguration.configuration = &configuration;
+  //configuration.moduleHandlerConfiguration.connectionManager =
+  //  connection_manager_p;
+  configuration.moduleHandlerConfiguration.traceParsing = debugParser_in;
   if (debugParser_in)
-    configuration.moduleHandlerConfiguration_2.traceScanning = true;
-  configuration.moduleHandlerConfiguration_2.targetFileName = fileName_in;
-  configuration.moduleHandlerConfiguration_2.socketConfiguration =
+    configuration.moduleHandlerConfiguration.traceScanning = true;
+  configuration.moduleHandlerConfiguration.targetFileName = fileName_in;
+  configuration.moduleHandlerConfiguration.socketConfiguration =
     &configuration.socketConfiguration;
-  configuration.moduleHandlerConfiguration_2.socketHandlerConfiguration =
+  configuration.moduleHandlerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
-  configuration.moduleHandlerConfiguration_2.stream = stream_p;
+  //configuration.moduleHandlerConfiguration.stream = stream_p;
 
   // ********************** protocol configuration data ************************
   configuration.protocolConfiguration.requestBroadcastReplies =
@@ -679,8 +679,8 @@ do_work (bool requestBroadcastReplies_in,
     } // end IF
   } // end IF
 
-  configuration.listenerConfiguration.connectionManager =
-    connection_manager_p;
+  //configuration.listenerConfiguration.connectionManager =
+  //  connection_manager_p;
   configuration.listenerConfiguration.messageAllocator = &message_allocator;
   configuration.listenerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
@@ -714,6 +714,7 @@ do_work (bool requestBroadcastReplies_in,
   int group_id = -1;
   ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
 
+  //Test_U_IConnection_t* CBData_in.connection = NULL;
   Test_U_ISocketConnection_t* isocket_connection_p = NULL;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
@@ -842,8 +843,7 @@ do_work (bool requestBroadcastReplies_in,
     goto clean_up;
   } // end IF
   if (iconnector_p->useReactor ())
-    configuration.moduleHandlerConfiguration_2.connection =
-      connection_manager_p->get (handle);
+    CBData_in.connection = connection_manager_p->get (handle);
   else
   {
     // step1: wait for the connection to register with the manager
@@ -858,12 +858,12 @@ do_work (bool requestBroadcastReplies_in,
     //              &timeout));
     do
     {
-      configuration.moduleHandlerConfiguration_2.connection =
-        connection_manager_p->get (configuration.socketConfiguration.address);
-      if (configuration.moduleHandlerConfiguration_2.connection) break;
+      CBData_in.connection =
+          connection_manager_p->get (configuration.socketConfiguration.address);
+      if (CBData_in.connection) break;
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
-  if (!configuration.moduleHandlerConfiguration_2.connection)
+  if (!CBData_in.connection)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to \"%s\", returning\n"),
@@ -875,7 +875,7 @@ do_work (bool requestBroadcastReplies_in,
   deadline = COMMON_TIME_NOW + timeout;
   do
   {
-    status = configuration.moduleHandlerConfiguration_2.connection->status ();
+    status = CBData_in.connection->status ();
     if (status == NET_CONNECTION_STATUS_OK) break;
   } while (COMMON_TIME_NOW < deadline);
   if (status != NET_CONNECTION_STATUS_OK)
@@ -888,19 +888,19 @@ do_work (bool requestBroadcastReplies_in,
   } // end IF
   // step1c: wait for the connection stream to finish initializing
   isocket_connection_p =
-    dynamic_cast<Test_U_ISocketConnection_t*> (configuration.moduleHandlerConfiguration_2.connection);
+    dynamic_cast<Test_U_ISocketConnection_t*> (CBData_in.connection);
   if (!isocket_connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<Test_U_ISocketConnection_t>(0x%@), returning\n"),
-                configuration.moduleHandlerConfiguration_2.connection));
+                CBData_in.connection));
     goto clean_up;
   } // end IF
   isocket_connection_p->wait (STREAM_STATE_RUNNING,
                               NULL); // <-- block
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: connected to \"%s\"...\n"),
-              configuration.moduleHandlerConfiguration_2.connection->id (),
+              CBData_in.connection->id (),
               buffer));
 
   // step1ca: reinitialize connection manager
@@ -968,21 +968,21 @@ do_work (bool requestBroadcastReplies_in,
       //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
       //              &timeout));
       deadline = COMMON_TIME_NOW + timeout;
-      Test_U_AsynchConnector_t::ICONNECTION_T* iconnection_p = NULL;
+      //CBData_in.connection = NULL;
       do
       {
-        iconnection_p =
+        CBData_in.connection =
             connection_manager_p->get (configuration.listenerConfiguration.address);
-        if (iconnection_p)
+        if (CBData_in.connection)
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           configuration.handle =
-              reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
+              reinterpret_cast<ACE_HANDLE> (CBData_in.connection->id ());
 #else
           configuration.handle =
-              static_cast<ACE_HANDLE> (iconnection_p->id ());
+              static_cast<ACE_HANDLE> (CBData_in.connection->id ());
 #endif
-          iconnection_p->decrease ();
+          CBData_in.connection->decrease ();
           break;
         } // end IF
       } while (COMMON_TIME_NOW < deadline);
@@ -1096,7 +1096,7 @@ allocate:
                            NULL);
 
     Test_U_ISocketConnection_t* isocket_connection_p =
-      dynamic_cast<Test_U_ISocketConnection_t*> (configuration.moduleHandlerConfiguration_2.connection);
+      dynamic_cast<Test_U_ISocketConnection_t*> (configuration.moduleHandlerConfiguration.connection);
     ACE_ASSERT (isocket_connection_p);
 
     Test_U_ConnectionState& state_r =
@@ -1130,7 +1130,7 @@ allocate:
         std::make_pair (UIDefinitionFileName_in, static_cast<GtkBuilder*> (NULL));
     CBData_in.userData = &CBData_in;
 
-    CBData_in.stream = stream_p;
+    //CBData_in.stream = stream_p;
 
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
     ACE_Time_Value one_second (1, 0);
@@ -1183,10 +1183,10 @@ clean_up:
 
   if (iconnector_p)
     delete iconnector_p;
-  if (configuration.moduleHandlerConfiguration_2.connection)
+  if (configuration.moduleHandlerConfiguration.connection)
   {
-    //configuration.moduleHandlerConfiguration_2.connection->close ();
-    configuration.moduleHandlerConfiguration_2.connection->decrease ();
+    //configuration.moduleHandlerConfiguration.connection->close ();
+    configuration.moduleHandlerConfiguration.connection->decrease ();
   } // end IF
 
   if (!UIDefinitionFileName_in.empty ())

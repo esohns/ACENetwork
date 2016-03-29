@@ -25,7 +25,7 @@
 template <typename ConnectorType>
 Test_U_Stream_T<ConnectorType>::Test_U_Stream_T ()
  : inherited (ACE_TEXT_ALWAYS_CHAR ("DHCPClientStream"))
- , DHCPDiscover_ (ACE_TEXT_ALWAYS_CHAR ("DHCPClient"),
+ , DHCPDiscover_ (ACE_TEXT_ALWAYS_CHAR ("DHCPDiscover"),
                   NULL,
                   false)
  , runtimeStatistic_ (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),

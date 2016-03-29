@@ -47,9 +47,11 @@ struct Test_U_DHCPClient_GTK_CBData
   inline Test_U_DHCPClient_GTK_CBData ()
    : Test_U_GTK_CBData ()
    , configuration (NULL)
+   , connection (NULL)
   {};
 
   Test_U_DHCPClient_Configuration* configuration;
+  Test_U_IConnection_t*            connection;
 };
 
 //struct Test_U_DHCPClient_ThreadData

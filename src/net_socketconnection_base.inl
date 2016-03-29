@@ -145,11 +145,11 @@ Net_SocketConnectionBase_T<HandlerType,
   task_p = module_p->reader ();
   ACE_ASSERT (task_p);
   //result = task_p->reply (message_inout, NULL);
-  result = task_p->put (message_inout, NULL);
+  result = task_p->put_next (message_inout, NULL);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Task::put(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to ACE_Task::put_next(): \"%m\", returning\n")));
     goto clean_up;
   } // end IF
 

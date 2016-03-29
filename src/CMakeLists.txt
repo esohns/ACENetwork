@@ -211,6 +211,7 @@ install (FILES
          net_configuration.h
          net_connection_base.h
          net_connection_manager.h
+         net_connection_manager.inl
          net_controller_base.h
          net_defines.h
          net_exports.h

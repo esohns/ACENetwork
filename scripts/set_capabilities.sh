@@ -5,6 +5,10 @@
 # *NOTE*: it is neither portable nor particularly stable !
 # parameters:   - $1 [BUILD] {"debug" || "debug_tracing" || "release" || ...}
 # return value: - 0 success, 1 failure
+
+# sanity checks
+command -v gksudo >/dev/null 2>&1 || { echo "gksudo is not installed, aborting" >&2; exit 1; }
+
 [ "root" != "$USER" ] && exec gksudo $0 "$@"
 
 echo "starting..."
@@ -55,18 +59,22 @@ do
  BIN="${BUILD_DIR}/${TEST_U_DIR}/${DIR}/${BINS}"
  [ ! -r "${BIN}" ] && echo "ERROR: invalid binary file (was: \"${BIN}\"), aborting" && exit 1
 
- cp -f ${BIN} ${TMP_DIR}
- [ $? -ne 0 ] && echo "ERROR: failed to cp ${BIN}: \"$?\", aborting" && exit 1
- echo "copied \"$BIN\"..."
+# cp -f ${BIN} ${TMP_DIR}
+# [ $? -ne 0 ] && echo "ERROR: failed to cp ${BIN}: \"$?\", aborting" && exit 1
+# echo "copied \"$BIN\"..."
 
- BIN_TMP="${TMP_DIR}/${BINS}"
- [ ! -r "${BIN_TMP}" ] && echo "ERROR: invalid binary file (was: \"${BIN_TMP}\"), aborting" && exit 1
+# BIN_TMP="${TMP_DIR}/${BINS}"
+# [ ! -r "${BIN_TMP}" ] && echo "ERROR: invalid binary file (was: \"${BIN_TMP}\"), aborting" && exit 1
 
 # chown --quiet root ${BIN_TMP}
-# [ $? -ne 0 ] && echo "ERROR: failed to chown ${BIN}: \"$?\", aborting" && exit 1
+ chown --quiet root ${BIN}
+ [ $? -ne 0 ] && echo "ERROR: failed to chown ${BIN}: \"$?\", aborting" && exit 1
 # chmod --quiet +s ${BIN_TMP}
-# [ $? -ne 0 ] && echo "ERROR: failed to chmod +s ${BIN}: \"$?\", aborting" && exit 1
- /sbin/setcap 'cap_net_bind_service=eip' ${BIN_TMP}
+ chmod --quiet +s ${BIN}
+ [ $? -ne 0 ] && echo "ERROR: failed to chmod +s ${BIN}: \"$?\", aborting" && exit 1
+
+# /sbin/setcap 'cap_net_bind_service=eip' ${BIN_TMP}
+ /sbin/setcap 'cap_net_bind_service=eip' ${BIN}
  [ $? -ne 0 ] && echo "ERROR: failed to /sbin/setcap ${BIN_TMP}: \"$?\", aborting" && exit 1
 
  echo "modified \"$BINS\"..."

@@ -106,16 +106,27 @@ struct Test_U_UserData
 //};
 //typedef Stream_DataBase_T<Test_U_MessageData> Test_U_MessageData_t;
 
+typedef DHCP_RuntimeStatistic_t Test_U_RuntimeStatistic_t;
+
+// forward declarations
+struct Test_U_Configuration;
+struct Test_U_ConnectionState;
+
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          Test_U_Configuration,
+                          Test_U_ConnectionState,
+                          Test_U_RuntimeStatistic_t> Test_U_IConnection_t;
+
 struct Test_U_StreamSessionData
  : Stream_SessionData
 {
   inline Test_U_StreamSessionData ()
    : Stream_SessionData ()
-   , connectionState (NULL)
+   , connection (NULL)
    , targetFileName ()
    , userData (NULL)
    , serverAddress (static_cast<u_short> (0),
-                    static_cast<ACE_UINT32> (INADDR_NONE))
+                    static_cast<ACE_UINT32> (INADDR_ANY))
    , timeStamp (ACE_Time_Value::zero)
    , xid (0)
   {};
@@ -123,8 +134,7 @@ struct Test_U_StreamSessionData
   {
     Stream_SessionData::operator= (rhs_in);
 
-    connectionState =
-        (connectionState ? connectionState : rhs_in.connectionState);
+    connection = (connection ? connection : rhs_in.connection);
     targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
                                               : targetFileName);
     userData = (userData ? userData : rhs_in.userData);
@@ -132,7 +142,7 @@ struct Test_U_StreamSessionData
     return *this;
   }
 
-  DHCP_ConnectionState* connectionState;
+  Test_U_IConnection_t* connection;
   std::string           targetFileName; // file writer module
   Test_U_UserData*      userData;
 
@@ -156,41 +166,37 @@ struct Test_U_SocketHandlerConfiguration
   Test_U_UserData* userData;
 };
 
+//typedef Net_IConnectionManager_T<ACE_INET_Addr,
+//                                 Test_U_Configuration,
+//                                 Test_U_ConnectionState,
+//                                 Test_U_RuntimeStatistic_t,
+//                                 ////////
+//                                 Test_U_UserData> Test_U_IConnectionManager_t;
+
 // forward declarations
-struct Test_U_Configuration;
-struct Test_U_ConnectionState;
-typedef DHCP_RuntimeStatistic_t Test_U_RuntimeStatistic_t;
-typedef Net_IConnection_T<ACE_INET_Addr,
-                          Test_U_Configuration,
-                          Test_U_ConnectionState,
-                          Test_U_RuntimeStatistic_t> Test_U_IConnection_t;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Test_U_Configuration,
-                                 Test_U_ConnectionState,
-                                 Test_U_RuntimeStatistic_t,
-                                 ////////
-                                 Test_U_UserData> Test_U_IConnectionManager_t;
 struct Test_U_StreamModuleHandlerConfiguration;
 struct Test_U_StreamState;
-typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                      ////////////////////
-                      ACE_MT_SYNCH,
-                      Common_TimePolicy_t,
-                      ////////////////////
-                      Stream_StateMachine_ControlState,
-                      Test_U_StreamState,
-                      ////////////////////
-                      Test_U_StreamConfiguration,
-                      ////////////////////
-                      Test_U_RuntimeStatistic_t,
-                      ////////////////////
-                      Stream_ModuleConfiguration,
-                      Test_U_StreamModuleHandlerConfiguration,
-                      ////////////////////
-                      Test_U_StreamSessionData,   // session data
-                      Test_U_StreamSessionData_t, // session data container (reference counted)
-                      Test_U_SessionMessage,
-                      Test_U_Message> Test_U_StreamBase_t;
+
+//typedef Stream_Base_T<ACE_SYNCH_MUTEX,
+//                      ////////////////////
+//                      ACE_MT_SYNCH,
+//                      Common_TimePolicy_t,
+//                      ////////////////////
+//                      Stream_StateMachine_ControlState,
+//                      Test_U_StreamState,
+//                      ////////////////////
+//                      Test_U_StreamConfiguration,
+//                      ////////////////////
+//                      Test_U_RuntimeStatistic_t,
+//                      ////////////////////
+//                      Stream_ModuleConfiguration,
+//                      Test_U_StreamModuleHandlerConfiguration,
+//                      ////////////////////
+//                      Test_U_StreamSessionData,   // session data
+//                      Test_U_StreamSessionData_t, // session data container (reference counted)
+//                      Test_U_SessionMessage,
+//                      Test_U_Message> Test_U_StreamBase_t;
+
 struct Test_U_StreamModuleHandlerConfiguration
  : DHCP_ModuleHandlerConfiguration
 {
@@ -198,27 +204,27 @@ struct Test_U_StreamModuleHandlerConfiguration
    : DHCP_ModuleHandlerConfiguration ()
    , configuration (NULL)
    , connection (NULL)
-   , connectionManager (NULL)
+   //, connectionManager (NULL)
    , contextID (0)
    , inbound (true)
    , passive (false)
    , printProgressDot (true)
    , socketConfiguration (NULL)
    , socketHandlerConfiguration (NULL)
-   , stream (NULL)
+   //, stream (NULL)
    , targetFileName ()
   {};
 
   Test_U_Configuration*              configuration;
   Test_U_IConnection_t*              connection; // UDP target/net IO module
-  Test_U_IConnectionManager_t*       connectionManager; // UDP IO module
+  //Test_U_IConnectionManager_t*       connectionManager; // UDP IO module
   guint                              contextID;
   bool                               inbound; // net IO module
   bool                               passive; // UDP target module
   bool                               printProgressDot; // dump module
   Net_SocketConfiguration*           socketConfiguration;
   Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-  Test_U_StreamBase_t*               stream; // UDP target/net IO module
+  //Test_U_StreamBase_t*               stream; // UDP target/net IO module
   std::string                        targetFileName; // dump module
 };
 
@@ -229,7 +235,7 @@ struct Test_U_ListenerConfiguration
 {
   inline Test_U_ListenerConfiguration ()
    : Net_ListenerConfiguration ()
-   , connectionManager (NULL)
+   //, connectionManager (NULL)
    , messageAllocator (NULL)
    , networkInterface ()
    , socketHandlerConfiguration (NULL)
@@ -246,7 +252,7 @@ struct Test_U_ListenerConfiguration
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
   };
 
-  Test_U_IConnectionManager_t*       connectionManager;
+  //Test_U_IConnectionManager_t*       connectionManager;
   Stream_IAllocator*                 messageAllocator;
   std::string                        networkInterface;
   Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
@@ -303,8 +309,8 @@ struct Test_U_Configuration
    : signalHandlerConfiguration ()
    , socketConfiguration ()
    , socketHandlerConfiguration ()
-   , moduleConfiguration_2 ()
-   , moduleHandlerConfiguration_2 ()
+   , moduleConfiguration ()
+   , moduleHandlerConfiguration ()
    , streamConfiguration ()
    , listenerConfiguration ()
    , userData ()
@@ -317,8 +323,8 @@ struct Test_U_Configuration
   Net_SocketConfiguration                 socketConfiguration;
   Test_U_SocketHandlerConfiguration       socketHandlerConfiguration;
   // **************************** stream data **********************************
-  Stream_ModuleConfiguration              moduleConfiguration_2;
-  Test_U_StreamModuleHandlerConfiguration moduleHandlerConfiguration_2;
+  Stream_ModuleConfiguration              moduleConfiguration;
+  Test_U_StreamModuleHandlerConfiguration moduleHandlerConfiguration;
   Test_U_StreamConfiguration              streamConfiguration;
   // *************************** protocol data *********************************
   Test_U_ProtocolConfiguration_t          protocolConfiguration;
@@ -390,7 +396,7 @@ struct Test_U_GTK_CBData
    , logStack ()
    , progressData ()
    , progressEventSourceID (0)
-   , stream (NULL)
+   //, stream (NULL)
    , subscribers ()
 //   , subscribersLock ()
   {};
@@ -400,7 +406,7 @@ struct Test_U_GTK_CBData
   Common_MessageStack_t     logStack;
   Test_U_GTK_ProgressData   progressData;
   guint                     progressEventSourceID;
-  Test_U_StreamBase_t*      stream;
+  //Test_U_StreamBase_t*      stream;
   Test_U_Subscribers_t      subscribers;
   // *NOTE*: use Common_UI_GTKState.lock instead
 //  ACE_SYNCH_RECURSIVE_MUTEX subscribersLock;
