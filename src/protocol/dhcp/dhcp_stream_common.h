@@ -99,7 +99,8 @@ struct DHCP_StreamState
 
 typedef Stream_SessionData_T<DHCP_Stream_SessionData> DHCP_Stream_SessionData_t;
 
-typedef Common_INotify_T<DHCP_Stream_SessionData,
+typedef Common_INotify_T<unsigned int,
+                         DHCP_Stream_SessionData,
                          DHCP_Record,
                          DHCP_SessionMessage> DHCP_IStreamNotify_t;
 

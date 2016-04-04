@@ -95,6 +95,7 @@ typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Test_U_StreamModuleHandlerConfiguration,
                                ///////////
                                Test_U_ConnectionManager_t,
+                               Test_U_OutboundConnectorBcast_t,
                                Test_U_OutboundConnector_t> Test_U_Module_DHCPDiscover;
 typedef DHCP_Module_DiscoverH_T<ACE_SYNCH_MUTEX,
                                 ACE_MT_SYNCH,
@@ -182,13 +183,15 @@ DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                            // task s
                               Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
                               Test_U_Module_DHCPDiscoverH);            // writer type
 
-//DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                            // task synch type
-//                          Common_TimePolicy_t,                     // time policy
-//                          Stream_ModuleConfiguration,              // module configuration type
-//                          Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
-//                          Test_U_Module_Streamer,                  // reader type
-//                          Test_U_Module_Bisector,                  // writer type
-//                          Test_U_Module_Marshal);                  // name
+typedef ACE_Thru_Task<ACE_MT_SYNCH,
+                      Common_TimePolicy_t> Test_U_ThruTask_t;
+DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                            // task synch type
+                          Common_TimePolicy_t,                     // time policy
+                          Stream_ModuleConfiguration,              // module configuration type
+                          Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+                          Test_U_Module_Streamer,                  // reader type
+                          Test_U_ThruTask_t,                       // writer type
+                          Test_U_Module_Streamer);                 // name
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                            // task synch type
                           Common_TimePolicy_t,                     // time policy
                           Stream_ModuleConfiguration,              // module configuration type

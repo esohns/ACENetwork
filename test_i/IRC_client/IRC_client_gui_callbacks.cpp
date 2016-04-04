@@ -151,7 +151,7 @@ connection_setup_function (void* arg_in)
   std::stringstream converter;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   bool result_2 = false;
-  IRC_Client_IControl_t* icontrol_p = NULL;
+  IRC_IControl* icontrol_p = NULL;
   const IRC_Client_Stream* stream_p = NULL;
   const Stream_Module_t* module_p = NULL;
   const Stream_Module_t* current_p = NULL;
@@ -338,11 +338,11 @@ connection_failed:
   } // end FOR
   ACE_ASSERT (module_p);
   icontrol_p =
-    dynamic_cast<IRC_Client_IControl_t*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+    dynamic_cast<IRC_IControl*> (const_cast<Stream_Module_t*> (module_p)->writer ());
   if (!icontrol_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_IControl_T> failed, returning\n")));
+                ACE_TEXT ("dynamic_cast<IRC_IControl> failed, returning\n")));
 
     // clean up
     connection_2->close ();
@@ -373,12 +373,12 @@ connection_failed:
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in IRC_Client_IControl_t::registerc(), continuing\n")));
+                ACE_TEXT ("caught exception in IRC_IControl::registerc(), continuing\n")));
   }
   if (!result_2)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_IIRCControl::registerConnection(), returning\n")));
+                ACE_TEXT ("failed to IRC_IControl::registerc(), returning\n")));
 
     // clean up
     connection_2->close ();

@@ -444,21 +444,22 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
     case 0:
     {
       // connection closed/reset (by peer) ? --> not an error
-      error = result_in.error ();
-      if ((error != ECONNRESET) &&
-          (error != EPIPE)      &&
-          (error != EBADF)) // 9 happens on Linux (local close())
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", aborting\n"),
-                    result_in.handle (),
-                    ACE::sock_error (static_cast<int> (error))));
-#else
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to write to output stream (%d): \"%s\", aborting\n"),
-                    result_in.handle (),
-                    ACE_TEXT (ACE_OS::strerror (error))));
-#endif
+      ACE_ASSERT (result_in.success () == 0);
+      //      error = result_in.error ();
+//      if ((error != ECONNRESET) &&
+//          (error != EPIPE)      &&
+//          (error != EBADF)) // 9 happens on Linux (local close())
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("failed to write to output stream (handle was: 0x%@): \"%s\", aborting\n"),
+//                    result_in.handle (),
+//                    ACE::sock_error (static_cast<int> (error))));
+//#else
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("failed to write to output stream (handle was: %d): \"%s\", aborting\n"),
+//                    result_in.handle (),
+//                    ACE_TEXT (ACE_OS::strerror (error))));
+//#endif
       close = true;
       goto release;
     }

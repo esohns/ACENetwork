@@ -14,9 +14,11 @@ command -v gksudo >/dev/null 2>&1 || { echo "gksudo is not installed, aborting" 
 echo "starting..."
 
 # sanity checks
+command -v chgrp >/dev/null 2>&1 || { echo "chgrp is not installed, aborting" >&2; exit 1; }
 command -v chmod >/dev/null 2>&1 || { echo "chmod is not installed, aborting" >&2; exit 1; }
 command -v chown >/dev/null 2>&1 || { echo "chown is not installed, aborting" >&2; exit 1; }
 command -v dirname >/dev/null 2>&1 || { echo "dirname is not installed, aborting" >&2; exit 1; }
+command -v echo >/dev/null 2>&1 || { echo "echo is not supported, aborting" >&2; exit 1; }
 command -v readlink >/dev/null 2>&1 || { echo "readlink is not installed, aborting" >&2; exit 1; }
 command -v /sbin/setcap >/dev/null 2>&1 || { echo "setcap is not installed, aborting" >&2; exit 1; }
 
@@ -69,6 +71,8 @@ do
 # chown --quiet root ${BIN_TMP}
  chown --quiet root ${BIN}
  [ $? -ne 0 ] && echo "ERROR: failed to chown ${BIN}: \"$?\", aborting" && exit 1
+ chgrp --quiet root ${BIN}
+ [ $? -ne 0 ] && echo "ERROR: failed to chgrp ${BIN}: \"$?\", aborting" && exit 1
 # chmod --quiet +s ${BIN_TMP}
  chmod --quiet +s ${BIN}
  [ $? -ne 0 ] && echo "ERROR: failed to chmod +s ${BIN}: \"$?\", aborting" && exit 1

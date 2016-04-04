@@ -693,7 +693,9 @@ Net_Common_Tools::interface2IPAddress (const std::string& interfaceIdentifier_in
   // initialize return value(s)
   IPAddress_out.reset ();
 
-  // initialize return value(s)
+//  ACE_TCHAR buffer[BUFSIZ];
+//  ACE_OS::memset (buffer, 0, sizeof (buffer));
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   PIP_ADAPTER_ADDRESSES ip_adapter_addresses_p = NULL;
   ULONG buffer_length = 0;
@@ -850,6 +852,20 @@ continue_:
   ACE_NOTREACHED (return false;)
 #endif /* ACE_HAS_GETIFADDRS */
 #endif
+
+//  result = IPAddress_out.addr_to_string (buffer,
+//                                         sizeof (buffer),
+//                                         1);
+//  if (result == -1)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", aborting\n")));
+//    return false;
+//  } // end IF
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("interface \"%s\" --> \"%s\"\n"),
+//              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+//              buffer));
 
   return true;
 }

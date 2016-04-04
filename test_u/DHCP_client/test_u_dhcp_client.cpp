@@ -596,6 +596,7 @@ do_work (bool requestBroadcastReplies_in,
     &configuration.userData;
 
   // ********************** stream configuration data **************************
+  configuration.streamConfiguration.cloneModule = true;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.module =
     (!UIDefinitionFileName_in.empty () ? &event_handler
@@ -617,8 +618,6 @@ do_work (bool requestBroadcastReplies_in,
   configuration.moduleHandlerConfiguration.streamConfiguration =
     &configuration.streamConfiguration;
   configuration.moduleHandlerConfiguration.configuration = &configuration;
-  //configuration.moduleHandlerConfiguration.connectionManager =
-  //  connection_manager_p;
   configuration.moduleHandlerConfiguration.traceParsing = debugParser_in;
   if (debugParser_in)
     configuration.moduleHandlerConfiguration.traceScanning = true;
@@ -627,7 +626,6 @@ do_work (bool requestBroadcastReplies_in,
     &configuration.socketConfiguration;
   configuration.moduleHandlerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
-  //configuration.moduleHandlerConfiguration.stream = stream_p;
 
   // ********************** protocol configuration data ************************
   configuration.protocolConfiguration.requestBroadcastReplies =
@@ -714,7 +712,7 @@ do_work (bool requestBroadcastReplies_in,
   int group_id = -1;
   ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
 
-  //Test_U_IConnection_t* CBData_in.connection = NULL;
+  Test_U_IConnection_t* iconnection_p = NULL;
   Test_U_ISocketConnection_t* isocket_connection_p = NULL;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
@@ -799,7 +797,10 @@ do_work (bool requestBroadcastReplies_in,
     goto clean_up;
   } // end IF
 
-  // step1b: connect
+  // step1b: connect (broadcast)
+  // *NOTE*: the DHCP server address may not be known at this stage, so
+  //         connection to the unicast address is handled by the discovery
+  //         module
   configuration.streamConfiguration.module = NULL;
   connection_manager_p->set (configuration,
                              &configuration.userData);
@@ -815,12 +816,12 @@ do_work (bool requestBroadcastReplies_in,
 
   if (useReactor_in)
     ACE_NEW_NORETURN (iconnector_p,
-                      Test_U_OutboundConnector_t (connection_manager_p,
-                                                  configuration.socketHandlerConfiguration.statisticReportingInterval));
+                      Test_U_OutboundConnectorBcast_t (connection_manager_p,
+                                                       configuration.socketHandlerConfiguration.statisticReportingInterval));
   else
     ACE_NEW_NORETURN (iconnector_p,
-                      Test_U_OutboundAsynchConnector_t (connection_manager_p,
-                                                        configuration.socketHandlerConfiguration.statisticReportingInterval));
+                      Test_U_OutboundAsynchConnectorBcast_t (connection_manager_p,
+                                                             configuration.socketHandlerConfiguration.statisticReportingInterval));
   if (!iconnector_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -843,7 +844,8 @@ do_work (bool requestBroadcastReplies_in,
     goto clean_up;
   } // end IF
   if (iconnector_p->useReactor ())
-    CBData_in.connection = connection_manager_p->get (handle);
+    configuration.moduleHandlerConfiguration.broadcastConnection =
+        connection_manager_p->get (handle);
   else
   {
     // step1: wait for the connection to register with the manager
@@ -858,12 +860,12 @@ do_work (bool requestBroadcastReplies_in,
     //              &timeout));
     do
     {
-      CBData_in.connection =
+      configuration.moduleHandlerConfiguration.broadcastConnection =
           connection_manager_p->get (configuration.socketConfiguration.address);
-      if (CBData_in.connection) break;
+      if (configuration.moduleHandlerConfiguration.broadcastConnection) break;
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
-  if (!CBData_in.connection)
+  if (!configuration.moduleHandlerConfiguration.broadcastConnection)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to \"%s\", returning\n"),
@@ -875,7 +877,8 @@ do_work (bool requestBroadcastReplies_in,
   deadline = COMMON_TIME_NOW + timeout;
   do
   {
-    status = CBData_in.connection->status ();
+    status =
+        configuration.moduleHandlerConfiguration.broadcastConnection->status ();
     if (status == NET_CONNECTION_STATUS_OK) break;
   } while (COMMON_TIME_NOW < deadline);
   if (status != NET_CONNECTION_STATUS_OK)
@@ -888,19 +891,19 @@ do_work (bool requestBroadcastReplies_in,
   } // end IF
   // step1c: wait for the connection stream to finish initializing
   isocket_connection_p =
-    dynamic_cast<Test_U_ISocketConnection_t*> (CBData_in.connection);
+    dynamic_cast<Test_U_ISocketConnection_t*> (configuration.moduleHandlerConfiguration.broadcastConnection);
   if (!isocket_connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<Test_U_ISocketConnection_t>(0x%@), returning\n"),
-                CBData_in.connection));
+                configuration.moduleHandlerConfiguration.broadcastConnection));
     goto clean_up;
   } // end IF
   isocket_connection_p->wait (STREAM_STATE_RUNNING,
                               NULL); // <-- block
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: connected to \"%s\"...\n"),
-              CBData_in.connection->id (),
+              configuration.moduleHandlerConfiguration.broadcastConnection->id (),
               buffer));
 
   // step1ca: reinitialize connection manager
@@ -956,7 +959,21 @@ do_work (bool requestBroadcastReplies_in,
     //         running the dispatch loop for a limited time...
     configuration.handle =
         iconnector_p->connect (configuration.listenerConfiguration.address);
-    if (!useReactor_in)
+    if (configuration.handle == ACE_INVALID_HANDLE)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to connect to \"%s\", returning\n"),
+                  buffer));
+
+      // clean up
+      iconnector_p->abort ();
+      connection_manager_p->abort ();
+
+      goto clean_up;
+    } // end IF
+    if (useReactor_in)
+      iconnection_p = connection_manager_p->get (configuration.handle);
+    else
     {
       configuration.handle = ACE_INVALID_HANDLE;
 
@@ -971,23 +988,23 @@ do_work (bool requestBroadcastReplies_in,
       //CBData_in.connection = NULL;
       do
       {
-        CBData_in.connection =
+        iconnection_p =
             connection_manager_p->get (configuration.listenerConfiguration.address);
-        if (CBData_in.connection)
+        if (iconnection_p)
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           configuration.handle =
-              reinterpret_cast<ACE_HANDLE> (CBData_in.connection->id ());
+              reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
 #else
           configuration.handle =
-              static_cast<ACE_HANDLE> (CBData_in.connection->id ());
+              static_cast<ACE_HANDLE> (iconnection_p->id ());
 #endif
-          CBData_in.connection->decrease ();
+          iconnection_p->decrease ();
           break;
         } // end IF
       } while (COMMON_TIME_NOW < deadline);
     } // end IF
-    if (configuration.handle == ACE_INVALID_HANDLE)
+    if (!iconnection_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to \"%s\", returning\n"),
@@ -1096,7 +1113,7 @@ allocate:
                            NULL);
 
     Test_U_ISocketConnection_t* isocket_connection_p =
-      dynamic_cast<Test_U_ISocketConnection_t*> (configuration.moduleHandlerConfiguration.connection);
+      dynamic_cast<Test_U_ISocketConnection_t*> (configuration.moduleHandlerConfiguration.broadcastConnection);
     ACE_ASSERT (isocket_connection_p);
 
     Test_U_ConnectionState& state_r =
@@ -1104,8 +1121,8 @@ allocate:
     state_r.timeStamp = COMMON_TIME_NOW;
     state_r.xid = DHCP_record.xid;
 
-    Test_U_ConnectionStream& stream_r =
-        const_cast<Test_U_ConnectionStream&> (isocket_connection_p->stream ());
+    Test_U_OutboundConnectionStream& stream_r =
+        const_cast<Test_U_OutboundConnectionStream&> (isocket_connection_p->stream ());
     const Test_U_StreamSessionData_t* session_data_container_p =
         stream_r.get ();
     ACE_ASSERT (session_data_container_p);
@@ -1183,10 +1200,15 @@ clean_up:
 
   if (iconnector_p)
     delete iconnector_p;
-  if (configuration.moduleHandlerConfiguration.connection)
+  if (configuration.moduleHandlerConfiguration.broadcastConnection)
   {
-    //configuration.moduleHandlerConfiguration.connection->close ();
-    configuration.moduleHandlerConfiguration.connection->decrease ();
+//    configuration.moduleHandlerConfiguration.broadcastConnection->close ();
+    configuration.moduleHandlerConfiguration.broadcastConnection->decrease ();
+  } // end IF
+  if (iconnection_p)
+  {
+//    iconnection_p->close ();
+    iconnection_p->decrease ();
   } // end IF
 
   if (!UIDefinitionFileName_in.empty ())

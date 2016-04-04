@@ -101,7 +101,8 @@ struct HTTP_StreamState
 
 typedef Stream_SessionData_T<HTTP_Stream_SessionData> HTTP_Stream_SessionData_t;
 
-typedef Common_INotify_T<HTTP_Stream_SessionData,
+typedef Common_INotify_T<unsigned int,
+                         HTTP_Stream_SessionData,
                          HTTP_Record,
                          HTTP_SessionMessage> HTTP_IStreamNotify_t;
 

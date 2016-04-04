@@ -56,10 +56,11 @@ class IRC_Client_SessionMessage;
 struct IRC_Client_SessionState;
 class IRC_Record;
 
-typedef Common_INotify_T<IRC_Client_SessionData,
-                         IRC_Record,
+typedef Common_INotify_T<unsigned int,
+                         IRC_Client_SessionData,
+                         IRC_Message,
                          IRC_Client_SessionMessage> IRC_Client_IStreamNotify_t;
-typedef IRC_IControl_T<IRC_Client_IStreamNotify_t> IRC_Client_IControl_t;
+//typedef IRC_IControl_T<IRC_Client_IStreamNotify_t> IRC_Client_IControl_t;
 
 // phonebook
 typedef std::set<std::string> IRC_Client_Networks_t;
@@ -157,14 +158,14 @@ struct IRC_Client_ConnectionState
  : IRC_ConnectionState
 {
   inline IRC_Client_ConnectionState ()
-    : IRC_ConnectionState ()
-    , configuration (NULL)
-    , controller (NULL)
-    , userData (NULL)
+   : IRC_ConnectionState ()
+   , configuration (NULL)
+   , controller (NULL)
+   , userData (NULL)
   {};
 
   IRC_Client_Configuration* configuration;
-  IRC_Client_IControl_t*    controller;
+  IRC_IControl*             controller;
 
   IRC_Client_UserData*      userData;
 };

@@ -34,6 +34,7 @@ template <typename TaskSynchType,
           typename ConfigurationType,
           ///////////////////////////////
           typename ConnectionManagerType,
+          typename ConnectorTypeBcast,
           typename ConnectorType>
 class DHCP_Module_Discover_T
  : public Stream_TaskBaseAsynch_T<TimePolicyType,
@@ -69,8 +70,11 @@ class DHCP_Module_Discover_T
 
   // helper methods
   ProtocolMessageType* allocateMessage (unsigned int); // (requested) size
+  ACE_HANDLE connect (const ACE_INET_Addr&, // peer address
+                      bool&);               // reuturn value: use reactor ?
 
-  ACE_HANDLE                                   connectionHandle_;
+  ACE_HANDLE                                   broadcastConnectionHandle_;
+  ACE_HANDLE                                   connectionHandle_; // unicast
   bool                                         initialized_;
   bool                                         isSessionConnection_;
   bool                                         sendRequestOnOffer_;

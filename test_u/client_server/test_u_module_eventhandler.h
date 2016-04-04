@@ -41,6 +41,7 @@ class Net_Module_EventHandler
 
                                          Stream_ModuleHandlerConfiguration,
 
+                                         unsigned int,
                                          Net_StreamSessionData_t>
 {
  public:
@@ -56,6 +57,7 @@ class Net_Module_EventHandler
 
                                          Stream_ModuleHandlerConfiguration,
 
+                                         unsigned int,
                                          Net_StreamSessionData_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler (const Net_Module_EventHandler&))

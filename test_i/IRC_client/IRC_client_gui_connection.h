@@ -62,16 +62,19 @@ class IRC_Client_GUI_Connection
   virtual ~IRC_Client_GUI_Connection ();
 
   void initialize (IRC_Client_SessionState*, // session state handle
-                   IRC_Client_IControl_t*);  // controller handle
+                   IRC_IControl*);           // controller handle
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
   void finalize (bool = true); // locked access ?
   void close ();
 
   // implement IRC_Client_IStreamNotify_t
-  virtual void start (const IRC_Client_SessionData&);
-  virtual void notify (const IRC_Record&);
-  virtual void notify (const IRC_Client_SessionMessage&);
-  virtual void end ();
+  virtual void start (unsigned int,
+                      const IRC_Client_SessionData&);
+  virtual void notify (unsigned int,
+                       const IRC_Message&);
+  virtual void notify (unsigned int,
+                       const IRC_Client_SessionMessage&);
+  virtual void end (unsigned int);
 
   // implement Common_IGet_T
   virtual const IRC_Client_GTK_ConnectionCBData& get () const;

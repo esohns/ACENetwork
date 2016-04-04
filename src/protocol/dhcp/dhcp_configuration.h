@@ -59,7 +59,8 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  ////////
                                  DHCP_Stream_UserData> DHCP_IConnection_Manager_t;
 
-typedef Common_INotify_T<DHCP_Stream_SessionData,
+typedef Common_INotify_T<unsigned int,
+                         DHCP_Stream_SessionData,
                          DHCP_Record,
                          DHCP_SessionMessage> DHCP_IStreamNotify_t;
 
@@ -110,15 +111,18 @@ struct DHCP_ModuleHandlerConfiguration
   inline DHCP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    //////////////////////////////////////
+//   , connection (NULL)
    , printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)
   {
-    crunchMessages = DHCP_DEFAULT_CRUNCH_MESSAGES; // http parser module
+    crunchMessages = DHCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
 
-    traceParsing = DHCP_DEFAULT_YACC_TRACE; // http parser module
-    traceScanning = DHCP_DEFAULT_LEX_TRACE; // http parser module
+    traceParsing = DHCP_DEFAULT_YACC_TRACE; // dhcp parser module
+    traceScanning = DHCP_DEFAULT_LEX_TRACE; // dhcp parser module
   };
+
+//  Test_U_IConnection_t*       connection; // UDP target/net IO module
 
   bool                        printProgressDot;  // print dot '.' (stdlog) for received messages
   DHCP_ProtocolConfiguration* protocolConfiguration;

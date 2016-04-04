@@ -214,7 +214,7 @@ release:
 
 bool
 curses_main (IRC_Client_CursesState& state_in,
-             IRC_Client_IControl_t* controller_in)
+             IRC_IControl* controller_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_main"));
 

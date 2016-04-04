@@ -27,12 +27,12 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common_iclone.h"
 #include "common_time_common.h"
 
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
-#include "stream_task_base_synch.h"
+
+#include "stream_misc_messagehandler.h"
 
 #include "irc_message.h"
 #include "irc_sessionmessage.h"
@@ -48,13 +48,15 @@ class Stream_IAllocator;
 class IRC_Record;
 
 class IRC_Client_Module_IRCHandler
- : public IRC_StateMachine_Registration
- , public Stream_TaskBaseSynch_T<Common_TimePolicy_t,
-                                 IRC_Client_SessionMessage,
-                                 IRC_Message>
- , public IRC_Client_IControl_t
- , public IRC_Client_IModuleHandler_t
- , public Common_IClone_T<Stream_Module_t>
+ : public Stream_Module_MessageHandler_T<IRC_Client_SessionMessage,
+                                         IRC_Message,
+
+                                         IRC_Client_ModuleHandlerConfiguration,
+
+                                         unsigned int,
+                                         IRC_Client_SessionData_t>
+ , public IRC_StateMachine_Registration
+ , public IRC_IControl
 {
  public:
   IRC_Client_Module_IRCHandler ();
@@ -69,9 +71,9 @@ class IRC_Client_Module_IRCHandler
   virtual void handleSessionMessage (IRC_Client_SessionMessage*&, // session message handle
                                      bool&);                      // return value: pass message downstream ?
 
-  // implement IRC_Client_IControl_t
-  virtual void subscribe (IRC_Client_IStreamNotify_t*); // new subscriber
-  virtual void unsubscribe (IRC_Client_IStreamNotify_t*); // existing subscriber
+  // implement IRC_IControl
+//  virtual void subscribe (IRC_Client_IStreamNotify_t*); // new subscriber
+//  virtual void unsubscribe (IRC_Client_IStreamNotify_t*); // existing subscriber
   virtual bool registerc (const IRC_LoginOptions&); // login details
   virtual void nick (const std::string&); // nick
   virtual void quit (const std::string&); // reason
@@ -107,18 +109,21 @@ class IRC_Client_Module_IRCHandler
   // override Common_IDumpState
   virtual void dump_state () const;
 
-  // implement IRC_Client_IModuleHandler_t
+  // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const IRC_Client_ModuleHandlerConfiguration&);
-  virtual const IRC_Client_ModuleHandlerConfiguration& get () const;
 
-  // implement Common_IClone_T
+  // override Common_IClone_T
   virtual Stream_Module_t* clone ();
 
  private:
-  typedef IRC_StateMachine_Registration inherited;
-  typedef Stream_TaskBaseSynch_T<Common_TimePolicy_t,
-                                 IRC_Client_SessionMessage,
-                                 IRC_Message> inherited2;
+  typedef Stream_Module_MessageHandler_T<IRC_Client_SessionMessage,
+                                         IRC_Message,
+
+                                         IRC_Client_ModuleHandlerConfiguration,
+
+                                         unsigned int,
+                                         IRC_Client_SessionData_t> inherited;
+  typedef IRC_StateMachine_Registration inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler (const IRC_Client_Module_IRCHandler&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler& operator= (const IRC_Client_Module_IRCHandler&))
@@ -134,16 +139,15 @@ class IRC_Client_Module_IRCHandler
   void sendMessage (IRC_Record*&); // command handle
 
   // convenient types
-  typedef std::list<IRC_Client_IStreamNotify_t*> Subscribers_t;
-  typedef Subscribers_t::iterator SubscribersIterator_t;
+  typedef typename inherited::SUBSCRIBERS_T::iterator SUBSCRIBERS_ITERATOR_T;
 
   // *NOTE*: lock subscribers_ and connectionIsAlive_
-  // *NOTE*: this lock needs to be recursive to prevent deadlocks when users
-  //         unsubscribe from within the notification callbacks
+//  // *NOTE*: this lock needs to be recursive to prevent deadlocks when users
+//  //         unsubscribe from within the notification callbacks
   ACE_SYNCH_RECURSIVE_MUTEX             lock_;
-  Subscribers_t                         subscribers_;
+  typename inherited::SUBSCRIBERS_T     subscribers_;
 
-  IRC_Client_ModuleHandlerConfiguration configuration_;
+//  IRC_Client_ModuleHandlerConfiguration configuration_;
   bool                                  isInitialized_;
 
   // *NOTE*: obviously, there is a delay between connection establishment and

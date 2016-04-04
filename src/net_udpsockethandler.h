@@ -23,7 +23,7 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/Reactor_Notification_Strategy.h"
-//#include "ace/SOCK_CODgram.h"
+#include "ace/SOCK_CODgram.h"
 #include "ace/SOCK_Dgram.h"
 #include "ace/SOCK_Dgram_Bcast.h"
 #include "ace/Svc_Handler.h"
@@ -33,15 +33,6 @@
 
 /////////////////////////////////////////
 
-class Net_SOCK_Dgram
- : public ACE_SOCK_Dgram
-{
- public:
-  int get_remote_addr (ACE_Addr&) const;
-
- private:
-  typedef ACE_SOCK_Dgram inherited;
-};
 class Net_SOCK_Dgram_Bcast
  : public ACE_SOCK_Dgram_Bcast
 {
@@ -51,7 +42,16 @@ class Net_SOCK_Dgram_Bcast
  private:
   typedef ACE_SOCK_Dgram_Bcast inherited;
 };
-//typedef ACE_SOCK_CODgram Net_SOCK_Dgram;
+class Net_SOCK_Dgram
+ : public ACE_SOCK_Dgram
+{
+ public:
+  int get_remote_addr (ACE_Addr&) const;
+
+ private:
+  typedef ACE_SOCK_Dgram inherited;
+};
+typedef ACE_SOCK_CODgram Net_SOCK_CODgram;
 
 /////////////////////////////////////////
 
@@ -90,9 +90,59 @@ class Net_UDPSocketHandler_T
 #endif
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
+  bool                              writeOnly_;
+
  private:
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
   typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> inherited2;
+
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&))
+};
+
+/////////////////////////////////////////
+
+// partial specialization (for connected sockets)
+template <typename ConfigurationType>
+class Net_UDPSocketHandler_T<Net_SOCK_CODgram,
+                             ConfigurationType>
+ : public Net_SocketHandlerBase_T<ConfigurationType>
+ , public ACE_Svc_Handler<Net_SOCK_CODgram, ACE_MT_SYNCH>
+{
+ public:
+  //// override some event handler methods
+  //virtual ACE_Event_Handler::Reference_Count add_reference (void);
+  //// *IMPORTANT NOTE*: this API works as long as the reactor doesn't manage
+  //// the lifecycle of the event handler. To avoid unforseen behavior, make sure
+  //// that the event handler has been properly deregistered from the reactor
+  //// before removing the last reference (delete on zero).
+  //virtual ACE_Event_Handler::Reference_Count remove_reference (void);
+
+  virtual int open (void* = NULL); // args
+
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+
+  // resolve ambiguity between ACE_Event_Handler and ACE_Svc_Handler
+  using ACE_Svc_Handler<Net_SOCK_CODgram, ACE_MT_SYNCH>::get_handle;
+  using ACE_Svc_Handler<Net_SOCK_CODgram, ACE_MT_SYNCH>::set_handle;
+
+ protected:
+  typedef ACE_Svc_Handler<Net_SOCK_CODgram, ACE_MT_SYNCH> SVC_HANDLER_T;
+
+  Net_UDPSocketHandler_T ();
+  virtual ~Net_UDPSocketHandler_T ();
+
+#if defined (ACE_LINUX)
+  bool                              errorQueue_;
+#endif
+  ACE_Reactor_Notification_Strategy notificationStrategy_;
+
+  bool                              writeOnly_;
+
+ private:
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
+  typedef ACE_Svc_Handler<Net_SOCK_CODgram, ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&))

@@ -44,7 +44,8 @@ struct DHCP_Record;
 class DHCP_SessionMessage;
 struct DHCP_Stream_SessionData;
 struct DHCP_Stream_UserData;
-typedef Common_INotify_T<DHCP_Stream_SessionData,
+typedef Common_INotify_T<unsigned int,
+                         DHCP_Stream_SessionData,
                          DHCP_Record,
                          DHCP_SessionMessage> DHCP_IStreamNotify_t;
 typedef Stream_Statistic DHCP_RuntimeStatistic_t;

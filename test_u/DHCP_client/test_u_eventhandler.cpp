@@ -36,7 +36,7 @@
 
 Test_U_EventHandler::Test_U_EventHandler (Test_U_GTK_CBData* CBData_in)
  : CBData_ (CBData_in)
- , sessionData_ (NULL)
+ , sessionDataMap_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::Test_U_EventHandler"));
 
@@ -49,19 +49,22 @@ Test_U_EventHandler::~Test_U_EventHandler ()
 }
 
 void
-Test_U_EventHandler::start (const Test_U_StreamSessionData& sessionData_in)
+Test_U_EventHandler::start (unsigned int sessionID_in,
+                            const Test_U_StreamSessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::start"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-  ACE_ASSERT (!sessionData_);
+  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionID_in);
+  ACE_ASSERT (iterator == sessionDataMap_.end ());
 
-  sessionData_ = &const_cast<Test_U_StreamSessionData&> (sessionData_in);
+  sessionDataMap_.insert (std::make_pair (sessionID_in,
+                                          &const_cast<Test_U_StreamSessionData&> (sessionData_in)));
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->lock);
 
-  CBData_->progressData.transferred = 0;
+//  CBData_->progressData.transferred = 0;
   CBData_->eventStack.push_back (TEST_U_GTKEVENT_START);
 
   guint event_source_id = g_idle_add (idle_start_UI_cb,
@@ -76,9 +79,12 @@ Test_U_EventHandler::start (const Test_U_StreamSessionData& sessionData_in)
 }
 
 void
-Test_U_EventHandler::notify (const Test_U_Message& message_in)
+Test_U_EventHandler::notify (unsigned int sessionID_in,
+                             const Test_U_Message& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
+
+  ACE_UNUSED_ARG (sessionID_in);
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -89,7 +95,8 @@ Test_U_EventHandler::notify (const Test_U_Message& message_in)
   CBData_->eventStack.push_back (TEST_U_GTKEVENT_DATA);
 }
 void
-Test_U_EventHandler::notify (const Test_U_SessionMessage& sessionMessage_in)
+Test_U_EventHandler::notify (unsigned int sessionID_in,
+                             const Test_U_SessionMessage& sessionMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
 
@@ -97,7 +104,8 @@ Test_U_EventHandler::notify (const Test_U_SessionMessage& sessionMessage_in)
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-  ACE_ASSERT (sessionData_);
+  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionID_in);
+  ACE_ASSERT (iterator != sessionDataMap_.end ());
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->lock);
 
@@ -106,27 +114,24 @@ Test_U_EventHandler::notify (const Test_U_SessionMessage& sessionMessage_in)
   {
     case STREAM_SESSION_STATISTIC:
     {
-      // sanity check(s)
-      if (!sessionData_)
-        goto continue_;
-
-      if (sessionData_->lock)
+      if ((*iterator).second->lock)
       {
-        result = sessionData_->lock->acquire ();
+        result = (*iterator).second->lock->acquire ();
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
       } // end IF
-      CBData_->progressData.statistic = sessionData_->currentStatistic;
-      if (sessionData_->lock)
+
+      CBData_->progressData.statistic = (*iterator).second->currentStatistic;
+
+      if ((*iterator).second->lock)
       {
-        result = sessionData_->lock->release ();
+        result = (*iterator).second->lock->release ();
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
       } // end IF
 
-continue_:
       event = TEST_U_GTKEVENT_STATISTIC;
       break;
     }
@@ -142,12 +147,14 @@ continue_:
 }
 
 void
-Test_U_EventHandler::end ()
+Test_U_EventHandler::end (unsigned int sessionID_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::end"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
+  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionID_in);
+  ACE_ASSERT (iterator != sessionDataMap_.end ());
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->lock);
 
@@ -163,6 +170,5 @@ Test_U_EventHandler::end ()
   } // end IF
   CBData_->eventSourceIds.insert (event_source_id);
 
-  if (sessionData_)
-    sessionData_ = NULL;
+  sessionDataMap_.erase (iterator);
 }

@@ -168,9 +168,9 @@ set (${PROJECT_NAME}_DHCPClient_EXE_SRCS
      test_u_session_message.h
      test_u_signalhandler.cpp
      test_u_signalhandler.h
-     test_u_stream.cpp
-     test_u_stream.h
-     test_u_stream.inl
+#     test_u_stream.cpp
+#     test_u_stream.h
+#     test_u_stream.inl
 #  test_u_template_instantiations.cpp
      stdafx.cpp
      stdafx.h)

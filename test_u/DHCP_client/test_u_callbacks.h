@@ -54,6 +54,7 @@ extern "C"
 #endif /* __cplusplus */
 // callbacks
 G_MODULE_EXPORT void action_discover_activate_cb (GtkAction*, gpointer);
+G_MODULE_EXPORT void action_inform_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void action_request_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void action_release_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void action_report_activate_cb (GtkAction*, gpointer);

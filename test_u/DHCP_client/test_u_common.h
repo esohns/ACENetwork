@@ -122,6 +122,7 @@ struct Test_U_StreamSessionData
 {
   inline Test_U_StreamSessionData ()
    : Stream_SessionData ()
+   , broadcastConnection (NULL)
    , connection (NULL)
    , targetFileName ()
    , userData (NULL)
@@ -134,6 +135,9 @@ struct Test_U_StreamSessionData
   {
     Stream_SessionData::operator= (rhs_in);
 
+    broadcastConnection =
+        (broadcastConnection ? broadcastConnection
+                             : rhs_in.broadcastConnection);
     connection = (connection ? connection : rhs_in.connection);
     targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
                                               : targetFileName);
@@ -142,7 +146,8 @@ struct Test_U_StreamSessionData
     return *this;
   }
 
-  Test_U_IConnection_t* connection;
+  Test_U_IConnection_t* broadcastConnection; // DISCOVER/REQUEST/INFORM
+  Test_U_IConnection_t* connection; // RELEASE
   std::string           targetFileName; // file writer module
   Test_U_UserData*      userData;
 
@@ -202,29 +207,25 @@ struct Test_U_StreamModuleHandlerConfiguration
 {
   inline Test_U_StreamModuleHandlerConfiguration ()
    : DHCP_ModuleHandlerConfiguration ()
+   , broadcastConnection (NULL)
    , configuration (NULL)
-   , connection (NULL)
-   //, connectionManager (NULL)
    , contextID (0)
    , inbound (true)
    , passive (false)
    , printProgressDot (true)
    , socketConfiguration (NULL)
    , socketHandlerConfiguration (NULL)
-   //, stream (NULL)
    , targetFileName ()
   {};
 
+  Test_U_IConnection_t*              broadcastConnection; // UDP target/net IO module
   Test_U_Configuration*              configuration;
-  Test_U_IConnection_t*              connection; // UDP target/net IO module
-  //Test_U_IConnectionManager_t*       connectionManager; // UDP IO module
   guint                              contextID;
   bool                               inbound; // net IO module
   bool                               passive; // UDP target module
   bool                               printProgressDot; // dump module
   Net_SocketConfiguration*           socketConfiguration;
   Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-  //Test_U_StreamBase_t*               stream; // UDP target/net IO module
   std::string                        targetFileName; // dump module
 };
 
@@ -235,7 +236,6 @@ struct Test_U_ListenerConfiguration
 {
   inline Test_U_ListenerConfiguration ()
    : Net_ListenerConfiguration ()
-   //, connectionManager (NULL)
    , messageAllocator (NULL)
    , networkInterface ()
    , socketHandlerConfiguration (NULL)
@@ -252,7 +252,6 @@ struct Test_U_ListenerConfiguration
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
   };
 
-  //Test_U_IConnectionManager_t*       connectionManager;
   Stream_IAllocator*                 messageAllocator;
   std::string                        networkInterface;
   Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
@@ -341,7 +340,8 @@ typedef Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_MessageAllocator_t;
 
-typedef Common_INotify_T<Test_U_StreamSessionData,
+typedef Common_INotify_T<unsigned int,
+                         Test_U_StreamSessionData,
                          Test_U_Message,
                          Test_U_SessionMessage> Test_U_IStreamNotify_t;
 typedef std::list<Test_U_IStreamNotify_t*> Test_U_Subscribers_t;
@@ -396,7 +396,6 @@ struct Test_U_GTK_CBData
    , logStack ()
    , progressData ()
    , progressEventSourceID (0)
-   //, stream (NULL)
    , subscribers ()
 //   , subscribersLock ()
   {};
@@ -406,7 +405,6 @@ struct Test_U_GTK_CBData
   Common_MessageStack_t     logStack;
   Test_U_GTK_ProgressData   progressData;
   guint                     progressEventSourceID;
-  //Test_U_StreamBase_t*      stream;
   Test_U_Subscribers_t      subscribers;
   // *NOTE*: use Common_UI_GTKState.lock instead
 //  ACE_SYNCH_RECURSIVE_MUTEX subscribersLock;

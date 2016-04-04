@@ -116,7 +116,7 @@ struct IRC_Client_GTK_ConnectionCBData
 
   unsigned int                  acknowledgements;
   IRC_Client_GUI_Connections_t* connections;
-  IRC_Client_IControl_t*        controller;
+  IRC_IControl*                 controller;
   guint                         eventSourceID;
   Common_UI_GTKState*           GTKState;
   // *TODO*: remove this
@@ -146,7 +146,7 @@ struct IRC_Client_GTK_HandlerCBData
   std::string                    builderLabel;
   IRC_ChannelModes_t             channelModes;
   IRC_Client_GUI_Connection*     connection;
-  IRC_Client_IControl_t*         controller;
+  IRC_IControl*                  controller;
   guint                          eventSourceID;
   Common_UI_GTKState*            GTKState;
   IRC_Client_GUI_MessageHandler* handler;

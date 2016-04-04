@@ -415,7 +415,7 @@ connection_setup_curses_function (void* arg_in)
   bool result_2 = false;
   const Stream_Module_t* module_p = NULL;
   const IRC_Client_Stream* stream_p = NULL;
-  IRC_Client_IControl_t* icontrol_p = NULL;
+  IRC_IControl* icontrol_p = NULL;
   IRC_IRegistrationStateMachine_t* iregistration_p = NULL;
   ACE_Time_Value deadline = ACE_Time_Value::zero;
   std::string channel_string;
@@ -485,11 +485,11 @@ connection_setup_curses_function (void* arg_in)
     goto clean_up;
   } // end IF
   icontrol_p =
-    dynamic_cast<IRC_Client_IControl_t*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+    dynamic_cast<IRC_IControl*> (const_cast<Stream_Module_t*> (module_p)->writer ());
   if (!icontrol_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<IRC_Client_IIRCControl*>(0x%@), aborting\n"),
+                ACE_TEXT ("failed to dynamic_cast<IRC_IControl*>(0x%@), aborting\n"),
                 connection_p));
     goto clean_up;
   } // end IF
@@ -501,12 +501,12 @@ connection_setup_curses_function (void* arg_in)
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in IRC_Client_IControl_t::registerc(), continuing\n")));
+                ACE_TEXT ("caught exception in IRC_IControl::registerc(), continuing\n")));
   }
   if (!result_2)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_IControl_t::registerc(), aborting\n")));
+                ACE_TEXT ("failed to IRC_IControl::registerc(), aborting\n")));
     goto clean_up;
   } // end IF
 

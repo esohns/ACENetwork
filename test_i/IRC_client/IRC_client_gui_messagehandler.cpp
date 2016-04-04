@@ -100,7 +100,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
 
 IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState* GTKState_in,
                                                               IRC_Client_GUI_Connection* connection_in,
-                                                              IRC_Client_IControl_t* controller_in,
+                                                              IRC_IControl* controller_in,
                                                               const std::string& id_in,
                                                               const std::string& UIFileDirectory_in,
                                                               const std::string& timestamp_in,

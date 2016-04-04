@@ -102,11 +102,12 @@ struct IRC_StreamState
 
 typedef Stream_SessionData_T<IRC_Stream_SessionData> IRC_Stream_SessionData_t;
 
-typedef Common_INotify_T<IRC_Stream_SessionData,
+typedef Common_INotify_T<unsigned int,
+                         IRC_Stream_SessionData,
                          IRC_Record,
                          IRC_SessionMessage> IRC_IStreamNotify_t;
 
-typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
+//typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 
 typedef IRC_Stream_T<IRC_StreamState,
                      IRC_StreamConfiguration,

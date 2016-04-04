@@ -35,10 +35,12 @@ struct Test_U_DHCPClient_Configuration
 {
   inline Test_U_DHCPClient_Configuration ()
    : Test_U_Configuration ()
+   , broadcastHandle (ACE_INVALID_HANDLE)
    , handle (ACE_INVALID_HANDLE)
   {};
 
-  ACE_HANDLE handle;
+  ACE_HANDLE broadcastHandle; // listen handle (broadcast)
+  ACE_HANDLE handle;          // listen handle (unicast)
 };
 
 struct Test_U_DHCPClient_GTK_CBData
@@ -47,11 +49,9 @@ struct Test_U_DHCPClient_GTK_CBData
   inline Test_U_DHCPClient_GTK_CBData ()
    : Test_U_GTK_CBData ()
    , configuration (NULL)
-   , connection (NULL)
   {};
 
   Test_U_DHCPClient_Configuration* configuration;
-  Test_U_IConnection_t*            connection;
 };
 
 //struct Test_U_DHCPClient_ThreadData

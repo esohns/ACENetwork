@@ -60,10 +60,11 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  ////////
                                  IRC_Stream_UserData> IRC_IConnection_Manager_t;
 
-typedef Common_INotify_T<IRC_Stream_SessionData,
+typedef Common_INotify_T<unsigned int,
+                         IRC_Stream_SessionData,
                          IRC_Record,
                          IRC_SessionMessage> IRC_IStreamNotify_t;
-typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
+//typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 
 struct IRC_SocketHandlerConfiguration
  : Net_SocketHandlerConfiguration

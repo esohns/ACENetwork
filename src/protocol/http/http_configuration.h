@@ -59,7 +59,8 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  ////////
                                  HTTP_Stream_UserData> HTTP_IConnection_Manager_t;
 
-typedef Common_INotify_T<HTTP_Stream_SessionData,
+typedef Common_INotify_T<unsigned int,
+                         HTTP_Stream_SessionData,
                          HTTP_Record,
                          HTTP_SessionMessage> HTTP_IStreamNotify_t;
 

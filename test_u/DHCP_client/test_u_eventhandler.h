@@ -21,6 +21,8 @@
 #ifndef TEST_U_EVENTHANDLER_H
 #define TEST_U_EVENTHANDLER_H
 
+#include <map>
+
 #include "ace/Global_Macros.h"
 
 #include "common_inotify.h"
@@ -37,18 +39,24 @@ class Test_U_EventHandler
   virtual ~Test_U_EventHandler ();
 
   // implement Common_INotify_T
-  virtual void start (const Test_U_StreamSessionData&);
-  virtual void notify (const Test_U_Message&);
-  virtual void notify (const Test_U_SessionMessage&);
-  virtual void end ();
+  virtual void start (unsigned int,                     // session id
+                      const Test_U_StreamSessionData&); // session data
+  virtual void notify (unsigned int,                    // session id
+                       const Test_U_Message&);          // (protocol) message
+  virtual void notify (unsigned int,                    // session id
+                       const Test_U_SessionMessage&);   // session message
+  virtual void end (unsigned int);                      // session id
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator= (const Test_U_EventHandler&))
 
-  Test_U_GTK_CBData*        CBData_;
-  Test_U_StreamSessionData* sessionData_;
+  typedef std::map<unsigned int, Test_U_StreamSessionData*> SESSION_DATA_MAP_T;
+  typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
+
+  Test_U_GTK_CBData* CBData_;
+  SESSION_DATA_MAP_T sessionDataMap_;
 };
 
 #endif

@@ -93,7 +93,7 @@ void curses_log (const std::string&,      // channel (empty ? server log : chann
                  IRC_Client_CursesState&, // state
                  bool = true);            // lock ?
 bool curses_main (IRC_Client_CursesState&, // state
-                  IRC_Client_IControl_t*); // controller
+                  IRC_IControl*);          // controller
 bool curses_part (const std::string&,       // channel
                   IRC_Client_CursesState&); // state
 

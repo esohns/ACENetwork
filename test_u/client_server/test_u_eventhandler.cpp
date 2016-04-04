@@ -43,10 +43,12 @@ Net_EventHandler::~Net_EventHandler ()
 }
 
 void
-Net_EventHandler::start (const Net_StreamSessionData& sessionData_in)
+Net_EventHandler::start (unsigned int sessionID_in,
+                         const Net_StreamSessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::start"));
 
+  ACE_UNUSED_ARG (sessionID_in);
   ACE_UNUSED_ARG (sessionData_in);
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
@@ -55,18 +57,24 @@ Net_EventHandler::start (const Net_StreamSessionData& sessionData_in)
 }
 
 void
-Net_EventHandler::notify (const Net_Message& message_in)
+Net_EventHandler::notify (unsigned int sessionID_in,
+                          const Net_Message& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
+
+  ACE_UNUSED_ARG (sessionID_in);
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 
   CBData_->eventStack.push_back (NET_GTKEVENT_DATA);
 }
 void
-Net_EventHandler::notify (const Net_SessionMessage& sessionMessage_in)
+Net_EventHandler::notify (unsigned int sessionID_in,
+                          const Net_SessionMessage& sessionMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
+
+  ACE_UNUSED_ARG (sessionID_in);
 
   Net_GTK_Event event =
     ((sessionMessage_in.type () == STREAM_SESSION_STATISTIC) ? NET_GTKEVENT_STATISTIC
@@ -78,9 +86,11 @@ Net_EventHandler::notify (const Net_SessionMessage& sessionMessage_in)
 }
 
 void
-Net_EventHandler::end ()
+Net_EventHandler::end (unsigned int sessionID_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::end"));
+
+  ACE_UNUSED_ARG (sessionID_in);
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 

@@ -34,7 +34,8 @@ struct Net_GTK_CBData;
 struct Net_StreamSessionData;
 
 class Net_EventHandler
- : public Common_INotify_T<Net_StreamSessionData,
+ : public Common_INotify_T<unsigned int,
+                           Net_StreamSessionData,
                            Net_Message,
                            Net_SessionMessage>
 {
@@ -43,10 +44,13 @@ class Net_EventHandler
   virtual ~Net_EventHandler ();
 
   // implement Common_INotify_T
-  virtual void start (const Net_StreamSessionData&);
-  virtual void notify (const Net_Message&);
-  virtual void notify (const Net_SessionMessage&);
-  virtual void end ();
+  virtual void start (unsigned int,
+                      const Net_StreamSessionData&);
+  virtual void notify (unsigned int,
+                       const Net_Message&);
+  virtual void notify (unsigned int,
+                       const Net_SessionMessage&);
+  virtual void end (unsigned int);
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_EventHandler ())

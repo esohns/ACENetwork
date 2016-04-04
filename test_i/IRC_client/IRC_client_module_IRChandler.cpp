@@ -42,7 +42,6 @@ IRC_Client_Module_IRCHandler::IRC_Client_Module_IRCHandler ()
  : inherited ()
  , lock_ ()
  , subscribers_ ()
- , configuration_ ()
  , isInitialized_ (false)
  , conditionLock_ ()
  , condition_ (conditionLock_)
@@ -65,12 +64,10 @@ IRC_Client_Module_IRCHandler::initialize (const IRC_Client_ModuleHandlerConfigur
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::initialize"));
 
-  configuration_ = configuration_in;
-
   // sanity check(s)
-  ACE_ASSERT (inherited::stateLock_);
-  ACE_ASSERT (configuration_.streamConfiguration);
-  ACE_ASSERT (configuration_.streamConfiguration->messageAllocator);
+  ACE_ASSERT (inherited2::stateLock_);
+  ACE_ASSERT (configuration_in.streamConfiguration);
+  ACE_ASSERT (configuration_in.streamConfiguration->messageAllocator);
 
   if (isInitialized_)
   {
@@ -84,9 +81,9 @@ IRC_Client_Module_IRCHandler::initialize (const IRC_Client_ModuleHandlerConfigur
     } // end lock scope
 
     { // synch access to state machine
-      ACE_Guard<ACE_SYNCH_NULL_MUTEX> aGuard (*inherited::stateLock_);
+      ACE_Guard<ACE_SYNCH_NULL_MUTEX> aGuard (*inherited2::stateLock_);
 
-      inherited::state_ = REGISTRATION_STATE_NICK;
+      inherited2::state_ = REGISTRATION_STATE_NICK;
     } // end lock scope
     initialRegistration_ = true;
     receivedInitialNotice_ = false;
@@ -96,29 +93,26 @@ IRC_Client_Module_IRCHandler::initialize (const IRC_Client_ModuleHandlerConfigur
 
       subscribers_.clear ();
     } // end lock scope
+
+    isInitialized_ = false;
   } // end IF
 
 //   if (configuration_.automaticPong)
 //     ACE_DEBUG((LM_DEBUG,
 //                ACE_TEXT("auto-answering ping messages...\n")));
 
-  if (configuration_.subscriber)
+  inherited::initialize (&subscribers_,
+                         &lock_);
+  if (configuration_in.subscriber)
   {
     ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
-    subscribers_.push_back (configuration_.subscriber);
+    subscribers_.push_back (configuration_in.subscriber);
   } // end IF
 
-  isInitialized_ = true;
+  isInitialized_ = inherited::initialize (configuration_in);
 
   return true;
-}
-const IRC_Client_ModuleHandlerConfiguration&
-IRC_Client_Module_IRCHandler::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::handleDataMessage"));
-
-  return configuration_;
 }
 
 void
@@ -131,7 +125,8 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
-  ACE_ASSERT (configuration_.protocolConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->protocolConfiguration);
 
   const IRC_Record& data_r = message_inout->get ();
 //   try
@@ -163,10 +158,10 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
           if (initialRegistration_)
           {
             initialRegistration_ = false;
-            if (!inherited::change (REGISTRATION_STATE_FINISHED))
+            if (!inherited2::change (REGISTRATION_STATE_FINISHED))
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to Common_IStateMachine_T::change(\"%s\"), continuing\n"),
-                          ACE_TEXT (inherited::state2String (REGISTRATION_STATE_FINISHED).c_str ())));
+                          ACE_TEXT (inherited2::state2String (REGISTRATION_STATE_FINISHED).c_str ())));
           } // end IF
 
           // *WARNING*: falls through !
@@ -345,7 +340,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //                      message_inout->getData()->parameters_.back().c_str()));
 
           // auto-answer ?
-          if (configuration_.protocolConfiguration->automaticPong)
+          if (inherited::configuration_->protocolConfiguration->automaticPong)
           {
             // --> reply with a "PONG"
 
@@ -379,7 +374,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
             sendMessage (reply_p);
           } // end IF
 
-          if (configuration_.protocolConfiguration->printPingDot)
+          if (inherited::configuration_->protocolConfiguration->printPingDot)
             std::clog << '.';
 
           break;
@@ -451,34 +446,8 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
     }
   } // end SWITCH
 
-  // forward the data to subscriber(s)
-
-  // synch access to subscribers
-  {
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
-
-    // *WARNING* if the user unsubscribes() within the callback
-    // BAD THINGS (TM) WILL happen, because the current iter WILL be invalidated
-    // --> use a slightly modified for-loop (advance first and THEN invoke the
-    //     callback, works for MOST containers)
-    // *NOTE*: this can only happen due to the ACE_RECURSIVE_Thread_Mutex
-    //         used as a lock in order to avoid deadlocks in precisely this
-    //         situation...
-    for (SubscribersIterator_t iterator = subscribers_.begin ();
-         iterator != subscribers_.end ();
-        )
-    {
-      try
-      {
-        (*iterator++)->notify (data_r);
-      }
-      catch (...)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in IRC_Client_INotify::notify(): \"%m\", continuing\n")));
-      }
-    } // end FOR
-  } // end lock scope
+  inherited::handleDataMessage (message_inout,
+                                passMessageDownstream_out);
 }
 
 void
@@ -493,7 +462,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
-  ACE_ASSERT (message_inout);
+  ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (isInitialized_);
 
   switch (message_inout->type ())
@@ -506,20 +475,10 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       //         (see: RFC 1459 page 13f)
       //         In particular, this means that the initial user nickname is not
       //         'acknowledged' during the (PASS-)NICK-USER sequence
-      Stream_Module_t* module_p = inherited2::module ();
-      ACE_ASSERT (module_p);
-      IRC_Client_IModule_t* imodule_p =
-          dynamic_cast<IRC_Client_IModule_t*> (module_p);
-      if (!imodule_p)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to dynamic_cast<Stream_IModule_T*>(%@), returning\n"),
-                    module_p));
-        break;
-      } // end IF
-      const IRC_Client_ModuleHandlerConfiguration& module_handler_configuration_r =
-          imodule_p->get ();
-      ACE_ASSERT (module_handler_configuration_r.protocolConfiguration);
+
+      // sanity check(s)
+      ACE_ASSERT (inherited::configuration_->protocolConfiguration);
+
       const IRC_Client_SessionData_t& session_data_container_r =
           message_inout->get ();
       const IRC_Client_SessionData& session_data_r =
@@ -528,7 +487,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       {
         ACE_Guard<ACE_SYNCH_MUTEX> aGuard (session_data_r.connectionState->lock);
         session_data_r.connectionState->nickName =
-            module_handler_configuration_r.protocolConfiguration->loginOptions.nickName;
+            inherited::configuration_->protocolConfiguration->loginOptions.nickName;
       } // end lock scope
 
       // step1: remember connection has been opened...
@@ -545,87 +504,17 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       } // end lock scope
 
       // step2: announce this state to any subscriber(s)
-
-      // forward the (current) session data to any subscriber(s)
-      {
-        ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
-
-        //// initial subscriber ?
-        //if (module_handler_configuration_r.subscriber)
-        //  subscribers_.push_back (module_handler_configuration_r.subscriber);
-
-//         ACE_DEBUG ((LM_DEBUG,
-//                     ACE_TEXT ("session starting, notifying %u subscriber(s)...\n"),
-//                     subscribers_.size()));
-
-        // *WARNING*: if the user unsubscribes() within the callback
-        //            BAD THINGS (TM) may happen, because the current iterator
-        //            WILL be invalidated
-        //            --> use a slightly modified for-loop (advance first and
-        //                THEN invoke the callback, this works for MOST
-        //                container types)
-        // *NOTE*: this can only happen due to the ACE_RECURSIVE_Thread_Mutex
-        //         being used as a lock in order to avoid deadlocks in exactly
-        //         this situation...
-        for (SubscribersIterator_t iterator = subscribers_.begin ();
-             iterator != subscribers_.end ();)
-        {
-          try
-          {
-            (*iterator++)->start (session_data_r);
-          }
-          catch (...)
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("caught exception in IRC_Client_IStreamNotify::start(), continuing\n")));
-          }
-        } // end FOR
-      } // end lock scope
+      inherited::handleSessionMessage (message_inout,
+                                       passMessageDownstream_out);
 
       break;
     }
     case STREAM_SESSION_END:
     {
-      // announce this information to any subscriber(s)
-      {
-        ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
+      inherited::handleSessionMessage (message_inout,
+                                       passMessageDownstream_out);
 
-//         ACE_DEBUG ((LM_DEBUG,
-//                     ACE_TEXT ("session ending, notifying %u subscriber(s)...\n"),
-//                     subscribers_.size()));
-
-        // *WARNING*: if the user unsubscribes() within the callback
-        //            BAD THINGS (TM) may happen, because the current iterator
-        //            WILL be invalidated
-        //            --> use a slightly modified for-loop (advance first and
-        //                THEN invoke the callback, this works for MOST
-        //                container types)
-        // *NOTE*: this can only happen due to the ACE_RECURSIVE_Thread_Mutex
-        //         being used as a lock in order to avoid deadlocks in exactly
-        //         this situation...
-        for (SubscribersIterator_t iterator = subscribers_.begin ();
-             iterator != subscribers_.end ();)
-        {
-          try
-          {
-            (*(iterator++))->end ();
-          }
-          catch (...)
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("caught exception in IRC_Client_IStreamNotify_t::end(), continuing\n")));
-          }
-        } // end FOR
-
-        if (!subscribers_.empty ())
-          ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT ("%s: removing %u subscription(s)...\n"),
-                      ACE_TEXT (inherited2::name ()),
-                      subscribers_.size ()));
-        subscribers_.clear ();
-      } // end lock scope
-
-      // remember connection has been closed...
+      // remember connection has been closed
       {
         ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
 
@@ -642,34 +531,8 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
     }
     default:
     {
-      // forward the data to subscriber(s)
-
-      // synch access to subscribers
-      {
-        ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
-
-        // *WARNING* if the user unsubscribes() within the callback
-        // BAD THINGS (TM) WILL happen, because the current iter WILL be invalidated
-        // --> use a slightly modified for-loop (advance first and THEN invoke the
-        //     callback, works for MOST containers)
-        // *NOTE*: this can only happen due to the ACE_RECURSIVE_Thread_Mutex
-        //         used as a lock in order to avoid deadlocks in precisely this
-        //         situation...
-        for (SubscribersIterator_t iterator = subscribers_.begin ();
-             iterator != subscribers_.end ();
-            )
-        {
-          try
-          {
-            (*iterator++)->notify (*message_inout);
-          }
-          catch (...)
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("caught exception in IRC_Client_INotify::notify(): \"%m\", continuing\n")));
-          }
-        } // end FOR
-      } // end lock scope
+      inherited::handleSessionMessage (message_inout,
+                                       passMessageDownstream_out);
 
       break;
     }
@@ -873,45 +736,45 @@ IRC_Client_Module_IRCHandler::wait (const ACE_Time_Value* timeout_in)
   return true;
 }
 
-void
-IRC_Client_Module_IRCHandler::subscribe (IRC_Client_IStreamNotify_t* interfaceHandle_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::subscribe"));
+//void
+//IRC_Client_Module_IRCHandler::subscribe (IRC_Client_IStreamNotify_t* interfaceHandle_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::subscribe"));
 
-  // sanity check(s)
-  ACE_ASSERT (interfaceHandle_in);
+//  // sanity check(s)
+//  ACE_ASSERT (interfaceHandle_in);
 
-  // synch access to subscribers
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
+//  // synch access to subscribers
+//  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
-  subscribers_.push_back (interfaceHandle_in);
-}
+//  subscribers_.push_back (interfaceHandle_in);
+//}
 
-void
-IRC_Client_Module_IRCHandler::unsubscribe (IRC_Client_IStreamNotify_t* interfaceHandle_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::unsubscribe"));
+//void
+//IRC_Client_Module_IRCHandler::unsubscribe (IRC_Client_IStreamNotify_t* interfaceHandle_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::unsubscribe"));
 
-  // sanity check(s)
-  ACE_ASSERT (interfaceHandle_in);
+//  // sanity check(s)
+//  ACE_ASSERT (interfaceHandle_in);
 
-  // synch access to subscribers
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
+//  // synch access to subscribers
+//  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
-  SubscribersIterator_t iterator = subscribers_.begin ();
-  for (;
-       iterator != subscribers_.end ();
-       iterator++)
-    if ((*iterator) == interfaceHandle_in)
-      break;
+//  SubscribersIterator_t iterator = subscribers_.begin ();
+//  for (;
+//       iterator != subscribers_.end ();
+//       iterator++)
+//    if ((*iterator) == interfaceHandle_in)
+//      break;
 
-  if (iterator != subscribers_.end ())
-    subscribers_.erase (iterator);
-  else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("invalid argument (was: %@), aborting\n"),
-                interfaceHandle_in));
-}
+//  if (iterator != subscribers_.end ())
+//    subscribers_.erase (iterator);
+//  else
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("invalid argument (was: %@), aborting\n"),
+//                interfaceHandle_in));
+//}
 
 void
 IRC_Client_Module_IRCHandler::nick (const std::string& nickName_in)
@@ -1412,15 +1275,16 @@ IRC_Client_Module_IRCHandler::allocateMessage (unsigned int requestedSize_in)
   IRC_Message* message_p = NULL;
 
   // sanity check(s)
-  ACE_ASSERT (configuration_.streamConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->streamConfiguration);
 
-  if (configuration_.streamConfiguration->messageAllocator)
+  if (inherited::configuration_->streamConfiguration->messageAllocator)
   {
 allocate:
     try
     {
       message_p =
-        static_cast<IRC_Message*> (configuration_.streamConfiguration->messageAllocator->malloc (requestedSize_in));
+        static_cast<IRC_Message*> (inherited::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
     }
     catch (...)
     {
@@ -1432,7 +1296,7 @@ allocate:
 
     // keep retrying ?
     if (!message_p &&
-        !configuration_.streamConfiguration->messageAllocator->block ())
+        !inherited::configuration_->streamConfiguration->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
@@ -1440,9 +1304,9 @@ allocate:
                       IRC_Message (requestedSize_in));
   if (!message_p)
   {
-    if (configuration_.streamConfiguration->messageAllocator)
+    if (inherited::configuration_->streamConfiguration->messageAllocator)
     {
-      if (configuration_.streamConfiguration->messageAllocator->block ())
+      if (inherited::configuration_->streamConfiguration->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
     } // end IF
@@ -1495,17 +1359,18 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
   int result = -1;
 
   // sanity check(s)
-  ACE_ASSERT (configuration_.streamConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->streamConfiguration);
   ACE_ASSERT (record_inout);
 
   // step1: get a message buffer
   IRC_Message* message_p =
-      allocateMessage (configuration_.streamConfiguration->bufferSize);
+      allocateMessage (inherited::configuration_->streamConfiguration->bufferSize);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(%u), returning\n"),
-                configuration_.streamConfiguration->bufferSize));
+                inherited::configuration_->streamConfiguration->bufferSize));
 
     // clean up
     record_inout->decrease ();
@@ -1540,7 +1405,7 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
     return;
   } // end IF
 
-  result = inherited2::reply (message_p, NULL);
+  result = inherited::reply (message_p, NULL);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1565,7 +1430,7 @@ IRC_Client_Module_IRCHandler::clone ()
   Stream_Module_t* module_p = NULL;
 
   ACE_NEW_NORETURN (module_p,
-                    IRC_Client_Module_IRCHandler_Module (ACE_TEXT_ALWAYS_CHAR (inherited2::name ()),
+                    IRC_Client_Module_IRCHandler_Module (ACE_TEXT_ALWAYS_CHAR (inherited::name ()),
                                                          NULL,
                                                          true));
   if (!module_p)

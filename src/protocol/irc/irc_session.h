@@ -42,9 +42,10 @@ class ACE_Message_Block;
 
 template <typename ConnectionType,
           typename SessionDataType,
-          typename ControllerType, // IRC_IControl_T
+//          typename ControllerType, // IRC_IControl_T
           typename NotificationType, // Common_INotify_T
           typename ConfigurationType,
+          typename MessageType,
           typename SessionMessageType,
           typename SocketHandlerConfigurationType,
           typename ModuleHandlerConfigurationType,
@@ -67,9 +68,10 @@ class IRC_Session_T
 {
  friend class ACE_Connector<IRC_Session_T<ConnectionType,
                                           SessionDataType,
-                                          ControllerType,
+//                                          ControllerType,
                                           NotificationType,
                                           ConfigurationType,
+                                          MessageType,
                                           SessionMessageType,
                                           SocketHandlerConfigurationType,
                                           ModuleHandlerConfigurationType,
@@ -81,9 +83,10 @@ class IRC_Session_T
                             ACE_SOCK_CONNECTOR>;
  friend class ACE_Asynch_Connector<IRC_Session_T<ConnectionType,
                                                  SessionDataType,
-                                                 ControllerType,
+//                                                 ControllerType,
                                                  NotificationType,
                                                  ConfigurationType,
+                                                 MessageType,
                                                  SessionMessageType,
                                                  SocketHandlerConfigurationType,
                                                  ModuleHandlerConfigurationType,
@@ -102,10 +105,13 @@ class IRC_Session_T
   //virtual const IRC_SessionState& state () const;
 
   // implement Common_INotify_T
-  virtual void start (const SessionDataType&);
-  virtual void notify (const IRC_Record&);
-  virtual void notify (const SessionMessageType&);
-  virtual void end ();
+  virtual void start (unsigned int,
+                      const SessionDataType&);
+  virtual void notify (unsigned int,
+                       const MessageType&);
+  virtual void notify (unsigned int,
+                       const SessionMessageType&);
+  virtual void end (unsigned int);
 
   // override some task-based members
   // *TODO*: make these private

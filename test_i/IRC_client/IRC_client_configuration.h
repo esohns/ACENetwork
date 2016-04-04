@@ -132,8 +132,8 @@ struct IRC_Client_InputHandlerConfiguration
    , streamConfiguration (NULL)
   {};
 
-  IRC_Client_IControl_t* controller;
-  Stream_Configuration*  streamConfiguration;
+  IRC_IControl*         controller;
+  Stream_Configuration* streamConfiguration;
 };
 
 struct IRC_Client_Configuration

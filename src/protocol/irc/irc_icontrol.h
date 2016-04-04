@@ -23,19 +23,19 @@
 
 #include <string>
 
-#include "common_isubscribe.h"
+//#include "common_isubscribe.h"
 
 #include "irc_record.h"
 
 // forward declarations
 struct IRC_LoginOptions;
 
-template <typename NotificationType>
-class IRC_IControl_T
- : public Common_ISubscribe_T<NotificationType>
+//template <typename NotificationType>
+class IRC_IControl
+// : public Common_ISubscribe_T<NotificationType>
 {
  public:
-  inline virtual ~IRC_IControl_T () {};
+  inline virtual ~IRC_IControl () {};
 
   virtual bool registerc (const IRC_LoginOptions&) = 0; // login details
 

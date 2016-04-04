@@ -42,10 +42,11 @@ class IRC_SessionMessage;
 struct IRC_Stream_SessionData;
 struct IRC_Stream_UserData;
 
-typedef Common_INotify_T<IRC_Stream_SessionData,
+typedef Common_INotify_T<unsigned int,
+                         IRC_Stream_SessionData,
                          IRC_Record,
                          IRC_SessionMessage> IRC_IStreamNotify_t;
-typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
+//typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 
 enum IRC_CharacterEncoding
 {
@@ -139,10 +140,10 @@ typedef std::bitset<7> IRC_UserModes_t;
 struct IRC_LoginOptions
 {
   inline IRC_LoginOptions ()
-    : passWord ()
-    , nickName ()
-    , user ()
-    , channel ()
+   : passWord ()
+   , nickName ()
+   , user ()
+   , channel ()
   {};
 
   std::string passWord;
@@ -150,18 +151,18 @@ struct IRC_LoginOptions
   struct User
   {
     inline User ()
-      : userName ()
-      , hostName ()
-      , serverName ()
-      , realName ()
+     : userName ()
+     , hostName ()
+     , serverName ()
+     , realName ()
     {};
 
     std::string userName;
     struct Hostname
     {
       inline Hostname ()
-        : discriminator (INVALID)
-        , string (NULL)
+       : discriminator (INVALID)
+       , string (NULL)
       {};
 
       enum
@@ -189,17 +190,17 @@ typedef Stream_Statistic IRC_RuntimeStatistic_t;
 struct IRC_ConnectionState
 {
   inline IRC_ConnectionState ()
-    : configuration (NULL)
-    , controller (NULL)
-    , currentStatistic ()
-    , lastCollectionTimestamp (ACE_Time_Value::zero)
-    , lock ()
-    , status (NET_CONNECTION_STATUS_INVALID)
-    , userData (NULL)
+   : configuration (NULL)
+   , controller (NULL)
+   , currentStatistic ()
+   , lastCollectionTimestamp (ACE_Time_Value::zero)
+   , lock ()
+   , status (NET_CONNECTION_STATUS_INVALID)
+   , userData (NULL)
   {};
 
   IRC_Configuration*     configuration;
-  IRC_IControl_t*        controller;
+  IRC_IControl*          controller;
 
   IRC_RuntimeStatistic_t currentStatistic;
   ACE_Time_Value         lastCollectionTimestamp;

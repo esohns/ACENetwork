@@ -44,6 +44,7 @@
 
 #define TEST_U_UI_GTKEVENT_RESOLUTION                     200 // ms --> 5 FPS
 #define TEST_U_UI_GTK_ACTION_DISCOVER_NAME                "action_discover"
+#define TEST_U_UI_GTK_ACTION_INFORM_NAME                  "action_inform"
 #define TEST_U_UI_GTK_ACTION_REQUEST_NAME                 "action_request"
 #define TEST_U_UI_GTK_ACTION_RELEASE_NAME                 "action_release"
 #define TEST_U_UI_GTK_ACTION_REPORT_NAME                  "action_report"

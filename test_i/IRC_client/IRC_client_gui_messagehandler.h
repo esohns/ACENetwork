@@ -53,7 +53,7 @@ class IRC_Client_GUI_MessageHandler
   //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
   IRC_Client_GUI_MessageHandler (Common_UI_GTKState*,        // GTK state handle
                                  IRC_Client_GUI_Connection*, // connection handle
-                                 IRC_Client_IControl_t*,     // controller handle
+                                 IRC_IControl*,              // controller handle
                                  const std::string&,         // identifier (channel/nick)
                                  const std::string&,         // UI (glade) file directory
                                  const std::string&,         // connection timestamp

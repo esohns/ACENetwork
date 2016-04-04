@@ -39,7 +39,8 @@ struct HTTP_Record;
 class HTTP_SessionMessage;
 struct HTTP_Stream_SessionData;
 struct HTTP_Stream_UserData;
-typedef Common_INotify_T<HTTP_Stream_SessionData,
+typedef Common_INotify_T<unsigned int,
+                         HTTP_Stream_SessionData,
                          HTTP_Record,
                          HTTP_SessionMessage> HTTP_IStreamNotify_t;
 typedef Stream_Statistic HTTP_RuntimeStatistic_t;
