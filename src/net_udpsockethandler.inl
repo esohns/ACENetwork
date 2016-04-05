@@ -208,65 +208,66 @@ Net_UDPSocketHandler_T<SocketType,
 
   // step2: connect ?
   // *TODO*: remove type inference
-  if (configuration_p->socketConfiguration->connect &&
-      writeOnly_)
+  if (configuration_p->socketConfiguration->connect)
   {
+    ACE_INET_Addr associated_address =
+        (writeOnly_ ? configuration_p->socketConfiguration->address
+                    : local_SAP);
+
+    ACE_TCHAR buffer_2[BUFSIZ];
+    ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
+    result = associated_address.addr_to_string (buffer_2,
+                                                sizeof (buffer_2),
+                                                1);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+
     struct sockaddr* sockaddr_p =
-        reinterpret_cast<struct sockaddr*> (configuration_p->socketConfiguration->address.get_addr ());
-    result =
-        ACE_OS::connect (handle,
-                         sockaddr_p,
-                         configuration_p->socketConfiguration->address.get_addr_size ());
+        reinterpret_cast<struct sockaddr*> (associated_address.get_addr ());
+    result = ACE_OS::connect (handle,
+                              sockaddr_p,
+                              associated_address.get_addr_size ());
     if (result == -1)
     {
-      {
-        ACE_Errno_Guard guard (errno);
-        result =
-            configuration_p->socketConfiguration->address.addr_to_string (buffer,
-                                                                          sizeof (buffer),
-                                                                          1);
-        if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-      } // end guard scope
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::connect(0x%@,\"%s\"): \"%m\", aborting\n"),
                   handle,
-                  buffer));
+                  buffer_2));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::connect(%d,\"%s\"): \"%m\", aborting\n"),
                   handle,
-                  buffer));
+                  buffer_2));
 #endif
       goto error;
     } // end IF
-
-    // debug info
-    ACE_TCHAR buffer_2[BUFSIZ];
-    ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
-    result =
-        configuration_p->socketConfiguration->address.addr_to_string (buffer_2,
-                                                                      sizeof (buffer_2),
-                                                                      1);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: (initial) MTU between \"%s\" and \"%s\": %u byte(s)...\n"),
+                ACE_TEXT ("0x%@: associated to \"%s\"\n"),
                 handle,
-                buffer, buffer_2,
-                Net_Common_Tools::getMTU (handle)));
+                buffer_2));
 #else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: (initial) MTU between \"%s\" and \"%s\": %u byte(s)...\n"),
+                ACE_TEXT ("%d: associated to \"%s\"\n"),
                 handle,
-                buffer, buffer_2,
-                Net_Common_Tools::getMTU (handle)));
+                buffer_2));
 #endif
+
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("0x%@: (initial) MTU between \"%s\" and \"%s\": %u byte(s)...\n"),
+//                handle,
+//                buffer, buffer_2,
+//                Net_Common_Tools::getMTU (handle)));
+//#else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("%d: (initial) MTU between \"%s\" and \"%s\": %u byte(s)...\n"),
+//                handle,
+//                buffer, buffer_2,
+//                Net_Common_Tools::getMTU (handle)));
+//#endif
   } // end IF
 
   // step3: tweak socket

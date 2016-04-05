@@ -752,7 +752,7 @@ do_work (bool requestBroadcastReplies_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
-      goto clean_up;
+      return;
     } // end IF
   } // end IF
 
@@ -776,7 +776,7 @@ do_work (bool requestBroadcastReplies_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
-    goto clean_up;
+    return;
   } // end IF
 
   // step1: handle events (signals, incoming connections/data[, timers], ...)
@@ -794,7 +794,7 @@ do_work (bool requestBroadcastReplies_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
-    goto clean_up;
+    return;
   } // end IF
 
   // step1b: connect (broadcast)
@@ -814,34 +814,32 @@ do_work (bool requestBroadcastReplies_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string: \"%m\", continuing\n")));
 
+  //Test_U_OutboundConnector_t connector (connection_manager_p,
+  //                                      configuration.socketHandlerConfiguration.statisticReportingInterval);
+  //Test_U_OutboundAsynchConnector_t asynch_connector (connection_manager_p,
+  //                                                   configuration.socketHandlerConfiguration.statisticReportingInterval);
+  Test_U_OutboundConnectorBcast_t connector (connection_manager_p,
+                                             configuration.socketHandlerConfiguration.statisticReportingInterval);
+  Test_U_OutboundAsynchConnectorBcast_t asynch_connector (connection_manager_p,
+                                                          configuration.socketHandlerConfiguration.statisticReportingInterval);
   if (useReactor_in)
-    ACE_NEW_NORETURN (iconnector_p,
-                      Test_U_OutboundConnectorBcast_t (connection_manager_p,
-                                                       configuration.socketHandlerConfiguration.statisticReportingInterval));
+    iconnector_p = &connector;
   else
-    ACE_NEW_NORETURN (iconnector_p,
-                      Test_U_OutboundAsynchConnectorBcast_t (connection_manager_p,
-                                                             configuration.socketHandlerConfiguration.statisticReportingInterval));
-  if (!iconnector_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-    goto clean_up;
-  } // end IF
+    iconnector_p = &asynch_connector;
   if (!iconnector_p->initialize (configuration.socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connector, aborting\n")));
-    goto clean_up;
+                ACE_TEXT ("failed to initialize connector, returning\n")));
+    return;
   } // end IF
   handle =
     iconnector_p->connect (configuration.socketConfiguration.address);
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to \"%s\", aborting\n"),
+                ACE_TEXT ("failed to connect to \"%s\", returning\n"),
                 buffer));
-    goto clean_up;
+    return;
   } // end IF
   if (iconnector_p->useReactor ())
     configuration.moduleHandlerConfiguration.broadcastConnection =
@@ -870,7 +868,7 @@ do_work (bool requestBroadcastReplies_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to \"%s\", returning\n"),
                 buffer));
-    goto clean_up;
+    return;
   } // end IF
   // step1b: wait for the connection to finish initializing
   // *TODO*: avoid tight loop here
@@ -887,7 +885,7 @@ do_work (bool requestBroadcastReplies_in,
                 ACE_TEXT ("failed to initialize connection to \"%s\" (status was: %d), returning\n"),
                 buffer,
                 status));
-    goto clean_up;
+    return;
   } // end IF
   // step1c: wait for the connection stream to finish initializing
   isocket_connection_p =
@@ -897,7 +895,7 @@ do_work (bool requestBroadcastReplies_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<Test_U_ISocketConnection_t>(0x%@), returning\n"),
                 configuration.moduleHandlerConfiguration.broadcastConnection));
-    goto clean_up;
+    return;
   } // end IF
   isocket_connection_p->wait (STREAM_STATE_RUNNING,
                               NULL); // <-- block
@@ -911,30 +909,20 @@ do_work (bool requestBroadcastReplies_in,
   configuration.streamConfiguration.module =
     (!UIDefinitionFileName_in.empty () ? &event_handler
                                        : NULL);
-  connection_manager_p->set (configuration,
-                             &configuration.userData);
+  //connection_manager_p->set (configuration,
+  //                           &configuration.userData);
 
   // step1cb: start listening ?
   if (UIDefinitionFileName_in.empty ())
   {
+    Test_U_Connector_t connector_2 (iconnection_manager_p,
+                                    configuration.streamConfiguration.statisticReportingInterval);
+    Test_U_AsynchConnector_t asynch_connector_2 (iconnection_manager_p,
+                                                 configuration.streamConfiguration.statisticReportingInterval);
     if (useReactor_in)
-      ACE_NEW_NORETURN (iconnector_p,
-                        Test_U_Connector_t (iconnection_manager_p,
-                                            configuration.streamConfiguration.statisticReportingInterval));
+      iconnector_p = &connector_2;
     else
-      ACE_NEW_NORETURN (iconnector_p,
-                        Test_U_AsynchConnector_t (iconnection_manager_p,
-                                                  configuration.streamConfiguration.statisticReportingInterval));
-    if (!iconnector_p)
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate memory, returning\n")));
-
-      // clean up
-      connection_manager_p->abort ();
-
-      goto clean_up;
-    } // end IF
+      iconnector_p = &asynch_connector_2;
     if (!iconnector_p->initialize (configuration.socketHandlerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -943,7 +931,7 @@ do_work (bool requestBroadcastReplies_in,
       // clean up
       connection_manager_p->abort ();
 
-      goto clean_up;
+      return;
     } // end IF
 
     // connect
@@ -969,7 +957,7 @@ do_work (bool requestBroadcastReplies_in,
       iconnector_p->abort ();
       connection_manager_p->abort ();
 
-      goto clean_up;
+      return;
     } // end IF
     if (useReactor_in)
       iconnection_p = connection_manager_p->get (configuration.handle);
@@ -1014,15 +1002,12 @@ do_work (bool requestBroadcastReplies_in,
       iconnector_p->abort ();
       connection_manager_p->abort ();
 
-      goto clean_up;
+      return;
     } // end IF
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("listening to UDP \"%s\"...\n"),
+                ACE_TEXT ("%d: listening to (UDP) \"%s\"...\n"),
+                iconnection_p->id (),
                 buffer));
-
-    // clean up
-    delete iconnector_p;
-    iconnector_p = NULL;
 
     // step2: send DHCP request
 //    ACE_NEW_NORETURN (message_data_p,
@@ -1074,7 +1059,7 @@ allocate:
 //      message_data_container_p->decrease ();
       connection_manager_p->abort ();
 
-      goto clean_up;
+      return;
     } // end IF
     DHCP_Record DHCP_record;
     DHCP_record.op = DHCP_Codes::DHCP_OP_REQUEST;
@@ -1093,7 +1078,7 @@ allocate:
       //    message_data_container_p->decrease ();
       connection_manager_p->abort ();
 
-      goto clean_up;
+      return;
     } // end IF
     // *TODO*: support optional options:
     //         - 'requested IP address'    (50)
@@ -1163,7 +1148,7 @@ allocate:
       // clean up
       connection_manager_p->abort ();
 
-      goto clean_up;
+      return;
     } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1172,7 +1157,7 @@ allocate:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
-      goto clean_up;
+      return;
     } // end IF
     //BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
     //ACE_UNUSED_ARG (was_visible_b);
@@ -1190,7 +1175,6 @@ allocate:
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
 
-clean_up:
   timer_manager_p->stop ();
   connection_manager_p->stop ();
   connection_manager_p->wait ();
@@ -1198,8 +1182,6 @@ clean_up:
                                        !useReactor_in,
                                        group_id);
 
-  if (iconnector_p)
-    delete iconnector_p;
   if (configuration.moduleHandlerConfiguration.broadcastConnection)
   {
 //    configuration.moduleHandlerConfiguration.broadcastConnection->close ();

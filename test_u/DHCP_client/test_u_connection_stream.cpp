@@ -110,6 +110,7 @@ Test_U_InboundConnectionStream::initialize (const Test_U_StreamConfiguration& co
   Test_U_StreamSessionData& session_data_r =
     const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
   // *TODO*: remove type inferences
+  session_data_r.sessionID = configuration_in.sessionID;
   ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
   session_data_r.targetFileName =
     configuration_in.moduleHandlerConfiguration->targetFileName;

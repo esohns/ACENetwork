@@ -113,36 +113,36 @@ typedef Net_ISocketConnection_T<ACE_INET_Addr,
 /////////////////////////////////////////
 
 // inbound
-//typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
-//                                                         Test_U_SocketHandlerConfiguration>,
-//                                  ///////
-//                                  ACE_INET_Addr,
-//                                  Test_U_Configuration,
-//                                  Test_U_ConnectionState,
-//                                  Test_U_RuntimeStatistic_t,
-//                                  Test_U_InboundConnectionStream,
-//                                  ///////
-//                                  Test_U_UserData,
-//                                  ///////
-//                                  Stream_ModuleConfiguration,
-//                                  Test_U_StreamModuleHandlerConfiguration,
-//                                  ///////
-//                                  Test_U_SocketHandlerConfiguration> Test_U_HandlerBcast_t;
-//typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<Test_U_SocketHandlerConfiguration>,
-//                                        Net_SOCK_Dgram_Bcast,
-//
-//                                        ACE_INET_Addr,
-//                                        Test_U_Configuration,
-//                                        Test_U_ConnectionState,
-//                                        Test_U_RuntimeStatistic_t,
-//                                        Test_U_InboundConnectionStream,
-//
-//                                        Test_U_UserData,
-//
-//                                        Stream_ModuleConfiguration,
-//                                        Test_U_StreamModuleHandlerConfiguration,
-//
-//                                        Test_U_SocketHandlerConfiguration> Test_U_AsynchHandlerBcast_t;
+typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
+                                                         Test_U_SocketHandlerConfiguration>,
+                                  ///////
+                                  ACE_INET_Addr,
+                                  Test_U_Configuration,
+                                  Test_U_ConnectionState,
+                                  Test_U_RuntimeStatistic_t,
+                                  Test_U_InboundConnectionStream,
+                                  ///////
+                                  Test_U_UserData,
+                                  ///////
+                                  Stream_ModuleConfiguration,
+                                  Test_U_StreamModuleHandlerConfiguration,
+                                  ///////
+                                  Test_U_SocketHandlerConfiguration> Test_U_HandlerBcast_t;
+typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<Test_U_SocketHandlerConfiguration>,
+                                        Net_SOCK_Dgram_Bcast,
+
+                                        ACE_INET_Addr,
+                                        Test_U_Configuration,
+                                        Test_U_ConnectionState,
+                                        Test_U_RuntimeStatistic_t,
+                                        Test_U_InboundConnectionStream,
+
+                                        Test_U_UserData,
+
+                                        Stream_ModuleConfiguration,
+                                        Test_U_StreamModuleHandlerConfiguration,
+
+                                        Test_U_SocketHandlerConfiguration> Test_U_AsynchHandlerBcast_t;
 typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_Dgram,
                                                          Test_U_SocketHandlerConfiguration>,
                                   ///////
@@ -174,26 +174,26 @@ typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<Test_U_Sock
 
                                         Test_U_SocketHandlerConfiguration> Test_U_AsynchHandler_t;
 
-//typedef Net_UDPConnectionBase_T<Test_U_HandlerBcast_t,
-//                                /////////
-//                                Test_U_Configuration,
-//                                Test_U_ConnectionState,
-//                                Test_U_RuntimeStatistic_t,
-//                                Test_U_InboundConnectionStream,
-//                                /////////
-//                                Test_U_SocketHandlerConfiguration,
-//                                /////////
-//                                Test_U_UserData> Test_U_ConnectionBcast_t;
-//typedef Net_AsynchUDPConnectionBase_T<Test_U_AsynchHandlerBcast_t,
-//                                      ///
-//                                      Test_U_Configuration,
-//                                      Test_U_ConnectionState,
-//                                      Test_U_RuntimeStatistic_t,
-//                                      Test_U_InboundConnectionStream,
-//                                      ///
-//                                      Test_U_SocketHandlerConfiguration,
-//                                      ///
-//                                      Test_U_UserData> Test_U_AsynchConnectionBcast_t;
+typedef Net_UDPConnectionBase_T<Test_U_HandlerBcast_t,
+                                /////////
+                                Test_U_Configuration,
+                                Test_U_ConnectionState,
+                                Test_U_RuntimeStatistic_t,
+                                Test_U_InboundConnectionStream,
+                                /////////
+                                Test_U_SocketHandlerConfiguration,
+                                /////////
+                                Test_U_UserData> Test_U_ConnectionBcast_t;
+typedef Net_AsynchUDPConnectionBase_T<Test_U_AsynchHandlerBcast_t,
+                                      ///
+                                      Test_U_Configuration,
+                                      Test_U_ConnectionState,
+                                      Test_U_RuntimeStatistic_t,
+                                      Test_U_InboundConnectionStream,
+                                      ///
+                                      Test_U_SocketHandlerConfiguration,
+                                      ///
+                                      Test_U_UserData> Test_U_AsynchConnectionBcast_t;
 typedef Net_UDPConnectionBase_T<Test_U_Handler_t,
                                 /////////
                                 Test_U_Configuration,
@@ -326,29 +326,29 @@ typedef Net_IConnector_T<ACE_INET_Addr,
 /////////////////////////////////////////
 
 // inbound
-//typedef Net_Client_AsynchConnector_T<Test_U_AsynchConnectionBcast_t,
-//                                     ////
-//                                     ACE_INET_Addr,
-//                                     Test_U_Configuration,
-//                                     Test_U_ConnectionState,
-//                                     Test_U_RuntimeStatistic_t,
-//                                     Test_U_InboundConnectionStream,
-//                                     ////
-//                                     Test_U_SocketHandlerConfiguration,
-//                                     ////
-//                                     Test_U_UserData> Test_U_AsynchConnectorBcast_t;
-//typedef Net_Client_Connector_T<Test_U_ConnectionBcast_t,
-//                               Net_SOCK_Connector,
-//                               //////////
-//                               ACE_INET_Addr,
-//                               Test_U_Configuration,
-//                               Test_U_ConnectionState,
-//                               Test_U_RuntimeStatistic_t,
-//                               Test_U_InboundConnectionStream,
-//                               //////////
-//                               Test_U_SocketHandlerConfiguration,
-//                               //////////
-//                               Test_U_UserData> Test_U_ConnectorBcast_t;
+typedef Net_Client_AsynchConnector_T<Test_U_AsynchConnectionBcast_t,
+                                     ////
+                                     ACE_INET_Addr,
+                                     Test_U_Configuration,
+                                     Test_U_ConnectionState,
+                                     Test_U_RuntimeStatistic_t,
+                                     Test_U_InboundConnectionStream,
+                                     ////
+                                     Test_U_SocketHandlerConfiguration,
+                                     ////
+                                     Test_U_UserData> Test_U_AsynchConnectorBcast_t;
+typedef Net_Client_Connector_T<Test_U_ConnectionBcast_t,
+                               Net_SOCK_Connector,
+                               //////////
+                               ACE_INET_Addr,
+                               Test_U_Configuration,
+                               Test_U_ConnectionState,
+                               Test_U_RuntimeStatistic_t,
+                               Test_U_InboundConnectionStream,
+                               //////////
+                               Test_U_SocketHandlerConfiguration,
+                               //////////
+                               Test_U_UserData> Test_U_ConnectorBcast_t;
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchConnection_t,
                                      ////
                                      ACE_INET_Addr,

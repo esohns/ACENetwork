@@ -1271,7 +1271,7 @@ allocate:
   } // end IF
   // *TODO*: support optional options:
   //         - 'overload'                (52)
-  char message_type = DHCP_Codes::DHCP_MESSAGE_RELEASE;
+  char message_type = DHCP_Codes::DHCP_MESSAGE_INFORM;
   DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE,
                                               std::string (1, message_type)));
   //         - 'parameter request list'  (55) [include in all subsequent messages]
@@ -1699,39 +1699,47 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     } // end IF
 
     // connect (broadcast)
+    //    bool handle_connection_manager = false;
+    //    ACE_INET_Addr peer_address;
+    Test_U_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
+      connection_manager_p;
+    ACE_ASSERT (iconnection_manager_p);
+    Test_U_ConnectorBcast_t connector_bcast (iconnection_manager_p,
+      data_p->configuration->streamConfiguration.statisticReportingInterval);
+    Test_U_AsynchConnectorBcast_t asynch_connector_bcast (iconnection_manager_p,
+      data_p->configuration->streamConfiguration.statisticReportingInterval);
+    //Test_U_Connector_t connector_bcast (iconnection_manager_p,
+    //                                    data_p->configuration->streamConfiguration.statisticReportingInterval);
+    //Test_U_AsynchConnector_t asynch_connector_bcast (iconnection_manager_p,
+    //                                                 data_p->configuration->streamConfiguration.statisticReportingInterval);
+    Test_U_IConnector_t* iconnector_p = NULL;
+
+    bool socket_connect = data_p->configuration->socketConfiguration.connect;
+    data_p->configuration->socketConfiguration.connect = false;
     int result =
         data_p->configuration->listenerConfiguration.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // *NOTE*: (on Windows(TM) sytems,) this needs to be INADDR_ANY (0.0.0.0) (why ?)
+                                                                  static_cast<ACE_UINT32> (INADDR_ANY));
+#else
                                                                   static_cast<ACE_UINT32> (INADDR_BROADCAST));
+#endif
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
-      return;
+      goto continue_;
     } // end IF
 
-//    bool handle_connection_manager = false;
-//    ACE_INET_Addr peer_address;
-    Test_U_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
-        connection_manager_p;
-    ACE_ASSERT (iconnection_manager_p);
-    //Test_U_ConnectorBcast_t connector_bcast (iconnection_manager_p,
-    //                                         data_p->configuration->streamConfiguration.statisticReportingInterval);
-    //Test_U_AsynchConnectorBcast_t asynch_connector_bcast (iconnection_manager_p,
-    //                                                      data_p->configuration->streamConfiguration.statisticReportingInterval);
-    Test_U_Connector_t connector (iconnection_manager_p,
-                                  data_p->configuration->streamConfiguration.statisticReportingInterval);
-    Test_U_AsynchConnector_t asynch_connector (iconnection_manager_p,
-                                               data_p->configuration->streamConfiguration.statisticReportingInterval);
-    Test_U_IConnector_t* iconnector_p = NULL;
     if (data_p->configuration->useReactor)
-      iconnector_p = &connector;
+      iconnector_p = &connector_bcast;
     else
-      iconnector_p = &asynch_connector;
+      iconnector_p = &asynch_connector_bcast;
     if (!iconnector_p->initialize (data_p->configuration->socketHandlerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
-      return;
+      goto continue_;
     } // end IF
 
     ACE_OS::memset (buffer, 0, sizeof (buffer));
@@ -1804,7 +1812,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       // clean up
       iconnector_p->abort ();
 
-      return;
+      goto continue_;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
@@ -1859,7 +1867,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
-      return;
+      goto continue_;
     } // end IF
 
     ACE_OS::memset (buffer, 0, sizeof (buffer));
@@ -1932,7 +1940,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       // clean up
       iconnector_p->abort ();
 
-      return;
+      goto continue_;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
@@ -1948,7 +1956,8 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
     failed = false;
 
-//continue_:
+continue_:
+    data_p->configuration->socketConfiguration.connect = socket_connect;
 //    // reset connection manager
 //    if (handle_connection_manager)
 //    {
