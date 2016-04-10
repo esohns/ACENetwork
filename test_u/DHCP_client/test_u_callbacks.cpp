@@ -1716,10 +1716,12 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
     bool socket_connect = data_p->configuration->socketConfiguration.connect;
     data_p->configuration->socketConfiguration.connect = false;
+    //data_p->configuration->listenerConfiguration.address = (ACE_INET_Addr&)ACE_Addr::sap_any;
     int result =
         data_p->configuration->listenerConfiguration.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    // *NOTE*: (on Windows(TM) sytems,) this needs to be INADDR_ANY (0.0.0.0) (why ?)
+    // *IMPORTANT NOTE*: this needs to be INADDR_ANY (0.0.0.0) (instead of
+    //                   255.255.255.255: why ?)
                                                                   static_cast<ACE_UINT32> (INADDR_ANY));
 #else
                                                                   static_cast<ACE_UINT32> (INADDR_BROADCAST));

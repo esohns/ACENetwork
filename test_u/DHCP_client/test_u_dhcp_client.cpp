@@ -569,6 +569,14 @@ do_work (bool requestBroadcastReplies_in,
   ACE_ASSERT (connection_manager_p);
 
   // *********************** socket configuration data ************************
+  // *IMPORTANT NOTE*: (global) UDP broadcast appears to be broken on
+  //                   Windows 7 and above (see e.g.:
+  //                   - http://serverfault.com/questions/72112/how-to-alter-the-global-broadcast-address-255-255-255-255-behavior-on-windows
+  // *WORKAROUND*: make sure the 'metric' value of the 'target' interface
+  //               (i.e. the one that shares the subnet with the target DHCP
+  //               server) is the lowest (run 'route print' and inspect the
+  //               (global) broadcast route entries) to ensure that broadcast
+  //               packets are (at least) sent out on the correct subnet
   result =
     configuration.socketConfiguration.address.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
                                                    static_cast<ACE_UINT32> (INADDR_BROADCAST),
