@@ -337,9 +337,13 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
         (error != EINVAL)     && // 22 : Linux [client: local close()]
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif
+    {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),
                   result));
+    } // end IF
+    else
+      result = 0;
   } // end IF
   int result_2 = outputStream_.cancel ();
   if ((result_2 != 0) && (result_2 != 1)) // 2: --> error ?
@@ -357,9 +361,13 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
         (error != EPIPE)      && // 32 : Linux [client: remote close()]
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif
+    {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),
                   result_2));
+    } // end IF
+    else
+      result_2 = 0;
   } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
