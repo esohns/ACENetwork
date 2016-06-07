@@ -17,48 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "stdafx.h"
 
-#ifndef NET_TCP_SOCKETHANDLER_T_H
-#define NET_TCP_SOCKETHANDLER_T_H
-
-#include "ace/config-macros.h"
-#include "ace/Event_Handler.h"
-#include "ace/Global_Macros.h"
-#include "ace/Reactor_Notification_Strategy.h"
-#include "ace/Svc_Handler.h"
-#include "ace/Synch_Traits.h"
-
-#include "net_sockethandler_base.h"
-
-template <typename ConfigurationType,
-          typename StreamType>
-class Net_TCPSocketHandler_T
- : public Net_SocketHandlerBase_T<ConfigurationType>
- , public ACE_Svc_Handler<StreamType, ACE_MT_SYNCH>
-{
- public:
-  // override some task-based members
-  virtual int open (void* = NULL); // args
-
-  // override some event handler methods
-  virtual int handle_close (ACE_HANDLE,        // handle
-                            ACE_Reactor_Mask); // event mask
-
- protected:
-  Net_TCPSocketHandler_T ();
-  virtual ~Net_TCPSocketHandler_T ();
-
-  ACE_Reactor_Notification_Strategy notificationStrategy_;
-
- private:
-  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Svc_Handler<StreamType, ACE_MT_SYNCH> inherited2;
-
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T (const Net_TCPSocketHandler_T&))
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T& operator= (const Net_TCPSocketHandler_T&))
-};
-
-// include template implementation
-#include "net_tcpsockethandler.inl"
-
-#endif
+#include "net_client_ssl_connector.h"

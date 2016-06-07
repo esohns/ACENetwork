@@ -82,13 +82,13 @@ DHCP_Module_Discover_T<TaskSynchType,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::~DHCP_Module_Discover_T"));
 
-  typename SessionMessageType::SESSION_DATA_T::DATA_T* session_data_p = NULL;
+  typename SessionMessageType::DATA_T::DATA_T* session_data_p = NULL;
 
   if (!sessionData_)
     goto continue_;
 
   session_data_p =
-      &const_cast<typename SessionMessageType::SESSION_DATA_T::DATA_T&> (sessionData_->get ());
+      &const_cast<typename SessionMessageType::DATA_T::DATA_T&> (sessionData_->get ());
 
   if (!session_data_p->broadcastConnection)
     goto continue_2;
@@ -241,8 +241,8 @@ DHCP_Module_Discover_T<TaskSynchType,
 
   const typename ProtocolMessageType::DATA_T& data_r = message_inout->get ();
 
-  typename SessionMessageType::SESSION_DATA_T::DATA_T& session_data_r =
-    const_cast<typename SessionMessageType::SESSION_DATA_T::DATA_T&> (sessionData_->get ());
+  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (sessionData_->get ());
 
   // sanity check(s)
   ACE_ASSERT (session_data_r.broadcastConnection);
@@ -506,10 +506,10 @@ DHCP_Module_Discover_T<TaskSynchType,
 
       // step1: retain a handle to the session data
       sessionData_ =
-        &const_cast<typename SessionMessageType::SESSION_DATA_T&> (message_inout->get ());
+        &const_cast<typename SessionMessageType::DATA_T&> (message_inout->get ());
       sessionData_->increase ();
-      typename SessionMessageType::SESSION_DATA_T::DATA_T& session_data_r =
-        const_cast<typename SessionMessageType::SESSION_DATA_T::DATA_T&> (sessionData_->get ());
+      typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+        const_cast<typename SessionMessageType::DATA_T::DATA_T&> (sessionData_->get ());
 
       // step2: setup a (UDP) connection ?
       int result = -1;
@@ -722,8 +722,8 @@ continue_2:
       // sanity check(s)
       ACE_ASSERT (sessionData_);
 
-      typename SessionMessageType::SESSION_DATA_T::DATA_T& session_data_r =
-        const_cast<typename SessionMessageType::SESSION_DATA_T::DATA_T&> (sessionData_->get ());
+      typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+        const_cast<typename SessionMessageType::DATA_T::DATA_T&> (sessionData_->get ());
 
       if (!session_data_r.broadcastConnection)
         goto continue_3;

@@ -21,6 +21,7 @@
 #ifndef TEST_U_CONNECTION_COMMON_H
 #define TEST_U_CONNECTION_COMMON_H
 
+#include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -117,7 +118,8 @@ typedef Net_ISocketConnection_T<ACE_INET_Addr,
 /////////////////////////////////////////
 
 // outbound
-typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<Test_U_SocketHandlerConfiguration>,
+typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<Test_U_SocketHandlerConfiguration,
+                                                         ACE_SOCK_STREAM>,
                                   ///////
                                   ACE_INET_Addr,
                                   Test_U_Configuration,

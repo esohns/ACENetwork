@@ -3,6 +3,10 @@
 #define HTTP_Scanner_IN_HEADER 1
 
 #line 2 "./../scripts/scanner.l"
+#include "net_iparser.h"
+
+#include "http_common.h"
+#undef YYTOKENTYPE
 #include "http_parser.h"
 
 /*
@@ -10,13 +14,13 @@
 yy::HTTP_Parser::token_type                                     \
 HTTP_Scanner_lex (yy::HTTP_Parser::semantic_type* yylval_param, \
                   yy::HTTP_Parser::location_type* yylloc_param, \
-                  HTTP_ParserDriver* driver,                    \
+                  Net_IParser<HTTP_Record>* driver,             \
                   yyscan_t yyscanner) */
-#define YY_DECL                              \
-yytokentype                                  \
-HTTP_Scanner_lex (YYSTYPE* yylval_param,     \
-                  YYLTYPE* yylloc_param,     \
-                  HTTP_ParserDriver* driver, \
+#define YY_DECL                                     \
+yytokentype                                         \
+HTTP_Scanner_lex (YYSTYPE* yylval_param,            \
+                  YYLTYPE* yylloc_param,            \
+                  Net_IParser<HTTP_Record>* driver, \
                   yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 YY_DECL;
@@ -25,9 +29,13 @@ YY_DECL;
 //#define YYLTYPE HTTP_Parser::location_type
 //#define YYSTYPE HTTP_Parser::semantic_type
 
+void HTTP_Scanner_set_column (int column_no , yyscan_t yyscanner);
+
+//#define FLEXINT_H
 
 
-#line 31 "http_scanner.h"
+
+#line 39 "http_scanner.h"
 
 #define  YY_INT_ALIGNED long int
 
@@ -344,7 +352,7 @@ void HTTP_Scanner_free (void * ,yyscan_t yyscanner );
 /* %endif */
 #endif
 
-#define YY_EXTRA_TYPE HTTP_ParserDriver*
+#define YY_EXTRA_TYPE Net_IParser<HTTP_Record>*
 
 /* %if-c-only Reentrant structure and macros (non-C++). */
 /* %if-reentrant */
@@ -504,6 +512,6 @@ extern int HTTP_Scanner_lex \
 #undef YY_DECL
 #endif
 
-#line 508 "http_scanner.h"
+#line 516 "http_scanner.h"
 #undef HTTP_Scanner_IN_HEADER
 #endif /* HTTP_Scanner_HEADER_H */

@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.0.2.  */
 
 /* Skeleton interface for Bison GLR parsers in C
 
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2013 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -42,10 +42,13 @@ extern int yydebug;
 /* "%code requires" blocks.  */
 
 
+#ifndef HTTP_PARSER_H
+#define HTTP_PARSER_H
+
 #include <cstdio>
 #include <string>
 
-enum yytokentype
+/* enum yytokentype
 {
   END = 0,
   METHOD = 258,
@@ -57,19 +60,28 @@ enum yytokentype
   REASON = 264,
   BODY = 265,
   CHUNK = 266
-};
-#define YYTOKENTYPE
-//enum yytokentype;
-class HTTP_ParserDriver;
+}; */
+//#define YYTOKENTYPE
+#undef YYTOKENTYPE
+/* enum yytokentype; */
+template <typename RecordType>
+class Net_IParser;
+struct HTTP_Record;
 //class HTTP_Scanner;
-struct YYLTYPE;
-union YYSTYPE;
+//struct YYLTYPE;
+
+/* #define YYSTYPE
+typedef union YYSTYPE
+{
+  int          ival;
+  std::string* sval;
+} YYSTYPE; */
+#undef YYSTYPE
+//union YYSTYPE;
 
 typedef void* yyscan_t;
 
 //#define YYERROR_VERBOSE
-extern void yyerror (YYLTYPE*, HTTP_ParserDriver*, yyscan_t, const char*);
-extern void yyprint (FILE*, yytokentype, YYSTYPE);
 
 
 
@@ -93,7 +105,7 @@ extern void yyprint (FILE*, yytokentype, YYSTYPE);
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
+typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
 
@@ -103,8 +115,6 @@ union YYSTYPE
 
 
 };
-
-typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -125,6 +135,16 @@ struct YYLTYPE
 
 
 
-int yyparse (HTTP_ParserDriver* driver, yyscan_t yyscanner);
+int yyparse (Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner);
+/* "%code provides" blocks.  */
+
+
+void yyerror (YYLTYPE*, Net_IParser<HTTP_Record>*, yyscan_t, const char*);
+int yyparse (Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner);
+void yyprint (FILE*, yytokentype, YYSTYPE);
+
+#endif // HTTP_PARSER_H
+
+
 
 #endif /* !YY_YY_HTTP_PARSER_H_INCLUDED  */

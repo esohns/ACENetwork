@@ -21,6 +21,8 @@
 #ifndef IRC_CLIENT_NETWORK_H
 #define IRC_CLIENT_NETWORK_H
 
+#include "ace/Global_Macros.h"
+
 #include "irc_network.h"
 
 #include "IRC_client_common.h"
@@ -31,7 +33,8 @@
 
 /////////////////////////////////////////
 
-typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<IRC_Client_SocketHandlerConfiguration>,
+typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<IRC_Client_SocketHandlerConfiguration,
+                                                         ACE_SOCK_STREAM>,
                                   ///////
                                   ACE_INET_Addr,
                                   IRC_Client_Configuration,

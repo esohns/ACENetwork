@@ -1,3 +1,8 @@
+#line 2 "./../scripts/scanner.l"
+#include "net_iparser.h"
+
+#include "http_common.h"
+#undef YYTOKENTYPE
 #include "http_parser.h"
 
 /*
@@ -5,13 +10,13 @@
 yy::HTTP_Parser::token_type                                     \
 HTTP_Scanner_lex (yy::HTTP_Parser::semantic_type* yylval_param, \
                   yy::HTTP_Parser::location_type* yylloc_param, \
-                  HTTP_ParserDriver* driver,                    \
+                  Net_IParser<HTTP_Record>* driver,             \
                   yyscan_t yyscanner) */
-#define YY_DECL                              \
-yytokentype                                  \
-HTTP_Scanner_lex (YYSTYPE* yylval_param,     \
-                  YYLTYPE* yylloc_param,     \
-                  HTTP_ParserDriver* driver, \
+#define YY_DECL                                     \
+yytokentype                                         \
+HTTP_Scanner_lex (YYSTYPE* yylval_param,            \
+                  YYLTYPE* yylloc_param,            \
+                  Net_IParser<HTTP_Record>* driver, \
                   yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 YY_DECL;
@@ -19,6 +24,14 @@ YY_DECL;
 //using namespace yy;
 //#define YYLTYPE HTTP_Parser::location_type
 //#define YYSTYPE HTTP_Parser::semantic_type
+
+void HTTP_Scanner_set_column (int column_no , yyscan_t yyscanner);
+
+//#define FLEXINT_H
+
+
+
+#line 35 "http_scanner.cpp"
 
 #define  YY_INT_ALIGNED long int
 
@@ -44,7 +57,7 @@ YY_DECL;
 /* %endif */
 
 /* %if-c-only */
-
+    
 /* %endif */
 
 /* %if-c-only */
@@ -76,7 +89,7 @@ YY_DECL;
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
- * if you want the limit (max/min) macros for int types.
+ * if you want the limit (max/min) macros for int types. 
  */
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
@@ -93,7 +106,7 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t;
+typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
 
@@ -258,7 +271,7 @@ typedef size_t yy_size_t;
 
     /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
      *       access to the local variable yy_act. Since yyless() is a macro, it would break
-     *       existing scanners that call yyless() from OUTSIDE HTTP_Scanner_lex.
+     *       existing scanners that call yyless() from OUTSIDE HTTP_Scanner_lex. 
      *       One obvious solution it to make yy_act a global. I tried that, and saw
      *       a 5% performance hit in a non-yylineno scanner, because yy_act is
      *       normally declared as a register variable-- so it is not worth it.
@@ -277,14 +290,14 @@ typedef size_t yy_size_t;
                     if ( *p == '\n' )\
                         --yylineno;\
             }while(0)
-
+    
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
 	do \
 		{ \
 		/* Undo effects of setting up yytext. */ \
-				int yyless_macro_arg = (n); \
-				YY_LESS_LINENO(yyless_macro_arg);\
+        int yyless_macro_arg = (n); \
+        YY_LESS_LINENO(yyless_macro_arg);\
 		*yy_cp = yyg->yy_hold_char; \
 		YY_RESTORE_YY_MORE_OFFSET \
 		yyg->yy_c_buf_p = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
@@ -339,7 +352,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-
+    
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -426,9 +439,9 @@ void HTTP_Scanner_free (void * ,yyscan_t yyscanner );
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-				HTTP_Scanner_ensure_buffer_stack (yyscanner); \
+        HTTP_Scanner_ensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-						HTTP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            HTTP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
@@ -436,9 +449,9 @@ void HTTP_Scanner_free (void * ,yyscan_t yyscanner );
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-				HTTP_Scanner_ensure_buffer_stack (yyscanner); \
+        HTTP_Scanner_ensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-						HTTP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            HTTP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
@@ -74544,7 +74557,7 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
  * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
-  yyg->yytext_ptr = yy_bp; \
+	yyg->yytext_ptr = yy_bp; \
 /* %% [2.0] code to fiddle yytext and yyleng for yymore() goes here \ */\
 	yyleng = (size_t) (yy_cp - yy_bp); \
 	yyg->yy_hold_char = *yy_cp; \
@@ -74556,7 +74569,7 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
 #define YY_NUM_RULES 23
 #define YY_END_OF_BUFFER 24
 /* This struct is not used in this scanner,
-	 but its presence is necessary. */
+   but its presence is necessary. */
 struct yy_trans_info
 	{
 	flex_int32_t yy_verify;
@@ -74827,7 +74840,7 @@ static yyconst flex_int32_t yy_accept[2344] =
 /* Table of booleans, true if rule could match eol. */
 static yyconst flex_int32_t yy_rule_can_match_eol[24] =
     {   0,
-0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1,
+0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 
     1, 1, 1, 0,     };
 
 static yyconst yy_state_type yy_NUL_trans[2344] =
@@ -75094,9 +75107,9 @@ static yyconst yy_state_type yy_NUL_trans[2344] =
 
 static yyconst flex_int32_t yy_rule_linenum[23] =
     {   0,
-      323,  327,  333,  346,  359,  372,  382,  392,  402,  410,
-      423,  436,  449,  459,  469,  479,  498,  510,  520,  530,
-      539,  645
+      331,  335,  341,  354,  367,  380,  390,  400,  410,  418,
+      431,  444,  457,  467,  477,  487,  507,  521,  531,  541,
+      550,  659
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -75118,7 +75131,7 @@ static yyconst flex_int32_t yy_rule_linenum[23] =
 #include "net_macros.h"
 
 #include "http_common.h"
-#include "http_parser_driver.h"
+#include "http_defines.h"
 
 /* *NOTE*: instead of the default (int), this HTTP_Scanner_lex returns token_type.
            Unfortunately, yyterminate by default returns 0, which is not of
@@ -75242,7 +75255,7 @@ CHARSET        (US-ASCII|ISO-8859-1|ISO-8859-2|ISO-8859-3|ISO-8859-4|ISO-8859-5|
 /* %endif */
 #endif
 
-#define YY_EXTRA_TYPE HTTP_ParserDriver*
+#define YY_EXTRA_TYPE Net_IParser<HTTP_Record>*
 
 /* %if-c-only Reentrant structure and macros (non-C++). */
 /* %if-reentrant */
@@ -75296,9 +75309,9 @@ static int yy_init_globals (yyscan_t yyscanner );
     /* This must go here because YYSTYPE and YYLTYPE are included
      * from bison output in section 1.*/
     #    define yylval yyg->yylval_r
-
+    
     #    define yylloc yyg->yylloc_r
-
+    
 int HTTP_Scanner_lex_init (yyscan_t* scanner);
 
 int HTTP_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
@@ -75347,9 +75360,9 @@ YYSTYPE * HTTP_Scanner_get_lval (yyscan_t yyscanner );
 void HTTP_Scanner_set_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
 
        YYLTYPE *HTTP_Scanner_get_lloc (yyscan_t yyscanner );
-
+    
         void HTTP_Scanner_set_lloc (YYLTYPE * yylloc_param ,yyscan_t yyscanner );
-
+    
 /* %endif */
 
 /* Macros after this point can all be overridden by user definitions in
@@ -75367,7 +75380,7 @@ extern int HTTP_Scanner_wrap (yyscan_t yyscanner );
 /* %not-for-header */
 
     static void yyunput (int c,char *buf_ptr  ,yyscan_t yyscanner);
-
+    
 /* %ok-for-header */
 
 /* %endif */
@@ -75509,7 +75522,7 @@ extern int HTTP_Scanner_lex \
 
 /* %% [6.0] YY_RULE_SETUP definition goes here */
 #define YY_RULE_SETUP \
-  YY_USER_ACTION
+	YY_USER_ACTION
 
 /* %not-for-header */
 
@@ -75520,11 +75533,11 @@ YY_DECL
 	register yy_state_type yy_current_state;
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-		yylval = yylval_param;
+    yylval = yylval_param;
 
-		yylloc = yylloc_param;
+    yylloc = yylloc_param;
 
 	if ( !yyg->yy_init )
 		{
@@ -75564,7 +75577,7 @@ YY_DECL
 /* %% [7.0] user's declarations go here */
 
   //yylloc->step ();
-  yy_flex_debug = driver->getDebugScanner ();
+  yy_flex_debug = driver->debugScanner ();
 
   std::istringstream converter;
   unsigned int chunk_size;
@@ -75611,12 +75624,12 @@ yy_find_action:
 			yy_size_t yyl;
 			for ( yyl = 0; yyl < yyleng; ++yyl )
 				if ( yytext[yyl] == '\n' )
-
+					   
     do{ yylineno++;
         yycolumn=0;
     }while(0)
 ;
-      }
+			}
 
 do_action:	/* This label is used only to access EOF actions. */
 
@@ -75627,10 +75640,10 @@ do_action:	/* This label is used only to access EOF actions. */
 				fprintf( stderr, "--scanner backing up\n" );
 			else if ( yy_act < 23 )
 				fprintf( stderr, "--accepting rule at line %ld (\"%s\")\n",
-								 (long)yy_rule_linenum[yy_act], yytext );
+				         (long)yy_rule_linenum[yy_act], yytext );
 			else if ( yy_act == 23 )
 				fprintf( stderr, "--accepting default rule (\"%s\")\n",
-								 yytext );
+				         yytext );
 			else if ( yy_act == 24 )
 				fprintf( stderr, "--(end of buffer or a NUL)\n" );
 			else
@@ -75653,20 +75666,20 @@ YY_RULE_SETUP
                              BEGIN (response);
                              yycolumn -= yyleng;
                              /* yymore (); */ yyless (0); }
-  YY_BREAK
+	YY_BREAK
 case 2:
 YY_RULE_SETUP
 {
                              BEGIN (request);
                              yycolumn -= yyleng;
                              /* yymore (); */ yyless (0); }
-  YY_BREAK
+	YY_BREAK
 // end <INITIAL>
 
 case 3:
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              BEGIN (uri);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
@@ -75676,14 +75689,14 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 1);
                              return yytokentype::METHOD;
                              /* return yy::HTTP_Parser::token::METHOD; */ }
-  YY_BREAK
+	YY_BREAK
 // end <request>
 
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              BEGIN (version);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
@@ -75693,14 +75706,14 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 1);
                              return yytokentype::URI;
                              /* return yy::HTTP_Parser::token::URI; */ }
-  YY_BREAK
+	YY_BREAK
 // end <uri>
 
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              BEGIN (request_headers);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
@@ -75710,14 +75723,14 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
                              return yytokentype::VERSION;
                              /* return yy::HTTP_Parser::token::VERSION; */ }
-  YY_BREAK
+	YY_BREAK
 // end <version>
 
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
@@ -75726,12 +75739,12 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
                              return yytokentype::HEADER;
                              /* return yy::HTTP_Parser::token::HEADER; */ }
-  YY_BREAK
+	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
@@ -75740,12 +75753,12 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
                              return yytokentype::HEADER;
                              /* return yy::HTTP_Parser::token::HEADER; */ }
-  YY_BREAK
+	YY_BREAK
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
@@ -75754,23 +75767,23 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
                              return yytokentype::HEADER;
                              /* return yy::HTTP_Parser::token::HEADER; */ }
-  YY_BREAK
+	YY_BREAK
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              BEGIN (body);
                              yylval->ival = 2;
                              return yytokentype::DELIMITER;
                              /* return yy::HTTP_Parser::token::DELIMITER; */ }
-  YY_BREAK
+	YY_BREAK
 // end <request_headers>
 
 case 10:
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              BEGIN (status);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
@@ -75780,13 +75793,13 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 1);
                              return yytokentype::VERSION;
                              /* return yy::HTTP_Parser::token::VERSION; */ }
-  YY_BREAK
+	YY_BREAK
 // end <response>
 
 case 11:
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              BEGIN (reason);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
@@ -75796,14 +75809,14 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 1);
                              return yytokentype::STATUS;
                              /* return yy::HTTP_Parser::token::STATUS; */ }
-  YY_BREAK
+	YY_BREAK
 // end <status>
 
 case 12:
 /* rule 12 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              BEGIN (response_headers);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
@@ -75813,14 +75826,14 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
                              return yytokentype::REASON;
                              /* return yy::HTTP_Parser::token::REASON; */ }
-  YY_BREAK
+	YY_BREAK
 // end <reason>
 
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
@@ -75829,12 +75842,12 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
                              return yytokentype::HEADER;
                              /* return yy::HTTP_Parser::token::HEADER; */ }
-  YY_BREAK
+	YY_BREAK
 case 14:
 /* rule 14 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
@@ -75843,12 +75856,12 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
                              return yytokentype::HEADER;
                              /* return yy::HTTP_Parser::token::HEADER; */ }
-  YY_BREAK
+	YY_BREAK
 case 15:
 /* rule 15 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
@@ -75857,20 +75870,21 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
                              return yytokentype::HEADER;
                              /* return yy::HTTP_Parser::token::HEADER; */ }
-  YY_BREAK
+	YY_BREAK
 case 16:
 /* rule 16 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
-                             ACE_ASSERT (driver->record_);
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
+                             HTTP_Record* record_p = driver->record ();
+                             ACE_ASSERT (record_p);
                              HTTP_HeadersIterator_t iterator =
-                                 driver->record_->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_HEADER_STRING));
-                             if ((iterator != driver->record_->headers.end ()) &&
+                                 record_p->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_HEADER_STRING));
+                             if ((iterator != record_p->headers.end ()) &&
                                  ((*iterator).second == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING)))
                              {
-                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("entity uses chunked transfer...\n")));
+//                               ACE_DEBUG ((LM_DEBUG,
+//                                           ACE_TEXT ("entity uses chunked transfer...\n")));
                                BEGIN (chunked_body);
                              } // end IF
                              else
@@ -75878,23 +75892,25 @@ YY_RULE_SETUP
                              yylval->ival = 2;
                              return yytokentype::DELIMITER;
                              /* return yy::HTTP_Parser::token::DELIMITER; */ }
-  YY_BREAK
+	YY_BREAK
 // end <response_headers>
 
 case 17:
 /* rule 17 can match eol */
 YY_RULE_SETUP
-{ driver->offset_ += yyleng;
-                             ACE_DEBUG ((LM_DEBUG,
-                                         ACE_TEXT ("found entity @%d[%d]: %d byte(s)\n"),
-                                         driver->offset_,
-                                         (driver->fragment_->rd_ptr () - driver->fragment_->base ()),
-                                         driver->fragment_->length ()));
+{ //ACE_Message_Block* message_block_p = driver->buffer ();
+                             //ACE_ASSERT (message_block_p);
+                             driver->offset (yyleng);
+//                             ACE_DEBUG ((LM_DEBUG,
+//                                         ACE_TEXT ("found entity @%d[%d]: %d byte(s)\n"),
+//                                         driver->offset (),
+//                                         (message_block_p->rd_ptr () - message_block_p->base ()),
+//                                         message_block_p->length ()));
                              yylval->ival = yyleng;
                              //YY_FLUSH_BUFFER; // --> use the next fragment
                              return yytokentype::BODY;
                              /* return yy::HTTP_Parser::token::BODY; */ }
-  YY_BREAK
+	YY_BREAK
 // end <body>
 
 case 18:
@@ -75909,12 +75925,12 @@ YY_RULE_SETUP
                              BEGIN (chunk);
                              yycolumn -= yyleng;
                              /* yymore (); */ yyless (0); }
-  YY_BREAK
+	YY_BREAK
 case 19:
 /* rule 19 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              yylval->ival = yyleng;
                              /* *TODO*: error handling */
                              ACE_NEW_NORETURN (yylval->sval,
@@ -75923,25 +75939,28 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
                              return yytokentype::HEADER;
                              /* return yy::HTTP_Parser::token::HEADER; */ }
-  YY_BREAK
+	YY_BREAK
 case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
-                             driver->finished_ = true; // done
+{ driver->buffer ()->rd_ptr (yyleng);
+                             driver->offset (yyleng);
+                             driver->finished (); // done
                              BEGIN (INITIAL);
                              yylval->ival = 2;
                              return yytokentype::DELIMITER;
                              /* return yy::HTTP_Parser::token::DELIMITER; */ }
-  YY_BREAK
+	YY_BREAK
 // end <chunked_body>
 
 case 21:
 /* rule 21 can match eol */
 YY_RULE_SETUP
-{ driver->fragment_->rd_ptr (yyleng);
-                             driver->offset_ += yyleng;
+{
+                             ACE_Message_Block* message_block_p = driver->buffer ();
+                             ACE_ASSERT (message_block_p);
+                             message_block_p->rd_ptr (yyleng);
+                             driver->offset (yyleng);
                              if (chunk_size)
                              {
                                /* undo the effects of YY_DO_BEFORE_ACTION */
@@ -75949,30 +75968,30 @@ YY_RULE_SETUP
 
                                // NOT the final chunk
                                // --> there is (trailing) entity data
-                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("found entity chunk @%d[%d]: %d + %d byte(s)\n"),
-                                           driver->offset_ - yyleng,
-                                           (driver->fragment_->rd_ptr () - driver->fragment_->base ()) - yyleng,
-                                           yyleng, chunk_size));
+//                               ACE_DEBUG ((LM_DEBUG,
+//                                           ACE_TEXT ("found entity chunk @%d[%d]: %d + %d byte(s)\n"),
+//                                           driver->offset () - yyleng,
+//                                           (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng,
+//                                           yyleng, chunk_size));
 
                                // adjust write pointer ?
                                ACE_Message_Block* message_p, *message_2;
                                unsigned int remainder =
-                                   driver->fragment_->length ();
+                                   message_block_p->length ();
                                if (chunk_size <= remainder)
                                { // current fragment contains the whole chunk
 
                                  // --> insert buffer
                                  message_p =
-                                   driver->fragment_->duplicate ();
+                                   message_block_p->duplicate ();
                                  ACE_ASSERT (message_p);
                                  message_2 =
-                                   driver->fragment_->cont ();
+                                   message_block_p->cont ();
                                  if (message_2)
                                    message_p->cont (message_2);
-                                 driver->fragment_->cont (message_p);
+                                 message_block_p->cont (message_p);
 
-                                 driver->fragment_->wr_ptr (driver->fragment_->rd_ptr () + chunk_size);
+                                 message_block_p->wr_ptr (message_block_p->rd_ptr () + chunk_size);
                                  remainder = chunk_size;
                                } // end IF
                                else
@@ -75984,12 +76003,12 @@ YY_RULE_SETUP
                                    if (!driver->switchBuffer ())
                                    {
                                      ACE_DEBUG ((LM_ERROR,
-                                                 ACE_TEXT ("failed to HTTP_ParserDriver::switchBuffer(), aborting\n")));
+                                                 ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                                      yyterminate();
                                    } // end IF
 
                                    skipped_bytes +=
-                                       driver->fragment_->length ();
+                                       message_block_p->length ();
                                  } // end WHILE
                                  remainder = (skipped_bytes - chunk_size);
 
@@ -75997,27 +76016,27 @@ YY_RULE_SETUP
                                  // --> insert buffer, adjust writer pointer,
                                  //     switch buffers one more time
                                  message_p =
-                                     driver->fragment_->duplicate ();
+                                     message_block_p->duplicate ();
                                  ACE_ASSERT (message_p);
                                  message_2 =
-                                     driver->fragment_->cont ();
+                                     message_block_p->cont ();
                                  if (message_2)
                                    message_p->cont (message_2);
-                                 driver->fragment_->cont (message_p);
+                                 message_block_p->cont (message_p);
                                  // computer offset to end of chunk
                                  remainder =
-                                     driver->fragment_->length () - remainder;
-                                 driver->fragment_->wr_ptr (driver->fragment_->rd_ptr () + remainder);
+                                     message_block_p->length () - remainder;
+                                 message_block_p->wr_ptr (message_block_p->rd_ptr () + remainder);
                                } // end ELSE
 
                                if (!driver->switchBuffer ())
                                {
                                  ACE_DEBUG ((LM_ERROR,
-                                             ACE_TEXT ("failed to HTTP_ParserDriver::switchBuffer(), aborting\n")));
+                                             ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                                  yyterminate();
                                } // end IF
                                remainder += 2;
-                               driver->fragment_->rd_ptr (remainder); // offset + CRLF
+                               message_block_p->rd_ptr (remainder); // offset + CRLF
 
                                // gobble initial bytes
                                yyg->yy_c_buf_p += remainder;
@@ -76030,21 +76049,21 @@ YY_RULE_SETUP
 //                                 c = yyinput (yyscanner);
 //                               ACE_UNUSED_ARG (c);
 
-                               driver->offset_ += (chunk_size + 2);
+                               driver->offset (chunk_size + 2);
                                yylval->ival = yyleng + (chunk_size + 2);
                              } // end IF
                              else
                              {
                                ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("found last entity chunk @%d[%d]\n"),
-                                           driver->offset_ - yyleng,
-                                           (driver->fragment_->rd_ptr () - driver->fragment_->base ()) - yyleng));
+                                           driver->offset () - yyleng,
+                                           (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng));
                                yylval->ival = yyleng;
                              } // end ELSE
                              BEGIN (chunked_body);
                              return yytokentype::CHUNK;
                              /* return yy::HTTP_Parser::token::CHUNK; */ }
-  YY_BREAK
+	YY_BREAK
 // end <chunk>
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(request):
@@ -76060,7 +76079,7 @@ case YY_STATE_EOF(body):
 case YY_STATE_EOF(chunked_body):
 case YY_STATE_EOF(chunk):
 { yyterminate(); }
-  YY_BREAK
+	YY_BREAK
 case 22:
 /* rule 22 can match eol */
 YY_RULE_SETUP
@@ -76077,7 +76096,7 @@ YY_RULE_SETUP
                              error_message += ACE_TEXT_ALWAYS_CHAR ("\", aborting");
                              driver->error (*yylloc, error_message);
                              yyterminate(); }
-  YY_BREAK
+	YY_BREAK
 case 23:
 YY_RULE_SETUP
 YY_FATAL_ERROR( "flex scanner jammed" );
@@ -76235,7 +76254,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	register char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
 	register char *source = yyg->yytext_ptr;
 	register int number_to_move, i;
@@ -76371,14 +76390,14 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c-only */
 /* %not-for-header */
 
-		static yy_state_type yy_get_previous_state (yyscan_t yyscanner)
+    static yy_state_type yy_get_previous_state (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
 	register yy_state_type yy_current_state;
 	register char *yy_cp;
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 /* %% [15.0] code to get the start state into yy_current_state goes here */
 	yy_current_state = yyg->yy_start;
@@ -76413,10 +76432,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-  register int yy_is_jam;
+	register int yy_is_jam;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner; /* This var may be unused depending upon options. */
 /* %% [17.0] code to find the next state, and perhaps do backing up, goes here */
-  register char *yy_cp = yyg->yy_c_buf_p;
+	register char *yy_cp = yyg->yy_c_buf_p;
 
 	yy_current_state = yy_NUL_trans[yy_current_state];
 	yy_is_jam = (yy_current_state == 0);
@@ -76436,12 +76455,12 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 /* %if-c-only */
 
-		static void yyunput (int c, register char * yy_bp , yyscan_t yyscanner)
+    static void yyunput (int c, register char * yy_bp , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
-  register char *yy_cp;
+	register char *yy_cp;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
     yy_cp = yyg->yy_c_buf_p;
@@ -76498,10 +76517,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-  int c;
+	int c;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  *yyg->yy_c_buf_p = yyg->yy_hold_char;
+	*yyg->yy_c_buf_p = yyg->yy_hold_char;
 
 	if ( *yyg->yy_c_buf_p == YY_END_OF_BUFFER_CHAR )
 		{
@@ -76563,13 +76582,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 /* %% [19.0] update BOL and yylineno */
 	if ( c == '\n' )
-
+		   
     do{ yylineno++;
         yycolumn=0;
     }while(0)
 ;
 
-  return c;
+	return c;
 }
 /* %if-c-only */
 #endif	/* ifndef YY_NO_INPUT */
@@ -76586,13 +76605,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  if ( ! YY_CURRENT_BUFFER ){
+	if ( ! YY_CURRENT_BUFFER ){
         HTTP_Scanner_ensure_buffer_stack (yyscanner);
-    YY_CURRENT_BUFFER_LVALUE =
+		YY_CURRENT_BUFFER_LVALUE =
             HTTP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
-  }
+	}
 
 	HTTP_Scanner__init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
 	HTTP_Scanner__load_buffer_state(yyscanner );
@@ -76608,13 +76627,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	/* TODO. We should be able to replace this entire function body
 	 * with
 	 *		HTTP_Scanner_pop_buffer_state();
 	 *		HTTP_Scanner_push_buffer_state(new_buffer);
-		 */
+     */
 	HTTP_Scanner_ensure_buffer_stack (yyscanner);
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
@@ -76644,7 +76663,7 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
 	yyg->yytext_ptr = yyg->yy_c_buf_p = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
 	yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
@@ -76663,8 +76682,8 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-  YY_BUFFER_STATE b;
-
+	YY_BUFFER_STATE b;
+    
 	b = (YY_BUFFER_STATE) HTTP_Scanner_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
 	if ( ! b )
 		YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner__create_buffer()" );
@@ -76695,7 +76714,7 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if ( ! b )
 		return;
@@ -76720,10 +76739,10 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %endif */
 
 {
-  int oerrno = errno;
+	int oerrno = errno;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  HTTP_Scanner__flush_buffer(b ,yyscanner);
+	HTTP_Scanner__flush_buffer(b ,yyscanner);
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
@@ -76740,11 +76759,11 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c-only */
 
         b->yy_is_interactive = 0;
-
+    
 /* %endif */
 /* %if-c++-only */
 /* %endif */
-  errno = oerrno;
+	errno = oerrno;
 }
 
 /** Discard all buffered characters. On the next scan, YY_INPUT will be called.
@@ -76757,7 +76776,7 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if ( ! b )
 		return;
 
@@ -76792,7 +76811,7 @@ void HTTP_Scanner_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yysca
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (new_buffer == NULL)
 		return;
 
@@ -76829,7 +76848,7 @@ void HTTP_Scanner_pop_buffer_state (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (!YY_CURRENT_BUFFER)
 		return;
 
@@ -76855,24 +76874,24 @@ static void HTTP_Scanner_ensure_buffer_stack (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-  yy_size_t num_to_alloc;
+	yy_size_t num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  if (!yyg->yy_buffer_stack) {
+	if (!yyg->yy_buffer_stack) {
 
 		/* First allocation is just for 2 elements, since we don't know if this
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
-				 */
+         */
 		num_to_alloc = 1;
 		yyg->yy_buffer_stack = (struct yy_buffer_state**)HTTP_Scanner_alloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
 			YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner_ensure_buffer_stack()" );
-
+								  
 		memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-
+				
 		yyg->yy_buffer_stack_max = num_to_alloc;
 		yyg->yy_buffer_stack_top = 0;
 		return;
@@ -76903,15 +76922,15 @@ static void HTTP_Scanner_ensure_buffer_stack (yyscan_t yyscanner)
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
  * @param yyscanner The scanner object.
- * @return the newly allocated buffer state object.
+ * @return the newly allocated buffer state object. 
  */
 YY_BUFFER_STATE HTTP_Scanner__scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
-  YY_BUFFER_STATE b;
-
+	YY_BUFFER_STATE b;
+    
 	if ( size < 2 ||
-			 base[size-2] != YY_END_OF_BUFFER_CHAR ||
-			 base[size-1] != YY_END_OF_BUFFER_CHAR )
+	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
+	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
 		return 0;
 
@@ -76946,8 +76965,8 @@ YY_BUFFER_STATE HTTP_Scanner__scan_buffer  (char * base, yy_size_t  size , yysca
  */
 YY_BUFFER_STATE HTTP_Scanner__scan_string (yyconst char * yystr , yyscan_t yyscanner)
 {
-
-  return HTTP_Scanner__scan_bytes(yystr,strlen(yystr) ,yyscanner);
+    
+	return HTTP_Scanner__scan_bytes(yystr,strlen(yystr) ,yyscanner);
 }
 /* %endif */
 
@@ -76965,7 +76984,7 @@ YY_BUFFER_STATE HTTP_Scanner__scan_bytes  (yyconst char * yybytes, yy_size_t  _y
 	char *buf;
 	yy_size_t n;
 	yy_size_t i;
-
+    
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
 	buf = (char *) HTTP_Scanner_alloc(n ,yyscanner );
@@ -76997,7 +77016,7 @@ YY_BUFFER_STATE HTTP_Scanner__scan_bytes  (yyconst char * yybytes, yy_size_t  _y
 /* %if-c-only */
 static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 {
-			(void) fprintf( stderr, "%s\n", msg );
+    	(void) fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 /* %endif */
@@ -77011,8 +77030,8 @@ static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 	do \
 		{ \
 		/* Undo effects of setting up yytext. */ \
-				int yyless_macro_arg = (n); \
-				YY_LESS_LINENO(yyless_macro_arg);\
+        int yyless_macro_arg = (n); \
+        YY_LESS_LINENO(yyless_macro_arg);\
 		yytext[yyleng] = yyg->yy_hold_char; \
 		yyg->yy_c_buf_p = yytext + yyless_macro_arg; \
 		yyg->yy_hold_char = *yyg->yy_c_buf_p; \
@@ -77043,10 +77062,10 @@ YY_EXTRA_TYPE HTTP_Scanner_get_extra  (yyscan_t yyscanner)
 int HTTP_Scanner_get_lineno  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
+    
         if (! YY_CURRENT_BUFFER)
             return 0;
-
+    
     return yylineno;
 }
 
@@ -77056,10 +77075,10 @@ int HTTP_Scanner_get_lineno  (yyscan_t yyscanner)
 int HTTP_Scanner_get_column  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
+    
         if (! YY_CURRENT_BUFFER)
             return 0;
-
+    
     return yycolumn;
 }
 
@@ -77125,7 +77144,7 @@ void HTTP_Scanner_set_lineno (int  line_number , yyscan_t yyscanner)
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
            YY_FATAL_ERROR( "HTTP_Scanner_set_lineno called with no buffer" );
-
+    
     yylineno = line_number;
 }
 
@@ -77140,7 +77159,7 @@ void HTTP_Scanner_set_column (int  column_no , yyscan_t yyscanner)
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
            YY_FATAL_ERROR( "HTTP_Scanner_set_column called with no buffer" );
-
+    
     yycolumn = column_no;
 }
 
@@ -77198,13 +77217,13 @@ YYLTYPE *HTTP_Scanner_get_lloc  (yyscan_t yyscanner)
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yylloc;
 }
-
+    
 void HTTP_Scanner_set_lloc (YYLTYPE *  yylloc_param , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yylloc = yylloc_param;
 }
-
+    
 /* %endif */
 
 /* User-visible API */
@@ -77254,20 +77273,20 @@ int HTTP_Scanner_lex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_g
         errno = EINVAL;
         return 1;
     }
-
-		*ptr_yy_globals = (yyscan_t) HTTP_Scanner_alloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
-
+	
+    *ptr_yy_globals = (yyscan_t) HTTP_Scanner_alloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
+	
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
         return 1;
     }
-
+    
     /* By setting to 0xAA, we expose bugs in
     yy_init_globals. Leave at 0x00 for releases. */
     memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
-
+    
     HTTP_Scanner_set_extra (yy_user_defined, *ptr_yy_globals);
-
+    
     return yy_init_globals ( *ptr_yy_globals );
 }
 
@@ -77314,7 +77333,7 @@ int HTTP_Scanner_lex_destroy  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-		/* Pop the buffer stack, destroying each element. */
+    /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
 		HTTP_Scanner__delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
 		YY_CURRENT_BUFFER_LVALUE = NULL;
@@ -77405,13 +77424,13 @@ HTTP_Scanner_wrap (yyscan_t yyscanner)
   NETWORK_TRACE (ACE_TEXT ("::HTTP_Scanner_wrap"));
 
   struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
-  HTTP_ParserDriver* driver = HTTP_Scanner_get_extra (yyscanner);
+  Net_IParser<HTTP_Record>* driver = HTTP_Scanner_get_extra (yyscanner);
 
   // sanity check(s)
   ACE_ASSERT (driver);
-  if (driver->finished_)
+  if (driver->hasFinished ())
     return 1; // done
-  ACE_ASSERT (driver->fragment_);
+  ACE_ASSERT (driver->buffer ());
 
   // *NOTE*: there is more data
   // 1. gobble/save the rest
@@ -77434,8 +77453,9 @@ HTTP_Scanner_wrap (yyscan_t yyscanner)
   // step2
   if (!driver->switchBuffer ())
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HTTP_ParserDriver::switchBuffer() [remaining data was: \"%s\"], aborting\n"),
+    // *NOTE*: most probable reason: received session end message
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to Net_IParser::switchBuffer() [remaining data was: \"%s\"], aborting\n"),
                 ACE_TEXT (the_rest.c_str ())));
     return 1;
   } // end IF

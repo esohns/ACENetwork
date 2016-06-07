@@ -26,8 +26,10 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-template <typename ConfigurationType>
-Net_TCPSocketHandler_T<ConfigurationType>::Net_TCPSocketHandler_T ()//MANAGER_T* manager_in)
+template <typename ConfigurationType,
+          typename StreamType>
+Net_TCPSocketHandler_T<ConfigurationType,
+                       StreamType>::Net_TCPSocketHandler_T ()//MANAGER_T* manager_in)
  : inherited ()
  , inherited2 (NULL,                     // thread manager
                NULL,                     // message queue
@@ -40,8 +42,10 @@ Net_TCPSocketHandler_T<ConfigurationType>::Net_TCPSocketHandler_T ()//MANAGER_T*
 
 }
 
-template <typename ConfigurationType>
-Net_TCPSocketHandler_T<ConfigurationType>::~Net_TCPSocketHandler_T ()
+template <typename ConfigurationType,
+          typename StreamType>
+Net_TCPSocketHandler_T<ConfigurationType,
+                       StreamType>::~Net_TCPSocketHandler_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::~Net_TCPSocketHandler_T"));
 
@@ -82,9 +86,11 @@ Net_TCPSocketHandler_T<ConfigurationType>::~Net_TCPSocketHandler_T ()
 //  return 0;
 //}
 
-template <typename ConfigurationType>
+template <typename ConfigurationType,
+          typename StreamType>
 int
-Net_TCPSocketHandler_T<ConfigurationType>::open (void* arg_in)
+Net_TCPSocketHandler_T<ConfigurationType,
+                       StreamType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::open"));
 
@@ -207,10 +213,12 @@ Net_TCPSocketHandler_T<ConfigurationType>::open (void* arg_in)
   return result;
 }
 
-template <typename ConfigurationType>
+template <typename ConfigurationType,
+          typename StreamType>
 int
-Net_TCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle_in,
-                                                         ACE_Reactor_Mask mask_in)
+Net_TCPSocketHandler_T<ConfigurationType,
+                       StreamType>::handle_close (ACE_HANDLE handle_in,
+                                                  ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::handle_close"));
 

@@ -6,7 +6,7 @@
 #ifndef STDAFX_H
 #define STDAFX_H
 
-#if defined _MSC_VER
+#if defined (_MSC_VER)
 #define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 
 // *NOTE*: work around quirky MSVC...
@@ -26,7 +26,7 @@
 #include <vector>
 
 // System Library Header Files
-//#include "ace/ACE.h"
+#include "ace/config-lite.h"
 #include "ace/Assert.h"
 //#include "ace/Lock_Adapter_T.h"
 //#include "ace/Log_Msg.h"
@@ -40,7 +40,7 @@
 // Local Header Files
 #include "net_macros.h"
 
-#if defined _MSC_VER
+#if defined (_MSC_VER)
 #include "targetver.h"
 #endif
 

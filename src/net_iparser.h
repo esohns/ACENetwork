@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Erik Sohns   *
+ *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,47 +18,39 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_TCP_SOCKETHANDLER_T_H
-#define NET_TCP_SOCKETHANDLER_T_H
+#ifndef NET_IPARSER_H
+#define NET_IPARSER_H
 
-#include "ace/config-macros.h"
-#include "ace/Event_Handler.h"
-#include "ace/Global_Macros.h"
-#include "ace/Reactor_Notification_Strategy.h"
-#include "ace/Svc_Handler.h"
-#include "ace/Synch_Traits.h"
+#include <string>
 
-#include "net_sockethandler_base.h"
+#include "common_idumpstate.h"
 
-template <typename ConfigurationType,
-          typename StreamType>
-class Net_TCPSocketHandler_T
- : public Net_SocketHandlerBase_T<ConfigurationType>
- , public ACE_Svc_Handler<StreamType, ACE_MT_SYNCH>
+// forward declarations
+struct YYLTYPE;
+class ACE_Message_Block;
+
+template <typename RecordType>
+class Net_IParser
+ : public Common_IDumpState
 {
  public:
-  // override some task-based members
-  virtual int open (void* = NULL); // args
+  inline virtual ~Net_IParser () {};
 
-  // override some event handler methods
-  virtual int handle_close (ACE_HANDLE,        // handle
-                            ACE_Reactor_Mask); // event mask
+  virtual ACE_Message_Block* buffer () = 0;
+  virtual RecordType* record () = 0;
 
- protected:
-  Net_TCPSocketHandler_T ();
-  virtual ~Net_TCPSocketHandler_T ();
+  virtual bool debugScanner () const = 0;
+  virtual void error (const struct YYLTYPE&,
+                      const std::string&) = 0;
 
-  ACE_Reactor_Notification_Strategy notificationStrategy_;
+  virtual void finished () = 0;
+  virtual bool hasFinished () const = 0;
 
- private:
-  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Svc_Handler<StreamType, ACE_MT_SYNCH> inherited2;
+  virtual void offset (unsigned int) = 0; // offset (increment)
+  virtual unsigned int offset () const = 0;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T (const Net_TCPSocketHandler_T&))
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T& operator= (const Net_TCPSocketHandler_T&))
+  virtual bool switchBuffer () = 0;
+  virtual void wait () = 0;
 };
-
-// include template implementation
-#include "net_tcpsockethandler.inl"
 
 #endif

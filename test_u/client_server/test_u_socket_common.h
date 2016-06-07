@@ -128,7 +128,8 @@ typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<Net_SocketH
 
                                         Net_SocketHandlerConfiguration> Net_AsynchIPBroadcastHandler_t;
 
-typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<Net_SocketHandlerConfiguration>,
+typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<Net_SocketHandlerConfiguration,
+                                                         ACE_SOCK_STREAM>,
                                   ///////
                                   ACE_INET_Addr,
                                   Net_Configuration,

@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.0.2.  */
 
 /* Skeleton implementation for Bison GLR parsers in C
 
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2013 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.0.4"
+#define YYBISON_VERSION "3.0.2"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "glr.c"
@@ -125,7 +125,7 @@ using namespace std;
 // *TODO*: this shouldn't be necessary
 #define yylex HTTP_Scanner_lex
 
-#define YYPRINT(file, type, value) yyprint (file, type, value)
+//#define YYPRINT(file, type, value) yyprint (file, type, value)
 
 
 
@@ -234,7 +234,7 @@ using namespace std;
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  14
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   55
+#define YYLAST   22
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  12
@@ -293,9 +293,9 @@ static const unsigned char yytranslate[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short int yyrline[] =
 {
-       0,   181,   181,   182,   189,   219,   221,   222,   228,   230,
-     237,   239,   240,   251,   253,   259,   261,   299,   300,   302,
-     304,   306,   307
+       0,   204,   204,   205,   212,   242,   244,   245,   251,   253,
+     260,   262,   263,   274,   276,   282,   284,   324,   326,   328,
+     330,   334,   335
 };
 #endif
 
@@ -312,17 +312,17 @@ static const char *const yytname[] =
 };
 #endif
 
-#define YYPACT_NINF -14
-#define YYTABLE_NINF -23
+#define YYPACT_NINF -16
+#define YYTABLE_NINF -1
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
 static const signed char yypact[] =
 {
-       3,     0,     5,     2,    23,    11,    14,    17,    43,    18,
-      20,     4,    44,    18,   -14,     1,    22,    24,    26,    28,
-      30,    32,    34,    36,    52,     8,    53,    38,     8,    18,
-      40,    42,    54
+       2,   -16,     8,     3,     6,    14,   -16,     4,   -16,   -16,
+     -16,     1,   -16,   -16,   -16,     7,   -16,   -16,   -16,     9,
+     -16,   -16,   -16,     9,   -16,    11,   -16,   -16,    11,   -16,
+     -16,    13,   -16
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -330,17 +330,17 @@ static const signed char yypact[] =
      means the default is an error.  */
 static const unsigned char yydefact[] =
 {
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     1,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0
+       0,     5,     0,     0,     0,     0,     8,     0,     3,    17,
+      13,     0,     4,    17,     1,    20,    10,     9,     7,     6,
+      15,    14,    12,    11,    18,    22,     2,    16,    22,    17,
+      21,     0,    19
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const signed char yypgoto[] =
 {
-     -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -13,
-     -14,    27
+     -16,   -16,   -16,   -16,   -16,   -16,   -16,   -16,   -16,   -13,
+     -16,   -15
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
@@ -353,24 +353,18 @@ static const signed char yydefgoto[] =
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
      positive, shift that token.  If negative, reduce the rule whose
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const signed char yytable[] =
+static const unsigned char yytable[] =
 {
-      23,   -20,    10,     1,    20,     6,     2,    -5,     3,     7,
-      11,    24,    25,    21,   -22,   -22,    31,    16,    15,    28,
-      -8,    -8,    17,    14,   -17,   -17,   -13,   -13,   -10,   -10,
-      -9,    -9,    -7,    -7,    27,    -6,   -15,   -15,   -14,   -14,
-     -12,   -12,    27,   -11,   -16,   -16,   -21,   -21,    27,    32,
-      -3,    -4,   -18,    -2,   -19,    30
+      23,    20,     1,    10,    16,     2,    14,     3,     6,    17,
+      21,    11,     7,    30,     0,    27,    31,    24,    25,    27,
+      32,    15,    28
 };
 
-static const unsigned char yycheck[] =
+static const signed char yycheck[] =
 {
-      13,     0,     0,     0,     0,     0,     3,     7,     5,     4,
-       8,    10,    11,     9,     6,     7,    29,     0,     7,    11,
-       6,     7,     5,     0,     6,     7,     6,     7,     6,     7,
-       6,     7,     6,     7,     6,     7,     6,     7,     6,     7,
-       6,     7,     6,     7,     6,     7,     6,     7,     6,     7,
-       7,     7,     0,     0,     0,    28
+      13,     0,     0,     0,     0,     3,     0,     5,     0,     5,
+       9,     8,     4,    28,    -1,     6,    29,    10,    11,     6,
+       7,     7,    11
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -433,10 +427,7 @@ static const unsigned char yyconflp[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0
+       0,     0,     0
 };
 
 /* YYCONFL[I] -- lists of conflicting rule numbers, each terminated by
@@ -563,7 +554,7 @@ yy_location_print_ (FILE *yyo, YYLTYPE const * const yylocp)
 `----------------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   FILE *yyo = yyoutput;
   YYUSE (yyo);
@@ -712,7 +703,7 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
 `--------------------------------*/
 
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   YYFPRINTF (yyoutput, "%s %s (",
              yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
@@ -963,7 +954,7 @@ static void yyexpandGLRStack (yyGLRStack* yystackp);
 #endif
 
 static _Noreturn void
-yyFail (yyGLRStack* yystackp, YYLTYPE *yylocp, HTTP_ParserDriver* driver, yyscan_t yyscanner, const char* yymsg)
+yyFail (yyGLRStack* yystackp, YYLTYPE *yylocp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner, const char* yymsg)
 {
   if (yymsg != YY_NULLPTR)
     yyerror (yylocp, driver, yyscanner, yymsg);
@@ -1038,7 +1029,7 @@ yyfill (yyGLRStackItem *yyvsp, int *yylow, int yylow1, yybool yynormal)
 static YYRESULTTAG
 yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
               yyGLRStack* yystackp,
-              YYSTYPE* yyvalp, YYLTYPE *yylocp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+              YYSTYPE* yyvalp, YYLTYPE *yylocp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   yybool yynormal YY_ATTRIBUTE_UNUSED = (yystackp->yysplitPoint == YY_NULLPTR);
   int yylow;
@@ -1085,7 +1076,7 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
   case 3:
 
     { ((*yyvalp).ival) = (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).size () + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival) + 1;
-                                                       driver->record_->method =
+                                                       driver->record ()->method =
                                                          HTTP_Tools::Method2Type (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval));
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set method: \"%s\"\n"),
@@ -1119,7 +1110,7 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
                                                          ACE_ASSERT (match_results.ready () && !match_results.empty ());
                                                          ACE_ASSERT (match_results[1].matched);
 
-                                                         driver->record_->version =
+                                                         driver->record ()->version =
                                                              HTTP_Tools::Version2Type (match_results[1].str ());
 //                                                         ACE_DEBUG ((LM_DEBUG,
 //                                                                     ACE_TEXT ("set version: \"%s\"\n"),
@@ -1145,7 +1136,7 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
   case 7:
 
     { ((*yyvalp).ival) = (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval)).size () + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival) + 1;
-                                                       driver->record_->URI = *(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval);
+                                                       driver->record ()->URI = *(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set URI: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));
@@ -1163,7 +1154,7 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
   case 9:
 
     { ((*yyvalp).ival) = (*(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)).size () + 2;
-                                                       driver->record_->version =
+                                                       driver->record ()->version =
                                                          HTTP_Tools::Version2Type (*(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval));
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set version: \"%s\"\n"),
@@ -1192,7 +1183,7 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
                                                        converter.str (*(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval));
                                                        int status;
                                                        converter >> status;
-                                                       driver->record_->status =
+                                                       driver->record ()->status =
                                                            static_cast<HTTP_Status_t> (status);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set status: %d\n"),
@@ -1211,7 +1202,7 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
   case 14:
 
     { ((*yyvalp).ival) = (*(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)).size () + 2;
-                                                       driver->record_->reason = *(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval);
+                                                       driver->record ()->reason = *(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set reason: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));
@@ -1249,9 +1240,11 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
                                                        ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
                                                        ACE_ASSERT (match_results[1].matched);
+                                                       HTTP_Record* record_p = driver->record ();
+                                                       ACE_ASSERT (record_p);
                                                        HTTP_HeadersIterator_t iterator =
-                                                         driver->record_->headers.find (match_results[1]);
-                                                       if (iterator != driver->record_->headers.end ())
+                                                         record_p->headers.find (match_results[1]);
+                                                       if (iterator != record_p->headers.end ())
                                                        {
                                                          ACE_DEBUG ((LM_WARNING,
                                                                      ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
@@ -1259,7 +1252,7 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
                                                        } // end IF
                                                        ACE_ASSERT (match_results[2].matched);
                                                        ACE_ASSERT (!match_results[2].str ().empty ());
-                                                       driver->record_->headers[match_results[1]] =
+                                                       record_p->headers[match_results[1]] =
                                                          match_results[2];
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set header: \"%s\" to \"%s\"\n"),
@@ -1344,7 +1337,7 @@ yyuserMerge (int yyn, YYSTYPE* yy0, YYSTYPE* yy1)
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   YYUSE (yyvaluep);
   YYUSE (yylocationp);
@@ -1498,7 +1491,7 @@ yyrhsLength (yyRuleNum yyrule)
 }
 
 static void
-yydestroyGLRState (char const *yymsg, yyGLRState *yys, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+yydestroyGLRState (char const *yymsg, yyGLRState *yys, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   if (yys->yyresolved)
     yydestruct (yymsg, yystos[yys->yylrState],
@@ -1537,7 +1530,7 @@ yylhsNonterm (yyRuleNum yyrule)
 }
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-14)))
+  (!!((Yystate) == (-16)))
 
 /** True iff LR state YYSTATE has only a default reduction (regardless
  *  of token).  */
@@ -1905,7 +1898,7 @@ do {                                    \
 
 static inline void
 yy_reduce_print (int yynormal, yyGLRStackItem* yyvsp, size_t yyk,
-                 yyRuleNum yyrule, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+                 yyRuleNum yyrule, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   int yynrhs = yyrhsLength (yyrule);
   int yylow = 1;
@@ -1938,7 +1931,7 @@ yy_reduce_print (int yynormal, yyGLRStackItem* yyvsp, size_t yyk,
  *  for userAction.  */
 static inline YYRESULTTAG
 yydoAction (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
-            YYSTYPE* yyvalp, YYLTYPE *yylocp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+            YYSTYPE* yyvalp, YYLTYPE *yylocp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   int yynrhs = yyrhsLength (yyrule);
 
@@ -1990,7 +1983,7 @@ yydoAction (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
  */
 static inline YYRESULTTAG
 yyglrReduce (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
-             yybool yyforceEval, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+             yybool yyforceEval, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   size_t yyposn = yystackp->yytops.yystates[yyk]->yyposn;
 
@@ -2200,7 +2193,7 @@ yypreference (yySemanticOption* y0, yySemanticOption* y1)
 }
 
 static YYRESULTTAG yyresolveValue (yyGLRState* yys,
-                                   yyGLRStack* yystackp, HTTP_ParserDriver* driver, yyscan_t yyscanner);
+                                   yyGLRStack* yystackp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner);
 
 
 /** Resolve the previous YYN states starting at and including state YYS
@@ -2210,7 +2203,7 @@ static YYRESULTTAG yyresolveValue (yyGLRState* yys,
  *  data so that yydestroyGLRState can be invoked if necessary.  */
 static YYRESULTTAG
 yyresolveStates (yyGLRState* yys, int yyn,
-                 yyGLRStack* yystackp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+                 yyGLRStack* yystackp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   if (0 < yyn)
     {
@@ -2229,7 +2222,7 @@ yyresolveStates (yyGLRState* yys, int yyn,
  *  semantic values if invoked).  */
 static YYRESULTTAG
 yyresolveAction (yySemanticOption* yyopt, yyGLRStack* yystackp,
-                 YYSTYPE* yyvalp, YYLTYPE *yylocp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+                 YYSTYPE* yyvalp, YYLTYPE *yylocp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   yyGLRStackItem yyrhsVals[YYMAXRHS + YYMAXLEFT + 1];
   int yynrhs = yyrhsLength (yyopt->yyrule);
@@ -2314,7 +2307,7 @@ yyreportTree (yySemanticOption* yyx, int yyindent)
 
 static YYRESULTTAG
 yyreportAmbiguity (yySemanticOption* yyx0,
-                   yySemanticOption* yyx1, YYLTYPE *yylocp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+                   yySemanticOption* yyx1, YYLTYPE *yylocp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   YYUSE (yyx0);
   YYUSE (yyx1);
@@ -2337,7 +2330,7 @@ yyreportAmbiguity (yySemanticOption* yyx0,
  *  The first semantic option of a state is always chosen.  */
 static void
 yyresolveLocations (yyGLRState* yys1, int yyn1,
-                    yyGLRStack *yystackp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+                    yyGLRStack *yystackp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   if (0 < yyn1)
     {
@@ -2396,7 +2389,7 @@ yyresolveLocations (yyGLRState* yys1, int yyn1,
  *  result = yyok, YYS has been left with consistent data so that
  *  yydestroyGLRState can be invoked if necessary.  */
 static YYRESULTTAG
-yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   yySemanticOption* yyoptionList = yys->yysemantics.yyfirstVal;
   yySemanticOption* yybest = yyoptionList;
@@ -2480,7 +2473,7 @@ yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, HTTP_ParserDriver* driver
 }
 
 static YYRESULTTAG
-yyresolveStack (yyGLRStack* yystackp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+yyresolveStack (yyGLRStack* yystackp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   if (yystackp->yysplitPoint != YY_NULLPTR)
     {
@@ -2529,7 +2522,7 @@ yycompressStack (yyGLRStack* yystackp)
 
 static YYRESULTTAG
 yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
-                   size_t yyposn, YYLTYPE *yylocp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+                   size_t yyposn, YYLTYPE *yylocp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   while (yystackp->yytops.yystates[yyk] != YY_NULLPTR)
     {
@@ -2644,7 +2637,7 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
 }
 
 static void
-yyreportSyntaxError (yyGLRStack* yystackp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+yyreportSyntaxError (yyGLRStack* yystackp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   if (yystackp->yyerrState != 0)
     return;
@@ -2781,7 +2774,7 @@ yyreportSyntaxError (yyGLRStack* yystackp, HTTP_ParserDriver* driver, yyscan_t y
    yylval, and yylloc are the syntactic category, semantic value, and location
    of the lookahead.  */
 static void
-yyrecoverSyntaxError (yyGLRStack* yystackp, HTTP_ParserDriver* driver, yyscan_t yyscanner)
+yyrecoverSyntaxError (yyGLRStack* yystackp, Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   size_t yyk;
   int yyj;
@@ -2900,7 +2893,7 @@ yyrecoverSyntaxError (yyGLRStack* yystackp, HTTP_ParserDriver* driver, yyscan_t 
 `----------*/
 
 int
-yyparse (HTTP_ParserDriver* driver, yyscan_t yyscanner)
+yyparse (Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner)
 {
   int yyresult;
   yyGLRStack yystack;
@@ -3249,7 +3242,7 @@ yy::HTTP_Parser::set (yyscan_t context_in)
 
 void
 yyerror (YYLTYPE* location_in,
-         HTTP_ParserDriver* driver_in,
+         Net_IParser<HTTP_Record>* driver_in,
          yyscan_t context_in,
          const char* message_in)
 {

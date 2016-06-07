@@ -73,19 +73,19 @@ class HTTP_Module_Parser_T
   // helper methods
   ProtocolMessageType* allocateMessage (unsigned int); // requested size
 
-  Stream_IAllocator*   allocator_;
+  Stream_IAllocator*                    allocator_;
 
   // driver
-  bool                 debugScanner_;
-  bool                 debugParser_;
-  HTTP_ParserDriver    driver_;
-  bool                 finished_;
-  ProtocolMessageType* headFragment_;
-  bool                 isDriverInitialized_;
+  bool                                  debugScanner_;
+  bool                                  debugParser_;
+  HTTP_ParserDriver<SessionMessageType> driver_;
+  //bool                                  finished_;
+  ProtocolMessageType*                  headFragment_;
+  bool                                  isDriverInitialized_;
 
-  bool                 crunchMessages_;
-  DATA_CONTAINER_T*    dataContainer_;
-  bool                 initialized_;
+  bool                                  crunchMessages_;
+  DATA_CONTAINER_T*                     dataContainer_;
+  bool                                  initialized_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,15 +184,15 @@ class HTTP_Module_ParserH_T
   //ProtocolMessageType* allocateMessage (unsigned int); // requested size
 
   // driver
-  bool                 debugScanner_;
-  bool                 debugParser_;
-  HTTP_ParserDriver    driver_;
-  bool                 finished_;
-  ProtocolMessageType* headFragment_;
-  bool                 isDriverInitialized_;
+  bool                                  debugScanner_;
+  bool                                  debugParser_;
+  HTTP_ParserDriver<SessionMessageType> driver_;
+  //bool                                  finished_;
+  ProtocolMessageType*                  headFragment_;
+  bool                                  isDriverInitialized_;
 
-  bool                 crunchMessages_;
-  DATA_CONTAINER_T*    dataContainer_;
+  bool                                  crunchMessages_;
+  DATA_CONTAINER_T*                     dataContainer_;
 };
 
 // include template implementation

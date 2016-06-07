@@ -86,6 +86,9 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/net)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
+
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/file)

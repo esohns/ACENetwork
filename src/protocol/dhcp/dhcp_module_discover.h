@@ -57,8 +57,8 @@ class DHCP_Module_Discover_T
                                      bool&);               // return value: pass message downstream ?
 
  protected:
-  ConfigurationType*                           configuration_;
-  typename SessionMessageType::SESSION_DATA_T* sessionData_;
+  ConfigurationType*                   configuration_;
+  typename SessionMessageType::DATA_T* sessionData_;
 
  private:
   typedef Stream_TaskBaseAsynch_T<TimePolicyType,
@@ -73,11 +73,11 @@ class DHCP_Module_Discover_T
   ACE_HANDLE connect (const ACE_INET_Addr&, // peer address
                       bool&);               // reuturn value: use reactor ?
 
-  ACE_HANDLE                                   broadcastConnectionHandle_;
-  ACE_HANDLE                                   connectionHandle_; // unicast
-  bool                                         initialized_;
-  bool                                         isSessionConnection_;
-  bool                                         sendRequestOnOffer_;
+  ACE_HANDLE                           broadcastConnectionHandle_;
+  ACE_HANDLE                           connectionHandle_; // unicast
+  bool                                 initialized_;
+  bool                                 isSessionConnection_;
+  bool                                 sendRequestOnOffer_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

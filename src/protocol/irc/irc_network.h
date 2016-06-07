@@ -23,6 +23,7 @@
 
 #include <string>
 
+#include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
@@ -49,7 +50,8 @@
 
 /////////////////////////////////////////
 
-typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<IRC_SocketHandlerConfiguration>,
+typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<IRC_SocketHandlerConfiguration,
+                                                         ACE_SOCK_STREAM>,
                                   ///////
                                   ACE_INET_Addr,
                                   IRC_Configuration,

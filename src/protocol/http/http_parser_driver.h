@@ -26,6 +26,8 @@
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
 
+#include "net_iparser.h"
+
 #include "location.hh"
 
 #include "http_defines.h"
@@ -40,7 +42,9 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 struct YYLTYPE;
 
-class HTTP_Export HTTP_ParserDriver
+template <typename SessionMessageType>
+class HTTP_ParserDriver
+ : public Net_IParser<HTTP_Record>
 {
   friend class HTTP_Scanner;
 
@@ -56,21 +60,30 @@ class HTTP_Export HTTP_ParserDriver
                    ACE_Message_Queue_Base* = NULL,          // data buffer queue (yywrap)
                    bool = HTTP_DEFAULT_USE_YY_SCAN_BUFFER); // yy_scan_buffer() ? : yy_scan_bytes()
 
+  // implement Net_IParser
+  inline virtual ACE_Message_Block* buffer () { return fragment_; };
+  inline virtual HTTP_Record* record () { return record_; };
+  virtual bool debugScanner () const;
+  virtual void error (const YYLTYPE&,      // location
+                      const std::string&); // message
+  inline virtual void finished () { finished_ = true; };
+  inline virtual bool hasFinished () const { return finished_; };
+  inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
+  inline virtual unsigned int offset () const { return offset_; };
+  virtual bool switchBuffer ();
+  virtual void wait ();
+  virtual void dump_state () const;
+
   bool parse (ACE_Message_Block*); // data
 
   // error handling
   void error (const yy::location&, // location
               const std::string&); // message
   void error (const std::string&); // message
-  void error (const YYLTYPE&,      // location
-              const std::string&); // message
 
   // *NOTE*: to be invoked by the scanner (ONLY !)
-  bool switchBuffer ();
-  bool getDebugScanner () const;
-  void wait ();
 
-  // *NOTE*: current (unscanned) data fragment
+ protected:
   bool                    finished_; // processed the whole entity ?
   ACE_Message_Block*      fragment_;
   unsigned int            offset_; // parsed entity bytes
@@ -104,5 +117,7 @@ class HTTP_Export HTTP_ParserDriver
 
   bool                    initialized_;
 };
+
+#include "http_parser_driver.inl"
 
 #endif

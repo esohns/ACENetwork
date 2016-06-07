@@ -77,10 +77,12 @@ add_definitions (-DHAVE_CONFIG_H)
 
 if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src)
 else ()
  include_directories ($ENV{ACE_ROOT})
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
 endif ()
@@ -115,6 +117,7 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_iconnectionmanager.h
      net_iconnector.h
      net_ilistener.h
+     net_iparser.h
      net_ipconnection.cpp
      net_ipconnection.h
      net_itransportlayer.h
@@ -219,6 +222,7 @@ install (FILES
          net_iconnectionmanager.h
          net_iconnector.h
          net_ilistener.h
+         net_iparser.h
          net_ipconnection.h
          net_itransportlayer.h
          net_macros.h

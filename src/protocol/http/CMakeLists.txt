@@ -51,6 +51,7 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_parser.h
      http_parser_driver.cpp
      http_parser_driver.h
+     http_parser_driver.inl
      http_scanner.cpp
      http_scanner.h
      http_message.cpp
@@ -76,6 +77,9 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_tools.h
      stdafx.cpp
      stdafx.h)
+set (${PROJECT_NAME}_Protocol_HTTP_SCRIPTS
+     scripts/scanner.l
+     scripts/parser.y)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS -DHTTP_BUILD_DLL)
@@ -83,9 +87,12 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
 # *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
  set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ source_group (scripts FILES ${PROJECT_NAME}_Protocol_HTTP_SCRIPTS)
 endif ()
 
-add_library (${PROJECT_NAME}_Protocol_HTTP SHARED ${ACENetwork_Protocol_HTTP_SRCS})
+add_library (${PROJECT_NAME}_Protocol_HTTP SHARED
+             ${ACENetwork_Protocol_HTTP_SRCS}
+             ${ACENetwork_Protocol_HTTP_SCRIPTS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${PROJECT_NAME}_Protocol_HTTP Common)
@@ -116,6 +123,7 @@ install (FILES
          http_message.h
          http_parser.h
          http_parser_driver.h
+         http_parser_driver.inl
          http_scanner.h
          http_message.h
          http_message.inl

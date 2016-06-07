@@ -38,5 +38,3 @@ using namespace std;
 
 // Local Header Files
 #include "net_macros.h"
-
-using namespace std;

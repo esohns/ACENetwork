@@ -11,20 +11,30 @@
 # sanity check(s)
 command -v dirname >/dev/null 2>&1 || { echo "dirname is not installed, aborting" >&2; exit 1; }
 command -v bison >/dev/null 2>&1 || { echo "bison is not installed, aborting" >&2; exit 1; }
-command -v dot >/dev/null 2>&1 || { echo "graphviz is not installed, aborting" >&2; exit 1; }
+#command -v dot >/dev/null 2>&1 || { echo "graphviz is not installed, aborting" >&2; exit 1; }
+HAS_GRAPHVIZ=0
+$(command -v dot) >/dev/null 2>&1
+if [ $? -eq 0 ]; then
+ HAS_GRAPHVIZ=1
+else
+ echo "graphviz is not installed, continuing" >&2
+fi
 
 PROJECT_ROOT=$(dirname $0)/../../../..
 SCRIPTS_DIRECTORY=${PROJECT_ROOT}/src/protocol/http/scripts
 
 SOURCE_FILE=${SCRIPTS_DIRECTORY}/parser.y
 [ ! -f ${SOURCE_FILE} ] && echo "ERROR: file ${SOURCE_FILE} not found, aborting" && exit 1
-bison --feature=caret --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${SOURCE_FILE}
+bison --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${SOURCE_FILE}
+#bison --feature=caret --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${SOURCE_FILE}
 [ $? -ne 0 ] && echo "ERROR: \"${SOURCE_FILE}\" failed (status was: $?), aborting" && exit 1
 DOT_FILE=${SCRIPTS_DIRECTORY}/http_parser.dot
 [ ! -f ${DOT_FILE} ] && echo "ERROR: file ${DOT_FILE} not found, aborting" && exit 1
 IMAGE_FILE=http_parser.png
-dot -Tpng ${DOT_FILE} >${IMAGE_FILE}
-[ $? -ne 0 ] && echo "ERROR: \"${DOT_FILE}\" failed (status was: $?), aborting" && exit 1
+if [ ${HAS_GRAPHVIZ} -ne 0 ]; then
+ dot -Tpng ${DOT_FILE} >${IMAGE_FILE}
+ [ $? -ne 0 ] && echo "ERROR: \"${DOT_FILE}\" failed (status was: $?), aborting" && exit 1
+fi
 # *TODO*: xsltproc /usr/local/share/bison/xslt/xml2xhtml.xsl gr.xml >gr.html
 
 # move generated file(s) into the project directory

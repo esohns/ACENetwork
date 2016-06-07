@@ -1,9 +1,20 @@
 cmake_minimum_required (VERSION 2.8)
 
+include (FindPkgConfig)
+#pkg_check_modules (PKGACE REQUIRED ACE)
 if (UNIX)
+ pkg_check_modules (PKG_SSL REQUIRED libssl)
+endif ()
+# *TODO*: repair WIN32 pkgconfig support
+
+if (UNIX)
+ include_directories (${PKG_SSL_INCLUDE_DIRS})
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
 else ()
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
 endif ()
@@ -18,6 +29,9 @@ set (${PROJECT_NAME}_Client_LIB_SRCS
      net_client_connector.cpp
      net_client_connector.h
      net_client_connector.inl
+     net_client_ssl_connector.cpp
+     net_client_ssl_connector.h
+     net_client_ssl_connector.inl
      net_client_defines.h
      net_client_exports.h
      stdafx.cpp

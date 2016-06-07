@@ -40,7 +40,6 @@ HTTP_Module_Parser_T<TimePolicyType,
  , debugParser_ (HTTP_DEFAULT_YACC_TRACE) // trace parsing ?
  , driver_ (HTTP_DEFAULT_LEX_TRACE,  // trace scanning ?
             HTTP_DEFAULT_YACC_TRACE) // trace parsing ?
- , finished_ (false)
  , headFragment_ (NULL)
  , isDriverInitialized_ (false)
  , crunchMessages_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
@@ -100,7 +99,6 @@ HTTP_Module_Parser_T<TimePolicyType,
     allocator_ = NULL;
     debugScanner_ = HTTP_DEFAULT_LEX_TRACE;
     debugParser_ = HTTP_DEFAULT_YACC_TRACE;
-    finished_ = false;
     if (headFragment_)
     {
       headFragment_->release ();
@@ -181,7 +179,7 @@ HTTP_Module_Parser_T<TimePolicyType,
   ProtocolMessageType* message_p = message_inout;
   HTTP_Record* record_p = NULL;
 
-  if (finished_)
+  if (driver_.hasFinished ())
   {
     ACE_ASSERT (dataContainer_);
     dataContainer_->increase ();
@@ -313,9 +311,8 @@ HTTP_Module_Parser_T<TimePolicyType,
   // *NOTE*: the (chained) fragment has been parsed, the read pointer has been
   //         advanced to the entity body
   //         --> pass message (and following) downstream
-  finished_ = true;
-  ACE_ASSERT (driver_.record_);
-//  driver_.record_->dump_state ();
+  //ACE_ASSERT (driver_.record ());
+  //driver_.record ()->dump_state ();
 
   // make sure the chain references the same data
   message_p = dynamic_cast<ProtocolMessageType*> (headFragment_->cont ());
@@ -482,7 +479,6 @@ HTTP_Module_ParserH_T<LockType,
  , debugParser_ (HTTP_DEFAULT_YACC_TRACE) // trace parsing ?
  , driver_ (HTTP_DEFAULT_LEX_TRACE,  // trace scanning ?
             HTTP_DEFAULT_YACC_TRACE) // trace parsing ?
- , finished_ (false)
  , headFragment_ (NULL)
  , isDriverInitialized_ (false)
  , crunchMessages_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
@@ -558,7 +554,6 @@ HTTP_Module_ParserH_T<LockType,
 
     debugScanner_ = HTTP_DEFAULT_LEX_TRACE;
     debugParser_ = HTTP_DEFAULT_YACC_TRACE;
-    finished_ = false;
     if (headFragment_)
     {
       headFragment_->release ();
@@ -655,8 +650,7 @@ HTTP_Module_ParserH_T<LockType,
   ProtocolMessageType* message_p = message_inout;
   HTTP_Record* record_p = NULL;
 
-  // sanity check(s)
-  if (finished_)
+  if (driver_.hasFinished ())
   {
     ACE_ASSERT (dataContainer_);
     dataContainer_->increase ();
@@ -788,9 +782,8 @@ HTTP_Module_ParserH_T<LockType,
   // *NOTE*: the (chained) fragment has been parsed, the read pointer has been
   //         advanced to the entity body
   //         --> pass message (and following) downstream
-  finished_ = true;
-  ACE_ASSERT (driver_.record_);
-//  driver_.record_->dump_state ();
+  //ACE_ASSERT (driver_.record ());
+//  driver_.record ()->dump_state ();
 
   // make sure the chain references the same data
   message_p = dynamic_cast<ProtocolMessageType*> (headFragment_->cont ());

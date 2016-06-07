@@ -20,38 +20,41 @@
 /* %define api.location.type         {} */
 /* %define namespace                 {yy} */
 /* %define api.namespace             {yy} */
-/* %name-prefix                      "yy" */
-%define api.prefix                {yy}
-/* %pure-parser */
-%define api.pure                  true
+%name-prefix                      "yy"
+/* %define api.prefix                {yy} */
+%pure-parser
+/* %define api.pure                  true */
 /* *TODO*: implement a push parser */
 /* %define api.push-pull             push */
 /* %define api.token.constructor */
-%define api.token.prefix          {}
+/* %define api.token.prefix          {} */
 /* %define api.value.type            variant */
 /* %define api.value.union.name      YYSTYPE */
 /* %define lr.default-reduction      most */
-%define lr.default-reduction      accepting
-%define lr.keep-unreachable-state false
-%define lr.type                   lalr
+/* %define lr.default-reduction      accepting */
+/* %define lr.keep-unreachable-state false */
+/* %define lr.type                   lalr */
 
 /* %define parse.assert              {true} */
-/* %error-verbose */
-%define parse.error               verbose
+%error-verbose
+/* %define parse.error               verbose */
 /* %define parse.lac                 {full} */
 /* %define parse.lac                 {none} */
 /* %define parser_class_name         {HTTP_Parser} */
 /* *NOTE*: enabling debugging functionality implies inclusion of <iostream> (see
            below). This interferes with ACE (version 6.2.3), when compiled with
            support for traditional iostreams */
-/* %debug */
-%define parse.trace               {true}
+%debug
+/* %define parse.trace               {true} */
 
 %code requires {
+#ifndef HTTP_PARSER_H
+#define HTTP_PARSER_H
+
 #include <cstdio>
 #include <string>
 
-enum yytokentype
+/* enum yytokentype
 {
   END = 0,
   METHOD = 258,
@@ -63,28 +66,39 @@ enum yytokentype
   REASON = 264,
   BODY = 265,
   CHUNK = 266
-};
-#define YYTOKENTYPE
-//enum yytokentype;
-class HTTP_ParserDriver;
+}; */
+//#define YYTOKENTYPE
+#undef YYTOKENTYPE
+/* enum yytokentype; */
+template <typename RecordType>
+class Net_IParser;
+struct HTTP_Record;
 //class HTTP_Scanner;
-struct YYLTYPE;
-union YYSTYPE;
+//struct YYLTYPE;
+
+/* #define YYSTYPE
+typedef union YYSTYPE
+{
+  int          ival;
+  std::string* sval;
+} YYSTYPE; */
+#undef YYSTYPE
+//union YYSTYPE;
 
 typedef void* yyscan_t;
 
 //#define YYERROR_VERBOSE
-extern void yyerror (YYLTYPE*, HTTP_ParserDriver*, yyscan_t, const char*);
-extern void yyprint (FILE*, yytokentype, YYSTYPE);
 }
 
 // calling conventions / parameter passing
-/* %parse-param              { HTTP_ParserDriver* driver }
+%parse-param              { Net_IParser<HTTP_Record>* driver }
 %parse-param              { yyscan_t yyscanner }
-%lex-param                { YYSTYPE* yylval }
+/*%lex-param                { YYSTYPE* yylval }
 %lex-param                { YYLTYPE* yylloc } */
-%param                    { HTTP_ParserDriver* driver }
-%param                    { yyscan_t yyscanner }
+%lex-param                { Net_IParser<HTTP_Record>* driver }
+%lex-param                { yyscan_t yyscanner }
+/* %param                    { Net_IParser* driver }
+%param                    { yyscan_t yyscanner } */
 
 %initial-action
 {
@@ -96,14 +110,15 @@ extern void yyprint (FILE*, yytokentype, YYSTYPE);
   // initialize the token value container
   $$.ival = 0;
   $$.sval = NULL;
-};
+}
 
 // symbols
 %union
 {
   int          ival;
   std::string* sval;
-};
+}
+
 /* %token <int>         INTEGER;
 %token <std::string> STRING; */
 
@@ -139,7 +154,7 @@ using namespace std;
 // *TODO*: this shouldn't be necessary
 #define yylex HTTP_Scanner_lex
 
-#define YYPRINT(file, type, value) yyprint (file, type, value)
+//#define YYPRINT(file, type, value) yyprint (file, type, value)
 }
 
 %token <sval> METHOD      "method"
@@ -165,6 +180,14 @@ using namespace std;
 %type  <ival> request_line_rest1 request_line_rest2
 %type  <ival> status_line_rest1 status_line_rest2
 
+%code provides {
+void yyerror (YYLTYPE*, Net_IParser<HTTP_Record>*, yyscan_t, const char*);
+int yyparse (Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner);
+void yyprint (FILE*, yytokentype, YYSTYPE);
+
+#endif // HTTP_PARSER_H
+}
+
 /* %printer                  { yyoutput << $$; } <*>; */
 /* %printer                  { yyoutput << *$$; } <sval>
 %printer                  { debug_stream () << $$; }  <ival> */
@@ -180,7 +203,7 @@ using namespace std;
 
 message:            head "delimiter" body            { $$ = $1 + $2 + $3; };
 head:               "method" head_rest1              { $$ = (*$1).size () + $2 + 1;
-                                                       driver->record_->method =
+                                                       driver->record ()->method =
                                                          HTTP_Tools::Method2Type (*$1);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set method: \"%s\"\n"),
@@ -209,7 +232,7 @@ head:               "method" head_rest1              { $$ = (*$1).size () + $2 +
                                                          ACE_ASSERT (match_results.ready () && !match_results.empty ());
                                                          ACE_ASSERT (match_results[1].matched);
 
-                                                         driver->record_->version =
+                                                         driver->record ()->version =
                                                              HTTP_Tools::Version2Type (match_results[1].str ());
 //                                                         ACE_DEBUG ((LM_DEBUG,
 //                                                                     ACE_TEXT ("set version: \"%s\"\n"),
@@ -220,7 +243,7 @@ head:               "method" head_rest1              { $$ = (*$1).size () + $2 +
                                                        yyclearin; };
 head_rest1:         request_line_rest1 headers       { $$ = $1 + $2; };
 request_line_rest1: "uri" request_line_rest2         { $$ = (*$1).size () + $2 + 1;
-                                                       driver->record_->URI = *$1;
+                                                       driver->record ()->URI = *$1;
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set URI: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));
@@ -228,7 +251,7 @@ request_line_rest1: "uri" request_line_rest2         { $$ = (*$1).size () + $2 +
                     | "end_of_fragment"              { $$ = $1;
                                                        yyclearin; };
 request_line_rest2: "version"                        { $$ = (*$1).size () + 2;
-                                                       driver->record_->version =
+                                                       driver->record ()->version =
                                                          HTTP_Tools::Version2Type (*$1);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set version: \"%s\"\n"),
@@ -242,7 +265,7 @@ status_line_rest1:  "status" status_line_rest2       { $$ = (*$1).size () + $2 +
                                                        converter.str (*$1);
                                                        int status;
                                                        converter >> status;
-                                                       driver->record_->status =
+                                                       driver->record ()->status =
                                                            static_cast<HTTP_Status_t> (status);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set status: %d\n"),
@@ -251,7 +274,7 @@ status_line_rest1:  "status" status_line_rest2       { $$ = (*$1).size () + $2 +
                     | "end_of_fragment"              { $$ = $1;
                                                        yyclearin; };
 status_line_rest2:  "reason"                         { $$ = (*$1).size () + 2;
-                                                       driver->record_->reason = *$1;
+                                                       driver->record ()->reason = *$1;
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set reason: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));
@@ -279,9 +302,11 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                                                        ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
                                                        ACE_ASSERT (match_results[1].matched);
+                                                       HTTP_Record* record_p = driver->record ();
+                                                       ACE_ASSERT (record_p);
                                                        HTTP_HeadersIterator_t iterator =
-                                                         driver->record_->headers.find (match_results[1]);
-                                                       if (iterator != driver->record_->headers.end ())
+                                                         record_p->headers.find (match_results[1]);
+                                                       if (iterator != record_p->headers.end ())
                                                        {
                                                          ACE_DEBUG ((LM_WARNING,
                                                                      ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
@@ -289,22 +314,26 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                                                        } // end IF
                                                        ACE_ASSERT (match_results[2].matched);
                                                        ACE_ASSERT (!match_results[2].str ().empty ());
-                                                       driver->record_->headers[match_results[1]] =
+                                                       record_p->headers[match_results[1]] =
                                                          match_results[2];
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set header: \"%s\" to \"%s\"\n"),
 //                                                                   ACE_TEXT (match_results[1].str ().c_str ()),
 //                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
                                                      };
-                    | %empty                         { $$ = 0; };
+                    |                                { $$ = 0; };
+//                    | %empty                         { $$ = 0; };
 body:               "body"                           { $$ = $1;
                                                        YYACCEPT; }; // *NOTE*: any following (entity) fragments will not be parsed
                     | "chunk" chunks headers "delimiter" { $$ = $1 + $2 + $3 + $4; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
                                                        YYACCEPT; };
-                    | %empty                         { $$ = 0;
-                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
+                    |                                { $$ = 0;
+                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk 
+//                    | %empty                         { $$ = 0;
+//                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
 chunks:             "chunk" chunks                   { $$ = $1 + $2; };
-                    | %empty                         { $$ = 0; };
+                    |                                { $$ = 0; };
+//                    | %empty                         { $$ = 0; };
 %%
 
 /* void
@@ -326,7 +355,7 @@ yy::HTTP_Parser::set (yyscan_t context_in)
 
 void
 yyerror (YYLTYPE* location_in,
-         HTTP_ParserDriver* driver_in,
+         Net_IParser<HTTP_Record>* driver_in,
          yyscan_t context_in,
          const char* message_in)
 {
