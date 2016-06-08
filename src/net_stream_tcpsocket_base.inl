@@ -677,9 +677,9 @@ Net_StreamTCPSocketBase_T<HandlerType,
   //                             NULL,                // timeout
   //                             &bytes_transferred); // bytes transferred
   bytes_sent =
-    inherited::peer_.send_n (currentWriteBuffer_->rd_ptr (), // buffer
-                             currentWriteBuffer_->length (), // bytes to send
-                             0);                             // flags
+    inherited::peer_.send_n (currentWriteBuffer_->rd_ptr (),                    // buffer
+                             static_cast<int> (currentWriteBuffer_->length ()), // bytes to send
+                             (int)0);                                           // flags
   switch (bytes_sent)
   {
     case -1:

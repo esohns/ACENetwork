@@ -38,13 +38,14 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
 
 ########### next target ###############
 set (${PROJECT_NAME}_Protocol_DHCP_SRCS
+#     dhcp_bisector.cpp
+#     dhcp_bisector.h
      dhcp_common.h
      dhcp_common_modules.h
      dhcp_configuration.h
-     dhcp_defines.h
      dhcp_codes.h
-#     dhcp_bisector.cpp
-#     dhcp_bisector.h
+     dhcp_defines.h
+     dhcp_exports.h
      dhcp_message.cpp
      dhcp_message.h
      dhcp_parser.cpp
@@ -84,7 +85,7 @@ set (${PROJECT_NAME}_Protocol_DCHP_SCRIPTS
      scripts/parser.y)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_dhcp_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
-#set_source_files_properties (${PROJECT_NAME}_Protocol_dhcp_SRCS PROPERTIES COMPILE_DEFINITIONS -Ddhcp_BUILD_DLL)
+#set_source_files_properties (${PROJECT_NAME}_Protocol_dhcp_SRCS PROPERTIES COMPILE_DEFINITIONS -DDHCP_BUILD_DLL)
 
 # *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
@@ -117,12 +118,13 @@ export (TARGETS ${PROJECT_NAME}_Protocol_DHCP
 
 ############### install files ################
 install (FILES
+         dhcp_bisector.h
+         dhcp_codes.h
          dhcp_common.h
          dhcp_common_modules.h
          dhcp_configuration.h
          dhcp_defines.h
-         dhcp_codes.h
-         dhcp_bisector.h
+         dhcp_exports.h
          dhcp_message.h
          dhcp_parser.h
          dhcp_parser_driver.h

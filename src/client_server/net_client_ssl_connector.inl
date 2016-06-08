@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include "ace/Log_Msg.h"
-#include "ace/SSL/SSL_SOCK_Connector.h"
 
 #include "common_defines.h"
 
@@ -44,13 +43,8 @@ Net_Client_SSL_Connector_T<HandlerType,
                            HandlerConfigurationType,
                            UserDataType>::Net_Client_SSL_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                                       const ACE_Time_Value& statisticCollectionInterval_in)
- : inherited (ACE_Reactor::instance (), // default reactor
-              // *IMPORTANT NOTE*: ACE_NONBLOCK is only set if timeout != NULL
-              //                   (see: SOCK_Connector.cpp:94), set via the
-              //                   "synch options" (see line 200 below)
-              ACE_NONBLOCK)             // flags: non-blocking I/O
-              //0)                       // flags
- , configuration_ ()
+ : inherited ()
+ , configuration_ (NULL)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -103,7 +97,8 @@ Net_Client_SSL_Connector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::initialize"));
 
-  configuration_ = configuration_in;
+  configuration_ =
+    &const_cast<HandlerConfigurationType&> (configuration_in);
 
   return true;
 }
@@ -130,7 +125,10 @@ Net_Client_SSL_Connector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::get"));
 
-  return configuration_;
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+
+  return *configuration_;
 }
 
 template <typename HandlerType,
@@ -180,10 +178,9 @@ Net_Client_SSL_Connector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::abort"));
 
-  int result = inherited::close ();
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Connector::close(): \"%m\", continuing\n")));
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+  ACE_NOTREACHED (return;)
 }
 
 template <typename HandlerType,
@@ -220,19 +217,18 @@ Net_Client_SSL_Connector_T<HandlerType,
   } // end IF
   ACE_ASSERT (handler_p);
 
-  ACE_SSL_SOCK_Connector connector;
   result =
-    connector.connect (handler_p->peer (),              // return value: (connected) stream
-                       address_in,                      // remote SAP
-                       NULL,                            // timeout
-                       ACE_sap_any_cast (AddressType&), // local address
-                       1,                               // re-use address (SO_REUSEADDR) ?
-                       O_RDWR,                          // flags
-                       0);                              // perms
+    inherited::connect (handler_p->peer (),              // return value: (connected) stream
+                        address_in,                      // remote SAP
+                        NULL,                            // timeout
+                        ACE_sap_any_cast (AddressType&), // local address
+                        1,                               // re-use address (SO_REUSEADDR) ?
+                        O_RDWR,                          // flags
+                        0);                              // perms
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
+      ACE_OS::memset (buffer, 0, sizeof (buffer));
     result = address_in.addr_to_string (buffer,
                                         sizeof (buffer),
                                         1);

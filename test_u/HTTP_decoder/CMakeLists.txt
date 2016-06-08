@@ -140,7 +140,6 @@ target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} ACEStream)
 target_link_libraries (${EXECUTABLE} ACENetwork)
-#target_link_libraries (${EXECUTABLE} ACENetwork_Client)
 target_link_libraries (${EXECUTABLE} ACENetwork_Protocol_HTTP)
 
 install (TARGETS ${EXECUTABLE}

@@ -39,14 +39,15 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
 
 ########### next target ###############
 set (${PROJECT_NAME}_Protocol_IRC_SRCS
+     irc_bisector.cpp
+     irc_bisector.h
+     irc_codes.h
      irc_common.h
      irc_common_modules.h
      irc_configuration.h
      irc_defines.h
+     irc_exports.h
      irc_icontrol.h
-     irc_codes.h
-     irc_bisector.cpp
-     irc_bisector.h
      irc_message.cpp
      irc_message.h
      irc_parser.cpp
@@ -115,13 +116,14 @@ export (TARGETS ${PROJECT_NAME}_Protocol_IRC
 
 ############### install files ################
 install (FILES
+         irc_bisector.h
+         irc_codes.h
          irc_common.h
          irc_common_modules.h
          irc_configuration.h
          irc_defines.h
+         irc_exports.h
          irc_icontrol.h
-         irc_codes.h
-         irc_bisector.h
          irc_message.h
          irc_parser.h
          irc_parser_driver.h

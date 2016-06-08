@@ -42,8 +42,11 @@ else ()
 endif ()
 add_definitions (-DACE_HAS_DLL)
 
-#include (FindPkgConfig)
+include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
+if (UNIX)
+ pkg_check_modules (PKG_SSL REQUIRED libssl)
+endif ()
 
 #if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
  # stand-alone build
@@ -78,10 +81,14 @@ add_definitions (-DHAVE_CONFIG_H)
 if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE)
 
+ include_directories (${PKG_SSL_INCLUDE_DIRS})
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src)
 else ()
  include_directories ($ENV{ACE_ROOT})
+
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../openssl/include)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
@@ -93,6 +100,9 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_asynch_netlinksockethandler.cpp
      net_asynch_netlinksockethandler.h
      net_asynch_netlinksockethandler.inl
+     net_asynch_ssl_tcpsockethandler.cpp
+     net_asynch_ssl_tcpsockethandler.h
+     net_asynch_ssl_tcpsockethandler.inl
      net_asynch_tcpsockethandler.cpp
      net_asynch_tcpsockethandler.h
      net_asynch_tcpsockethandler.inl
@@ -182,6 +192,16 @@ set (${PROJECT_NAME}_LIB_SRCS
      stdafx.cpp
      stdafx.h)
 
+if (WIN32)
+ add_definitions (-DWIN32)
+ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc") # C++ exception handling
+ if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MDd") # multithreaded debug dll
+ else ()
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD")  # multithreaded dll
+ endif ()
+endif ()
+
 add_library (${PROJECT_NAME} SHARED ${ACENetwork_LIB_SRCS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
@@ -205,6 +225,8 @@ export (TARGETS ${PROJECT_NAME}
 install (FILES
          net_asynch_netlinksockethandler.h
          net_asynch_netlinksockethandler.inl
+         net_asynch_ssl_tcpsockethandler.h
+         net_asynch_ssl_tcpsockethandler.inl
          net_asynch_tcpsockethandler.h
          net_asynch_tcpsockethandler.inl
          net_asynch_udpsockethandler.h

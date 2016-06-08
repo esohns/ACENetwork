@@ -231,7 +231,6 @@ target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonUI)
 target_link_libraries (${EXECUTABLE} ACEStream)
 target_link_libraries (${EXECUTABLE} ACENetwork)
-#target_link_libraries (${EXECUTABLE} ACENetwork_Client)
 target_link_libraries (${EXECUTABLE} ACENetwork_Protocol_DHCP)
 
 install (TARGETS ${EXECUTABLE}

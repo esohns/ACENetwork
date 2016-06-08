@@ -109,10 +109,10 @@ class Net_Client_Connector_T
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  HandlerConfigurationType configuration_;
+  HandlerConfigurationType* configuration_;
 
-  ICONNECTION_MANAGER_T*   connectionManager_;
-  ACE_Time_Value           statisticCollectionInterval_;
+  ICONNECTION_MANAGER_T*    connectionManager_;
+  ACE_Time_Value            statisticCollectionInterval_;
 };
 
 /////////////////////////////////////////
@@ -239,10 +239,10 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  HandlerConfigurationType configuration_;
+  HandlerConfigurationType* configuration_;
 
-  ICONNECTION_MANAGER_T*   connectionManager_;
-  ACE_Time_Value           statisticCollectionInterval_;
+  ICONNECTION_MANAGER_T*    connectionManager_;
+  ACE_Time_Value            statisticCollectionInterval_;
 };
 
 /////////////////////////////////////////
@@ -326,10 +326,10 @@ class Net_Client_Connector_T<HandlerType,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  HandlerConfigurationType configuration_;
+  HandlerConfigurationType* configuration_;
 
-  ICONNECTION_MANAGER_T*   connectionManager_;
-  ACE_Time_Value           statisticCollectionInterval_;
+  ICONNECTION_MANAGER_T*    connectionManager_;
+  ACE_Time_Value            statisticCollectionInterval_;
 };
 #endif
 

@@ -38,13 +38,14 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
 
 ########### next target ###############
 set (${PROJECT_NAME}_Protocol_HTTP_SRCS
+     http_bisector.cpp
+     http_bisector.h
+     http_codes.h
      http_common.h
      http_common_modules.h
      http_configuration.h
      http_defines.h
-     http_codes.h
-     http_bisector.cpp
-     http_bisector.h
+     http_exports.h
      http_message.cpp
      http_message.h
      http_parser.cpp
@@ -90,6 +91,13 @@ if (WIN32)
  source_group (scripts FILES ${PROJECT_NAME}_Protocol_HTTP_SCRIPTS)
 endif ()
 
+# *NOTE*: this is needed to export yydebug, so it can be imported from template
+#         instances. Note that there is no way to #define YYDEBUG in the .y
+#         parser definition file, as the generated '%code requires' sections are
+#         inserted after the first '#define YYDEBUG' statements.
+# *TODO*: this holds for GNU Bison > 2.4.2
+#add_definitions (-DYYDEBUG)
+
 add_library (${PROJECT_NAME}_Protocol_HTTP SHARED
              ${ACENetwork_Protocol_HTTP_SRCS}
              ${ACENetwork_Protocol_HTTP_SCRIPTS})
@@ -114,12 +122,13 @@ export (TARGETS ${PROJECT_NAME}_Protocol_HTTP
 
 ############### install files ################
 install (FILES
+         http_bisector.h
+         http_codes.h
          http_common.h
          http_common_modules.h
          http_configuration.h
          http_defines.h
-         http_codes.h
-         http_bisector.h
+         http_exports.h
          http_message.h
          http_parser.h
          http_parser_driver.h

@@ -1,25 +1,18 @@
 cmake_minimum_required (VERSION 2.8)
 
-include (FindPkgConfig)
+#include (FindPkgConfig)
 #pkg_check_modules (PKGACE REQUIRED ACE)
-if (UNIX)
- pkg_check_modules (PKG_SSL REQUIRED libssl)
-endif ()
 # *TODO*: repair WIN32 pkgconfig support
 
 if (UNIX)
- include_directories (${PKG_SSL_INCLUDE_DIRS})
-
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
 else ()
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
-
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
 endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../)
-include_directories (${CMAKE_CURRENT_BINARY_DIR}/../../)
+#include_directories (${CMAKE_CURRENT_BINARY_DIR}/../../)
 
 ############## next target ################
 set (${PROJECT_NAME}_Client_LIB_SRCS
@@ -54,6 +47,9 @@ set (${PROJECT_NAME}_Server_LIB_SRCS
      net_server_listener.cpp
      net_server_listener.h
      net_server_listener.inl
+     net_server_ssl_listener.cpp
+     net_server_ssl_listener.h
+     net_server_ssl_listener.inl
      stdafx.cpp
      stdafx.h)
 
@@ -84,6 +80,8 @@ install (FILES
          net_server_exports.h
          net_server_listener.h
          net_server_listener.inl
+         net_server_ssl_listener.h
+         net_server_ssl_listener.inl
          DESTINATION include)
 install (TARGETS ${PROJECT_NAME}_Client ${PROJECT_NAME}_Server
          EXPORT ${PROJECT_NAME}Targets

@@ -21,10 +21,10 @@
 #ifndef NET_CLIENT_SSL_CONNECTOR_H
 #define NET_CLIENT_SSL_CONNECTOR_H
 
-#include "ace/Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/Time_Value.h"
+#include "ace/SSL/SSL_SOCK_Connector.h"
 
 #include "stream_statemachine_control.h"
 
@@ -32,7 +32,7 @@
 #include "net_iconnector.h"
 
 template <typename HandlerType,
-          typename ConnectorType, // ACE_SOCK_CONNECTOR
+          typename ConnectorType, // ACE_SSL_SOCK_Connector
           ///////////////////////////////
           typename AddressType,
           typename ConfigurationType,
@@ -44,8 +44,7 @@ template <typename HandlerType,
           ///////////////////////////////
           typename UserDataType>
 class Net_Client_SSL_Connector_T
- : public ACE_Connector<HandlerType,
-                        ConnectorType>
+ : public ACE_SSL_SOCK_Connector
  , public Net_IConnector_T<AddressType,
                            HandlerConfigurationType>
 {
@@ -97,17 +96,16 @@ class Net_Client_SSL_Connector_T
   virtual int make_svc_handler (HandlerType*&);
 
  private:
-  typedef ACE_Connector<HandlerType,
-                        ConnectorType> inherited;
+  typedef ACE_SSL_SOCK_Connector inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T (const Net_Client_SSL_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T& operator= (const Net_Client_SSL_Connector_T&))
 
-  HandlerConfigurationType configuration_;
+  HandlerConfigurationType* configuration_;
 
-  ICONNECTION_MANAGER_T*   connectionManager_;
-  ACE_Time_Value           statisticCollectionInterval_;
+  ICONNECTION_MANAGER_T*    connectionManager_;
+  ACE_Time_Value            statisticCollectionInterval_;
 };
 
 // include template implementation

@@ -49,7 +49,7 @@ Net_Client_Connector_T<HandlerType,
               //                   "synch options" (see line 200 below)
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
- , configuration_ ()
+ , configuration_ (NULL)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -102,7 +102,8 @@ Net_Client_Connector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::initialize"));
 
-  configuration_ = configuration_in;
+  configuration_ =
+    &const_cast<HandlerConfigurationType&> (configuration_in);
 
   return true;
 }
@@ -129,7 +130,10 @@ Net_Client_Connector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::get"));
 
-  return configuration_;
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+
+  return *configuration_;
 }
 
 template <typename HandlerType,
@@ -260,13 +264,13 @@ Net_Client_Connector_T<HandlerType,
                        StatisticContainerType,
                        StreamType,
                        HandlerConfigurationType,
-                       UserDataType>::activate_svc_handler (HandlerType* svc_handler)
+                       UserDataType>::activate_svc_handler (HandlerType* handler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::activate_svc_handler"));
 
   // pre-initialize the connection handler
   // *TODO*: remove type inference
-  svc_handler->set (NET_ROLE_CLIENT);
+  handler_in->set (NET_ROLE_CLIENT);
 
   // *IMPORTANT NOTE*: this bit is mostly copy/pasted from Connector.cpp:251
 
@@ -277,7 +281,7 @@ Net_Client_Connector_T<HandlerType,
   // peer.
   //if (ACE_BIT_ENABLED (this->flags_, ACE_NONBLOCK) != 0)
   //{
-    if (svc_handler->peer ().enable (ACE_NONBLOCK) == -1)
+    if (handler_in->peer ().enable (ACE_NONBLOCK) == -1)
       error = 1;
   //}
   //// Otherwise, make sure it's disabled by default.
@@ -286,13 +290,13 @@ Net_Client_Connector_T<HandlerType,
 
   // We are connected now, so try to open things up.
   ICONNECTOR_T* iconnector_p = this;
-  if (error || svc_handler->open (iconnector_p) == -1)
+  if (error || handler_in->open (iconnector_p) == -1)
   {
     // Make sure to close down the <svc_handler> to avoid descriptor
     // leaks.
     // The connection was already made; so this close is a "normal"
     // close operation.
-    svc_handler->close (NORMAL_CLOSE_OPERATION);
+    handler_in->close (NORMAL_CLOSE_OPERATION);
     return -1;
   }
   else
@@ -360,7 +364,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                        HandlerConfigurationType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                               const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ ()
+ : configuration_ (NULL)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -423,7 +427,8 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::initialize"));
 
-  configuration_ = configuration_in;
+  configuration_ =
+    &const_cast<HandlerConfigurationType&> (configuration_in);
 
   return true;
 }
@@ -455,7 +460,10 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::get"));
 
-  return configuration_;
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+
+  return *configuration_;
 }
 
 template <typename HandlerType,
@@ -515,6 +523,9 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
 
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+  ACE_NOTREACHED (return;)
 }
 
 template <typename HandlerType,
@@ -599,13 +610,13 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                        StatisticContainerType,
                        StreamType,
                        HandlerConfigurationType,
-                       UserDataType>::activate_svc_handler (CONNECTION_T* svc_handler)
+                       UserDataType>::activate_svc_handler (CONNECTION_T* handler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::activate_svc_handler"));
 
   // pre-initialize the connection handler
   // *TODO*: remove type inference
-  svc_handler->set (NET_ROLE_CLIENT);
+  handler_in->set (NET_ROLE_CLIENT);
 
   // *IMPORTANT NOTE*: this bit is mostly copy/pasted from Connector.cpp:251
 
@@ -625,13 +636,13 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 
   // We are connected now, so try to open things up.
   ICONNECTOR_T* iconnector_p = this;
-  if (error || svc_handler->open (iconnector_p) == -1)
+  if (error || handler_in->open (iconnector_p) == -1)
   {
     // Make sure to close down the <svc_handler> to avoid descriptor
     // leaks.
     // The connection was already made; so this close is a "normal"
     // close operation.
-    svc_handler->close (NORMAL_CLOSE_OPERATION);
+    handler_in->close (NORMAL_CLOSE_OPERATION);
     return -1;
   }
   else
@@ -786,7 +797,7 @@ Net_Client_Connector_T<HandlerType,
                        HandlerConfigurationType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                               const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ ()
+ : configuration_ (NULL)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -837,7 +848,8 @@ Net_Client_Connector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::initialize"));
 
-  configuration_ = configuration_in;
+  configuration_ =
+    &const_cast<HandlerConfigurationType&> (configuration_in);
 
   return true;
 }
@@ -863,7 +875,10 @@ Net_Client_Connector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::get"));
 
-  return configuration_;
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+
+  return *configuration_;
 }
 
 template <typename HandlerType,
@@ -913,7 +928,6 @@ Net_Client_Connector_T<HandlerType,
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
-
   ACE_NOTREACHED (return;)
 }
 

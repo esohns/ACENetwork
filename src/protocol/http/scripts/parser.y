@@ -48,11 +48,15 @@
 /* %define parse.trace               {true} */
 
 %code requires {
+// *NOTE*: add double include protection, required for GNU Bison 2.4.2
+// *TODO*: remove this ASAP
 #ifndef HTTP_PARSER_H
 #define HTTP_PARSER_H
 
 #include <cstdio>
 #include <string>
+
+#include "http_exports.h"
 
 /* enum yytokentype
 {
@@ -87,6 +91,8 @@ typedef union YYSTYPE
 
 typedef void* yyscan_t;
 
+#define YYDEBUG 1
+extern int HTTP_Export yydebug;
 //#define YYERROR_VERBOSE
 }
 
@@ -185,6 +191,8 @@ void yyerror (YYLTYPE*, Net_IParser<HTTP_Record>*, yyscan_t, const char*);
 int yyparse (Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner);
 void yyprint (FILE*, yytokentype, YYSTYPE);
 
+// *NOTE*: add double include protection, required for GNU Bison 2.4.2
+// *TODO*: remove this ASAP
 #endif // HTTP_PARSER_H
 }
 
