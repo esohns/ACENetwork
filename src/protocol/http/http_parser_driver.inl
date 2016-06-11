@@ -94,6 +94,8 @@ HTTP_ParserDriver<SessionMessageType>::initialize (HTTP_Record& record_in,
       fragment_ = NULL;
     } // end IF
     offset_ = 0;
+    //record_ = NULL;
+    //trace_ = traceParsing_in;
 
     initialized_ = false;
   } // end IF
@@ -102,12 +104,13 @@ HTTP_ParserDriver<SessionMessageType>::initialize (HTTP_Record& record_in,
   record_ = &record_in;
 
   // trace ?
+  trace_ = traceParsing_in;
   HTTP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
                           scannerState_);
 #if YYDEBUG
   //parser_.set_debug_level (traceParsing_in ? 1
   //                                         : 0); // binary (see bison manual)
-  yydebug = (traceParsing_in ? 1 : 0);
+  yydebug = (trace_ ? 1 : 0);
 #endif
   messageQueue_ = messageQueue_in;
   useYYScanBuffer_ = useYYScanBuffer_in;
@@ -206,8 +209,8 @@ HTTP_ParserDriver<SessionMessageType>::switchBuffer ()
     return false;
   } // end IF
 
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("switched input buffers...\n")));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("switched input buffers...\n")));
 
   return true;
 }
@@ -308,74 +311,72 @@ HTTP_ParserDriver<SessionMessageType>::parse (ACE_Message_Block* data_in)
   // *NOTE*: parse ALL available message fragments
   // *TODO*: yyrestart(), yy_create_buffer/yy_switch_to_buffer, YY_INPUT...
   int result = -1;
-  //   do
-  //   { // initialize scan buffer
+  bool do_scan_end = false;
   if (!scan_begin ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HTTP_ParserDriver::scan_begin(), aborting\n")));
-
-    // clean up
-    fragment_ = NULL;
-
-    //       break;
-    return false;
+    goto error;
   } // end IF
+  do_scan_end = true;
 
-    // initialize scanner
+  // initialize scanner
   HTTP_Scanner_set_column (1, scannerState_);
   HTTP_Scanner_set_lineno (1, scannerState_);
-  int debug_level = 0;
-#if YYDEBUG
-  //debug_level = parser_.debug_level ();
-  debug_level = yydebug;
-#endif
-  ACE_UNUSED_ARG (debug_level);
 
   // parse data fragment
   try
   {
-    //result = parser_.parse ();
     result = yyparse (this, scannerState_);
   }
   catch (...)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
+                ACE_TEXT ("caught exception in ::yyparse(), aborting\n")));
+    goto error;
   }
   switch (result)
   {
-  case 0:
-    break; // done
-  case 1:
-  default:
-  { // *NOTE*: need more data
-    //        ACE_DEBUG ((LM_DEBUG,
-    //                    ACE_TEXT ("failed to parse message fragment (result was: %d), aborting\n"),
-    //                    result));
-
-    //        // debug info
-    //        if (debug_level)
-    //        {
-    //          try
-    //          {
-    //            record_->dump_state ();
-    //          }
-    //          catch (...)
-    //          {
-    //            ACE_DEBUG ((LM_ERROR,
-    //                        ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
-    //          }
-    //        } // end IF
-
-    break;
-  }
+    case 0:
+      break; // done
+    case 1:
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to parse HTTP PDU (result was: %d), aborting\n"),
+                  result));
+      break;
+    }
   } // end SWITCH
 
-    // finalize buffer/scanner
+  // finalize buffer/scanner
   scan_end ();
-  //   } while (fragment_);
+  do_scan_end = false;
 
+  // debug info
+  if (trace_ && record_)
+  {
+    try
+    {
+      ACE_DEBUG ((LM_INFO,
+                  ACE_TEXT ("%s"),
+                  ACE_TEXT (HTTP_Tools::dump (*record_).c_str ())));
+    }
+    catch (...)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in HTTP_Tools::dump(), continuing\n")));
+    }
+  } // end IF
+
+  goto continue_;
+
+error:
+  if (do_scan_end)
+    scan_end ();
+  fragment_ = NULL;
+
+continue_:
   return (result == 0);
 }
 

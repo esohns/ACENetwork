@@ -33,12 +33,13 @@ class ACE_Data_Block;
 class ACE_Message_Block;
 class Test_U_SessionMessage;
 template <typename AllocatorConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename MessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_Message
- : public Stream_DataMessageBase_T<Test_U_AllocatorConfiguration,
+ : public Stream_DataMessageBase_2<Test_U_AllocatorConfiguration,
+                                   ///////
                                    Test_U_MessageData_t,
                                    HTTP_Method_t>
 {
@@ -52,13 +53,15 @@ class Test_U_Message
   Test_U_Message (unsigned int); // size
   virtual ~Test_U_Message ();
 
-  virtual HTTP_Method_t command () const; // return value: message type
-  static std::string CommandType2String (HTTP_Method_t);
-
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
   // *NOTE*: this uses our allocator (if any) to create a new message
   virtual ACE_Message_Block* duplicate (void) const;
+
+  // implement Stream_MessageBase_T
+  virtual HTTP_Method_t command () const; // return value: message type
+
+  static std::string CommandType2String (HTTP_Method_t);
 
  protected:
   // copy ctor to be used by duplicate() and child classes
@@ -68,7 +71,8 @@ class Test_U_Message
  private:
 //  typedef Stream_DataMessageBase_T<xmlDoc,
 //                                   Stream_CommandType_t> inherited;
-  typedef Stream_DataMessageBase_T<Test_U_AllocatorConfiguration,
+  typedef Stream_DataMessageBase_2<Test_U_AllocatorConfiguration,
+                                   ///////
                                    Test_U_MessageData_t,
                                    HTTP_Method_t> inherited;
 

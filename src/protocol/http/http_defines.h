@@ -67,8 +67,18 @@
 #define HTTP_COMMAND_STRING_RESPONSE              "HTTP_RESPONSE"
 #define HTTP_PRT_VERSION_STRING_PREFIX            "HTTP/"
 // headers
+#define HTTP_PRT_ACCEPT_HEADER_STRING             "Accept"
+#define HTTP_PRT_AGENT_HEADER_STRING              "User-Agent"
+#define HTTP_PRT_ACCEPT_REFERER_STRING            "Referer"
+#define HTTP_PRT_CONNECTION_HEADER_STRING         "Connection"
+#define HTTP_PRT_COOKIE_HEADER_STRING             "Cookie"
+#define HTTP_PRT_ENCODING_HEADER_STRING           "Accept-Encoding"
+#define HTTP_PRT_HOST_HEADER_STRING               "Host"
+#define HTTP_PRT_LANGUAGE_HEADER_STRING           "Accept-Language"
 #define HTTP_PRT_LOCATION_HEADER_STRING           "Location"
+#define HTTP_PRT_TRACKING_HEADER_STRING           "DNT"
 #define HTTP_PRT_TRANSFER_ENCODING_HEADER_STRING  "Transfer-Encoding"
+
 #define HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING "chunked"
 
 #endif

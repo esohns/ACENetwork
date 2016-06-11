@@ -302,8 +302,8 @@ static const signed char yyrhs[] =
 static const unsigned short int yyrline[] =
 {
        0,   212,   212,   213,   220,   250,   252,   253,   259,   261,
-     268,   270,   271,   282,   284,   290,   292,   332,   334,   336,
-     338,   342,   343
+     268,   270,   271,   282,   284,   290,   292,   331,   333,   336,
+     339,   344,   345
 };
 #endif
 
@@ -1174,22 +1174,21 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                                                               std::regex_constants::match_default))
                                                        {
                                                          ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("invalid HTTP header (was: \"%s\"), continuing\n"),
+                                                                     ACE_TEXT ("invalid HTTP header (was: \"%s\"), returning\n"),
                                                                      ACE_TEXT ((*(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.sval)).c_str ())));
+                                                         break;
                                                        } // end IF
                                                        ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
                                                        ACE_ASSERT (match_results[1].matched);
                                                        HTTP_Record* record_p = driver->record ();
                                                        ACE_ASSERT (record_p);
-                                                       HTTP_HeadersIterator_t iterator =
-                                                         record_p->headers.find (match_results[1]);
-                                                       if (iterator != record_p->headers.end ())
-                                                       {
-                                                         ACE_DEBUG ((LM_WARNING,
-                                                                     ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
-                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
-                                                       } // end IF
+//                                                       HTTP_HeadersIterator_t iterator =
+//                                                         record_p->headers.find (match_results[1]);
+//                                                       if (iterator != record_p->headers.end ())
+//                                                         ACE_DEBUG ((LM_DEBUG,
+//                                                                     ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
+//                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
                                                        ACE_ASSERT (match_results[2].matched);
                                                        ACE_ASSERT (!match_results[2].str ().empty ());
                                                        record_p->headers[match_results[1]] =
@@ -1209,18 +1208,21 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   case 18:
 
     { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.ival);
+                                                       driver->finished ();
                                                        YYACCEPT; }
     break;
 
   case 19:
 
     { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.ival); // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
-                                                       YYACCEPT; }
+                                                           driver->finished ();
+                                                           YYACCEPT; }
     break;
 
   case 20:
 
     { ((*yyvalp).ival) = 0;
+                                                       driver->finished ();
                                                        YYACCEPT; }
     break;
 

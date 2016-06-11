@@ -29,6 +29,9 @@
 
 Test_U_Stream::Test_U_Stream (const std::string& name_in)
  : inherited (name_in)
+ , IO_ (ACE_TEXT_ALWAYS_CHAR ("NetIO"),
+        NULL,
+        false)
  , dump_ (ACE_TEXT_ALWAYS_CHAR ("FileDump"),
           NULL,
           false)
@@ -49,6 +52,7 @@ Test_U_Stream::Test_U_Stream (const std::string& name_in)
   // *NOTE*: one problem is that all modules which have NOT enqueued onto the
   //         stream (e.g. because initialize() failed...) need to be explicitly
   //         close()d
+  inherited::modules_.push_front (&IO_);
   inherited::modules_.push_front (&dump_);
   inherited::modules_.push_front (&marshal_);
   inherited::modules_.push_front (&runtimeStatistic_);
@@ -76,10 +80,17 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::initialize"));
 
+  bool result = false;
+
   // sanity check(s)
-  ACE_ASSERT (!inherited::isInitialized_);
-  ACE_ASSERT (configuration_in.moduleConfiguration);
-  ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
+  ACE_ASSERT (!isRunning ());
+
+  if (inherited::isInitialized_)
+  {
+    if (!inherited::finalize ())
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Stream_Base_T::finalize(): \"%m\", continuing\n")));
+  } // end IF
 
   // allocate a new session state, reset stream
   if (!inherited::initialize (configuration_in,
@@ -87,97 +98,50 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
                               resetSessionData_in))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_Base_T::initialize(), aborting\n")));
+                ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
+                ACE_TEXT (inherited::name ().c_str ())));
     return false;
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
-
-  // things to be done here:
-  // [- initialize base class]
-  // ------------------------------------
-  // - initialize notification strategy (if any)
-  // ------------------------------------
-  // - push the final module onto the stream (if any)
-  // ------------------------------------
-  // - initialize modules
-  // - push them onto the stream (tail-first) !
-  // ------------------------------------
   Test_U_StreamSessionData& session_data_r =
       const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
   session_data_r.sessionID = configuration_in.sessionID;
+  // *TODO*: remove type inferences
+  ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
+  //session_data_r.targetFileName =
+  //  configuration_in.moduleHandlerConfiguration->targetFileName;
+  //configuration_in.moduleConfiguration.streamState = &state_;
 
-//  int result = -1;
-  inherited::MODULE_T* module_p = NULL;
-  if (configuration_in.notificationStrategy)
+  // *IMPORTANT NOTE*: a connection data processing stream may be appended
+  //                   ('outbound' scenario) or prepended ('inbound' (e.g.
+  //                   listener-based) scenario) to another stream. In the first
+  //                   case, the net io (head) module behaves in a somewhat
+  //                   particular manner, as it may be neither 'active' (run a
+  //                   dedicated thread) nor 'passive' (borrow calling thread in
+  //                   start()). Instead, it can behave as a regular
+  //                   synchronous (i.e. passive) module; this reduces the
+  //                   thread-count and generally improves efficiency
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
+  // *TODO*: remove type inference
+  bool reset_configuration = false;
+  bool is_active, is_passive;
+  if (!configuration_in.moduleHandlerConfiguration->inbound)
   {
-    module_p = inherited::head ();
-    if (!module_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("no head module found, aborting\n")));
-      return false;
-    } // end IF
-    inherited::TASK_T* task_p = module_p->reader ();
-    if (!task_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("no head module reader task found, aborting\n")));
-      return false;
-    } // end IF
-    inherited::QUEUE_T* queue_p = task_p->msg_queue ();
-    if (!queue_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("no head module reader task queue found, aborting\n")));
-      return false;
-    } // end IF
-    queue_p->notification_strategy (configuration_in.notificationStrategy);
-  } // end IF
-//  configuration_in.moduleConfiguration.streamState = &state_;
+    is_active = configuration_in.moduleHandlerConfiguration->active;
+    is_passive = configuration_in.moduleHandlerConfiguration->passive;
 
-  // ---------------------------------------------------------------------------
-  if (configuration_in.module)
-  {
-    // *TODO*: (at least part of) this procedure belongs in libACEStream
-    //         --> remove type inferences
-    inherited::IMODULE_T* imodule_p =
-      dynamic_cast<inherited::IMODULE_T*> (configuration_in.module);
-    if (!imodule_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
-    if (!imodule_p->initialize (*configuration_in.moduleConfiguration))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to initialize module, aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
-    Stream_Task_t* task_p = configuration_in.module->writer ();
-    ACE_ASSERT (task_p);
-    inherited::IMODULEHANDLER_T* module_handler_p =
-      dynamic_cast<inherited::IMODULEHANDLER_T*> (task_p);
-    if (!module_handler_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Common_IInitialize_T<HandlerConfigurationType>> failed, aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
-    if (!module_handler_p->initialize (*configuration_in.moduleHandlerConfiguration))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to initialize module handler, aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
-    inherited::modules_.push_front (configuration_in.module);
+    configuration_in.moduleHandlerConfiguration->active = false;
+    configuration_in.moduleHandlerConfiguration->passive = false;
+
+    reset_configuration = true;
   } // end IF
 
   // ---------------------------------------------------------------------------
+  // *TODO*: remove type inferences
+  ACE_ASSERT (configuration_in.moduleConfiguration);
+
+  std::string buffer;
 
   // ******************* File Writer ************************
   fileWriter_.initialize (*configuration_in.moduleConfiguration);
@@ -187,14 +151,14 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_FileWriter*> failed, aborting\n")));
-    return false;
+    goto error;
   } // end IF
   if (!fileWriter_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
                 fileWriter_.name ()));
-    return false;
+    goto error;
   } // end IF
 
   // ******************* Runtime Statistics ************************
@@ -205,7 +169,7 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_Statistic_WriterTask_T*> failed, aborting\n")));
-    return false;
+    goto error;
   } // end IF
   if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
                                             true,                                        // push statistic messages downstream ?
@@ -215,7 +179,7 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
                 runtimeStatistic_.name ()));
-    return false;
+    goto error;
   } // end IF
 
   // ******************* Marshal ************************
@@ -226,44 +190,31 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_Parser*> failed, aborting\n")));
-    return false;
+    goto error;
   } // end IF
   if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
                 marshal_.name ()));
-    return false;
+    goto error;
   } // end IF
-
-  if (!parser_impl_p->initialize (inherited::state_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                marshal_.name ()));
-    return false;
-  } // end IF
-
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head modules expect a
-  //             handle to the session data)
-  marshal_.arg (inherited::sessionData_);
 
   // ******************* Dump ************************
   dump_.initialize (*configuration_in.moduleConfiguration);
-  Test_U_Module_FileWriterH* fileWriterH_impl_p =
-    dynamic_cast<Test_U_Module_FileWriterH*> (dump_.writer ());
-  if (!fileWriterH_impl_p)
+  fileWriter_impl_p =
+    dynamic_cast<Test_U_Module_FileWriter*> (dump_.writer ());
+  if (!fileWriter_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_FileWriterH*> failed, aborting\n")));
-    return false;
+    goto error;
   } // end IF
-  std::string buffer =
+  buffer =
       configuration_in.moduleHandlerConfiguration->targetFileName;
   configuration_in.moduleHandlerConfiguration->targetFileName =
       configuration_in.moduleHandlerConfiguration->dumpFileName;
-  if (!fileWriterH_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+  if (!fileWriter_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
@@ -273,30 +224,68 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
     const_cast<Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration->targetFileName =
         buffer;
 
-    return false;
+    goto error;
   } // end IF
   const_cast<Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration->targetFileName =
       buffer;
 
-  if (!fileWriterH_impl_p->initialize (inherited::state_))
+  // ******************* IO ************************
+  IO_.initialize (*configuration_in.moduleConfiguration);
+  READER_T* IOReader_impl_p = NULL;
+  WRITER_T* IOWriter_impl_p = dynamic_cast<WRITER_T*> (IO_.writer ());
+  if (!IOWriter_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                dump_.name ()));
-    return false;
+                ACE_TEXT ("dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n")));
+    goto error;
   } // end IF
-
+  if (!IOWriter_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to initialize Stream_Module_Net_IOWriter_T, aborting\n"),
+                IO_.name ()));
+    goto error;
+  } // end IF
+  if (!IOWriter_impl_p->initialize (inherited::state_))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to initialize Stream_Module_Net_IOWriter_T, aborting\n"),
+                IO_.name ()));
+    goto error;
+  } // end IF
+  //  IOWriter_impl_p->reset ();
+  IOReader_impl_p = dynamic_cast<READER_T*> (IO_.reader ());
+  if (!IOReader_impl_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("dynamic_cast<Stream_Module_Net_IOReader_T> failed, aborting\n")));
+    goto error;
+  } // end IF
+  if (!IOReader_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to initialize Stream_Module_Net_IOReader_T, aborting\n"),
+                IO_.name ()));
+    goto error;
+  } // end IF
+  //if (!IOReader_impl_p->initialize (inherited::state_))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("%s: failed to initialize Stream_Module_Net_IOReader_T, aborting\n"),
+  //              IO_.name ()));
+  //  return false;
+  //} // end IF
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
-  dump_.arg (inherited::sessionData_);
+  IO_.arg (inherited::sessionData_);
 
   if (setupPipeline_in)
     if (!inherited::setup ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to setup pipeline, aborting\n")));
-      return false;
+      goto error;
     } // end IF
 
   // -------------------------------------------------------------
@@ -308,7 +297,16 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   inherited::isInitialized_ = true;
   //inherited::dump_state ();
 
-  return true;
+  result = true;
+
+error:
+  if (reset_configuration)
+  {
+    configuration_in.moduleHandlerConfiguration->active = is_active;
+    configuration_in.moduleHandlerConfiguration->passive = is_passive;
+  } // end IF
+
+  return result;
 }
 
 void

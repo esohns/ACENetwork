@@ -559,78 +559,87 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 
                                // NOT the final chunk
                                // --> there is (trailing) entity data
-//                               ACE_DEBUG ((LM_DEBUG,
-//                                           ACE_TEXT ("found entity chunk @%d[%d]: %d + %d byte(s)\n"),
-//                                           driver->offset () - yyleng,
-//                                           (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng,
-//                                           yyleng, chunk_size));
+                               if (yy_flex_debug)
+                                 ACE_DEBUG ((LM_DEBUG,
+                                             ACE_TEXT ("found entity chunk @%d[fragment offset: %d]: (%d +) %d (+ 2) byte(s)\n"),
+                                             driver->offset () - yyleng,
+                                             (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng,
+                                             yyleng, chunk_size));
 
                                // adjust write pointer ?
-                               ACE_Message_Block* message_p, *message_2;
-                               unsigned int remainder =
+                               ACE_Message_Block* message_p, *message_2, *message_3;
+                               unsigned int received_bytes =
                                    message_block_p->length ();
-                               if (chunk_size <= remainder)
+                               if (chunk_size <= received_bytes)
                                { // current fragment contains the whole chunk
-
-                                 // --> insert buffer
-                                 message_p =
-                                   message_block_p->duplicate ();
+                                 // --> insert buffer (and slurp the whole chunk
+                                 //     in one go, see below))
+                                 message_p = message_block_p->duplicate ();
                                  ACE_ASSERT (message_p);
-                                 message_2 =
-                                   message_block_p->cont ();
+                                 message_2 = message_block_p->cont ();
                                  if (message_2)
                                    message_p->cont (message_2);
                                  message_block_p->cont (message_p);
 
-                                 message_block_p->wr_ptr (message_block_p->rd_ptr () + chunk_size);
-                                 remainder = chunk_size;
+                                 message_block_p->wr_ptr (message_block_p->rd_ptr () +
+                                                          chunk_size);
+                                 received_bytes = chunk_size;
                                } // end IF
                                else
                                {
-                                 // skip trailing entity data fragments
-                                 unsigned int skipped_bytes = remainder;
-                                 while (skipped_bytes <= chunk_size)
+                                 // (wait for/)skip over (missing) entity data
+                                 // fragment(s)
+                                 while (received_bytes <= chunk_size)
                                  {
                                    if (!driver->switchBuffer ())
-                                   {
-                                     ACE_DEBUG ((LM_ERROR,
+                                   { // *NOTE*: most probable reason: connection
+                                     //         has been closed --> session end
+                                     ACE_DEBUG ((LM_DEBUG,
                                                  ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                                      yyterminate();
                                    } // end IF
 
-                                   skipped_bytes +=
-                                       message_block_p->length ();
+                                   received_bytes =
+                                       message_block_p->total_length ();
                                  } // end WHILE
-                                 remainder = (skipped_bytes - chunk_size);
+                                 received_bytes -= chunk_size;
 
-                                 // this chunk ends in the current fragment
-                                 // --> insert buffer, adjust writer pointer,
-                                 //     switch buffers one more time
-                                 message_p =
-                                     message_block_p->duplicate ();
+                                 // chunk ends in the current fragment
+                                 // --> insert buffer, adjust writer pointer
+                                 message_p = driver->buffer ();
                                  ACE_ASSERT (message_p);
-                                 message_2 =
-                                     message_block_p->cont ();
-                                 if (message_2)
-                                   message_p->cont (message_2);
-                                 message_block_p->cont (message_p);
-                                 // computer offset to end of chunk
-                                 remainder =
-                                     message_block_p->length () - remainder;
-                                 message_block_p->wr_ptr (message_block_p->rd_ptr () + remainder);
+                                 message_2 = message_p->duplicate ();
+                                 ACE_ASSERT (message_2);
+                                 // *TODO*: solve potential race condition here:
+                                 //         calling message_p->cont() here is
+                                 //         not safe, more data could arrive in
+                                 //         the meantime
+                                 message_3 = message_p->cont ();
+                                 if (message_3)
+                                   message_2->cont (message_3);
+                                 message_p->cont (message_2);
+                                 // compute offset to end of chunk
+                                 message_p->wr_ptr (message_p->rd_ptr () +
+                                                    (message_p->length () - received_bytes));
+                                 message_2->rd_ptr (message_2->length () - received_bytes);
+                                 ACE_ASSERT (message_block_p->total_length () == (chunk_size + received_bytes));
+                                 ACE_ASSERT (message_2->length () == received_bytes);
                                } // end ELSE
 
+                               // switch buffers (one more time)
                                if (!driver->switchBuffer ())
                                {
                                  ACE_DEBUG ((LM_ERROR,
                                              ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                                  yyterminate();
                                } // end IF
-                               remainder += 2;
-                               message_block_p->rd_ptr (remainder); // offset + CRLF
+                               message_block_p = driver->buffer ();
+//                               remainder += 2;
+                               message_block_p->rd_ptr (2); // chunk_size + CRLF
 
                                // gobble initial bytes
-                               yyg->yy_c_buf_p += remainder;
+//                               yyg->yy_c_buf_p += remainder;
+                               yyg->yy_c_buf_p += 2;
                                yyg->yy_hold_char = *yyg->yy_c_buf_p;
                                //YY_FLUSH_BUFFER; // --> refill scan buffer
 //                               char c;
@@ -645,10 +654,11 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              } // end IF
                              else
                              {
-                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("found last entity chunk @%d[%d]\n"),
-                                           driver->offset () - yyleng,
-                                           (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng));
+                               if (yy_flex_debug)
+                                 ACE_DEBUG ((LM_DEBUG,
+                                             ACE_TEXT ("found last entity chunk @%d[fragment offset: %d]: 1 (+ 2) byte(s)\n"),
+                                             driver->offset () - yyleng,
+                                             (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng));
                                yylval->ival = yyleng;
                              } // end ELSE
                              BEGIN (chunked_body);

@@ -483,22 +483,6 @@ do_work (unsigned int bufferSize_in,
       &configuration.streamConfiguration;
   configuration.useReactor = useReactor_in;
 
-  Stream_Module_t* module_p = NULL;
-//  Test_U_Module_FileWriter_Module file_writer (ACE_TEXT_ALWAYS_CHAR ("FileWriter"),
-//                                               NULL,
-//                                               true);
-//  module_p = &file_writer;
-//  Test_U_IModuleHandler_t* module_handler_p =
-//    dynamic_cast<Test_U_IModuleHandler_t*> (module_p->writer ());
-//  if (!module_handler_p)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("%s: dynamic_cast<Test_U_IModuleHandler_t>(0x%@) failed, returning\n"),
-//                module_p->name (),
-//                module_p->writer ()));
-//    return;
-//  } // end IF
-
   Stream_AllocatorHeap_T<Test_U_AllocatorConfiguration> heap_allocator;
   Test_U_MessageAllocator_t message_allocator (TEST_U_MAX_MESSAGES, // maximum #buffers
                                                &heap_allocator,     // heap allocator handle
@@ -571,7 +555,6 @@ do_work (unsigned int bufferSize_in,
   if (bufferSize_in)
     configuration.streamConfiguration.bufferSize = bufferSize_in;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.module = module_p;
   configuration.streamConfiguration.moduleConfiguration =
     &configuration.moduleConfiguration;
   configuration.streamConfiguration.moduleHandlerConfiguration =
@@ -832,6 +815,9 @@ do_work (unsigned int bufferSize_in,
 
     goto clean_up;
   } // end IF
+  message_data_p->HTTPRecord->method = HTTP_Codes::HTTP_METHOD_GET;
+  message_data_p->HTTPRecord->URI = URL_in;
+  message_data_p->HTTPRecord->version = HTTP_Codes::HTTP_VERSION_1_1;
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
   ACE_NEW_NORETURN (message_data_container_p,
                     Test_U_MessageData_t (message_data_p,
@@ -866,11 +852,8 @@ allocate:
 
     goto clean_up;
   } // end IF
-  message_data_p->HTTPRecord->method = HTTP_Codes::HTTP_METHOD_GET;
-  message_data_p->HTTPRecord->URI = URL_in;
-  message_data_p->HTTPRecord->version = HTTP_Codes::HTTP_VERSION_1_1;
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
-  message_p->initialize (*message_data_container_p,
+  message_p->initialize (message_data_container_p,
                          NULL);
   isocket_connection_p->send (message_p);
 

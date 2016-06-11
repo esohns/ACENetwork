@@ -297,15 +297,15 @@ HTTP_Module_Parser_T<TimePolicyType,
 
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-//              message_p->getID (),
-//              message_p->length ()));
+//              message_inout->getID (),
+//              message_inout->length ()));
 
   if (!driver_.parse (headFragment_))
-  { // *NOTE*: most probable cause: need more data
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("failed to HTTP_ParserDriver::parse() (message ID: %d), returning\n"),
-//                message_p->getID ()));
-    goto done;
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HTTP_ParserDriver::parse() (message ID was: %d), aborting\n"),
+                message_inout->getID ()));
+    goto error;
   } // end IF
 
   // *NOTE*: the (chained) fragment has been parsed, the read pointer has been
@@ -314,7 +314,7 @@ HTTP_Module_Parser_T<TimePolicyType,
   //ACE_ASSERT (driver_.record ());
   //driver_.record ()->dump_state ();
 
-  // make sure the chain references the same data
+  // make sure the whole fragment chain references the same data
   message_p = dynamic_cast<ProtocolMessageType*> (headFragment_->cont ());
 
   ACE_ASSERT (dataContainer_);
@@ -337,7 +337,6 @@ HTTP_Module_Parser_T<TimePolicyType,
   } // end IF
   headFragment_ = NULL;
 
-done:
   return;
 
 error:

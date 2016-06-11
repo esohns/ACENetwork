@@ -32,6 +32,8 @@
 #include "stream_common.h"
 #include "stream_statemachine_control.h"
 
+#include "stream_module_io.h"
+
 #include "test_u_common.h"
 #include "test_u_common_modules.h"
 #include "test_u_message.h"
@@ -53,7 +55,7 @@ class Test_U_Stream
                         HTTP_RuntimeStatistic_t,
                         /////////////////
                         Stream_ModuleConfiguration,
-                        HTTP_ModuleHandlerConfiguration,
+                        Test_U_ModuleHandlerConfiguration,
                         /////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
@@ -79,24 +81,59 @@ class Test_U_Stream
 
  private:
   typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamConfiguration,
-                        /////////////////
+                        //////////////////
                         HTTP_RuntimeStatistic_t,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
-                        HTTP_ModuleHandlerConfiguration,
-                        /////////////////
+                        Test_U_ModuleHandlerConfiguration,
+                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
                         Test_U_SessionMessage,
                         Test_U_Message> inherited;
+
+  typedef Stream_Module_Net_IOWriter_T<ACE_SYNCH_MUTEX,
+                                       ///
+                                       Test_U_SessionMessage,
+                                       Test_U_Message,
+                                       ///
+                                       Test_U_ModuleHandlerConfiguration,
+                                       ///
+                                       Test_U_StreamState,
+                                       ///
+                                       Test_U_StreamSessionData,
+                                       Test_U_StreamSessionData_t,
+                                       ///
+                                       HTTP_RuntimeStatistic_t,
+                                       ///
+                                       ACE_INET_Addr,
+                                       Test_U_ConnectionManager_t> WRITER_T;
+  typedef Stream_Module_Net_IOReader_T<Test_U_SessionMessage,
+                                       Test_U_Message,
+                                       ///
+                                       Test_U_StreamConfiguration,
+                                       ///
+                                       Test_U_ModuleHandlerConfiguration,
+                                       ///
+                                       Test_U_StreamSessionData,
+                                       Test_U_StreamSessionData_t,
+                                       ///
+                                       ACE_INET_Addr,
+                                       Test_U_ConnectionManager_t> READER_T;
+  typedef Stream_StreamModule_T<ACE_MT_SYNCH,                      // task synch type
+                                Common_TimePolicy_t,               // time policy
+                                Stream_ModuleConfiguration,        // module configuration type
+                                Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                                READER_T,                          // reader type
+                                WRITER_T> IO_MODULE_T;             // writer type
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))
@@ -108,14 +145,11 @@ class Test_U_Stream
   bool finalize (const Stream_Configuration&); // configuration
 
   // modules
-  Test_U_Module_FileWriterH_Module      dump_; // <-- raw HTTP output
+  IO_MODULE_T                           IO_;
+  Test_U_Module_FileWriter_Module       dump_; // <-- raw HTTP output
   Test_U_Module_Marshal_Module          marshal_;
   Test_U_Module_RuntimeStatistic_Module runtimeStatistic_;
   Test_U_Module_FileWriter_Module       fileWriter_; // <-- entity (HTML) output
-  // *NOTE*: the final module needs to be supplied to the stream from outside,
-  //         otherwise data might be lost if event dispatch runs in (a) separate
-  //         thread(s)
-  //   Test_U_Module_Handler_Module handler_;
 };
 
 #endif

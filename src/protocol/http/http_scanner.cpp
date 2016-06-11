@@ -48,7 +48,7 @@ void HTTP_Scanner_set_column (int column_no , yyscan_t yyscanner);
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 39
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -252,11 +252,6 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
-
 /* %if-not-reentrant */
 /* %endif */
 
@@ -283,13 +278,6 @@ typedef size_t yy_size_t;
                     if ( yytext[yyl] == '\n' )\
                         --yylineno;\
             }while(0)
-    #define YY_LINENO_REWIND_TO(dst) \
-            do {\
-                const char *p;\
-                for ( p = yy_cp-1; p >= (dst); --p)\
-                    if ( *p == '\n' )\
-                        --yylineno;\
-            }while(0)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -306,6 +294,11 @@ typedef size_t yy_size_t;
 	while ( 0 )
 
 #define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
+
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
@@ -329,7 +322,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	yy_size_t yy_n_chars;
+	int yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -426,7 +419,7 @@ static void HTTP_Scanner__init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yy
 
 YY_BUFFER_STATE HTTP_Scanner__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
 YY_BUFFER_STATE HTTP_Scanner__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Scanner__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
 /* %endif */
 
@@ -468,8 +461,6 @@ typedef unsigned char YY_CHAR;
 typedef int yy_state_type;
 
 #define yytext_ptr yytext_r
-
-/* %% [1.5] DFA */
 static yyconst flex_int32_t yy_nxt[][256] =
     {
     {
@@ -75109,7 +75100,7 @@ static yyconst flex_int32_t yy_rule_linenum[23] =
     {   0,
       331,  335,  341,  354,  367,  380,  390,  400,  410,  418,
       431,  444,  457,  467,  477,  487,  507,  521,  531,  541,
-      550,  659
+      550,  669
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -75273,8 +75264,8 @@ struct yyguts_t
     size_t yy_buffer_stack_max; /**< capacity of stack. */
     YY_BUFFER_STATE * yy_buffer_stack; /**< Stack as an array. */
     char yy_hold_char;
-    yy_size_t yy_n_chars;
-    yy_size_t yyleng_r;
+    int yy_n_chars;
+    int yyleng_r;
     char *yy_c_buf_p;
     int yy_init;
     int yy_start;
@@ -75341,17 +75332,13 @@ FILE *HTTP_Scanner_get_out (yyscan_t yyscanner );
 
 void HTTP_Scanner_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-yy_size_t HTTP_Scanner_get_leng (yyscan_t yyscanner );
+int HTTP_Scanner_get_leng (yyscan_t yyscanner );
 
 char *HTTP_Scanner_get_text (yyscan_t yyscanner );
 
 int HTTP_Scanner_get_lineno (yyscan_t yyscanner );
 
 void HTTP_Scanner_set_lineno (int line_number ,yyscan_t yyscanner );
-
-int HTTP_Scanner_get_column  (yyscan_t yyscanner );
-
-void HTTP_Scanner_set_column (int column_no ,yyscan_t yyscanner );
 
 /* %if-bison-bridge */
 
@@ -75535,6 +75522,14 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
+/* %% [7.0] user's declarations go here */
+
+  //yylloc->step ();
+  yy_flex_debug = driver->debugScanner ();
+
+  std::istringstream converter;
+  unsigned int chunk_size;
+
     yylval = yylval_param;
 
     yylloc = yylloc_param;
@@ -75572,15 +75567,6 @@ YY_DECL
 
 		HTTP_Scanner__load_buffer_state(yyscanner );
 		}
-
-	{
-/* %% [7.0] user's declarations go here */
-
-  //yylloc->step ();
-  yy_flex_debug = driver->debugScanner ();
-
-  std::istringstream converter;
-  unsigned int chunk_size;
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -75621,7 +75607,7 @@ yy_find_action:
 
 		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
 			{
-			yy_size_t yyl;
+			int yyl;
 			for ( yyl = 0; yyl < yyleng; ++yyl )
 				if ( yytext[yyl] == '\n' )
 					   
@@ -75968,78 +75954,87 @@ YY_RULE_SETUP
 
                                // NOT the final chunk
                                // --> there is (trailing) entity data
-//                               ACE_DEBUG ((LM_DEBUG,
-//                                           ACE_TEXT ("found entity chunk @%d[%d]: %d + %d byte(s)\n"),
-//                                           driver->offset () - yyleng,
-//                                           (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng,
-//                                           yyleng, chunk_size));
+                               if (yy_flex_debug)
+                                 ACE_DEBUG ((LM_DEBUG,
+                                             ACE_TEXT ("found entity chunk @%d[fragment offset: %d]: (%d +) %d (+ 2) byte(s)\n"),
+                                             driver->offset () - yyleng,
+                                             (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng,
+                                             yyleng, chunk_size));
 
                                // adjust write pointer ?
-                               ACE_Message_Block* message_p, *message_2;
-                               unsigned int remainder =
+                               ACE_Message_Block* message_p, *message_2, *message_3;
+                               unsigned int received_bytes =
                                    message_block_p->length ();
-                               if (chunk_size <= remainder)
+                               if (chunk_size <= received_bytes)
                                { // current fragment contains the whole chunk
-
-                                 // --> insert buffer
-                                 message_p =
-                                   message_block_p->duplicate ();
+                                 // --> insert buffer (and slurp the whole chunk
+                                 //     in one go, see below))
+                                 message_p = message_block_p->duplicate ();
                                  ACE_ASSERT (message_p);
-                                 message_2 =
-                                   message_block_p->cont ();
+                                 message_2 = message_block_p->cont ();
                                  if (message_2)
                                    message_p->cont (message_2);
                                  message_block_p->cont (message_p);
 
-                                 message_block_p->wr_ptr (message_block_p->rd_ptr () + chunk_size);
-                                 remainder = chunk_size;
+                                 message_block_p->wr_ptr (message_block_p->rd_ptr () +
+                                                          chunk_size);
+                                 received_bytes = chunk_size;
                                } // end IF
                                else
                                {
-                                 // skip trailing entity data fragments
-                                 unsigned int skipped_bytes = remainder;
-                                 while (skipped_bytes <= chunk_size)
+                                 // (wait for/)skip over (missing) entity data
+                                 // fragment(s)
+                                 while (received_bytes <= chunk_size)
                                  {
                                    if (!driver->switchBuffer ())
-                                   {
-                                     ACE_DEBUG ((LM_ERROR,
+                                   { // *NOTE*: most probable reason: connection
+                                     //         has been closed --> session end
+                                     ACE_DEBUG ((LM_DEBUG,
                                                  ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                                      yyterminate();
                                    } // end IF
 
-                                   skipped_bytes +=
-                                       message_block_p->length ();
+                                   received_bytes =
+                                       message_block_p->total_length ();
                                  } // end WHILE
-                                 remainder = (skipped_bytes - chunk_size);
+                                 received_bytes -= chunk_size;
 
-                                 // this chunk ends in the current fragment
-                                 // --> insert buffer, adjust writer pointer,
-                                 //     switch buffers one more time
-                                 message_p =
-                                     message_block_p->duplicate ();
+                                 // chunk ends in the current fragment
+                                 // --> insert buffer, adjust writer pointer
+                                 message_p = driver->buffer ();
                                  ACE_ASSERT (message_p);
-                                 message_2 =
-                                     message_block_p->cont ();
-                                 if (message_2)
-                                   message_p->cont (message_2);
-                                 message_block_p->cont (message_p);
-                                 // computer offset to end of chunk
-                                 remainder =
-                                     message_block_p->length () - remainder;
-                                 message_block_p->wr_ptr (message_block_p->rd_ptr () + remainder);
+                                 message_2 = message_p->duplicate ();
+                                 ACE_ASSERT (message_2);
+                                 // *TODO*: solve potential race condition here:
+                                 //         calling message_p->cont() here is
+                                 //         not safe, more data could arrive in
+                                 //         the meantime
+                                 message_3 = message_p->cont ();
+                                 if (message_3)
+                                   message_2->cont (message_3);
+                                 message_p->cont (message_2);
+                                 // compute offset to end of chunk
+                                 message_p->wr_ptr (message_p->rd_ptr () +
+                                                    (message_p->length () - received_bytes));
+                                 message_2->rd_ptr (message_2->length () - received_bytes);
+                                 ACE_ASSERT (message_block_p->total_length () == (chunk_size + received_bytes));
+                                 ACE_ASSERT (message_2->length () == received_bytes);
                                } // end ELSE
 
+                               // switch buffers (one more time)
                                if (!driver->switchBuffer ())
                                {
                                  ACE_DEBUG ((LM_ERROR,
                                              ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                                  yyterminate();
                                } // end IF
-                               remainder += 2;
-                               message_block_p->rd_ptr (remainder); // offset + CRLF
+                               message_block_p = driver->buffer ();
+//                               remainder += 2;
+                               message_block_p->rd_ptr (2); // chunk_size + CRLF
 
                                // gobble initial bytes
-                               yyg->yy_c_buf_p += remainder;
+//                               yyg->yy_c_buf_p += remainder;
+                               yyg->yy_c_buf_p += 2;
                                yyg->yy_hold_char = *yyg->yy_c_buf_p;
                                //YY_FLUSH_BUFFER; // --> refill scan buffer
 //                               char c;
@@ -76054,10 +76049,11 @@ YY_RULE_SETUP
                              } // end IF
                              else
                              {
-                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("found last entity chunk @%d[%d]\n"),
-                                           driver->offset () - yyleng,
-                                           (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng));
+                               if (yy_flex_debug)
+                                 ACE_DEBUG ((LM_DEBUG,
+                                             ACE_TEXT ("found last entity chunk @%d[fragment offset: %d]: 1 (+ 2) byte(s)\n"),
+                                             driver->offset () - yyleng,
+                                             (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng));
                                yylval->ival = yyleng;
                              } // end ELSE
                              BEGIN (chunked_body);
@@ -76230,7 +76226,6 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-	} /* end of user's declarations */
 } /* end of HTTP_Scanner_lex */
 /* %ok-for-header */
 
@@ -76299,21 +76294,21 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 	else
 		{
-			yy_size_t num_to_read =
+			int num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
 			{ /* Not enough room in the buffer - grow it. */
 
 			/* just a shorter name for the current buffer */
-			YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
+			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
 
 			int yy_c_buf_p_offset =
 				(int) (yyg->yy_c_buf_p - b->yy_ch_buf);
 
 			if ( b->yy_is_our_buffer )
 				{
-				yy_size_t new_size = b->yy_buf_size * 2;
+				int new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -76344,7 +76339,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			yyg->yy_n_chars, num_to_read );
+			yyg->yy_n_chars, (size_t) num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
 		}
@@ -76449,7 +76444,6 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 			}
 		}
 
-	(void)yyg;
 	return yy_is_jam ? 0 : yy_current_state;
 }
 
@@ -76471,7 +76465,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 		{ /* need to shift things up to make room */
 		/* +2 for EOB chars. */
-		register yy_size_t number_to_move = yyg->yy_n_chars + 2;
+		register int number_to_move = yyg->yy_n_chars + 2;
 		register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
 					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
 		register char *source =
@@ -76534,7 +76528,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 		else
 			{ /* need more input */
-			yy_size_t offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
+			int offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
 			++yyg->yy_c_buf_p;
 
 			switch ( yy_get_next_buffer( yyscanner ) )
@@ -76728,6 +76722,13 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 	HTTP_Scanner_free((void *) b ,yyscanner );
 }
 
+/* %if-c-only */
+
+/* %endif */
+
+/* %if-c++-only */
+/* %endif */
+
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a HTTP_Scanner_restart() or at EOF.
@@ -76874,7 +76875,7 @@ static void HTTP_Scanner_ensure_buffer_stack (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-	yy_size_t num_to_alloc;
+	int num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if (!yyg->yy_buffer_stack) {
@@ -76978,12 +76979,12 @@ YY_BUFFER_STATE HTTP_Scanner__scan_string (yyconst char * yystr , yyscan_t yysca
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE HTTP_Scanner__scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE HTTP_Scanner__scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 	char *buf;
 	yy_size_t n;
-	yy_size_t i;
+	int i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
@@ -77103,7 +77104,7 @@ FILE *HTTP_Scanner_get_out  (yyscan_t yyscanner)
 /** Get the length of the current token.
  * @param yyscanner The scanner object.
  */
-yy_size_t HTTP_Scanner_get_leng  (yyscan_t yyscanner)
+int HTTP_Scanner_get_leng  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyleng;
@@ -77143,7 +77144,7 @@ void HTTP_Scanner_set_lineno (int  line_number , yyscan_t yyscanner)
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "HTTP_Scanner_set_lineno called with no buffer" );
+           yy_fatal_error( "HTTP_Scanner_set_lineno called with no buffer" , yyscanner); 
     
     yylineno = line_number;
 }
@@ -77158,7 +77159,7 @@ void HTTP_Scanner_set_column (int  column_no , yyscan_t yyscanner)
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "HTTP_Scanner_set_column called with no buffer" );
+           yy_fatal_error( "HTTP_Scanner_set_column called with no buffer" , yyscanner); 
     
     yycolumn = column_no;
 }

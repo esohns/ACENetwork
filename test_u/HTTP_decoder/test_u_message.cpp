@@ -66,31 +66,6 @@ Test_U_Message::~Test_U_Message ()
 
 }
 
-HTTP_Method_t
-Test_U_Message::command () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::command"));
-
-  // sanity check(s)
-  if (!inherited::initialized_)
-    return HTTP_Codes::HTTP_METHOD_INVALID;
-
-  const Test_U_MessageData_t::DATA_T& data_r =
-      inherited::data_.get ();
-
-  return (data_r.HTTPRecord ? data_r.HTTPRecord->method
-                            : HTTP_Codes::HTTP_METHOD_INVALID);
-}
-
-std::string
-Test_U_Message::CommandType2String (HTTP_Method_t method_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::CommandType2String"));
-
-  return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
-                                                       : HTTP_Tools::Method2String (method_in));
-}
-
 ACE_Message_Block*
 Test_U_Message::duplicate (void) const
 {
@@ -112,7 +87,7 @@ Test_U_Message::duplicate (void) const
     //         a shallow copy which just references the same data block
     ACE_NEW_MALLOC_NORETURN (message_p,
                              static_cast<Test_U_Message*> (inherited::message_block_allocator_->calloc (inherited::capacity (),
-                                                                                                               '\0')),
+                                                                                                        '\0')),
                              Test_U_Message (*this));
   } // end ELSE
   if (!message_p)
@@ -145,4 +120,29 @@ Test_U_Message::duplicate (void) const
   // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
 
   return message_p;
+}
+
+HTTP_Method_t
+Test_U_Message::command () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::command"));
+
+  // sanity check(s)
+  if (!inherited::initialized_)
+    return HTTP_Codes::HTTP_METHOD_INVALID;
+  ACE_ASSERT (inherited::data_);
+
+  const Test_U_MessageData& data_r = inherited::data_->get ();
+
+  return (data_r.HTTPRecord ? data_r.HTTPRecord->method
+                            : HTTP_Codes::HTTP_METHOD_INVALID);
+}
+
+std::string
+Test_U_Message::CommandType2String (HTTP_Method_t method_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::CommandType2String"));
+
+  return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
+                                                       : HTTP_Tools::Method2String (method_in));
 }

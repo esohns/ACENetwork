@@ -44,6 +44,7 @@
 #include "stream_messageallocatorheap_base.h"
 #include "stream_session_data.h"
 
+#include "net_connection_manager.h"
 #include "net_defines.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
@@ -149,11 +150,17 @@ typedef Net_IConnection_T<ACE_INET_Addr,
                           Test_U_Configuration,
                           Test_U_ConnectionState,
                           HTTP_RuntimeStatistic_t> Test_U_IConnection_t;
+typedef Net_Connection_Manager_T<ACE_INET_Addr,
+                                 Test_U_Configuration,
+                                 Test_U_ConnectionState,
+                                 HTTP_RuntimeStatistic_t,
+                                 /////////
+                                 Test_U_UserData> Test_U_ConnectionManager_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Test_U_Configuration,
                                  Test_U_ConnectionState,
                                  HTTP_RuntimeStatistic_t,
-                                 ////////
+                                 /////////
                                  Test_U_UserData> Test_U_IConnectionManager_t;
 struct Test_U_ModuleHandlerConfiguration
  : HTTP_ModuleHandlerConfiguration

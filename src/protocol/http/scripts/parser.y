@@ -304,22 +304,21 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                                                                               std::regex_constants::match_default))
                                                        {
                                                          ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("invalid HTTP header (was: \"%s\"), continuing\n"),
+                                                                     ACE_TEXT ("invalid HTTP header (was: \"%s\"), returning\n"),
                                                                      ACE_TEXT ((*$2).c_str ())));
+                                                         break;
                                                        } // end IF
                                                        ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
                                                        ACE_ASSERT (match_results[1].matched);
                                                        HTTP_Record* record_p = driver->record ();
                                                        ACE_ASSERT (record_p);
-                                                       HTTP_HeadersIterator_t iterator =
-                                                         record_p->headers.find (match_results[1]);
-                                                       if (iterator != record_p->headers.end ())
-                                                       {
-                                                         ACE_DEBUG ((LM_WARNING,
-                                                                     ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
-                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
-                                                       } // end IF
+//                                                       HTTP_HeadersIterator_t iterator =
+//                                                         record_p->headers.find (match_results[1]);
+//                                                       if (iterator != record_p->headers.end ())
+//                                                         ACE_DEBUG ((LM_DEBUG,
+//                                                                     ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
+//                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
                                                        ACE_ASSERT (match_results[2].matched);
                                                        ACE_ASSERT (!match_results[2].str ().empty ());
                                                        record_p->headers[match_results[1]] =
@@ -332,10 +331,13 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                     |                                { $$ = 0; };
 //                    | %empty                         { $$ = 0; };
 body:               "body"                           { $$ = $1;
+                                                       driver->finished ();
                                                        YYACCEPT; }; // *NOTE*: any following (entity) fragments will not be parsed
                     | "chunk" chunks headers "delimiter" { $$ = $1 + $2 + $3 + $4; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
-                                                       YYACCEPT; };
+                                                           driver->finished ();
+                                                           YYACCEPT; };
                     |                                { $$ = 0;
+                                                       driver->finished ();
                                                        YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk 
 //                    | %empty                         { $$ = 0;
 //                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)

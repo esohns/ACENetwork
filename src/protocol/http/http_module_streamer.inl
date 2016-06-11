@@ -121,7 +121,7 @@ HTTP_Module_Streamer_T<TaskSynchType,
       continue;
 
     buffer += (*iterator).first;
-    buffer += ACE_TEXT_ALWAYS_CHAR (":");
+    buffer += ACE_TEXT_ALWAYS_CHAR (": ");
     buffer += (*iterator).second;
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end FOR
@@ -136,7 +136,7 @@ HTTP_Module_Streamer_T<TaskSynchType,
       continue;
 
     buffer += (*iterator).first;
-    buffer += ACE_TEXT_ALWAYS_CHAR (":");
+    buffer += ACE_TEXT_ALWAYS_CHAR (": ");
     buffer += (*iterator).second;
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end FOR
@@ -150,7 +150,7 @@ HTTP_Module_Streamer_T<TaskSynchType,
       continue;
 
     buffer += (*iterator).first;
-    buffer += ACE_TEXT_ALWAYS_CHAR (":");
+    buffer += ACE_TEXT_ALWAYS_CHAR (": ");
     buffer += (*iterator).second;
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end FOR
