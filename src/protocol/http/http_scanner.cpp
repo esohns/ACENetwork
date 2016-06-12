@@ -75098,9 +75098,9 @@ static yyconst yy_state_type yy_NUL_trans[2344] =
 
 static yyconst flex_int32_t yy_rule_linenum[23] =
     {   0,
-      331,  335,  341,  354,  367,  380,  390,  400,  410,  418,
-      431,  444,  457,  467,  477,  487,  507,  521,  531,  541,
-      550,  669
+      334,  338,  344,  357,  370,  383,  393,  403,  413,  421,
+      434,  447,  460,  470,  480,  490,  510,  524,  535,  545,
+      554,  695
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -75527,8 +75527,11 @@ YY_DECL
   //yylloc->step ();
   yy_flex_debug = driver->debugScanner ();
 
+  // *TODO*: these prevent the scanner from being fully re-entrant
+  //         --> remove ASAP
   std::istringstream converter;
   unsigned int chunk_size;
+  unsigned int missing_chunk_bytes;
 
     yylval = yylval_param;
 
@@ -75906,6 +75909,7 @@ YY_RULE_SETUP
                                              std::ios::basefield);
                              converter.str (yytext);
                              converter >> chunk_size;
+                             missing_chunk_bytes = chunk_size;
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              BEGIN (chunk);
@@ -75961,76 +75965,96 @@ YY_RULE_SETUP
                                              (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng,
                                              yyleng, chunk_size));
 
-                               // adjust write pointer ?
+                               // skip over chunk data
+                               unsigned int bytes_to_skip = missing_chunk_bytes;
+                               unsigned int remainder = 0;
                                ACE_Message_Block* message_p, *message_2, *message_3;
-                               unsigned int received_bytes =
-                                   message_block_p->length ();
-                               if (chunk_size <= received_bytes)
-                               { // current fragment contains the whole chunk
-                                 // --> insert buffer (and slurp the whole chunk
-                                 //     in one go, see below))
-                                 message_p = message_block_p->duplicate ();
-                                 ACE_ASSERT (message_p);
-                                 message_2 = message_block_p->cont ();
-                                 if (message_2)
-                                   message_p->cont (message_2);
-                                 message_block_p->cont (message_p);
+                               if (missing_chunk_bytes > message_block_p->length ())
+                                 missing_chunk_bytes -= message_block_p->length ();
+                               else
+                               {
+                                 remainder =
+                                   (message_block_p->length () - missing_chunk_bytes);
+                                 missing_chunk_bytes = 0;
+                               } // end ELSE
+                               if (!missing_chunk_bytes)
+                               { // the fragment contains the (trailing end of
+                                 // the) chunk
+                                 // --> (insert buffer and) slurp the chunk
+                                 //     data, see below)
+                                 if (remainder)
+                                 { // bits of the next chunk are available
+                                   message_p = message_block_p->duplicate ();
+                                   ACE_ASSERT (message_p);
+                                   message_2 = message_block_p->cont ();
+                                   if (message_2)
+                                     message_p->cont (message_2);
+                                   message_p->rd_ptr (bytes_to_skip);
+                                   ACE_ASSERT (message_p->length () == remainder);
+                                   message_block_p->cont (message_p);
+                                 } // end IF
 
-                                 message_block_p->wr_ptr (message_block_p->rd_ptr () +
-                                                          chunk_size);
-                                 received_bytes = chunk_size;
+                                 message_block_p->wr_ptr (message_block_p->rd_ptr () + bytes_to_skip);
+                                 ACE_ASSERT (message_block_p->length () == bytes_to_skip);
                                } // end IF
                                else
                                {
-                                 // (wait for/)skip over (missing) entity data
-                                 // fragment(s)
-                                 while (received_bytes <= chunk_size)
+                                 if (!driver->isBlocking ())
+                                   return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+
+                                 // wait for (missing) chunk data fragment(s)
+                                 while (missing_chunk_bytes)
                                  {
                                    if (!driver->switchBuffer ())
                                    { // *NOTE*: most probable reason: connection
                                      //         has been closed --> session end
                                      ACE_DEBUG ((LM_DEBUG,
-                                                 ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
+                                                 ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
                                      yyterminate();
                                    } // end IF
+                                   message_p = driver->buffer ();
 
-                                   received_bytes =
-                                       message_block_p->total_length ();
+                                   if (missing_chunk_bytes > message_p->length ())
+                                     missing_chunk_bytes -= message_p->length ();
+                                   else
+                                   {
+                                     bytes_to_skip = missing_chunk_bytes;
+                                     remainder =
+                                       (message_p->length () - missing_chunk_bytes);
+                                     missing_chunk_bytes = 0;
+                                   } // end ELSE
                                  } // end WHILE
-                                 received_bytes -= chunk_size;
 
                                  // chunk ends in the current fragment
-                                 // --> insert buffer, adjust writer pointer
-                                 message_p = driver->buffer ();
-                                 ACE_ASSERT (message_p);
-                                 message_2 = message_p->duplicate ();
-                                 ACE_ASSERT (message_2);
-                                 // *TODO*: solve potential race condition here:
-                                 //         calling message_p->cont() here is
-                                 //         not safe, more data could arrive in
-                                 //         the meantime
-                                 message_3 = message_p->cont ();
-                                 if (message_3)
-                                   message_2->cont (message_3);
-                                 message_p->cont (message_2);
-                                 // compute offset to end of chunk
-                                 message_p->wr_ptr (message_p->rd_ptr () +
-                                                    (message_p->length () - received_bytes));
-                                 message_2->rd_ptr (message_2->length () - received_bytes);
-                                 ACE_ASSERT (message_block_p->total_length () == (chunk_size + received_bytes));
-                                 ACE_ASSERT (message_2->length () == received_bytes);
+                                 // --> (insert buffer and) slurp the chunk
+                                 //     data, see below)
+                                 if (remainder)
+                                 { // bits of the next chunk are available
+                                   message_2 = message_p->duplicate ();
+                                   ACE_ASSERT (message_2);
+                                   message_3 = message_p->cont ();
+                                   if (message_3)
+                                     message_2->cont (message_3);
+                                   message_2->rd_ptr (bytes_to_skip);
+                                   ACE_ASSERT (message_2->length () == remainder);
+                                   message_p->cont (message_2);
+                                   message_p->wr_ptr (message_p->rd_ptr () + bytes_to_skip);
+                                   ACE_ASSERT (message_p->length () == bytes_to_skip);
+                                 } // end IF
+
+                                 ACE_ASSERT (message_block_p->total_length () >= chunk_size);
                                } // end ELSE
 
                                // switch buffers (one more time)
                                if (!driver->switchBuffer ())
                                {
                                  ACE_DEBUG ((LM_ERROR,
-                                             ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
+                                             ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
                                  yyterminate();
                                } // end IF
                                message_block_p = driver->buffer ();
 //                               remainder += 2;
-                               message_block_p->rd_ptr (2); // chunk_size + CRLF
+                               message_block_p->rd_ptr (2); // chunk_size/remainder + CRLF
 
                                // gobble initial bytes
 //                               yyg->yy_c_buf_p += remainder;
@@ -76054,6 +76078,8 @@ YY_RULE_SETUP
                                              ACE_TEXT ("found last entity chunk @%d[fragment offset: %d]: 1 (+ 2) byte(s)\n"),
                                              driver->offset () - yyleng,
                                              (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng));
+
+                               driver->offset (1 + 2);
                                yylval->ival = yyleng;
                              } // end ELSE
                              BEGIN (chunked_body);
@@ -76080,17 +76106,17 @@ case 22:
 /* rule 22 can match eol */
 YY_RULE_SETUP
 { /* *TODO*: use (?s:.) ? */
+                             // debug info
+                             std::string error_message =
+                               ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");
+                             error_message += yytext[0];
+                             error_message += ACE_TEXT_ALWAYS_CHAR ("\", returning");
+                             driver->error (*yylloc, error_message);
 
                              /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */
                              ACE_ASSERT (false);
 
-                             // debug info
-                             std::string error_message =
-                               ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");
-                             error_message += yytext[0];
-                             error_message += ACE_TEXT_ALWAYS_CHAR ("\", aborting");
-                             driver->error (*yylloc, error_message);
                              yyterminate(); }
 	YY_BREAK
 case 23:
@@ -77429,9 +77455,8 @@ HTTP_Scanner_wrap (yyscan_t yyscanner)
 
   // sanity check(s)
   ACE_ASSERT (driver);
-  if (driver->hasFinished ())
-    return 1; // done
-  ACE_ASSERT (driver->buffer ());
+  if (!driver->isBlocking ())
+    return 1; // not enough data, cannot proceed
 
   // *NOTE*: there is more data
   // 1. gobble/save the rest
@@ -77468,7 +77493,9 @@ HTTP_Scanner_wrap (yyscan_t yyscanner)
     unput (*iterator);
 
   // step4
+  //yyg->yy_did_buffer_switch_on_eof = 1;
   // yymore ();
+
   return 0;
 }
 #ifdef __cplusplus

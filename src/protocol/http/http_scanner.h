@@ -2,6 +2,7 @@
 #define HTTP_Scanner_HEADER_H 1
 #define HTTP_Scanner_IN_HEADER 1
 
+#line 2 "./../scripts/scanner.l"
 #include "net_iparser.h"
 
 #include "http_common.h"
@@ -31,6 +32,10 @@ YY_DECL;
 void HTTP_Scanner_set_column (int column_no , yyscan_t yyscanner);
 
 //#define FLEXINT_H
+
+
+
+#line 39 "http_scanner.h"
 
 #define  YY_INT_ALIGNED long int
 
@@ -74576,5 +74581,6 @@ extern int HTTP_Scanner_lex \
 #undef YY_DECL
 #endif
 
+#line 74585 "http_scanner.h"
 #undef HTTP_Scanner_IN_HEADER
 #endif /* HTTP_Scanner_HEADER_H */

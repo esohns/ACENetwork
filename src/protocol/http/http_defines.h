@@ -23,11 +23,6 @@
 
 //#include "ace/Default_Constants.h"
 
-// parser
-// "\0\0"
-#define YY_END_OF_BUFFER_CHAR                     0
-#define HTTP_FLEX_BUFFER_BOUNDARY_SIZE            2
-
 // stream
 #define HTTP_BUFFER_SIZE                          16384
 
@@ -52,10 +47,6 @@
 //             BEYOND their datas' tail byte (i.e. at positions length() + 1 and
 //             length() + 2)
 #define HTTP_DEFAULT_USE_YY_SCAN_BUFFER           true
-
-// output more debugging information
-#define HTTP_DEFAULT_LEX_TRACE                    false
-#define HTTP_DEFAULT_YACC_TRACE                   false
 
 #define HTTP_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
 

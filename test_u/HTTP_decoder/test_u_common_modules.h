@@ -59,7 +59,8 @@ class Test_U_Message;
 typedef HTTP_Module_Parser_T<Common_TimePolicy_t,
                              Test_U_SessionMessage,
                              Test_U_Message,
-                             Test_U_ModuleHandlerConfiguration> Test_U_Module_Parser;
+                             Test_U_ModuleHandlerConfiguration,
+                             HTTP_Record> Test_U_Module_Parser;
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                Test_U_SessionMessage,

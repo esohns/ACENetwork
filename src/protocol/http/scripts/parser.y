@@ -179,7 +179,8 @@ using namespace std;
 %token <std::string> HEADER      "header"
 %token <std::string> DELIMITER   "delimiter"
 %token <int>         BODY        "body" */
-%token <ival> END 0       "end_of_fragment"
+%token <ival> END_OF_FRAGMENT    "end_of_fragment"
+%token <ival> END 0       "end"
 
 %type  <ival> message head body
 %type  <ival> head_rest1 head_rest2 headers chunks
@@ -247,8 +248,8 @@ head:               "method" head_rest1              { $$ = (*$1).size () + $2 +
 //                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
                                                        } // end ELSE
                                                      };
-                    | "end_of_fragment"              { $$ = $1;
-                                                       yyclearin; };
+                    | "end_of_fragment"              { $$ = 0;
+                                                       YYACCEPT; };
 head_rest1:         request_line_rest1 headers       { $$ = $1 + $2; };
 request_line_rest1: "uri" request_line_rest2         { $$ = (*$1).size () + $2 + 1;
                                                        driver->record ()->URI = *$1;
@@ -256,8 +257,8 @@ request_line_rest1: "uri" request_line_rest2         { $$ = (*$1).size () + $2 +
 //                                                                   ACE_TEXT ("set URI: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));
                                                      };
-                    | "end_of_fragment"              { $$ = $1;
-                                                       yyclearin; };
+                    | "end_of_fragment"              { $$ = 0;
+                                                       YYACCEPT; };
 request_line_rest2: "version"                        { $$ = (*$1).size () + 2;
                                                        driver->record ()->version =
                                                          HTTP_Tools::Version2Type (*$1);
@@ -265,8 +266,8 @@ request_line_rest2: "version"                        { $$ = (*$1).size () + 2;
 //                                                                   ACE_TEXT ("set version: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));
                                                      };
-                    | "end_of_fragment"              { $$ = $1;
-                                                       yyclearin; };
+                    | "end_of_fragment"              { $$ = 0;
+                                                       YYACCEPT; };
 head_rest2:         status_line_rest1 headers        { $$ = $1 + $2; };
 status_line_rest1:  "status" status_line_rest2       { $$ = (*$1).size () + $2 + 1;
                                                        std::stringstream converter;
@@ -279,16 +280,16 @@ status_line_rest1:  "status" status_line_rest2       { $$ = (*$1).size () + $2 +
 //                                                                   ACE_TEXT ("set status: %d\n"),
 //                                                                   status));
                                                      };
-                    | "end_of_fragment"              { $$ = $1;
-                                                       yyclearin; };
+                    | "end_of_fragment"              { $$ = 0;
+                                                       YYACCEPT; };
 status_line_rest2:  "reason"                         { $$ = (*$1).size () + 2;
                                                        driver->record ()->reason = *$1;
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set reason: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));
                                                      };
-                    | "end_of_fragment"              { $$ = $1;
-                                                       yyclearin; };
+                    | "end_of_fragment"              { $$ = 0;
+                                                       YYACCEPT; };
 headers:            headers "header"                 { /* NOTE*: use right-recursion here to force early state reductions
                                                                  (i.e. parse headers). This is required so the scanner can
                                                                  act on any set transfer encoding. */
@@ -328,17 +329,20 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
 //                                                                   ACE_TEXT (match_results[1].str ().c_str ()),
 //                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
                                                      };
+                    | "end_of_fragment"              { $$ = 0;
+                                                       yyclearin;
+                                                       YYACCEPT; };
                     |                                { $$ = 0; };
 //                    | %empty                         { $$ = 0; };
 body:               "body"                           { $$ = $1;
                                                        driver->finished ();
                                                        YYACCEPT; }; // *NOTE*: any following (entity) fragments will not be parsed
-                    | "chunk" chunks headers "delimiter" { $$ = $1 + $2 + $3 + $4; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
-                                                           driver->finished ();
-                                                           YYACCEPT; };
-                    |                                { $$ = 0;
+                    | chunks headers "delimiter"     { $$ = $1 + $2 + $3; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
                                                        driver->finished ();
-                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk 
+                                                       YYACCEPT; };
+                    | "end_of_fragment"              { $$ = 0;
+                                                       yyclearin;
+                                                       YYACCEPT; };
 //                    | %empty                         { $$ = 0;
 //                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
 chunks:             "chunk" chunks                   { $$ = $1 + $2; };

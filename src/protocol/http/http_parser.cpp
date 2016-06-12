@@ -222,25 +222,25 @@ YYID (i)
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  14
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   22
+#define YYLAST   27
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  12
+#define YYNTOKENS  13
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  12
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  22
+#define YYNRULES  23
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  33
+#define YYNSTATES  34
 /* YYMAXRHS -- Maximum number of symbols on right-hand side of rule.  */
-#define YYMAXRHS 4
+#define YYMAXRHS 3
 /* YYMAXLEFT -- Maximum number of symbols to the left of a handle
    accessed by $0, $-1, etc., in any rule.  */
 #define YYMAXLEFT 0
 
 /* YYTRANSLATE(X) -- Bison symbol number corresponding to X.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   266
+#define YYMAXUTOK   267
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -274,7 +274,7 @@ static const unsigned char yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11
+       5,     6,     7,     8,     9,    10,    11,    12
 };
 
 #if YYDEBUG
@@ -283,27 +283,27 @@ static const unsigned char yytranslate[] =
 static const unsigned char yyprhs[] =
 {
        0,     0,     3,     7,    10,    13,    15,    18,    21,    23,
-      25,    27,    30,    33,    35,    37,    39,    42,    43,    45,
-      50,    51,    54
+      25,    27,    30,    33,    35,    37,    39,    42,    44,    45,
+      47,    51,    53,    56
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const signed char yyrhs[] =
 {
-      13,     0,    -1,    14,     7,    22,    -1,     3,    15,    -1,
-       5,    18,    -1,     0,    -1,    16,    21,    -1,     4,    17,
-      -1,     0,    -1,     5,    -1,     0,    -1,    19,    21,    -1,
-       8,    20,    -1,     0,    -1,     9,    -1,     0,    -1,    21,
-       6,    -1,    -1,    10,    -1,    11,    23,    21,     7,    -1,
-      -1,    11,    23,    -1,    -1
+      14,     0,    -1,    15,     7,    23,    -1,     3,    16,    -1,
+       5,    19,    -1,    12,    -1,    17,    22,    -1,     4,    18,
+      -1,    12,    -1,     5,    -1,    12,    -1,    20,    22,    -1,
+       8,    21,    -1,    12,    -1,     9,    -1,    12,    -1,    22,
+       6,    -1,    12,    -1,    -1,    10,    -1,    24,    22,     7,
+      -1,    12,    -1,    11,    24,    -1,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short int yyrline[] =
 {
-       0,   212,   212,   213,   220,   250,   252,   253,   259,   261,
-     268,   270,   271,   282,   284,   290,   292,   331,   333,   336,
-     339,   344,   345
+       0,   213,   213,   214,   221,   251,   253,   254,   260,   262,
+     269,   271,   272,   283,   285,   291,   293,   332,   334,   336,
+     339,   342,   347,   348
 };
 #endif
 
@@ -312,28 +312,29 @@ static const unsigned short int yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "\"end_of_fragment\"", "error", "$undefined", "\"method\"", "\"uri\"",
+  "\"end\"", "error", "$undefined", "\"method\"", "\"uri\"",
   "\"version\"", "\"header\"", "\"delimiter\"", "\"status\"", "\"reason\"",
-  "\"body\"", "\"chunk\"", "$accept", "message", "head", "head_rest1",
-  "request_line_rest1", "request_line_rest2", "head_rest2",
-  "status_line_rest1", "status_line_rest2", "headers", "body", "chunks", 0
+  "\"body\"", "\"chunk\"", "\"end_of_fragment\"", "$accept", "message",
+  "head", "head_rest1", "request_line_rest1", "request_line_rest2",
+  "head_rest2", "status_line_rest1", "status_line_rest2", "headers",
+  "body", "chunks", 0
 };
 #endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const unsigned char yyr1[] =
 {
-       0,    12,    13,    14,    14,    14,    15,    16,    16,    17,
-      17,    18,    19,    19,    20,    20,    21,    21,    22,    22,
-      22,    23,    23
+       0,    13,    14,    15,    15,    15,    16,    17,    17,    18,
+      18,    19,    20,    20,    21,    21,    22,    22,    22,    23,
+      23,    23,    24,    24
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const unsigned char yyr2[] =
 {
        0,     2,     3,     2,     2,     1,     2,     2,     1,     1,
-       1,     2,     2,     1,     1,     1,     2,     0,     1,     4,
-       0,     2,     0
+       1,     2,     2,     1,     1,     1,     2,     1,     0,     1,
+       3,     1,     2,     0
 };
 
 /* YYDPREC[RULE-NUM] -- Dynamic precedence of rule #RULE-NUM (0 if none).  */
@@ -341,7 +342,7 @@ static const unsigned char yydprec[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0
+       0,     0,     0,     0
 };
 
 /* YYMERGER[RULE-NUM] -- Index of merging function for rule #RULE-NUM.  */
@@ -349,7 +350,7 @@ static const unsigned char yymerger[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0
+       0,     0,     0,     0
 };
 
 /* YYDEFACT[S] -- default rule to reduce with in state S when YYTABLE
@@ -357,35 +358,35 @@ static const unsigned char yymerger[] =
    error.  */
 static const unsigned char yydefact[] =
 {
-       0,     5,     0,     0,     0,     0,     8,     0,     3,    17,
-      13,     0,     4,    17,     1,    20,    10,     9,     7,     6,
-      15,    14,    12,    11,    18,    22,     2,    16,    22,    17,
-      21,     0,    19
+       0,     0,     0,     5,     0,     0,     0,     8,     3,    18,
+       0,    13,     4,    18,     1,    23,     9,    10,     7,    17,
+       6,    14,    15,    12,    11,    19,    23,    21,     2,    18,
+      16,    22,     0,    20
 };
 
 /* YYPDEFGOTO[NTERM-NUM].  */
 static const signed char yydefgoto[] =
 {
-      -1,     4,     5,     8,     9,    18,    12,    13,    22,    19,
-      26,    29
+      -1,     4,     5,     8,     9,    18,    12,    13,    23,    20,
+      28,    29
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -16
+#define YYPACT_NINF -14
 static const signed char yypact[] =
 {
-       2,   -16,     8,     3,     6,    14,   -16,     4,   -16,   -16,
-     -16,     1,   -16,   -16,   -16,     7,   -16,   -16,   -16,     9,
-     -16,   -16,   -16,     9,   -16,    11,   -16,   -16,    11,   -16,
-     -16,    13,   -16
+      -2,     0,    -1,   -14,     6,    12,    -3,   -14,   -14,     8,
+      -4,   -14,   -14,     8,   -14,     3,   -14,   -14,   -14,   -14,
+      15,   -14,   -14,   -14,    15,   -14,    13,   -14,   -14,     8,
+     -14,   -14,    11,   -14
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const signed char yypgoto[] =
 {
-     -16,   -16,   -16,   -16,   -16,   -16,   -16,   -16,   -16,   -13,
-     -16,   -15
+     -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -13,
+     -14,     1
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -395,9 +396,9 @@ static const signed char yypgoto[] =
 #define YYTABLE_NINF -1
 static const unsigned char yytable[] =
 {
-      23,    20,     1,    10,    16,     2,    14,     3,     6,    17,
-      21,    11,     7,    30,     0,    27,    31,    24,    25,    27,
-      32,    15,    28
+      24,     1,    16,     2,     6,    21,    14,    10,    22,    17,
+       3,    11,     7,    25,    26,    27,    32,    30,    33,    15,
+      19,    30,     0,     0,    26,     0,     0,    31
 };
 
 /* YYCONFLP[YYPACT[STATE-NUM]] -- Pointer into YYCONFL of start of
@@ -408,7 +409,7 @@ static const unsigned char yyconflp[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0
+       0,     0,     0,     0,     0,     0,     0,     0
 };
 
 /* YYCONFL[I] -- lists of conflicting rule numbers, each terminated by
@@ -420,19 +421,19 @@ static const short int yyconfl[] =
 
 static const signed char yycheck[] =
 {
-      13,     0,     0,     0,     0,     3,     0,     5,     0,     5,
-       9,     8,     4,    28,    -1,     6,    29,    10,    11,     6,
-       7,     7,    11
+      13,     3,     5,     5,     4,     9,     0,     8,    12,    12,
+      12,    12,    12,    10,    11,    12,    29,     6,     7,     7,
+      12,     6,    -1,    -1,    11,    -1,    -1,    26
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const unsigned char yystos[] =
 {
-       0,     0,     3,     5,    13,    14,     0,     4,    15,    16,
-       0,     8,    18,    19,     0,     7,     0,     5,    17,    21,
-       0,     9,    20,    21,    10,    11,    22,     6,    11,    23,
-      23,    21,     7
+       0,     3,     5,    12,    14,    15,     4,    12,    16,    17,
+       8,    12,    19,    20,     0,     7,     5,    12,    18,    12,
+      22,     9,    12,    21,    22,    10,    11,    12,    23,    24,
+       6,    24,    22,     7
 };
 
 
@@ -540,7 +541,7 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
 # endif
   switch (yytype)
     {
-      case 0: /* "\"end_of_fragment\"" */
+      case 0: /* "\"end\"" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
@@ -590,57 +591,62 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
 	break;
-      case 13: /* "message" */
+      case 12: /* "\"end_of_fragment\"" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
 	break;
-      case 14: /* "head" */
+      case 14: /* "message" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
 	break;
-      case 15: /* "head_rest1" */
+      case 15: /* "head" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
 	break;
-      case 16: /* "request_line_rest1" */
+      case 16: /* "head_rest1" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
 	break;
-      case 17: /* "request_line_rest2" */
+      case 17: /* "request_line_rest1" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
 	break;
-      case 18: /* "head_rest2" */
+      case 18: /* "request_line_rest2" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
 	break;
-      case 19: /* "status_line_rest1" */
+      case 19: /* "head_rest2" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
 	break;
-      case 20: /* "status_line_rest2" */
+      case 20: /* "status_line_rest1" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
 	break;
-      case 21: /* "headers" */
+      case 21: /* "status_line_rest2" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
 	break;
-      case 22: /* "body" */
+      case 22: /* "headers" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
 	break;
-      case 23: /* "chunks" */
+      case 23: /* "body" */
+
+	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
+
+	break;
+      case 24: /* "chunks" */
 
 	{ ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), (yyvaluep->ival)); };
 
@@ -1073,8 +1079,8 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 5:
 
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.ival);
-                                                       yyclearin; }
+    { ((*yyvalp).ival) = 0;
+                                                       YYACCEPT; }
     break;
 
   case 6:
@@ -1094,8 +1100,8 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 8:
 
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.ival);
-                                                       yyclearin; }
+    { ((*yyvalp).ival) = 0;
+                                                       YYACCEPT; }
     break;
 
   case 9:
@@ -1111,8 +1117,8 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 10:
 
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.ival);
-                                                       yyclearin; }
+    { ((*yyvalp).ival) = 0;
+                                                       YYACCEPT; }
     break;
 
   case 11:
@@ -1137,8 +1143,8 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 13:
 
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.ival);
-                                                       yyclearin; }
+    { ((*yyvalp).ival) = 0;
+                                                       YYACCEPT; }
     break;
 
   case 14:
@@ -1153,8 +1159,8 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 15:
 
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.ival);
-                                                       yyclearin; }
+    { ((*yyvalp).ival) = 0;
+                                                       YYACCEPT; }
     break;
 
   case 16:
@@ -1202,36 +1208,42 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 17:
 
-    { ((*yyvalp).ival) = 0; }
+    { ((*yyvalp).ival) = 0;
+                                                       YYACCEPT; }
     break;
 
   case 18:
+
+    { ((*yyvalp).ival) = 0; }
+    break;
+
+  case 19:
 
     { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.ival);
                                                        driver->finished ();
                                                        YYACCEPT; }
     break;
 
-  case 19:
-
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.ival); // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
-                                                           driver->finished ();
-                                                           YYACCEPT; }
-    break;
-
   case 20:
 
-    { ((*yyvalp).ival) = 0;
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.ival); // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
                                                        driver->finished ();
                                                        YYACCEPT; }
     break;
 
   case 21:
 
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.ival); }
+    { ((*yyvalp).ival) = 0;
+                                                       yyclearin;
+                                                       YYACCEPT; }
     break;
 
   case 22:
+
+    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 23:
 
     { ((*yyvalp).ival) = 0; }
     break;
@@ -1286,7 +1298,7 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocatio
 
   switch (yytype)
     {
-      case 0: /* "\"end_of_fragment\"" */
+      case 0: /* "\"end\"" */
 
 	{ (yyvaluep->ival) = 0; };
 
@@ -1336,57 +1348,62 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocatio
 	{ (yyvaluep->ival) = 0; };
 
 	break;
-      case 13: /* "message" */
+      case 12: /* "\"end_of_fragment\"" */
 
 	{ (yyvaluep->ival) = 0; };
 
 	break;
-      case 14: /* "head" */
+      case 14: /* "message" */
 
 	{ (yyvaluep->ival) = 0; };
 
 	break;
-      case 15: /* "head_rest1" */
+      case 15: /* "head" */
 
 	{ (yyvaluep->ival) = 0; };
 
 	break;
-      case 16: /* "request_line_rest1" */
+      case 16: /* "head_rest1" */
 
 	{ (yyvaluep->ival) = 0; };
 
 	break;
-      case 17: /* "request_line_rest2" */
+      case 17: /* "request_line_rest1" */
 
 	{ (yyvaluep->ival) = 0; };
 
 	break;
-      case 18: /* "head_rest2" */
+      case 18: /* "request_line_rest2" */
 
 	{ (yyvaluep->ival) = 0; };
 
 	break;
-      case 19: /* "status_line_rest1" */
+      case 19: /* "head_rest2" */
 
 	{ (yyvaluep->ival) = 0; };
 
 	break;
-      case 20: /* "status_line_rest2" */
+      case 20: /* "status_line_rest1" */
 
 	{ (yyvaluep->ival) = 0; };
 
 	break;
-      case 21: /* "headers" */
+      case 21: /* "status_line_rest2" */
 
 	{ (yyvaluep->ival) = 0; };
 
 	break;
-      case 22: /* "body" */
+      case 22: /* "headers" */
 
 	{ (yyvaluep->ival) = 0; };
 
 	break;
-      case 23: /* "chunks" */
+      case 23: /* "body" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 24: /* "chunks" */
 
 	{ (yyvaluep->ival) = 0; };
 

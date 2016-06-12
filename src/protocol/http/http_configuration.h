@@ -114,8 +114,8 @@ struct HTTP_ModuleHandlerConfiguration
   {
     crunchMessages = HTTP_DEFAULT_CRUNCH_MESSAGES; // http parser module
 
-    traceParsing = HTTP_DEFAULT_YACC_TRACE; // http parser module
-    traceScanning = HTTP_DEFAULT_LEX_TRACE; // http parser module
+    traceParsing = NET_PROTOCOL_DEFAULT_YACC_TRACE; // http parser module
+    traceScanning = NET_PROTOCOL_DEFAULT_LEX_TRACE; // http parser module
   };
 
   HTTP_ProtocolConfiguration* protocolConfiguration;

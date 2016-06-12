@@ -97,7 +97,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d          : debug parser [")
-            << HTTP_DEFAULT_YACC_TRACE
+            << NET_PROTOCOL_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
   std::string output_file = path;
@@ -177,7 +177,7 @@ do_processArguments (int argc_in,
 
   // initialize results
   bufferSize_out = TEST_U_DEFAULT_BUFFER_SIZE;
-  debugParser_out = HTTP_DEFAULT_YACC_TRACE;
+  debugParser_out = NET_PROTOCOL_DEFAULT_YACC_TRACE;
   outputFileName_out = path;
   outputFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   outputFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
@@ -986,7 +986,7 @@ ACE_TMAIN (int argc_in,
 
   // step1a set defaults
   unsigned int buffer_size = TEST_U_DEFAULT_BUFFER_SIZE;
-  bool debug_parser = HTTP_DEFAULT_YACC_TRACE;
+  bool debug_parser = NET_PROTOCOL_DEFAULT_YACC_TRACE;
   std::string output_file = ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
   std::string host_name;
   bool log_to_file = false;

@@ -52,10 +52,26 @@
 #define NET_ADDRESS_DEFAULT_IP_MULTICAST                "224.0.0.1"
 #define NET_ADDRESS_DEFAULT_IP_BROADCAST                "255.255.255.255"
 
-// protocol
+// protocols
 // *IMPORTANT NOTE*: must match with the kernel module implementation !
 #define NET_PROTOCOL_DEFAULT_NETLINK                    NETLINK_GENERIC
 #define NET_PROTOCOL_DEFAULT_NETLINK_GROUP              1
+
+// protocol parsers
+#define YY_END_OF_BUFFER_CHAR                           0 // "\0\0"
+#define NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE          2
+
+// output more debugging information ?
+#define NET_PROTOCOL_DEFAULT_LEX_TRACE                  false
+#define NET_PROTOCOL_DEFAULT_YACC_TRACE                 false
+
+// *NOTE*: scan buffers in-place to avoid a copy ?
+//         see: http://flex.sourceforge.net/manual/Multiple-Input-Buffers.html)
+//         --> in order to use yy_scan_buffer(), the buffer needs to have been
+//             prepared for usage by flex: buffers need two trailing '\0's
+//             BEYOND their datas' tail byte (i.e. at positions length() + 1 and
+//             length() + 2)
+#define NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER         true
 
 // socket
 #if defined (ACE_LINUX)

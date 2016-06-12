@@ -98,7 +98,8 @@ extern int HTTP_Export yydebug;
      STATUS = 263,
      REASON = 264,
      BODY = 265,
-     CHUNK = 266
+     CHUNK = 266,
+     END_OF_FRAGMENT = 267
    };
 #endif
 

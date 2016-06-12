@@ -24,86 +24,77 @@
 #include <string>
 
 #include "ace/Global_Macros.h"
-#include "ace/Message_Block.h"
 
 #include "net_iparser.h"
 
 #include "location.hh"
 
-#include "http_defines.h"
-#include "http_exports.h"
-//#include "http_scanner.h"
-
 // forward declaration(s)
+class ACE_Message_Block;
 class ACE_Message_Queue_Base;
-struct HTTP_Record;
-//class HTTP_Scanner;
 typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 struct YYLTYPE;
 
-template <typename SessionMessageType>
+template <typename RecordType,
+          typename SessionMessageType>
 class HTTP_ParserDriver
- : public Net_IParser<HTTP_Record>
+ : public Net_IParser<RecordType>
 {
-  friend class HTTP_Scanner;
-
  public:
   HTTP_ParserDriver (bool,  // debug scanning ?
                      bool); // debug parsing ?
   virtual ~HTTP_ParserDriver ();
 
-  // target data, needs to be set before invoking parse() !
-  void initialize (HTTP_Record&,                            // target data
-                   bool = HTTP_DEFAULT_LEX_TRACE,           // debug scanner ?
-                   bool = HTTP_DEFAULT_YACC_TRACE,          // debug parser ?
-                   ACE_Message_Queue_Base* = NULL,          // data buffer queue (yywrap)
-                   bool = HTTP_DEFAULT_USE_YY_SCAN_BUFFER); // yy_scan_buffer() ? : yy_scan_bytes()
-
   // implement Net_IParser
+  virtual void initialize (RecordType&,                                    // target data record
+                           bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,          // debug scanner ?
+                           bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,         // debug parser ?
+                           ACE_Message_Queue_Base* = NULL,                 // data buffer queue (yywrap)
+                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
+                           bool = false);                                  // block in parse() ?
+
   inline virtual ACE_Message_Block* buffer () { return fragment_; };
-  inline virtual HTTP_Record* record () { return record_; };
+  inline virtual RecordType* record () { return record_; };
   virtual bool debugScanner () const;
+  inline virtual bool isBlocking () const { return blockInParse_; };
+
   virtual void error (const YYLTYPE&,      // location
                       const std::string&); // message
   inline virtual void finished () { finished_ = true; };
   inline virtual bool hasFinished () const { return finished_; };
+
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
   inline virtual unsigned int offset () const { return offset_; };
+
+  virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer ();
   virtual void wait ();
+
   virtual void dump_state () const;
-
-  bool parse (ACE_Message_Block*); // data
-
-  // error handling
-  void error (const yy::location&, // location
-              const std::string&); // message
-  void error (const std::string&); // message
-
-  // *NOTE*: to be invoked by the scanner (ONLY !)
 
  protected:
   bool                    finished_; // processed the whole entity ?
   ACE_Message_Block*      fragment_;
   unsigned int            offset_; // parsed entity bytes
-
-  // target
-  HTTP_Record*            record_;
+  RecordType*             record_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver (const HTTP_ParserDriver&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver& operator= (const HTTP_ParserDriver&))
 
-  //// convenient typedefs
-  //typedef HTTP_Message_T<AllocatorConfigurationType> MESSAGE_T;
-
   // helper methods
   bool scan_begin ();
   void scan_end ();
 
-  // context
+  // error handling
+  void error (const yy::location&, // location
+              const std::string&); // message
+  void error (const std::string&); // message
+
+  bool                    blockInParse_;
+  bool                    isFirst_;
   bool                    trace_;
 
   //// parser
@@ -118,6 +109,7 @@ class HTTP_ParserDriver
   bool                    initialized_;
 };
 
+// include template implementation
 #include "http_parser_driver.inl"
 
 #endif

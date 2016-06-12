@@ -22,10 +22,12 @@
 #define HTTP_MODULE_PARSER_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "stream_headmoduletask_base.h"
 #include "stream_statistichandler.h"
 #include "stream_task_base_asynch.h"
+//#include "stream_task_base_synch.h"
 
 #include "http_defines.h"
 #include "http_parser_driver.h"
@@ -36,8 +38,10 @@ class Stream_IAllocator;
 template <typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          ///////////////////////////////
-          typename ConfigurationType>
+          ////////////////////////////////
+          typename ConfigurationType,
+          ////////////////////////////////
+          typename RecordType>
 class HTTP_Module_Parser_T
  : public Stream_TaskBaseAsynch_T<TimePolicyType,
                                   SessionMessageType,
@@ -78,10 +82,12 @@ class HTTP_Module_Parser_T
   // driver
   bool                                  debugScanner_;
   bool                                  debugParser_;
-  HTTP_ParserDriver<SessionMessageType> driver_;
-  //bool                                  finished_;
+  HTTP_ParserDriver<RecordType,
+                    SessionMessageType> driver_;
   ProtocolMessageType*                  headFragment_;
   bool                                  isDriverInitialized_;
+  //ACE_SYNCH_MUTEX                       lock_;
+  //ACE_SYNCH_CONDITION                   condition_;
 
   bool                                  crunchMessages_;
   DATA_CONTAINER_T*                     dataContainer_;
@@ -91,35 +97,37 @@ class HTTP_Module_Parser_T
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename LockType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename StreamStateType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
-          ///////////////////////////////
-          typename StatisticContainerType>
+          ////////////////////////////////
+          typename StatisticContainerType,
+          ////////////////////////////////
+          typename RecordType>
 class HTTP_Module_ParserH_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ///
+                                      ////
                                       TaskSynchType,
                                       TimePolicyType,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ///
+                                      ////
                                       ConfigurationType,
-                                      ///
+                                      ////
                                       StreamStateType,
-                                      ///
+                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ///
+                                      ////
                                       StatisticContainerType>
 {
  public:
@@ -178,21 +186,22 @@ class HTTP_Module_ParserH_T
   // convenience types
   typedef typename ProtocolMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename ProtocolMessageType::DATA_T::DATA_T DATA_T;
+  typedef typename HTTP_ParserDriver<RecordType,
+                                     SessionMessageType> PARSER_T;
 
   // helper methods
   //bool putStatisticMessage (const StatisticContainerType&) const;
   //ProtocolMessageType* allocateMessage (unsigned int); // requested size
 
   // driver
-  bool                                  debugScanner_;
-  bool                                  debugParser_;
-  HTTP_ParserDriver<SessionMessageType> driver_;
-  //bool                                  finished_;
-  ProtocolMessageType*                  headFragment_;
-  bool                                  isDriverInitialized_;
+  bool                 debugScanner_;
+  bool                 debugParser_;
+  PARSER_T             driver_;
+  ProtocolMessageType* headFragment_;
+  bool                 isDriverInitialized_;
 
-  bool                                  crunchMessages_;
-  DATA_CONTAINER_T*                     dataContainer_;
+  bool                 crunchMessages_;
+  DATA_CONTAINER_T*    dataContainer_;
 };
 
 // include template implementation
