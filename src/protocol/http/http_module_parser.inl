@@ -21,10 +21,13 @@
 
 #include "common_timer_manager_common.h"
 
+#include "stream_dec_tools.h"
+
 #include "net_macros.h"
 
 #include "http_common.h"
 #include "http_defines.h"
+#include "http_tools.h"
 
 template <typename TimePolicyType,
           typename SessionMessageType,
@@ -37,6 +40,7 @@ HTTP_Module_Parser_T<TimePolicyType,
                      ConfigurationType,
                      RecordType>::HTTP_Module_Parser_T ()
  : inherited ()
+ , sessionData_ (NULL)
  , allocator_ (NULL)
  , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
@@ -104,6 +108,8 @@ HTTP_Module_Parser_T<TimePolicyType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Queue_Base::activate(): \"%m\", continuing\n")));
 
+    sessionData_ = NULL;
+
     allocator_ = NULL;
     debugScanner_ = NET_PROTOCOL_DEFAULT_LEX_TRACE;
     debugParser_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
@@ -140,7 +146,7 @@ HTTP_Module_Parser_T<TimePolicyType,
     return false;
   } // end IF
   ACE_NEW_NORETURN (data_p->HTTPRecord,
-                    HTTP_Record ());
+                    RecordType ());
   if (!data_p->HTTPRecord)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -188,7 +194,7 @@ HTTP_Module_Parser_T<TimePolicyType,
   DATA_CONTAINER_T* data_container_p = NULL;
   ProtocolMessageType* message_p = NULL;
   ProtocolMessageType* message_2 = NULL;
-  HTTP_Record* record_p = NULL;
+  RecordType* record_p = NULL;
   bool release_inbound_message = true; // message_inout
   bool release_message = false; // message_p
 
@@ -253,7 +259,7 @@ HTTP_Module_Parser_T<TimePolicyType,
       if (!data_r.HTTPRecord)
       {
         ACE_NEW_NORETURN (data_r.HTTPRecord,
-                          HTTP_Record ());
+                          RecordType ());
         if (!data_r.HTTPRecord)
         {
           ACE_DEBUG ((LM_CRITICAL,
@@ -353,6 +359,26 @@ HTTP_Module_Parser_T<TimePolicyType,
 
     if (!driver_.hasFinished ())
       goto continue_; // --> wait for more data to arrive
+
+    // set session data
+    // *TODO*: move this somewhere else
+    DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
+
+    // sanity check(s)
+    ACE_ASSERT (data_r.HTTPRecord);
+    ACE_ASSERT (sessionData_);
+
+    HTTP_HeadersIterator_t iterator =
+      data_r.HTTPRecord->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_CONTENTENCODING_HEADER_STRING));
+    if (iterator != data_r.HTTPRecord->headers.end ())
+    {
+      sessionData_->format =
+        HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: set compression format: \"%s\"\n"),
+                  inherited::mod_->name (),
+                  ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (sessionData_->format).c_str ())));
+    } // end IF
 
     // make sure the whole fragment chain references the same data record
     data_container_p = dataContainer_;
@@ -480,6 +506,18 @@ HTTP_Module_Parser_T<TimePolicyType,
 
   switch (message_inout->type ())
   {
+    case STREAM_SESSION_BEGIN:
+    {
+      // sanity check(s)
+      ACE_ASSERT (!sessionData_);
+
+      const typename SessionMessageType::DATA_T& session_data_container_r =
+        message_inout->get ();
+      sessionData_ =
+        &const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_data_container_r.get ());
+
+      break;
+    }
     case STREAM_SESSION_END:
     {
       // *NOTE*: a parser thread may be waiting for additional (entity)
@@ -491,13 +529,12 @@ HTTP_Module_Parser_T<TimePolicyType,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
 
+      sessionData_ = NULL;
+
       break;
     }
     default:
-    {
-      // don't do anything...
       break;
-    }
   } // end SWITCH
 }
 
@@ -591,6 +628,7 @@ HTTP_Module_ParserH_T<LockType,
               true,  // auto-start !
               false, // do not run the svc() routine on start (passive mode)
               false) // do not push session messages
+ , sessionData_ (NULL)
  , debugScanner_ (HTTP_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (HTTP_DEFAULT_YACC_TRACE) // trace parsing ?
  , driver_ (HTTP_DEFAULT_LEX_TRACE,  // trace scanning ?

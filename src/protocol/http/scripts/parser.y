@@ -28,6 +28,7 @@
 /* %define api.push-pull             push */
 /* %define api.token.constructor */
 /* %define api.token.prefix          {} */
+%token-table
 /* %define api.value.type            variant */
 /* %define api.value.union.name      YYSTYPE */
 /* %define lr.default-reduction      most */
@@ -163,24 +164,21 @@ using namespace std;
 //#define YYPRINT(file, type, value) yyprint (file, type, value)
 }
 
-%token <sval> METHOD      "method"
-%token <sval> URI         "uri"
-%token <sval> VERSION     "version"
-%token <sval> HEADER      "header"
-%token <ival> DELIMITER   "delimiter"
-%token <sval> STATUS      "status"
-%token <sval> REASON      "reason"
-%token <ival> BODY        "body"
-%token <ival> CHUNK       "chunk"
-/* %token <std::string> METHOD      "method"
-%token <std::string> VERSION     "version"
-%token <std::string> REQUEST     "request_line"
-%token <std::string> RESPONSE    "status_line"
-%token <std::string> HEADER      "header"
-%token <std::string> DELIMITER   "delimiter"
-%token <int>         BODY        "body" */
-%token <ival> END_OF_FRAGMENT    "end_of_fragment"
-%token <ival> END 0       "end"
+//%token <std::string> METHOD      "method"
+%token <sval> METHOD          "method"
+%token <sval> URI             "uri"
+%token <sval> VERSION         "version"
+%token <sval> HEADER          "header"
+%token <ival> DELIMITER       "delimiter"
+%token <sval> STATUS          "status"
+%token <sval> REASON          "reason"
+%token <ival> BODY            "body"
+//%token <int>         BODY        "body"
+%token <ival> CHUNK           "chunk"
+//%token <std::string> REQUEST     "request_line"
+//%token <std::string> RESPONSE    "status_line"
+%token <ival> END_OF_FRAGMENT "end_of_fragment"
+%token <ival> END 0           "end"
 
 %type  <ival> message head body
 %type  <ival> head_rest1 head_rest2 headers chunks

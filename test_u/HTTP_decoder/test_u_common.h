@@ -44,6 +44,8 @@
 #include "stream_messageallocatorheap_base.h"
 #include "stream_session_data.h"
 
+#include "stream_dec_common.h"
+
 #include "net_connection_manager.h"
 #include "net_defines.h"
 #include "net_iconnection.h"
@@ -110,6 +112,7 @@ struct Test_U_StreamSessionData
   inline Test_U_StreamSessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
+   , format (STREAM_COMPRESSION_FORMAT_NONE)
    , targetFileName ()
    , userData (NULL)
   {};
@@ -125,9 +128,10 @@ struct Test_U_StreamSessionData
     return *this;
   }
 
-  HTTP_ConnectionState* connectionState;
-  std::string           targetFileName; // file writer module
-  Test_U_UserData*      userData;
+  HTTP_ConnectionState*                     connectionState;
+  enum Stream_Decoder_CompressionFormatType format; // decompressor module
+  std::string                               targetFileName; // file writer module
+  Test_U_UserData*                          userData;
 };
 typedef Stream_SessionData_T<Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 

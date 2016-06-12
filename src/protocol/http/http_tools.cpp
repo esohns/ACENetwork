@@ -19,11 +19,14 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <sstream>
-
 #include "http_tools.h"
 
+#include <locale>
+#include <sstream>
+
 #include "ace/Log_Msg.h"
+
+#include "stream_dec_common.h"
 
 #include "net_macros.h"
 
@@ -277,14 +280,6 @@ HTTP_Tools::Version2Type (const std::string& version_in)
   return HTTP_Codes::HTTP_VERSION_INVALID;
 }
 
-bool
-HTTP_Tools::isRequest (const HTTP_Record& record_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::isRequest"));
-
-  return (record_in.method < HTTP_Codes::HTTP_METHOD_MAX);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 bool
@@ -296,29 +291,29 @@ HTTP_Tools::isHeaderType (const std::string& fieldName_in,
   switch (headerType_in)
   {
     case HTTP_Codes::HTTP_HEADER_GENERAL:
-      return ((fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Date"))  ||
+      return ((fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Date")) ||
               (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Pragma")));
     case HTTP_Codes::HTTP_HEADER_REQUEST:
-      return ((fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Authorization"))     ||
-              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("From"))              ||
+      return ((fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Authorization")) ||
+              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("From")) ||
               (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("If-Modified-Since")) ||
-              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Referer"))           ||
+              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Referer")) ||
               (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("User-Agent")));
     case HTTP_Codes::HTTP_HEADER_RESPONSE:
-      return ((fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Location"))        ||
-              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Server"))          ||
+      return ((fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Location")) ||
+              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Server")) ||
               (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("WWW-Authenticate")));
     case HTTP_Codes::HTTP_HEADER_ENTITY:
-      return ((fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Allow"))            ||
+      return ((fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Allow")) ||
               (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Content-Encoding")) ||
-              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Content-Length"))   ||
-              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Content-Type"))     ||
-              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Expires"))          ||
-              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Last-Modified"))    ||
+              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Content-Length")) ||
+              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Content-Type")) ||
+              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Expires")) ||
+              (fieldName_in == ACE_TEXT_ALWAYS_CHAR ("Last-Modified")) ||
               (!HTTP_Tools::isHeaderType (fieldName_in,
-                                          HTTP_Codes::HTTP_HEADER_GENERAL)  &&
+                                          HTTP_Codes::HTTP_HEADER_GENERAL) &&
                !HTTP_Tools::isHeaderType (fieldName_in,
-                                          HTTP_Codes::HTTP_HEADER_REQUEST)  &&
+                                          HTTP_Codes::HTTP_HEADER_REQUEST) &&
                !HTTP_Tools::isHeaderType (fieldName_in,
                                           HTTP_Codes::HTTP_HEADER_RESPONSE)));
     default:
@@ -331,4 +326,37 @@ HTTP_Tools::isHeaderType (const std::string& fieldName_in,
   } // end SWITCH
 
   return false;
+}
+
+bool
+HTTP_Tools::isRequest (const HTTP_Record& record_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::isRequest"));
+
+  return (record_in.method < HTTP_Codes::HTTP_METHOD_MAX);
+}
+
+//////////////////////////////////////////
+
+enum Stream_Decoder_CompressionFormatType
+HTTP_Tools::Encoding2CompressionFormat (const std::string& encoding_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::Encoding2CompressionFormat"));
+
+  std::locale locale;
+  std::string lowercase_string;
+  for (std::string::size_type i = 0; i < encoding_in.length (); ++i)
+    lowercase_string += std::tolower (encoding_in[i], locale);
+  //std::transform (encoding_in.begin (), encoding_in.end (),
+  //                lowercase_string.begin (), ::tolower);
+
+  if ((lowercase_string == ACE_TEXT_ALWAYS_CHAR ("deflate")) ||
+      (lowercase_string == ACE_TEXT_ALWAYS_CHAR ("gzip")))
+    return STREAM_COMPRESSION_FORMAT_GZIP;
+  else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid/unknown encoding (was: \"%s\"), aborting\n"),
+                ACE_TEXT (encoding_in.c_str ())));
+
+  return STREAM_COMPRESSION_FORMAT_INVALID;
 }

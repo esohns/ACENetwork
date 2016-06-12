@@ -62,6 +62,9 @@ class HTTP_Module_Parser_T
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
+ protected:
+  typename SessionMessageType::DATA_T::DATA_T* sessionData_;
+
  private:
   typedef Stream_TaskBaseAsynch_T<TimePolicyType,
                                   SessionMessageType,
@@ -77,21 +80,21 @@ class HTTP_Module_Parser_T
   // helper methods
   ProtocolMessageType* allocateMessage (unsigned int); // requested size
 
-  Stream_IAllocator*                    allocator_;
+  Stream_IAllocator*                           allocator_;
 
   // driver
-  bool                                  debugScanner_;
-  bool                                  debugParser_;
+  bool                                         debugScanner_;
+  bool                                         debugParser_;
   HTTP_ParserDriver<RecordType,
-                    SessionMessageType> driver_;
-  ProtocolMessageType*                  headFragment_;
-  bool                                  isDriverInitialized_;
+                    SessionMessageType>        driver_;
+  ProtocolMessageType*                         headFragment_;
+  bool                                         isDriverInitialized_;
   //ACE_SYNCH_MUTEX                       lock_;
   //ACE_SYNCH_CONDITION                   condition_;
 
-  bool                                  crunchMessages_;
-  DATA_CONTAINER_T*                     dataContainer_;
-  bool                                  initialized_;
+  bool                                         crunchMessages_;
+  DATA_CONTAINER_T*                            dataContainer_;
+  bool                                         initialized_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,6 +165,9 @@ class HTTP_Module_ParserH_T
   // *NOTE*: this reuses the interface to implement timer-based data collection
   virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
   //virtual void report () const;
+
+ protected:
+  SessionDataType*     sessionData_;
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,

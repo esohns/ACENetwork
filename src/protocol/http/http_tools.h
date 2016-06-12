@@ -29,6 +29,9 @@
 #include "http_common.h"
 #include "http_exports.h"
 
+// forward declarations
+enum Stream_Decoder_CompressionFormatType;
+
 class HTTP_Export HTTP_Tools
 {
  public:
@@ -45,6 +48,8 @@ class HTTP_Export HTTP_Tools
   static bool isHeaderType (const std::string&,      // field name
                             HTTP_Codes::HeaderType); // header type
   static bool isRequest (const HTTP_Record&);
+
+  static enum Stream_Decoder_CompressionFormatType Encoding2CompressionFormat (const std::string&);
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_Tools ())

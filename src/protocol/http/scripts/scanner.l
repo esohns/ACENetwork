@@ -25,7 +25,7 @@ YY_DECL;
 //#define YYLTYPE HTTP_Parser::location_type
 //#define YYSTYPE HTTP_Parser::semantic_type
 
-void HTTP_Scanner_set_column (int column_no , yyscan_t yyscanner);
+void HTTP_Scanner_set_column (int, yyscan_t);
 
 //#define FLEXINT_H
 }
@@ -194,7 +194,7 @@ DATE           ({RFC1123_DATE}|{RFC850_DATE}|{ASCTIME_DATE})
 /* Character Sets */
 /* NOTE*: "...Applications should limit their use of character sets to those
           defined by the IANA registry." */
-CHARSET_TOKEN  {CHAR}+
+CHARSET_TOKEN  {TOKEN}+
 /* *NOTE*: "When no explicit charset parameter is provided by the sender, media
            subtypes of the "text" type are defined to have a default charset
            value of "ISO-8859-1" when received via HTTP"
@@ -202,7 +202,7 @@ CHARSET        (US-ASCII|ISO-8859-1|ISO-8859-2|ISO-8859-3|ISO-8859-4|ISO-8859-5|
 
 
 /* Content Coding */
-CODING_TOKEN   {CHAR}+
+CODING_TOKEN   {TOKEN}+
 CONTENT_CODING (x-gzip|x-compress|{CODING_TOKEN})
 
 
@@ -570,7 +570,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                              (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng,
                                              yyleng, chunk_size));
 
-                               // skip over chunk data
+                               // (frame and) skip over chunk data
                                unsigned int bytes_to_skip = missing_chunk_bytes;
                                unsigned int remainder = 0;
                                ACE_Message_Block* message_p, *message_2, *message_3;
@@ -585,7 +585,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                if (!missing_chunk_bytes)
                                { // the fragment contains the (trailing end of
                                  // the) chunk
-                                 // --> (insert buffer and) slurp the chunk
+                                 // --> (insert buffer and) frame the chunk
                                  //     data, see below)
                                  if (remainder)
                                  { // bits of the next chunk are available
@@ -631,7 +631,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                  } // end WHILE
 
                                  // chunk ends in the current fragment
-                                 // --> (insert buffer and) slurp the chunk
+                                 // --> (insert buffer and) frame the chunk
                                  //     data, see below)
                                  if (remainder)
                                  { // bits of the next chunk are available
@@ -683,7 +683,6 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                              ACE_TEXT ("found last entity chunk @%d[fragment offset: %d]: 1 (+ 2) byte(s)\n"),
                                              driver->offset () - yyleng,
                                              (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng));
-
                                driver->offset (1 + 2);
                                yylval->ival = yyleng;
                              } // end ELSE

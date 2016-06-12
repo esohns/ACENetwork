@@ -62,6 +62,7 @@
 #define HTTP_PRT_AGENT_HEADER_STRING              "User-Agent"
 #define HTTP_PRT_ACCEPT_REFERER_STRING            "Referer"
 #define HTTP_PRT_CONNECTION_HEADER_STRING         "Connection"
+#define HTTP_PRT_CONTENTENCODING_HEADER_STRING    "Content-Encoding"
 #define HTTP_PRT_COOKIE_HEADER_STRING             "Cookie"
 #define HTTP_PRT_ENCODING_HEADER_STRING           "Accept-Encoding"
 #define HTTP_PRT_HOST_HEADER_STRING               "Host"

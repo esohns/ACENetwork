@@ -36,10 +36,8 @@
 
 #include "test_u_common.h"
 #include "test_u_common_modules.h"
+#include "test_u_session_message.h"
 #include "test_u_message.h"
-
-// forward declarations
-class Test_U_SessionMessage;
 
 class Test_U_Stream
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
