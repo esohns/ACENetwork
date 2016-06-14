@@ -25,7 +25,6 @@
 #include "ace/Global_Macros.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
-#include "ace/ssl/SSL_SOCK_Acceptor.h"
 
 #include "common_idumpstate.h"
 
@@ -43,7 +42,8 @@ template <typename HandlerType,
           ///////////////////////////////
           typename UserDataType>
 class Net_Server_SSL_Listener_T
- : public ACE_SSL_SOCK_Acceptor
+ : public ACE_Acceptor<HandlerType,
+                       AcceptorType>
  , public Net_IListener_T<ConfigurationType, 
                           HandlerConfigurationType>
  , public Common_IDumpState
@@ -102,7 +102,8 @@ class Net_Server_SSL_Listener_T
   virtual int activate_svc_handler (HandlerType*);
 
  private:
-  typedef ACE_SSL_SOCK_Acceptor inherited;
+  typedef ACE_Acceptor<HandlerType,
+                       AcceptorType> inherited;
 
   typedef Net_IListener_T<ConfigurationType,
                           HandlerConfigurationType> ILISTENER_T;
@@ -120,6 +121,7 @@ class Net_Server_SSL_Listener_T
   bool                      isInitialized_;
   bool                      isListening_;
   bool                      isOpen_;
+  bool                      isSuspended_;
 };
 
 // include template implementation

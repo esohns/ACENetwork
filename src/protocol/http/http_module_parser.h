@@ -192,8 +192,8 @@ class HTTP_Module_ParserH_T
   // convenience types
   typedef typename ProtocolMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename ProtocolMessageType::DATA_T::DATA_T DATA_T;
-  typedef typename HTTP_ParserDriver<RecordType,
-                                     SessionMessageType> PARSER_T;
+  typedef HTTP_ParserDriver<RecordType,
+                            SessionMessageType> PARSER_T;
 
   // helper methods
   //bool putStatisticMessage (const StatisticContainerType&) const;

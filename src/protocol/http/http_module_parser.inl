@@ -608,16 +608,16 @@ template <typename LockType,
           typename StatisticContainerType,
           typename RecordType>
 HTTP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType,
-                     RecordType>::HTTP_Module_ParserH_T ()
+                      TaskSynchType,
+                      TimePolicyType,
+                      SessionMessageType,
+                      ProtocolMessageType,
+                      ConfigurationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType,
+                      RecordType>::HTTP_Module_ParserH_T ()
  : inherited (NULL,  // lock handle
               // *NOTE*: the current (pull-)parser needs to be active because
               //         yyparse() will not return until the entity has been
@@ -629,10 +629,10 @@ HTTP_Module_ParserH_T<LockType,
               false, // do not run the svc() routine on start (passive mode)
               false) // do not push session messages
  , sessionData_ (NULL)
- , debugScanner_ (HTTP_DEFAULT_LEX_TRACE) // trace scanning ?
- , debugParser_ (HTTP_DEFAULT_YACC_TRACE) // trace parsing ?
- , driver_ (HTTP_DEFAULT_LEX_TRACE,  // trace scanning ?
-            HTTP_DEFAULT_YACC_TRACE) // trace parsing ?
+ , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
+ , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
+ , driver_ (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
+            NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
  , headFragment_ (NULL)
  , isDriverInitialized_ (false)
  , crunchMessages_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
@@ -654,16 +654,16 @@ template <typename LockType,
           typename StatisticContainerType,
           typename RecordType>
 HTTP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType,
-                     RecordType>::~HTTP_Module_ParserH_T ()
+                      TaskSynchType,
+                      TimePolicyType,
+                      SessionMessageType,
+                      ProtocolMessageType,
+                      ConfigurationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType,
+                      RecordType>::~HTTP_Module_ParserH_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::~HTTP_Module_ParserH_T"));
 
@@ -687,16 +687,16 @@ template <typename LockType,
           typename RecordType>
 bool
 HTTP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType,
-                     RecordType>::initialize (const ConfigurationType& configuration_in)
+                      TaskSynchType,
+                      TimePolicyType,
+                      SessionMessageType,
+                      ProtocolMessageType,
+                      ConfigurationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType,
+                      RecordType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::initialize"));
 
@@ -710,8 +710,8 @@ HTTP_Module_ParserH_T<LockType,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
 
-    debugScanner_ = HTTP_DEFAULT_LEX_TRACE;
-    debugParser_ = HTTP_DEFAULT_YACC_TRACE;
+    debugScanner_ = NET_PROTOCOL_DEFAULT_LEX_TRACE;
+    debugParser_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
     if (headFragment_)
     {
       headFragment_->release ();
@@ -791,17 +791,17 @@ template <typename LockType,
           typename RecordType>
 void
 HTTP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType,
-                     RecordType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                     bool& passMessageDownstream_out)
+                      TaskSynchType,
+                      TimePolicyType,
+                      SessionMessageType,
+                      ProtocolMessageType,
+                      ConfigurationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType,
+                      RecordType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                                                      bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleDataMessage"));
 
@@ -822,7 +822,8 @@ HTTP_Module_ParserH_T<LockType,
   } // end IF
 
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (message_inout->capacity () - message_inout->length () >= HTTP_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT (message_inout->capacity () - message_inout->length () >=
+              NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
   *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
@@ -988,17 +989,17 @@ template <typename LockType,
           typename RecordType>
 void
 HTTP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType,
-                     RecordType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                        bool& passMessageDownstream_out)
+                      TaskSynchType,
+                      TimePolicyType,
+                      SessionMessageType,
+                      ProtocolMessageType,
+                      ConfigurationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType,
+                      RecordType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                         bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleSessionMessage"));
 
@@ -1130,16 +1131,16 @@ template <typename LockType,
           typename RecordType>
 bool
 HTTP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType,
-                     RecordType>::collect (StatisticContainerType& data_out)
+                      TaskSynchType,
+                      TimePolicyType,
+                      SessionMessageType,
+                      ProtocolMessageType,
+                      ConfigurationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType,
+                      RecordType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::collect"));
 

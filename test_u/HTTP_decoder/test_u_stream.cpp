@@ -141,6 +141,10 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   // *TODO*: remove type inferences
   ACE_ASSERT (configuration_in.moduleConfiguration);
 
+  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p = NULL;
+  Test_U_Module_Parser* parser_impl_p = NULL;
+  READER_T* IOReader_impl_p = NULL;
+  WRITER_T* IOWriter_impl_p = NULL;
   std::string buffer;
 
   // ******************* File Writer ************************
@@ -163,7 +167,7 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
 
   // ******************* Runtime Statistics ************************
   runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
-  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p =
+  runtimeStatistic_impl_p =
     dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
   if (!runtimeStatistic_impl_p)
   {
@@ -184,7 +188,7 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
 
   // ******************* Marshal ************************
   marshal_.initialize (*configuration_in.moduleConfiguration);
-  Test_U_Module_Parser* parser_impl_p =
+  parser_impl_p =
     dynamic_cast<Test_U_Module_Parser*> (marshal_.writer ());
   if (!parser_impl_p)
   {
@@ -231,8 +235,7 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
 
   // ******************* IO ************************
   IO_.initialize (*configuration_in.moduleConfiguration);
-  READER_T* IOReader_impl_p = NULL;
-  WRITER_T* IOWriter_impl_p = dynamic_cast<WRITER_T*> (IO_.writer ());
+  IOWriter_impl_p = dynamic_cast<WRITER_T*> (IO_.writer ());
   if (!IOWriter_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,

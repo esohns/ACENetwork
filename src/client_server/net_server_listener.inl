@@ -50,6 +50,7 @@ Net_Server_Listener_T<HandlerType,
  , isInitialized_ (false)
  , isListening_ (false)
  , isOpen_ (false)
+ , isSuspended_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::Net_Server_Listener_T"));
 
@@ -75,6 +76,14 @@ Net_Server_Listener_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::~Net_Server_Listener_T"));
 
   int result = -1;
+
+  if (isSuspended_)
+  {
+    result = inherited::resume ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", continuing\n")));
+  } // end IF
 
   if (isOpen_)
   {
@@ -186,22 +195,27 @@ Net_Server_Listener_T<HandlerType,
 
   // sanity check(s)
   if (isListening_)
-    return; // nothing to do...
+    return; // nothing to do
 
   if (isOpen_)
   {
-    // already open (maybe suspended ?) --> resume listening...
+    // already open --> resume listening
+
+    // sanity check(s)
+    ACE_ASSERT (isSuspended_);
+
     result = inherited::resume ();
     if (result == -1)
+    {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", returning\n")));
-    else
-    {
-      isListening_ = true;
+      return;
+    } // end IF
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("resumed listening...\n")));
 
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("resumed listening...\n")));
-    } // end ELSE
+    isSuspended_ = false;
+    isListening_ = true;
 
     return;
   } // end IF
@@ -297,36 +311,39 @@ Net_Server_Listener_T<HandlerType,
   ACE_UNUSED_ARG (waitForCompletion_in);
   ACE_UNUSED_ARG (lockedAccess_in);
 
+  int result = -1;
+
   // sanity check(s)
   if (!isListening_)
-    return; // nothing to do...
+    return; // nothing to do
 
-  int result = -1;
-//  if (inherited::suspend() == -1)
-//  {
-//    ACE_DEBUG((LM_ERROR,
-//               ACE_TEXT("failed to ACE_Acceptor::suspend(): \"%m\", returning\n")));
-//    return;
-//  } // end IF
-  result = inherited::close ();
+  result = inherited::suspend ();
   if (result == -1)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", returning\n")));
-
-    // clean up
-    isOpen_ = false;
-    isListening_ = false;
-
+    ACE_DEBUG((LM_ERROR,
+               ACE_TEXT("failed to ACE_Acceptor::suspend(): \"%m\", returning\n")));
     return;
   } // end IF
-  isOpen_ = false;
+  isSuspended_ = true;
+
+//  result = inherited::close ();
+//  if (result == -1)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", returning\n")));
+
+//    isOpen_ = false;
+//    isListening_ = false;
+
+//    return;
+//  } // end IF
+//  isOpen_ = false;
   isListening_ = false;
 
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("stopped listening...\n")));
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("stopped listening...\n")));
-//  ACE_DEBUG((LM_DEBUG,
-//             ACE_TEXT("suspended listening...\n")));
+              ACE_TEXT ("suspended listening...\n")));
 }
 
 template <typename HandlerType,

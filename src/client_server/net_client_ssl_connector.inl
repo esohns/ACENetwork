@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "ace/Log_Msg.h"
+#include "ace/Svc_Handler.h"
 
 #include "common_defines.h"
 

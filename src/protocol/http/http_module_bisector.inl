@@ -27,10 +27,10 @@
 
 #include "stream_iallocator.h"
 
+#include "net_defines.h"
 #include "net_macros.h"
 
 #include "http_bisector.h"
-#include "http_defines.h"
 
 template <typename LockType,
           typename TaskSynchType,
@@ -69,7 +69,7 @@ HTTP_Module_Bisector_T<LockType,
                 ACE_TEXT ("failed to yylex_init(): \"%m\", continuing\n")));
 
   // trace ?
-  HTTP_Bisector_set_debug ((HTTP_DEFAULT_LEX_TRACE ? 1 : 0),
+  HTTP_Bisector_set_debug ((NET_PROTOCOL_DEFAULT_LEX_TRACE ? 1 : 0),
                            context_);
 }
 

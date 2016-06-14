@@ -43,12 +43,14 @@ Net_Server_SSL_Listener_T<HandlerType,
                           StreamType,
                           HandlerConfigurationType,
                           UserDataType>::Net_Server_SSL_Listener_T ()
- : inherited ()
+ : inherited (NULL, // use global (default) reactor
+              1)    // always accept ALL pending connections
  , configuration_ (NULL)
  , handlerConfiguration_ (NULL)
  , isInitialized_ (false)
  , isListening_ (false)
  , isOpen_ (false)
+ , isSuspended_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::Net_Server_SSL_Listener_T"));
 
@@ -74,6 +76,14 @@ Net_Server_SSL_Listener_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::~Net_Server_SSL_Listener_T"));
 
   int result = -1;
+
+  if (isSuspended_)
+  {
+    result = inherited::resume ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", continuing\n")));
+  } // end IF
 
   if (isOpen_)
   {
@@ -189,18 +199,23 @@ Net_Server_SSL_Listener_T<HandlerType,
 
   if (isOpen_)
   {
-    // already open (maybe suspended ?) --> resume listening...
+    // already open --> resume listening
+
+    // sanity check(s)
+    ACE_ASSERT (isSuspended_);
+
     result = inherited::resume ();
     if (result == -1)
+    {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", returning\n")));
-    else
-    {
-      isListening_ = true;
+      return;
+    } // end IF
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("resumed listening...\n")));
 
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("resumed listening...\n")));
-    } // end ELSE
+    isSuspended_ = false;
+    isListening_ = true;
 
     return;
   } // end IF
@@ -244,15 +259,16 @@ Net_Server_SSL_Listener_T<HandlerType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
   result =
-    inherited::open (configuration_->address,  // local address
-                     1,                        // try to re-use address
-                     PF_UNSPEC,                // protocol family
-                     ACE_DEFAULT_BACKLOG,      // backlog
-                     0);                       // protocol
+      inherited::open (configuration_->address,  // local address
+                       ACE_Reactor::instance (), // corresp. reactor
+                       ACE_NONBLOCK,             // flags (use non-blocking sockets !)
+                       //0,                        // flags (default is blocking sockets)
+                       1,                        // always accept ALL pending connections
+                       1);                       // try to re-use address
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SSL_SOCK_Acceptor::open(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", returning\n")));
     return;
   } // end IF
   isOpen_ = true;
@@ -295,36 +311,39 @@ Net_Server_SSL_Listener_T<HandlerType,
   ACE_UNUSED_ARG (waitForCompletion_in);
   ACE_UNUSED_ARG (lockedAccess_in);
 
+  int result = -1;
+
   // sanity check(s)
   if (!isListening_)
     return; // nothing to do...
 
-  int result = -1;
-//  if (inherited::suspend() == -1)
-//  {
-//    ACE_DEBUG((LM_ERROR,
-//               ACE_TEXT("failed to ACE_Acceptor::suspend(): \"%m\", returning\n")));
-//    return;
-//  } // end IF
-  result = inherited::close ();
+  result = inherited::suspend ();
   if (result == -1)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SSL_SOCK_Acceptor::close(): \"%m\", returning\n")));
-
-    // clean up
-    isOpen_ = false;
-    isListening_ = false;
-
+    ACE_DEBUG((LM_ERROR,
+               ACE_TEXT("failed to ACE_Acceptor::suspend(): \"%m\", returning\n")));
     return;
   } // end IF
-  isOpen_ = false;
+  isSuspended_ = true;
+
+//  result = inherited::close ();
+//  if (result == -1)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", returning\n")));
+
+//    isOpen_ = false;
+//    isListening_ = false;
+
+//    return;
+//  } // end IF
+//  isOpen_ = false;
   isListening_ = false;
 
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("stopped listening...\n")));
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("stopped listening...\n")));
-//  ACE_DEBUG((LM_DEBUG,
-//             ACE_TEXT("suspended listening...\n")));
+              ACE_TEXT ("suspended listening...\n")));
 }
 
 template <typename HandlerType,

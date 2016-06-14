@@ -25,12 +25,11 @@
 
 #include "ace/Global_Macros.h"
 
+#include "stream_dec_common.h"
+
 #include "http_codes.h"
 #include "http_common.h"
 #include "http_exports.h"
-
-// forward declarations
-enum Stream_Decoder_CompressionFormatType;
 
 class HTTP_Export HTTP_Tools
 {

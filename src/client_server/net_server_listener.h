@@ -24,7 +24,6 @@
 #include "ace/Acceptor.h"
 #include "ace/Global_Macros.h"
 #include "ace/Singleton.h"
-//#include "ace/SOCK_Acceptor.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_idumpstate.h"
@@ -122,6 +121,7 @@ class Net_Server_Listener_T
   bool                      isInitialized_;
   bool                      isListening_;
   bool                      isOpen_;
+  bool                      isSuspended_;
 };
 
 // include template implementation

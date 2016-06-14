@@ -26,7 +26,7 @@
 #include "ace/INET_Addr.h"
 #include "ace/Message_Block.h"
 #include "ace/Notification_Strategy.h"
-#include "ace/ssl/SSL_Asynch_Stream.h"
+#include "ace/SSL/SSL_Asynch_Stream.h"
 
 #include "common_referencecounter_base.h"
 
