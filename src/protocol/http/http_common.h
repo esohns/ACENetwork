@@ -46,11 +46,15 @@ typedef Common_INotify_T<unsigned int,
 typedef Stream_Statistic HTTP_RuntimeStatistic_t;
 
 typedef std::map<std::string, std::string> HTTP_Headers_t;
-typedef HTTP_Headers_t::const_iterator HTTP_HeadersIterator_t;
+typedef HTTP_Headers_t::const_iterator HTTP_HeadersConstIterator_t;
+typedef HTTP_Headers_t::iterator HTTP_HeadersIterator_t;
+typedef std::map<std::string, std::string> HTTP_Form_t;
+typedef HTTP_Form_t::const_iterator HTTP_FormIterator_t;
 struct HTTP_Record
 {
   inline HTTP_Record ()
-   : headers ()
+   : form ()
+   , headers ()
    , method (HTTP_Codes::HTTP_METHOD_INVALID)
    , reason ()
    , status (HTTP_Codes::HTTP_STATUS_INVALID)
@@ -58,10 +62,11 @@ struct HTTP_Record
    , version (HTTP_Codes::HTTP_VERSION_INVALID)
   {};
 
+  HTTP_Form_t             form; // request
   HTTP_Headers_t          headers;
   HTTP_Codes::MethodType  method;
-  std::string             reason;
-  HTTP_Codes::StatusType  status;
+  std::string             reason; // response
+  HTTP_Codes::StatusType  status; // response
   std::string             URI;
   HTTP_Codes::VersionType version;
 };

@@ -22,11 +22,14 @@
 #include "http_tools.h"
 
 #include <locale>
+#include <regex>
 #include <sstream>
 
 #include "ace/Log_Msg.h"
 
 #include "net_macros.h"
+
+#include "http_defines.h"
 
 std::string
 HTTP_Tools::dump (const HTTP_Record& record_in)
@@ -36,6 +39,8 @@ HTTP_Tools::dump (const HTTP_Record& record_in)
   std::ostringstream converter;
   std::string buffer;
   bool is_request = false;
+  HTTP_HeadersConstIterator_t iterator;
+
   if (HTTP_Tools::isRequest (record_in))
   {
     is_request = true;
@@ -71,7 +76,7 @@ HTTP_Tools::dump (const HTTP_Record& record_in)
   buffer += converter.str ();
   buffer += ACE_TEXT_ALWAYS_CHAR ("):\n");
   // general headers
-  for (HTTP_HeadersIterator_t iterator = record_in.headers.begin ();
+  for (iterator = record_in.headers.begin ();
        iterator != record_in.headers.end ();
        ++iterator)
   {
@@ -87,7 +92,7 @@ HTTP_Tools::dump (const HTTP_Record& record_in)
   buffer += ACE_TEXT_ALWAYS_CHAR ("-------------------------------\n");
 
   // general headers
-  for (HTTP_HeadersIterator_t iterator = record_in.headers.begin ();
+  for (iterator = record_in.headers.begin ();
        iterator != record_in.headers.end ();
        ++iterator)
   {
@@ -104,7 +109,7 @@ HTTP_Tools::dump (const HTTP_Record& record_in)
   buffer += ACE_TEXT_ALWAYS_CHAR ("-------------------------------\n");
 
   // general headers
-  for (HTTP_HeadersIterator_t iterator = record_in.headers.begin ();
+  for (iterator = record_in.headers.begin ();
        iterator != record_in.headers.end ();
        ++iterator)
   {
@@ -118,6 +123,28 @@ HTTP_Tools::dump (const HTTP_Record& record_in)
     buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
   } // end FOR
   buffer += ACE_TEXT_ALWAYS_CHAR ("Headers /END\n");
+
+  if (!record_in.form.empty ())
+  {
+    buffer += ACE_TEXT_ALWAYS_CHAR ("Form (");
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter << record_in.form.size ();
+    buffer += converter.str ();
+    buffer += ACE_TEXT_ALWAYS_CHAR ("):\n");
+
+    for (HTTP_FormIterator_t iterator_2 = record_in.form.begin ();
+         iterator_2 != record_in.form.end ();
+         ++iterator_2)
+    {
+      buffer += ACE_TEXT_ALWAYS_CHAR ("\"");
+      buffer += (*iterator_2).first;
+      buffer += ACE_TEXT_ALWAYS_CHAR ("\"=\"");
+      buffer += (*iterator_2).second;
+      buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+    } // end FOR
+    buffer += ACE_TEXT_ALWAYS_CHAR ("Form /END\n");
+  } // end IF
 
   return buffer;
 }
@@ -334,8 +361,6 @@ HTTP_Tools::isRequest (const HTTP_Record& record_in)
   return (record_in.method < HTTP_Codes::HTTP_METHOD_MAX);
 }
 
-//////////////////////////////////////////
-
 enum Stream_Decoder_CompressionFormatType
 HTTP_Tools::Encoding2CompressionFormat (const std::string& encoding_in)
 {
@@ -357,4 +382,101 @@ HTTP_Tools::Encoding2CompressionFormat (const std::string& encoding_in)
                 ACE_TEXT (encoding_in.c_str ())));
 
   return STREAM_COMPRESSION_FORMAT_INVALID;
+}
+
+bool
+HTTP_Tools::parseURL (const std::string& URL_in,
+                      ACE_INET_Addr& address_out,
+                      std::string& URI_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::parseURL"));
+
+  bool use_SSL = false;
+  std::string hostname;
+  unsigned short port = HTTP_DEFAULT_SERVER_PORT;
+  std::istringstream converter;
+  //std::string dotted_decimal_string;
+  int result = -1;
+
+  // step1: split protocol/hostname/port
+  std::string regex_string =
+    ACE_TEXT_ALWAYS_CHAR ("^(?:http(s)?://)?([[:alnum:]-.]+)(?:\\:([[:digit:]]{1,5}))?(.+)?$");
+  std::regex regex (regex_string);
+  std::smatch match_results;
+  if (!std::regex_match (URL_in,
+                         match_results,
+                         regex,
+                         std::regex_constants::match_default))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid URL string (was: \"%s\"), aborting\n"),
+                ACE_TEXT (URL_in.c_str ())));
+    return false;
+  } // end IF
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+  if (match_results[1].matched)
+    use_SSL = true;
+  ACE_ASSERT (match_results[2].matched);
+  hostname = match_results[2];
+  if (match_results[3].matched)
+  {
+    converter.clear ();
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.str (match_results[3].str ());
+    converter >> port;
+  } // end IF
+  ACE_ASSERT (match_results[4].matched);
+  URI_out = match_results[4];
+
+  // step2: validate address/verify host name exists
+  //        --> resolve
+  // *TODO*: support IPv6 as well
+  //regex_string =
+  //  ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]{1,3}\\.){4}$");
+  //regex = regex_string;
+  //std::smatch match_results_2;
+  //if (std::regex_match (hostname,
+  //                      match_results_2,
+  //                      regex,
+  //                      std::regex_constants::match_default))
+  //{
+  //  ACE_ASSERT (match_results_2.ready () &&
+  //              !match_results_2.empty () &&
+  //              match_results_2[1].matched);
+  //  dotted_decimal_string = hostname;
+  //} // end IF
+  result = address_out.set (port,
+                            hostname.c_str (),
+                            1,
+                            ACE_ADDRESS_FAMILY_INET);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set (): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+
+  // step3: validate URI
+  regex_string =
+    ACE_TEXT_ALWAYS_CHAR ("^(\\/.+(?=\\/))*\\/(.+?)(\\.(html|htm))?$");
+  //regex_string =
+  //    ACE_TEXT_ALWAYS_CHAR ("^(?:http(?:s)?://)?((.+\\.)+([^\\/]+))(\\/.+(?=\\/))*\\/(.+?)(\\.(html|htm))?$");
+  regex.assign (regex_string,
+                (std::regex_constants::ECMAScript |
+                 std::regex_constants::icase));
+  std::smatch match_results_3;
+  if (!std::regex_match (URI_out,
+                         match_results_3,
+                         regex,
+                         std::regex_constants::match_default))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid URI (was: \"%s\"), aborting\n"),
+                ACE_TEXT (URI_out.c_str ())));
+    return false;
+  } // end IF
+  ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
+
+  return true;
 }

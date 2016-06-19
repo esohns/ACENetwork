@@ -88,7 +88,7 @@ LF             \x0A
 SP             \x20
 /* *NOTE*: (horizontal) TAB */
 HT             \x09
-DOUBLE_QUOTE   \x22
+/* DOUBLE_QUOTE   \x22 */
 
 
 CRLF           \x0D\x0A
@@ -113,21 +113,27 @@ VERSION        HTTP\/[[:digit:]]{1}\.[[:digit:]]{1}
 
 
 /* ESCAPE         (%(HEX)(HEX)) */
-
-/* (UCHAR|:|@|&|=|+) */
-P_CHAR         [[:alpha:][:digit:]$\-_.!*'(),%a-fA-F:@&=+]{+}[^[:alpha:][:digit:];/?:@&=+!*'(),$\-_.\x00-\x1F\x20\x22\x7F#%<>]
-/* (UNRESERVED|ESCAPE) */
-U_CHAR         [[:alpha:][:digit:]$\-_.!*'(),%a-fA-F]{+}[^[:alpha:][:digit:];/?:@&=+!*'(),$\-_.\x00-\x1F\x20\x22\x7F#%<>]
-/* [[:alpha:][:digit:]]{+}(SAFE|EXTRA|NATIONAL) */
-UNRESERVED     [[:alpha:][:digit:]$\-_.!*'(),]{+}[^[:alpha:][:digit:];/?:@&=+!*'(),$\-_.\x00-\x1F\x20\x22\x7F#%<>]
+ESCAPE         (%({HEX}{1})({HEX}{1}))
 
 RESERVED       [;/?:@&=+]
 EXTRA          [!*'(),]
 SAFE           [$\-_.]
-/* (CTL|SP|DOUBLEQUOTE){+}[#%<>] */
-UNSAFE         [\x00-\x1F\x20\x22\x7F#%<>]
-/* (OCTET){-}([[:alpha:][:digit:]]{+}(RESERVED|EXTRA|SAFE|UNSAFE)) */
-NATIONAL       [^[:alpha:][:digit:];/?:@&=+!*'(),$\-_.\x00-\x1F\x20\x22\x7F#%<>]
+/* (CTL|SP){+}["#%<>] */
+UNSAFE         [\x00-\x1F\x7F]{+}[\x20]{+}["#%<>]
+/* (OCTET){-}([[:alnum:]]{+}(RESERVED|EXTRA|SAFE|UNSAFE)) */
+/* NATIONAL       [^[:alnum:]]{-}[;/?:@&=+]{-}[!*'(),]{-}[$\-_.]{-}([\x00-\x1F\x7F]{+}[\x20]{+}["#%<>]) */
+NATIONAL       [\x00-\xFF]{-}[[:alnum:]]{-}[;/?:@&=+]{-}[!*'(),]{-}[$\-_.]{-}[\x00-\x1F\x7F]{-}[\x20]{-}["#%<>]
+
+/* [[:alnum:]]{+}(SAFE|EXTRA|NATIONAL) */
+/* UNRESERVED     [[:alnum:]]{+}[$\-_.]{+}[!*'(),]{+}{NATIONAL} */
+UNRESERVED     [\x00-\xFF]{-}[[:alnum:]]{-}[;/?:@&=+]{-}[!*'(),]{-}[$\-_.]{-}[\x00-\x1F\x7F]{-}[\x20]{-}["#%<>]{+}[[:alnum:]]{+}[$\-_.]{+}[!*'(),]
+/* UNRESERVED     [[:alnum:]]{+}[$\-_.]{+}[!*'(),] */
+/* (UNRESERVED|ESCAPE) */
+/* U_CHAR         {UNRESERVED}|{ESCAPE} */
+/* U_CHAR         [[:alnum:]]{+}{SAFE}{+}{EXTRA}{+}{NATIONAL} */
+U_CHAR         {UNRESERVED}|{ESCAPE}
+/* (U_CHAR|:|@|&|=|+) */
+P_CHAR         [[:alnum:]$\-_.!*'(),%a-fA-F:@&=+]{+}[^[:alnum:];/?:@&=+!*'(),$\-_.\x00-\x1F\x7F\x20"#%<>]
 
 
 /* Uniform Resource Identifiers */
@@ -321,13 +327,13 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 %%
 %{
   //yylloc->step ();
-  yy_flex_debug = driver->debugScanner ();
+  //yy_flex_debug = HTTP_Scanner_get_debug (yyscanner);
 
   // *TODO*: these prevent the scanner from being fully re-entrant
   //         --> remove ASAP
   std::istringstream converter;
-  unsigned int chunk_size;
-  unsigned int missing_chunk_bytes;
+  unsigned int chunk_size = 0;
+  unsigned int missing_chunk_bytes = 0;
 %}
 
 <INITIAL>{
@@ -492,7 +498,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              HTTP_Record* record_p = driver->record ();
                              ACE_ASSERT (record_p);
                              HTTP_HeadersIterator_t iterator =
-                                 record_p->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_HEADER_STRING));
+                                 record_p->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING));
                              if ((iterator != record_p->headers.end ()) &&
                                  ((*iterator).second == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING)))
                              {
@@ -507,16 +513,32 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              /* return yy::HTTP_Parser::token::DELIMITER; */ }
 } // end <response_headers>
 <body>{
-{OCTET}*                   { //ACE_Message_Block* message_block_p = driver->buffer ();
-                             //ACE_ASSERT (message_block_p);
+{OCTET}*                   { ACE_Message_Block* message_block_p = driver->buffer ();
+                             ACE_ASSERT (message_block_p);
                              driver->offset (yyleng);
-//                             ACE_DEBUG ((LM_DEBUG,
-//                                         ACE_TEXT ("found entity @%d[%d]: %d byte(s)\n"),
-//                                         driver->offset (),
-//                                         (message_block_p->rd_ptr () - message_block_p->base ()),
-//                                         message_block_p->length ()));
                              yylval->ival = yyleng;
-                             //YY_FLUSH_BUFFER; // --> use the next fragment
+                             if (!chunk_size)
+                             {
+                               HTTP_Record* record_p = driver->record ();
+                               ACE_ASSERT (record_p);
+                               HTTP_HeadersIterator_t iterator =
+                                   record_p->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
+                               ACE_ASSERT (iterator != record_p->headers.end ());
+                               converter.str ((*iterator).second);
+                               converter.clear ();
+                               converter >> chunk_size;
+                               missing_chunk_bytes = chunk_size - yyleng;
+                               if (yy_flex_debug)
+                                 ACE_DEBUG ((LM_DEBUG,
+                                             ACE_TEXT ("found entity @%d[fragment offset: %d]: %d/%d byte(s)\n"),
+                                             driver->offset () - yyleng,
+                                             (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng,
+                                             yyleng, chunk_size));
+                             } // end IF
+                             else
+                               missing_chunk_bytes -= yyleng;
+                             if (!missing_chunk_bytes)
+                               driver->finished (); // done
                              return yytokentype::BODY;
                              /* return yy::HTTP_Parser::token::BODY; */ }
 } // end <body>
@@ -721,6 +743,11 @@ HTTP_Scanner_wrap (yyscan_t yyscanner)
   ACE_ASSERT (driver);
   if (!driver->isBlocking ())
     return 1; // not enough data, cannot proceed
+  if (driver->hasFinished ())
+  {
+    BEGIN (INITIAL);
+    return 1; // done
+  } // end IF
 
   // *NOTE*: there is more data
   // 1. gobble/save the rest
@@ -736,9 +763,11 @@ HTTP_Scanner_wrap (yyscan_t yyscanner)
 //       c = yyinput (yyscanner));
   yyg->yy_c_buf_p += yyleng;
   yyg->yy_hold_char = *yyg->yy_c_buf_p;
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("the rest: \"%s\"\n"),
-              ACE_TEXT (the_rest.c_str ())));
+  if (yy_flex_debug)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("the rest: \"%s\" (%d byte(s))\n"),
+                ACE_TEXT (the_rest.c_str ()),
+                the_rest.size ()));
 
   // step2
   if (!driver->switchBuffer ())

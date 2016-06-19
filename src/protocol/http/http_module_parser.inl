@@ -369,7 +369,7 @@ HTTP_Module_Parser_T<TimePolicyType,
     ACE_ASSERT (sessionData_);
 
     HTTP_HeadersIterator_t iterator =
-      data_r.HTTPRecord->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_CONTENTENCODING_HEADER_STRING));
+      data_r.HTTPRecord->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
     if (iterator != data_r.HTTPRecord->headers.end ())
     {
       sessionData_->format =

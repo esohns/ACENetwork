@@ -135,6 +135,7 @@ typedef struct YYLTYPE
 /* "%code provides" blocks.  */
 
 
+extern void yysetdebug (int);
 void yyerror (YYLTYPE*, Net_IParser<HTTP_Record>*, yyscan_t, const char*);
 int yyparse (Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner);
 void yyprint (FILE*, yytokentype, YYSTYPE);

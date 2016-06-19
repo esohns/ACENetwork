@@ -884,7 +884,7 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
 
   int result = -1;
   ACE_INET_Addr inet_address;
-  ACE_TCHAR buffer[MAXHOSTNAMELEN];
+  ACE_TCHAR buffer[HOST_NAME_MAX];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
 
   if (hostName_inout.empty ())

@@ -97,11 +97,7 @@ HTTP_ParserDriver<RecordType,
   if (initialized_)
   {
     finished_ = false;
-    if (fragment_)
-    {
-      fragment_->release ();
-      fragment_ = NULL;
-    } // end IF
+    fragment_ = NULL;
     offset_ = 0;
     //record_ = NULL;
 
@@ -121,7 +117,8 @@ HTTP_ParserDriver<RecordType,
 #if YYDEBUG
   //parser_.set_debug_level (traceParsing_in ? 1
   //                                         : 0); // binary (see bison manual)
-  yydebug = (trace_ ? 1 : 0);
+  //yydebug = (trace_ ? 1 : 0);
+  yysetdebug (trace_ ? 1 : 0);
 #endif
   messageQueue_ = messageQueue_in;
   useYYScanBuffer_ = useYYScanBuffer_in;

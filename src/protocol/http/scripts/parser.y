@@ -181,11 +181,13 @@ using namespace std;
 %token <ival> END 0           "end"
 
 %type  <ival> message head body
-%type  <ival> head_rest1 head_rest2 headers chunks
+%type  <ival> regular_body chunked_body chunks
+%type  <ival> head_rest1 head_rest2 headers
 %type  <ival> request_line_rest1 request_line_rest2
 %type  <ival> status_line_rest1 status_line_rest2
 
 %code provides {
+extern void yysetdebug (int);
 void yyerror (YYLTYPE*, Net_IParser<HTTP_Record>*, yyscan_t, const char*);
 int yyparse (Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner);
 void yyprint (FILE*, yytokentype, YYSTYPE);
@@ -246,7 +248,7 @@ head:               "method" head_rest1              { $$ = (*$1).size () + $2 +
 //                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
                                                        } // end ELSE
                                                      };
-                    | "end_of_fragment"              { $$ = 0;
+                    | "end_of_fragment"              { $$ = $1;
                                                        YYACCEPT; };
 head_rest1:         request_line_rest1 headers       { $$ = $1 + $2; };
 request_line_rest1: "uri" request_line_rest2         { $$ = (*$1).size () + $2 + 1;
@@ -255,7 +257,7 @@ request_line_rest1: "uri" request_line_rest2         { $$ = (*$1).size () + $2 +
 //                                                                   ACE_TEXT ("set URI: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));
                                                      };
-                    | "end_of_fragment"              { $$ = 0;
+                    | "end_of_fragment"              { $$ = $1;
                                                        YYACCEPT; };
 request_line_rest2: "version"                        { $$ = (*$1).size () + 2;
                                                        driver->record ()->version =
@@ -264,13 +266,13 @@ request_line_rest2: "version"                        { $$ = (*$1).size () + 2;
 //                                                                   ACE_TEXT ("set version: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));
                                                      };
-                    | "end_of_fragment"              { $$ = 0;
+                    | "end_of_fragment"              { $$ = $1;
                                                        YYACCEPT; };
 head_rest2:         status_line_rest1 headers        { $$ = $1 + $2; };
 status_line_rest1:  "status" status_line_rest2       { $$ = (*$1).size () + $2 + 1;
-                                                       std::stringstream converter;
+                                                       std::istringstream converter;
                                                        converter.str (*$1);
-                                                       int status;
+                                                       int status = -1;
                                                        converter >> status;
                                                        driver->record ()->status =
                                                            static_cast<HTTP_Status_t> (status);
@@ -278,7 +280,7 @@ status_line_rest1:  "status" status_line_rest2       { $$ = (*$1).size () + $2 +
 //                                                                   ACE_TEXT ("set status: %d\n"),
 //                                                                   status));
                                                      };
-                    | "end_of_fragment"              { $$ = 0;
+                    | "end_of_fragment"              { $$ = $1;
                                                        YYACCEPT; };
 status_line_rest2:  "reason"                         { $$ = (*$1).size () + 2;
                                                        driver->record ()->reason = *$1;
@@ -286,7 +288,7 @@ status_line_rest2:  "reason"                         { $$ = (*$1).size () + 2;
 //                                                                   ACE_TEXT ("set reason: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));
                                                      };
-                    | "end_of_fragment"              { $$ = 0;
+                    | "end_of_fragment"              { $$ = $1;
                                                        YYACCEPT; };
 headers:            headers "header"                 { /* NOTE*: use right-recursion here to force early state reductions
                                                                  (i.e. parse headers). This is required so the scanner can
@@ -327,20 +329,63 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
 //                                                                   ACE_TEXT (match_results[1].str ().c_str ()),
 //                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
                                                      };
-                    | "end_of_fragment"              { $$ = 0;
+                    | "end_of_fragment"              { $$ = $1;
                                                        yyclearin;
                                                        YYACCEPT; };
                     |                                { $$ = 0; };
 //                    | %empty                         { $$ = 0; };
-body:               "body"                           { $$ = $1;
-                                                       driver->finished ();
-                                                       YYACCEPT; }; // *NOTE*: any following (entity) fragments will not be parsed
-                    | chunks headers "delimiter"     { $$ = $1 + $2 + $3; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
-                                                       driver->finished ();
-                                                       YYACCEPT; };
-                    | "end_of_fragment"              { $$ = 0;
+body:               "body" regular_body              { $$ = $1 + $2;
+                                                       HTTP_Record* record_p = driver->record ();
+                                                       ACE_ASSERT (record_p);
+                                                       HTTP_HeadersIterator_t iterator =
+                                                         record_p->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
+                                                       ACE_ASSERT (iterator != record_p->headers.end ());
+                                                       std::istringstream converter;
+                                                       converter.str ((*iterator).second);
+                                                       unsigned int content_length = 0;
+                                                       converter >> content_length;
+                                                       if ($1 == content_length)
+                                                       {
+                                                         driver->finished ();
+                                                         YYACCEPT;
+                                                       } // end IF
+                                                     };
+                    | "chunk" chunked_body           { $$ = $1 + $2; };
+                    | "end_of_fragment"              { $$ = $1;
                                                        yyclearin;
                                                        YYACCEPT; };
+regular_body:       "body" regular_body              { $$ = $1 + $2;
+                                                       HTTP_Record* record_p = driver->record ();
+                                                       ACE_ASSERT (record_p);
+                                                       HTTP_HeadersIterator_t iterator =
+                                                         record_p->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
+                                                       ACE_ASSERT (iterator != record_p->headers.end ());
+                                                       std::istringstream converter;
+                                                       converter.str ((*iterator).second);
+                                                       unsigned int content_length = 0;
+                                                       converter >> content_length;
+                                                       if ($1 == content_length)
+                                                       {
+                                                         driver->finished ();
+                                                         YYACCEPT;
+                                                       } // end IF
+                                                     };
+                    | "end_of_fragment"              { $$ = $1;
+                                                       yyclearin;
+                                                       YYACCEPT; };
+                    |                                { $$ = 0;
+                                                       driver->finished ();
+                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
+//                    | %empty                         { $$ = 0;
+//                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
+chunked_body:       chunks headers "delimiter"     { $$ = $1 + $2 + $3; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
+                                                     driver->finished ();
+                                                     YYACCEPT; };
+                    | "end_of_fragment"              { $$ = $1;
+                                                       yyclearin;
+                                                       YYACCEPT; };
+                    |                                { $$ = 0;
+                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
 //                    | %empty                         { $$ = 0;
 //                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
 chunks:             "chunk" chunks                   { $$ = $1 + $2; };
@@ -364,6 +409,14 @@ yy::HTTP_Parser::set (yyscan_t context_in)
 
   yyscanner = context_in;
 } */
+
+void
+yysetdebug (int debug_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::yysetdebug"));
+
+  yydebug = debug_in;
+}
 
 void
 yyerror (YYLTYPE* location_in,

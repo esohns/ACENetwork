@@ -24,6 +24,7 @@
 #include <string>
 
 #include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 
 #include "stream_dec_common.h"
 
@@ -49,6 +50,10 @@ class HTTP_Export HTTP_Tools
   static bool isRequest (const HTTP_Record&);
 
   static enum Stream_Decoder_CompressionFormatType Encoding2CompressionFormat (const std::string&);
+
+  static bool parseURL (const std::string&, // URL
+                        ACE_INET_Addr&,     // return value: host address
+                        std::string&);      // return value: URI
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_Tools ())
