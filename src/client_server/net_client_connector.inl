@@ -55,6 +55,8 @@ Net_Client_Connector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
 
+  if (!connectionManager_)
+    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 }
 
 template <typename HandlerType,
@@ -370,6 +372,8 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
 
+  if (!connectionManager_)
+    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 }
 
 template <typename HandlerType,
@@ -724,7 +728,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 //  // sanity check(s)
 //  ACE_ASSERT (handler_inout);
 //
-//  Net_IConnector_t* iconnector_p = this;
+//  Net_ICONNECTOR_T* iconnector_p = this;
 //  result = handler_inout->open (iconnector_p);
 //  if (result == -1)
 //  {
@@ -803,6 +807,8 @@ Net_Client_Connector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
 
+  if (!connectionManager_)
+    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 }
 
 template <typename HandlerType,

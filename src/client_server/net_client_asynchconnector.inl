@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "ace/Log_Msg.h"
 
+#include "common_defines.h"
+
 #include "net_common_tools.h"
 #include "net_macros.h"
 
@@ -47,6 +49,9 @@ Net_Client_AsynchConnector_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
   int result = -1;
+
+  //if (!connectionManager_)
+  //  connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
   result = inherited::open (true,  // pass addresses ?
@@ -259,7 +264,10 @@ Net_Client_AsynchConnector_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
   int result = -1;
-  ACE_Asynch_Connect* asynch_connect_p = NULL;
+  ACE_Asynch_Connect& connect_r = inherited::asynch_connect ();
+  //ACE_Asynch_Connect_Impl* connect_p =
+  //  dynamic_cast<ACE_Asynch_Connect_Impl*> (connect_r.implementation ());
+  //ACE_ASSERT (connect_p);
 
   // *NOTE*: some socket options need to be set before connect()ing
   //         --> set these here (this implements the shared_connect_start()
@@ -318,12 +326,13 @@ Net_Client_AsynchConnector_T<HandlerType,
     } // end IF
 #endif
 
-  asynch_connect_p = &inherited::asynch_connect ();
-  result = asynch_connect_p->connect (connectHandle_,
-                                      remoteAddress_in,
-                                      localAddress_in,
-                                      reuseAddr_in,
-                                      act_in);
+  result = connect_r.connect (connectHandle_,
+                              remoteAddress_in,
+                              localAddress_in,
+                              reuseAddr_in,
+                              act_in,
+                              0,
+                              COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
   if (result == -1)
   {
     ACE_TCHAR buffer[BUFSIZ];
@@ -335,7 +344,7 @@ Net_Client_AsynchConnector_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Connect::connect(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_Asynch_Connect_Impl::connect(\"%s\"): \"%m\", aborting\n"),
                 buffer));
     goto close;
   } // end IF
@@ -595,6 +604,9 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
   int result = -1;
+
+  //if (!connectionManager_)
+  //  connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
   result = inherited::open (true,  // pass addresses ?
@@ -940,6 +952,9 @@ Net_Client_AsynchConnector_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
   int result = -1;
+
+  //if (!connectionManager_)
+  //  connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
   result = inherited::open (true,  // pass addresses ?

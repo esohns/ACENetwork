@@ -417,6 +417,7 @@ HTTP_Tools::parseURL (const std::string& URL_in,
 
   if (match_results[1].matched)
     use_SSL = true;
+  ACE_UNUSED_ARG (use_SSL);
   ACE_ASSERT (match_results[2].matched);
   hostname = match_results[2];
   if (match_results[3].matched)

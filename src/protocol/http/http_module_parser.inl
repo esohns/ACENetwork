@@ -194,7 +194,7 @@ HTTP_Module_Parser_T<TimePolicyType,
   DATA_CONTAINER_T* data_container_p = NULL;
   ProtocolMessageType* message_p = NULL;
   ProtocolMessageType* message_2 = NULL;
-  RecordType* record_p = NULL;
+//  RecordType* record_p = NULL;
   bool release_inbound_message = true; // message_inout
   bool release_message = false; // message_p
 

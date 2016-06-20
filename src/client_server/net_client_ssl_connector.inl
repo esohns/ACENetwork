@@ -51,6 +51,8 @@ Net_Client_SSL_Connector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::Net_Client_SSL_Connector_T"));
 
+  if (!connectionManager_)
+    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 }
 
 template <typename HandlerType,

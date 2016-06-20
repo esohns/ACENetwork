@@ -28,6 +28,7 @@
 
 #include "stream_statemachine_common.h"
 
+#include "net_connection_manager.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
@@ -38,16 +39,16 @@
 #include "net_udpconnection_base.h"
 
 template <typename HandlerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename StreamType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename HandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_Client_AsynchConnector_T
  : public ACE_Asynch_Connector<HandlerType>
@@ -55,9 +56,8 @@ class Net_Client_AsynchConnector_T
                            HandlerConfigurationType>
 {
  public:
-  typedef Net_IConnector_T<AddressType,
-                           HandlerConfigurationType> ICONNECTOR_T;
   typedef StreamType STREAM_T;
+
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
                             StateType,
@@ -68,20 +68,28 @@ class Net_Client_AsynchConnector_T
                                   StatisticContainerType,
                                   StreamType,
                                   Stream_StateMachine_ControlState,
-                                  ///////
+                                  ////////
                                   Net_SocketConfiguration,
-                                  ///////
+                                  ////////
                                   HandlerConfigurationType> ISOCKET_CONNECTION_T;
+
+  typedef Net_Connection_Manager_T<AddressType,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   ////////
+                                   UserDataType> CONNECTION_MANAGER_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
+                                   ///////
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Net_IConnector_T<AddressType,
-                           HandlerConfigurationType> INTERFACE_T;
 
-  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+  typedef Net_IConnector_T<AddressType,
+                           HandlerConfigurationType> ICONNECTOR_T;
+
+  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_Client_AsynchConnector_T ();
 
@@ -137,14 +145,14 @@ class Net_Client_AsynchConnector_T
 
 // partial specialization (for UDP)
 template <typename HandlerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename HandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
@@ -156,15 +164,15 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                                  HandlerConfigurationType,
 
                                                                  UserDataType>,
-                                   //////
+                                   ///////
                                    ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
                                    StreamType,
-                                   //////
+                                   ///////
                                    HandlerConfigurationType,
-                                   //////
+                                   ///////
                                    UserDataType>
  : public ACE_Asynch_Connector<Net_AsynchUDPConnectionBase_T<HandlerType,
 
@@ -180,43 +188,50 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                            HandlerConfigurationType>
 {
  public:
-  typedef Net_IConnector_T<ACE_INET_Addr,
-                           HandlerConfigurationType> ICONNECTOR_T;
   typedef StreamType STREAM_T;
+
   typedef Net_IConnection_T<ACE_INET_Addr,
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_ISocketConnection_T<ACE_INET_Addr,
-                                  ConfigurationType,
-                                  StateType,
-                                  StatisticContainerType,
-                                  StreamType,
-                                  Stream_StateMachine_ControlState,
-                                  ///////
-                                  Net_SocketConfiguration,
-                                  ///////
-                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
-  typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   //////
-                                   UserDataType> ICONNECTION_MANAGER_T;
   typedef Net_AsynchUDPConnectionBase_T<HandlerType,
 
                                         ConfigurationType,
                                         StateType,
                                         StatisticContainerType,
                                         StreamType,
-
+                                        //
                                         HandlerConfigurationType,
-
+                                        //
                                         UserDataType> CONNECTION_T;
-  typedef Net_IConnector_T<ACE_INET_Addr,
-                           HandlerConfigurationType> INTERFACE_T;
+  typedef Net_ISocketConnection_T<ACE_INET_Addr,
+                                  ConfigurationType,
+                                  StateType,
+                                  StatisticContainerType,
+                                  StreamType,
+                                  Stream_StateMachine_ControlState,
+                                  ////////
+                                  Net_SocketConfiguration,
+                                  ////////
+                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
 
-  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+  typedef Net_Connection_Manager_T<ACE_INET_Addr,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   ///////
+                                   UserDataType> CONNECTION_MANAGER_T;
+  typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   //////
+                                   UserDataType> ICONNECTION_MANAGER_T;
+
+  typedef Net_IConnector_T<ACE_INET_Addr,
+                           HandlerConfigurationType> ICONNECTOR_T;
+
+  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_Client_AsynchConnector_T ();
 
@@ -277,34 +292,33 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 #else
 // partial specialization (for Netlink)
 template <typename HandlerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename HandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_Client_AsynchConnector_T<HandlerType,
-                                   //////
+                                   ///////
                                    Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
                                    StreamType,
-                                   //////
+                                   ///////
                                    HandlerConfigurationType,
-                                   //////
+                                   ///////
                                    UserDataType>
  : public ACE_Asynch_Connector<HandlerType>
  , public Net_IConnector_T<Net_Netlink_Addr,
                            HandlerConfigurationType>
 {
  public:
-  typedef Net_IConnector_T<Net_Netlink_Addr,
-                           HandlerConfigurationType> ICONNECTOR_T;
   typedef StreamType STREAM_T;
+
   typedef Net_IConnection_T<Net_Netlink_Addr,
                             ConfigurationType,
                             StateType,
@@ -315,20 +329,28 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                   StatisticContainerType,
                                   StreamType,
                                   Stream_StateMachine_ControlState,
-                                  ///////
+                                  ////////
                                   Net_SocketConfiguration,
-                                  ///////
+                                  ////////
                                   HandlerConfigurationType> ISOCKET_CONNECTION_T;
+
+  typedef Net_Connection_Manager_T<Net_Netlink_Addr,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   ///////
+                                   UserDataType> CONNECTION_MANAGER_T;
   typedef Net_IConnectionManager_T<Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
+                                   ///////
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Net_IConnector_T<Net_Netlink_Addr,
-                           HandlerConfigurationType> INTERFACE_T;
 
-  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+  typedef Net_IConnector_T<Net_Netlink_Addr,
+                           HandlerConfigurationType> ICONNECTOR_T;
+
+  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_Client_AsynchConnector_T ();
 

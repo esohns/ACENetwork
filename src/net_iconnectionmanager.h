@@ -30,7 +30,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_IConnectionManager_T
  : public Common_IControl

@@ -28,20 +28,21 @@
 
 #include "stream_statemachine_control.h"
 
+#include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
 
 template <typename HandlerType,
           typename ConnectorType, // ACE_SSL_SOCK_Connector
-          ///////////////////////////////
+          ////////////////////////////////
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename HandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_Client_SSL_Connector_T
  : public ACE_SSL_SOCK_Connector
@@ -49,9 +50,8 @@ class Net_Client_SSL_Connector_T
                            HandlerConfigurationType>
 {
  public:
-  typedef Net_IConnector_T<AddressType,
-                           HandlerConfigurationType> ICONNECTOR_T;
   typedef StreamType STREAM_T;
+
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
                             StateType,
@@ -62,20 +62,28 @@ class Net_Client_SSL_Connector_T
                                   StatisticContainerType,
                                   StreamType,
                                   Stream_StateMachine_ControlState,
-                                  ///////
+                                  ////////
                                   Net_SocketConfiguration,
-                                  ///////
+                                  ////////
                                   HandlerConfigurationType> ISOCKET_CONNECTION_T;
+
+  typedef Net_Connection_Manager_T<AddressType,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   ///////
+                                   UserDataType> CONNECTION_MANAGER_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
+                                   ///////
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Net_IConnector_T<AddressType,
-                           HandlerConfigurationType> INTERFACE_T;
 
-  Net_Client_SSL_Connector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+  typedef Net_IConnector_T<AddressType,
+                           HandlerConfigurationType> ICONNECTOR_T;
+
+  Net_Client_SSL_Connector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                               const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_Client_SSL_Connector_T ();
 
