@@ -303,8 +303,8 @@ static const signed char yyrhs[] =
 static const unsigned short int yyrline[] =
 {
        0,   213,   213,   214,   221,   251,   253,   254,   260,   262,
-     269,   271,   272,   283,   285,   291,   293,   332,   335,   337,
-     353,   354,   357,   373,   376,   381,   384,   387,   391,   392
+     269,   271,   272,   283,   285,   291,   293,   333,   336,   338,
+     354,   355,   358,   374,   377,   382,   385,   388,   392,   393
 };
 #endif
 
@@ -1202,8 +1202,10 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                                          break;
                                                        } // end IF
                                                        ACE_ASSERT (match_results.ready () && !match_results.empty ());
-
                                                        ACE_ASSERT (match_results[1].matched);
+                                                       ACE_ASSERT (match_results[2].matched);
+                                                       ACE_ASSERT (!match_results[2].str ().empty ());
+
                                                        HTTP_Record* record_p = driver->record ();
                                                        ACE_ASSERT (record_p);
 //                                                       HTTP_HeadersIterator_t iterator =
@@ -1212,8 +1214,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 //                                                         ACE_DEBUG ((LM_DEBUG,
 //                                                                     ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
 //                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
-                                                       ACE_ASSERT (match_results[2].matched);
-                                                       ACE_ASSERT (!match_results[2].str ().empty ());
+
                                                        record_p->headers[match_results[1]] =
                                                          match_results[2];
 //                                                       ACE_DEBUG ((LM_DEBUG,

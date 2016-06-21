@@ -31,6 +31,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 }
 
 %{
+#include <regex>
 #include <sstream>
 #include <string>
 
@@ -331,6 +332,10 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 
   // *TODO*: these prevent the scanner from being fully re-entrant
   //         --> remove ASAP
+  std::string regex_string;
+  std::regex::flag_type regex_flags = std::regex_constants::ECMAScript;
+  std::regex regex;
+  std::smatch match_results;
   std::istringstream converter;
   unsigned int chunk_size = 0;
   unsigned int missing_chunk_bytes = 0;
@@ -543,14 +548,31 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              /* return yy::HTTP_Parser::token::BODY; */ }
 } // end <body>
 <chunked_body>{
-{CHUNKSIZE}                {
+{CHUNK_LINE}{CRLF}         { // *TODO*: let the scanner parse this (it does it anyway)
+                             regex_string =
+                                 ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_REGEX_CHUNK_LINE);
+                             regex.assign (regex_string, regex_flags);
+                             std::string input_string = yytext;
+                             if (!std::regex_match (input_string,
+                                                    match_results,
+                                                    regex,
+                                                    std::regex_constants::match_default))
+                             {
+                               ACE_DEBUG ((LM_ERROR,
+                                           ACE_TEXT ("invalid chunk line (was: \"%s\"), returning\n"),
+                                           ACE_TEXT (yytext)));
+                               yyterminate();
+                             } // end IF
+                             ACE_ASSERT (match_results.ready () && !match_results.empty ());
+                             ACE_ASSERT (match_results[1].matched);
                              converter.setf (std::ios::hex,
                                              std::ios::basefield);
-                             converter.str (yytext);
+                             converter.clear ();
+                             converter.str (match_results[1].str ());
                              converter >> chunk_size;
                              missing_chunk_bytes = chunk_size;
-                             converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-                             converter.clear ();
+                             converter.setf (std::ios::dec,
+                                             std::ios::basefield);
                              BEGIN (chunk);
                              yycolumn -= yyleng;
                              /* yymore (); */ yyless (0); }

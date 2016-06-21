@@ -50,8 +50,8 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   int result = -1;
 
-  //if (!connectionManager_)
-  //  connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
+  if (!connectionManager_)
+    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
   result = inherited::open (true,  // pass addresses ?
@@ -605,8 +605,8 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
   int result = -1;
 
-  //if (!connectionManager_)
-  //  connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
+  if (!connectionManager_)
+    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
   result = inherited::open (true,  // pass addresses ?
@@ -953,8 +953,8 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   int result = -1;
 
-  //if (!connectionManager_)
-  //  connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
+  if (!connectionManager_)
+    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
   result = inherited::open (true,  // pass addresses ?

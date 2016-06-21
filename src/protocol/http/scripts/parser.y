@@ -310,8 +310,10 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                                                          break;
                                                        } // end IF
                                                        ACE_ASSERT (match_results.ready () && !match_results.empty ());
-
                                                        ACE_ASSERT (match_results[1].matched);
+                                                       ACE_ASSERT (match_results[2].matched);
+                                                       ACE_ASSERT (!match_results[2].str ().empty ());
+
                                                        HTTP_Record* record_p = driver->record ();
                                                        ACE_ASSERT (record_p);
 //                                                       HTTP_HeadersIterator_t iterator =
@@ -320,8 +322,7 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
 //                                                         ACE_DEBUG ((LM_DEBUG,
 //                                                                     ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
 //                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
-                                                       ACE_ASSERT (match_results[2].matched);
-                                                       ACE_ASSERT (!match_results[2].str ().empty ());
+
                                                        record_p->headers[match_results[1]] =
                                                          match_results[2];
 //                                                       ACE_DEBUG ((LM_DEBUG,
