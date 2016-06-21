@@ -28,7 +28,7 @@
 
 #include "net_client_connector_common.h"
 
-// forward declarations
+// forward declaration(s)
 class Stream_IAllocator;
 struct Net_SocketHandlerConfiguration;
 class Net_Client_TimeoutHandler;
@@ -43,14 +43,15 @@ struct Net_Client_ConnectorConfiguration
 
   Net_IInetConnectionManager_t*   connectionManager;
   Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  //unsigned int                    statisticCollectionInterval; // statistics collecting interval (second(s))
-  //                                                             // 0 --> DON'T collect statistics
+  //unsigned int                    statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
 struct Net_Client_SignalHandlerConfiguration
+ : Common_SignalHandlerConfiguration
 {
   inline Net_Client_SignalHandlerConfiguration ()
-   : actionTimerId (-1)
+   : Common_SignalHandlerConfiguration ()
+   , actionTimerId (-1)
    , connector (NULL)
    , messageAllocator (NULL)
    , peerAddress ()
@@ -63,7 +64,7 @@ struct Net_Client_SignalHandlerConfiguration
   Stream_IAllocator*              messageAllocator;
   ACE_INET_Addr                   peerAddress;
   Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  unsigned int                    statisticReportingInterval; // statistics collecting interval (second(s)) [0: off]
+  unsigned int                    statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
 struct Net_Client_Configuration

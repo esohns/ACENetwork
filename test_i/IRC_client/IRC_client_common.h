@@ -35,13 +35,13 @@
 
 #include "common_inotify.h"
 
-#include "irc_icontrol.h"
-
 #include "stream_common.h"
 
 #include "net_defines.h"
 #include "net_iconnection.h"
+#include "net_iconnector.h"
 
+#include "irc_icontrol.h"
 #include "irc_stream_common.h"
 
 #include "FILE_Stream.h"
@@ -54,6 +54,7 @@ struct IRC_Client_ModuleHandlerConfiguration;
 struct IRC_Client_SessionData;
 class IRC_Client_SessionMessage;
 struct IRC_Client_SessionState;
+struct IRC_Client_SocketHandlerConfiguration;
 class IRC_Record;
 
 typedef Common_INotify_T<unsigned int,
@@ -93,7 +94,7 @@ struct IRC_Client_PhoneBook
    , timeStamp ()
   {};
 
-  // *NOTE*: this member is redundant (but still useful ?)...
+  // *TODO*: this member is redundant (but still useful ?)
   IRC_Client_Networks_t networks;
   IRC_Client_Servers_t  servers;
   ACE_Date_Time         timeStamp;
@@ -191,6 +192,24 @@ struct IRC_Client_SessionState
   bool               isFirstMessage;
   std::string        nickName;
   IRC_UserModes_t    userModes;
+};
+
+typedef Net_IConnector_T<ACE_INET_Addr,
+                         IRC_Client_SocketHandlerConfiguration> IRC_Client_IConnector_t;
+struct IRC_Client_CursesState;
+struct IRC_Client_SignalHandlerConfiguration
+ : Common_SignalHandlerConfiguration
+{
+  inline IRC_Client_SignalHandlerConfiguration ()
+   : Common_SignalHandlerConfiguration ()
+   , connector (NULL)
+   , cursesState (NULL)
+   , peerAddress ()
+  {};
+
+  IRC_Client_IConnector_t* connector;
+  IRC_Client_CursesState*  cursesState;
+  ACE_INET_Addr            peerAddress;
 };
 
 #endif

@@ -776,7 +776,14 @@ do_work (bool requestBroadcastReplies_in,
     connection_manager_p;
   CBData_in.configuration->signalHandlerConfiguration.statisticReportingTimerID =
     timer_id;
-  signalHandler_in.initialize (configuration.signalHandlerConfiguration);
+  CBData_in.configuration->signalHandlerConfiguration.useReactor =
+    useReactor_in;
+  if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize signal handler, returning\n")));
+    return;
+  } // end IF
   if (!Common_Tools::initializeSignals (signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -1513,7 +1520,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  Test_U_SignalHandler signal_handler (use_reactor);
+  Test_U_SignalHandler signal_handler;
 
   // step1f: handle specific program modes
   if (print_version_and_exit)

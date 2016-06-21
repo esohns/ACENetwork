@@ -578,7 +578,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                        interval);                  // interval
     if (timer_id == -1)
     {
-      ACE_DEBUG ((LM_DEBUG,
+      ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
 
       // clean up
@@ -601,7 +601,17 @@ do_work (unsigned int maximumNumberOfConnections_in,
   signal_handler_configuration.statisticReportingHandler =
       NET_CONNECTIONMANAGER_SINGLETON::instance ();
   signal_handler_configuration.statisticReportingTimerID = timer_id;
-  signalHandler_in.initialize (signal_handler_configuration);
+  signal_handler_configuration.useReactor = useReactor_in;
+  if (!signalHandler_in.initialize (signal_handler_configuration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize signal handler, returning\n")));
+
+    // clean up
+    timer_manager_p->stop ();
+
+    return;
+  } // end IF
   if (!Common_Tools::initializeSignals (signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -1115,7 +1125,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  Net_Server_SignalHandler signal_handler (use_reactor);
+  Net_Server_SignalHandler signal_handler;
 
   // step1f: handle specific program modes
   if (print_version_and_exit)

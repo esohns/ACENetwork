@@ -32,11 +32,8 @@
 
 #include "test_u_connection_manager_common.h"
 
-Net_Client_SignalHandler::Net_Client_SignalHandler (bool useReactor_in)
- : inherited (this,          // event handler handle
-              useReactor_in) // use reactor ?
- , configuration_ ()
- , useReactor_ (useReactor_in)
+Net_Client_SignalHandler::Net_Client_SignalHandler ()
+ : inherited (this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::Net_Client_SignalHandler"));
 
@@ -46,16 +43,6 @@ Net_Client_SignalHandler::~Net_Client_SignalHandler ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::~Net_Client_SignalHandler"));
 
-}
-
-bool
-Net_Client_SignalHandler::initialize (const Net_Client_SignalHandlerConfiguration& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::initialize"));
-
-  configuration_ = configuration_in;
-
-  return true;
 }
 
 bool
@@ -130,17 +117,16 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     iconnection_manager_p->abortLeastRecent ();
 
   // connect ?
-  if (connect && configuration_.connector)
+  if (connect &&
+      inherited::configuration_->connector)
   {
-    ACE_ASSERT (configuration_.socketHandlerConfiguration);
+    ACE_ASSERT (inherited::configuration_->socketHandlerConfiguration);
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    try
-    {
-      configuration_.connector->initialize (*configuration_.socketHandlerConfiguration);
-      handle = configuration_.connector->connect (configuration_.peerAddress);
-    }
-    catch (...)
-    {
+    try {
+      inherited::configuration_->connector->initialize (*inherited::configuration_->socketHandlerConfiguration);
+      handle =
+        inherited::configuration_->connector->connect (inherited::configuration_->peerAddress);
+    } catch (...) {
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
@@ -150,8 +136,9 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     {
       ACE_TCHAR buffer[BUFSIZ];
       ACE_OS::memset (buffer, 0, sizeof (buffer));
-      result = configuration_.peerAddress.addr_to_string (buffer,
-                                                          sizeof (buffer));
+      result =
+        inherited::configuration_->peerAddress.addr_to_string (buffer,
+                                                               sizeof (buffer));
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       if (result == -1)
@@ -181,30 +168,27 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
 //    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
 
     // step2: stop action timer (if any)
-    if (configuration_.actionTimerId >= 0)
+    if (inherited::configuration_->actionTimerId >= 0)
     {
       const void* act_p = NULL;
       result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (configuration_.actionTimerId,
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (inherited::configuration_->actionTimerId,
                                                                     &act_p);
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       if (result <= 0)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", continuing\n"),
-                    configuration_.actionTimerId));
-      configuration_.actionTimerId = -1;
+                    inherited::configuration_->actionTimerId));
+      inherited::configuration_->actionTimerId = -1;
     } // end IF
 
     // step3: cancel connection attempts (if any)
-    if (configuration_.connector)
+    if (inherited::configuration_->connector)
     {
-      try
-      {
-        configuration_.connector->abort ();
-      }
-      catch (...)
-      {
+      try {
+        inherited::configuration_->connector->abort ();
+      } catch (...) {
         // *PORTABILITY*: tracing in a signal handler context is not portable
         // *TODO*
         ACE_DEBUG ((LM_ERROR,
@@ -217,9 +201,9 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (true,         // stop reactor ?
-                                         !useReactor_, // stop proactor ?
-                                         -1);          // group ID (--> don't block !)
+    Common_Tools::finalizeEventDispatch (true,                                   // stop reactor ?
+                                         !inherited::configuration_->useReactor, // stop proactor ?
+                                         -1);                                    // group ID (--> don't block !)
   } // end IF
 
   return true;

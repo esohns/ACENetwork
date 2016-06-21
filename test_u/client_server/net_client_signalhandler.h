@@ -24,36 +24,27 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
-#include "common_iinitialize.h"
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
 #include "net_client_common.h"
 
 class Net_Client_SignalHandler
- : public Common_SignalHandler
- , public Common_IInitialize_T<Net_Client_SignalHandlerConfiguration>
+ : public Common_SignalHandler_T<Net_Client_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
-  Net_Client_SignalHandler (bool = true); // use reactor ?
+  Net_Client_SignalHandler ();
   virtual ~Net_Client_SignalHandler ();
-
-  // implement Common_IInitialize_T
-  virtual bool initialize (const Net_Client_SignalHandlerConfiguration&); // configuration
 
   // implement Common_ISignal
   virtual bool handleSignal (int); // signal
 
  private:
-  typedef Common_SignalHandler inherited;
+  typedef Common_SignalHandler_T<Net_Client_SignalHandlerConfiguration> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler (const Net_Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler& operator= (const Net_Client_SignalHandler&))
-
-  Net_Client_SignalHandlerConfiguration configuration_;
-  bool                                  useReactor_;
 };
 
 #endif

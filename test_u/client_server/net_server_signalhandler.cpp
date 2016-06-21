@@ -39,10 +39,8 @@
 
 #include "test_u_connection_manager_common.h"
 
-Net_Server_SignalHandler::Net_Server_SignalHandler (bool useReactor_in)
- : inherited (this,          // event handler handle
-              useReactor_in) // use reactor ?
- , configuration_ ()
+Net_Server_SignalHandler::Net_Server_SignalHandler ()
+ : inherited (this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::Net_Server_SignalHandler"));
 
@@ -53,16 +51,6 @@ Net_Server_SignalHandler::~Net_Server_SignalHandler ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::~Net_Server_SignalHandler"));
 
-}
-
-bool
-Net_Server_SignalHandler::initialize (const Net_Server_SignalHandlerConfiguration& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::initialize"));
-
-  configuration_ = configuration_in;
-
-  return true;
 }
 
 bool
@@ -91,7 +79,7 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
       //ACE_DEBUG((LM_DEBUG,
       //           ACE_TEXT("shutting down...\n")));
 
-      // shutdown...
+      // shutdown
       shutdown = true;
 
       break;
@@ -104,7 +92,7 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
     case SIGBREAK:
 #endif
     {
-      // dump statistics
+      // dump statistic
       report = true;
 
       break;
@@ -121,14 +109,12 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
   // ------------------------------------
 
   // report ?
-  if (report && configuration_.statisticReportingHandler)
+  if (report &&
+      inherited::configuration_->statisticReportingHandler)
   {
-    try
-    {
-      configuration_.statisticReportingHandler->report ();
-    }
-    catch (...)
-    {
+    try {
+      inherited::configuration_->statisticReportingHandler->report ();
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
       return false;
@@ -150,14 +136,11 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
 //    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
 
     // step2: invoke controller (if any)
-    if (configuration_.listener)
+    if (inherited::configuration_->listener)
     {
-      try
-      {
-        configuration_.listener->stop ();
-      }
-      catch (...)
-      {
+      try {
+        inherited::configuration_->listener->stop ();
+      } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Common_IControl::stop(), aborting\n")));
         return false;
@@ -165,24 +148,24 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
     } // end IF
 
     // step3: stop timer
-    if (configuration_.statisticReportingTimerID >= 0)
+    if (inherited::configuration_->statisticReportingTimerID >= 0)
     {
       const void* act_p = NULL;
       result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (configuration_.statisticReportingTimerID,
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (inherited::configuration_->statisticReportingTimerID,
                                                               &act_p);
       if (result <= 0)
       {
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", aborting\n"),
-                    configuration_.statisticReportingTimerID));
+                    inherited::configuration_->statisticReportingTimerID));
 
         // clean up
-        configuration_.statisticReportingTimerID = -1;
+        inherited::configuration_->statisticReportingTimerID = -1;
 
         return false;
       } // end IF
-      configuration_.statisticReportingTimerID = -1;
+      inherited::configuration_->statisticReportingTimerID = -1;
     } // end IF
 
     // step4: stop accepting connections, abort open connections
@@ -190,9 +173,9 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (useReactor_,  // stop reactor ?
-                                         !useReactor_, // stop proactor ?
-                                         -1);          // group ID (--> don't block)
+    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,  // stop reactor ?
+                                         !inherited::configuration_->useReactor, // stop proactor ?
+                                         -1);                                    // group ID (--> don't block)
   } // end IF
 
   return true;

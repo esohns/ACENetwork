@@ -198,14 +198,16 @@ struct Test_U_ModuleHandlerConfiguration
 };
 
 struct Test_U_SignalHandlerConfiguration
+ : Common_SignalHandlerConfiguration
 {
   inline Test_U_SignalHandlerConfiguration ()
-   : //messageAllocator (NULL)
-   /*,*/ statisticReportingInterval (0)
+   : Common_SignalHandlerConfiguration ()
+   //messageAllocator (NULL)
+   , statisticReportingInterval (0)
   {};
 
   //Stream_IAllocator* messageAllocator;
-  unsigned int       statisticReportingInterval; // statistics collecting interval (second(s)) [0: off]
+  unsigned int       statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
 struct Test_U_StreamConfiguration

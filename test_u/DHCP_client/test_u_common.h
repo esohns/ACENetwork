@@ -264,9 +264,11 @@ typedef Net_IListener_T<Test_U_ListenerConfiguration,
 typedef Common_IStatistic_T<Test_U_RuntimeStatistic_t> Test_U_StatisticReportingHandler_t;
 
 struct Test_U_SignalHandlerConfiguration
+ : Common_SignalHandlerConfiguration
 {
   inline Test_U_SignalHandlerConfiguration ()
-   : listener (NULL)
+   : Common_SignalHandlerConfiguration ()
+   , listener (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerID (-1)
   {};

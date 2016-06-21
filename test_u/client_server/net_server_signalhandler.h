@@ -24,7 +24,6 @@
 #include "ace/Global_Macros.h"
 
 #include "common_signalhandler.h"
-#include "common_iinitialize.h"
 #include "common_isignal.h"
 #include "common_istatistic.h"
 
@@ -35,28 +34,21 @@
 #include "net_server_common.h"
 
 class Net_Server_SignalHandler
- : public Common_SignalHandler
- , public Common_IInitialize_T<Net_Server_SignalHandlerConfiguration>
+ : public Common_SignalHandler_T<Net_Server_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
-  Net_Server_SignalHandler (bool = true); // use reactor ?
+  Net_Server_SignalHandler ();
   virtual ~Net_Server_SignalHandler ();
-
-  // implement Common_IInitialize_T
-  virtual bool initialize (const Net_Server_SignalHandlerConfiguration&); // configuration
 
   // implement Common_ISignal
   virtual bool handleSignal (int); // signal
 
  private:
-  typedef Common_SignalHandler inherited;
+  typedef Common_SignalHandler_T<Net_Server_SignalHandlerConfiguration> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler (const Net_Server_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler& operator= (const Net_Server_SignalHandler&))
-
-  Net_Server_SignalHandlerConfiguration configuration_;
 };
 
 #endif

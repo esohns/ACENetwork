@@ -591,16 +591,16 @@ do_work (unsigned int bufferSize_in,
   Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
-  Stream_StatisticHandler_Reactor_t statistics_handler (ACTION_REPORT,
-                                                        connection_manager_p,
-                                                        false);
-  //Stream_StatisticHandler_Proactor_t statistics_handler_proactor (ACTION_REPORT,
-  //                                                                connection_manager_p,
-  //                                                                false);
+  Stream_StatisticHandler_Reactor_t statistic_handler (ACTION_REPORT,
+                                                       connection_manager_p,
+                                                       false);
+  //Stream_StatisticHandler_Proactor_t statistic_handler_proactor (ACTION_REPORT,
+  //                                                               connection_manager_p,
+  //                                                               false);
   long timer_id = -1;
   if (statisticReportingInterval_in)
   {
-    ACE_Event_Handler* handler_p = &statistics_handler;
+    ACE_Event_Handler* handler_p = &statistic_handler;
     ACE_Time_Value interval (statisticReportingInterval_in, 0);
     timer_id =
       timer_manager_p->schedule_timer (handler_p,                  // event handler
@@ -609,7 +609,7 @@ do_work (unsigned int bufferSize_in,
                                        interval);                  // interval
     if (timer_id == -1)
     {
-      ACE_DEBUG ((LM_DEBUG,
+      ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
 
       // clean up
@@ -623,14 +623,24 @@ do_work (unsigned int bufferSize_in,
   //configuration.signalHandlerConfiguration.statisticReportingHandler =
   //  connection_manager_p;
   //configuration.signalHandlerConfiguration.statisticReportingTimerID = timer_id;
-  signalHandler_in.initialize (configuration.signalHandlerConfiguration);
+  configuration.signalHandlerConfiguration.useReactor = useReactor_in;
+  if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize signal handler, returning\n")));
+
+    // clean up
+    timer_manager_p->stop ();
+
+    return;
+  } // end IF
   if (!Common_Tools::initializeSignals (signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
 
     // clean up
     timer_manager_p->stop ();
@@ -699,13 +709,13 @@ do_work (unsigned int bufferSize_in,
   if (!iconnector_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
+                ACE_TEXT ("failed to allocate memory, returning\n")));
     goto clean_up;
   } // end IF
   if (!iconnector_p->initialize (configuration.socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connector, aborting\n")));
+                ACE_TEXT ("failed to initialize connector, returning\n")));
     goto clean_up;
   } // end IF
   handle =
@@ -713,7 +723,7 @@ do_work (unsigned int bufferSize_in,
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to \"%s\", aborting\n"),
+                ACE_TEXT ("failed to connect to \"%s\", returning\n"),
                 buffer));
     goto clean_up;
   } // end IF
@@ -1141,7 +1151,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  Test_U_Protocol_SignalHandler signal_handler (use_reactor);
+  Test_U_Protocol_SignalHandler signal_handler;
 
   // step1f: handle specific program modes
   if (print_version_and_exit)

@@ -603,7 +603,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
     return;
   } // end IF
 
@@ -634,7 +634,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     if (configuration.signalHandlerConfiguration.actionTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to schedule action timer: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to schedule action timer: \"%m\", returning\n")));
 
       // clean up
       timer_manager_p->stop ();
@@ -648,14 +648,25 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     &message_allocator;
   configuration.signalHandlerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
-  signalHandler_in.initialize (configuration.signalHandlerConfiguration);
+  configuration.signalHandlerConfiguration.useReactor = useReactor_in;
+  if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize signal handler, returning\n")));
+
+    // clean up
+    timer_manager_p->stop ();
+    connector_p->abort ();
+
+    return;
+  } // end IF
   if (!Common_Tools::initializeSignals (signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
 
     // clean up
     timer_manager_p->stop ();
@@ -687,7 +698,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to start GTK event dispatch, aborting\n")));
+                  ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
 
       // clean up
       timer_manager_p->stop ();
@@ -720,7 +731,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to start event dispatch, aborting\n")));
+                ACE_TEXT ("failed to start event dispatch, returning\n")));
 
     // clean up
 //		{ // synch access
@@ -1142,7 +1153,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  Net_Client_SignalHandler signal_handler (use_reactor);
+  Net_Client_SignalHandler signal_handler;
 
   // step1f: handle specific program modes
   if (print_version_and_exit)

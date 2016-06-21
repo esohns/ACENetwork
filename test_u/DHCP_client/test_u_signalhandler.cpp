@@ -31,10 +31,8 @@
 
 #include "test_u_connection_manager_common.h"
 
-Test_U_SignalHandler::Test_U_SignalHandler (bool useReactor_in)
- : inherited (this,          // event handler handle
-              useReactor_in) // use reactor ?
- , configuration_ ()
+Test_U_SignalHandler::Test_U_SignalHandler ()
+ : inherited (this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_SignalHandler::Test_U_SignalHandler"));
 
@@ -44,16 +42,6 @@ Test_U_SignalHandler::~Test_U_SignalHandler ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_SignalHandler::~Test_U_SignalHandler"));
 
-}
-
-bool
-Test_U_SignalHandler::initialize (const Test_U_SignalHandlerConfiguration& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_SignalHandler::initialize"));
-
-  configuration_ = configuration_in;
-
-  return true;
 }
 
 bool
@@ -172,9 +160,9 @@ Test_U_SignalHandler::handleSignal (int signal_in)
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (inherited::useReactor_,  // stop reactor ?
-                                         !inherited::useReactor_, // stop proactor ?
-                                         -1);                     // group ID (--> don't block)
+    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,  // stop reactor ?
+                                         !inherited::configuration_->useReactor, // stop proactor ?
+                                         -1);                                    // group ID (--> don't block)
 
     // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF

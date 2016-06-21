@@ -36,9 +36,11 @@
 
 #include "IRC_client_common.h"
 
-// forward declarations
+// forward declaration(s)
 struct IRC_Client_ModuleHandlerConfiguration;
+struct IRC_Client_SessionData;
 class IRC_Client_SessionMessage;
+struct IRC_Client_UserData;
 class IRC_Message;
 
 typedef Stream_IModuleHandler_T<IRC_Client_ModuleHandlerConfiguration> IRC_Client_IModuleHandler_t;

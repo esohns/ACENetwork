@@ -47,7 +47,15 @@ typedef Net_IListener_T<Net_Server_ListenerConfiguration,
 /////////////////////////////////////////
 
 struct Net_Server_SignalHandlerConfiguration
+ : Common_SignalHandlerConfiguration
 {
+  inline Net_Server_SignalHandlerConfiguration ()
+   : Common_SignalHandlerConfiguration ()
+   , listener (NULL)
+   , statisticReportingHandler (NULL)
+   , statisticReportingTimerID (-1)
+  {};
+
   Net_IListener_t*                        listener;
   Net_Server_StatisticReportingHandler_t* statisticReportingHandler;
   long                                    statisticReportingTimerID;

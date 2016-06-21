@@ -23,35 +23,27 @@
 
 #include "ace/Global_Macros.h"
 
-#include "common_iinitialize.h"
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
 #include "test_u_common.h"
 
 class Test_U_SignalHandler
- : public Common_SignalHandler
- , public Common_IInitialize_T<Test_U_SignalHandlerConfiguration>
+ : public Common_SignalHandler_T<Test_U_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
-  Test_U_SignalHandler (bool = true); // use reactor ?
+  Test_U_SignalHandler ();
   virtual ~Test_U_SignalHandler ();
-
-  // implement Common_IInitialize_T
-  virtual bool initialize (const Test_U_SignalHandlerConfiguration&); // configuration
 
   // implement Common_ISignal
   virtual bool handleSignal (int); // signal
 
  private:
-  typedef Common_SignalHandler inherited;
+  typedef Common_SignalHandler_T<Test_U_SignalHandlerConfiguration> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler (const Test_U_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler& operator= (const Test_U_SignalHandler&))
-
-  Test_U_SignalHandlerConfiguration configuration_;
 };
 
 #endif

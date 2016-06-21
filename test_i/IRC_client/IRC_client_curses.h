@@ -40,10 +40,10 @@
 #include "IRC_client_common.h"
 #include "IRC_client_stream_common.h"
 
-// forward declarations
+// forward declaration(s)
 struct IRC_Client_SessionState;
 
-typedef std::map<std::string, PANEL*> IRC_Client_CursesChannels_t;
+typedef std::map<std::string, struct panel*> IRC_Client_CursesChannels_t;
 typedef IRC_Client_CursesChannels_t::iterator IRC_Client_CursesChannelsIterator_t;
 
 typedef std::map<std::string, IRC_Client_MessageQueue_t> IRC_Client_CursesMessages_t;
@@ -60,7 +60,7 @@ struct IRC_Client_CursesState
    , status (NULL)
    , finished (false)
    , lock ()
-   //////////////////////////////////////
+   ///////////////////////////////////////
    , backLog ()
    , sessionState (NULL)
   {
@@ -69,17 +69,17 @@ struct IRC_Client_CursesState
 
   // curses
   IRC_Client_CursesChannelsIterator_t activePanel;
-  WINDOW*                             input;
-  WINDOW*                             log;
+  struct _win*                        input;
+  struct _win*                        log;
   IRC_Client_CursesChannels_t         panels;
   SCREEN*                             screen;
-  WINDOW*                             status;
+  struct _win*                        status;
 
   // dispatch loop
   bool                                finished;
   ACE_SYNCH_MUTEX                     lock;
 
-  ///////////////////////////////////////
+  ////////////////////////////////////////
 
   // session
   IRC_Client_CursesMessages_t         backLog;

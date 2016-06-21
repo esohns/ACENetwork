@@ -23,8 +23,8 @@
 
 #include "ace/Guard_T.h"
 #include "ace/Log_Msg.h"
-#include "ace/Proactor.h"
-#include "ace/Reactor.h"
+//#include "ace/Proactor.h"
+//#include "ace/Reactor.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_tools.h"
@@ -32,14 +32,12 @@
 #include "net_macros.h"
 
 #include "IRC_client_curses.h"
+#include "IRC_client_network.h"
 
 IRC_Client_SignalHandler::IRC_Client_SignalHandler (bool useReactor_in,
                                                     bool useCursesLibrary_in)
- : inherited (this,          // event handler handle
-              useReactor_in) // use reactor ?
- , configuration_ (NULL)
+ : inherited (this) // event handler handle
  , useCursesLibrary_ (useCursesLibrary_in)
- , useReactor_ (useReactor_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::IRC_Client_SignalHandler"));
 
@@ -49,17 +47,6 @@ IRC_Client_SignalHandler::~IRC_Client_SignalHandler ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::~IRC_Client_SignalHandler"));
 
-}
-
-bool
-IRC_Client_SignalHandler::initialize (const IRC_Client_SignalHandlerConfiguration& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::initialize"));
-
-  configuration_ =
-      &const_cast<IRC_Client_SignalHandlerConfiguration&> (configuration_in);
-
-  return true;
 }
 
 bool
@@ -87,7 +74,7 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
 //       ACE_DEBUG((LM_DEBUG,
 //                  ACE_TEXT("shutting down...\n")));
 
-      // shutdown...
+      // shutdown
       shutdown = true;
 
       break;
@@ -100,7 +87,7 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
   case SIGBREAK:
 #endif
     {
-      // (try to) connect...
+      // (try to) connect
       connect = true;
 
       break;
@@ -111,7 +98,7 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
   case SIGABRT:
 #endif
     {
-      // abort connection...
+      // abort connection
       abort = true;
 
       break;
@@ -134,13 +121,13 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
   // ...connect ?
   if (connect)
   {
-    if (!configuration_)
+    if (!inherited::configuration_)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("not configured: cannot connect, continuing\n")));
       goto done_connect;
     } // end IF
-    if (!configuration_->connector)
+    if (!inherited::configuration_->connector)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("no connector: cannot connect, continuing\n")));
@@ -148,12 +135,10 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
     } // end IF
 
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    try
-    {
-      handle = configuration_->connector->connect (configuration_->peerAddress);
-    }
-    catch (...)
-    {
+    try {
+      handle =
+        inherited::configuration_->connector->connect (inherited::configuration_->peerAddress);
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_Client_IConnector_t::connect(): \"%m\", continuing\n")));
     }
@@ -161,8 +146,9 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
     {
       ACE_TCHAR buffer[BUFSIZ];
       ACE_OS::memset(buffer, 0, sizeof (buffer));
-      result = configuration_->peerAddress.addr_to_string (buffer,
-                                                           sizeof (buffer));
+      result =
+        inherited::configuration_->peerAddress.addr_to_string (buffer,
+                                                               sizeof (buffer));
       if (result == -1)
       {
         // *PORTABILITY*: tracing in a signal handler context is not portable
@@ -186,18 +172,18 @@ done_connect:
   if (shutdown)
   {
     // step1: notify curses dispatch ?
-    if (configuration_)
-      if (configuration_->cursesState)
+    if (inherited::configuration_)
+      if (inherited::configuration_->cursesState)
       {
-        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (configuration_->cursesState->lock);
+        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (inherited::configuration_->cursesState->lock);
 
-        configuration_->cursesState->finished = true;
+        inherited::configuration_->cursesState->finished = true;
       } // end IF
 
     // step2: stop event dispatch
-    Common_Tools::finalizeEventDispatch (useReactor_,  // stop reactor ?
-                                         !useReactor_, // stop proactor ?
-                                         -1);          // group ID (--> don't block !)
+    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,  // stop reactor ?
+                                         !inherited::configuration_->useReactor, // stop proactor ?
+                                         -1);                                    // group ID (--> don't block !)
   } // end IF
 
   return true;
