@@ -78,7 +78,7 @@ m4/xsize.m4
 
 # qtcreator
 Makefile.am.user
-CMakeLists.txt.user
+CMakeLists.txt.user*
 
 Makefile.in.in
 po/Makevars.template

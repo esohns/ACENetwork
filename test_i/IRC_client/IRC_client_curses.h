@@ -69,11 +69,11 @@ struct IRC_Client_CursesState
 
   // curses
   IRC_Client_CursesChannelsIterator_t activePanel;
-  struct _win*                        input;
-  struct _win*                        log;
+  WINDOW*                             input;
+  WINDOW*                             log;
   IRC_Client_CursesChannels_t         panels;
   SCREEN*                             screen;
-  struct _win*                        status;
+  WINDOW*                             status;
 
   // dispatch loop
   bool                                finished;
