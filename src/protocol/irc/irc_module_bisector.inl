@@ -50,11 +50,10 @@ IRC_Module_Bisector_T<LockType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::IRC_Module_Bisector_T ()
- : inherited (NULL,  // lock handle
-              false, // inactive by default
-              false, // DON'T auto-start !
-              false) // do not run the svc() routine on start
+                      StatisticContainerType>::IRC_Module_Bisector_T (LockType* lock_in)
+ : inherited (lock_in, // lock handle
+              false,   // auto-start ?
+              true)    // generate sesssion messages ?
  , bufferState_ (NULL)
  , context_ (NULL)
  , numberOfFrames_ (0)
@@ -175,6 +174,9 @@ IRC_Module_Bisector_T<LockType,
                 ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
     return false;
   } // end IF
+  // *NOTE*: data is fed into the stream from outside, as it arrives
+  //         --> do not run svc() on start()
+  inherited::runSvcOnStart_ = false;
 
   return result;
 }

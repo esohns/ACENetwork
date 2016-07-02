@@ -44,11 +44,10 @@ Net_Module_SocketHandler_T<LockType,
                            SessionDataType,
                            SessionDataContainerType,
                            StatisticContainerType,
-                           ProtocolHeaderType>::Net_Module_SocketHandler_T ()
- : inherited (NULL,  // lock handle
-              false, // inactive by default
-              false, // DON'T auto-start !
-              false) // do not run svc()
+                           ProtocolHeaderType>::Net_Module_SocketHandler_T (LockType* lock_in)
+ : inherited (lock_in, // lock handle
+              false,   // auto-start ?
+              true)    // generate sesssion messages ?
  , currentBuffer_ (NULL)
  , currentMessage_ (NULL)
  , currentMessageLength_ (0)
@@ -122,6 +121,9 @@ Net_Module_SocketHandler_T<LockType,
   if (!result)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
+  // *NOTE*: data is fed into the stream from outside, as it arrives
+  //         --> do not run svc() on start()
+  inherited::runSvcOnStart_ = false;
 
   return result;
 }

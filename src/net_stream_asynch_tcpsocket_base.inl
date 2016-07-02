@@ -107,7 +107,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   bool handle_manager = false;
   bool handle_socket = false;
   // *TODO*: remove type inferences
-  const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p = NULL;
+  const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
+      NULL;
   typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
   // step1: initialize base-class, tweak socket, initialize I/O, ...
@@ -284,10 +285,13 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
-  Stream_Base_t* stream_p = (stream_.upStream () ? stream_.upStream ()
-                                                 : &stream_);
-
+  Stream_Base_t* stream_p = stream_.upStream ();
   ACE_Message_Block* message_block_p = NULL;
+
+  // sanity check(s)
+  if (!stream_p) stream_p = &stream_;
+  ACE_ASSERT (stream_p);
+
 //  if (!inherited::buffer_)
 //  {
     // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has

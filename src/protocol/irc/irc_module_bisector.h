@@ -39,19 +39,19 @@ class Stream_IAllocator;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 
 template <typename LockType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename StreamStateType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
-          ///////////////////////////////
+          ////////////////////////////////
           typename StatisticContainerType>
 class IRC_Module_Bisector_T
  : public Stream_HeadModuleTaskBase_T<LockType,
@@ -71,7 +71,7 @@ class IRC_Module_Bisector_T
                                       StatisticContainerType>
 {
  public:
-  IRC_Module_Bisector_T ();
+  IRC_Module_Bisector_T (LockType* = NULL); // lock handle (state machine)
   virtual ~IRC_Module_Bisector_T ();
 
   // *PORTABILITY*: for some reason, this base class member is not exposed

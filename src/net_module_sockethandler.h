@@ -33,19 +33,19 @@
 class Stream_IAllocator;
 
 template <typename LockType,                 // connection stream state machine lock
-          ///////////////////////////////
+          ////////////////////////////////
           typename SessionMessageType,
           typename ProtocolMessageType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename StreamStateType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
-          ///////////////////////////////
+          ////////////////////////////////
           typename StatisticContainerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ProtocolHeaderType>
 class Net_Module_SocketHandler_T
  : public Stream_HeadModuleTaskBase_T<LockType,
@@ -65,7 +65,7 @@ class Net_Module_SocketHandler_T
                                       StatisticContainerType>
 {
  public:
-  Net_Module_SocketHandler_T ();
+  Net_Module_SocketHandler_T (LockType* = NULL); // lock handle (state machine)
   virtual ~Net_Module_SocketHandler_T ();
 
 #if defined (__GNUG__) || defined (_MSC_VER)
@@ -133,20 +133,20 @@ class Net_Module_SocketHandler_T
   unsigned int         currentMessageLength_;
 };
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 template <typename LockType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SessionMessageType,
           typename ProtocolMessageType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename StreamStateType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
-          ///////////////////////////////
+          ////////////////////////////////
           typename StatisticContainerType>
 class Net_Module_UDPSocketHandler_T
  : public Stream_HeadModuleTaskBase_T<LockType,
