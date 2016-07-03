@@ -99,12 +99,6 @@ endif ()
 
 add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
-if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  add_definitions (-DDEBUG)
-  if (WIN32)
-    add_definitions (-DDEBUG_DEBUGGER)
-  endif ()
-endif ()
 
 if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)

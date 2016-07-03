@@ -75,9 +75,6 @@ if (NOT EXISTS ${ACENetwork_DIR})
 endif ()
 
 add_definitions (-DHAVE_CONFIG_H)
-if (CMAKE_BUILD_TYPE STREQUAL Debug)
- add_definitions (-DDEBUG_DEBUGGER)
-endif ()
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)
