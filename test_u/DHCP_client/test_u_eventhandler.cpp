@@ -112,7 +112,7 @@ Test_U_EventHandler::notify (unsigned int sessionID_in,
   Test_U_GTK_Event event = TEST_U_GKTEVENT_INVALID;
   switch (sessionMessage_in.type ())
   {
-    case STREAM_SESSION_STATISTIC:
+    case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       if ((*iterator).second->lock)
       {

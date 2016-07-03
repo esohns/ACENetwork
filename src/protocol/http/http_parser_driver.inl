@@ -268,7 +268,7 @@ HTTP_ParserDriver<RecordType,
     } // end IF
     ACE_ASSERT (message_block_p);
 
-    if (message_block_p->msg_type () >= STREAM_MESSAGE_MAP_2)
+    if (message_block_p->msg_type () & STREAM_MESSAGE_DATA_MASK)
       break;
 
     SessionMessageType* session_message_p = NULL;
@@ -279,7 +279,7 @@ HTTP_ParserDriver<RecordType,
     Stream_SessionMessageType session_message_type =
       session_message_p->type ();
 
-    if (session_message_type == STREAM_SESSION_END)
+    if (session_message_type == STREAM_SESSION_MESSAGE_END)
       done = true; // session has finished --> abort
 
     result = messageQueue_->enqueue_tail (message_block_p, NULL);

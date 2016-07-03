@@ -38,19 +38,21 @@
 
 // declare module(s)
 typedef Net_Module_SocketHandler_T<ACE_SYNCH_MUTEX,
-                                   //////
+                                   ///////
                                    Net_SessionMessage,
                                    Net_Message,
-                                   //////
+                                   ///////
                                    Net_ModuleHandlerConfiguration,
-                                   //////
+                                   ///////
+                                   int,
+                                   int,
                                    Net_StreamState,
-                                   //////
+                                   ///////
                                    Net_StreamSessionData,   // session data
                                    Net_StreamSessionData_t, // session message payload (reference counted)
-                                   //////
+                                   ///////
                                    Net_RuntimeStatistic_t,
-                                   //////
+                                   ///////
                                    Net_Remote_Comm::MessageHeader> Net_Module_SocketHandler;
 DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                   // task synch type
                               Common_TimePolicy_t,            // time policy type

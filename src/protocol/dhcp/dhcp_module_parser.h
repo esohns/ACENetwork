@@ -36,7 +36,7 @@ class Stream_IAllocator;
 template <typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType>
 class DHCP_Module_Parser_T
  : public Stream_TaskBaseSynch_T<TimePolicyType,
@@ -83,19 +83,21 @@ class DHCP_Module_Parser_T
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename LockType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
-          ///////////////////////////////
+          ////////////////////////////////
           typename StatisticContainerType>
 class DHCP_Module_ParserH_T
  : public Stream_HeadModuleTaskBase_T<LockType,
@@ -107,6 +109,8 @@ class DHCP_Module_ParserH_T
                                       ////
                                       ConfigurationType,
                                       ////
+                                      StreamControlType,
+                                      StreamNotificationType,
                                       StreamStateType,
                                       ////
                                       SessionDataType,
@@ -115,7 +119,7 @@ class DHCP_Module_ParserH_T
                                       StatisticContainerType>
 {
  public:
-  DHCP_Module_ParserH_T ();
+  DHCP_Module_ParserH_T (LockType* = NULL); // lock handle (state machine)
   virtual ~DHCP_Module_ParserH_T ();
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
@@ -126,6 +130,8 @@ class DHCP_Module_ParserH_T
                                     SessionMessageType,
                                     ProtocolMessageType,
                                     ConfigurationType,
+                                    StreamControlType,
+                                    StreamNotificationType,
                                     StreamStateType,
                                     SessionDataType,
                                     SessionDataContainerType,
@@ -157,6 +163,8 @@ class DHCP_Module_ParserH_T
                                       ////
                                       ConfigurationType,
                                       ////
+                                      StreamControlType,
+                                      StreamNotificationType,
                                       StreamStateType,
                                       ////
                                       SessionDataType,
@@ -164,6 +172,7 @@ class DHCP_Module_ParserH_T
                                       ////
                                       StatisticContainerType> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T (const DHCP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T& operator= (const DHCP_Module_ParserH_T&))
 

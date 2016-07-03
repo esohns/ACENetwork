@@ -234,7 +234,7 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
   int result = -1;
   switch (message_inout->type ())
   {
-    case STREAM_SESSION_BEGIN:
+    case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // retain session ID for reporting...
       const Net_StreamSessionData_t& session_data_container_r =
@@ -269,7 +269,7 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
 
       break;
     }
-    case STREAM_SESSION_END:
+    case STREAM_SESSION_MESSAGE_END:
     {
       if (pingTimerID_ != -1)
       {

@@ -47,6 +47,8 @@ template <typename LockType,
           ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           ////////////////////////////////
           typename SessionDataType,          // session data
@@ -63,6 +65,8 @@ class IRC_Module_Bisector_T
                                       ////
                                       ConfigurationType,
                                       ////
+                                      StreamControlType,
+                                      StreamNotificationType,
                                       StreamStateType,
                                       ////
                                       SessionDataType,
@@ -82,6 +86,8 @@ class IRC_Module_Bisector_T
                                     SessionMessageType,
                                     ProtocolMessageType,
                                     ConfigurationType,
+                                    StreamControlType,
+                                    StreamNotificationType,
                                     StreamStateType,
                                     SessionDataType,
                                     SessionDataContainerType,
@@ -113,6 +119,8 @@ class IRC_Module_Bisector_T
                                       ////
                                       ConfigurationType,
                                       ////
+                                      StreamControlType,
+                                      StreamNotificationType,
                                       StreamStateType,
                                       ////
                                       SessionDataType,
@@ -120,6 +128,7 @@ class IRC_Module_Bisector_T
                                       ////
                                       StatisticContainerType> inherited;
 
+//  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Bisector_T ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Bisector_T (const IRC_Module_Bisector_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Bisector_T& operator= (const IRC_Module_Bisector_T&))
 

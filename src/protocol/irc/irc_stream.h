@@ -43,33 +43,35 @@
 #include "irc_stream_common.h"
 
 template <typename StreamStateType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename StatisticContainerType,
           ///////////////////////////////
           typename ModuleHandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SessionDataType,
           typename SessionDataContainerType,
           typename SessionMessageType,
           typename ProtocolMessageType>
 class IRC_Stream_T
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         StreamStateType,
-                        /////////////////
+                        //////////////////
                         ConfigurationType,
-                        /////////////////
+                        //////////////////
                         StatisticContainerType,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
-                        /////////////////
+                        //////////////////
                         SessionDataType,
                         SessionDataContainerType,
                         SessionMessageType,
@@ -95,20 +97,22 @@ class IRC_Stream_T
 
  private:
   typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         StreamStateType,
-                        /////////////////
+                        //////////////////
                         ConfigurationType,
-                        /////////////////
+                        //////////////////
                         StatisticContainerType,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
-                        /////////////////
+                        //////////////////
                         SessionDataType,
                         SessionDataContainerType,
                         SessionMessageType,
@@ -119,19 +123,21 @@ class IRC_Stream_T
                                 SessionMessageType,
                                 ProtocolMessageType> STREAMER_T;
   typedef IRC_Module_Bisector_T<ACE_SYNCH_MUTEX,
-                                ///////////
+                                //////////
                                 ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 SessionMessageType,
                                 ProtocolMessageType,
-                                ///////////
+                                //////////
                                 ModuleHandlerConfigurationType,
-                                ///////////
+                                //////////
+                                int,
+                                int,
                                 StreamStateType,
-                                ///////////
+                                //////////
                                 SessionDataType,
                                 SessionDataContainerType,
-                                ///////////
+                                //////////
                                 StatisticContainerType> BISECTOR_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,

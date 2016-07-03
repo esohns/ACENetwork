@@ -108,6 +108,8 @@ template <typename LockType,
           ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           ////////////////////////////////
           typename SessionDataType,          // session data
@@ -126,6 +128,8 @@ class HTTP_Module_ParserH_T
                                       ////
                                       ConfigurationType,
                                       ////
+                                      StreamControlType,
+                                      StreamNotificationType,
                                       StreamStateType,
                                       ////
                                       SessionDataType,
@@ -134,7 +138,9 @@ class HTTP_Module_ParserH_T
                                       StatisticContainerType>
 {
  public:
-  HTTP_Module_ParserH_T ();
+  HTTP_Module_ParserH_T (LockType* = NULL, // lock handle (state machine)
+                         /////////////////
+                         bool = false);    // auto-start ?
   virtual ~HTTP_Module_ParserH_T ();
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
@@ -145,6 +151,8 @@ class HTTP_Module_ParserH_T
                                     SessionMessageType,
                                     ProtocolMessageType,
                                     ConfigurationType,
+                                    StreamControlType,
+                                    StreamNotificationType,
                                     StreamStateType,
                                     SessionDataType,
                                     SessionDataContainerType,
@@ -179,6 +187,8 @@ class HTTP_Module_ParserH_T
                                       ////
                                       ConfigurationType,
                                       ////
+                                      StreamControlType,
+                                      StreamNotificationType,
                                       StreamStateType,
                                       ////
                                       SessionDataType,
@@ -186,6 +196,7 @@ class HTTP_Module_ParserH_T
                                       ////
                                       StatisticContainerType> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T (const HTTP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T& operator= (const HTTP_Module_ParserH_T&))
 

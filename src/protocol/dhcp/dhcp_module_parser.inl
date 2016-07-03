@@ -200,6 +200,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -210,20 +212,15 @@ DHCP_Module_ParserH_T<LockType,
                      SessionMessageType,
                      ProtocolMessageType,
                      ConfigurationType,
+                     StreamControlType,
+                     StreamNotificationType,
                      StreamStateType,
                      SessionDataType,
                      SessionDataContainerType,
-                     StatisticContainerType>::DHCP_Module_ParserH_T ()
- : inherited (NULL,  // lock handle
-              // *NOTE*: the current (pull-)parser needs to be active because
-              //         yyparse() will not return until the entity has been
-              //         received and processed completely; otherwise, it would
-              //         tie one dispatch thread during this time (deadlock for
-              //         single-threaded reactors/proactor scenarios)
-              true,  // active by default
-              true,  // auto-start !
-              false, // do not run the svc() routine on start (passive mode)
-              false) // do not push session messages
+                     StatisticContainerType>::DHCP_Module_ParserH_T (LockType* lock_in)
+ : inherited (lock_in, // lock handle
+              false,   // auto-start ?
+              true)    // generate sesssion messages ?
  , debugScanner_ (DHCP_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (DHCP_DEFAULT_YACC_TRACE) // trace parsing ?
  , driver_ (DHCP_DEFAULT_LEX_TRACE,  // trace scanning ?
@@ -240,6 +237,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -250,6 +249,8 @@ DHCP_Module_ParserH_T<LockType,
                      SessionMessageType,
                      ProtocolMessageType,
                      ConfigurationType,
+                     StreamControlType,
+                     StreamNotificationType,
                      StreamStateType,
                      SessionDataType,
                      SessionDataContainerType,
@@ -265,6 +266,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -276,6 +279,8 @@ DHCP_Module_ParserH_T<LockType,
                      SessionMessageType,
                      ProtocolMessageType,
                      ConfigurationType,
+                     StreamControlType,
+                     StreamNotificationType,
                      StreamStateType,
                      SessionDataType,
                      SessionDataContainerType,
@@ -316,6 +321,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -327,6 +334,8 @@ DHCP_Module_ParserH_T<LockType,
                      SessionMessageType,
                      ProtocolMessageType,
                      ConfigurationType,
+                     StreamControlType,
+                     StreamNotificationType,
                      StreamStateType,
                      SessionDataType,
                      SessionDataContainerType,
@@ -392,6 +401,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -403,6 +414,8 @@ DHCP_Module_ParserH_T<LockType,
                      SessionMessageType,
                      ProtocolMessageType,
                      ConfigurationType,
+                     StreamControlType,
+                     StreamNotificationType,
                      StreamStateType,
                      SessionDataType,
                      SessionDataContainerType,
@@ -416,7 +429,7 @@ DHCP_Module_ParserH_T<LockType,
 
   switch (message_inout->type ())
   {
-    case STREAM_SESSION_BEGIN:
+    case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // retain session ID for reporting
       const SessionDataContainerType& session_data_container_r =
@@ -433,7 +446,7 @@ DHCP_Module_ParserH_T<LockType,
 
       break;
     }
-    case STREAM_SESSION_END:
+    case STREAM_SESSION_MESSAGE_END:
     default:
       break;
   } // end SWITCH
@@ -445,6 +458,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -456,6 +471,8 @@ DHCP_Module_ParserH_T<LockType,
                      SessionMessageType,
                      ProtocolMessageType,
                      ConfigurationType,
+                     StreamControlType,
+                     StreamNotificationType,
                      StreamStateType,
                      SessionDataType,
                      SessionDataContainerType,

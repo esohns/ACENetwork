@@ -44,20 +44,22 @@ class Stream_IAllocator;
 template <typename ConnectorType>
 class Test_U_Stream_T
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_RuntimeStatistic_t,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_StreamModuleHandlerConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
                         Test_U_SessionMessage,
@@ -82,32 +84,34 @@ class Test_U_Stream_T
 
  private:
   typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_RuntimeStatistic_t,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_StreamModuleHandlerConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
                         Test_U_SessionMessage,
                         Test_U_Message> inherited;
   typedef Stream_Module_Net_Target_T<Test_U_SessionMessage,
                                      Test_U_Message,
-                                     ////
+                                     /////
                                      Test_U_StreamModuleHandlerConfiguration,
-                                     ////
+                                     /////
                                      Test_U_StreamSessionData,
                                      Test_U_StreamSessionData_t,
-                                     ////
+                                     /////
                                      Test_U_ConnectionManager_t,
                                      ConnectorType> WRITER_T;
   typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,                            // task synch type

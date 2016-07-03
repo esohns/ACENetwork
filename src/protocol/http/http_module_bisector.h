@@ -38,39 +38,45 @@ class Stream_IAllocator;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 
 template <typename LockType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename TaskSynchType,
           typename TimePolicyType,
           typename SessionMessageType,
           typename ProtocolMessageType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
-          ///////////////////////////////
+          ////////////////////////////////
           typename StatisticContainerType>
 class HTTP_Module_Bisector_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
+                                      /////
                                       TaskSynchType,
                                       TimePolicyType,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ////
+                                      /////
                                       ConfigurationType,
-                                      ////
+                                      /////
+                                      StreamControlType,
+                                      StreamNotificationType,
                                       StreamStateType,
-                                      ////
+                                      /////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
+                                      /////
                                       StatisticContainerType>
 {
  public:
-  HTTP_Module_Bisector_T ();
+  HTTP_Module_Bisector_T (LockType* = NULL, // lock handle (state machine)
+                          ////////////////
+                          bool = false);    // auto-start ?
   virtual ~HTTP_Module_Bisector_T ();
 
 //#if defined (__GNUG__) || defined (_MSC_VER)
@@ -98,21 +104,24 @@ class HTTP_Module_Bisector_T
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
+                                      /////
                                       TaskSynchType,
                                       TimePolicyType,
                                       SessionMessageType,
                                       ProtocolMessageType,
-                                      ////
+                                      /////
                                       ConfigurationType,
-                                      ////
+                                      /////
+                                      StreamControlType,
+                                      StreamNotificationType,
                                       StreamStateType,
-                                      ////
+                                      /////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
+                                      /////
                                       StatisticContainerType> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T (const HTTP_Module_Bisector_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T& operator= (const HTTP_Module_Bisector_T&))
 

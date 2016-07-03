@@ -46,6 +46,7 @@ class Net_SocketHandlerBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase_T& operator= (const Net_SocketHandlerBase_T&))
 };
 
+// include template implementation
 #include "net_sockethandler_base.inl"
 
 #endif

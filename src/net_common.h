@@ -36,7 +36,7 @@ enum Net_ClientServerRole
   NET_ROLE_INVALID = -1,
   NET_ROLE_CLIENT = 0,
   NET_ROLE_SERVER,
-  ///////////////////////////////////////
+  ////////////////////////////////////////
   NET_ROLE_MAX
 };
 
@@ -48,32 +48,59 @@ enum Net_TransportLayerType
   NET_TRANSPORTLAYER_NETLINK,
   NET_TRANSPORTLAYER_TCP,
   NET_TRANSPORTLAYER_UDP,
-  ///////////////////////////////////////
+  ////////////////////////////////////////
   NET_TRANSPORTLAYER_MAX
+};
+
+enum Net_Stream_ControlMessageType : int
+{
+  NET_STREAM_CONTROL_MESSAGE_MASK = STREAM_CONTROL_MESSAGE_USER_MASK,
+  ////////////////////////////////////////
+  NET_STREAM_CONTROL_MESSAGE_MAX,
+  NET_STREAM_CONTROL_MESSAGE_INVALID
+};
+
+enum Net_Stream_SessionMessageType : int
+{
+  NET_STREAM_SESSION_MESSAGE_MASK = STREAM_SESSION_MESSAGE_USER_MASK,
+  NET_STREAM_SESSION_MESSAGE_CLOSE,
+  ////////////////////////////////////////
+  NET_STREAM_SESSION_MESSAGE_MAX,
+  NET_STREAM_SESSION_MESSAGE_INVALID
+};
+
+enum Net_Stream_ControlType : int
+{
+  NET_STREAM_CONTROL_MASK = STREAM_CONTROL_USER_MASK,
+  NET_STREAM_CONTROL_CONNECT,
+  NET_STREAM_CONTROL_DISCONNECT,
+  ////////////////////////////////////////
+  NET_STREAM_CONTROL_MAX,
+  NET_STREAM_CONTROL_INVALID
 };
 
 // *NOTE*: this extends ACE_Svc_Handler_Close (see Svc_Handler.h)
 enum Net_Connection_CloseReason
 {
   NET_CONNECTION_CLOSE_REASON_INVALID = -1,
-  ///////////////////////////////////////
+  ////////////////////////////////////////
   NET_CONNECTION_CLOSE_REASON_INITIALIZATION = 0x02,
   NET_CONNECTION_CLOSE_REASON_USER_ABORT,
-  ///////////////////////////////////////
+  ////////////////////////////////////////
   NET_CONNECTION_CLOSE_REASON_MAX
 };
 
 enum Net_Connection_Status
 {
   NET_CONNECTION_STATUS_INVALID = -1,
-  ///////////////////////////////////////
+  ////////////////////////////////////////
   NET_CONNECTION_STATUS_OK = 0,
-  ///////////////////////////////////////
+  ////////////////////////////////////////
   NET_CONNECTION_STATUS_INITIALIZATION_FAILED,
-  ///////////////////////////////////////
+  ////////////////////////////////////////
   NET_CONNECTION_STATUS_CLOSED,      // (local) close ()
   NET_CONNECTION_STATUS_PEER_CLOSED, // connection closed by the peer
-  ///////////////////////////////////////
+  ////////////////////////////////////////
   NET_CONNECTION_STATUS_MAX
 };
 

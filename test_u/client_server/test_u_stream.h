@@ -41,20 +41,22 @@
 
 class Net_Stream
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         Net_StreamState,
-                        /////////////////
+                        //////////////////
                         Net_StreamConfiguration,
-                        /////////////////
+                        //////////////////
                         Net_RuntimeStatistic_t,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         Stream_ModuleHandlerConfiguration,
-                        /////////////////
+                        //////////////////
                         Net_StreamSessionData,   // session data
                         Net_StreamSessionData_t, // session data container (reference counted)
                         Net_SessionMessage,
@@ -79,20 +81,22 @@ class Net_Stream
 
  private:
   typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         Net_StreamState,
-                        /////////////////
+                        //////////////////
                         Net_StreamConfiguration,
-                        /////////////////
+                        //////////////////
                         Net_RuntimeStatistic_t,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         Stream_ModuleHandlerConfiguration,
-                        /////////////////
+                        //////////////////
                         Net_StreamSessionData,
                         Net_StreamSessionData_t,
                         Net_SessionMessage,

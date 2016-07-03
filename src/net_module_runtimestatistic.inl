@@ -250,7 +250,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
   switch (message_inout->type ())
   {
-    case STREAM_SESSION_BEGIN:
+    case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // retain session ID for reporting...
       // *TODO*: remove type inferences
@@ -292,7 +292,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
       break;
     }
-    case STREAM_SESSION_END:
+    case STREAM_SESSION_MESSAGE_END:
     {
       // stop reporting timer
       fini_timers (false);
@@ -303,7 +303,7 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
       break;
     }
-    case STREAM_SESSION_STATISTIC:
+    case STREAM_SESSION_MESSAGE_STATISTIC:
     {
 //       // *NOTE*: protect access to statistics data
 //       // from asynchronous API calls (as well as local reporting)...

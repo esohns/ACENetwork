@@ -41,20 +41,22 @@
 
 class Test_U_Stream
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamConfiguration,
-                        /////////////////
+                        //////////////////
                         HTTP_RuntimeStatistic_t,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_ModuleHandlerConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
                         Test_U_SessionMessage,
@@ -83,6 +85,8 @@ class Test_U_Stream
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
                         //////////////////
@@ -105,6 +109,8 @@ class Test_U_Stream
                                        ///
                                        Test_U_ModuleHandlerConfiguration,
                                        ///
+                                       int,
+                                       int,
                                        Test_U_StreamState,
                                        ///
                                        Test_U_StreamSessionData,

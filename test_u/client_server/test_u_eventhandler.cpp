@@ -77,8 +77,8 @@ Net_EventHandler::notify (unsigned int sessionID_in,
   ACE_UNUSED_ARG (sessionID_in);
 
   Net_GTK_Event event =
-    ((sessionMessage_in.type () == STREAM_SESSION_STATISTIC) ? NET_GTKEVENT_STATISTIC
-                                                             : NET_GKTEVENT_INVALID);
+    ((sessionMessage_in.type () == STREAM_SESSION_MESSAGE_STATISTIC) ? NET_GTKEVENT_STATISTIC
+                                                                     : NET_GKTEVENT_INVALID);
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 

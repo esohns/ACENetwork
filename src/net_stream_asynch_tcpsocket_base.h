@@ -115,7 +115,7 @@ class Net_StreamAsynchTCPSocketBase_T
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
   virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 
-  StreamType         stream_;
+  StreamType stream_;
 
  private:
   typedef HandlerType inherited;

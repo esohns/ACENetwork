@@ -35,10 +35,10 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , inherited2 ()
  , inherited3 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
-// , buffer_ (NULL)
  , counter_ (0) // initial count
  , inputStream_ ()
  , outputStream_ ()
+ , partialWrite_ (false)
  , localSAP_ ()
  , remoteSAP_ ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -397,37 +397,36 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (void)
   int result = -1;
   ACE_HANDLE handle = inherited2::handle ();
 
-  try
-  {
+  try {
     result = handle_output (handle);
-  }
-  catch (...)
-  {
+  } catch (...) {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_AsynchTCPSocketHandler_T::handle_output(0x%@): \"%m\", continuing\n"),
+                ACE_TEXT ("caught exception in ACE_Event_Handler::handle_output(0x%@): \"%m\", continuing\n"),
                 handle));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_AsynchTCPSocketHandler_T::handle_output(%d): \"%m\", continuing\n"),
+                ACE_TEXT ("caught exception in ACE_Event_Handler::handle_output(%d): \"%m\", continuing\n"),
                 handle));
 #endif
     result = -1;
   }
   if (result == -1)
-  {
-    // *IMPORTANT NOTE*: socket may have closed in the meantime...
+  { // *NOTE*: most probable reason: socket has been closed by the peer, which
+    //         close()s the processing stream (see: handle_close()),
+    //         shutting down the message queue
     int error = ACE_OS::last_error ();
-    if ((error != ENOTSOCK)   && // 10038, happens on Win32
-        (error != ECONNRESET) && // 10054, happens on Win32
-        (error != ENOTCONN))     // 10057, happens on Win32
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if ((error != ENOTSOCK)   && // 10038: happens on Win32
+        (error != ECONNRESET) && // 10054: happens on Win32
+        (error != ENOTCONN))     // 10057: happens on Win32
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(0x%@): \"%m\", continuing\n"),
+                  ACE_TEXT ("failed to ACE_Event_Handler::handle_output(0x%@): \"%m\", continuing\n"),
                   handle));
 #else
+    if (error != ESHUTDOWN) // 108: happens on Linux
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(%d): \"%m\", continuing\n"),
+                  ACE_TEXT ("failed to ACE_Event_Handler::handle_output(%d): \"%m\", continuing\n"),
                   handle));
 #endif
   } // end IF
@@ -465,13 +464,10 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::allocateMessage (unsigned int r
   if (inherited::configuration_->messageAllocator)
   {
 allocate:
-    try
-    {
+    try {
       message_block_p =
         static_cast<ACE_Message_Block*> (inherited::configuration_->messageAllocator->malloc (requestedSize_in));
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(0), aborting\n")));
       return NULL;
@@ -525,7 +521,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
   ACE_Message_Block* message_block_p = &result_in.message_block ();
 
   // sanity check(s)
-//  ACE_ASSERT (message_block_p == buffer_);
   if (result_in.success () == 0)
   {
     // connection closed/reset (by peer) ? --> not an error
@@ -539,12 +534,12 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", continuing\n"),
+                  ACE_TEXT ("0x%@: failed to write to output stream: \"%s\", continuing\n"),
                   result_in.handle (),
                   ACE::sock_error (static_cast<int> (error))));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
+                  ACE_TEXT ("%d: failed to write to output stream: \"%s\", continuing\n"),
                   result_in.handle (),
                   ACE_TEXT (ACE_OS::strerror (error))));
 #endif
@@ -564,12 +559,12 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
           (error != ECONNRESET))                // 104/10054: reset by peer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to write to output stream (0x%@): \"%s\", continuing\n"),
+                        ACE_TEXT ("0x%@: failed to write to output stream: \"%s\", continuing\n"),
                         result_in.handle (),
                         ACE::sock_error (static_cast<int> (error))));
 #else
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to write to output stream (%d): \"%s\", continuing\n"),
+                        ACE_TEXT ("%d: failed to write to output stream: \"%s\", continuing\n"),
                         result_in.handle (),
                         ACE_TEXT (ACE_OS::strerror (error))));
 #endif
@@ -580,11 +575,11 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
       {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("0x%@: socket was closed by the peer\n"),
+                    ACE_TEXT ("0x%@: socket was closed\n"),
                     result_in.handle ()));
 #else
         ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("%d: socket was closed by the peer\n"),
+                    ACE_TEXT ("%d: socket was closed\n"),
                     result_in.handle ()));
 #endif
       } // end IF
@@ -598,28 +593,18 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
       // finished with this buffer ?
       if (message_block_p->length () > 0)
       {
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("partial write (%u/%u bytes)...\n"),
-                    bytes_transferred, bytes_transferred + message_block_p->length ()));
-
-        // --> reschedule
-        // *TODO*: put the buffer back into the queue. This will not work if
-        //         other buffers have been scheduled in the meantime...
-        result = handle_output (result_in.handle ());
-        if (result == -1)
-        {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(0x%@): \"%m\", aborting\n"),
-                      result_in.handle ()));
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("0x%@: partial write (%u/%u byte(s)), continuing\n"),
+                    result_in.handle (),
+                    bytes_transferred, bytes_transferred + message_block_p->length ()));
 #else
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_output(%d): \"%m\", aborting\n"),
-                      result_in.handle ()));
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("%d: partial write (%u/%u byte(s)), continuing\n"),
+                    result_in.handle (),
+                    bytes_transferred, bytes_transferred + message_block_p->length ()));
 #endif
-          close = true;
-          goto release;
-        } // end IF
+        partialWrite_ = true;
 
         goto continue_; // done
       } // end IF
@@ -630,7 +615,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
 
 release:
   message_block_p->release ();
-//  buffer_ = NULL;
 
 continue_:
   if (close)
@@ -687,7 +671,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read_stream ()
     return false;
   } // end IF
 
-  // start (asynchronous) read...
+  // start (asynchronous) read
   int error = 0;
 receive:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

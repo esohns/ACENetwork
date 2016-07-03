@@ -42,33 +42,35 @@
 #include "dhcp_stream_common.h"
 
 template <typename StreamStateType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename StatisticContainerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ModuleHandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SessionDataType,
           typename SessionDataContainerType,
           typename SessionMessageType,
           typename ProtocolMessageType>
 class DHCP_Stream_T
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         StreamStateType,
-                        /////////////////
+                        //////////////////
                         ConfigurationType,
-                        /////////////////
+                        //////////////////
                         StatisticContainerType,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
-                        /////////////////
+                        //////////////////
                         SessionDataType,
                         SessionDataContainerType,
                         SessionMessageType,
@@ -92,20 +94,22 @@ class DHCP_Stream_T
 
  private:
   typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         StreamStateType,
-                        /////////////////
+                        //////////////////
                         ConfigurationType,
-                        /////////////////
+                        //////////////////
                         StatisticContainerType,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
-                        /////////////////
+                        //////////////////
                         SessionDataType,
                         SessionDataContainerType,
                         SessionMessageType,
@@ -139,6 +143,8 @@ class DHCP_Stream_T
                                 //////////
                                 ModuleHandlerConfigurationType,
                                 //////////
+                                int,
+                                int,
                                 StreamStateType,
                                 //////////
                                 SessionDataType,

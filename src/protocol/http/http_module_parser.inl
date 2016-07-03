@@ -506,7 +506,7 @@ HTTP_Module_Parser_T<TimePolicyType,
 
   switch (message_inout->type ())
   {
-    case STREAM_SESSION_BEGIN:
+    case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // sanity check(s)
       ACE_ASSERT (!sessionData_);
@@ -518,7 +518,7 @@ HTTP_Module_Parser_T<TimePolicyType,
 
       break;
     }
-    case STREAM_SESSION_END:
+    case STREAM_SESSION_MESSAGE_END:
     {
       // *NOTE*: a parser thread may be waiting for additional (entity)
       //         fragments to arrive
@@ -602,6 +602,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -613,21 +615,17 @@ HTTP_Module_ParserH_T<LockType,
                       SessionMessageType,
                       ProtocolMessageType,
                       ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
-                      RecordType>::HTTP_Module_ParserH_T ()
- : inherited (NULL,  // lock handle
-              // *NOTE*: the current (pull-)parser needs to be active because
-              //         yyparse() will not return until the entity has been
-              //         received and processed completely; otherwise, it would
-              //         tie one dispatch thread during this time (deadlock for
-              //         single-threaded reactors/proactor scenarios)
-              true,  // active by default
-              true,  // auto-start !
-              false, // do not run the svc() routine on start (passive mode)
-              false) // do not push session messages
+                      RecordType>::HTTP_Module_ParserH_T (LockType* lock_in,
+                                                          bool autoStart_in)
+ : inherited (lock_in,      // lock handle
+              autoStart_in, // auto-start ?
+              true)         // generate sesssion messages ?
  , sessionData_ (NULL)
  , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
@@ -648,6 +646,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -659,6 +659,8 @@ HTTP_Module_ParserH_T<LockType,
                       SessionMessageType,
                       ProtocolMessageType,
                       ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
@@ -680,6 +682,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -692,6 +696,8 @@ HTTP_Module_ParserH_T<LockType,
                       SessionMessageType,
                       ProtocolMessageType,
                       ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
@@ -784,6 +790,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -796,6 +804,8 @@ HTTP_Module_ParserH_T<LockType,
                       SessionMessageType,
                       ProtocolMessageType,
                       ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
@@ -982,6 +992,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -994,6 +1006,8 @@ HTTP_Module_ParserH_T<LockType,
                       SessionMessageType,
                       ProtocolMessageType,
                       ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
@@ -1010,7 +1024,7 @@ HTTP_Module_ParserH_T<LockType,
 
   switch (message_inout->type ())
   {
-    case STREAM_SESSION_BEGIN:
+    case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // retain session ID for reporting
       const SessionDataContainerType& session_data_container_r =
@@ -1027,7 +1041,7 @@ HTTP_Module_ParserH_T<LockType,
 
       break;
     }
-    case STREAM_SESSION_END:
+    case STREAM_SESSION_MESSAGE_END:
     {
       // *NOTE*: a parser thread may be waiting for additional (entity)
       //         fragments to arrive
@@ -1124,6 +1138,8 @@ template <typename LockType,
           typename SessionMessageType,
           typename ProtocolMessageType,
           typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -1136,6 +1152,8 @@ HTTP_Module_ParserH_T<LockType,
                       SessionMessageType,
                       ProtocolMessageType,
                       ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,

@@ -467,7 +467,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
 
   switch (message_inout->type ())
   {
-    case STREAM_SESSION_BEGIN:
+    case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // step0: initialize session state
       // *NOTE*: the IRC protocol does not foresee a 'handshake' during session
@@ -509,7 +509,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
 
       break;
     }
-    case STREAM_SESSION_END:
+    case STREAM_SESSION_MESSAGE_END:
     {
       inherited::handleSessionMessage (message_inout,
                                        passMessageDownstream_out);

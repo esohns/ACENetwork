@@ -41,20 +41,22 @@ class Stream_IAllocator;
 
 class Test_U_InboundConnectionStream
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_RuntimeStatistic_t,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_StreamModuleHandlerConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
                         Test_U_SessionMessage,
@@ -79,20 +81,22 @@ class Test_U_InboundConnectionStream
 
  private:
   typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_RuntimeStatistic_t,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_StreamModuleHandlerConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
                         Test_U_SessionMessage,
@@ -115,20 +119,22 @@ class Test_U_InboundConnectionStream
 
 class Test_U_OutboundConnectionStream
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_RuntimeStatistic_t,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_StreamModuleHandlerConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
                         Test_U_SessionMessage,
@@ -153,20 +159,22 @@ class Test_U_OutboundConnectionStream
 
  private:
   typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        /////////////////
+                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        /////////////////
+                        //////////////////
+                        int,
+                        int,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_RuntimeStatistic_t,
-                        /////////////////
+                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_StreamModuleHandlerConfiguration,
-                        /////////////////
+                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
                         Test_U_SessionMessage,

@@ -41,7 +41,7 @@ class Net_AsynchTCPSocketHandler_T
  public:
   virtual ~Net_AsynchTCPSocketHandler_T ();
 
-  // override some service handler methods
+  // override some ACE_Service_Handler methods
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
   virtual void addresses (const ACE_INET_Addr&,  // remote address
@@ -54,22 +54,21 @@ class Net_AsynchTCPSocketHandler_T
 
   // implement ACE_Notification_Strategy
   virtual int notify (void);
-  virtual int notify (ACE_Event_Handler*, // event handler handle
-                      ACE_Reactor_Mask);  // mask
 
  protected:
   Net_AsynchTCPSocketHandler_T ();
 
+  // override some ACE_Handler methods
+  virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
+
   // helper method(s)
   bool initiate_read_stream ();
 
-  virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
-
-//  ACE_Message_Block*          buffer_;
   // the number of open write (i.e. send) requests
   Common_ReferenceCounterBase counter_;
   ACE_Asynch_Read_Stream      inputStream_;
   ACE_Asynch_Write_Stream     outputStream_;
+  bool                        partialWrite_;
   ACE_INET_Addr               localSAP_;
   ACE_INET_Addr               remoteSAP_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -84,6 +83,10 @@ class Net_AsynchTCPSocketHandler_T
 
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPSocketHandler_T (const Net_AsynchTCPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPSocketHandler_T& operator= (const Net_AsynchTCPSocketHandler_T&))
+
+  // implement ACE_Notification_Strategy
+  virtual int notify (ACE_Event_Handler*, // event handler handle
+                      ACE_Reactor_Mask);  // mask
 
   // helper method(s)
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
