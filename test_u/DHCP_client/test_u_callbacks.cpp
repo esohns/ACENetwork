@@ -34,8 +34,6 @@
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
 
-#include "glade/glade.h"
-
 #include "common_file_tools.h"
 #include "common_timer_manager.h"
 

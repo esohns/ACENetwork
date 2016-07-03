@@ -23,8 +23,6 @@
 
 #include "ace/Synch_Traits.h"
 
-#include "glade/glade.h"
-
 #include "common_timer_manager.h"
 
 #include "common_ui_common.h"
