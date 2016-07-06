@@ -134,6 +134,9 @@ if (CMAKE_COMPILER_IS_GNUCXX)
  add_definitions (-D_GNU_SOURCE)
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS _GNU_SOURCE)
 endif ()
+if (MSVC)  
+ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")  
+endif (MSVC)
 
 option (BUILD_MODULES
         "build (git) sub-modules" OFF)
