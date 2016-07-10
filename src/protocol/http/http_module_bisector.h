@@ -39,10 +39,11 @@ typedef struct yy_buffer_state* YY_BUFFER_STATE;
 
 template <typename LockType,
           ////////////////////////////////
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
@@ -56,21 +57,22 @@ template <typename LockType,
           typename StatisticContainerType>
 class HTTP_Module_Bisector_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      /////
-                                      TaskSynchType,
+                                      ////
+                                      SynchStrategyType,
                                       TimePolicyType,
+                                      ControlMessageType,
+                                      DataMessageType,
                                       SessionMessageType,
-                                      ProtocolMessageType,
-                                      /////
+                                      ////
                                       ConfigurationType,
-                                      /////
+                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      /////
+                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      /////
+                                      ////
                                       StatisticContainerType>
 {
  public:
@@ -90,8 +92,8 @@ class HTTP_Module_Bisector_T
   virtual bool initialize (const ConfigurationType&);
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
-                                  bool&);                // return value: pass message downstream ?
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
 
   // catch the session ID...
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
@@ -104,21 +106,22 @@ class HTTP_Module_Bisector_T
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      /////
-                                      TaskSynchType,
+                                      ////
+                                      SynchStrategyType,
                                       TimePolicyType,
+                                      ControlMessageType,
+                                      DataMessageType,
                                       SessionMessageType,
-                                      ProtocolMessageType,
-                                      /////
+                                      ////
                                       ConfigurationType,
-                                      /////
+                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      /////
+                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      /////
+                                      ////
                                       StatisticContainerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T ())

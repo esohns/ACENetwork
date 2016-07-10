@@ -23,14 +23,18 @@
 
 #include "irc_record.h"
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
-IRC_Module_Parser_T<TaskSynchType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+IRC_Module_Parser_T<SynchStrategyType,
                     TimePolicyType,
-                    SessionMessageType,
-                    ProtocolMessageType>::IRC_Module_Parser_T ()
+                    ConfigurationType,
+                    ControlMessageType,
+                    DataMessageType,
+                    SessionMessageType>::IRC_Module_Parser_T ()
  : inherited ()
  , allocator_ (NULL)
  , debugScanner_ (IRC_DEFAULT_LEX_TRACE) // trace scanning ?
@@ -44,31 +48,39 @@ IRC_Module_Parser_T<TaskSynchType,
 
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
-IRC_Module_Parser_T<TaskSynchType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+IRC_Module_Parser_T<SynchStrategyType,
                     TimePolicyType,
-                    SessionMessageType,
-                    ProtocolMessageType>::~IRC_Module_Parser_T ()
+                    ConfigurationType,
+                    ControlMessageType,
+                    DataMessageType,
+                    SessionMessageType>::~IRC_Module_Parser_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Parser_T::~IRC_Module_Parser_T"));
 
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 bool
-IRC_Module_Parser_T<TaskSynchType,
+IRC_Module_Parser_T<SynchStrategyType,
                     TimePolicyType,
-                    SessionMessageType,
-                    ProtocolMessageType>::initialize (Stream_IAllocator* allocator_in,
-                                                      bool crunchMessages_in,
-                                                      bool debugScanner_in,
-                                                      bool debugParser_in)
+                    ConfigurationType,
+                    ControlMessageType,
+                    DataMessageType,
+                    SessionMessageType>::initialize (Stream_IAllocator* allocator_in,
+                                                     bool crunchMessages_in,
+                                                     bool debugScanner_in,
+                                                     bool debugParser_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Parser_T::initialize"));
 
@@ -97,16 +109,20 @@ IRC_Module_Parser_T<TaskSynchType,
   return isInitialized_;
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 void
-IRC_Module_Parser_T<TaskSynchType,
+IRC_Module_Parser_T<SynchStrategyType,
                     TimePolicyType,
-                    SessionMessageType,
-                    ProtocolMessageType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                             bool& passMessageDownstream_out)
+                    ConfigurationType,
+                    ControlMessageType,
+                    DataMessageType,
+                    SessionMessageType>::handleDataMessage (DataMessageType*& message_inout,
+                                                            bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Parser_T::handleDataMessage"));
 
@@ -128,7 +144,7 @@ IRC_Module_Parser_T<TaskSynchType,
 //   ACE_ASSERT(message_inout->getData() == NULL);
 
   // "crunch" messages for easier parsing ?
-  ProtocolMessageType* message_p = message_inout;
+  DataMessageType* message_p = message_inout;
   if (crunchMessages_)
   {
 //     message->dump_state();
@@ -237,31 +253,32 @@ error:
   passMessageDownstream_out = false;
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
-ProtocolMessageType*
-IRC_Module_Parser_T<TaskSynchType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+DataMessageType*
+IRC_Module_Parser_T<SynchStrategyType,
                     TimePolicyType,
-                    SessionMessageType,
-                    ProtocolMessageType>::allocateMessage (unsigned int requestedSize_in)
+                    ConfigurationType,
+                    ControlMessageType,
+                    DataMessageType,
+                    SessionMessageType>::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Parser_T::allocateMessage"));
 
   // initialize return value(s)
-  ProtocolMessageType* message_p = NULL;
+  DataMessageType* message_p = NULL;
 
   if (allocator_)
   {
 allocate:
-    try
-    {
+    try {
       message_p =
-        static_cast<ProtocolMessageType*> (allocator_->malloc (requestedSize_in));
-    }
-    catch (...)
-    {
+        static_cast<DataMessageType*> (allocator_->malloc (requestedSize_in));
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
                   requestedSize_in));
@@ -274,18 +291,18 @@ allocate:
   } // end IF
   else
     ACE_NEW_NORETURN (message_p,
-                      ProtocolMessageType (requestedSize_in));
+                      DataMessageType (requestedSize_in));
   if (!message_p)
   {
     if (allocator_)
     {
       if (allocator_->block ())
         ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to allocate data message: \"%m\", aborting\n")));
     } // end IF
     else
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to allocate data message: \"%m\", aborting\n")));
   } // end IF
 
   return message_p;

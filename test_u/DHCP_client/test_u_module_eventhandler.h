@@ -35,10 +35,14 @@
 #include "test_u_session_message.h"
 
 class Test_U_Module_EventHandler
- : public Stream_Module_MessageHandler_T<Test_U_SessionMessage,
-                                         Test_U_Message,
+ : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
 
                                          Test_U_StreamModuleHandlerConfiguration,
+
+                                         ACE_Message_Block,
+                                         Test_U_Message,
+                                         Test_U_SessionMessage,
 
                                          unsigned int,
                                          Test_U_StreamSessionData_t>
@@ -51,10 +55,14 @@ class Test_U_Module_EventHandler
   virtual Stream_Module_t* clone ();
 
  private:
-  typedef Stream_Module_MessageHandler_T<Test_U_SessionMessage,
-                                         Test_U_Message,
+  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
 
                                          Test_U_StreamModuleHandlerConfiguration,
+
+                                         ACE_Message_Block,
+                                         Test_U_Message,
+                                         Test_U_SessionMessage,
 
                                          unsigned int,
                                          Test_U_StreamSessionData_t> inherited;

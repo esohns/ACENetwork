@@ -29,18 +29,23 @@
 #include "http_defines.h"
 #include "http_tools.h"
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
+template <typename SynchStrategyType,
+          typename TimePolicyType,
           typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
           typename RecordType>
-HTTP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
+HTTP_Module_Parser_T<SynchStrategyType,
+                     TimePolicyType,
                      ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
                      RecordType>::HTTP_Module_Parser_T ()
  : inherited ()
  , sessionData_ (NULL)
+ /////////////////////////////////////////
  , allocator_ (NULL)
  , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
@@ -58,15 +63,19 @@ HTTP_Module_Parser_T<TimePolicyType,
 
 }
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
+template <typename SynchStrategyType,
+          typename TimePolicyType,
           typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
           typename RecordType>
-HTTP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
+HTTP_Module_Parser_T<SynchStrategyType,
+                     TimePolicyType,
                      ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
                      RecordType>::~HTTP_Module_Parser_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::~HTTP_Module_Parser_T"));
@@ -78,16 +87,20 @@ HTTP_Module_Parser_T<TimePolicyType,
     dataContainer_->decrease ();
 }
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
+template <typename SynchStrategyType,
+          typename TimePolicyType,
           typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
           typename RecordType>
 bool
-HTTP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
+HTTP_Module_Parser_T<SynchStrategyType,
+                     TimePolicyType,
                      ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
                      RecordType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::initialize"));
@@ -175,25 +188,29 @@ HTTP_Module_Parser_T<TimePolicyType,
   return true;
 }
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
+template <typename SynchStrategyType,
+          typename TimePolicyType,
           typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
           typename RecordType>
 void
-HTTP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
+HTTP_Module_Parser_T<SynchStrategyType,
+                     TimePolicyType,
                      ConfigurationType,
-                     RecordType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
+                     RecordType>::handleDataMessage (DataMessageType*& message_inout,
                                                      bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::handleDataMessage"));
 
   int result = -1;
   DATA_CONTAINER_T* data_container_p = NULL;
-  ProtocolMessageType* message_p = NULL;
-  ProtocolMessageType* message_2 = NULL;
+  DataMessageType* message_p = NULL;
+  DataMessageType* message_2 = NULL;
 //  RecordType* record_p = NULL;
   bool release_inbound_message = true; // message_inout
   bool release_message = false; // message_p
@@ -223,7 +240,7 @@ HTTP_Module_Parser_T<TimePolicyType,
     {
       for (message_2 = headFragment_;
            message_2->cont ();
-           message_2 = dynamic_cast<ProtocolMessageType*> (message_2->cont ()));
+           message_2 = dynamic_cast<DataMessageType*> (message_2->cont ()));
       message_2->cont (message_inout);
 
       //// just signal the parser (see below for an explanation)
@@ -236,7 +253,7 @@ HTTP_Module_Parser_T<TimePolicyType,
     //ACE_ASSERT (message_2);
 
     message_p = headFragment_;
-    //  dynamic_cast<ProtocolMessageType*> (message_2->duplicate ());
+    //  dynamic_cast<DataMessageType*> (message_2->duplicate ());
     //if (!message_p)
     //{
     //  ACE_DEBUG ((LM_ERROR,
@@ -384,14 +401,14 @@ HTTP_Module_Parser_T<TimePolicyType,
     data_container_p = dataContainer_;
     headFragment_->initialize (data_container_p,
                                NULL);
-    message_2 = dynamic_cast<ProtocolMessageType*> (headFragment_->cont ());
+    message_2 = dynamic_cast<DataMessageType*> (headFragment_->cont ());
     while (message_2)
     {
       dataContainer_->increase ();
       data_container_p = dataContainer_;
       message_2->initialize (data_container_p,
                              NULL);
-      message_2 = dynamic_cast<ProtocolMessageType*> (message_2->cont ());
+      message_2 = dynamic_cast<DataMessageType*> (message_2->cont ());
 
       // *NOTE*: new data fragments may have arrived by now
       if (message_2 == message_p)
@@ -447,7 +464,7 @@ HTTP_Module_Parser_T<TimePolicyType,
 
     //// *NOTE*: new data fragments may have arrived by now
     ////         --> set the next head fragment ?
-    //message_2 = dynamic_cast<ProtocolMessageType*> (message_p->cont ());
+    //message_2 = dynamic_cast<DataMessageType*> (message_p->cont ());
     //if (message_2)
     //  message_p->cont (NULL);
 
@@ -481,16 +498,20 @@ error:
   } // end IF
 }
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
+template <typename SynchStrategyType,
+          typename TimePolicyType,
           typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
           typename RecordType>
 void
-HTTP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
+HTTP_Module_Parser_T<SynchStrategyType,
+                     TimePolicyType,
                      ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
                      RecordType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                         bool& passMessageDownstream_out)
 {
@@ -538,22 +559,26 @@ HTTP_Module_Parser_T<TimePolicyType,
   } // end SWITCH
 }
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
+template <typename SynchStrategyType,
+          typename TimePolicyType,
           typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
           typename RecordType>
-ProtocolMessageType*
-HTTP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
+DataMessageType*
+HTTP_Module_Parser_T<SynchStrategyType,
+                     TimePolicyType,
                      ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
                      RecordType>::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::allocateMessage"));
 
   // initialize return value(s)
-  ProtocolMessageType* message_p = NULL;
+  DataMessageType* message_p = NULL;
 
   if (allocator_)
   {
@@ -561,7 +586,7 @@ allocate:
     try
     {
       message_p =
-        static_cast<ProtocolMessageType*> (allocator_->malloc (requestedSize_in));
+        static_cast<DataMessageType*> (allocator_->malloc (requestedSize_in));
     }
     catch (...)
     {
@@ -577,18 +602,18 @@ allocate:
   } // end IF
   else
     ACE_NEW_NORETURN (message_p,
-                      ProtocolMessageType (requestedSize_in));
+                      DataMessageType (requestedSize_in));
   if (!message_p)
   {
     if (allocator_)
     {
       if (allocator_->block ())
         ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate ProtocolMessageType: \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to allocate DataMessageType: \"%m\", aborting\n")));
     } // end IF
     else
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate ProtocolMessageType: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to allocate DataMessageType: \"%m\", aborting\n")));
   } // end IF
 
   return message_p;
@@ -599,8 +624,9 @@ allocate:
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -612,8 +638,9 @@ template <typename LockType,
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
                       SessionMessageType,
-                      ProtocolMessageType,
                       ConfigurationType,
                       StreamControlType,
                       StreamNotificationType,
@@ -627,6 +654,7 @@ HTTP_Module_ParserH_T<LockType,
               autoStart_in, // auto-start ?
               true)         // generate sesssion messages ?
  , sessionData_ (NULL)
+ /////////////////////////////////////////
  , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
  , driver_ (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
@@ -643,8 +671,9 @@ HTTP_Module_ParserH_T<LockType,
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -656,8 +685,9 @@ template <typename LockType,
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
                       SessionMessageType,
-                      ProtocolMessageType,
                       ConfigurationType,
                       StreamControlType,
                       StreamNotificationType,
@@ -679,8 +709,9 @@ HTTP_Module_ParserH_T<LockType,
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -693,8 +724,9 @@ bool
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
                       SessionMessageType,
-                      ProtocolMessageType,
                       ConfigurationType,
                       StreamControlType,
                       StreamNotificationType,
@@ -787,8 +819,9 @@ HTTP_Module_ParserH_T<LockType,
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -801,8 +834,9 @@ void
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
                       SessionMessageType,
-                      ProtocolMessageType,
                       ConfigurationType,
                       StreamControlType,
                       StreamNotificationType,
@@ -810,14 +844,14 @@ HTTP_Module_ParserH_T<LockType,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
-                      RecordType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                      RecordType>::handleDataMessage (DataMessageType*& message_inout,
                                                       bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleDataMessage"));
 
   int result = -1;
   DATA_CONTAINER_T* data_container_p = NULL;
-  ProtocolMessageType* message_p = message_inout;
+  DataMessageType* message_p = message_inout;
   HTTP_Record* record_p = NULL;
 
   if (driver_.hasFinished ())
@@ -957,7 +991,7 @@ HTTP_Module_ParserH_T<LockType,
 //  driver_.record ()->dump_state ();
 
   // make sure the chain references the same data
-  message_p = dynamic_cast<ProtocolMessageType*> (headFragment_->cont ());
+  message_p = dynamic_cast<DataMessageType*> (headFragment_->cont ());
 
   while (message_p)
   {
@@ -966,7 +1000,7 @@ HTTP_Module_ParserH_T<LockType,
     // *TODO*: need to merge message data here
     message_p->initialize (*data_container_p,
                            NULL);
-    message_p = dynamic_cast<ProtocolMessageType*> (message_p->cont ());
+    message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
 
   result = inherited::put_next (headFragment_, NULL);
@@ -989,8 +1023,9 @@ error:
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -1003,8 +1038,9 @@ void
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
                       SessionMessageType,
-                      ProtocolMessageType,
                       ConfigurationType,
                       StreamControlType,
                       StreamNotificationType,
@@ -1066,18 +1102,18 @@ HTTP_Module_ParserH_T<LockType,
 //          typename TaskSynchType,
 //          typename TimePolicyType,
 //          typename SessionMessageType,
-//          typename ProtocolMessageType,
+//          typename DataMessageType,
 //          typename ConfigurationType,
 //          typename StreamStateType,
 //          typename SessionDataType,
 //          typename SessionDataContainerType,
 //          typename StatisticContainerType>
-//ProtocolMessageType*
+//DataMessageType*
 //HTTP_Module_ParserH_T<LockType,
 //                     TaskSynchType,
 //                     TimePolicyType,
 //                     SessionMessageType,
-//                     ProtocolMessageType,
+//                     DataMessageType,
 //                     ConfigurationType,
 //                     StreamStateType,
 //                     SessionDataType,
@@ -1091,7 +1127,7 @@ HTTP_Module_ParserH_T<LockType,
 //  ACE_ASSERT (inherited::configuration_->streamConfiguration);
 //
 //  // initialize return value(s)
-//  ProtocolMessageType* message_p = NULL;
+//  DataMessageType* message_p = NULL;
 //
 //  if (inherited::configuration_->streamConfiguration->messageAllocator)
 //  {
@@ -1099,7 +1135,7 @@ HTTP_Module_ParserH_T<LockType,
 //    try
 //    {
 //      message_p =
-//        static_cast<ProtocolMessageType*> (inherited::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
+//        static_cast<DataMessageType*> (inherited::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
 //    }
 //    catch (...)
 //    {
@@ -1115,7 +1151,7 @@ HTTP_Module_ParserH_T<LockType,
 //  } // end IF
 //  else
 //    ACE_NEW_NORETURN (message_p,
-//                      ProtocolMessageType (requestedSize_in));
+//                      DataMessageType (requestedSize_in));
 //  if (!message_p)
 //  {
 //    if (inherited::configuration_->streamConfiguration->messageAllocator)
@@ -1135,8 +1171,9 @@ HTTP_Module_ParserH_T<LockType,
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -1149,8 +1186,9 @@ bool
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
                       SessionMessageType,
-                      ProtocolMessageType,
                       ConfigurationType,
                       StreamControlType,
                       StreamNotificationType,
@@ -1185,7 +1223,7 @@ HTTP_Module_ParserH_T<LockType,
 //          typename TaskSynchType,
 //          typename TimePolicyType,
 //          typename SessionMessageType,
-//          typename ProtocolMessageType,
+//          typename DataMessageType,
 //          typename ConfigurationType,
 //          typename StreamStateType,
 //          typename SessionDataType,
@@ -1196,7 +1234,7 @@ HTTP_Module_ParserH_T<LockType,
 //                     TaskSynchType,
 //                     TimePolicyType,
 //                     SessionMessageType,
-//                     ProtocolMessageType,
+//                     DataMessageType,
 //                     ConfigurationType,
 //                     StreamStateType,
 //                     SessionDataType,
@@ -1214,7 +1252,7 @@ HTTP_Module_ParserH_T<LockType,
 //          typename TaskSynchType,
 //          typename TimePolicyType,
 //          typename SessionMessageType,
-//          typename ProtocolMessageType,
+//          typename DataMessageType,
 //          typename ConfigurationType,
 //          typename StreamStateType,
 //          typename SessionDataType,
@@ -1225,7 +1263,7 @@ HTTP_Module_ParserH_T<LockType,
 //                     TaskSynchType,
 //                     TimePolicyType,
 //                     SessionMessageType,
-//                     ProtocolMessageType,
+//                     DataMessageType,
 //                     ConfigurationType,
 //                     StreamStateType,
 //                     SessionDataType,

@@ -26,43 +26,55 @@
 #include "irc_defines.h"
 #include "irc_record.h"
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
-IRC_Module_Streamer_T<TaskSynchType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+IRC_Module_Streamer_T<SynchStrategyType,
                       TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType>::IRC_Module_Streamer_T ()
+                      ConfigurationType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType>::IRC_Module_Streamer_T ()
  : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Streamer_T::IRC_Module_Streamer_T"));
 
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
-IRC_Module_Streamer_T<TaskSynchType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+IRC_Module_Streamer_T<SynchStrategyType,
                       TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType>::~IRC_Module_Streamer_T ()
+                      ConfigurationType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType>::~IRC_Module_Streamer_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Streamer_T::~IRC_Module_Streamer_T"));
 
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 void
-IRC_Module_Streamer_T<TaskSynchType,
+IRC_Module_Streamer_T<SynchStrategyType,
                       TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                               bool& passMessageDownstream_out)
+                      ConfigurationType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType>::handleDataMessage (DataMessageType*& message_inout,
+                                                              bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Streamer_T::handleDataMessage"));
 

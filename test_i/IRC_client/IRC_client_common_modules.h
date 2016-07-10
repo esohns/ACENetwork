@@ -25,7 +25,7 @@
 
 #include "common_time_common.h"
 
-#include "stream_module_runtimestatistic.h"
+#include "stream_misc_runtimestatistic.h"
 
 #include "irc_common_modules.h"
 #include "irc_module_bisector.h"
@@ -41,11 +41,14 @@ typedef IRC_Module_Bisector_T<ACE_SYNCH_MUTEX,
                               ///////////
                               ACE_MT_SYNCH,
                               Common_TimePolicy_t,
-                              IRC_Client_SessionMessage,
+                              ACE_Message_Block,
                               IRC_Message,
+                              IRC_Client_SessionMessage,
                               ///////////
                               IRC_Client_ModuleHandlerConfiguration,
                               ///////////
+                              int,
+                              int,
                               IRC_StreamState,
                               ///////////
                               IRC_Client_SessionData,
@@ -57,16 +60,20 @@ typedef IRC_Module_Parser_Module IRC_Client_Module_Parser_Module;
 
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             IRC_Client_SessionMessage,
+                                             IRC_Client_ModuleHandlerConfiguration,
+                                             ACE_Message_Block,
                                              IRC_Message,
+                                             IRC_Client_SessionMessage,
                                              IRC_CommandType_t,
                                              IRC_RuntimeStatistic_t,
                                              IRC_Client_SessionData,
                                              IRC_Client_SessionData_t> IRC_Client_Module_Statistic_ReaderTask_t;
 typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             IRC_Client_SessionMessage,
+                                             IRC_Client_ModuleHandlerConfiguration,
+                                             ACE_Message_Block,
                                              IRC_Message,
+                                             IRC_Client_SessionMessage,
                                              IRC_CommandType_t,
                                              IRC_RuntimeStatistic_t,
                                              IRC_Client_SessionData,
@@ -76,7 +83,7 @@ DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                          // task synch t
                           Common_TimePolicy_t,                   // time policy
                           Stream_ModuleConfiguration,            // module configuration type
                           IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
-                          IRC_Module_Streamer,                   // reader type
+                          IRC_Module_Streamer_t,                 // reader type
                           IRC_Client_Module_Bisector_t,          // writer type
                           IRC_Client_Module_Marshal);            // name
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                             // task synch type

@@ -28,16 +28,18 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
              ModuleHandlerConfigurationType,
              SessionDataType,
              SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::IRC_Stream_T (const std::string& name_in)
+             ControlMessageType,
+             DataMessageType,
+             SessionMessageType>::IRC_Stream_T (const std::string& name_in)
  : inherited (name_in)
  , marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
              NULL,
@@ -64,7 +66,7 @@ IRC_Stream_T<StreamStateType,
   inherited::modules_.push_front (&runtimeStatistic_);
 
   // *TODO*: fix ACE bug: modules should initialize their "next" member to NULL
-  for (typename inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::modules_.begin ();
+  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
        iterator != inherited::modules_.end ();
        iterator++)
     (*iterator)->next (NULL);
@@ -76,16 +78,18 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
              ModuleHandlerConfigurationType,
              SessionDataType,
              SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::~IRC_Stream_T ()
+             ControlMessageType,
+             DataMessageType,
+             SessionMessageType>::~IRC_Stream_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::~IRC_Stream_T"));
 
@@ -99,8 +103,9 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 bool
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
@@ -108,10 +113,11 @@ IRC_Stream_T<StreamStateType,
              ModuleHandlerConfigurationType,
              SessionDataType,
              SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::initialize (const ConfigurationType& configuration_in,
-                                               bool setupPipeline_in,
-                                               bool resetSessionData_in)
+             ControlMessageType,
+             DataMessageType,
+             SessionMessageType>::initialize (const ConfigurationType& configuration_in,
+                                              bool setupPipeline_in,
+                                              bool resetSessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::initialize"));
 
@@ -166,8 +172,8 @@ IRC_Stream_T<StreamStateType,
     } // end IF
     Stream_Task_t* task_p = configuration_in.module->writer ();
     ACE_ASSERT (task_p);
-    typename inherited::IMODULEHANDLER_T* imodule_handler_p =
-        dynamic_cast<typename inherited::IMODULEHANDLER_T*> (task_p);
+    typename inherited::MODULEHANDLER_IINITIALIZE_T* imodule_handler_p =
+        dynamic_cast<typename inherited::MODULEHANDLER_IINITIALIZE_T*> (task_p);
     if (!imodule_handler_p)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -182,30 +188,30 @@ IRC_Stream_T<StreamStateType,
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    inherited::modules_.push_front (configuration_in.module);
+    //inherited::modules_.push_front (configuration_in.module);
   } // end IF
 
   // ---------------------------------------------------------------------------
 
   // ******************* Runtime Statistics ************************
-  STATISTIC_WRITER_T* runtimeStatistic_impl_p =
-    dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
-  if (!runtimeStatistic_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
-    return false;
-  } // end IF
-  if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
-                                            true,
-                                            configuration_in.printFinalReport,
-                                            configuration_in.messageAllocator))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                runtimeStatistic_.name ()));
-    return false;
-  } // end IF
+  //STATISTIC_WRITER_T* runtimeStatistic_impl_p =
+  //  dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
+  //if (!runtimeStatistic_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
+  //  return false;
+  //} // end IF
+  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
+  //                                          true,
+  //                                          configuration_in.printFinalReport,
+  //                                          configuration_in.messageAllocator))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              runtimeStatistic_.name ()));
+  //  return false;
+  //} // end IF
 
 //   // ******************* Handler ************************
 //   IRC_Module_Handler* handler_impl = NULL;
@@ -229,8 +235,7 @@ IRC_Stream_T<StreamStateType,
 
   // ******************* Parser ************************
   PARSER_T* parser_impl_p = NULL;
-  parser_impl_p =
-    dynamic_cast<PARSER_T*> (parser_.writer ());
+  parser_impl_p = dynamic_cast<PARSER_T*> (parser_.writer ());
   if (!parser_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -290,7 +295,7 @@ IRC_Stream_T<StreamStateType,
   // set (session) message allocator
   // *TODO*: clean this up ! --> sanity check
   ACE_ASSERT (configuration_in.messageAllocator);
-  inherited::allocator_ = configuration_in.messageAllocator;
+  //inherited::allocator_ = configuration_in.messageAllocator;
 
   inherited::isInitialized_ = true;
 
@@ -303,8 +308,9 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 bool
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
@@ -312,8 +318,9 @@ IRC_Stream_T<StreamStateType,
              ModuleHandlerConfigurationType,
              SessionDataType,
              SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::collect (StatisticContainerType& data_out)
+             ControlMessageType,
+             DataMessageType,
+             SessionMessageType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::collect"));
 
@@ -337,8 +344,9 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 void
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
@@ -346,8 +354,9 @@ IRC_Stream_T<StreamStateType,
              ModuleHandlerConfigurationType,
              SessionDataType,
              SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::report () const
+             ControlMessageType,
+             DataMessageType,
+             SessionMessageType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::report"));
 
@@ -376,8 +385,9 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 void
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
@@ -385,8 +395,9 @@ IRC_Stream_T<StreamStateType,
              ModuleHandlerConfigurationType,
              SessionDataType,
              SessionDataContainerType,
-             SessionMessageType,
-             ProtocolMessageType>::ping ()
+             ControlMessageType,
+             DataMessageType,
+             SessionMessageType>::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::ping"));
 
@@ -426,12 +437,9 @@ IRC_Stream_T<StreamStateType,
   } // end IF
 
   // *TODO*
-  try
-  {
+  try {
 //    control_impl->stop ();
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Stream_IStreamControl::stop (module: \"%s\"), returning\n"),
                 module_p->name ()));

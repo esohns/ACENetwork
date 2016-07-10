@@ -38,17 +38,19 @@
 
 class IRC_Client_Stream
  : public IRC_Stream_T<IRC_Client_StreamState,
-                       //////////////////
+                       ///////////////////
                        IRC_Client_StreamConfiguration,
-                       //////////////////
+                       ///////////////////
                        IRC_RuntimeStatistic_t,
-                       //////////////////
+                       ///////////////////
                        IRC_Client_ModuleHandlerConfiguration,
-                       //////////////////
+                       ///////////////////
                        IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
-                       IRC_Client_SessionMessage,
-                       IRC_Message>
+                       ///////////////////
+                       ACE_Message_Block,
+                       IRC_Message,
+                       IRC_Client_SessionMessage>
 {
  public:
   IRC_Client_Stream (const std::string&); // name
@@ -70,17 +72,19 @@ class IRC_Client_Stream
 
  private:
   typedef IRC_Stream_T<IRC_Client_StreamState,
-                       //////////////////
+                       ///////////////////
                        IRC_Client_StreamConfiguration,
-                       //////////////////
+                       ///////////////////
                        IRC_RuntimeStatistic_t,
-                       //////////////////
+                       ///////////////////
                        IRC_Client_ModuleHandlerConfiguration,
-                       //////////////////
+                       ///////////////////
                        IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
-                       IRC_Client_SessionMessage,
-                       IRC_Message> inherited;
+                       ///////////////////
+                       ACE_Message_Block,
+                       IRC_Message,
+                       IRC_Client_SessionMessage> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream (const IRC_Client_Stream&))

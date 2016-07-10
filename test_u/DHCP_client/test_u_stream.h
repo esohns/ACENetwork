@@ -62,8 +62,10 @@ class Test_U_Stream_T
                         //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        Test_U_SessionMessage,
-                        Test_U_Message>
+                        //////////////////
+                        ACE_Message_Block,
+                        Test_U_Message,
+                        Test_U_SessionMessage>
 {
  public:
   Test_U_Stream_T ();
@@ -102,16 +104,20 @@ class Test_U_Stream_T
                         //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        Test_U_SessionMessage,
-                        Test_U_Message> inherited;
-  typedef Stream_Module_Net_Target_T<Test_U_SessionMessage,
-                                     Test_U_Message,
+                        //////////////////
+                        ACE_Message_Block,
+                        Test_U_Message,
+                        Test_U_SessionMessage> inherited;
+  typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
+                                     Common_TimePolicy_t,
                                      /////
                                      Test_U_StreamModuleHandlerConfiguration,
                                      /////
-                                     Test_U_StreamSessionData,
-                                     Test_U_StreamSessionData_t,
+                                     ACE_Message_Block,
+                                     Test_U_Message,
+                                     Test_U_SessionMessage,
                                      /////
+                                     Test_U_StreamSessionData_t,
                                      Test_U_ConnectionManager_t,
                                      ConnectorType> WRITER_T;
   typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,                            // task synch type

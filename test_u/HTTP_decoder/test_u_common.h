@@ -261,7 +261,7 @@ struct Test_U_Configuration
   bool                              useReactor;
 };
 
-typedef Stream_IModuleHandler_T<Test_U_ModuleHandlerConfiguration> Test_U_IModuleHandler_t;
+//typedef Stream_IModuleHandler_T<Test_U_ModuleHandlerConfiguration> Test_U_IModuleHandler_t;
 typedef Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
 
                                           Test_U_Message,

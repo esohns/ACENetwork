@@ -43,7 +43,7 @@ class IRC_Client_SessionMessage;
 struct IRC_Client_UserData;
 class IRC_Message;
 
-typedef Stream_IModuleHandler_T<IRC_Client_ModuleHandlerConfiguration> IRC_Client_IModuleHandler_t;
+//typedef Stream_IModuleHandler_T<IRC_Client_ModuleHandlerConfiguration> IRC_Client_IModuleHandler_t;
 typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Common_TimePolicy_t,
                          Stream_ModuleConfiguration,

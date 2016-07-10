@@ -59,8 +59,10 @@ class Test_U_InboundConnectionStream
                         //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        Test_U_SessionMessage,
-                        Test_U_Message>
+                        //////////////////
+                        ACE_Message_Block,
+                        Test_U_Message,
+                        Test_U_SessionMessage>
 {
  public:
   Test_U_InboundConnectionStream (const std::string&); // name
@@ -99,8 +101,10 @@ class Test_U_InboundConnectionStream
                         //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        Test_U_SessionMessage,
-                        Test_U_Message> inherited;
+                        //////////////////
+                        ACE_Message_Block,
+                        Test_U_Message,
+                        Test_U_SessionMessage> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream (const Test_U_InboundConnectionStream&))
@@ -137,8 +141,10 @@ class Test_U_OutboundConnectionStream
                         //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        Test_U_SessionMessage,
-                        Test_U_Message>
+                        //////////////////
+                        ACE_Message_Block,
+                        Test_U_Message,
+                        Test_U_SessionMessage>
 {
  public:
   Test_U_OutboundConnectionStream (const std::string&); // name
@@ -177,8 +183,10 @@ class Test_U_OutboundConnectionStream
                         //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        Test_U_SessionMessage,
-                        Test_U_Message> inherited;
+                        //////////////////
+                        ACE_Message_Block,
+                        Test_U_Message,
+                        Test_U_SessionMessage> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream (const Test_U_OutboundConnectionStream&))

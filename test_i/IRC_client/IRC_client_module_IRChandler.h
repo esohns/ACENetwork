@@ -48,10 +48,14 @@ class Stream_IAllocator;
 class IRC_Record;
 
 class IRC_Client_Module_IRCHandler
- : public Stream_Module_MessageHandler_T<IRC_Client_SessionMessage,
-                                         IRC_Message,
-
+ : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+ 
                                          IRC_Client_ModuleHandlerConfiguration,
+
+                                         ACE_Message_Block,
+                                         IRC_Message,
+                                         IRC_Client_SessionMessage,
 
                                          unsigned int,
                                          IRC_Client_SessionData_t>
@@ -64,6 +68,8 @@ class IRC_Client_Module_IRCHandler
 
   // implement (part of) Common_IStateMachine_T
   virtual bool wait (const ACE_Time_Value* = NULL);
+
+  virtual bool initialize (const IRC_Client_ModuleHandlerConfiguration&);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (IRC_Message*&, // data message handle
@@ -109,17 +115,21 @@ class IRC_Client_Module_IRCHandler
   // override Common_IDumpState
   virtual void dump_state () const;
 
-  // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const IRC_Client_ModuleHandlerConfiguration&);
+  //// override (part of) Stream_IModuleHandler_T
+  //virtual bool initialize (const IRC_Client_ModuleHandlerConfiguration&);
 
   // override Common_IClone_T
   virtual Stream_Module_t* clone ();
 
  private:
-  typedef Stream_Module_MessageHandler_T<IRC_Client_SessionMessage,
-                                         IRC_Message,
-
+  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+ 
                                          IRC_Client_ModuleHandlerConfiguration,
+
+                                         ACE_Message_Block,
+                                         IRC_Message,
+                                         IRC_Client_SessionMessage,
 
                                          unsigned int,
                                          IRC_Client_SessionData_t> inherited;
@@ -144,21 +154,21 @@ class IRC_Client_Module_IRCHandler
   // *NOTE*: lock subscribers_ and connectionIsAlive_
 //  // *NOTE*: this lock needs to be recursive to prevent deadlocks when users
 //  //         unsubscribe from within the notification callbacks
-  ACE_SYNCH_RECURSIVE_MUTEX             lock_;
-  typename inherited::SUBSCRIBERS_T     subscribers_;
+  ACE_SYNCH_RECURSIVE_MUTEX         lock_;
+  typename inherited::SUBSCRIBERS_T subscribers_;
 
 //  IRC_Client_ModuleHandlerConfiguration configuration_;
-  bool                                  isInitialized_;
+  bool                              isInitialized_;
 
   // *NOTE*: obviously, there is a delay between connection establishment and
   //         reception of the welcome NOTICE; let clients wait for it so they
   //         can start registering connections in accordance with the IRC
   //         protocol (*TODO*: reference)
-  ACE_SYNCH_MUTEX                       conditionLock_;
-  ACE_SYNCH_CONDITION                   condition_;
-  bool                                  connectionIsAlive_;
-  bool                                  initialRegistration_;
-  bool                                  receivedInitialNotice_;
+  ACE_SYNCH_MUTEX                   conditionLock_;
+  ACE_SYNCH_CONDITION               condition_;
+  bool                              connectionIsAlive_;
+  bool                              initialRegistration_;
+  bool                              receivedInitialNotice_;
 };
 
 // declare module

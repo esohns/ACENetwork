@@ -53,7 +53,7 @@ IRC_Client_Stream::IRC_Client_Stream (const std::string& name_in)
   //     iterator.next (module_p);
   //     iterator.advance ())
   //  module_p->next (NULL);
-  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::modules_.begin ();
+  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
        iterator != inherited::modules_.end ();
        iterator++)
     (*iterator)->next (NULL);
@@ -257,7 +257,7 @@ IRC_Client_Stream::ping ()
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::ping"));
 
   // delegate to the head module, skip over ACE_Stream_Head
-  MODULE_T* module_p = inherited::head ();
+  typename inherited::MODULE_T* module_p = inherited::head ();
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -280,8 +280,9 @@ IRC_Client_Stream::ping ()
     return;
   } // end IF
 
-  ISTREAM_CONTROL_T* control_impl_p = NULL;
-  control_impl_p = dynamic_cast<ISTREAM_CONTROL_T*> (module_p->reader ());
+  typename inherited::ISTREAM_CONTROL_T* control_impl_p = NULL;
+  control_impl_p =
+    dynamic_cast<typename inherited::ISTREAM_CONTROL_T*> (module_p->reader ());
   if (!control_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -291,12 +292,9 @@ IRC_Client_Stream::ping ()
   } // end IF
 
   // *TODO*
-  try
-  {
+  try {
 //    control_impl->stop ();
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Stream_IStreamControl::stop (module: \"%s\"), returning\n"),
                 module_p->name ()));

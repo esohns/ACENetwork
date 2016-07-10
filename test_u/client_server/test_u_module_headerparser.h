@@ -34,9 +34,14 @@ class Net_Message;
 class Net_SessionMessage;
 
 class Net_Module_HeaderParser
- : public Stream_TaskBaseSynch_T<Common_TimePolicy_t,
-                                 Net_SessionMessage,
-                                 Net_Message>
+ : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 /////////
+                                 Stream_ModuleHandlerConfiguration,
+                                 /////////
+                                 ACE_Message_Block,
+                                 Net_Message,
+                                 Net_SessionMessage>
 {
  public:
   Net_Module_HeaderParser ();
@@ -53,9 +58,14 @@ class Net_Module_HeaderParser
   virtual void dump_state () const;
 
  private:
-  typedef Stream_TaskBaseSynch_T<Common_TimePolicy_t,
-                                 Net_SessionMessage,
-                                 Net_Message> inherited;
+  typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 /////////
+                                 Stream_ModuleHandlerConfiguration,
+                                 /////////
+                                 ACE_Message_Block,
+                                 Net_Message,
+                                 Net_SessionMessage> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Module_HeaderParser (const Net_Module_HeaderParser&));
   ACE_UNIMPLEMENTED_FUNC (Net_Module_HeaderParser& operator= (const Net_Module_HeaderParser&));

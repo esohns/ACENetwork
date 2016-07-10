@@ -43,7 +43,7 @@ Net_Stream::Net_Stream (const std::string& name_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::Net_Stream"));
 
-  // remember the "owned" ones...
+  // remember the 'owned' ones
   // *TODO*: clean this up
   // *NOTE*: one problem is that all modules which have NOT enqueued onto the
   //         stream (e.g. because initialize() failed...) need to be explicitly
@@ -54,7 +54,7 @@ Net_Stream::Net_Stream (const std::string& name_in)
   inherited::modules_.push_front (&protocolHandler_);
 
   // *TODO* fix ACE bug: modules should initialize their "next" member to NULL
-  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::modules_.begin ();
+  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
        iterator != inherited::modules_.end ();
        iterator++)
      (*iterator)->next (NULL);
@@ -110,64 +110,64 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in,
   // ---------------------------------------------------------------------------
 
   // ******************* Protocol Handler ************************
-  protocolHandler_.initialize (configuration_in.moduleConfiguration_2);
-  Net_Module_ProtocolHandler* protocolHandler_impl_p =
-    dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
-  if (!protocolHandler_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_ProtocolHandler> failed, aborting\n")));
-    return false;
-  } // end IF
-  if (!protocolHandler_impl_p->initialize (configuration_in.messageAllocator,
-                                           configuration_in.protocolConfiguration->pingInterval,
-                                           configuration_in.protocolConfiguration->pingAutoAnswer,
-                                           configuration_in.protocolConfiguration->printPongMessages)) // print ('.') for received "pong"s...
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                protocolHandler_.name ()));
-    return false;
-  } // end IF
+  //protocolHandler_.initialize (configuration_in.moduleConfiguration_2);
+  //Net_Module_ProtocolHandler* protocolHandler_impl_p =
+  //  dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
+  //if (!protocolHandler_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Net_Module_ProtocolHandler> failed, aborting\n")));
+  //  return false;
+  //} // end IF
+  //if (!protocolHandler_impl_p->initialize (configuration_in.messageAllocator,
+  //                                         configuration_in.protocolConfiguration->pingInterval,
+  //                                         configuration_in.protocolConfiguration->pingAutoAnswer,
+  //                                         configuration_in.protocolConfiguration->printPongMessages)) // print ('.') for received "pong"s...
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              protocolHandler_.name ()));
+  //  return false;
+  //} // end IF
 
   // ******************* Runtime Statistics ************************
-  runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
-  Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p =
-    dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
-  if (!runtimeStatistic_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_RuntimeStatistic> failed, aborting\n")));
-    return false;
-  } // end IF
-  if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
-                                            true,                                        // push statistic messages ?
-                                            configuration_in.printFinalReport,           // print final report ?
-                                            configuration_in.messageAllocator))          // message allocator handle
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                runtimeStatistic_.name ()));
-    return false;
-  } // end IF
+  //runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
+  //Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p =
+  //  dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
+  //if (!runtimeStatistic_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Net_Module_RuntimeStatistic> failed, aborting\n")));
+  //  return false;
+  //} // end IF
+  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
+  //                                          true,                                        // push statistic messages ?
+  //                                          configuration_in.printFinalReport,           // print final report ?
+  //                                          configuration_in.messageAllocator))          // message allocator handle
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              runtimeStatistic_.name ()));
+  //  return false;
+  //} // end IF
 
   // ******************* Header Parser ************************
-  headerParser_.initialize (*configuration_in.moduleConfiguration);
-  Net_Module_HeaderParser* headerParser_impl_p =
-    dynamic_cast<Net_Module_HeaderParser*> (headerParser_.writer ());
-  if (!headerParser_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_HeaderParser> failed, aborting\n")));
-    return false;
-  } // end IF
-  if (!headerParser_impl_p->initialize ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                headerParser_.name ()));
-    return false;
-  } // end IF
+  //headerParser_.initialize (*configuration_in.moduleConfiguration);
+  //Net_Module_HeaderParser* headerParser_impl_p =
+  //  dynamic_cast<Net_Module_HeaderParser*> (headerParser_.writer ());
+  //if (!headerParser_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Net_Module_HeaderParser> failed, aborting\n")));
+  //  return false;
+  //} // end IF
+  //if (!headerParser_impl_p->initialize ())
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              headerParser_.name ()));
+  //  return false;
+  //} // end IF
 
   // ******************* Socket Handler ************************
   socketHandler_.initialize (configuration_in.moduleConfiguration_2);
@@ -210,7 +210,7 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in,
   // -------------------------------------------------------------
 
   // set (session) message allocator
-  inherited::allocator_ = configuration_in.messageAllocator;
+  //inherited::allocator_ = configuration_in.messageAllocator;
 
   // OK: all went well
   inherited::isInitialized_ = true;
@@ -274,12 +274,9 @@ Net_Stream::collect (Net_RuntimeStatistic_t& data_out)
 
   // delegate to the statistics module...
   bool result_2 = false;
-  try
-  {
+  try {
     result_2 = runtimeStatistic_impl->collect (data_out);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
   }

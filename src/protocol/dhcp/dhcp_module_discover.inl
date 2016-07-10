@@ -34,24 +34,25 @@
 #include "dhcp_defines.h"
 #include "dhcp_tools.h"
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
-DHCP_Module_Discover_T<TaskSynchType,
+DHCP_Module_Discover_T<SynchStrategyType,
                        TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
                        SessionMessageType,
-                       ProtocolMessageType,
                        ConfigurationType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
                        ConnectorType>::DHCP_Module_Discover_T ()
  : inherited ()
- , configuration_ (NULL)
  , sessionData_ (NULL)
  , broadcastConnectionHandle_ (ACE_INVALID_HANDLE)
  , connectionHandle_ (ACE_INVALID_HANDLE)
@@ -63,18 +64,20 @@ DHCP_Module_Discover_T<TaskSynchType,
 
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
-DHCP_Module_Discover_T<TaskSynchType,
+DHCP_Module_Discover_T<SynchStrategyType,
                        TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
                        SessionMessageType,
-                       ProtocolMessageType,
                        ConfigurationType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
@@ -136,43 +139,46 @@ continue_:
   ACE_NOTREACHED (return;)
 }
 
-template <typename TaskSynchType,
+//template <typename SynchStrategyType,
+//          typename TimePolicyType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename ConfigurationType,
+//          typename ConnectionManagerType,
+//          typename ConnectorTypeBcast,
+//          typename ConnectorType>
+//const ConfigurationType&
+//DHCP_Module_Discover_T<SynchStrategyType,
+//                       TimePolicyType,
+//                       SessionMessageType,
+//                       DataMessageType,
+//                       ConfigurationType,
+//                       ConnectionManagerType,
+//                       ConnectorTypeBcast,
+//                       ConnectorType>::get () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::get"));
+//
+//  ACE_ASSERT (configuration_);
+//
+//  return *configuration_;
+//}
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType,
-          typename ConnectionManagerType,
-          typename ConnectorTypeBcast,
-          typename ConnectorType>
-const ConfigurationType&
-DHCP_Module_Discover_T<TaskSynchType,
-                       TimePolicyType,
-                       SessionMessageType,
-                       ProtocolMessageType,
-                       ConfigurationType,
-                       ConnectionManagerType,
-                       ConnectorTypeBcast,
-                       ConnectorType>::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::get"));
-
-  ACE_ASSERT (configuration_);
-
-  return *configuration_;
-}
-template <typename TaskSynchType,
-          typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
 bool
-DHCP_Module_Discover_T<TaskSynchType,
+DHCP_Module_Discover_T<SynchStrategyType,
                        TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
                        SessionMessageType,
-                       ProtocolMessageType,
                        ConfigurationType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
@@ -208,23 +214,25 @@ DHCP_Module_Discover_T<TaskSynchType,
   return initialized_;
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
 void
-DHCP_Module_Discover_T<TaskSynchType,
+DHCP_Module_Discover_T<SynchStrategyType,
                        TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
                        SessionMessageType,
-                       ProtocolMessageType,
                        ConfigurationType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
-                       ConnectorType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                       ConnectorType>::handleDataMessage (DataMessageType*& message_inout,
                                                           bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::handleDataMessage"));
@@ -239,7 +247,7 @@ DHCP_Module_Discover_T<TaskSynchType,
   ACE_ASSERT (configuration_->socketConfiguration);
   ACE_ASSERT (configuration_->socketHandlerConfiguration);
 
-  const typename ProtocolMessageType::DATA_T& data_r = message_inout->get ();
+  const typename DataMessageType::DATA_T& data_r = message_inout->get ();
 
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
     const_cast<typename SessionMessageType::DATA_T::DATA_T&> (sessionData_->get ());
@@ -395,7 +403,7 @@ continue_:
   if (data_r.xid != session_data_r.xid)
     return; // done
 
-  ProtocolMessageType* message_p =
+  DataMessageType* message_p =
       allocateMessage (configuration_->socketHandlerConfiguration->PDUSize);
   if (!message_p)
   {
@@ -465,22 +473,25 @@ continue_:
 
     return;
   } // end IF
-  isocket_connection_p->send (message_p);
+  ACE_Message_Block* message_block_p = message_p;
+  isocket_connection_p->send (message_block_p);
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
 void
-DHCP_Module_Discover_T<TaskSynchType,
+DHCP_Module_Discover_T<SynchStrategyType,
                        TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
                        SessionMessageType,
-                       ProtocolMessageType,
                        ConfigurationType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
@@ -781,19 +792,21 @@ continue_3:
   } // end SWITCH
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
-ProtocolMessageType*
-DHCP_Module_Discover_T<TaskSynchType,
+DataMessageType*
+DHCP_Module_Discover_T<SynchStrategyType,
                        TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
                        SessionMessageType,
-                       ProtocolMessageType,
                        ConfigurationType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
@@ -803,23 +816,19 @@ DHCP_Module_Discover_T<TaskSynchType,
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->streamConfiguration);
 
   // initialize return value(s)
-  ProtocolMessageType* message_p = NULL;
+  DataMessageType* message_p = NULL;
 
   // *TODO*: remove type inference
-  if (configuration_->streamConfiguration->messageAllocator)
+  if (configuration_->messageAllocator)
   {
 allocate:
-    try
-    {
+    try {
       // *TODO*: remove type inference
       message_p =
-          static_cast<ProtocolMessageType*> (configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
-    }
-    catch (...)
-    {
+          static_cast<DataMessageType*> (configuration_->messageAllocator->malloc (requestedSize_in));
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), continuing\n"),
                   requestedSize_in));
@@ -828,43 +837,45 @@ allocate:
 
     // keep retrying ?
     if (!message_p &&
-        !configuration_->streamConfiguration->messageAllocator->block ())
+        !configuration_->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
     ACE_NEW_NORETURN (message_p,
-                      ProtocolMessageType (requestedSize_in));
+                      DataMessageType (requestedSize_in));
   if (!message_p)
   {
-    if (configuration_->streamConfiguration->messageAllocator)
+    if (configuration_->messageAllocator)
     {
-      if (configuration_->streamConfiguration->messageAllocator->block ())
+      if (configuration_->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate ProtocolMessageType(%u): \"%m\", aborting\n"),
+                    ACE_TEXT ("failed to allocate data message (%u): \"%m\", aborting\n"),
                     requestedSize_in));
     } // end IF
     else
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate ProtocolMessageType(%u): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to allocate data message (%u): \"%m\", aborting\n"),
                   requestedSize_in));
   } // end IF
 
   return message_p;
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
 ACE_HANDLE
-DHCP_Module_Discover_T<TaskSynchType,
+DHCP_Module_Discover_T<SynchStrategyType,
                        TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
                        SessionMessageType,
-                       ProtocolMessageType,
                        ConfigurationType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
@@ -1037,10 +1048,11 @@ error:
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -1049,10 +1061,11 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 DHCP_Module_DiscoverH_T<LockType,
-                        TaskSynchType,
+                        SynchStrategyType,
                         TimePolicyType,
+                        ControlMessageType,
+                        DataMessageType,
                         SessionMessageType,
-                        ProtocolMessageType,
                         ConfigurationType,
                         StreamControlType,
                         StreamNotificationType,
@@ -1071,10 +1084,11 @@ DHCP_Module_DiscoverH_T<LockType,
 }
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -1083,10 +1097,11 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 DHCP_Module_DiscoverH_T<LockType,
-                        TaskSynchType,
+                        SynchStrategyType,
                         TimePolicyType,
+                        ControlMessageType,
+                        DataMessageType,
                         SessionMessageType,
-                        ProtocolMessageType,
                         ConfigurationType,
                         StreamControlType,
                         StreamNotificationType,
@@ -1100,10 +1115,11 @@ DHCP_Module_DiscoverH_T<LockType,
 }
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -1113,10 +1129,11 @@ template <typename LockType,
           typename StatisticContainerType>
 bool
 DHCP_Module_DiscoverH_T<LockType,
-                        TaskSynchType,
+                        SynchStrategyType,
                         TimePolicyType,
+                        ControlMessageType,
+                        DataMessageType,
                         SessionMessageType,
-                        ProtocolMessageType,
                         ConfigurationType,
                         StreamControlType,
                         StreamNotificationType,
@@ -1151,10 +1168,11 @@ DHCP_Module_DiscoverH_T<LockType,
 }
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -1164,17 +1182,18 @@ template <typename LockType,
           typename StatisticContainerType>
 void
 DHCP_Module_DiscoverH_T<LockType,
-                        TaskSynchType,
+                        SynchStrategyType,
                         TimePolicyType,
+                        ControlMessageType,
+                        DataMessageType,
                         SessionMessageType,
-                        ProtocolMessageType,
                         ConfigurationType,
                         StreamControlType,
                         StreamNotificationType,
                         StreamStateType,
                         SessionDataType,
                         SessionDataContainerType,
-                        StatisticContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                        StatisticContainerType>::handleDataMessage (DataMessageType*& message_inout,
                                                                     bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::handleDataMessage"));
@@ -1184,10 +1203,11 @@ DHCP_Module_DiscoverH_T<LockType,
 }
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -1197,10 +1217,11 @@ template <typename LockType,
           typename StatisticContainerType>
 void
 DHCP_Module_DiscoverH_T<LockType,
-                        TaskSynchType,
+                        SynchStrategyType,
                         TimePolicyType,
+                        ControlMessageType,
+                        DataMessageType,
                         SessionMessageType,
-                        ProtocolMessageType,
                         ConfigurationType,
                         StreamControlType,
                         StreamNotificationType,
@@ -1241,10 +1262,11 @@ DHCP_Module_DiscoverH_T<LockType,
 }
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -1254,10 +1276,11 @@ template <typename LockType,
           typename StatisticContainerType>
 bool
 DHCP_Module_DiscoverH_T<LockType,
-                        TaskSynchType,
+                        SynchStrategyType,
                         TimePolicyType,
+                        ControlMessageType,
+                        DataMessageType,
                         SessionMessageType,
-                        ProtocolMessageType,
                         ConfigurationType,
                         StreamControlType,
                         StreamNotificationType,
@@ -1288,10 +1311,10 @@ DHCP_Module_DiscoverH_T<LockType,
 }
 
 //template <typename LockType,
-//          typename TaskSynchType,
+//          typename SynchStrategyType,
 //          typename TimePolicyType,
 //          typename SessionMessageType,
-//          typename ProtocolMessageType,
+//          typename DataMessageType,
 //          typename ConfigurationType,
 //          typename StreamStateType,
 //          typename SessionDataType,
@@ -1299,10 +1322,10 @@ DHCP_Module_DiscoverH_T<LockType,
 //          typename StatisticContainerType>
 //void
 //DHCP_Module_DiscoverH_T<LockType,
-//                        TaskSynchType,
+//                        SynchStrategyType,
 //                        TimePolicyType,
 //                        SessionMessageType,
-//                        ProtocolMessageType,
+//                        DataMessageType,
 //                        ConfigurationType,
 //                        StreamStateType,
 //                        SessionDataType,
@@ -1317,10 +1340,10 @@ DHCP_Module_DiscoverH_T<LockType,
 //}
 
 //template <typename LockType,
-//          typename TaskSynchType,
+//          typename SynchStrategyType,
 //          typename TimePolicyType,
 //          typename SessionMessageType,
-//          typename ProtocolMessageType,
+//          typename DataMessageType,
 //          typename ConfigurationType,
 //          typename StreamStateType,
 //          typename SessionDataType,
@@ -1328,10 +1351,10 @@ DHCP_Module_DiscoverH_T<LockType,
 //          typename StatisticContainerType>
 //bool
 //DHCP_Module_DiscoverH_T<LockType,
-//                        TaskSynchType,
+//                        SynchStrategyType,
 //                        TimePolicyType,
 //                        SessionMessageType,
-//                        ProtocolMessageType,
+//                        DataMessageType,
 //                        ConfigurationType,
 //                        StreamStateType,
 //                        SessionDataType,

@@ -35,17 +35,25 @@
 // forward declaration(s)
 class Stream_IAllocator;
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
+template <typename SynchStrategyType,
+          typename TimePolicyType,
           ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          ////////////////////////////////
           typename RecordType>
 class HTTP_Module_Parser_T
- : public Stream_TaskBaseAsynch_T<TimePolicyType,
-                                  SessionMessageType,
-                                  ProtocolMessageType>
+ : public Stream_TaskBaseAsynch_T<SynchStrategyType,
+                                  TimePolicyType,
+                                  ////////
+                                  ConfigurationType,
+                                  ////////
+                                  ControlMessageType,
+                                  DataMessageType,
+                                  SessionMessageType>
 {
  public:
   HTTP_Module_Parser_T ();
@@ -55,7 +63,7 @@ class HTTP_Module_Parser_T
   virtual bool initialize (const ConfigurationType&);
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
                                   bool&);                // return value: pass message downstream ?
 
   // catch the session ID...
@@ -66,19 +74,24 @@ class HTTP_Module_Parser_T
   typename SessionMessageType::DATA_T::DATA_T* sessionData_;
 
  private:
-  typedef Stream_TaskBaseAsynch_T<TimePolicyType,
-                                  SessionMessageType,
-                                  ProtocolMessageType> inherited;
+  typedef Stream_TaskBaseAsynch_T<SynchStrategyType,
+                                  TimePolicyType,
+                                  ////////
+                                  ConfigurationType,
+                                  ////////
+                                  ControlMessageType,
+                                  DataMessageType,
+                                  SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T (const HTTP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T& operator= (const HTTP_Module_Parser_T&))
 
   // convenient types
-  typedef typename ProtocolMessageType::DATA_T DATA_CONTAINER_T;
-  typedef typename ProtocolMessageType::DATA_T::DATA_T DATA_T;
+  typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
+  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
   // helper methods
-  ProtocolMessageType* allocateMessage (unsigned int); // requested size
+  DataMessageType* allocateMessage (unsigned int); // requested size
 
   Stream_IAllocator*                           allocator_;
 
@@ -87,7 +100,7 @@ class HTTP_Module_Parser_T
   bool                                         debugParser_;
   HTTP_ParserDriver<RecordType,
                     SessionMessageType>        driver_;
-  ProtocolMessageType*                         headFragment_;
+  DataMessageType*                             headFragment_;
   bool                                         isDriverInitialized_;
   //ACE_SYNCH_MUTEX                       lock_;
   //ACE_SYNCH_CONDITION                   condition_;
@@ -103,8 +116,10 @@ template <typename LockType,
           ////////////////////////////////
           typename TaskSynchType,
           typename TimePolicyType,
+          ////////////////////////////////
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
@@ -123,8 +138,10 @@ class HTTP_Module_ParserH_T
                                       ////
                                       TaskSynchType,
                                       TimePolicyType,
+                                      ////
+                                      ControlMessageType,
+                                      DataMessageType,
                                       SessionMessageType,
-                                      ProtocolMessageType,
                                       ////
                                       ConfigurationType,
                                       ////
@@ -148,8 +165,9 @@ class HTTP_Module_ParserH_T
   using Stream_HeadModuleTaskBase_T<LockType,
                                     TaskSynchType,
                                     TimePolicyType,
+                                    ControlMessageType,
+                                    DataMessageType,
                                     SessionMessageType,
-                                    ProtocolMessageType,
                                     ConfigurationType,
                                     StreamControlType,
                                     StreamNotificationType,
@@ -162,7 +180,7 @@ class HTTP_Module_ParserH_T
   virtual bool initialize (const ConfigurationType&);
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
                                   bool&);                // return value: pass message downstream ?
 
   // catch the session ID...
@@ -175,15 +193,17 @@ class HTTP_Module_ParserH_T
   //virtual void report () const;
 
  protected:
-  SessionDataType*     sessionData_;
+  SessionDataType*  sessionData_;
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
                                       ////
                                       TaskSynchType,
                                       TimePolicyType,
+                                      ////
+                                      ControlMessageType,
+                                      DataMessageType,
                                       SessionMessageType,
-                                      ProtocolMessageType,
                                       ////
                                       ConfigurationType,
                                       ////
@@ -201,24 +221,24 @@ class HTTP_Module_ParserH_T
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T& operator= (const HTTP_Module_ParserH_T&))
 
   // convenience types
-  typedef typename ProtocolMessageType::DATA_T DATA_CONTAINER_T;
-  typedef typename ProtocolMessageType::DATA_T::DATA_T DATA_T;
+  typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
+  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
   typedef HTTP_ParserDriver<RecordType,
                             SessionMessageType> PARSER_T;
 
   // helper methods
   //bool putStatisticMessage (const StatisticContainerType&) const;
-  //ProtocolMessageType* allocateMessage (unsigned int); // requested size
+  //DataMessageType* allocateMessage (unsigned int); // requested size
 
   // driver
-  bool                 debugScanner_;
-  bool                 debugParser_;
-  PARSER_T             driver_;
-  ProtocolMessageType* headFragment_;
-  bool                 isDriverInitialized_;
+  bool              debugScanner_;
+  bool              debugParser_;
+  PARSER_T          driver_;
+  DataMessageType*  headFragment_;
+  bool              isDriverInitialized_;
 
-  bool                 crunchMessages_;
-  DATA_CONTAINER_T*    dataContainer_;
+  bool              crunchMessages_;
+  DATA_CONTAINER_T* dataContainer_;
 };
 
 // include template implementation

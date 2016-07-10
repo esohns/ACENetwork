@@ -118,7 +118,7 @@ Net_SocketConnectionBase_T<HandlerType,
                            StreamStatusType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
-                           UserDataType>::send (typename StreamType::PROTOCOL_DATA_T*& message_inout)
+                           UserDataType>::send (ACE_Message_Block*& message_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::send"));
 
@@ -771,7 +771,7 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
                                  StreamStatusType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
-                                 UserDataType>::send (typename StreamType::PROTOCOL_DATA_T*& message_inout)
+                                 UserDataType>::send (ACE_Message_Block*& message_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::send"));
 

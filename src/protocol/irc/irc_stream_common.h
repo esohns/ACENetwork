@@ -45,12 +45,13 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 class IRC_Stream_T;
 struct IRC_StreamConfiguration;
 
-typedef Stream_IModuleHandler_T<IRC_ModuleHandlerConfiguration> IRC_IModuleHandler_t;
+//typedef Stream_IModuleHandler_T<IRC_ModuleHandlerConfiguration> IRC_IModuleHandler_t;
 typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Common_TimePolicy_t,
                          Stream_ModuleConfiguration,
@@ -115,7 +116,8 @@ typedef IRC_Stream_T<IRC_StreamState,
                      IRC_ModuleHandlerConfiguration,
                      IRC_Stream_SessionData,
                      IRC_Stream_SessionData_t,
-                     IRC_SessionMessage,
-                     IRC_Message> IRC_Stream_t;
+                     ACE_Message_Block,
+                     IRC_Message,
+                     IRC_SessionMessage> IRC_Stream_t;
 
 #endif

@@ -43,21 +43,25 @@
 class ACE_Message_Block;
 class ACE_Time_Value;
 class Stream_IAllocator;
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType> class Net_Module_Statistic_WriterTask_T;
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 class Net_Module_Statistic_ReaderTask_T
- : public ACE_Thru_Task<TaskSynchType,
+ : public ACE_Thru_Task<SynchStrategyType,
                         TimePolicyType>
 {
  public:
@@ -68,38 +72,55 @@ class Net_Module_Statistic_ReaderTask_T
                    ACE_Time_Value* = NULL); // time
 
  private:
-  typedef ACE_Thru_Task<TaskSynchType,
+  typedef ACE_Thru_Task<SynchStrategyType,
                         TimePolicyType> inherited;
-  typedef Net_Module_Statistic_WriterTask_T<TaskSynchType,
+  typedef Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                             TimePolicyType,
+
+                                            ConfigurationType,
+
+                                            ControlMessageType,
+                                            DataMessageType,
                                             SessionMessageType,
-                                            ProtocolMessageType,
+
                                             ProtocolCommandType,
                                             StatisticContainerType> WRITER_TASK_T;
-  typedef ProtocolMessageType Net_MessageType_t;
+  typedef DataMessageType Net_MessageType_t;
   typedef ProtocolCommandType Net_CommandType_t;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T (const Net_Module_Statistic_ReaderTask_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T& operator= (const Net_Module_Statistic_ReaderTask_T&))
 };
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 class Net_Module_Statistic_WriterTask_T
- : public Stream_TaskBaseSynch_T<TimePolicyType,
-                                 SessionMessageType,
-                                 ProtocolMessageType>
+ : public Stream_TaskBaseSynch_T<SynchStrategyType,
+                                 TimePolicyType,
+                                 /////////
+                                 ConfigurationType,
+                                 /////////
+                                 ControlMessageType,
+                                 DataMessageType,
+                                 SessionMessageType>
  , public Common_ICounter
  , public Common_IStatistic_T<StatisticContainerType>
 {
- friend class Net_Module_Statistic_ReaderTask_T<TaskSynchType,
+ friend class Net_Module_Statistic_ReaderTask_T<SynchStrategyType,
                                                 TimePolicyType,
+
+                                                ConfigurationType,
+
+                                                ControlMessageType,
+                                                DataMessageType,
                                                 SessionMessageType,
-                                                ProtocolMessageType,
+
                                                 ProtocolCommandType,
                                                 StatisticContainerType>;
  public:
@@ -112,7 +133,7 @@ class Net_Module_Statistic_WriterTask_T
                    const Stream_IAllocator* = NULL);                               // report cache usage ?
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
                                   bool&);            // return value: pass message downstream ?
 
   // implement this so we can print overall statistics after session completes...
@@ -128,9 +149,14 @@ class Net_Module_Statistic_WriterTask_T
   virtual void report () const;
 
  private:
-  typedef Stream_TaskBaseSynch_T<TimePolicyType,
-                                 SessionMessageType,
-                                 ProtocolMessageType> inherited;
+  typedef Stream_TaskBaseSynch_T<SynchStrategyType,
+                                 TimePolicyType,
+                                 /////////
+                                 ConfigurationType,
+                                 /////////
+                                 ControlMessageType,
+                                 DataMessageType,
+                                 SessionMessageType> inherited;
 
   // message type counters
 //  typedef std::set<ProtocolCommandType> Net_Messages_t;
@@ -166,16 +192,16 @@ class Net_Module_Statistic_WriterTask_T
   unsigned int                      numInboundMessages_;
   unsigned int                      numOutboundMessages_;
   unsigned int                      numSessionMessages_;
-  // used to compute message throughput...
+  // used to compute message throughput
   unsigned int                      messageCounter_;
   // *NOTE: support asynchronous collecting/reporting of data...
   unsigned int                      lastMessagesPerSecondCount_;
 
   float                             numInboundBytes_;
   float                             numOutboundBytes_;
-  // used to compute data throughput...
+  // used to compute data throughput
   unsigned int                      byteCounter_;
-  // *NOTE: support asynchronous collecting/reporting of data...
+  // *NOTE: support asynchronous collecting/reporting of data
   unsigned int                      lastBytesPerSecondCount_;
 
   // *MESSAGE TYPE STATS*

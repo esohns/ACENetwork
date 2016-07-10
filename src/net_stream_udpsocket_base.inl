@@ -681,11 +681,11 @@ Net_StreamUDPSocketBase_T<HandlerType,
     } // end IF
 
     currentWriteBuffer_ =
-        dynamic_cast<typename StreamType::PROTOCOL_DATA_T*> (message_block_p);
+        dynamic_cast<typename StreamType::MESSAGE_T*> (message_block_p);
     if (!currentWriteBuffer_)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to dynamic_cast<typename StreamType::PROTOCOL_DATA_T*>(%@): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to dynamic_cast<typename StreamType::MESSAGE_T*>(%@): \"%m\", aborting\n"),
                   message_block_p));
       goto clean;
     } // end IF
@@ -2135,11 +2135,11 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
     } // end IF
 
     currentWriteBuffer_ =
-        dynamic_cast<typename StreamType::PROTOCOL_DATA_T*> (message_block_p);
+        dynamic_cast<typename StreamType::MESSAGE_T*> (message_block_p);
     if (!currentWriteBuffer_)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to dynamic_cast<typename StreamType::PROTOCOL_DATA_T*>(%@): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to dynamic_cast<typename StreamType::MESSAGE_T*>(%@): \"%m\", aborting\n"),
                   message_block_p));
       goto clean;
     } // end IF

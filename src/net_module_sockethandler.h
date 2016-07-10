@@ -34,8 +34,9 @@ class Stream_IAllocator;
 
 template <typename LockType,                 // connection stream state machine lock
           ////////////////////////////////
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
@@ -54,8 +55,9 @@ class Net_Module_SocketHandler_T
                                       ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
+                                      ControlMessageType,
+                                      DataMessageType,
                                       SessionMessageType,
-                                      ProtocolMessageType,
                                       ////
                                       ConfigurationType,
                                       ////
@@ -78,8 +80,9 @@ class Net_Module_SocketHandler_T
   using Stream_HeadModuleTaskBase_T<LockType,
                                     ACE_MT_SYNCH,
                                     Common_TimePolicy_t,
+                                    ControlMessageType,
+                                    DataMessageType,
                                     SessionMessageType,
-                                    ProtocolMessageType,
                                     ConfigurationType,
                                     StreamControlType,
                                     StreamNotificationType,
@@ -98,8 +101,8 @@ class Net_Module_SocketHandler_T
 //  unsigned int getSessionID () const;
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
-                                  bool&);                // return value: pass message downstream ?
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
@@ -113,8 +116,9 @@ class Net_Module_SocketHandler_T
                                       ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
+                                      ControlMessageType,
+                                      DataMessageType,
                                       SessionMessageType,
-                                      ProtocolMessageType,
                                       ////
                                       ConfigurationType,
                                       ////
@@ -132,22 +136,23 @@ class Net_Module_SocketHandler_T
   ACE_UNIMPLEMENTED_FUNC (Net_Module_SocketHandler_T& operator= (const Net_Module_SocketHandler_T&))
 
   // helper methods
-  bool bisectMessages (ProtocolMessageType*&); // return value: complete message (chain)
+  bool bisectMessages (DataMessageType*&); // return value: complete message (chain)
 //   Net_Message* allocateMessage(const unsigned int&); // requested size
   bool putStatisticMessage (const StatisticContainerType&) const; // statistics info
 
   // protocol
-  ProtocolMessageType* currentBuffer_;
-  ProtocolMessageType* currentMessage_;
-  unsigned int         currentMessageLength_;
+  DataMessageType* currentBuffer_;
+  DataMessageType* currentMessage_;
+  unsigned int     currentMessageLength_;
 };
 
 //////////////////////////////////////////
 
 template <typename LockType,
           ////////////////////////////////
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
@@ -164,8 +169,9 @@ class Net_Module_UDPSocketHandler_T
                                       ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
+                                      ControlMessageType,
+                                      DataMessageType,
                                       SessionMessageType,
-                                      ProtocolMessageType,
                                       ////
                                       ConfigurationType,
                                       ////
@@ -190,8 +196,8 @@ class Net_Module_UDPSocketHandler_T
 //  unsigned int getSessionID () const;
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
-                                  bool&);                // return value: pass message downstream ?
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
@@ -205,8 +211,9 @@ class Net_Module_UDPSocketHandler_T
                                       ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
+                                      ControlMessageType,
+                                      DataMessageType,
                                       SessionMessageType,
-                                      ProtocolMessageType,
                                       ////
                                       ConfigurationType,
                                       ////
@@ -224,7 +231,7 @@ class Net_Module_UDPSocketHandler_T
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T& operator= (const Net_Module_UDPSocketHandler_T&))
 
   //// helper methods
-  //bool putStatisticsMessage (const StatisticContainerType&) const; // statistics info
+  //bool putStatisticMessage (const StatisticContainerType&) const; // statistics info
 };
 
 // include template implementation

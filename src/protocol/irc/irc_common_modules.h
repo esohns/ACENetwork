@@ -34,7 +34,7 @@
 #include "irc_configuration.h"
 //#include "irc_module_bisector.h"
 #include "irc_module_parser.h"
-//#include "irc_module_streamer.h"
+#include "irc_module_streamer.h"
 //#include "irc_stream_common.h"
 
 // forward declarations
@@ -45,30 +45,48 @@ class IRC_Message;
 
 typedef IRC_Module_Parser_T<ACE_MT_SYNCH,
                             Common_TimePolicy_t,
-                            IRC_SessionMessage,
-                            IRC_Message> IRC_Module_Parser;
+                            //////////////
+                            IRC_ModuleHandlerConfiguration,
+                            //////////////
+                            ACE_Message_Block,
+                            IRC_Message,
+                            IRC_SessionMessage> IRC_Module_Parser;
 
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             IRC_SessionMessage,
+
+                                             IRC_ModuleHandlerConfiguration,
+
+                                             ACE_Message_Block,
                                              IRC_Message,
+                                             IRC_SessionMessage,
+
                                              IRC_CommandType_t,
                                              IRC_RuntimeStatistic_t,
                                              IRC_Stream_SessionData,
                                              IRC_Stream_SessionData_t> IRC_Module_Statistic_ReaderTask_t;
 typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             IRC_SessionMessage,
+
+                                             IRC_ModuleHandlerConfiguration,
+
+                                             ACE_Message_Block,
                                              IRC_Message,
+                                             IRC_SessionMessage,
+
                                              IRC_CommandType_t,
                                              IRC_RuntimeStatistic_t,
                                              IRC_Stream_SessionData,
                                              IRC_Stream_SessionData_t> IRC_Module_Statistic_WriterTask_t;
 
-//typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
-//                              Common_TimePolicy_t,
-//                              IRC_SessionMessage,
-//                              IRC_Message> IRC_Module_Streamer_t;
+typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
+                            Common_TimePolicy_t,
+                            //////////////
+                            IRC_ModuleHandlerConfiguration,
+                            //////////////
+                            ACE_Message_Block,
+                            IRC_Message,
+                            IRC_SessionMessage> IRC_Module_Streamer_t;
 //typedef IRC_Module_Bisector_T<ACE_SYNCH_MUTEX,
 //                              ///////////
 //                              ACE_MT_SYNCH,

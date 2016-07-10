@@ -133,7 +133,7 @@ class Net_ISocketConnection_T
 
   // *TODO*: remove type inference
   // *IMPORTANT NOTE*: fire-and-forget API
-  virtual void send (typename StreamType::PROTOCOL_DATA_T*&) = 0;
+  virtual void send (ACE_Message_Block*&) = 0;
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL) = 0; // timeout (absolute) ? : block
 

@@ -112,7 +112,9 @@ struct DHCP_ModuleHandlerConfiguration
    : Stream_ModuleHandlerConfiguration ()
    //////////////////////////////////////
 //   , connection (NULL)
+   , printFinalReport (true)
    , printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)
+   , pushStatisticMessages (true)
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)
   {
@@ -124,9 +126,11 @@ struct DHCP_ModuleHandlerConfiguration
 
 //  Test_U_IConnection_t*       connection; // UDP target/net IO module
 
-  bool                        printProgressDot;  // print dot '.' (stdlog) for received messages
-  DHCP_ProtocolConfiguration* protocolConfiguration;
+  bool                        printFinalReport;
+  bool                        printProgressDot; // file writer module
+  bool                        pushStatisticMessages;
 
+  DHCP_ProtocolConfiguration* protocolConfiguration;
   DHCP_StreamConfiguration*   streamConfiguration;
 };
 

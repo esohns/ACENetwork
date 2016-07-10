@@ -51,14 +51,23 @@ YY_DECL;
 // forward declaration(s)
 class Stream_IAllocator;
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          ////////////////////////////////
+          typename ConfigurationType,
+          ////////////////////////////////
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 class IRC_Module_Parser_T
- : public Stream_TaskBaseSynch_T<TimePolicyType,
-                                 SessionMessageType,
-                                 ProtocolMessageType>
+ : public Stream_TaskBaseSynch_T<SynchStrategyType,
+                                 TimePolicyType,
+                                 /////////
+                                 ConfigurationType,
+                                 /////////
+                                 ControlMessageType,
+                                 DataMessageType,
+                                 SessionMessageType>
 {
  public:
   IRC_Module_Parser_T ();
@@ -71,19 +80,24 @@ class IRC_Module_Parser_T
                    bool = IRC_DEFAULT_YACC_TRACE);     // debug parser ?
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
-                                  bool&);                // return value: pass message downstream ?
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
 
  private:
-  typedef Stream_TaskBaseSynch_T<TimePolicyType,
-                                 SessionMessageType,
-                                 ProtocolMessageType> inherited;
+  typedef Stream_TaskBaseSynch_T<SynchStrategyType,
+                                 TimePolicyType,
+                                 /////////
+                                 ConfigurationType,
+                                 /////////
+                                 ControlMessageType,
+                                 DataMessageType,
+                                 SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T (const IRC_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T& operator= (const IRC_Module_Parser_T&))
 
   // helper methods
-  ProtocolMessageType* allocateMessage (unsigned int); // requested size
+  DataMessageType* allocateMessage (unsigned int); // requested size
 
   // message allocator
   Stream_IAllocator* allocator_;

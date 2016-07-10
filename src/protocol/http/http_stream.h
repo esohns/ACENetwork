@@ -51,8 +51,10 @@ template <typename StreamStateType,
           ////////////////////////////////
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          ////////////////////////////////
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 class HTTP_Stream_T
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
                         //////////////////
@@ -73,8 +75,10 @@ class HTTP_Stream_T
                         //////////////////
                         SessionDataType,
                         SessionDataContainerType,
-                        SessionMessageType,
-                        ProtocolMessageType>
+                        //////////////////
+                        ControlMessageType,
+                        DataMessageType,
+                        SessionMessageType>
 {
  public:
   HTTP_Stream_T (const std::string&); // name
@@ -112,13 +116,19 @@ class HTTP_Stream_T
                         //////////////////
                         SessionDataType,
                         SessionDataContainerType,
-                        SessionMessageType,
-                        ProtocolMessageType> inherited;
+                        //////////////////
+                        ControlMessageType,
+                        DataMessageType,
+                        SessionMessageType> inherited;
 
   typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 SessionMessageType,
-                                 ProtocolMessageType> STREAMER_T;
+                                 /////////
+                                 ConfigurationType,
+                                 /////////
+                                 ControlMessageType,
+                                 DataMessageType,
+                                 SessionMessageType> STREAMER_T;
   //typedef HTTP_Module_Bisector_T<ACE_SYNCH_MUTEX,
   //                               ///////////
   //                               ACE_MT_SYNCH,
@@ -138,8 +148,10 @@ class HTTP_Stream_T
                                 //////////
                                 ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
+                                //////////
+                                ControlMessageType,
+                                DataMessageType,
                                 SessionMessageType,
-                                ProtocolMessageType,
                                 //////////
                                 ModuleHandlerConfigurationType,
                                 //////////
@@ -178,14 +190,18 @@ class HTTP_Stream_T
 
   typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                             Common_TimePolicy_t,
+                                            ModuleHandlerConfigurationType,
+                                            ControlMessageType,
+                                            DataMessageType,
                                             SessionMessageType,
-                                            ProtocolMessageType,
                                             HTTP_Method_t,
                                             HTTP_RuntimeStatistic_t> STATISTIC_READER_T;
   typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                             Common_TimePolicy_t,
+                                            ModuleHandlerConfigurationType,
+                                            ControlMessageType,
+                                            DataMessageType,
                                             SessionMessageType,
-                                            ProtocolMessageType,
                                             HTTP_Method_t,
                                             HTTP_RuntimeStatistic_t> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,

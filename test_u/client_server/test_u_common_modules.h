@@ -39,8 +39,9 @@
 // declare module(s)
 typedef Net_Module_SocketHandler_T<ACE_SYNCH_MUTEX,
                                    ///////
-                                   Net_SessionMessage,
+                                   ACE_Message_Block,
                                    Net_Message,
+                                   Net_SessionMessage,
                                    ///////
                                    Net_ModuleHandlerConfiguration,
                                    ///////
@@ -62,16 +63,20 @@ DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                   // task synch type
 
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             Net_SessionMessage,
+                                             Net_ModuleHandlerConfiguration,
+                                             ACE_Message_Block,
                                              Net_Message,
+                                             Net_SessionMessage,
                                              Net_MessageType_t,
                                              Net_RuntimeStatistic_t,
                                              Net_StreamSessionData,
                                              Net_StreamSessionData_t> Net_Module_Statistic_ReaderTask_t;
 typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             Net_SessionMessage,
+                                             Net_ModuleHandlerConfiguration,
+                                             ACE_Message_Block,
                                              Net_Message,
+                                             Net_SessionMessage,
                                              Net_MessageType_t,
                                              Net_RuntimeStatistic_t,
                                              Net_StreamSessionData,

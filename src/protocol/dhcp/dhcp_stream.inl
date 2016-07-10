@@ -28,16 +28,18 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
-              SessionMessageType,
-              ProtocolMessageType>::DHCP_Stream_T (const std::string& name_in)
+              ControlMessageType,
+              DataMessageType,
+              SessionMessageType>::DHCP_Stream_T (const std::string& name_in)
  : inherited (name_in)
  , marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
              NULL,
@@ -69,7 +71,7 @@ DHCP_Stream_T<StreamStateType,
   //     iterator.next (module_p);
   //     iterator.advance ())
   //  module_p->next (NULL);
-  for (typename inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::availableModules_.begin ();
+  for (Stream_ModuleListIterator_t iterator = inherited::availableModules_.begin ();
        iterator != inherited::availableModules_.end ();
        iterator++)
     (*iterator)->next (NULL);
@@ -81,16 +83,18 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
-              SessionMessageType,
-              ProtocolMessageType>::~DHCP_Stream_T ()
+              ControlMessageType,
+              DataMessageType,
+              SessionMessageType>::~DHCP_Stream_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Stream_T::~DHCP_Stream_T"));
 
@@ -104,8 +108,9 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 bool
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
@@ -113,8 +118,9 @@ DHCP_Stream_T<StreamStateType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
-              SessionMessageType,
-              ProtocolMessageType>::initialize (const ConfigurationType& configuration_in)
+              ControlMessageType,
+              DataMessageType,
+              SessionMessageType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Stream_T::initialize"));
 
@@ -143,31 +149,31 @@ DHCP_Stream_T<StreamStateType,
 
   int result = -1;
   typename inherited::MODULE_T* module_p = NULL;
-  if (configuration_in.notificationStrategy)
-  {
-    module_p = inherited::head ();
-    if (!module_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("no head module found, aborting\n")));
-      return false;
-    } // end IF
-    typename inherited::TASK_T* task_p = module_p->reader ();
-    if (!task_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("no head module reader task found, aborting\n")));
-      return false;
-    } // end IF
-    typename inherited::QUEUE_T* queue_p = task_p->msg_queue ();
-    if (!queue_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("no head module reader task queue found, aborting\n")));
-      return false;
-    } // end IF
-    queue_p->notification_strategy (configuration_in.notificationStrategy);
-  } // end IF
+  //if (configuration_in.notificationStrategy)
+  //{
+  //  module_p = inherited::head ();
+  //  if (!module_p)
+  //  {
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("no head module found, aborting\n")));
+  //    return false;
+  //  } // end IF
+  //  typename inherited::TASK_T* task_p = module_p->reader ();
+  //  if (!task_p)
+  //  {
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("no head module reader task found, aborting\n")));
+  //    return false;
+  //  } // end IF
+  //  typename inherited::QUEUE_T* queue_p = task_p->msg_queue ();
+  //  if (!queue_p)
+  //  {
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("no head module reader task queue found, aborting\n")));
+  //    return false;
+  //  } // end IF
+  //  queue_p->notification_strategy (configuration_in.notificationStrategy);
+  //} // end IF
 
 //  ACE_ASSERT (configuration_in.moduleConfiguration);
 //  configuration_in.moduleConfiguration->streamState = &inherited::state_;
@@ -211,14 +217,6 @@ DHCP_Stream_T<StreamStateType,
                   configuration_in.module->name ()));
       return false;
     } // end IF
-    result = inherited::push (configuration_in.module);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Stream::push(\"%s\"): \"%m\", aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
   } // end IF
 
   // ---------------------------------------------------------------------------
@@ -253,32 +251,32 @@ DHCP_Stream_T<StreamStateType,
   //   } // end IF
 
   // ******************* Runtime Statistics ************************
-  STATISTIC_WRITER_T* runtimeStatistic_impl_p =
-    dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
-  if (!runtimeStatistic_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
-    return false;
-  } // end IF
-  if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
-                                            configuration_in.messageAllocator))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                runtimeStatistic_.name ()));
-    return false;
-  } // end IF
+  //STATISTIC_WRITER_T* runtimeStatistic_impl_p =
+  //  dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
+  //if (!runtimeStatistic_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
+  //  return false;
+  //} // end IF
+  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
+  //                                          configuration_in.messageAllocator))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              runtimeStatistic_.name ()));
+  //  return false;
+  //} // end IF
 
-  // enqueue the module...
-  result = inherited::push (&runtimeStatistic_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-                runtimeStatistic_.name ()));
-    return false;
-  } // end IF
+  //// enqueue the module...
+  //result = inherited::push (&runtimeStatistic_);
+  //if (result == -1)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
+  //              runtimeStatistic_.name ()));
+  //  return false;
+  //} // end IF
 
   //// ******************* Parser ************************
   //PARSER_T* parser_impl_p = NULL;
@@ -312,8 +310,7 @@ DHCP_Stream_T<StreamStateType,
   //} // end IF
 
   // ******************* Marshal ************************
-  PARSER_T* parser_impl_p =
-   dynamic_cast<PARSER_T*> (marshal_.writer ());
+  PARSER_T* parser_impl_p = dynamic_cast<PARSER_T*> (marshal_.writer ());
   if (!parser_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -340,14 +337,14 @@ DHCP_Stream_T<StreamStateType,
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
   marshal_.arg (inherited::sessionData_);
-  result = inherited::push (&marshal_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-                marshal_.name ()));
-    return false;
-  } // end IF
+  //result = inherited::push (&marshal_);
+  //if (result == -1)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
+  //              marshal_.name ()));
+  //  return false;
+  //} // end IF
 
   // set (session) message allocator
   // *TODO*: clean this up ! --> sanity check
@@ -366,8 +363,9 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 bool
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
@@ -375,8 +373,9 @@ DHCP_Stream_T<StreamStateType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
-              SessionMessageType,
-              ProtocolMessageType>::collect (StatisticContainerType& data_out)
+              ControlMessageType,
+              DataMessageType,
+              SessionMessageType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Stream_T::collect"));
 
@@ -400,8 +399,9 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 void
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
@@ -409,8 +409,9 @@ DHCP_Stream_T<StreamStateType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
-              SessionMessageType,
-              ProtocolMessageType>::report () const
+              ControlMessageType,
+              DataMessageType,
+              SessionMessageType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Stream_T::report"));
 
@@ -439,8 +440,9 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 void
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
@@ -448,8 +450,9 @@ DHCP_Stream_T<StreamStateType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
-              SessionMessageType,
-              ProtocolMessageType>::ping ()
+              ControlMessageType,
+              DataMessageType,
+              SessionMessageType>::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Stream_T::ping"));
 
@@ -478,7 +481,8 @@ DHCP_Stream_T<StreamStateType,
   } // end IF
 
   typename inherited::ISTREAM_CONTROL_T* control_impl = NULL;
-  control_impl = dynamic_cast<typename inherited::ISTREAM_CONTROL_T*> (module_p->reader ());
+  control_impl =
+    dynamic_cast<typename inherited::ISTREAM_CONTROL_T*> (module_p->reader ());
   if (!control_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -488,12 +492,9 @@ DHCP_Stream_T<StreamStateType,
   } // end IF
 
   // *TODO*
-  try
-  {
+  try {
 //    control_impl->stop ();
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Stream_IStreamControl::stop (module: \"%s\"), returning\n"),
                 module_p->name ()));

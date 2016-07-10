@@ -73,7 +73,7 @@ class Net_SocketConnectionBase_T
   virtual const StreamType& stream () const;
   // *IMPORTANT NOTE*: fire-and-forget API
   //virtual bool send (ACE_Message_Block*&);
-  virtual void send (typename StreamType::PROTOCOL_DATA_T*&);
+  virtual void send (ACE_Message_Block*&);
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
   virtual const HandlerConfigurationType& get ();
@@ -171,8 +171,7 @@ class Net_AsynchSocketConnectionBase_T
   //virtual const HandlerConfigurationType& get () const;
   virtual const StreamType& stream () const;
   // *IMPORTANT NOTE*: fire-and-forget API
-  //virtual bool send (ACE_Message_Block*&);
-  virtual void send (typename StreamType::PROTOCOL_DATA_T*&);
+  virtual void send (ACE_Message_Block*&);
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
   virtual const HandlerConfigurationType& get ();

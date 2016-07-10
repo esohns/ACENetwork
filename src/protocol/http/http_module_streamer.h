@@ -25,27 +25,41 @@
 
 #include "stream_task_base_synch.h"
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          ////////////////////////////////
+          typename ConfigurationType,
+          ////////////////////////////////
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 class HTTP_Module_Streamer_T
- : public Stream_TaskBaseSynch_T<TimePolicyType,
-                                 SessionMessageType,
-                                 ProtocolMessageType>
+ : public Stream_TaskBaseSynch_T<SynchStrategyType,
+                                 TimePolicyType,
+                                 /////////
+                                 ConfigurationType,
+                                 /////////
+                                 ControlMessageType,
+                                 DataMessageType,
+                                 SessionMessageType>
 {
  public:
   HTTP_Module_Streamer_T ();
   virtual ~HTTP_Module_Streamer_T ();
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
-                                  bool&);                // return value: pass message downstream ?
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
 
  private:
-  typedef Stream_TaskBaseSynch_T<TimePolicyType,
-                                 SessionMessageType,
-                                 ProtocolMessageType> inherited;
+  typedef Stream_TaskBaseSynch_T<SynchStrategyType,
+                                 TimePolicyType,
+                                 /////////
+                                 ConfigurationType,
+                                 /////////
+                                 ControlMessageType,
+                                 DataMessageType,
+                                 SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T (const HTTP_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T& operator= (const HTTP_Module_Streamer_T&))

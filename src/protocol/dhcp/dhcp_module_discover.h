@@ -27,49 +27,61 @@
 #include "stream_statistichandler.h"
 #include "stream_task_base_asynch.h"
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          ////////////////////////////////
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
+          ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
 class DHCP_Module_Discover_T
- : public Stream_TaskBaseAsynch_T<TimePolicyType,
-                                  SessionMessageType,
-                                  ProtocolMessageType>
- , public Stream_IModuleHandler_T<ConfigurationType>
+ : public Stream_TaskBaseAsynch_T<SynchStrategyType,
+                                  TimePolicyType,
+                                  ////////
+                                  ConfigurationType,
+                                  ////////
+                                  ControlMessageType,
+                                  DataMessageType,
+                                  SessionMessageType>
+ //, public Stream_IModuleHandler_T<ConfigurationType>
 {
  public:
   DHCP_Module_Discover_T ();
   virtual ~DHCP_Module_Discover_T ();
 
-  // override (part of) Stream_IModuleHandler_T
-  virtual const ConfigurationType& get () const;
+  //// override (part of) Stream_IModuleHandler_T
+  //virtual const ConfigurationType& get () const;
   virtual bool initialize (const ConfigurationType&);
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
-                                  bool&);                // return value: pass message downstream ?
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
  protected:
-  ConfigurationType*                   configuration_;
   typename SessionMessageType::DATA_T* sessionData_;
 
  private:
-  typedef Stream_TaskBaseAsynch_T<TimePolicyType,
-                                  SessionMessageType,
-                                  ProtocolMessageType> inherited;
+  typedef Stream_TaskBaseAsynch_T<SynchStrategyType,
+                                  TimePolicyType,
+                                  ////////
+                                  ConfigurationType,
+                                  ////////
+                                  ControlMessageType,
+                                  DataMessageType,
+                                  SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T (const DHCP_Module_Discover_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T& operator= (const DHCP_Module_Discover_T&))
 
   // helper methods
-  ProtocolMessageType* allocateMessage (unsigned int); // (requested) size
+  DataMessageType* allocateMessage (unsigned int); // (requested) size
   ACE_HANDLE connect (const ACE_INET_Addr&, // peer address
                       bool&);               // reuturn value: use reactor ?
 
@@ -84,10 +96,11 @@ class DHCP_Module_Discover_T
 
 template <typename LockType,
           ////////////////////////////////
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
@@ -102,10 +115,11 @@ template <typename LockType,
 class DHCP_Module_DiscoverH_T
  : public Stream_HeadModuleTaskBase_T<LockType,
                                       ////
-                                      TaskSynchType,
+                                      SynchStrategyType,
                                       TimePolicyType,
+                                      ControlMessageType,
+                                      DataMessageType,
                                       SessionMessageType,
-                                      ProtocolMessageType,
                                       ////
                                       ConfigurationType,
                                       ////
@@ -127,10 +141,11 @@ class DHCP_Module_DiscoverH_T
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
   using Stream_HeadModuleTaskBase_T<LockType,
-                                    TaskSynchType,
+                                    SynchStrategyType,
                                     TimePolicyType,
+                                    ControlMessageType,
+                                    DataMessageType,
                                     SessionMessageType,
-                                    ProtocolMessageType,
                                     ConfigurationType,
                                     StreamControlType,
                                     StreamNotificationType,
@@ -143,7 +158,7 @@ class DHCP_Module_DiscoverH_T
   virtual bool initialize (const ConfigurationType&);
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (ProtocolMessageType*&, // data message handle
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
                                   bool&);                // return value: pass message downstream ?
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
@@ -156,10 +171,11 @@ class DHCP_Module_DiscoverH_T
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
                                       ////
-                                      TaskSynchType,
+                                      SynchStrategyType,
                                       TimePolicyType,
+                                      ControlMessageType,
+                                      DataMessageType,
                                       SessionMessageType,
-                                      ProtocolMessageType,
                                       ////
                                       ConfigurationType,
                                       ////
@@ -169,7 +185,7 @@ class DHCP_Module_DiscoverH_T
                                       ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////,
+                                      ////
                                       StatisticContainerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_DiscoverH_T ())
@@ -178,9 +194,9 @@ class DHCP_Module_DiscoverH_T
 
   // convenience types
   typedef Stream_StatisticHandler_Reactor_T<StatisticContainerType> STATISTICHANDLER_T;
-//  typedef typename ProtocolMessageType::DATA_T DATA_CONTAINER_T;
-//  typedef typename ProtocolMessageType::DATA_T::DATA_T DATA_T;
-  typedef typename ProtocolMessageType::DATA_T DATA_T;
+//  typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
+//  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
+  typedef typename DataMessageType::DATA_T DATA_T;
 
   //// helper methods
   //bool putStatisticMessage (const StatisticContainerType&) const;

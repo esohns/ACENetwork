@@ -33,30 +33,32 @@
 #include "http_bisector.h"
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionDataType,          // session data
+          typename SessionDataContainerType, // session message payload (reference counted)
           typename StatisticContainerType>
 HTTP_Module_Bisector_T<LockType,
-                      TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::HTTP_Module_Bisector_T (LockType* lock_in,
-                                                                       bool autoStart_in)
+                       SynchStrategyType,
+                       TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
+                       SessionMessageType,
+                       ConfigurationType,
+                       StreamControlType,
+                       StreamNotificationType,
+                       StreamStateType,
+                       SessionDataType,
+                       SessionDataContainerType,
+                       StatisticContainerType>::HTTP_Module_Bisector_T (LockType* lock_in,
+                                                                        bool autoStart_in)
  : inherited (lock_in,      // lock handle
               autoStart_in, // auto-start ?
               true)         // generate sesssion messages ?
@@ -78,29 +80,31 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionDataType,          // session data
+          typename SessionDataContainerType, // session message payload (reference counted)
           typename StatisticContainerType>
 HTTP_Module_Bisector_T<LockType,
-                      TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::~HTTP_Module_Bisector_T ()
+                       SynchStrategyType,
+                       TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
+                       SessionMessageType,
+                       ConfigurationType,
+                       StreamControlType,
+                       StreamNotificationType,
+                       StreamStateType,
+                       SessionDataType,
+                       SessionDataContainerType,
+                       StatisticContainerType>::~HTTP_Module_Bisector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::~HTTP_Module_Bisector_T"));
 
@@ -114,30 +118,32 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionDataType,          // session data
+          typename SessionDataContainerType, // session message payload (reference counted)
           typename StatisticContainerType>
 bool
 HTTP_Module_Bisector_T<LockType,
-                      TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
+                       SynchStrategyType,
+                       TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
+                       SessionMessageType,
+                       ConfigurationType,
+                       StreamControlType,
+                       StreamNotificationType,
+                       StreamStateType,
+                       SessionDataType,
+                       SessionDataContainerType,
+                       StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::initialize"));
 
@@ -195,31 +201,33 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionDataType,          // session data
+          typename SessionDataContainerType, // session message payload (reference counted)
           typename StatisticContainerType>
 void
 HTTP_Module_Bisector_T<LockType,
-                      TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                                  bool& passMessageDownstream_out)
+                       SynchStrategyType,
+                       TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
+                       SessionMessageType,
+                       ConfigurationType,
+                       StreamControlType,
+                       StreamNotificationType,
+                       StreamStateType,
+                       SessionDataType,
+                       SessionDataContainerType,
+                       StatisticContainerType>::handleDataMessage (DataMessageType*& message_inout,
+                                                                   bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::handleDataMessage"));
 
@@ -433,31 +441,33 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionDataType,          // session data
+          typename SessionDataContainerType, // session message payload (reference counted)
           typename StatisticContainerType>
 void
 HTTP_Module_Bisector_T<LockType,
-                      TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                     bool& passMessageDownstream_out)
+                       SynchStrategyType,
+                       TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
+                       SessionMessageType,
+                       ConfigurationType,
+                       StreamControlType,
+                       StreamNotificationType,
+                       StreamStateType,
+                       SessionDataType,
+                       SessionDataContainerType,
+                       StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                      bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::handleSessionMessage"));
 
@@ -496,30 +506,32 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionDataType,          // session data
+          typename SessionDataContainerType, // session message payload (reference counted)
           typename StatisticContainerType>
 bool
 HTTP_Module_Bisector_T<LockType,
-                      TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::collect (StatisticContainerType& data_out)
+                       SynchStrategyType,
+                       TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
+                       SessionMessageType,
+                       ConfigurationType,
+                       StreamControlType,
+                       StreamNotificationType,
+                       StreamStateType,
+                       SessionDataType,
+                       SessionDataContainerType,
+                       StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::collect"));
 
@@ -641,31 +653,33 @@ HTTP_Module_Bisector_T<LockType,
 //}
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionDataType,          // session data
+          typename SessionDataContainerType, // session message payload (reference counted)
           typename StatisticContainerType>
 bool
 HTTP_Module_Bisector_T<LockType,
-                      TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::scan_begin (char* data_in,
-                                                           size_t length_in)
+                       SynchStrategyType,
+                       TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
+                       SessionMessageType,
+                       ConfigurationType,
+                       StreamControlType,
+                       StreamNotificationType,
+                       StreamStateType,
+                       SessionDataType,
+                       SessionDataContainerType,
+                       StatisticContainerType>::scan_begin (char* data_in,
+                                                            size_t length_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::scan_begin"));
 
@@ -702,30 +716,32 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename TaskSynchType,
+          typename SynchStrategyType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionDataType,          // session data
+          typename SessionDataContainerType, // session message payload (reference counted)
           typename StatisticContainerType>
 void
 HTTP_Module_Bisector_T<LockType,
-                      TaskSynchType,
-                      TimePolicyType,
-                      SessionMessageType,
-                      ProtocolMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::scan_end ()
+                       SynchStrategyType,
+                       TimePolicyType,
+                       ControlMessageType,
+                       DataMessageType,
+                       SessionMessageType,
+                       ConfigurationType,
+                       StreamControlType,
+                       StreamNotificationType,
+                       StreamStateType,
+                       SessionDataType,
+                       SessionDataContainerType,
+                       StatisticContainerType>::scan_end ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::scan_end"));
 

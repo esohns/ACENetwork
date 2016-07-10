@@ -56,36 +56,47 @@ class Test_U_Message;
 //                              HTTP_Stream_SessionData,
 //                              HTTP_Stream_SessionData_t,
 //                              HTTP_RuntimeStatistic_t> HTTP_Module_Bisector_t;
-typedef HTTP_Module_Parser_T<Common_TimePolicy_t,
-                             Test_U_SessionMessage,
-                             Test_U_Message,
+typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
+                             Common_TimePolicy_t,
                              Test_U_ModuleHandlerConfiguration,
+                             ACE_Message_Block,
+                             Test_U_Message,
+                             Test_U_SessionMessage,
                              HTTP_Record> Test_U_Module_Parser;
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
-                               Common_TimePolicy_t,
-                               Test_U_SessionMessage,
-                               Test_U_Message> Test_U_Module_Streamer;
+                             Common_TimePolicy_t,
+                             Test_U_ModuleHandlerConfiguration,
+                             ACE_Message_Block,
+                             Test_U_Message,
+                             Test_U_SessionMessage> Test_U_Module_Streamer;
 
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             Test_U_SessionMessage,
+                                             Test_U_ModuleHandlerConfiguration,
+                                             ACE_Message_Block,
                                              Test_U_Message,
+                                             Test_U_SessionMessage,
                                              HTTP_Method_t,
                                              HTTP_RuntimeStatistic_t,
                                              Test_U_StreamSessionData,
                                              Test_U_StreamSessionData_t> Test_U_Module_Statistic_ReaderTask_t;
 typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             Test_U_SessionMessage,
+                                             Test_U_ModuleHandlerConfiguration,
+                                             ACE_Message_Block,
                                              Test_U_Message,
+                                             Test_U_SessionMessage,
                                              HTTP_Method_t,
                                              HTTP_RuntimeStatistic_t,
                                              Test_U_StreamSessionData,
                                              Test_U_StreamSessionData_t> Test_U_Module_Statistic_WriterTask_t;
 
-typedef Stream_Module_FileWriter_T<Test_U_SessionMessage,
-                                   Test_U_Message,
+typedef Stream_Module_FileWriter_T<ACE_MT_SYNCH,
+                                   Common_TimePolicy_t,
                                    Test_U_ModuleHandlerConfiguration,
+                                   ACE_Message_Block,
+                                   Test_U_Message,
+                                   Test_U_SessionMessage,
                                    Test_U_StreamSessionData> Test_U_Module_FileWriter;
 
 // declare module(s)

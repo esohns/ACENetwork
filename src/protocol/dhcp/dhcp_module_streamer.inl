@@ -27,43 +27,55 @@
 #include "dhcp_defines.h"
 #include "dhcp_tools.h"
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
-DHCP_Module_Streamer_T<TaskSynchType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+DHCP_Module_Streamer_T<SynchStrategyType,
                        TimePolicyType,
-                       SessionMessageType,
-                       ProtocolMessageType>::DHCP_Module_Streamer_T ()
+                       ConfigurationType,
+                       ControlMessageType,
+                       DataMessageType,
+                       SessionMessageType>::DHCP_Module_Streamer_T ()
  : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Streamer_T::DHCP_Module_Streamer_T"));
 
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
-DHCP_Module_Streamer_T<TaskSynchType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+DHCP_Module_Streamer_T<SynchStrategyType,
                        TimePolicyType,
-                       SessionMessageType,
-                       ProtocolMessageType>::~DHCP_Module_Streamer_T ()
+                       ConfigurationType,
+                       ControlMessageType,
+                       DataMessageType,
+                       SessionMessageType>::~DHCP_Module_Streamer_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Streamer_T::~DHCP_Module_Streamer_T"));
 
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 void
-DHCP_Module_Streamer_T<TaskSynchType,
+DHCP_Module_Streamer_T<SynchStrategyType,
                        TimePolicyType,
-                       SessionMessageType,
-                       ProtocolMessageType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                                bool& passMessageDownstream_out)
+                       ConfigurationType,
+                       ControlMessageType,
+                       DataMessageType,
+                       SessionMessageType>::handleDataMessage (DataMessageType*& message_inout,
+                                                               bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Streamer_T::handleDataMessage"));
 
@@ -91,11 +103,11 @@ DHCP_Module_Streamer_T<TaskSynchType,
 
   // serialize structured data
   // --> create the appropriate bytestream corresponding to its elements
-//  const typename ProtocolMessageType::DATA_T& data_container_r =
+//  const typename DataMessageType::DATA_T& data_container_r =
 //      message_inout->get ();
-//  const typename ProtocolMessageType::DATA_T::DATA_T& data_r =
+//  const typename DataMessageType::DATA_T::DATA_T& data_r =
 //        data_container_r.get ();
-  const typename ProtocolMessageType::DATA_T& data_r =
+  const typename DataMessageType::DATA_T& data_r =
       message_inout->get ();
   result =
     message_inout->copy (reinterpret_cast<const char*> (&data_r.op),

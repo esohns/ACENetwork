@@ -26,14 +26,18 @@
 #include "dhcp_common.h"
 #include "dhcp_defines.h"
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType>
-DHCP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType>::DHCP_Module_Parser_T ()
+template <typename SynchStrategyType,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+DHCP_Module_Parser_T<SynchStrategyType,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType>::DHCP_Module_Parser_T ()
  : inherited ()
  , debugScanner_ (DHCP_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (DHCP_DEFAULT_YACC_TRACE) // trace parsing ?
@@ -46,33 +50,38 @@ DHCP_Module_Parser_T<TimePolicyType,
 
 }
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType>
-DHCP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType>::~DHCP_Module_Parser_T ()
+template <typename SynchStrategyType,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+DHCP_Module_Parser_T<SynchStrategyType,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType>::~DHCP_Module_Parser_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::~DHCP_Module_Parser_T"));
 
 }
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType>
+template <typename SynchStrategyType,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 bool
-DHCP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType>::initialize (const ConfigurationType& configuration_in)
+DHCP_Module_Parser_T<SynchStrategyType,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::initialize"));
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_in.streamConfiguration);
 
   if (initialized_)
   {
@@ -91,21 +100,25 @@ DHCP_Module_Parser_T<TimePolicyType,
   debugScanner_ = configuration_in.traceScanning;
   debugParser_ = configuration_in.traceParsing;
 
-  initialized_ = true;
+  initialized_ = inherited::initialize (configuration_in);
 
-  return true;
+  return initialized_;
 }
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType>
+template <typename SynchStrategyType,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 void
-DHCP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType>::handleDataMessage (ProtocolMessageType*& message_inout,
-                                                            bool& passMessageDownstream_out)
+DHCP_Module_Parser_T<SynchStrategyType,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType>::handleDataMessage (DataMessageType*& message_inout,
+                                                             bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::handleDataMessage"));
 
@@ -166,16 +179,20 @@ DHCP_Module_Parser_T<TimePolicyType,
   isDriverInitialized_ = false;
 }
 
-template <typename TimePolicyType,
-          typename SessionMessageType,
-          typename ProtocolMessageType,
-          typename ConfigurationType>
+template <typename SynchStrategyType,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 void
-DHCP_Module_Parser_T<TimePolicyType,
-                     SessionMessageType,
-                     ProtocolMessageType,
-                     ConfigurationType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                               bool& passMessageDownstream_out)
+DHCP_Module_Parser_T<SynchStrategyType,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::handleSessionMessage"));
 
@@ -197,8 +214,9 @@ DHCP_Module_Parser_T<TimePolicyType,
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -209,8 +227,9 @@ template <typename LockType,
 DHCP_Module_ParserH_T<LockType,
                      TaskSynchType,
                      TimePolicyType,
+                     ControlMessageType,
+                     DataMessageType,
                      SessionMessageType,
-                     ProtocolMessageType,
                      ConfigurationType,
                      StreamControlType,
                      StreamNotificationType,
@@ -234,8 +253,9 @@ DHCP_Module_ParserH_T<LockType,
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -246,8 +266,9 @@ template <typename LockType,
 DHCP_Module_ParserH_T<LockType,
                      TaskSynchType,
                      TimePolicyType,
+                     ControlMessageType,
+                     DataMessageType,
                      SessionMessageType,
-                     ProtocolMessageType,
                      ConfigurationType,
                      StreamControlType,
                      StreamNotificationType,
@@ -263,8 +284,9 @@ DHCP_Module_ParserH_T<LockType,
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -276,8 +298,9 @@ bool
 DHCP_Module_ParserH_T<LockType,
                      TaskSynchType,
                      TimePolicyType,
+                     ControlMessageType,
+                     DataMessageType,
                      SessionMessageType,
-                     ProtocolMessageType,
                      ConfigurationType,
                      StreamControlType,
                      StreamNotificationType,
@@ -318,8 +341,9 @@ DHCP_Module_ParserH_T<LockType,
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -331,15 +355,16 @@ void
 DHCP_Module_ParserH_T<LockType,
                      TaskSynchType,
                      TimePolicyType,
+                     ControlMessageType,
+                     DataMessageType,
                      SessionMessageType,
-                     ProtocolMessageType,
                      ConfigurationType,
                      StreamControlType,
                      StreamNotificationType,
                      StreamStateType,
                      SessionDataType,
                      SessionDataContainerType,
-                     StatisticContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                     StatisticContainerType>::handleDataMessage (DataMessageType*& message_inout,
                                                                  bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::handleDataMessage"));
@@ -398,8 +423,9 @@ DHCP_Module_ParserH_T<LockType,
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -411,8 +437,9 @@ void
 DHCP_Module_ParserH_T<LockType,
                      TaskSynchType,
                      TimePolicyType,
+                     ControlMessageType,
+                     DataMessageType,
                      SessionMessageType,
-                     ProtocolMessageType,
                      ConfigurationType,
                      StreamControlType,
                      StreamNotificationType,
@@ -455,8 +482,9 @@ DHCP_Module_ParserH_T<LockType,
 template <typename LockType,
           typename TaskSynchType,
           typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ConfigurationType,
           typename StreamControlType,
           typename StreamNotificationType,
@@ -468,8 +496,9 @@ bool
 DHCP_Module_ParserH_T<LockType,
                      TaskSynchType,
                      TimePolicyType,
+                     ControlMessageType,
+                     DataMessageType,
                      SessionMessageType,
-                     ProtocolMessageType,
                      ConfigurationType,
                      StreamControlType,
                      StreamNotificationType,

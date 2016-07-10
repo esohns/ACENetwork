@@ -30,16 +30,20 @@
 #include "net_common_tools.h"
 #include "net_macros.h"
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
-Net_Module_Statistic_WriterTask_T<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::Net_Module_Statistic_WriterTask_T ()
  : inherited ()
@@ -68,16 +72,20 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
-Net_Module_Statistic_WriterTask_T<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::~Net_Module_Statistic_WriterTask_T ()
 {
@@ -87,17 +95,21 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   fini_timers (true);
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 bool
-Net_Module_Statistic_WriterTask_T<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::initialize (unsigned int reportingInterval_in,
                                                                        bool printFinalReport_in,
@@ -176,19 +188,23 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   return true;
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 void
-Net_Module_Statistic_WriterTask_T<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
-                                  StatisticContainerType>::handleDataMessage (ProtocolMessageType*& message_inout,
+                                  StatisticContainerType>::handleDataMessage (DataMessageType*& message_inout,
                                                                               bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::handleDataMessage"));
@@ -214,17 +230,21 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   } // end lock scope
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 void
-Net_Module_Statistic_WriterTask_T<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                                  bool& passMessageDownstream_out)
@@ -325,17 +345,21 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   } // end SWITCH
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 void
-Net_Module_Statistic_WriterTask_T<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::reset ()
 {
@@ -355,17 +379,21 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   } // end lock scope
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 bool
-Net_Module_Statistic_WriterTask_T<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
@@ -389,17 +417,21 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   return true;
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 void
-Net_Module_Statistic_WriterTask_T<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::report () const
 {
@@ -421,17 +453,21 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
               (allocator_ ? allocator_->cache_depth () : 0)));
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 void
-Net_Module_Statistic_WriterTask_T<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::final_report () const
 {
@@ -470,17 +506,21 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
   } // end lock scope
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 void
-Net_Module_Statistic_WriterTask_T<TaskSynchType,
+Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::fini_timers (bool cancelAllTimers_in)
 {
@@ -520,16 +560,20 @@ Net_Module_Statistic_WriterTask_T<TaskSynchType,
 
 // -----------------------------------------------------------------------------
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
-Net_Module_Statistic_ReaderTask_T<TaskSynchType,
+Net_Module_Statistic_ReaderTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::Net_Module_Statistic_ReaderTask_T ()
  : inherited ()
@@ -539,34 +583,42 @@ Net_Module_Statistic_ReaderTask_T<TaskSynchType,
   inherited::flags_ |= ACE_Task_Flags::ACE_READER;
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
-Net_Module_Statistic_ReaderTask_T<TaskSynchType,
-                                   TimePolicyType,
-                                   SessionMessageType,
-                                   ProtocolMessageType,
-                                   ProtocolCommandType,
-                                   StatisticContainerType>::~Net_Module_Statistic_ReaderTask_T ()
+Net_Module_Statistic_ReaderTask_T<SynchStrategyType,
+                                  TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
+                                  SessionMessageType,
+                                  ProtocolCommandType,
+                                  StatisticContainerType>::~Net_Module_Statistic_ReaderTask_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_ReaderTask_T::~Net_Module_Statistic_ReaderTask_T"));
 
 }
 
-template <typename TaskSynchType,
+template <typename SynchStrategyType,
           typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType,
-          typename ProtocolMessageType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 int
-Net_Module_Statistic_ReaderTask_T<TaskSynchType,
+Net_Module_Statistic_ReaderTask_T<SynchStrategyType,
                                   TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
                                   SessionMessageType,
-                                  ProtocolMessageType,
                                   ProtocolCommandType,
                                   StatisticContainerType>::put (ACE_Message_Block* messageBlock_in,
                                                                 ACE_Time_Value* timeValue_in)
@@ -589,12 +641,12 @@ Net_Module_Statistic_ReaderTask_T<TaskSynchType,
                 ACE_TEXT ("failed to dynamic_cast<Net_Module_Statistic_WriterTask_t>: \"%m\", aborting\n")));
     return -1;
   } // end IF
-  ProtocolMessageType* message_p =
-    dynamic_cast<ProtocolMessageType*> (messageBlock_in);
+  DataMessageType* message_p =
+    dynamic_cast<DataMessageType*> (messageBlock_in);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<ProtocolMessageType>(%@), aborting\n"),
+                ACE_TEXT ("failed to dynamic_cast<DataMessageType>(%@), aborting\n"),
                 messageBlock_in));
     return -1;
   } // end IF

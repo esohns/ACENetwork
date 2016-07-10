@@ -45,12 +45,13 @@ template <typename StreamStateType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 class HTTP_Stream_T;
 struct HTTP_StreamConfiguration;
 
-typedef Stream_IModuleHandler_T<HTTP_ModuleHandlerConfiguration> HTTP_IModuleHandler_t;
+//typedef Stream_IModuleHandler_T<HTTP_ModuleHandlerConfiguration> HTTP_IModuleHandler_t;
 typedef Stream_IModule_T<ACE_MT_SYNCH,
                          Common_TimePolicy_t,
                          Stream_ModuleConfiguration,
@@ -112,7 +113,8 @@ typedef HTTP_Stream_T<HTTP_StreamState,
                       HTTP_ModuleHandlerConfiguration,
                       HTTP_Stream_SessionData,
                       HTTP_Stream_SessionData_t,
-                      HTTP_SessionMessage,
-                      HTTP_Message_t> HTTP_Stream_t;
+                      ACE_Message_Block,
+                      HTTP_Message_t,
+                      HTTP_SessionMessage> HTTP_Stream_t;
 
 #endif

@@ -60,8 +60,9 @@ class Test_U_Message;
 // declare module(s)
 typedef Stream_Module_Net_IOWriter_T<ACE_SYNCH_MUTEX,
                                      /////
-                                     Test_U_SessionMessage,
+                                     ACE_Message_Block,
                                      Test_U_Message,
+                                     Test_U_SessionMessage,
                                      /////
                                      Test_U_StreamModuleHandlerConfiguration,
                                      /////
@@ -76,12 +77,14 @@ typedef Stream_Module_Net_IOWriter_T<ACE_SYNCH_MUTEX,
                                      /////
                                      ACE_INET_Addr,
                                      Test_U_ConnectionManager_t> Test_U_Module_Net_Writer_t;
-typedef Stream_Module_Net_IOReader_T<Test_U_SessionMessage,
-                                     Test_U_Message,
-                                     /////
-                                     Test_U_Configuration,
+typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
+                                     Common_TimePolicy_t,
                                      /////
                                      Test_U_StreamModuleHandlerConfiguration,
+                                     /////
+                                     ACE_Message_Block,
+                                     Test_U_Message,
+                                     Test_U_SessionMessage,
                                      /////
                                      Test_U_StreamSessionData,
                                      Test_U_StreamSessionData_t,
@@ -91,8 +94,10 @@ typedef Stream_Module_Net_IOReader_T<Test_U_SessionMessage,
 
 typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
-                               Test_U_SessionMessage,
+                               ///////////
+                               ACE_Message_Block,
                                Test_U_Message,
+                               Test_U_SessionMessage,
                                ///////////
                                Test_U_StreamModuleHandlerConfiguration,
                                ///////////
@@ -103,10 +108,12 @@ typedef DHCP_Module_DiscoverH_T<ACE_SYNCH_MUTEX,
                                 //////////
                                 ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                Test_U_SessionMessage,
-                                Test_U_Message,
                                 //////////
                                 Test_U_StreamModuleHandlerConfiguration,
+                                //////////
+                                ACE_Message_Block,
+                                Test_U_Message,
+                                Test_U_SessionMessage,
                                 //////////
                                 int,
                                 int,
@@ -130,13 +137,17 @@ typedef DHCP_Module_DiscoverH_T<ACE_SYNCH_MUTEX,
 
 typedef DHCP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
-                               Test_U_SessionMessage,
-                               Test_U_Message> Test_U_Module_Streamer;
+                               Test_U_StreamModuleHandlerConfiguration,
+                               ACE_Message_Block,
+                               Test_U_Message,
+                               Test_U_SessionMessage> Test_U_Module_Streamer;
 
-typedef DHCP_Module_Parser_T<Common_TimePolicy_t,
-                             Test_U_SessionMessage,
+typedef DHCP_Module_Parser_T<ACE_MT_SYNCH,
+                             Common_TimePolicy_t,
+                             Test_U_StreamModuleHandlerConfiguration,
+                             ACE_Message_Block,
                              Test_U_Message,
-                             Test_U_StreamModuleHandlerConfiguration> Test_U_Module_Parser;
+                             Test_U_SessionMessage> Test_U_Module_Parser;
 //typedef DHCP_Module_ParserH_T<ACE_SYNCH_MUTEX,
 //                              ////////////
 //                              ACE_MT_SYNCH,
@@ -152,24 +163,40 @@ typedef DHCP_Module_Parser_T<Common_TimePolicy_t,
 
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             Test_U_SessionMessage,
+
+                                             Test_U_StreamModuleHandlerConfiguration,
+
+                                             ACE_Message_Block,
                                              Test_U_Message,
+                                             Test_U_SessionMessage,
+
                                              DHCP_MessageType_t,
                                              Test_U_RuntimeStatistic_t,
                                              Test_U_StreamSessionData,
                                              Test_U_StreamSessionData_t> Test_U_Module_Statistic_ReaderTask_t;
 typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             Test_U_SessionMessage,
+
+                                             Test_U_StreamModuleHandlerConfiguration,
+
+                                             ACE_Message_Block,
                                              Test_U_Message,
+                                             Test_U_SessionMessage,
+
                                              DHCP_MessageType_t,
                                              Test_U_RuntimeStatistic_t,
                                              Test_U_StreamSessionData,
                                              Test_U_StreamSessionData_t> Test_U_Module_Statistic_WriterTask_t;
 
-typedef Stream_Module_Dump_T<Test_U_SessionMessage,
-                             Test_U_Message,
+typedef Stream_Module_Dump_T<ACE_MT_SYNCH,
+                             Common_TimePolicy_t,
+
                              Test_U_StreamModuleHandlerConfiguration,
+
+                             ACE_Message_Block,
+                             Test_U_Message,
+                             Test_U_SessionMessage,
+
                              Test_U_StreamSessionData_t> Test_U_Module_Dump;
 
 // declare module(s)

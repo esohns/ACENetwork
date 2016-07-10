@@ -59,8 +59,10 @@ class Test_U_Stream
                         //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        Test_U_SessionMessage,
-                        Test_U_Message>
+                        //////////////////
+                        ACE_Message_Block,
+                        Test_U_Message,
+                        Test_U_SessionMessage>
 {
  public:
   Test_U_Stream (const std::string&); // name
@@ -99,13 +101,16 @@ class Test_U_Stream
                         //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        Test_U_SessionMessage,
-                        Test_U_Message> inherited;
+                        //////////////////
+                        ACE_Message_Block,
+                        Test_U_Message,
+                        Test_U_SessionMessage> inherited;
 
   typedef Stream_Module_Net_IOWriter_T<ACE_SYNCH_MUTEX,
                                        ///
-                                       Test_U_SessionMessage,
+                                       ACE_Message_Block,
                                        Test_U_Message,
+                                       Test_U_SessionMessage,
                                        ///
                                        Test_U_ModuleHandlerConfiguration,
                                        ///
@@ -120,12 +125,14 @@ class Test_U_Stream
                                        ///
                                        ACE_INET_Addr,
                                        Test_U_ConnectionManager_t> WRITER_T;
-  typedef Stream_Module_Net_IOReader_T<Test_U_SessionMessage,
-                                       Test_U_Message,
-                                       ///
-                                       Test_U_StreamConfiguration,
+  typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
+                                       Common_TimePolicy_t,
                                        ///
                                        Test_U_ModuleHandlerConfiguration,
+                                       ///
+                                       ACE_Message_Block,
+                                       Test_U_Message,
+                                       Test_U_SessionMessage,
                                        ///
                                        Test_U_StreamSessionData,
                                        Test_U_StreamSessionData_t,

@@ -176,8 +176,8 @@ Net_Server_AsynchListener_T<HandlerType,
   // *TODO*: remove type inference
   if (handlerConfiguration_->messageAllocator)
   {
-    typename StreamType::PROTOCOL_DATA_T* message_p =
-      static_cast<typename StreamType::PROTOCOL_DATA_T*> (handlerConfiguration_->messageAllocator->malloc (space_needed));
+    typename StreamType::MESSAGE_T* message_p =
+      static_cast<typename StreamType::MESSAGE_T*> (handlerConfiguration_->messageAllocator->malloc (space_needed));
     message_block_p = message_p;
   } // end IF
   else

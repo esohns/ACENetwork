@@ -52,8 +52,10 @@ template <typename StreamStateType,
           ////////////////////////////////
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename SessionMessageType,
-          typename ProtocolMessageType>
+          ////////////////////////////////
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
 class IRC_Stream_T
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
                         //////////////////
@@ -74,8 +76,10 @@ class IRC_Stream_T
                         //////////////////
                         SessionDataType,
                         SessionDataContainerType,
-                        SessionMessageType,
-                        ProtocolMessageType>
+                        //////////////////
+                        ControlMessageType,
+                        DataMessageType,
+                        SessionMessageType>
 {
  public:
   IRC_Stream_T (const std::string&); // name
@@ -115,19 +119,24 @@ class IRC_Stream_T
                         //////////////////
                         SessionDataType,
                         SessionDataContainerType,
-                        SessionMessageType,
-                        ProtocolMessageType> inherited;
+                        //////////////////
+                        ControlMessageType,
+                        DataMessageType,
+                        SessionMessageType> inherited;
 
   typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                SessionMessageType,
-                                ProtocolMessageType> STREAMER_T;
+                                ModuleHandlerConfigurationType,
+                                ControlMessageType,
+                                DataMessageType,
+                                SessionMessageType> STREAMER_T;
   typedef IRC_Module_Bisector_T<ACE_SYNCH_MUTEX,
                                 //////////
                                 ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
+                                ControlMessageType,
+                                DataMessageType,
                                 SessionMessageType,
-                                ProtocolMessageType,
                                 //////////
                                 ModuleHandlerConfigurationType,
                                 //////////
@@ -148,8 +157,10 @@ class IRC_Stream_T
 
   typedef IRC_Module_Parser_T<ACE_MT_SYNCH,
                               Common_TimePolicy_t,
-                              SessionMessageType,
-                              ProtocolMessageType> PARSER_T;
+                              ModuleHandlerConfigurationType,
+                              ControlMessageType,
+                              DataMessageType,
+                              SessionMessageType> PARSER_T;
   typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          Stream_ModuleConfiguration,
@@ -158,16 +169,20 @@ class IRC_Stream_T
 
   typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                                Common_TimePolicy_t,
+                                               ModuleHandlerConfigurationType,
+                                               ControlMessageType,
+                                               DataMessageType,
                                                SessionMessageType,
-                                               ProtocolMessageType,
                                                IRC_CommandType_t,
                                                IRC_RuntimeStatistic_t,
                                                SessionDataType,
                                                SessionDataContainerType> STATISTIC_READER_T;
   typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                                Common_TimePolicy_t,
+                                               ModuleHandlerConfigurationType,
+                                               ControlMessageType,
+                                               DataMessageType,
                                                SessionMessageType,
-                                               ProtocolMessageType,
                                                IRC_CommandType_t,
                                                IRC_RuntimeStatistic_t,
                                                SessionDataType,

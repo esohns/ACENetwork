@@ -39,31 +39,57 @@
 //#include "http_stream_common.h"
 
 // forward declarations
+template <typename AllocatorConfigurationType,
+          typename DataType>
+class HTTP_Message_T;
 class HTTP_SessionMessage;
-class HTTP_Message_T<>;
 //struct HTTP_Stream_SessionData;
 //struct HTTP_StreamState;
 
 typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
+
+                             HTTP_ModuleHandlerConfiguration,
+
+                             ACE_Message_Block,
+                             HTTP_Message_T<Stream_AllocatorConfiguration,
+                                            HTTP_Record>,
                              HTTP_SessionMessage,
-                             HTTP_Message> HTTP_Module_Parser;
+                             
+                             HTTP_Record> HTTP_Module_Parser;
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
-                               HTTP_SessionMessage,
-                               HTTP_Message> HTTP_Module_Streamer;
+
+                               HTTP_ModuleHandlerConfiguration,
+
+                               ACE_Message_Block,
+                               HTTP_Message_T<Stream_AllocatorConfiguration,
+                                              HTTP_Record>,
+                               HTTP_SessionMessage> HTTP_Module_Streamer;
 
 typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
+
+                                          HTTP_ModuleHandlerConfiguration,
+
+                                          ACE_Message_Block,
+                                          HTTP_Message_T<Stream_AllocatorConfiguration,
+                                                         HTTP_Record>,
                                           HTTP_SessionMessage,
-                                          HTTP_Message,
-                                          HTTP_MethodType_t,
+
+                                          HTTP_Method_t,
                                           HTTP_RuntimeStatistic_t> HTTP_Module_Statistic_ReaderTask_t;
 typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
+
+                                          HTTP_ModuleHandlerConfiguration,
+
+                                          ACE_Message_Block,
+                                          HTTP_Message_T<Stream_AllocatorConfiguration,
+                                                         HTTP_Record>,
                                           HTTP_SessionMessage,
-                                          HTTP_Message,
-                                          HTTP_MethodType_t,
+
+                                          HTTP_Method_t,
                                           HTTP_RuntimeStatistic_t> HTTP_Module_Statistic_WriterTask_t;
 
 //typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,

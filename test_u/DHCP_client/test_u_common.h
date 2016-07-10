@@ -162,7 +162,7 @@ struct Test_U_SocketHandlerConfiguration
 {
   inline Test_U_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
-   ////////////////////////////////////
+   ///////////////////////////////////////
    , userData (NULL)
   {
     PDUSize = DHCP_MESSAGE_SIZE;
@@ -212,7 +212,6 @@ struct Test_U_StreamModuleHandlerConfiguration
    , contextID (0)
    , inbound (true)
    , passive (false)
-   , printProgressDot (true)
    , socketConfiguration (NULL)
    , socketHandlerConfiguration (NULL)
    , targetFileName ()
@@ -223,7 +222,6 @@ struct Test_U_StreamModuleHandlerConfiguration
   guint                              contextID;
   bool                               inbound; // net IO module
   bool                               passive; // UDP target module
-  bool                               printProgressDot; // dump module
   Net_SocketConfiguration*           socketConfiguration;
   Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
   std::string                        targetFileName; // dump module
@@ -336,7 +334,7 @@ struct Test_U_Configuration
   bool                                    useReactor;
 };
 
-typedef Stream_IModuleHandler_T<Test_U_StreamModuleHandlerConfiguration> Test_U_IModuleHandler_t;
+//typedef Stream_IModuleHandler_T<Test_U_StreamModuleHandlerConfiguration> Test_U_IModuleHandler_t;
 typedef Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
 
                                           Test_U_Message,

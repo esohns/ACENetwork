@@ -36,10 +36,14 @@
 #include "test_u_stream_common.h"
 
 class Net_Module_EventHandler
- : public Stream_Module_MessageHandler_T<Net_SessionMessage,
-                                         Net_Message,
-
+ : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+ 
                                          Stream_ModuleHandlerConfiguration,
+
+                                         ACE_Message_Block,
+                                         Net_Message,
+                                         Net_SessionMessage,
 
                                          unsigned int,
                                          Net_StreamSessionData_t>
@@ -52,10 +56,14 @@ class Net_Module_EventHandler
   virtual Stream_Module_t* clone ();
 
  private:
-  typedef Stream_Module_MessageHandler_T<Net_SessionMessage,
-                                         Net_Message,
-
+  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+ 
                                          Stream_ModuleHandlerConfiguration,
+
+                                         ACE_Message_Block,
+                                         Net_Message,
+                                         Net_SessionMessage,
 
                                          unsigned int,
                                          Net_StreamSessionData_t> inherited;

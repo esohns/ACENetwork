@@ -61,7 +61,7 @@ Test_U_InboundConnectionStream::Test_U_InboundConnectionStream (const std::strin
   inherited::modules_.push_front (&dump_);
 
   // *TODO* fix ACE bug: modules should initialize their "next" member to NULL
-  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::modules_.begin ();
+  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
        iterator != inherited::modules_.end ();
        iterator++)
     (*iterator)->next (NULL);
@@ -128,77 +128,77 @@ Test_U_InboundConnectionStream::initialize (const Test_U_StreamConfiguration& co
   Test_U_Module_Net_Writer_t* netIO_impl_p = NULL;
 
   // ******************* Dump ************************
-  dump_.initialize (*configuration_in.moduleConfiguration);
-  dump_impl_p = dynamic_cast<Test_U_Module_Dump*> (dump_.writer ());
-  if (!dump_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_Dump> failed, aborting\n")));
-    goto failed;
-  } // end IF
-  if (!dump_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                dump_.name ()));
-    goto failed;
-  } // end IF
+  //dump_.initialize (*configuration_in.moduleConfiguration);
+  //dump_impl_p = dynamic_cast<Test_U_Module_Dump*> (dump_.writer ());
+  //if (!dump_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Test_U_Module_Dump> failed, aborting\n")));
+  //  goto failed;
+  //} // end IF
+  //if (!dump_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              dump_.name ()));
+  //  goto failed;
+  //} // end IF
 
   // ******************* DHCP Discover ************************
-  DHCPDiscover_.initialize (*configuration_in.moduleConfiguration);
-  DHCPDiscover_impl_p = dynamic_cast<Test_U_Module_DHCPDiscover*> (DHCPDiscover_.writer ());
-  if (!DHCPDiscover_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_DHCPDiscover> failed, aborting\n")));
-    goto failed;
-  } // end IF
-  if (!DHCPDiscover_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                DHCPDiscover_.name ()));
-    goto failed;
-  } // end IF
+  //DHCPDiscover_.initialize (*configuration_in.moduleConfiguration);
+  //DHCPDiscover_impl_p = dynamic_cast<Test_U_Module_DHCPDiscover*> (DHCPDiscover_.writer ());
+  //if (!DHCPDiscover_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Test_U_Module_DHCPDiscover> failed, aborting\n")));
+  //  goto failed;
+  //} // end IF
+  //if (!DHCPDiscover_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              DHCPDiscover_.name ()));
+  //  goto failed;
+  //} // end IF
 
   // ******************* Runtime Statistic ************************
-  runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
-  runtimeStatistic_impl_p =
-    dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
-  if (!runtimeStatistic_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_RuntimeStatistic> failed, aborting\n")));
-    goto failed;
-  } // end IF
-  if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
-                                            false,                                       // push statistic messages ?
-                                            configuration_in.printFinalReport,           // print final report ?
-                                            configuration_in.messageAllocator))          // message allocator handle
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                runtimeStatistic_.name ()));
-    goto failed;
-  } // end IF
+  //runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
+  //runtimeStatistic_impl_p =
+  //  dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
+  //if (!runtimeStatistic_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Test_U_Module_RuntimeStatistic> failed, aborting\n")));
+  //  goto failed;
+  //} // end IF
+  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
+  //                                          false,                                       // push statistic messages ?
+  //                                          configuration_in.printFinalReport,           // print final report ?
+  //                                          configuration_in.messageAllocator))          // message allocator handle
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              runtimeStatistic_.name ()));
+  //  goto failed;
+  //} // end IF
 
   // ******************* Marshal ************************
-  marshal_.initialize (*configuration_in.moduleConfiguration);
-  parser_impl_p = dynamic_cast<Test_U_Module_Parser*> (marshal_.writer ());
-  if (!parser_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_Parser> failed, aborting\n")));
-    goto failed;
-  } // end IF
-    // *TODO*: remove type inferences
-  if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                marshal_.name ()));
-    goto failed;
-  } // end IF
+  //marshal_.initialize (*configuration_in.moduleConfiguration);
+  //parser_impl_p = dynamic_cast<Test_U_Module_Parser*> (marshal_.writer ());
+  //if (!parser_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Test_U_Module_Parser> failed, aborting\n")));
+  //  goto failed;
+  //} // end IF
+  //  // *TODO*: remove type inferences
+  //if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              marshal_.name ()));
+  //  goto failed;
+  //} // end IF
 
   // ******************* Net IO ************************
   netIO_.initialize (*configuration_in.moduleConfiguration);
@@ -239,7 +239,7 @@ Test_U_InboundConnectionStream::initialize (const Test_U_StreamConfiguration& co
   // -------------------------------------------------------------
 
   // set (session) message allocator
-  inherited::allocator_ = configuration_in.messageAllocator;
+  //inherited::allocator_ = configuration_in.messageAllocator;
 
   // OK: all went well
   inherited::isInitialized_ = true;
@@ -367,7 +367,7 @@ Test_U_OutboundConnectionStream::Test_U_OutboundConnectionStream (const std::str
   inherited::modules_.push_front (&runtimeStatistic_);
 
   // *TODO* fix ACE bug: modules should initialize their "next" member to NULL
-  for (inherited::MODULE_CONTAINER_ITERATOR_T iterator = inherited::modules_.begin ();
+  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
        iterator != inherited::modules_.end ();
        iterator++)
     (*iterator)->next (NULL);
@@ -558,25 +558,25 @@ Test_U_OutboundConnectionStream::initialize (const Test_U_StreamConfiguration& c
   Test_U_Module_Net_Writer_t* netIO_impl_p = NULL;
 
   // ******************* Runtime Statistic ************************
-  runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
-  runtimeStatistic_impl_p =
-    dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
-  if (!runtimeStatistic_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_RuntimeStatistic> failed, aborting\n")));
-    goto failed;
-  } // end IF
-  if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
-                                            false,                                       // push statistic messages ?
-                                            configuration_in.printFinalReport,           // print final report ?
-                                            configuration_in.messageAllocator))          // message allocator handle
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                runtimeStatistic_.name ()));
-    goto failed;
-  } // end IF
+  //runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
+  //runtimeStatistic_impl_p =
+  //  dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
+  //if (!runtimeStatistic_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Test_U_Module_RuntimeStatistic> failed, aborting\n")));
+  //  goto failed;
+  //} // end IF
+  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
+  //                                          false,                                       // push statistic messages ?
+  //                                          configuration_in.printFinalReport,           // print final report ?
+  //                                          configuration_in.messageAllocator))          // message allocator handle
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              runtimeStatistic_.name ()));
+  //  goto failed;
+  //} // end IF
 
 //  // ******************* Streamer ************************
 //  marshal_.initialize (*configuration_in.moduleConfiguration);
@@ -635,7 +635,7 @@ Test_U_OutboundConnectionStream::initialize (const Test_U_StreamConfiguration& c
   // -------------------------------------------------------------
 
   // set (session) message allocator
-  inherited::allocator_ = configuration_in.messageAllocator;
+  //inherited::allocator_ = configuration_in.messageAllocator;
 
   // OK: all went well
   inherited::isInitialized_ = true;

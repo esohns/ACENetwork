@@ -120,6 +120,9 @@ struct IRC_ModuleHandlerConfiguration
    , traceParsing (IRC_DEFAULT_YACC_TRACE)
    , traceScanning (IRC_DEFAULT_LEX_TRACE)
    //////////////////////////////////////
+   , printFinalReport (true)
+   , printProgressDot (false)
+   , pushStatisticMessages (true)
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)
   {};
@@ -136,6 +139,9 @@ struct IRC_ModuleHandlerConfiguration
   bool                       traceParsing;       // debug yacc (bison) ?
   bool                       traceScanning;      // debug (f)lex ?
 
+  bool                       printFinalReport;
+  bool                       printProgressDot; // file writer module
+  bool                       pushStatisticMessages;
   IRC_ProtocolConfiguration* protocolConfiguration;
 
   Stream_Configuration*      streamConfiguration;

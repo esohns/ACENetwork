@@ -59,8 +59,10 @@ class Net_Stream
                         //////////////////
                         Net_StreamSessionData,   // session data
                         Net_StreamSessionData_t, // session data container (reference counted)
-                        Net_SessionMessage,
-                        Net_Message>
+                        //////////////////
+                        ACE_Message_Block,
+                        Net_Message,
+                        Net_SessionMessage>
 {
  public:
   Net_Stream (const std::string&); // name
@@ -99,8 +101,10 @@ class Net_Stream
                         //////////////////
                         Net_StreamSessionData,
                         Net_StreamSessionData_t,
-                        Net_SessionMessage,
-                        Net_Message> inherited;
+                        //////////////////
+                        ACE_Message_Block,
+                        Net_Message,
+                        Net_SessionMessage> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Stream ())
   ACE_UNIMPLEMENTED_FUNC (Net_Stream (const Net_Stream&))
