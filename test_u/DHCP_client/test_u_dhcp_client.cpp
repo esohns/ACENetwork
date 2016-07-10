@@ -1131,7 +1131,8 @@ allocate:
     session_data_r.timeStamp = state_r.timeStamp;
     session_data_r.xid = DHCP_record.xid;
 
-    isocket_connection_p->send (message_p);
+    ACE_Message_Block* message_block_p = message_p;
+    isocket_connection_p->send (message_block_p);
   } // end IF
 
   // *NOTE*: from this point on, clean up any remote connections !

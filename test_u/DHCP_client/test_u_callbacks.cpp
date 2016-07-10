@@ -1162,7 +1162,9 @@ allocate:
   Test_U_ISocketConnection_t* isocket_connection_p =
     dynamic_cast<Test_U_ISocketConnection_t*> (session_data_r.broadcastConnection);
   ACE_ASSERT (isocket_connection_p);
-  isocket_connection_p->send (message_p);
+
+  ACE_Message_Block* message_block_p = message_p;
+  isocket_connection_p->send (message_block_p);
 
   return;
 
@@ -1283,7 +1285,9 @@ allocate:
   Test_U_ISocketConnection_t* isocket_connection_p =
     dynamic_cast<Test_U_ISocketConnection_t*> (iconnection_p);
   ACE_ASSERT (isocket_connection_p);
-  isocket_connection_p->send (message_p);
+
+  ACE_Message_Block* message_block_p = message_p;
+  isocket_connection_p->send (message_block_p);
 
   return;
 
@@ -1388,7 +1392,9 @@ allocate:
   Test_U_ISocketConnection_t* isocket_connection_p =
     dynamic_cast<Test_U_ISocketConnection_t*> (session_data_r.broadcastConnection);
   ACE_ASSERT (isocket_connection_p);
-  isocket_connection_p->send (message_p);
+
+  ACE_Message_Block* message_block_p = message_p;
+  isocket_connection_p->send (message_block_p);
 
   return;
 
@@ -1514,7 +1520,9 @@ allocate:
   Test_U_ISocketConnection_t* isocket_connection_p =
     dynamic_cast<Test_U_ISocketConnection_t*> (iconnection_p);
   ACE_ASSERT (isocket_connection_p);
-  isocket_connection_p->send (message_p);
+
+  ACE_Message_Block* message_block_p = message_p;
+  isocket_connection_p->send (message_block_p);
 
   return;
 

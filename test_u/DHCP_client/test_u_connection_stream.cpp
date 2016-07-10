@@ -121,10 +121,10 @@ Test_U_InboundConnectionStream::initialize (const Test_U_StreamConfiguration& co
 
   // ---------------------------------------------------------------------------
 
-  Test_U_Module_Dump* dump_impl_p = NULL;
-  Test_U_Module_DHCPDiscover* DHCPDiscover_impl_p = NULL;
-  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p = NULL;
-  Test_U_Module_Parser* parser_impl_p = NULL;
+//  Test_U_Module_Dump* dump_impl_p = NULL;
+//  Test_U_Module_DHCPDiscover* DHCPDiscover_impl_p = NULL;
+//  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p = NULL;
+//  Test_U_Module_Parser* parser_impl_p = NULL;
   Test_U_Module_Net_Writer_t* netIO_impl_p = NULL;
 
   // ******************* Dump ************************

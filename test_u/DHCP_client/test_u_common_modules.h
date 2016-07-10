@@ -108,12 +108,11 @@ typedef DHCP_Module_DiscoverH_T<ACE_SYNCH_MUTEX,
                                 //////////
                                 ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                //////////
-                                Test_U_StreamModuleHandlerConfiguration,
-                                //////////
                                 ACE_Message_Block,
                                 Test_U_Message,
                                 Test_U_SessionMessage,
+                                //////////
+                                Test_U_StreamModuleHandlerConfiguration,
                                 //////////
                                 int,
                                 int,

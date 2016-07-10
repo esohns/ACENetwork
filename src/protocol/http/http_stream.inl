@@ -359,7 +359,7 @@ HTTP_Stream_T<StreamStateType,
   ACE_ASSERT (configuration_in.messageAllocator);
   //inherited::allocator_ = configuration_in.messageAllocator;
 
-  isInitialized_ = true;
+  inherited::isInitialized_ = true;
 //   inherited::dump_state();
 
   return true;

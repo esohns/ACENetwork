@@ -698,6 +698,7 @@ do_work (unsigned int bufferSize_in,
   Test_U_MessageData* message_data_p = NULL;
   Test_U_MessageData_t* message_data_container_p = NULL;
   Test_U_Message* message_p = NULL;
+  ACE_Message_Block* message_block_p = NULL;
   if (useReactor_in)
     ACE_NEW_NORETURN (iconnector_p,
                       Test_U_TCPConnector_t (connection_manager_p,
@@ -865,7 +866,9 @@ allocate:
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
   message_p->initialize (message_data_container_p,
                          NULL);
-  isocket_connection_p->send (message_p);
+  // *IMPORTANT NOTE*: fire-and-forget API (message_p)
+  message_block_p = message_p;
+  isocket_connection_p->send (message_block_p);
 
   connection_manager_p->wait ();
 

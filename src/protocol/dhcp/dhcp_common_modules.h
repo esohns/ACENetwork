@@ -50,23 +50,31 @@ typedef DHCP_Message_T<Stream_AllocatorConfiguration,
 
 typedef DHCP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
-                             DHCP_SessionMessage,
-                             DHCP_Message_t> DHCP_Module_Parser;
+                             DHCP_ModuleHandlerConfiguration,
+                             ACE_Message_Block,
+                             DHCP_Message_t,
+                             DHCP_SessionMessage> DHCP_Module_Parser;
 typedef DHCP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
-                               DHCP_SessionMessage,
-                               DHCP_Message_t> DHCP_Module_Streamer;
+                               DHCP_ModuleHandlerConfiguration,
+                               ACE_Message_Block,
+                               DHCP_Message_t,
+                               DHCP_SessionMessage> DHCP_Module_Streamer;
 
 typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          DHCP_SessionMessage,
+                                          DHCP_ModuleHandlerConfiguration,
+                                          ACE_Message_Block,
                                           DHCP_Message_t,
+                                          DHCP_SessionMessage,
                                           DHCP_MessageType_t,
                                           DHCP_RuntimeStatistic_t> DHCP_Module_Statistic_ReaderTask_t;
 typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          DHCP_SessionMessage,
+                                          DHCP_ModuleHandlerConfiguration,
+                                          ACE_Message_Block,
                                           DHCP_Message_t,
+                                          DHCP_SessionMessage,
                                           DHCP_MessageType_t,
                                           DHCP_RuntimeStatistic_t> DHCP_Module_Statistic_WriterTask_t;
 

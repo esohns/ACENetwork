@@ -195,7 +195,6 @@ DHCP_Module_Discover_T<SynchStrategyType,
                 ACE_TEXT ("re-initializing...\n")));
 
     // clean up
-    configuration_ = NULL;
     if (sessionData_)
     {
       sessionData_->decrease ();
@@ -205,11 +204,11 @@ DHCP_Module_Discover_T<SynchStrategyType,
     initialized_ = false;
   } // end IF
 
-  configuration_ = &const_cast<ConfigurationType&> (configuration_in);
   // *TODO*: remove type inference
   sendRequestOnOffer_ =
       configuration_in.protocolConfiguration->sendRequestOnOffer;
-  initialized_ = true;
+
+  initialized_ = inherited::initialize (configuration_in);
 
   return initialized_;
 }
@@ -242,10 +241,10 @@ DHCP_Module_Discover_T<SynchStrategyType,
   // sanity check(s)
   ACE_ASSERT (message_inout->isInitialized ());
   ACE_ASSERT (sessionData_);
-  ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->protocolConfiguration);
-  ACE_ASSERT (configuration_->socketConfiguration);
-  ACE_ASSERT (configuration_->socketHandlerConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->protocolConfiguration);
+  ACE_ASSERT (inherited::configuration_->socketConfiguration);
+  ACE_ASSERT (inherited::configuration_->socketHandlerConfiguration);
 
   const typename DataMessageType::DATA_T& data_r = message_inout->get ();
 
@@ -306,11 +305,11 @@ DHCP_Module_Discover_T<SynchStrategyType,
   // *TODO*: remove type inferences
   // sanity check(s)
   ACE_ASSERT (!session_data_r.connection);
-  ACE_ASSERT (configuration_->socketConfiguration);
 
-  address = configuration_->socketConfiguration->address;
-  configuration_->socketConfiguration->address = session_data_r.serverAddress;
-  configuration_->socketConfiguration->writeOnly = true;
+  address = inherited::configuration_->socketConfiguration->address;
+  inherited::configuration_->socketConfiguration->address =
+      session_data_r.serverAddress;
+  inherited::configuration_->socketConfiguration->writeOnly = true;
 
   // step2ab: set up the connection manager
   // *NOTE*: the stream configuration may contain a module handle that is
@@ -323,19 +322,18 @@ DHCP_Module_Discover_T<SynchStrategyType,
   //         --> to be removed ASAP
   // *TODO*: remove type inferences
   // sanity check(s)
-  ACE_ASSERT (configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (configuration_->streamConfiguration);
+  ACE_ASSERT (inherited::configuration_->streamConfiguration);
 
   // *TODO*: remove type inferences
   connection_manager_p =
     ConnectionManagerType::SINGLETON_T::instance ();
   ACE_ASSERT (connection_manager_p);
-  clone_module = configuration_->streamConfiguration->cloneModule;
-  delete_module = configuration_->streamConfiguration->deleteModule;
-  module_p = configuration_->streamConfiguration->module;
-  configuration_->streamConfiguration->cloneModule = false;
-  configuration_->streamConfiguration->deleteModule = false;
-  configuration_->streamConfiguration->module = NULL;
+  clone_module = inherited::configuration_->streamConfiguration->cloneModule;
+  delete_module = inherited::configuration_->streamConfiguration->deleteModule;
+  module_p = inherited::configuration_->streamConfiguration->module;
+  inherited::configuration_->streamConfiguration->cloneModule = false;
+  inherited::configuration_->streamConfiguration->deleteModule = false;
+  inherited::configuration_->streamConfiguration->module = NULL;
   reset_configuration = true;
 
   //connection_manager_p->set (*configuration_,
@@ -366,12 +364,12 @@ DHCP_Module_Discover_T<SynchStrategyType,
   } // end IF
 
   // step2e: reset the connection configuration
-  configuration_->socketConfiguration->address = address;
-  configuration_->socketConfiguration->writeOnly = false;
+  inherited::configuration_->socketConfiguration->address = address;
+  inherited::configuration_->socketConfiguration->writeOnly = false;
 
-  configuration_->streamConfiguration->cloneModule = clone_module;
-  configuration_->streamConfiguration->deleteModule = delete_module;
-  configuration_->streamConfiguration->module = module_p;
+  inherited::configuration_->streamConfiguration->cloneModule = clone_module;
+  inherited::configuration_->streamConfiguration->deleteModule = delete_module;
+  inherited::configuration_->streamConfiguration->module = module_p;
 
   //connection_manager_p->set (*configuration_,
   //                           configuration_->userData);
@@ -381,12 +379,12 @@ DHCP_Module_Discover_T<SynchStrategyType,
 error:
   if (reset_configuration)
   {
-    configuration_->socketConfiguration->address = address;
-    configuration_->socketConfiguration->writeOnly = false;
+    inherited::configuration_->socketConfiguration->address = address;
+    inherited::configuration_->socketConfiguration->writeOnly = false;
 
-    configuration_->streamConfiguration->cloneModule = clone_module;
-    configuration_->streamConfiguration->deleteModule = delete_module;
-    configuration_->streamConfiguration->module = module_p;
+    inherited::configuration_->streamConfiguration->cloneModule = clone_module;
+    inherited::configuration_->streamConfiguration->deleteModule = delete_module;
+    inherited::configuration_->streamConfiguration->module = module_p;
 
     //connection_manager_p->set (*configuration_,
     //                           configuration_->userData);
@@ -404,12 +402,12 @@ continue_:
     return; // done
 
   DataMessageType* message_p =
-      allocateMessage (configuration_->socketHandlerConfiguration->PDUSize);
+      allocateMessage (inherited::configuration_->socketHandlerConfiguration->PDUSize);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to DHCP_Module_Discover_T::allocateMessage(%u): \"%m\", returning\n"),
-                configuration_->socketHandlerConfiguration->PDUSize));
+                inherited::configuration_->socketHandlerConfiguration->PDUSize));
     return;
   } // end IF
   DHCP_Record DHCP_record;
@@ -418,9 +416,9 @@ continue_:
   DHCP_record.hlen = DHCP_FRAME_HLEN;
   DHCP_record.xid = data_r.xid;
   DHCP_record.secs = data_r.secs;
-  if (configuration_->protocolConfiguration->requestBroadcastReplies)
+  if (inherited::configuration_->protocolConfiguration->requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interface2MACAddress (configuration_->socketConfiguration->networkInterface,
+  if (!Net_Common_Tools::interface2MACAddress (inherited::configuration_->socketConfiguration->networkInterface,
                                                DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -504,7 +502,7 @@ DHCP_Module_Discover_T<SynchStrategyType,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
-  ACE_ASSERT (configuration_);
+  ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (initialized_);
 
   switch (message_inout->type ())
@@ -537,13 +535,13 @@ DHCP_Module_Discover_T<SynchStrategyType,
       bool use_reactor = false;
 
       // *TODO*: remove type inferences
-      if (configuration_->broadcastConnection)
+      if (inherited::configuration_->broadcastConnection)
       {
         // sanity check(s)
         ACE_ASSERT (!session_data_r.broadcastConnection);
 
         session_data_r.broadcastConnection =
-            configuration_->broadcastConnection;
+            inherited::configuration_->broadcastConnection;
 
         goto continue_;
       } // end IF
@@ -558,7 +556,7 @@ DHCP_Module_Discover_T<SynchStrategyType,
       else
       {
         // sanity check(s)
-        ACE_ASSERT (configuration_->streamConfiguration);
+        ACE_ASSERT (inherited::configuration_->streamConfiguration);
 
         // *NOTE*: this means that this module is part of a connection
         //         processing stream
@@ -572,7 +570,7 @@ DHCP_Module_Discover_T<SynchStrategyType,
         //         when a connection handles several consecutive sessions,
         //         and/or each session needs a reference to its' own specific
         //         and/or 'unique' ID...)
-        if (configuration_->streamConfiguration->sessionID)
+        if (inherited::configuration_->streamConfiguration->sessionID)
         {
           // *NOTE*: this may have to wait for the connection to finish
           //         initializing
@@ -583,9 +581,9 @@ DHCP_Module_Discover_T<SynchStrategyType,
             if (!session_data_r.broadcastConnection)
               session_data_r.broadcastConnection =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-              connection_manager_p->get (reinterpret_cast<ACE_HANDLE> (configuration_->streamConfiguration->sessionID));
+              connection_manager_p->get (reinterpret_cast<ACE_HANDLE> (inherited::configuration_->streamConfiguration->sessionID));
 #else
-              connection_manager_p->get (static_cast<ACE_HANDLE> (configuration_->streamConfiguration->sessionID));
+              connection_manager_p->get (static_cast<ACE_HANDLE> (inherited::configuration_->streamConfiguration->sessionID));
 #endif
             if (!session_data_r.broadcastConnection)
               continue;
@@ -597,7 +595,7 @@ DHCP_Module_Discover_T<SynchStrategyType,
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to retrieve connection handle (handle was: %u), aborting\n"),
-                        configuration_->streamConfiguration->sessionID));
+                        inherited::configuration_->streamConfiguration->sessionID));
             goto error;
           } // end IF
 
@@ -609,9 +607,9 @@ DHCP_Module_Discover_T<SynchStrategyType,
       // step2aa: set up the socket configuration
       // *TODO*: remove type inferences
       // sanity check(s)
-      ACE_ASSERT (configuration_->socketConfiguration);
+      ACE_ASSERT (inherited::configuration_->socketConfiguration);
 
-      configuration_->socketConfiguration->writeOnly = true;
+      inherited::configuration_->socketConfiguration->writeOnly = true;
 
       // step2ab: set up the connection manager
       // *NOTE*: the stream configuration may contain a module handle that is
@@ -624,16 +622,18 @@ DHCP_Module_Discover_T<SynchStrategyType,
       //         --> to be removed ASAP
       // *TODO*: remove type inferences
       // sanity check(s)
-      ACE_ASSERT (configuration_->socketHandlerConfiguration);
-      ACE_ASSERT (configuration_->streamConfiguration);
+      ACE_ASSERT (inherited::configuration_->socketHandlerConfiguration);
+      ACE_ASSERT (inherited::configuration_->streamConfiguration);
 
       // *TODO*: remove type inferences
-      clone_module = configuration_->streamConfiguration->cloneModule;
-      delete_module = configuration_->streamConfiguration->deleteModule;
-      module_p = configuration_->streamConfiguration->module;
-      configuration_->streamConfiguration->cloneModule = false;
-      configuration_->streamConfiguration->deleteModule = false;
-      configuration_->streamConfiguration->module = NULL;
+      clone_module =
+          inherited::configuration_->streamConfiguration->cloneModule;
+      delete_module =
+          inherited::configuration_->streamConfiguration->deleteModule;
+      module_p = inherited::configuration_->streamConfiguration->module;
+      inherited::configuration_->streamConfiguration->cloneModule = false;
+      inherited::configuration_->streamConfiguration->deleteModule = false;
+      inherited::configuration_->streamConfiguration->module = NULL;
       reset_configuration = true;
 
       //connection_manager_p->set (*configuration_,
@@ -641,15 +641,15 @@ DHCP_Module_Discover_T<SynchStrategyType,
 
       ACE_OS::memset (buffer, 0, sizeof (buffer));
       result =
-        configuration_->socketConfiguration->address.addr_to_string (buffer,
-                                                                     sizeof (buffer),
-                                                                     1);
+        inherited::configuration_->socketConfiguration->address.addr_to_string (buffer,
+                                                                                sizeof (buffer),
+                                                                                1);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string: \"%m\", continuing\n")));
 
       broadcastConnectionHandle_ =
-          this->connect (configuration_->socketConfiguration->address,
+          this->connect (inherited::configuration_->socketConfiguration->address,
                          use_reactor);
       if (broadcastConnectionHandle_ == ACE_INVALID_HANDLE)
       {
@@ -664,7 +664,7 @@ DHCP_Module_Discover_T<SynchStrategyType,
             connection_manager_p->get (broadcastConnectionHandle_);
       else
         session_data_r.broadcastConnection =
-            connection_manager_p->get (configuration_->socketConfiguration->address);
+            connection_manager_p->get (inherited::configuration_->socketConfiguration->address);
       if (!session_data_r.broadcastConnection)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -675,14 +675,14 @@ DHCP_Module_Discover_T<SynchStrategyType,
       } // end IF
 
       // step2e: reset the connection configuration
-      configuration_->socketConfiguration->writeOnly = false;
+      inherited::configuration_->socketConfiguration->writeOnly = false;
 
-      configuration_->streamConfiguration->cloneModule = clone_module;
-      configuration_->streamConfiguration->deleteModule = delete_module;
-      configuration_->streamConfiguration->module = module_p;
+      inherited::configuration_->streamConfiguration->cloneModule = clone_module;
+      inherited::configuration_->streamConfiguration->deleteModule = delete_module;
+      inherited::configuration_->streamConfiguration->module = module_p;
 
-      //connection_manager_p->set (*configuration_,
-      //                           configuration_->userData);
+      //connection_manager_p->set (*inherited::configuration_,
+      //                           inherited::configuration_->userData);
 
 continue_:
       break;
@@ -692,11 +692,13 @@ error:
 
       if (reset_configuration)
       {
-        configuration_->socketConfiguration->writeOnly = false;
+        inherited::configuration_->socketConfiguration->writeOnly = false;
 
-        configuration_->streamConfiguration->cloneModule = clone_module;
-        configuration_->streamConfiguration->deleteModule = delete_module;
-        configuration_->streamConfiguration->module = module_p;
+        inherited::configuration_->streamConfiguration->cloneModule =
+            clone_module;
+        inherited::configuration_->streamConfiguration->deleteModule =
+            delete_module;
+        inherited::configuration_->streamConfiguration->module = module_p;
 
         //connection_manager_p->set (*configuration_,
         //                           configuration_->userData);
@@ -815,19 +817,19 @@ DHCP_Module_Discover_T<SynchStrategyType,
   STREAM_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::allocateMessage"));
 
   // sanity check(s)
-  ACE_ASSERT (configuration_);
+  ACE_ASSERT (inherited::configuration_);
 
   // initialize return value(s)
   DataMessageType* message_p = NULL;
 
   // *TODO*: remove type inference
-  if (configuration_->messageAllocator)
+  if (inherited::configuration_->messageAllocator)
   {
 allocate:
     try {
       // *TODO*: remove type inference
       message_p =
-          static_cast<DataMessageType*> (configuration_->messageAllocator->malloc (requestedSize_in));
+          static_cast<DataMessageType*> (inherited::configuration_->messageAllocator->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), continuing\n"),
@@ -837,7 +839,7 @@ allocate:
 
     // keep retrying ?
     if (!message_p &&
-        !configuration_->messageAllocator->block ())
+        !inherited::configuration_->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
@@ -845,9 +847,9 @@ allocate:
                       DataMessageType (requestedSize_in));
   if (!message_p)
   {
-    if (configuration_->messageAllocator)
+    if (inherited::configuration_->messageAllocator)
     {
-      if (configuration_->messageAllocator->block ())
+      if (inherited::configuration_->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate data message (%u): \"%m\", aborting\n"),
                     requestedSize_in));
@@ -889,8 +891,8 @@ DHCP_Module_Discover_T<SynchStrategyType,
   useReactor_out = false;
 
   // sanity check(s)
-  ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->socketHandlerConfiguration);
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->socketHandlerConfiguration);
 
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
@@ -921,18 +923,18 @@ DHCP_Module_Discover_T<SynchStrategyType,
   if (is_broadcast)
     ACE_NEW_NORETURN (iconnector_p,
                       ConnectorTypeBcast (connection_manager_p,
-                                          configuration_->socketHandlerConfiguration->statisticReportingInterval));
+                                          inherited::configuration_->socketHandlerConfiguration->statisticReportingInterval));
   else
     ACE_NEW_NORETURN (iconnector_p,
                       ConnectorType (connection_manager_p,
-                                     configuration_->socketHandlerConfiguration->statisticReportingInterval));
+                                     inherited::configuration_->socketHandlerConfiguration->statisticReportingInterval));
   if (!iconnector_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory, aborting\n")));
     return ACE_INVALID_HANDLE;
   } // end IF
-  if (!iconnector_p->initialize (*(configuration_->socketHandlerConfiguration)))
+  if (!iconnector_p->initialize (*(inherited::configuration_->socketHandlerConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, aborting\n")));

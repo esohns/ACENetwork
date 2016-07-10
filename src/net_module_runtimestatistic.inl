@@ -490,7 +490,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
            iterator++)
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("\"%s\": %u --> %.2f %%\n"),
-                    ACE_TEXT (ProtocolMessageType::Command2String (iterator->first).c_str ()),
+                    ACE_TEXT (DataMessageType::Command2String (iterator->first).c_str ()),
                     iterator->second,
                     static_cast<double> (((iterator->second * 100.0) / (numInboundMessages_ + numOutboundMessages_)))));
     } // end IF
