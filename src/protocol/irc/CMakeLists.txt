@@ -39,6 +39,8 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
 
 ########### next target ###############
 set (${PROJECT_NAME}_Protocol_IRC_SRCS
+     stdafx.cpp
+     stdafx.h
      irc_bisector.cpp
      irc_bisector.h
      irc_codes.h
@@ -82,9 +84,7 @@ set (${PROJECT_NAME}_Protocol_IRC_SRCS
      irc_stream.inl
      irc_stream_common.h
      irc_tools.cpp
-     irc_tools.h
-     stdafx.cpp
-     stdafx.h)
+     irc_tools.h)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/libACENetwork/protocol/irc")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS -DIRC_BUILD_DLL)
@@ -109,6 +109,10 @@ if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_IRC Common)
  target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACEStream)
 endif ()
+
+# add PCH
+set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+cotire (${PROJECT_NAME}_Protocol_IRC)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_IRC

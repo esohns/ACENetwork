@@ -120,6 +120,8 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
 set (client_SRCS
+     stdafx.cpp
+     stdafx.h
      net_client.cpp
      net_client_common.h
      net_client_connector_common.h
@@ -152,49 +154,52 @@ set (client_SRCS
      test_u_socket_common.h
      test_u_stream_common.h
      test_u_tcpconnection.cpp
-     test_u_tcpconnection.h
-     stdafx.cpp
-     stdafx.h)
+     test_u_tcpconnection.h)
 
-set (EXECUTABLE client)
-add_executable (${EXECUTABLE} ${client_SRCS} etc/net_client.glade)
+set (EXECUTABLE_SOURCE client)
+add_executable (${EXECUTABLE_SOURCE} ${client_SRCS} etc/net_client.glade)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
-add_dependencies (${PROJECT_NAME} Common)
-add_dependencies (${PROJECT_NAME} ACEStream)
-add_dependencies (${PROJECT_NAME} ACENetwork)
-add_dependencies (${PROJECT_NAME} ACENetwork_Client)
+add_dependencies (${EXECUTABLE_SOURCE} Common)
+add_dependencies (${EXECUTABLE_SOURCE} ACEStream)
+add_dependencies (${EXECUTABLE_SOURCE} ${PROJECT_NAME})
+add_dependencies (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Client)
 
-target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
+target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_LIBRARY})
 if (UNIX)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- target_link_libraries (${EXECUTABLE} ${PKG_GTK_GLADE_LIBRARIES})
+ target_link_libraries (${EXECUTABLE_SOURCE} ${PKG_CAP_LIBRARIES})
+ target_link_libraries (${EXECUTABLE_SOURCE} ${PKG_GTK_GLADE_LIBRARIES})
 elseif (WIN32)
 # *TODO*: repair WIN32 pkgconfig support
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gio-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/glib-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gobject-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/pango-1.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gdk-win32-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gtk-win32-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gio-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/glib-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gobject-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/pango-1.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gdk-win32-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gtk-win32-2.0.lib)
+# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gio-2.0.lib)
+# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/glib-2.0.lib)
+# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gobject-2.0.lib)
+# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/pango-1.0.lib)
+# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gdk-win32-2.0.lib)
+# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gtk-win32-2.0.lib)
+ target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gio-2.0.lib)
+ target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/glib-2.0.lib)
+ target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gobject-2.0.lib)
+ target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/pango-1.0.lib)
+ target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gdk-win32-2.0.lib)
+ target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gtk-win32-2.0.lib)
 endif ()
-target_link_libraries (${EXECUTABLE} Common)
+target_link_libraries (${EXECUTABLE_SOURCE} Common)
 if (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+ set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
-target_link_libraries (${EXECUTABLE} CommonUI)
-target_link_libraries (${EXECUTABLE} ACEStream)
-target_link_libraries (${EXECUTABLE} ACENetwork)
+target_link_libraries (${EXECUTABLE_SOURCE} CommonUI)
+target_link_libraries (${EXECUTABLE_SOURCE} ACEStream)
+target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME})
 
-install (TARGETS ${EXECUTABLE}
+# add PCH
+set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+#cotire (${EXECUTABLE_SOURCE})
+
+install (TARGETS ${EXECUTABLE_SOURCE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
@@ -239,47 +244,45 @@ set (server_SRCS
      stdafx.cpp
      stdafx.h)
 
-unset (EXECUTABLE)
-set (EXECUTABLE server)
-add_executable (${EXECUTABLE} ${server_SRCS} etc/net_server.glade)
+set (EXECUTABLE_TARGET server)
+add_executable (${EXECUTABLE_TARGET} ${server_SRCS} etc/net_server.glade)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
-add_dependencies (${PROJECT_NAME} Common)
-add_dependencies (${PROJECT_NAME} ACEStream)
-add_dependencies (${PROJECT_NAME} ACENetwork)
-add_dependencies (${PROJECT_NAME} ACENetwork_Server)
+add_dependencies (${EXECUTABLE_TARGET} Common)
+add_dependencies (${EXECUTABLE_TARGET} ACEStream)
+add_dependencies (${EXECUTABLE_TARGET} ${PROJECT_NAME})
+add_dependencies (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
 
-target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
+target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (${EXECUTABLE_TARGET} ${ACE_LIBRARY})
 if (UNIX)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- target_link_libraries (${EXECUTABLE} ${PKG_GTK_GLADE_LIBRARIES})
+ target_link_libraries (${EXECUTABLE_TARGET} ${PKG_CAP_LIBRARIES})
+ target_link_libraries (${EXECUTABLE_TARGET} ${PKG_GTK_GLADE_LIBRARIES})
 elseif (WIN32)
 # *TODO*: repair WIN32 pkgconfig support
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gio-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/glib-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gobject-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/pango-1.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gdk-win32-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gtk-win32-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gio-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/glib-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gobject-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/pango-1.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gdk-win32-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gtk-win32-2.0.lib)
+ target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gio-2.0.lib)
+ target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/glib-2.0.lib)
+ target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gobject-2.0.lib)
+ target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/pango-1.0.lib)
+ target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gdk-win32-2.0.lib)
+ target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gtk-win32-2.0.lib)
 endif ()
-target_link_libraries (${EXECUTABLE} Common)
+target_link_libraries (${EXECUTABLE_TARGET} Common)
 if (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+ set_target_properties (${EXECUTABLE_TARGET} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
-target_link_libraries (${EXECUTABLE} CommonUI)
-target_link_libraries (${EXECUTABLE} ACEStream)
-target_link_libraries (${EXECUTABLE} ACENetwork)
-target_link_libraries (${EXECUTABLE} ACENetwork_Server)
+target_link_libraries (${EXECUTABLE_TARGET} CommonUI)
+target_link_libraries (${EXECUTABLE_TARGET} ACEStream)
+target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
 
-install (TARGETS ${EXECUTABLE}
+# add PCH
+set_target_properties (${EXECUTABLE_TARGET} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+set_target_properties (${EXECUTABLE_TARGET} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+cotire (${EXECUTABLE_SOURCE} ${EXECUTABLE_TARGET})
+
+install (TARGETS ${EXECUTABLE_TARGET}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)

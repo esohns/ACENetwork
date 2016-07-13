@@ -155,6 +155,8 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ############## next target ################
 set (${PROJECT_NAME}_DHCPClient_EXE_SRCS
+     stdafx.cpp
+     stdafx.h
      test_u_callbacks.cpp
      test_u_callbacks.h
      test_u_common.h
@@ -176,13 +178,11 @@ set (${PROJECT_NAME}_DHCPClient_EXE_SRCS
      test_u_session_message.cpp
      test_u_session_message.h
      test_u_signalhandler.cpp
-     test_u_signalhandler.h
+     test_u_signalhandler.h)
 #     test_u_stream.cpp
 #     test_u_stream.h
 #     test_u_stream.inl
 #  test_u_template_instantiations.cpp
-     stdafx.cpp
-     stdafx.h)
 set (${PROJECT_NAME}_DHCPClient_EXE_CFG
      etc/test_u.glade
      etc/resources.rc)
@@ -192,7 +192,11 @@ set (EXECUTABLE DHCP_client)
 add_executable (${EXECUTABLE} ${ACENetwork_DHCPClient_EXE_SRCS} etc/test_u.glade)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
-#add_dependencies (${PROJECT_NAME} Common)
+add_dependencies (${EXECUTABLE} Common)
+add_dependencies (${EXECUTABLE} CommonUI)
+add_dependencies (${EXECUTABLE} ACEStream)
+add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
+add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
@@ -208,12 +212,6 @@ elseif (WIN32)
 # target_link_libraries (${EXECUTABLE} ${CURSES_LIBRARY})
 # target_link_libraries (${EXECUTABLE} ${PANEL_LIBRARY})
 # *TODO*: repair WIN32 pkgconfig support
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gio-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/glib-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gobject-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/pango-1.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gdk-win32-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gtk-win32-2.0.lib)
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gio-2.0.lib)
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/glib-2.0.lib)
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gobject-2.0.lib)
@@ -224,8 +222,12 @@ endif ()
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonUI)
 target_link_libraries (${EXECUTABLE} ACEStream)
-target_link_libraries (${EXECUTABLE} ACENetwork)
-target_link_libraries (${EXECUTABLE} ACENetwork_Protocol_DHCP)
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
+
+# add PCH
+set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+cotire (${EXECUTABLE})
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets

@@ -359,28 +359,26 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   int result = -1;
   Stream_Base_t* stream_p = (stream_.upStream () ? stream_.upStream ()
                                                  : &stream_);
+  ACE_Message_Block* message_block_p = NULL;
 
-  if (!inherited::buffer_)
+  // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
+  //                   been notified
+  result = stream_p->get (message_block_p, NULL);
+  if (result == -1)
   {
-    // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
-    //                   been notified
-    result = stream_p->get (inherited::buffer_, NULL);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
-      return -1;
-    } // end IF
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
+    return -1;
   } // end IF
-  ACE_ASSERT (inherited::buffer_);
+  ACE_ASSERT (message_block_p);
 
   // start (asynchronous) write
   this->increase ();
   inherited::counter_.increase ();
-  size_t bytes_to_send = inherited::buffer_->length ();
+  size_t bytes_to_send = message_block_p->length ();
 send:
   ssize_t result_2 =
-    inherited::outputStream_.send (inherited::buffer_,                                      // data
+    inherited::outputStream_.send (message_block_p,                                         // data
                                    bytes_to_send,                                           // #bytes to send
                                    0,                                                       // flags
                                    inherited4::configuration_->socketConfiguration.address, // remote address (ignored)
@@ -395,11 +393,10 @@ send:
 
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
-                inherited::buffer_->length ()));
+                message_block_p->length ()));
 
     // clean up
-    inherited::buffer_->release ();
-    inherited::buffer_ = NULL;
+    message_block_p->release ();
     this->decrease ();
     inherited::counter_.decrease ();
 
@@ -722,7 +719,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // step1: wait for the stream to flush
   //        --> all data has been dispatched (here: to the proactor/kernel)
   stream_.waitForCompletion (waitForThreads_in,
-                             true);
+                             false);            // don't wait for upstream modules
 
   // step2: wait for the asynchronous operations to complete
   inherited::counter_.wait (0);

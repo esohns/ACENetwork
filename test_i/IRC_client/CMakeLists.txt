@@ -127,6 +127,8 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
 set (IRC_client_SRCS
+     stdafx.cpp
+     stdafx.h
      FILE_Stream.cpp
      FILE_Stream.h
      FILE_Stream.inl
@@ -160,9 +162,7 @@ set (IRC_client_SRCS
      IRC_client_tools.h
      Streambuf_alt.cpp
      Streambuf_alt.h
-     Streambuf_alt.inl
-     stdafx.cpp
-     stdafx.h)
+     Streambuf_alt.inl)
 
 #set_source_files_properties(${IRC_client_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
@@ -170,7 +170,10 @@ set (EXECUTABLE IRC_client)
 add_executable(${EXECUTABLE} ${IRC_client_SRCS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
-#add_dependencies (${PROJECT_NAME} Common)
+add_dependencies (${EXECUTABLE} Common)
+add_dependencies (${EXECUTABLE} ACEStream)
+add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
+add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
@@ -183,9 +186,14 @@ elseif (WIN32)
 endif ()
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} ACEStream)
-target_link_libraries (${EXECUTABLE} ACENetwork)
-target_link_libraries (${EXECUTABLE} ACENetwork_Protocol_IRC)
-#target_link_libraries (${EXECUTABLE} ACENetwork_Client)
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
+#target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Client)
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
+
+# add PCH
+set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+#cotire (${EXECUTABLE})
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
@@ -226,6 +234,8 @@ endif ()
 
 ########### next target ###############
 set (IRC_client_gui_SRCS
+     stdafx.cpp
+     stdafx.h
      IRC_client_common.h
      IRC_client_common_modules.h
      IRC_client_configuration.h
@@ -254,51 +264,51 @@ set (IRC_client_gui_SRCS
      IRC_client_stream.h
      IRC_client_stream_common.h
      IRC_client_tools.cpp
-     IRC_client_tools.h
-     stdafx.cpp
-     stdafx.h)
+     IRC_client_tools.h)
 
 #set_source_files_properties (${IRC_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
-unset (EXECUTABLE)
-set (EXECUTABLE IRC_client_gui)
-add_executable (${EXECUTABLE} ${IRC_client_gui_SRCS})
+set (EXECUTABLE_GUI IRC_client_gui)
+add_executable (${EXECUTABLE_GUI} ${IRC_client_gui_SRCS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
-#add_dependencies (${PROJECT_NAME} Common)
+add_dependencies (${EXECUTABLE_GUI} Common)
+add_dependencies (${EXECUTABLE_GUI} Common)
+add_dependencies (${EXECUTABLE_GUI} ACEStream)
+add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME})
+add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 
-target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
+target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 if (UNIX)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- target_link_libraries (${EXECUTABLE} ${PKG_GTK_GLADE_LIBRARIES})
+ target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
+ target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK_GLADE_LIBRARIES})
 elseif (WIN32)
 # *TODO*: repair WIN32 pkgconfig support
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gio-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/glib-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gobject-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/pango-1.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gdk-win32-2.0.lib)
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gtk-win32-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gio-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/glib-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gobject-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/pango-1.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gdk-win32-2.0.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gtk-win32-2.0.lib)
+ target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gio-2.0.lib)
+ target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/glib-2.0.lib)
+ target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gobject-2.0.lib)
+ target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/pango-1.0.lib)
+ target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gdk-win32-2.0.lib)
+ target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gtk-win32-2.0.lib)
 endif ()
-target_link_libraries (${EXECUTABLE} Common)
+target_link_libraries (${EXECUTABLE_GUI} Common)
 if (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+ set_target_properties (${EXECUTABLE_GUI} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
-target_link_libraries (${EXECUTABLE} CommonUI)
-target_link_libraries (${EXECUTABLE} ACEStream)
-target_link_libraries (${EXECUTABLE} ACENetwork)
-target_link_libraries (${EXECUTABLE} ACENetwork_Protocol_IRC)
-#target_link_libraries (${EXECUTABLE} ACENetwork_Client)
+target_link_libraries (${EXECUTABLE_GUI} CommonUI)
+target_link_libraries (${EXECUTABLE_GUI} ACEStream)
+target_link_libraries (${EXECUTABLE_GUI} ACENetwork)
+#target_link_libraries (${EXECUTABLE_GUI} ACENetwork_Client)
+target_link_libraries (${EXECUTABLE_GUI} ACENetwork_Protocol_IRC)
 
-install (TARGETS ${EXECUTABLE}
+# add PCH
+set_target_properties (${EXECUTABLE_GUI} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+set_target_properties (${EXECUTABLE_GUI} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+cotire (${EXECUTABLE} ${EXECUTABLE_GUI})
+
+install (TARGETS ${EXECUTABLE_GUI}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)

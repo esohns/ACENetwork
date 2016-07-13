@@ -51,7 +51,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
  , inherited2 ()
  , inherited3 (interfaceHandle_in,
                statisticCollectionInterval_in)
- , stream_ (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME))
+ , stream_ (std::string (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME)))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::Net_StreamAsynchTCPSocketBase_T"));
 
@@ -710,7 +710,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::waitForCompletion"));
 
   // step1: wait until the stream becomes idle
-  stream_.waitForCompletion (false,
+  stream_.waitForCompletion (false,  // don't wait for any worker thread(s)
                              false); // don't wait for upstream modules
   // --> stream data has been processed
 

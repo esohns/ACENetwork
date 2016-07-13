@@ -105,6 +105,8 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ############## next target ################
 set (${PROJECT_NAME}_Protocol_EXE_SRCS
+     stdafx.cpp
+     stdafx.h
      test_u_common.h
      test_u_common_modules.h
      test_u_connection_common.h
@@ -119,17 +121,18 @@ set (${PROJECT_NAME}_Protocol_EXE_SRCS
      test_u_HTTP_decoder.cpp
      test_u_HTTP_decoder_common.h
      test_u_HTTP_decoder_signalhandler.cpp
-     test_u_HTTP_decoder_signalhandler.h
+     test_u_HTTP_decoder_signalhandler.h)
 #  test_u_template_instantiations.cpp
-     stdafx.cpp
-     stdafx.h)
 
 #string (TOLOWER "${PROJECT_NAME}_Protocol" EXECUTABLE)
 set (EXECUTABLE httpdecoder)
 add_executable (${EXECUTABLE} ${ACENetwork_Protocol_EXE_SRCS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
-#add_dependencies (${PROJECT_NAME} Common)
+add_dependencies (${EXECUTABLE} Common)
+add_dependencies (${EXECUTABLE} ACEStream)
+add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
+add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
@@ -142,8 +145,12 @@ target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} ACEStream)
 target_link_libraries (${EXECUTABLE} ACEStream_Decoder)
-target_link_libraries (${EXECUTABLE} ACENetwork)
-target_link_libraries (${EXECUTABLE} ACENetwork_Protocol_HTTP)
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
+
+# add PCH
+set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+cotire (${EXECUTABLE})
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets

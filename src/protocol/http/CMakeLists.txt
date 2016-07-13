@@ -44,6 +44,8 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
 
 ########### next target ###############
 set (${PROJECT_NAME}_Protocol_HTTP_SRCS
+     stdafx.cpp
+     stdafx.h
      http_bisector.cpp
      http_bisector.h
      http_codes.h
@@ -81,9 +83,7 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_stream.inl
      http_stream_common.h
      http_tools.cpp
-     http_tools.h
-     stdafx.cpp
-     stdafx.h)
+     http_tools.h)
 set (${PROJECT_NAME}_Protocol_HTTP_SCRIPTS
      scripts/scanner.l
      scripts/parser.y)
@@ -121,6 +121,10 @@ if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_HTTP Common)
  target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ACEStream)
 endif ()
+
+# add PCH
+set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+cotire (${PROJECT_NAME}_Protocol_HTTP)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_HTTP

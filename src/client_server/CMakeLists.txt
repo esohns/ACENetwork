@@ -16,6 +16,8 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../)
 
 ############## next target ################
 set (${PROJECT_NAME}_Client_LIB_SRCS
+     stdafx.cpp
+     stdafx.h
      net_client_asynchconnector.cpp
      net_client_asynchconnector.h
      net_client_asynchconnector.inl
@@ -26,17 +28,22 @@ set (${PROJECT_NAME}_Client_LIB_SRCS
      net_client_ssl_connector.h
      net_client_ssl_connector.inl
      net_client_defines.h
-     net_client_exports.h
-     stdafx.cpp
-     stdafx.h)
+     net_client_exports.h)
 
 add_library (${PROJECT_NAME}_Client SHARED ${ACENetwork_Client_LIB_SRCS})
 
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES DEFINE_SYMBOL NET_CLIENT_BUILD_DLL)
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
+# add PCH
+set_target_properties (${PROJECT_NAME}_Client PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+set_target_properties (${PROJECT_NAME}_Client PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+#cotire (${PROJECT_NAME}_Client)
+
 ############## next target ################
 set (${PROJECT_NAME}_Server_LIB_SRCS
+     stdafx.cpp
+     stdafx.h
      net_server_asynchlistener.cpp
      net_server_asynchlistener.h
      net_server_asynchlistener.inl
@@ -49,9 +56,7 @@ set (${PROJECT_NAME}_Server_LIB_SRCS
      net_server_listener.inl
      net_server_ssl_listener.cpp
      net_server_ssl_listener.h
-     net_server_ssl_listener.inl
-     stdafx.cpp
-     stdafx.h)
+     net_server_ssl_listener.inl)
 
 add_library (${PROJECT_NAME}_Server SHARED ${ACENetwork_Server_LIB_SRCS})
 
@@ -62,6 +67,11 @@ endif ()
 
 set_target_properties (${PROJECT_NAME}_Server PROPERTIES DEFINE_SYMBOL NET_SERVER_BUILD_DLL)
 set_target_properties (${PROJECT_NAME}_Server PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
+
+# add PCH
+set_target_properties (${PROJECT_NAME}_Server PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+set_target_properties (${PROJECT_NAME}_Server PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+cotire (${PROJECT_NAME}_Client ${PROJECT_NAME}_Server)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Client ${PROJECT_NAME}_Server

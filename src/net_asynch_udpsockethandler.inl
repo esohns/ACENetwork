@@ -36,7 +36,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::Net_AsynchUDPSocketHandler_T ()
  , inherited2 ()
  , inherited3 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
- , buffer_ (NULL)
+ //, buffer_ (NULL)
  , counter_ (0) // initial count
  , inputStream_ ()
  , outputStream_ ()
@@ -51,8 +51,8 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::~Net_AsynchUDPSocketHandler_T (
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::~Net_AsynchUDPSocketHandler_T"));
 
-  if (buffer_)
-    buffer_->release ();
+  //if (buffer_)
+  //  buffer_->release ();
 }
 
 template <typename ConfigurationType>
@@ -233,13 +233,10 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_wakeup ()
   int result = -1;
   ACE_HANDLE handle = inherited2::handle ();
 
-  try
-  {
+  try {
     result = handle_close (handle,
                            ACE_Event_Handler::ALL_EVENTS_MASK);
-  }
-  catch (...)
-  {
+  } catch (...) {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
@@ -278,12 +275,9 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::notify (void)
   int result = -1;
   ACE_HANDLE handle = inherited2::handle ();
 
-  try
-  {
+  try {
     result = handle_output (handle);
-  }
-  catch (...)
-  {
+  } catch (...) {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler_T::handle_output(0x%@): \"%m\", continuing\n"),
@@ -418,7 +412,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
   ACE_Message_Block* message_block_p = result_in.message_block ();
 
   // sanity check
-  ACE_ASSERT (message_block_p == buffer_);
+  //ACE_ASSERT (message_block_p == buffer_);
   if (result_in.success () == 0)
   {
     // connection closed/reset (by peer) ? --> not an error
@@ -467,7 +461,6 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
     default:
     {
       // finished with this buffer ?
-      message_block_p->rd_ptr (bytes_transferred);
       if (message_block_p->length () > 0)
       {
         // --> reschedule
@@ -496,7 +489,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
 
 release:
   message_block_p->release ();
-  buffer_ = NULL;
+  //buffer_ = NULL;
 
 continue_:
   if (close)
@@ -537,13 +530,10 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::allocateMessage (unsigned int r
   if (inherited::configuration_->messageAllocator)
   {
 allocate:
-    try
-    {
+    try {
       message_block_p =
         static_cast<ACE_Message_Block*> (inherited::configuration_->messageAllocator->malloc (requestedSize_in));
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(0), aborting\n")));
       return NULL;

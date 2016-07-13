@@ -126,6 +126,9 @@ if (VALGRIND_SUPPORT)
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS LIBACENETWORK_ENABLE_VALGRIND_SUPPORT)
 endif ()
 
+option (BUILD_MODULES
+        "build (git) sub-modules" OFF)
+
 if (CMAKE_COMPILER_IS_GNUCXX)
  add_compile_options (-ansi)
  add_compile_options (-std=c++11)
@@ -135,11 +138,23 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS _GNU_SOURCE)
 endif ()
 if (MSVC)  
- set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")  
+ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+
+ set (MSVC_INCREMENTAL_YES_FLAG "/INCREMENTAL:NO")
+ foreach (FLAG_TYPE EXE MODULE SHARED STATIC)
+  string (REGEX REPLACE "/INCREMENTAL* " "/INCREMENTAL:NO " CMAKE_${FLAG_TYPE}_LINKER_FLAGS_DEBUG "${CMAKE_${FLAG_TYPE}_LINKER_FLAGS_DEBUG}")
+#  message (STATUS "flag: ${FLAG_TYPE}: ${CMAKE_${FLAG_TYPE}_LINKER_FLAGS_DEBUG}")
+  string (REPLACE "/EDITANDCONTINUE"     ""                 CMAKE_${FLAG_TYPE}_LINKER_FLAGS_DEBUG "${CMAKE_${FLAG_TYPE}_LINKER_FLAGS_DEBUG}")
+  set (CMAKE_${FLAG_TYPE}_LINKER_FLAGS_DEBUG "${CMAKE_${FLAG_TYPE}_LINKER_FLAGS_DEBUG}"
+       CACHE STRING "Overriding default debug ${FLAG_TYPE} linker flags." FORCE)
+  mark_as_advanced (CMAKE_${FLAG_TYPE}_LINKER_FLAGS_DEBUG)
+ endforeach ()
 endif (MSVC)
 
-option (BUILD_MODULES
-        "build (git) sub-modules" OFF)
+list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cotire/CMAKE")
+#list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
+include (cotire)
+set_directory_properties (PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)

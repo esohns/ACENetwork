@@ -38,6 +38,8 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
 
 ########### next target ###############
 set (${PROJECT_NAME}_Protocol_DHCP_SRCS
+     stdafx.cpp
+     stdafx.h
 #     dhcp_bisector.cpp
 #     dhcp_bisector.h
      dhcp_common.h
@@ -77,9 +79,7 @@ set (${PROJECT_NAME}_Protocol_DHCP_SRCS
      dhcp_stream.inl
      dhcp_stream_common.h
      dhcp_tools.cpp
-     dhcp_tools.h
-     stdafx.cpp
-     stdafx.h)
+     dhcp_tools.h)
 set (${PROJECT_NAME}_Protocol_DCHP_SCRIPTS
      scripts/scanner.l
      scripts/parser.y)
@@ -111,6 +111,10 @@ if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACEStream)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACENetwork)
 endif ()
+
+# add PCH
+set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+cotire (${PROJECT_NAME}_Protocol_DHCP)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_DHCP

@@ -97,6 +97,8 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
 
 ############## next target ################
 set (${PROJECT_NAME}_LIB_SRCS
+     stdafx.cpp
+     stdafx.h
      net_asynch_netlinksockethandler.cpp
      net_asynch_netlinksockethandler.h
      net_asynch_netlinksockethandler.inl
@@ -188,9 +190,7 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_udpconnection_base.inl
      net_udpsockethandler.cpp
      net_udpsockethandler.h
-     net_udpsockethandler.inl
-     stdafx.cpp
-     stdafx.h)
+     net_udpsockethandler.inl)
 
 if (WIN32)
  add_definitions (-DWIN32)
@@ -216,6 +216,10 @@ if (WIN32)
  target_link_libraries (${PROJECT_NAME} ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME} Common)
 endif ()
+
+# add PCH
+set_target_properties (${PROJECT_NAME} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+cotire (${PROJECT_NAME})
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}
