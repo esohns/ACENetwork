@@ -474,7 +474,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
     return -1;
   } // end IF
 
-  // read some data from the socket...
+  // read some data from the socket
   ssize_t bytes_received =
       inherited::peer_.recv (currentReadBuffer_->wr_ptr (), // buffer
                              currentReadBuffer_->size (),   // #bytes to read
@@ -815,11 +815,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
     {
-      // step1: stop, flush and wait for all workers within the stream (if any)
+      // step1: signal completion and wait for all processing
       stream_.finished (true);
-      //stream_.stop (false, // wait for completion
-      //              true); // lock ?
-      //stream_.flush (true); // flush upstream (if any)
       stream_.waitForCompletion (true,   // wait for worker(s) (if any)
                                  false); // wait for upstream (if any)
 
@@ -1218,14 +1215,11 @@ Net_StreamTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::collect"));
 
-  try
-  {
+  try {
     return stream_.collect (data_out);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-      ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), aborting\n")));
+                ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), aborting\n")));
   }
 
   return false;
@@ -1253,14 +1247,11 @@ Net_StreamTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::report"));
 
-  try
-  {
+  try {
     return stream_.report ();
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-      ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
+                ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
   }
 }
 
@@ -1349,13 +1340,10 @@ Net_StreamTCPSocketBase_T<HandlerType,
   if (inherited2::configuration_->streamConfiguration.messageAllocator)
   {
 allocate:
-    try
-    {
+    try {
       message_block_p =
         static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration.messageAllocator->malloc (requestedSize_in));
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
                   requestedSize_in));

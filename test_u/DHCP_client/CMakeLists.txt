@@ -181,7 +181,7 @@ set (${PROJECT_NAME}_DHCPClient_EXE_SRCS
      test_u_signalhandler.h)
 #     test_u_stream.cpp
 #     test_u_stream.h
-#     test_u_stream.inl
+#     test_u_stream.inl)
 #  test_u_template_instantiations.cpp
 set (${PROJECT_NAME}_DHCPClient_EXE_CFG
      etc/test_u.glade
@@ -205,6 +205,7 @@ if (WIN32)
 endif ()
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
+ target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
 # target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${PKG_GTK_GLADE_LIBRARIES})

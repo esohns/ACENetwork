@@ -61,10 +61,6 @@
 #include "net_iconnector.h"
 #include "net_macros.h"
 
-#include "net_client_common.h"
-#include "net_client_connector_common.h"
-#include "net_client_defines.h"
-
 #ifdef HAVE_CONFIG_H
 #include "libACENetwork_config.h"
 #endif
@@ -73,9 +69,15 @@
 #include "test_u_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
+#include "test_u_stream.h"
 #include "test_u_eventhandler.h"
+#include "test_u_message.h"
 #include "test_u_module_eventhandler.h"
+#include "test_u_sessionmessage.h"
 
+#include "net_client_common.h"
+#include "net_client_connector_common.h"
+#include "net_client_defines.h"
 #include "net_client_signalhandler.h"
 #include "net_client_timeouthandler.h"
 
@@ -462,7 +464,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
          const ACE_Time_Value& pingInterval_in,
          unsigned int numberOfDispatchThreads_in,
          bool useUDP_in,
-         Net_GTK_CBData& CBData_in,
+         Net_Client_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -1076,7 +1078,7 @@ ACE_TMAIN (int argc_in,
   if (run_stress_test)
     action_mode = Net_Client_TimeoutHandler::ACTION_STRESS;
 
-  Net_GTK_CBData gtk_cb_user_data;
+  Net_Client_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
   // step1d: initialize logging and/or tracing
   Common_Logger logger (&gtk_cb_user_data.logStack,

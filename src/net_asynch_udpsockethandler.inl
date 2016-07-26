@@ -434,7 +434,8 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
 
   switch (bytes_transferred)
   {
-    case -1:
+    //case -1:
+    case std::numeric_limits<size_t>::max ():
     case 0:
     {
       // connection closed/reset (by peer) ? --> not an error

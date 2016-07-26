@@ -78,6 +78,7 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_network.h
      http_sessionmessage.cpp
      http_sessionmessage.h
+     http_sessionmessage.inl
      http_stream.cpp
      http_stream.h
      http_stream.inl
@@ -154,6 +155,7 @@ install (FILES
          http_module_streamer.inl
          http_network.h
          http_sessionmessage.h
+         http_sessionmessage.inl
          http_stream.h
          http_stream.inl
          http_stream_common.h

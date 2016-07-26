@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include "test_u_stream.h"
+#include "test_u_sessionmessage.h"
 #include "test_u_module_protocolhandler.h"
 
 #include <iostream>
@@ -32,7 +34,6 @@
 #include "net_macros.h"
 
 #include "test_u_message.h"
-#include "test_u_sessionmessage.h"
 
 Net_Module_ProtocolHandler::Net_Module_ProtocolHandler ()
  : inherited ()

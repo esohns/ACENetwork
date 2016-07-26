@@ -18,34 +18,36 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_MESSAGE_H
-#define NET_MESSAGE_H
+#ifndef TEST_U_MESSAGE_H
+#define TEST_U_MESSAGE_H
 
 #include <string>
 
 #include "stream_message_base.h"
+#include "stream_messageallocatorheap_base.h"
 
 #include "net_remote_comm.h"
+
+#include "test_u_common.h"
+
+#include "net_client_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 class Net_SessionMessage;
-template <typename AllocatorConfigurationType,
-          ///////////////////////////////
-          typename MessageType,
-          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Net_Message
  : public Stream_MessageBase_2<Stream_AllocatorConfiguration,
-                               //////////
+                               Net_ControlMessage_t,
+                               Net_SessionMessage,
                                Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t>
 {
-  // enable access to specific private ctors...
+  // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
-                                                 
+                                                 Net_ControlMessage_t,
                                                  Net_Message,
                                                  Net_SessionMessage>;
 
@@ -65,18 +67,19 @@ class Net_Message
   virtual void dump_state () const;
 
  protected:
-  // copy ctor to be used by duplicate() and child classes
+  // copy ctor to be used by duplicate() and derived classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")
   Net_Message (const Net_Message&);
 
  private:
   typedef Stream_MessageBase_2<Stream_AllocatorConfiguration,
-                               //////////
+                               Net_ControlMessage_t,
+                               Net_SessionMessage,
                                Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Message ())
-  // *NOTE*: to be used by allocators...
+  // *NOTE*: to be used by allocators
   Net_Message (ACE_Data_Block*, // data block to use
                ACE_Allocator*); // message allocator
 //   Net_Message (ACE_Allocator*); // message allocator

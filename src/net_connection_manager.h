@@ -36,14 +36,13 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_Connection_Manager_T
  : public Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType>
  , public Common_IStatistic_T<StatisticContainerType>
  , public Common_IDumpState
@@ -53,18 +52,17 @@ class Net_Connection_Manager_T
                                                       ConfigurationType,
                                                       StateType,
                                                       StatisticContainerType,
-
                                                       UserDataType>,
                              ACE_SYNCH_MUTEX>;
 
  public:
   // convenience types
   typedef ConfigurationType CONFIGURATION_T;
+  typedef StateType STATE_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> INTERFACE_T;
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
@@ -74,7 +72,6 @@ class Net_Connection_Manager_T
                                                  ConfigurationType,
                                                  StateType,
                                                  StatisticContainerType,
-
                                                  UserDataType>,
                         ACE_SYNCH_MUTEX> SINGLETON_T;
 
@@ -134,7 +131,6 @@ class Net_Connection_Manager_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> OWN_TYPE_T;
 
   typedef ACE_DLList<ICONNECTION_T> CONNECTION_CONTAINER_T;
@@ -165,7 +161,7 @@ class Net_Connection_Manager_T
   UserDataType*                         userData_;
 };
 
-// include template implementation
+// include template definition
 #include "net_connection_manager.inl"
 
 #endif

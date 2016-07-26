@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include "test_u_stream.h"
 #include "test_u_module_eventhandler.h"
 
 #include "net_macros.h"

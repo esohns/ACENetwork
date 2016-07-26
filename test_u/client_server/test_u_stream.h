@@ -32,34 +32,27 @@
 #include "stream_common.h"
 #include "stream_statemachine_control.h"
 
-#include "test_u_common_modules.h"
+#include "test_u_common.h"
 #include "test_u_configuration.h"
-#include "test_u_message.h"
-#include "test_u_module_headerparser.h"
-#include "test_u_module_protocolhandler.h"
-#include "test_u_sessionmessage.h"
+
+// forward declarations
+class Net_Message;
+class Net_SessionMessage;
 
 class Net_Stream
- : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
+ : public Stream_Base_T<ACE_MT_SYNCH,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         Net_StreamState,
-                        //////////////////
                         Net_StreamConfiguration,
-                        //////////////////
                         Net_RuntimeStatistic_t,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         Stream_ModuleHandlerConfiguration,
-                        //////////////////
                         Net_StreamSessionData,   // session data
                         Net_StreamSessionData_t, // session data container (reference counted)
-                        //////////////////
                         ACE_Message_Block,
                         Net_Message,
                         Net_SessionMessage>
@@ -67,6 +60,9 @@ class Net_Stream
  public:
   Net_Stream (const std::string&); // name
   virtual ~Net_Stream ();
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ModuleList_t&); // return value: module list
 
   // implement Common_IInitialize_T
   virtual bool initialize (const Net_StreamConfiguration&, // configuration
@@ -82,26 +78,19 @@ class Net_Stream
   virtual void report () const;
 
  private:
-  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
+  typedef Stream_Base_T<ACE_MT_SYNCH,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         Net_StreamState,
-                        //////////////////
                         Net_StreamConfiguration,
-                        //////////////////
                         Net_RuntimeStatistic_t,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         Stream_ModuleHandlerConfiguration,
-                        //////////////////
                         Net_StreamSessionData,
                         Net_StreamSessionData_t,
-                        //////////////////
                         ACE_Message_Block,
                         Net_Message,
                         Net_SessionMessage> inherited;
@@ -114,12 +103,6 @@ class Net_Stream
   // *NOTE*: need this to clean up queued modules if something goes wrong during
   //         initialize () !
   bool finalize (const Stream_Configuration&); // configuration
-
-  // modules
-  Net_Module_SocketHandler_Module    socketHandler_;
-  Net_Module_HeaderParser_Module     headerParser_;
-  Net_Module_ProtocolHandler_Module  protocolHandler_;
-  Net_Module_RuntimeStatistic_Module runtimeStatistic_;
 };
 
 #endif

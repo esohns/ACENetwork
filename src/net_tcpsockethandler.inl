@@ -301,7 +301,7 @@ Net_TCPSocketHandler_T<ConfigurationType,
     }
     default:
     {
-// *PORTABILITY*: this isn't entirely portable...
+// *PORTABILITY*: this isn't entirely portable
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("handle_close called for unknown reasons (handle: %@, mask: %d) --> check implementation !, continuing\n"),

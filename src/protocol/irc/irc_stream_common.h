@@ -52,10 +52,11 @@ class IRC_Stream_T;
 struct IRC_StreamConfiguration;
 
 //typedef Stream_IModuleHandler_T<IRC_ModuleHandlerConfiguration> IRC_IModuleHandler_t;
-typedef Stream_IModule_T<ACE_MT_SYNCH,
-                         Common_TimePolicy_t,
-                         Stream_ModuleConfiguration,
-                         IRC_ModuleHandlerConfiguration> IRC_IModule_t;
+//typedef Stream_IModule_T<ACE_MT_SYNCH,
+//                         Common_TimePolicy_t,
+//                         Stream_ModuleConfiguration,
+//                         IRC_ModuleHandlerConfiguration> IRC_IModule_t;
+typedef Stream_INotify_T<Stream_SessionMessageType> IRC_Stream_INotify_t;
 
 struct IRC_Stream_UserData
  : Stream_UserData
@@ -103,10 +104,10 @@ struct IRC_StreamState
 
 typedef Stream_SessionData_T<IRC_Stream_SessionData> IRC_Stream_SessionData_t;
 
-typedef Common_INotify_T<unsigned int,
-                         IRC_Stream_SessionData,
-                         IRC_Record,
-                         IRC_SessionMessage> IRC_IStreamNotify_t;
+//typedef Common_INotify_T<unsigned int,
+//                         IRC_Stream_SessionData,
+//                         IRC_Record,
+//                         IRC_SessionMessage> IRC_IStreamNotify_t;
 
 //typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 

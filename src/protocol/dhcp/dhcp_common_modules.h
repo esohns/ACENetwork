@@ -41,10 +41,12 @@
 // forward declarations
 class DHCP_SessionMessage;
 template <typename AllocatorConfigurationType,
-          typename DataType>
+          typename ControlMessageType,
+          typename SessionMessageType>
 class DHCP_Message_T;
 typedef DHCP_Message_T<Stream_AllocatorConfiguration,
-                       DHCP_Record> DHCP_Message_t;
+                       DHCP_ControlMessage_t,
+                       DHCP_SessionMessage> DHCP_Message_t;
 //struct DHCP_StreamSessionData;
 //struct DHCP_StreamState;
 

@@ -1151,22 +1151,15 @@ DHCP_Module_DiscoverH_T<LockType,
   // sanity check(s)
   ACE_ASSERT (configuration_in.streamConfiguration);
 
-  if (inherited::initialized_)
+  if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("re-initializing...\n")));
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("re-initializing...\n")));
+
+    inherited::isInitialized_ = false;
   } // end IF
 
-  // OK: all's well...
-  result = inherited::initialize (configuration_in);
-  if (!result)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-
-  return result;
+  return inherited::initialize (configuration_in);
 }
 
 template <typename LockType,

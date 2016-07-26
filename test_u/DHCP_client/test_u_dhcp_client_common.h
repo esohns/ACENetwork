@@ -21,14 +21,25 @@
 #ifndef TEST_U_DHCPCLIENT_COMMON_H
 #define TEST_U_DHCPCLIENT_COMMON_H
 
-//#include "gtk/gtk.h"
+#include <list>
+
+#include "stream_common.h"
+#include "stream_control_message.h"
+#include "stream_isessionnotify.h"
+#include "stream_messageallocatorheap_base.h"
 
 #include "test_u_common.h"
 #include "test_u_connection_common.h"
-#include "test_u_stream.h"
+//#include "test_u_message.h"
+//#include "test_u_session_message.h"
+//#include "test_u_stream.h"
 
-typedef Test_U_Stream_T<Test_U_OutboundConnector_t> Test_U_Stream_t;
-typedef Test_U_Stream_T<Test_U_OutboundAsynchConnector_t> Test_U_AsynchStream_t;
+// forward declarations
+class Test_U_Message;
+class Test_U_SessionMessage;
+
+//typedef Test_U_Stream_T<Test_U_OutboundConnector_t> Test_U_Stream_t;
+//typedef Test_U_Stream_T<Test_U_OutboundAsynchConnector_t> Test_U_AsynchStream_t;
 
 struct Test_U_DHCPClient_Configuration
  : Test_U_Configuration
@@ -43,15 +54,39 @@ struct Test_U_DHCPClient_Configuration
   ACE_HANDLE handle;          // listen handle (unicast)
 };
 
+typedef Stream_ControlMessage_T<Stream_ControlMessageType,
+                                Test_U_AllocatorConfiguration,
+                                Test_U_Message,
+                                Test_U_SessionMessage> Test_U_ControlMessage_t;
+
+typedef Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
+                                          Test_U_ControlMessage_t,
+                                          Test_U_Message,
+                                          Test_U_SessionMessage> Test_U_MessageAllocator_t;
+
+typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
+                                    Test_U_StreamSessionData,
+                                    Stream_SessionMessageType,
+                                    Test_U_Message,
+                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
+typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
+typedef Test_U_Subscribers_t::iterator Test_U_SubscribersIterator_t;
+typedef Common_ISubscribe_T<Test_U_ISessionNotify_t> Test_U_ISubscribe_t;
+
 struct Test_U_DHCPClient_GTK_CBData
  : Test_U_GTK_CBData
 {
   inline Test_U_DHCPClient_GTK_CBData ()
    : Test_U_GTK_CBData ()
    , configuration (NULL)
+   , subscribers ()
+//   , subscribersLock ()
   {};
 
   Test_U_DHCPClient_Configuration* configuration;
+  Test_U_Subscribers_t             subscribers;
+  // *NOTE*: use Common_UI_GTKState.lock instead
+//  ACE_SYNCH_RECURSIVE_MUTEX subscribersLock;
 };
 
 //struct Test_U_DHCPClient_ThreadData

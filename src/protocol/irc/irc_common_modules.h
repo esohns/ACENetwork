@@ -45,75 +45,60 @@ class IRC_Message;
 
 typedef IRC_Module_Parser_T<ACE_MT_SYNCH,
                             Common_TimePolicy_t,
-                            //////////////
                             IRC_ModuleHandlerConfiguration,
-                            //////////////
                             ACE_Message_Block,
                             IRC_Message,
                             IRC_SessionMessage> IRC_Module_Parser;
 
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-
                                              IRC_ModuleHandlerConfiguration,
-
                                              ACE_Message_Block,
                                              IRC_Message,
                                              IRC_SessionMessage,
-
                                              IRC_CommandType_t,
                                              IRC_RuntimeStatistic_t,
                                              IRC_Stream_SessionData,
                                              IRC_Stream_SessionData_t> IRC_Module_Statistic_ReaderTask_t;
 typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-
                                              IRC_ModuleHandlerConfiguration,
-
                                              ACE_Message_Block,
                                              IRC_Message,
                                              IRC_SessionMessage,
-
                                              IRC_CommandType_t,
                                              IRC_RuntimeStatistic_t,
                                              IRC_Stream_SessionData,
                                              IRC_Stream_SessionData_t> IRC_Module_Statistic_WriterTask_t;
 
 typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
-                            Common_TimePolicy_t,
-                            //////////////
-                            IRC_ModuleHandlerConfiguration,
-                            //////////////
-                            ACE_Message_Block,
-                            IRC_Message,
-                            IRC_SessionMessage> IRC_Module_Streamer_t;
+                              Common_TimePolicy_t,
+                              IRC_ModuleHandlerConfiguration,
+                              ACE_Message_Block,
+                              IRC_Message,
+                              IRC_SessionMessage> IRC_Module_Streamer_t;
 //typedef IRC_Module_Bisector_T<ACE_SYNCH_MUTEX,
-//                              ///////////
 //                              ACE_MT_SYNCH,
 //                              Common_TimePolicy_t,
 //                              IRC_SessionMessage,
 //                              IRC_Message,
-//                              ///////////
 //                              IRC_ModuleHandlerConfiguration,
-//                              ///////////
 //                              IRC_StreamState,
-//                              ///////////
 //                              IRC_Stream_SessionData,
 //                              IRC_Stream_SessionData_t,
-//                              ///////////
 //                              IRC_RuntimeStatistic_t> IRC_Module_Bisector_t;
 
 // declare module(s)
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                   // task synch type
-                              Common_TimePolicy_t,            // time policy
-                              Stream_ModuleConfiguration,     // module configuration type
+DATASTREAM_MODULE_INPUT_ONLY (IRC_Stream_SessionData,         // session data type
+                              Stream_SessionMessageType,      // session event type
                               IRC_ModuleHandlerConfiguration, // module handler configuration type
+                              IRC_Stream_INotify_t,           // stream notification interface type
                               IRC_Module_Parser);             // writer type
 
-DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                      // task synch type
-                          Common_TimePolicy_t,               // time policy type
-                          Stream_ModuleConfiguration,        // module configuration type
+DATASTREAM_MODULE_DUPLEX (IRC_Stream_SessionData,            // session data type
+                          Stream_SessionMessageType,         // session event type
                           IRC_ModuleHandlerConfiguration,    // module handler configuration type
+                          IRC_Stream_INotify_t,              // stream notification interface type
                           IRC_Module_Statistic_ReaderTask_t, // reader type
                           IRC_Module_Statistic_WriterTask_t, // writer type
                           IRC_Module_RuntimeStatistic);      // name

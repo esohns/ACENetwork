@@ -25,6 +25,7 @@
 
 #include "stream_data_message_base.h"
 
+#include "irc_common.h"
 #include "irc_exports.h"
 #include "irc_record.h"
 
@@ -34,25 +35,30 @@ class ACE_Data_Block;
 class ACE_Message_Block;
 class IRC_SessionMessage;
 template <typename AllocatorConfigurationType,
-          typename MessageType,
-          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+class Stream_MessageAllocatorHeapBase_T;
 template <typename AllocatorConfigurationType,
-          typename MessageType,
-          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+class Stream_CachedMessageAllocator_T;
 
 class IRC_Export IRC_Message
  : public Stream_DataMessageBase_T<Stream_AllocatorConfiguration,
-                                   //////
+                                   IRC_ControlMessage_t,
+                                   IRC_SessionMessage,
                                    IRC_Record,
                                    IRC_CommandType_t>
 {
-  // enable access to specific private ctors...
+  // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
-                                                 
+                                                 IRC_ControlMessage_t,
                                                  IRC_Message,
                                                  IRC_SessionMessage>;
   friend class Stream_CachedMessageAllocator_T<Stream_AllocatorConfiguration,
-                                                 
+                                               IRC_ControlMessage_t,
                                                IRC_Message,
                                                IRC_SessionMessage>;
 
@@ -73,7 +79,7 @@ class IRC_Export IRC_Message
   static std::string CommandType2String (const IRC_CommandType_t&);
 
  protected:
-   // *NOTE*: to be used by allocators...
+   // *NOTE*: to be used by allocators
    IRC_Message (ACE_Data_Block*, // data block to use
                 ACE_Allocator*); // message allocator
    //   IRC_Client_Message(ACE_Allocator*); // message allocator
@@ -84,7 +90,8 @@ class IRC_Export IRC_Message
 
  private:
   typedef Stream_DataMessageBase_T<Stream_AllocatorConfiguration,
-                                   //////
+                                   IRC_ControlMessage_t,
+                                   IRC_SessionMessage,
                                    IRC_Record,
                                    IRC_CommandType_t> inherited;
 

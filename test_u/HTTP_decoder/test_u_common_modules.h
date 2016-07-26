@@ -64,11 +64,11 @@ typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Test_U_SessionMessage,
                              HTTP_Record> Test_U_Module_Parser;
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
-                             Common_TimePolicy_t,
-                             Test_U_ModuleHandlerConfiguration,
-                             ACE_Message_Block,
-                             Test_U_Message,
-                             Test_U_SessionMessage> Test_U_Module_Streamer;
+                               Common_TimePolicy_t,
+                               Test_U_ModuleHandlerConfiguration,
+                               ACE_Message_Block,
+                               Test_U_Message,
+                               Test_U_SessionMessage> Test_U_Module_Streamer;
 
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
@@ -112,26 +112,26 @@ typedef Stream_Module_FileWriter_T<ACE_MT_SYNCH,
 //                          HTTP_Module_Streamer,            // reader type
 //                          HTTP_Module_Bisector_t,          // writer type
 //                          HTTP_Module_Marshal);            // name
-DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                      // task synch type
-                          Common_TimePolicy_t,               // time policy
-                          Stream_ModuleConfiguration,        // module configuration type
+DATASTREAM_MODULE_DUPLEX (Test_U_StreamSessionData,          // session data type
+                          Stream_SessionMessageType,         // session event type
                           Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                          Test_U_IStreamNotify_t,            // stream notification interface type
                           Test_U_Module_Streamer,            // reader type
                           Test_U_Module_Parser,              // writer type
                           Test_U_Module_Marshal);            // name
 
-DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                         // task synch type
-                          Common_TimePolicy_t,                  // time policy type
-                          Stream_ModuleConfiguration,           // module configuration type
+DATASTREAM_MODULE_DUPLEX (Test_U_StreamSessionData,             // session data type
+                          Stream_SessionMessageType,            // session event type
                           Test_U_ModuleHandlerConfiguration,    // module handler configuration type
+                          Test_U_IStreamNotify_t,               // stream notification interface type
                           Test_U_Module_Statistic_ReaderTask_t, // reader type
                           Test_U_Module_Statistic_WriterTask_t, // writer type
                           Test_U_Module_RuntimeStatistic);      // name
 
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                      // task synch type
-                              Common_TimePolicy_t,               // time policy
-                              Stream_ModuleConfiguration,        // module configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Test_U_StreamSessionData,          // session data type
+                              Stream_SessionMessageType,         // session event type
                               Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                              Test_U_IStreamNotify_t,            // stream notification interface type
                               Test_U_Module_FileWriter);         // writer type
 
 #endif

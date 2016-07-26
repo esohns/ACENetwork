@@ -27,9 +27,9 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
-#include "common_inotify.h"
-
-#include "stream_common.h"
+//#include "stream_common.h"
+#include "stream_control_message.h"
+#include "stream_isessionnotify.h"
 
 #include "net_common.h"
 
@@ -38,14 +38,21 @@
 // forward declarations
 struct IRC_Configuration;
 class IRC_Record;
+class IRC_Message;
 class IRC_SessionMessage;
 struct IRC_Stream_SessionData;
 struct IRC_Stream_UserData;
 
-typedef Common_INotify_T<unsigned int,
-                         IRC_Stream_SessionData,
-                         IRC_Record,
-                         IRC_SessionMessage> IRC_IStreamNotify_t;
+typedef Stream_ControlMessage_T<Stream_ControlMessageType,
+                                Stream_AllocatorConfiguration,
+                                IRC_Message,
+                                IRC_SessionMessage> IRC_ControlMessage_t;
+
+typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
+                                    IRC_Stream_SessionData,
+                                    Stream_SessionMessageType,
+                                    IRC_Record,
+                                    IRC_SessionMessage> IRC_ISessionNotify_t;
 //typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 
 enum IRC_CharacterEncoding
@@ -55,7 +62,7 @@ enum IRC_CharacterEncoding
   IRC_CHARACTERENCODING_LOCALE, // *NOTE*: may lead to problems if peers do not
                                 //         share the same configuration
   IRC_CHARACTERENCODING_UTF8,
-  ///////////////////////////////////////
+  ////////////////////////////////////////
   IRC_CHARACTERENCODING_MAX
 };
 
@@ -100,7 +107,7 @@ enum IRC_ChannelMode
   CHANNELMODE_SECRET,           // 's'
   CHANNELMODE_RESTRICTEDTOPIC,  // 't'
   CHANNELMODE_VOICE,            // 'v'
-  ///////////////////////////////////////
+  ////////////////////////////////////////
   CHANNELMODE_MAX,
   CHANNELMODE_INVALID
 };
@@ -130,7 +137,7 @@ enum IRC_UserMode
   USERMODE_RESTRICTEDCONN, // 'r'
   USERMODE_RECVNOTICES,    // 's'
   USERMODE_RECVWALLOPS,    // 'w'
-  ///////////////////////////////////////
+  ////////////////////////////////////////
   USERMODE_MAX,
   USERMODE_INVALID
 };

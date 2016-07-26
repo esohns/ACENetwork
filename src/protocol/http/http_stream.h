@@ -57,25 +57,18 @@ template <typename StreamStateType,
           typename SessionMessageType>
 class HTTP_Stream_T
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         StreamStateType,
-                        //////////////////
                         ConfigurationType,
-                        //////////////////
                         StatisticContainerType,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
-                        //////////////////
                         SessionDataType,
                         SessionDataContainerType,
-                        //////////////////
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType>
@@ -83,6 +76,9 @@ class HTTP_Stream_T
  public:
   HTTP_Stream_T (const std::string&); // name
   virtual ~HTTP_Stream_T ();
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ModuleList_t&); // return value: module list
 
   // implement Common_IInitialize_T
   virtual bool initialize (const ConfigurationType&); // configuration
@@ -93,77 +89,53 @@ class HTTP_Stream_T
   // this is just a dummy (use statisticsReportingInterval instead)
   virtual void report () const;
 
-  // *TODO*: remove this API
-  void ping ();
-
  private:
   typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         StreamStateType,
-                        //////////////////
                         ConfigurationType,
-                        //////////////////
                         StatisticContainerType,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
-                        //////////////////
                         SessionDataType,
                         SessionDataContainerType,
-                        //////////////////
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType> inherited;
 
   typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 /////////
                                  ConfigurationType,
-                                 /////////
                                  ControlMessageType,
                                  DataMessageType,
                                  SessionMessageType> STREAMER_T;
   //typedef HTTP_Module_Bisector_T<ACE_SYNCH_MUTEX,
-  //                               ///////////
   //                               ACE_MT_SYNCH,
   //                               Common_TimePolicy_t,
   //                               SessionMessageType,
   //                               ProtocolMessageType,
-  //                               ///////////
   //                               ModuleHandlerConfigurationType,
-  //                               ///////////
   //                               StreamStateType,
-  //                               ///////////
   //                               SessionDataType,
   //                               SessionDataContainerType,
-  //                               ///////////
   //                               StatisticContainerType> BISECTOR_T;
   typedef HTTP_Module_ParserH_T<ACE_SYNCH_MUTEX,
-                                //////////
                                 ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                //////////
                                 ControlMessageType,
                                 DataMessageType,
                                 SessionMessageType,
-                                //////////
                                 ModuleHandlerConfigurationType,
-                                //////////
                                 int,
-                                int,
+                                Stream_SessionMessageType,
                                 StreamStateType,
-                                //////////
                                 SessionDataType,
                                 SessionDataContainerType,
-                                //////////
                                 StatisticContainerType,
-                                //////////
                                 HTTP_Record> PARSER_T;
   //typedef Stream_StreamModule_T<ACE_MT_SYNCH,
   //                              Common_TimePolicy_t,
@@ -173,8 +145,12 @@ class HTTP_Stream_T
   //                              BISECTOR_T> MODULE_MARSHAL_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
+                                Stream_SessionId_t,             // session id type
+                                SessionDataType,                // session data type
+                                Stream_SessionMessageType,      // session event type
                                 Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                HTTP_Stream_INotify_t,          // stream notification interface type
                                 STREAMER_T,
                                 PARSER_T> MODULE_MARSHAL_T;
 
@@ -206,14 +182,21 @@ class HTTP_Stream_T
                                             HTTP_RuntimeStatistic_t> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
+                                Stream_SessionId_t,             // session id type
+                                SessionDataType,                // session data type
+                                Stream_SessionMessageType,      // session event type
                                 Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                HTTP_Stream_INotify_t,          // stream notification interface type
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T (const HTTP_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T& operator= (const HTTP_Stream_T&))
+
+  // *TODO*: remove this API
+  void ping ();
 
   // modules
   MODULE_MARSHAL_T   marshal_;
@@ -225,7 +208,7 @@ class HTTP_Stream_T
   //   HTTP_Module_Handler_Module handler_;
 };
 
-// include template implementation
+// include template definition
 #include "http_stream.inl"
 
 #endif

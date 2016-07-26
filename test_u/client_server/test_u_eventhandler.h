@@ -34,23 +34,22 @@ struct Net_GTK_CBData;
 struct Net_StreamSessionData;
 
 class Net_EventHandler
- : public Common_INotify_T<unsigned int,
-                           Net_StreamSessionData,
-                           Net_Message,
-                           Net_SessionMessage>
+ : public Net_ISessionNotify_t
 {
  public:
   Net_EventHandler (Net_GTK_CBData*); // GTK state
   virtual ~Net_EventHandler ();
 
   // implement Common_INotify_T
-  virtual void start (unsigned int,
+  virtual void start (Stream_SessionId_t,
                       const Net_StreamSessionData&);
-  virtual void notify (unsigned int,
+  virtual void notify (Stream_SessionId_t,
+                       const Stream_SessionMessageType&);
+  virtual void end (Stream_SessionId_t);
+  virtual void notify (Stream_SessionId_t,
                        const Net_Message&);
-  virtual void notify (unsigned int,
+  virtual void notify (Stream_SessionId_t,
                        const Net_SessionMessage&);
-  virtual void end (unsigned int);
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_EventHandler ())

@@ -23,31 +23,32 @@
 
 #include "stream_cachedmessageallocator.h"
 
+#include "irc_common.h"
 #include "irc_message.h"
 #include "irc_sessionmessage.h"
 
 // forward declarations
 class ACE_Allocator;
 
-class IRC_Client_MessageAllocator
- : public Stream_CachedMessageAllocator_T<Stream_AllocatorConfiguration,
-                                          
-                                          IRC_Message,
-                                          IRC_SessionMessage>
-{
- public:
-  IRC_Client_MessageAllocator (unsigned int,    // total number of concurrent messages
-                               ACE_Allocator*); // (heap) memory allocator...
-  virtual ~IRC_Client_MessageAllocator ();
+//class IRC_Client_MessageAllocator
+// : public Stream_CachedMessageAllocator_T<Stream_AllocatorConfiguration,
+//                                          IRC_ControlMessage_t,
+//                                          IRC_Message,
+//                                          IRC_SessionMessage>
+//{
+// public:
+//  IRC_Client_MessageAllocator (unsigned int,    // total number of concurrent messages
+//                               ACE_Allocator*); // (heap) memory allocator
+//  virtual ~IRC_Client_MessageAllocator ();
 
- private:
-  typedef Stream_CachedMessageAllocator_T<Stream_AllocatorConfiguration,
-                                          
-                                          IRC_Message,
-                                          IRC_SessionMessage> inherited;
+// private:
+//  typedef Stream_CachedMessageAllocator_T<Stream_AllocatorConfiguration,
+//                                          IRC_ControlMessage_t,
+//                                          IRC_Message,
+//                                          IRC_SessionMessage> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_MessageAllocator (const IRC_Client_MessageAllocator&));
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_MessageAllocator& operator= (const IRC_Client_MessageAllocator&));
-};
+//  ACE_UNIMPLEMENTED_FUNC (IRC_Client_MessageAllocator (const IRC_Client_MessageAllocator&));
+//  ACE_UNIMPLEMENTED_FUNC (IRC_Client_MessageAllocator& operator= (const IRC_Client_MessageAllocator&));
+//};
 
 #endif

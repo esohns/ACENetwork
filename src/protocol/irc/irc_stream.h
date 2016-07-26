@@ -57,26 +57,19 @@ template <typename StreamStateType,
           typename DataMessageType,
           typename SessionMessageType>
 class IRC_Stream_T
- : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
+ : public Stream_Base_T<ACE_MT_SYNCH,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         StreamStateType,
-                        //////////////////
                         ConfigurationType,
-                        //////////////////
                         StatisticContainerType,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
-                        //////////////////
                         SessionDataType,
                         SessionDataContainerType,
-                        //////////////////
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType>
@@ -84,6 +77,9 @@ class IRC_Stream_T
  public:
   IRC_Stream_T (const std::string&); // name
   virtual ~IRC_Stream_T ();
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ModuleList_t&); // return value: module list
 
   // implement Common_IInitialize_T
   virtual bool initialize (const ConfigurationType&, // configuration
@@ -96,30 +92,20 @@ class IRC_Stream_T
   // this is just a dummy (use statisticsReportingInterval instead)
   virtual void report () const;
 
-  // *TODO*: remove this API
-  void ping ();
-
  private:
-  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
+  typedef Stream_Base_T<ACE_MT_SYNCH,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         StreamStateType,
-                        //////////////////
                         ConfigurationType,
-                        //////////////////
                         StatisticContainerType,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
-                        //////////////////
                         SessionDataType,
                         SessionDataContainerType,
-                        //////////////////
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType> inherited;
@@ -130,28 +116,27 @@ class IRC_Stream_T
                                 ControlMessageType,
                                 DataMessageType,
                                 SessionMessageType> STREAMER_T;
-  typedef IRC_Module_Bisector_T<ACE_SYNCH_MUTEX,
-                                //////////
+  typedef IRC_Module_Bisector_T<ACE_MT_SYNCH,
                                 ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 ControlMessageType,
                                 DataMessageType,
                                 SessionMessageType,
-                                //////////
                                 ModuleHandlerConfigurationType,
-                                //////////
                                 int,
-                                int,
+                                Stream_SessionMessageType,
                                 StreamStateType,
-                                //////////
                                 SessionDataType,
                                 SessionDataContainerType,
-                                //////////
                                 StatisticContainerType> BISECTOR_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
+                                Stream_SessionId_t,             // session id type
+                                SessionDataType,                // session data type
+                                Stream_SessionMessageType,      // session event type
                                 Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                IRC_Stream_INotify_t,           // stream notification interface type
                                 STREAMER_T,
                                 BISECTOR_T> MODULE_MARSHAL_T;
 
@@ -163,8 +148,12 @@ class IRC_Stream_T
                               SessionMessageType> PARSER_T;
   typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
+                                         Stream_SessionId_t,             // session id type
+                                         SessionDataType,                // session data type
+                                         Stream_SessionMessageType,      // session event type
                                          Stream_ModuleConfiguration,
                                          ModuleHandlerConfigurationType,
+                                         IRC_Stream_INotify_t,           // stream notification interface type
                                          PARSER_T> MODULE_PARSER_T;
 
   typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
@@ -189,14 +178,21 @@ class IRC_Stream_T
                                                SessionDataContainerType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
+                                Stream_SessionId_t,             // session id type
+                                SessionDataType,                // session data type
+                                Stream_SessionMessageType,      // session event type
                                 Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                IRC_Stream_INotify_t,           // stream notification interface type
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T (const IRC_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T& operator= (const IRC_Stream_T&))
+
+  // *TODO*: remove this API
+  void ping ();
 
   // modules
   MODULE_MARSHAL_T   marshal_;
@@ -208,7 +204,7 @@ class IRC_Stream_T
   //   IRC_Module_Handler_Module handler_;
 };
 
-// include template implementation
+// include template definition
 #include "irc_stream.inl"
 
 #endif

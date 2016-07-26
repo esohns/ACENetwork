@@ -32,34 +32,26 @@
 #include "stream_common.h"
 
 #include "test_u_common.h"
-#include "test_u_common_modules.h"
-#include "test_u_message.h"
-#include "test_u_session_message.h"
 
 // forward declarations
 class Stream_IAllocator;
+class Test_U_Message;
+class Test_U_SessionMessage;
 
 class Test_U_InboundConnectionStream
- : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
+ : public Stream_Base_T<ACE_MT_SYNCH,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        //////////////////
                         Test_U_StreamConfiguration,
-                        //////////////////
                         Test_U_RuntimeStatistic_t,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_StreamModuleHandlerConfiguration,
-                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        //////////////////
                         ACE_Message_Block,
                         Test_U_Message,
                         Test_U_SessionMessage>
@@ -68,40 +60,36 @@ class Test_U_InboundConnectionStream
   Test_U_InboundConnectionStream (const std::string&); // name
   virtual ~Test_U_InboundConnectionStream ();
 
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ModuleList_t&); // return value: module list
+
   // implement Common_IInitialize_T
   virtual bool initialize (const Test_U_StreamConfiguration&, // configuration
                            bool = true,                       // setup pipeline ?
                            bool = true);                      // reset session data ?
-
-  // *TODO*: re-consider this API
-  void ping ();
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
   virtual bool collect (Test_U_RuntimeStatistic_t&); // return value: statistic data
   virtual void report () const;
 
+  // *TODO*: re-consider this API
+  void ping ();
+
  private:
-  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
+  typedef Stream_Base_T<ACE_MT_SYNCH,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        //////////////////
                         Test_U_StreamConfiguration,
-                        //////////////////
                         Test_U_RuntimeStatistic_t,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_StreamModuleHandlerConfiguration,
-                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        //////////////////
                         ACE_Message_Block,
                         Test_U_Message,
                         Test_U_SessionMessage> inherited;
@@ -109,39 +97,24 @@ class Test_U_InboundConnectionStream
   ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream (const Test_U_InboundConnectionStream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream& operator= (const Test_U_InboundConnectionStream&))
-
-  // modules
-  Test_U_Module_Net_IO_Module           netIO_;
-  Test_U_Module_Marshal_Module          marshal_;
-  //Test_U_Module_Parser_Module           parser_;
-  Test_U_Module_RuntimeStatistic_Module runtimeStatistic_;
-  Test_U_Module_DHCPDiscover_Module     DHCPDiscover_;
-  Test_U_Module_Dump_Module             dump_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 class Test_U_OutboundConnectionStream
- : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
+ : public Stream_Base_T<ACE_MT_SYNCH,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        //////////////////
                         Test_U_StreamConfiguration,
-                        //////////////////
                         Test_U_RuntimeStatistic_t,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_StreamModuleHandlerConfiguration,
-                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        //////////////////
                         ACE_Message_Block,
                         Test_U_Message,
                         Test_U_SessionMessage>
@@ -150,40 +123,36 @@ class Test_U_OutboundConnectionStream
   Test_U_OutboundConnectionStream (const std::string&); // name
   virtual ~Test_U_OutboundConnectionStream ();
 
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ModuleList_t&); // return value: module list
+
   // implement Common_IInitialize_T
   virtual bool initialize (const Test_U_StreamConfiguration&, // configuration
                            bool = true,                       // setup pipeline ?
                            bool = true);                      // reset session data ?
-
-  // *TODO*: re-consider this API
-  void ping ();
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
   virtual bool collect (Test_U_RuntimeStatistic_t&); // return value: statistic data
   virtual void report () const;
 
+  // *TODO*: re-consider this API
+  void ping ();
+
  private:
-  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
+  typedef Stream_Base_T<ACE_MT_SYNCH,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        //////////////////
                         Test_U_StreamConfiguration,
-                        //////////////////
                         Test_U_RuntimeStatistic_t,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_StreamModuleHandlerConfiguration,
-                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        //////////////////
                         ACE_Message_Block,
                         Test_U_Message,
                         Test_U_SessionMessage> inherited;
@@ -191,11 +160,6 @@ class Test_U_OutboundConnectionStream
   ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream (const Test_U_OutboundConnectionStream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream& operator= (const Test_U_OutboundConnectionStream&))
-
-  // modules
-  Test_U_Module_Net_IO_Module           netIO_;
-  Test_U_Module_Streamer_Module         marshal_;
-  Test_U_Module_RuntimeStatistic_Module runtimeStatistic_;
 };
 
 #endif

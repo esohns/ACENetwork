@@ -23,17 +23,17 @@
 
 #include "net_macros.h"
 
-IRC_Client_MessageAllocator::IRC_Client_MessageAllocator (unsigned int maxNumMessages_in,
-                                                          ACE_Allocator* allocator_in)
- : inherited (maxNumMessages_in,
-              allocator_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_MessageAllocator::IRC_Client_MessageAllocator"));
+//IRC_Client_MessageAllocator::IRC_Client_MessageAllocator (unsigned int maxNumMessages_in,
+//                                                          ACE_Allocator* allocator_in)
+// : inherited (maxNumMessages_in,
+//              allocator_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_MessageAllocator::IRC_Client_MessageAllocator"));
 
-}
+//}
 
-IRC_Client_MessageAllocator::~IRC_Client_MessageAllocator ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_MessageAllocator::~IRC_Client_MessageAllocator"));
+//IRC_Client_MessageAllocator::~IRC_Client_MessageAllocator ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_MessageAllocator::~IRC_Client_MessageAllocator"));
 
-}
+//}

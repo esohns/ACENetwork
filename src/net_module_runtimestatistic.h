@@ -21,8 +21,8 @@
 #ifndef NET_MODULE_RUNTIMESTATISTIC_H
 #define NET_MODULE_RUNTIMESTATISTIC_H
 
-#include <set>
 #include <map>
+#include <set>
 
 #include "ace/Global_Macros.h"
 #include "ace/Stream_Modules.h"
@@ -43,7 +43,7 @@
 class ACE_Message_Block;
 class ACE_Time_Value;
 class Stream_IAllocator;
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
@@ -52,7 +52,7 @@ template <typename SynchStrategyType,
           typename ProtocolCommandType,
           typename StatisticContainerType> class Net_Module_Statistic_WriterTask_T;
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
@@ -61,7 +61,7 @@ template <typename SynchStrategyType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 class Net_Module_Statistic_ReaderTask_T
- : public ACE_Thru_Task<SynchStrategyType,
+ : public ACE_Thru_Task<ACE_SYNCH_USE,
                         TimePolicyType>
 {
  public:
@@ -72,17 +72,14 @@ class Net_Module_Statistic_ReaderTask_T
                    ACE_Time_Value* = NULL); // time
 
  private:
-  typedef ACE_Thru_Task<SynchStrategyType,
+  typedef ACE_Thru_Task<ACE_SYNCH_USE,
                         TimePolicyType> inherited;
-  typedef Net_Module_Statistic_WriterTask_T<SynchStrategyType,
+  typedef Net_Module_Statistic_WriterTask_T<ACE_SYNCH_USE,
                                             TimePolicyType,
-
                                             ConfigurationType,
-
                                             ControlMessageType,
                                             DataMessageType,
                                             SessionMessageType,
-
                                             ProtocolCommandType,
                                             StatisticContainerType> WRITER_TASK_T;
   typedef DataMessageType Net_MessageType_t;
@@ -92,7 +89,7 @@ class Net_Module_Statistic_ReaderTask_T
   ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T& operator= (const Net_Module_Statistic_ReaderTask_T&))
 };
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
@@ -101,26 +98,23 @@ template <typename SynchStrategyType,
           typename ProtocolCommandType,
           typename StatisticContainerType>
 class Net_Module_Statistic_WriterTask_T
- : public Stream_TaskBaseSynch_T<SynchStrategyType,
+ : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
-                                 /////////
                                  ConfigurationType,
-                                 /////////
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType>
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 Stream_SessionMessageType>
  , public Common_ICounter
  , public Common_IStatistic_T<StatisticContainerType>
 {
- friend class Net_Module_Statistic_ReaderTask_T<SynchStrategyType,
+ friend class Net_Module_Statistic_ReaderTask_T<ACE_SYNCH_USE,
                                                 TimePolicyType,
-
                                                 ConfigurationType,
-
                                                 ControlMessageType,
                                                 DataMessageType,
                                                 SessionMessageType,
-
                                                 ProtocolCommandType,
                                                 StatisticContainerType>;
  public:
@@ -149,14 +143,14 @@ class Net_Module_Statistic_WriterTask_T
   virtual void report () const;
 
  private:
-  typedef Stream_TaskBaseSynch_T<SynchStrategyType,
+  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
-                                 /////////
                                  ConfigurationType,
-                                 /////////
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType> inherited;
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 Stream_SessionMessageType> inherited;
 
   // message type counters
 //  typedef std::set<ProtocolCommandType> Net_Messages_t;
@@ -211,7 +205,7 @@ class Net_Module_Statistic_WriterTask_T
   const Stream_IAllocator*          allocator_;
 };
 
-// include template implementation
+// include template definition
 #include "net_module_runtimestatistic.inl"
 
 #endif

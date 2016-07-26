@@ -77,7 +77,7 @@ IRC_Client_SessionMessage::duplicate (void) const
   // the message block fields, but a reference counted duplicate of
   // the ACE_Data_Block
 
-  // if there is no allocator, use the standard new and delete calls.
+  // if there is no allocator, use the standard new and delete calls
   if (!inherited::message_block_allocator_)
     ACE_NEW_NORETURN (message_p,
                       IRC_Client_SessionMessage (*this));
@@ -87,20 +87,17 @@ IRC_Client_SessionMessage::duplicate (void) const
       dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
     ACE_ASSERT (allocator_p);
 allocate:
-    try
-    {
+    try {
       // *NOTE*: instruct the allocator to return a session message by passing 0 as
-      //         argument to malloc()...
+      //         argument to malloc()
       // *IMPORTANT NOTE*: cached allocators require the object size as argument
       //                   to malloc() (instead of its internal "capacity()" !)
       // *TODO*: (depending on the allocator implementation) this senselessly
-      // allocates a datablock anyway, only to immediately release it again...
+      // allocates a datablock anyway, only to immediately release it again
       ACE_NEW_MALLOC_NORETURN (message_p,
                                static_cast<IRC_Client_SessionMessage*> (inherited::message_block_allocator_->calloc (0)),
                                IRC_Client_SessionMessage (*this));
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::calloc(0), aborting\n")));
       return NULL;
@@ -129,7 +126,7 @@ allocate:
     return NULL;
   } // end IF
 
-  // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
+  // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)
 
   return message_p;
 }

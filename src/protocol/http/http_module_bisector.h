@@ -39,7 +39,7 @@ typedef struct yy_buffer_state* YY_BUFFER_STATE;
 
 template <typename LockType,
           ////////////////////////////////
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -57,22 +57,17 @@ template <typename LockType,
           typename StatisticContainerType>
 class HTTP_Module_Bisector_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
-                                      SynchStrategyType,
+                                      ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType>
 {
  public:
@@ -106,22 +101,17 @@ class HTTP_Module_Bisector_T
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
-                                      SynchStrategyType,
+                                      ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T ())
@@ -149,7 +139,7 @@ class HTTP_Module_Bisector_T
   unsigned int       messageLength_;
 };
 
-// include template implementation
+// include template definition
 #include "http_module_bisector.inl"
 
 #endif

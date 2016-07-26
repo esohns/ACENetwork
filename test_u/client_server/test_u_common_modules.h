@@ -21,6 +21,7 @@
 #ifndef NET_COMMON_MODULES_H
 #define NET_COMMON_MODULES_H
 
+#include "ace/Message_Block.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
@@ -32,33 +33,30 @@
 #include "net_module_sockethandler.h"
 #include "net_remote_comm.h"
 
+#include "test_u_common.h"
 #include "test_u_configuration.h"
-#include "test_u_message.h"
-#include "test_u_sessionmessage.h"
+
+// forward declarations
+class Net_Message;
+class Net_SessionMessage;
 
 // declare module(s)
-typedef Net_Module_SocketHandler_T<ACE_SYNCH_MUTEX,
-                                   ///////
+typedef Net_Module_SocketHandler_T<ACE_MT_SYNCH,
                                    ACE_Message_Block,
                                    Net_Message,
                                    Net_SessionMessage,
-                                   ///////
                                    Net_ModuleHandlerConfiguration,
-                                   ///////
                                    int,
-                                   int,
+                                   Stream_SessionMessageType,
                                    Net_StreamState,
-                                   ///////
                                    Net_StreamSessionData,   // session data
                                    Net_StreamSessionData_t, // session message payload (reference counted)
-                                   ///////
                                    Net_RuntimeStatistic_t,
-                                   ///////
                                    Net_Remote_Comm::MessageHeader> Net_Module_SocketHandler;
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                   // task synch type
-                              Common_TimePolicy_t,            // time policy type
-                              Stream_ModuleConfiguration,     // module configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Net_StreamSessionData,          // session data type
+                              Stream_SessionMessageType,      // session event type
                               Net_ModuleHandlerConfiguration, // module handler configuration type
+                              Net_IStreamNotify_t,            // stream notification interface type
                               Net_Module_SocketHandler);      // writer type
 
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
@@ -81,10 +79,10 @@ typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                              Net_RuntimeStatistic_t,
                                              Net_StreamSessionData,
                                              Net_StreamSessionData_t> Net_Module_Statistic_WriterTask_t;
-DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                      // task synch type
-                          Common_TimePolicy_t,               // time policy type
-                          Stream_ModuleConfiguration,        // module configuration type
+DATASTREAM_MODULE_DUPLEX (Net_StreamSessionData,             // session data type
+                          Stream_SessionMessageType,         // session event type
                           Stream_ModuleHandlerConfiguration, // module handler configuration type
+                          Net_IStreamNotify_t,               // stream notification interface type
                           Net_Module_Statistic_ReaderTask_t, // reader type
                           Net_Module_Statistic_WriterTask_t, // writer type
                           Net_Module_RuntimeStatistic);      // name

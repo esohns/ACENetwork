@@ -40,26 +40,19 @@
 #include "test_u_message.h"
 
 class Test_U_Stream
- : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
+ : public Stream_Base_T<ACE_MT_SYNCH,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        //////////////////
                         Test_U_StreamConfiguration,
-                        //////////////////
                         HTTP_RuntimeStatistic_t,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_ModuleHandlerConfiguration,
-                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        //////////////////
                         ACE_Message_Block,
                         Test_U_Message,
                         Test_U_SessionMessage>
@@ -68,81 +61,71 @@ class Test_U_Stream
   Test_U_Stream (const std::string&); // name
   virtual ~Test_U_Stream ();
 
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ModuleList_t&); // return value: module list
+
   // implement Common_IInitialize_T
   virtual bool initialize (const Test_U_StreamConfiguration&, // configuration
                            bool = true,                       // setup pipeline ?
                            bool = true);                      // reset session data ?
-
-  // *TODO*: re-consider this API
-  void ping ();
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
   virtual bool collect (Net_RuntimeStatistic_t&); // return value: statistic data
   virtual void report () const;
 
+  // *TODO*: re-consider this API
+  void ping ();
+
  private:
-  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        //////////////////
+  typedef Stream_Base_T<ACE_MT_SYNCH,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        //////////////////
                         int,
-                        int,
+                        Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
                         Test_U_StreamState,
-                        //////////////////
                         Test_U_StreamConfiguration,
-                        //////////////////
                         HTTP_RuntimeStatistic_t,
-                        //////////////////
                         Stream_ModuleConfiguration,
                         Test_U_ModuleHandlerConfiguration,
-                        //////////////////
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        //////////////////
                         ACE_Message_Block,
                         Test_U_Message,
                         Test_U_SessionMessage> inherited;
 
-  typedef Stream_Module_Net_IOWriter_T<ACE_SYNCH_MUTEX,
-                                       ///
+  typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                        ACE_Message_Block,
                                        Test_U_Message,
                                        Test_U_SessionMessage,
-                                       ///
                                        Test_U_ModuleHandlerConfiguration,
-                                       ///
                                        int,
-                                       int,
+                                       Stream_SessionMessageType,
                                        Test_U_StreamState,
-                                       ///
                                        Test_U_StreamSessionData,
                                        Test_U_StreamSessionData_t,
-                                       ///
                                        HTTP_RuntimeStatistic_t,
-                                       ///
                                        ACE_INET_Addr,
                                        Test_U_ConnectionManager_t> WRITER_T;
   typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,
-                                       ///
                                        Test_U_ModuleHandlerConfiguration,
-                                       ///
                                        ACE_Message_Block,
                                        Test_U_Message,
                                        Test_U_SessionMessage,
-                                       ///
                                        Test_U_StreamSessionData,
                                        Test_U_StreamSessionData_t,
-                                       ///
                                        ACE_INET_Addr,
                                        Test_U_ConnectionManager_t> READER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,                      // task synch type
                                 Common_TimePolicy_t,               // time policy
+                                Stream_SessionId_t,                // session id type
+                                Test_U_StreamSessionData,          // session data type
+                                Stream_SessionMessageType,         // session event type
                                 Stream_ModuleConfiguration,        // module configuration type
                                 Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                                Test_U_IStreamNotify_t,            // stream notification interface type
                                 READER_T,                          // reader type
                                 WRITER_T> IO_MODULE_T;             // writer type
 

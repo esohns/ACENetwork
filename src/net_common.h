@@ -52,32 +52,31 @@ enum Net_TransportLayerType
   NET_TRANSPORTLAYER_MAX
 };
 
-enum Net_Stream_ControlMessageType : int
-{
-  NET_STREAM_CONTROL_MESSAGE_MASK = STREAM_CONTROL_MESSAGE_USER_MASK,
-  ////////////////////////////////////////
-  NET_STREAM_CONTROL_MESSAGE_MAX,
-  NET_STREAM_CONTROL_MESSAGE_INVALID
-};
+//enum Net_Stream_ControlMessageType : int
+//{
+//  NET_STREAM_CONTROL_MESSAGE_MASK = STREAM_CONTROL_MESSAGE_USER_MASK,
+//  ////////////////////////////////////////
+//  NET_STREAM_CONTROL_MESSAGE_MAX,
+//  NET_STREAM_CONTROL_MESSAGE_INVALID
+//};
 
-enum Net_Stream_SessionMessageType : int
-{
-  NET_STREAM_SESSION_MESSAGE_MASK = STREAM_SESSION_MESSAGE_USER_MASK,
-  NET_STREAM_SESSION_MESSAGE_CLOSE,
-  ////////////////////////////////////////
-  NET_STREAM_SESSION_MESSAGE_MAX,
-  NET_STREAM_SESSION_MESSAGE_INVALID
-};
+//enum Net_Stream_SessionMessageType : int
+//{
+//  NET_STREAM_SESSION_MESSAGE_MASK = STREAM_SESSION_MESSAGE_USER_MASK,
+//  // *** notification ***
+//  NET_STREAM_SESSION_MESSAGE_CLOSE,
+//  ////////////////////////////////////////
+//  NET_STREAM_SESSION_MESSAGE_MAX,
+//  NET_STREAM_SESSION_MESSAGE_INVALID
+//};
 
-enum Net_Stream_ControlType : int
-{
-  NET_STREAM_CONTROL_MASK = STREAM_CONTROL_USER_MASK,
-  NET_STREAM_CONTROL_CONNECT,
-  NET_STREAM_CONTROL_DISCONNECT,
-  ////////////////////////////////////////
-  NET_STREAM_CONTROL_MAX,
-  NET_STREAM_CONTROL_INVALID
-};
+//enum Net_Stream_ControlType : int
+//{
+//  NET_STREAM_CONTROL_MASK = STREAM_CONTROL_USER_MASK,
+//  ////////////////////////////////////////
+//  NET_STREAM_CONTROL_MAX,
+//  NET_STREAM_CONTROL_INVALID
+//};
 
 // *NOTE*: this extends ACE_Svc_Handler_Close (see Svc_Handler.h)
 enum Net_Connection_CloseReason

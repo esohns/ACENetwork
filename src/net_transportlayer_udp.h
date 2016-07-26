@@ -24,7 +24,8 @@
 #include "net_exports.h"
 #include "net_transportlayer_base.h"
 
-class Net_Export Net_TransportLayer_UDP
+//class Net_Export Net_TransportLayer_UDP
+class Net_TransportLayer_UDP
  : public Net_InetTransportLayer_Base
 {
  public:

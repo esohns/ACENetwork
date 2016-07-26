@@ -33,7 +33,7 @@
 #include "http_bisector.h"
 
 template <typename LockType,
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -46,7 +46,7 @@ template <typename LockType,
           typename SessionDataContainerType, // session message payload (reference counted)
           typename StatisticContainerType>
 HTTP_Module_Bisector_T<LockType,
-                       SynchStrategyType,
+                       ACE_SYNCH_USE,
                        TimePolicyType,
                        ControlMessageType,
                        DataMessageType,
@@ -80,7 +80,7 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -93,7 +93,7 @@ template <typename LockType,
           typename SessionDataContainerType, // session message payload (reference counted)
           typename StatisticContainerType>
 HTTP_Module_Bisector_T<LockType,
-                       SynchStrategyType,
+                       ACE_SYNCH_USE,
                        TimePolicyType,
                        ControlMessageType,
                        DataMessageType,
@@ -118,7 +118,7 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -132,7 +132,7 @@ template <typename LockType,
           typename StatisticContainerType>
 bool
 HTTP_Module_Bisector_T<LockType,
-                       SynchStrategyType,
+                       ACE_SYNCH_USE,
                        TimePolicyType,
                        ControlMessageType,
                        DataMessageType,
@@ -201,7 +201,7 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -215,7 +215,7 @@ template <typename LockType,
           typename StatisticContainerType>
 void
 HTTP_Module_Bisector_T<LockType,
-                       SynchStrategyType,
+                       ACE_SYNCH_USE,
                        TimePolicyType,
                        ControlMessageType,
                        DataMessageType,
@@ -441,7 +441,7 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -455,7 +455,7 @@ template <typename LockType,
           typename StatisticContainerType>
 void
 HTTP_Module_Bisector_T<LockType,
-                       SynchStrategyType,
+                       ACE_SYNCH_USE,
                        TimePolicyType,
                        ControlMessageType,
                        DataMessageType,
@@ -506,7 +506,7 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -520,7 +520,7 @@ template <typename LockType,
           typename StatisticContainerType>
 bool
 HTTP_Module_Bisector_T<LockType,
-                       SynchStrategyType,
+                       ACE_SYNCH_USE,
                        TimePolicyType,
                        ControlMessageType,
                        DataMessageType,
@@ -653,7 +653,7 @@ HTTP_Module_Bisector_T<LockType,
 //}
 
 template <typename LockType,
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -667,7 +667,7 @@ template <typename LockType,
           typename StatisticContainerType>
 bool
 HTTP_Module_Bisector_T<LockType,
-                       SynchStrategyType,
+                       ACE_SYNCH_USE,
                        TimePolicyType,
                        ControlMessageType,
                        DataMessageType,
@@ -716,7 +716,7 @@ HTTP_Module_Bisector_T<LockType,
 }
 
 template <typename LockType,
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -730,7 +730,7 @@ template <typename LockType,
           typename StatisticContainerType>
 void
 HTTP_Module_Bisector_T<LockType,
-                       SynchStrategyType,
+                       ACE_SYNCH_USE,
                        TimePolicyType,
                        ControlMessageType,
                        DataMessageType,

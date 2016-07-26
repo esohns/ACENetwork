@@ -51,7 +51,7 @@ YY_DECL;
 // forward declaration(s)
 class Stream_IAllocator;
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           ////////////////////////////////
           typename ConfigurationType,
@@ -60,14 +60,14 @@ template <typename SynchStrategyType,
           typename DataMessageType,
           typename SessionMessageType>
 class IRC_Module_Parser_T
- : public Stream_TaskBaseSynch_T<SynchStrategyType,
+ : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
-                                 /////////
                                  ConfigurationType,
-                                 /////////
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType>
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 Stream_SessionMessageType>
 {
  public:
   IRC_Module_Parser_T ();
@@ -84,14 +84,14 @@ class IRC_Module_Parser_T
                                   bool&);            // return value: pass message downstream ?
 
  private:
-  typedef Stream_TaskBaseSynch_T<SynchStrategyType,
+  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
-                                 /////////
                                  ConfigurationType,
-                                 /////////
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType> inherited;
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 Stream_SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T (const IRC_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T& operator= (const IRC_Module_Parser_T&))
@@ -111,7 +111,7 @@ class IRC_Module_Parser_T
   bool               isInitialized_;
 };
 
-// include template implementation
+// include template definition
 #include "irc_module_parser.inl"
 
 #endif

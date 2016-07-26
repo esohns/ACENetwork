@@ -25,7 +25,7 @@
 
 #include "stream_task_base_synch.h"
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           ////////////////////////////////
           typename ConfigurationType,
@@ -34,14 +34,14 @@ template <typename SynchStrategyType,
           typename DataMessageType,
           typename SessionMessageType>
 class HTTP_Module_Streamer_T
- : public Stream_TaskBaseSynch_T<SynchStrategyType,
+ : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
-                                 /////////
                                  ConfigurationType,
-                                 /////////
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType>
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 Stream_SessionMessageType>
 {
  public:
   HTTP_Module_Streamer_T ();
@@ -52,20 +52,20 @@ class HTTP_Module_Streamer_T
                                   bool&);            // return value: pass message downstream ?
 
  private:
-  typedef Stream_TaskBaseSynch_T<SynchStrategyType,
+  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
-                                 /////////
                                  ConfigurationType,
-                                 /////////
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType> inherited;
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 Stream_SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T (const HTTP_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T& operator= (const HTTP_Module_Streamer_T&))
 };
 
-// include template implementation
+// include template definition
 #include "http_module_streamer.inl"
 
 #endif

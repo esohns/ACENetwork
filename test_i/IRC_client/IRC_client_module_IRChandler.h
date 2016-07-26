@@ -40,6 +40,7 @@
 
 #include "IRC_client_common.h"
 #include "IRC_client_configuration.h"
+#include "IRC_client_sessionmessage.h"
 #include "IRC_client_stream_common.h"
 
 // forward declaration(s)
@@ -50,14 +51,11 @@ class IRC_Record;
 class IRC_Client_Module_IRCHandler
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
- 
                                          IRC_Client_ModuleHandlerConfiguration,
-
                                          ACE_Message_Block,
                                          IRC_Message,
                                          IRC_Client_SessionMessage,
-
-                                         unsigned int,
+                                         Stream_SessionId_t,
                                          IRC_Client_SessionData_t>
  , public IRC_StateMachine_Registration
  , public IRC_IControl
@@ -124,14 +122,11 @@ class IRC_Client_Module_IRCHandler
  private:
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
- 
                                          IRC_Client_ModuleHandlerConfiguration,
-
                                          ACE_Message_Block,
                                          IRC_Message,
                                          IRC_Client_SessionMessage,
-
-                                         unsigned int,
+                                         Stream_SessionId_t,
                                          IRC_Client_SessionData_t> inherited;
   typedef IRC_StateMachine_Registration inherited2;
 
@@ -172,10 +167,10 @@ class IRC_Client_Module_IRCHandler
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                          // task synch type
-                              Common_TimePolicy_t,                   // time policy
-                              Stream_ModuleConfiguration,            // module configuration type
+DATASTREAM_MODULE_INPUT_ONLY (IRC_Client_SessionData,                // session data type
+                              Stream_SessionMessageType,             // session event type
                               IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
+                              IRC_Client_IStreamNotify_t,            // stream notification interface type
                               IRC_Client_Module_IRCHandler);         // writer type
 
 #endif

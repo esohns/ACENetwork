@@ -918,7 +918,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   switch (result_in.bytes_transferred ())
   {
-    case -1:
+    //case -1:
+    case std::numeric_limits<size_t>::max ():
     {
       // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();

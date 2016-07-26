@@ -1307,8 +1307,8 @@ ACE_TMAIN (int argc_in,
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
                                                                               IRC_BUFFER_SIZE);
-  IRC_Client_MessageAllocator message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                 &heap_allocator);
+  IRC_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                   &heap_allocator);
 
   IRC_Client_Configuration configuration;
   IRC_Client_UserData user_data;

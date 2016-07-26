@@ -37,7 +37,8 @@ class ACE_Time_Value;
 // *TODO*: move this class to Net_Client. 'friend'liness of
 //         Net_TCPConnectionBase_T currently precludes this
 
-class Net_Export Net_SOCK_Connector
+//class Net_Export Net_SOCK_Connector
+class Net_SOCK_Connector
  : public ACE_SOCK_Connector
 {
  public:

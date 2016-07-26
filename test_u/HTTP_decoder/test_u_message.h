@@ -25,7 +25,7 @@
 
 #include "stream_data_message_base.h"
 
-#include "test_u_common.h"
+#include "test_u_HTTP_decoder_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;
@@ -33,19 +33,20 @@ class ACE_Data_Block;
 class ACE_Message_Block;
 class Test_U_SessionMessage;
 template <typename AllocatorConfigurationType,
-          ////////////////////////////////
-          typename MessageType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_Message
  : public Stream_DataMessageBase_2<Test_U_AllocatorConfiguration,
-                                   ///////
+                                   Test_U_ControlMessage_t,
+                                   Test_U_SessionMessage,
                                    Test_U_MessageData_t,
                                    HTTP_Method_t>
 {
-  // grant access to specific private ctors...
+  // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
-
+                                                 Test_U_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
 
@@ -72,12 +73,13 @@ class Test_U_Message
 //  typedef Stream_DataMessageBase_T<xmlDoc,
 //                                   Stream_CommandType_t> inherited;
   typedef Stream_DataMessageBase_2<Test_U_AllocatorConfiguration,
-                                   ///////
+                                   Test_U_ControlMessage_t,
+                                   Test_U_SessionMessage,
                                    Test_U_MessageData_t,
                                    HTTP_Method_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
-  // *NOTE*: to be used by message allocators...
+  // *NOTE*: to be used by message allocators
   Test_U_Message (ACE_Data_Block*, // data block
                   ACE_Allocator*,  // message allocator
                   bool = true);    // increment running message counter ?

@@ -33,7 +33,6 @@
 #include "ace/Time_Value.h"
 
 #include "common.h"
-#include "common_inotify.h"
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 #include "common_time_common.h"
@@ -41,6 +40,7 @@
 #include "stream_base.h"
 #include "stream_common.h"
 #include "stream_data_base.h"
+#include "stream_inotify.h"
 #include "stream_messageallocatorheap_base.h"
 #include "stream_session_data.h"
 
@@ -56,8 +56,6 @@
 #include "http_defines.h"
 
 #include "test_u_defines.h"
-//#include "test_u_message.h"
-//#include "test_u_session_message.h"
 
 struct Test_U_AllocatorConfiguration
  : Stream_AllocatorConfiguration
@@ -140,7 +138,7 @@ struct Test_U_SocketHandlerConfiguration
 {
   inline Test_U_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
-   ////////////////////////////////////
+   ///////////////////////////////////////
    , userData (NULL)
   {};
 
@@ -158,13 +156,11 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  Test_U_Configuration,
                                  Test_U_ConnectionState,
                                  HTTP_RuntimeStatistic_t,
-                                 /////////
                                  Test_U_UserData> Test_U_ConnectionManager_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Test_U_Configuration,
                                  Test_U_ConnectionState,
                                  HTTP_RuntimeStatistic_t,
-                                 /////////
                                  Test_U_UserData> Test_U_IConnectionManager_t;
 struct Test_U_ModuleHandlerConfiguration
  : HTTP_ModuleHandlerConfiguration
@@ -261,10 +257,6 @@ struct Test_U_Configuration
   bool                              useReactor;
 };
 
-//typedef Stream_IModuleHandler_T<Test_U_ModuleHandlerConfiguration> Test_U_IModuleHandler_t;
-typedef Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
-
-                                          Test_U_Message,
-                                          Test_U_SessionMessage> Test_U_MessageAllocator_t;
+typedef Stream_INotify_T<Stream_SessionMessageType> Test_U_IStreamNotify_t;
 
 #endif

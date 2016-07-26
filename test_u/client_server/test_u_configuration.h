@@ -43,7 +43,6 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 ////////
                                  Net_UserData> Net_IInetConnectionManager_t;
 
 struct Net_ProtocolConfiguration

@@ -246,6 +246,9 @@ HTTP_ParserDriver<RecordType,
   int result = -1;
   ACE_Message_Block* message_block_p = NULL;
   bool done = false;
+  SessionMessageType* session_message_p = NULL;
+  Stream_SessionMessageType session_message_type =
+    STREAM_SESSION_MESSAGE_INVALID;
 
   // *IMPORTANT NOTE*: 'this' is the parser thread currently blocked in yylex()
 
@@ -268,20 +271,17 @@ HTTP_ParserDriver<RecordType,
     } // end IF
     ACE_ASSERT (message_block_p);
 
-    if (message_block_p->msg_type () & STREAM_MESSAGE_DATA_MASK)
+    if (message_block_p->msg_type () == ACE_Message_Block::MB_DATA)
+      break;
+    session_message_p = dynamic_cast<SessionMessageType*> (message_block_p);
+    if (!session_message_p)
       break;
 
-    SessionMessageType* session_message_p = NULL;
-    // downcast message
-    session_message_p = dynamic_cast<SessionMessageType*> (message_block_p);
-    ACE_ASSERT (session_message_p);
-    // OK: process session message...
-    Stream_SessionMessageType session_message_type =
-      session_message_p->type ();
-
+    session_message_type = session_message_p->type ();
     if (session_message_type == STREAM_SESSION_MESSAGE_END)
       done = true; // session has finished --> abort
 
+    // requeue message
     result = messageQueue_->enqueue_tail (message_block_p, NULL);
     if (result == -1)
     {

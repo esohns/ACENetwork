@@ -38,16 +38,11 @@
 
 class IRC_Client_Stream
  : public IRC_Stream_T<IRC_Client_StreamState,
-                       ///////////////////
                        IRC_Client_StreamConfiguration,
-                       ///////////////////
                        IRC_RuntimeStatistic_t,
-                       ///////////////////
                        IRC_Client_ModuleHandlerConfiguration,
-                       ///////////////////
                        IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
-                       ///////////////////
                        ACE_Message_Block,
                        IRC_Message,
                        IRC_Client_SessionMessage>
@@ -72,16 +67,11 @@ class IRC_Client_Stream
 
  private:
   typedef IRC_Stream_T<IRC_Client_StreamState,
-                       ///////////////////
                        IRC_Client_StreamConfiguration,
-                       ///////////////////
                        IRC_RuntimeStatistic_t,
-                       ///////////////////
                        IRC_Client_ModuleHandlerConfiguration,
-                       ///////////////////
                        IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
-                       ///////////////////
                        ACE_Message_Block,
                        IRC_Message,
                        IRC_Client_SessionMessage> inherited;

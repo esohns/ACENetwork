@@ -26,46 +26,74 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
+#include "test_u_message.h"
+#include "test_u_sessionmessage.h"
+#include "test_u_common_modules.h"
+#include "test_u_module_headerparser.h"
+#include "test_u_module_protocolhandler.h"
+
 Net_Stream::Net_Stream (const std::string& name_in)
  : inherited (name_in)
- , socketHandler_ (ACE_TEXT_ALWAYS_CHAR ("SocketHandler"),
-                   NULL,
-                   false)
- , headerParser_ (ACE_TEXT_ALWAYS_CHAR ("HeaderParser"),
-                  NULL,
-                  false)
- , protocolHandler_ (ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler"),
-                     NULL,
-                     false)
- , runtimeStatistic_ (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
-                      NULL,
-                      false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::Net_Stream"));
 
-  // remember the 'owned' ones
-  // *TODO*: clean this up
-  // *NOTE*: one problem is that all modules which have NOT enqueued onto the
-  //         stream (e.g. because initialize() failed...) need to be explicitly
-  //         close()d
-  inherited::modules_.push_front (&socketHandler_);
-  inherited::modules_.push_front (&headerParser_);
-  inherited::modules_.push_front (&runtimeStatistic_);
-  inherited::modules_.push_front (&protocolHandler_);
-
-  // *TODO* fix ACE bug: modules should initialize their "next" member to NULL
-  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
-       iterator != inherited::modules_.end ();
-       iterator++)
-     (*iterator)->next (NULL);
 }
 
 Net_Stream::~Net_Stream ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::~Net_Stream"));
 
-  // *NOTE*: this implements an ordered shutdown on destruction...
+  // *NOTE*: this implements an ordered shutdown on destruction
   inherited::shutdown ();
+}
+
+bool
+Net_Stream::load (Stream_ModuleList_t& modules_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Stream::load"));
+
+  // initialize return value(s)
+  for (Stream_ModuleListIterator_t iterator = modules_out.begin ();
+       iterator != modules_out.end ();
+       iterator++)
+    delete *iterator;
+  modules_out.clear ();
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  // *TODO*: remove type inference
+  ACE_ASSERT (inherited::configuration_->moduleHandlerConfiguration);
+
+  Stream_Module_t* module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Net_Module_ProtocolHandler_Module (ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler"),
+                                                     NULL,
+                                                     false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Net_Module_RuntimeStatistic_Module (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
+                                                      NULL,
+                                                      false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Net_Module_HeaderParser_Module (ACE_TEXT_ALWAYS_CHAR ("HeaderParser"),
+                                                  NULL,
+                                                  false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Net_Module_SocketHandler_Module (ACE_TEXT_ALWAYS_CHAR ("SocketHandler"),
+                                                   NULL,
+                                                   false),
+                  false);
+  modules_out.push_back (module_p);
+
+  return true;
 }
 
 bool
@@ -90,114 +118,52 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in,
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
 
-  // things to be done here:
-  // [- initialize base class]
-  // ------------------------------------
-  // - initialize notification strategy (if any)
-  // ------------------------------------
-  // - push the final module onto the stream (if any)
-  // ------------------------------------
-  // - initialize modules
-  // - push them onto the stream (tail-first) !
-  // ------------------------------------
   Net_StreamSessionData& session_data_r =
       const_cast<Net_StreamSessionData&> (inherited::sessionData_->get ());
   session_data_r.sessionID = configuration_in.sessionID;
 
-  int result = -1;
-//  configuration_in.moduleConfiguration.streamState = &state_;
+  //  configuration_in.moduleConfiguration.streamState = &state_;
 
   // ---------------------------------------------------------------------------
 
-  // ******************* Protocol Handler ************************
-  //protocolHandler_.initialize (configuration_in.moduleConfiguration_2);
-  //Net_Module_ProtocolHandler* protocolHandler_impl_p =
-  //  dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
-  //if (!protocolHandler_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Net_Module_ProtocolHandler> failed, aborting\n")));
-  //  return false;
-  //} // end IF
-  //if (!protocolHandler_impl_p->initialize (configuration_in.messageAllocator,
-  //                                         configuration_in.protocolConfiguration->pingInterval,
-  //                                         configuration_in.protocolConfiguration->pingAutoAnswer,
-  //                                         configuration_in.protocolConfiguration->printPongMessages)) // print ('.') for received "pong"s...
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              protocolHandler_.name ()));
-  //  return false;
-  //} // end IF
-
-  // ******************* Runtime Statistics ************************
-  //runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
-  //Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p =
-  //  dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
-  //if (!runtimeStatistic_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Net_Module_RuntimeStatistic> failed, aborting\n")));
-  //  return false;
-  //} // end IF
-  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
-  //                                          true,                                        // push statistic messages ?
-  //                                          configuration_in.printFinalReport,           // print final report ?
-  //                                          configuration_in.messageAllocator))          // message allocator handle
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              runtimeStatistic_.name ()));
-  //  return false;
-  //} // end IF
-
-  // ******************* Header Parser ************************
-  //headerParser_.initialize (*configuration_in.moduleConfiguration);
-  //Net_Module_HeaderParser* headerParser_impl_p =
-  //  dynamic_cast<Net_Module_HeaderParser*> (headerParser_.writer ());
-  //if (!headerParser_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Net_Module_HeaderParser> failed, aborting\n")));
-  //  return false;
-  //} // end IF
-  //if (!headerParser_impl_p->initialize ())
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              headerParser_.name ()));
-  //  return false;
-  //} // end IF
-
   // ******************* Socket Handler ************************
-  socketHandler_.initialize (configuration_in.moduleConfiguration_2);
+  Stream_Module_t* module_p =
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("SocketHandler")));
+  if (!module_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
+                ACE_TEXT ("SocketHandler")));
+    return false;
+  } // end IF
+  //  socketHandler_.initialize (configuration_in.moduleConfiguration_2);
   Net_Module_SocketHandler* socketHandler_impl_p =
-    dynamic_cast<Net_Module_SocketHandler*> (socketHandler_.writer ());
+    dynamic_cast<Net_Module_SocketHandler*> (module_p->writer ());
   if (!socketHandler_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_SocketHandler> failed, aborting\n")));
     return false;
   } // end IF
-  if (!socketHandler_impl_p->initialize (configuration_in.moduleHandlerConfiguration_2))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                socketHandler_.name ()));
-    return false;
-  } // end IF
+//  if (!socketHandler_impl_p->initialize (configuration_in.moduleHandlerConfiguration_2))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+//                socketHandler_.name ()));
+//    return false;
+//  } // end IF
   if (!socketHandler_impl_p->initialize (inherited::state_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                socketHandler_.name ()));
+                module_p->name ()));
     return false;
   } // end IF
   socketHandler_impl_p->initialize ();
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
-  socketHandler_.arg (inherited::sessionData_);
+  module_p->arg (inherited::sessionData_);
 
   if (setupPipeline_in)
     if (!inherited::setup (configuration_in.notificationStrategy))
@@ -223,9 +189,18 @@ Net_Stream::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Stream::ping"));
 
+  Stream_Module_t* module_p =
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler")));
+  if (!module_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to retrieve \"%s\" module handle, returning\n"),
+                ACE_TEXT ("ProtocolHandler")));
+    return;
+  } // end IF
   Net_Module_ProtocolHandler* protocolHandler_impl_p = NULL;
   protocolHandler_impl_p =
-    dynamic_cast<Net_Module_ProtocolHandler*> (protocolHandler_.writer ());
+    dynamic_cast<Net_Module_ProtocolHandler*> (module_p->writer ());
   if (!protocolHandler_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -233,7 +208,7 @@ Net_Stream::ping ()
     return;
   } // end IF
 
-  // delegate to this module...
+  // delegate to this module
   protocolHandler_impl_p->handleTimeout (NULL);
 }
 
@@ -247,8 +222,17 @@ Net_Stream::collect (Net_RuntimeStatistic_t& data_out)
 
   int result = -1;
 
+  Stream_Module_t* module_p =
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic")));
+  if (!module_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
+                ACE_TEXT ("RuntimeStatistic")));
+    return false;
+  } // end IF
   Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl =
-    dynamic_cast<Net_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
+    dynamic_cast<Net_Module_Statistic_WriterTask_t*> (module_p->writer ());
   if (!runtimeStatistic_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -272,7 +256,7 @@ Net_Stream::collect (Net_RuntimeStatistic_t& data_out)
 
   session_data_r.currentStatistic.timeStamp = COMMON_TIME_NOW;
 
-  // delegate to the statistics module...
+  // delegate to the statistics module
   bool result_2 = false;
   try {
     result_2 = runtimeStatistic_impl->collect (data_out);

@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include "test_u_stream.h"
 #include "test_u_message.h"
 
 #include "ace/Log_Msg.h"

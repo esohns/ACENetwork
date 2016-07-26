@@ -33,7 +33,7 @@
 // forward declaration(s)
 class Stream_IAllocator;
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           ////////////////////////////////
           typename ConfigurationType,
@@ -42,14 +42,14 @@ template <typename SynchStrategyType,
           typename DataMessageType,
           typename SessionMessageType>
 class DHCP_Module_Parser_T
- : public Stream_TaskBaseSynch_T<SynchStrategyType,
+ : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
-                                 /////////
                                  ConfigurationType,
-                                 /////////
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType>
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 Stream_SessionMessageType>
 {
  public:
   DHCP_Module_Parser_T ();
@@ -65,14 +65,14 @@ class DHCP_Module_Parser_T
                                      bool&);               // return value: pass message downstream ?
 
  private:
-  typedef Stream_TaskBaseSynch_T<SynchStrategyType,
+  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
-                                 /////////
                                  ConfigurationType,
-                                 /////////
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType> inherited;
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 Stream_SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Parser_T (const DHCP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Parser_T& operator= (const DHCP_Module_Parser_T&))
@@ -95,7 +95,7 @@ class DHCP_Module_Parser_T
 
 template <typename LockType,
           ////////////////////////////////
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -113,22 +113,17 @@ template <typename LockType,
           typename StatisticContainerType>
 class DHCP_Module_ParserH_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
-                                      SynchStrategyType,
+                                      ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType>
 {
  public:
@@ -138,7 +133,7 @@ class DHCP_Module_ParserH_T
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
   using Stream_HeadModuleTaskBase_T<LockType,
-                                    SynchStrategyType,
+                                    ACE_SYNCH_USE,
                                     TimePolicyType,
                                     ControlMessageType,
                                     DataMessageType,
@@ -157,8 +152,6 @@ class DHCP_Module_ParserH_T
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
                                   bool&);                // return value: pass message downstream ?
-
-  // catch the session ID...
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
@@ -169,22 +162,17 @@ class DHCP_Module_ParserH_T
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
-                                      SynchStrategyType,
+                                      ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T ())
@@ -207,7 +195,7 @@ class DHCP_Module_ParserH_T
   bool               isDriverInitialized_;
 };
 
-// include template implementation
+// include template definition
 #include "dhcp_module_parser.inl"
 
 #endif

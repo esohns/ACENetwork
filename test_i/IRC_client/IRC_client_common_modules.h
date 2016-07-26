@@ -37,23 +37,18 @@
 class IRC_Message;
 class IRC_Client_SessionMessage;
 
-typedef IRC_Module_Bisector_T<ACE_SYNCH_MUTEX,
-                              ///////////
+typedef IRC_Module_Bisector_T<ACE_MT_SYNCH,
                               ACE_MT_SYNCH,
                               Common_TimePolicy_t,
                               ACE_Message_Block,
                               IRC_Message,
                               IRC_Client_SessionMessage,
-                              ///////////
                               IRC_Client_ModuleHandlerConfiguration,
-                              ///////////
                               int,
                               int,
                               IRC_StreamState,
-                              ///////////
                               IRC_Client_SessionData,
                               IRC_Client_SessionData_t,
-                              ///////////
                               IRC_RuntimeStatistic_t> IRC_Client_Module_Bisector_t;
 
 typedef IRC_Module_Parser_Module IRC_Client_Module_Parser_Module;

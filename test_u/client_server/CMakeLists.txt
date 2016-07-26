@@ -89,14 +89,6 @@ elseif (WIN32)
  include_directories ($ENV{ACE_ROOT})
  # *TODO*: repair pkgconfig support
 # gtk
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/include/atk-1.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/include/pango-1.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/include/cairo)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/glib-2.0/include)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/include/glib-2.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/include/gdk-pixbuf-2.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gtk-2.0/include)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/include/gtk-2.0)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/include/glib-2.0)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/glib-2.0/include)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/include/gtk-2.0)
@@ -116,6 +108,7 @@ elseif (WIN32)
 endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
@@ -131,7 +124,6 @@ set (client_SRCS
      net_client_timeouthandler.h
      test_u_callbacks.cpp
      test_u_callbacks.h
-     test_u_common.h
      test_u_common_modules.h
      test_u_configuration.h
      test_u_connection_common.h
@@ -152,7 +144,6 @@ set (client_SRCS
      test_u_stream.cpp
      test_u_stream.h
      test_u_socket_common.h
-     test_u_stream_common.h
      test_u_tcpconnection.cpp
      test_u_tcpconnection.h)
 
@@ -168,16 +159,11 @@ add_dependencies (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Client)
 target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_LIBRARY})
 if (UNIX)
+ target_link_libraries (${EXECUTABLE_SOURCE} rt)
  target_link_libraries (${EXECUTABLE_SOURCE} ${PKG_CAP_LIBRARIES})
  target_link_libraries (${EXECUTABLE_SOURCE} ${PKG_GTK_GLADE_LIBRARIES})
 elseif (WIN32)
 # *TODO*: repair WIN32 pkgconfig support
-# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gio-2.0.lib)
-# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/glib-2.0.lib)
-# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gobject-2.0.lib)
-# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/pango-1.0.lib)
-# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gdk-win32-2.0.lib)
-# target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/lib/gtk-win32-2.0.lib)
  target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gio-2.0.lib)
  target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/glib-2.0.lib)
  target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk3/lib/gobject-2.0.lib)
@@ -217,7 +203,6 @@ set (server_SRCS
      net_server_signalhandler.h
      test_u_callbacks.cpp
      test_u_callbacks.h
-     test_u_common.h
      test_u_common_modules.h
      test_u_configuration.h
      test_u_connection_common.h
@@ -238,7 +223,6 @@ set (server_SRCS
      test_u_stream.cpp
      test_u_stream.h
      test_u_socket_common.h
-     test_u_stream_common.h
      test_u_tcpconnection.cpp
      test_u_tcpconnection.h
      stdafx.cpp
@@ -256,6 +240,7 @@ add_dependencies (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
 target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE_TARGET} ${ACE_LIBRARY})
 if (UNIX)
+ target_link_libraries (${EXECUTABLE_TARGET} rt)
  target_link_libraries (${EXECUTABLE_TARGET} ${PKG_CAP_LIBRARIES})
  target_link_libraries (${EXECUTABLE_TARGET} ${PKG_GTK_GLADE_LIBRARIES})
 elseif (WIN32)

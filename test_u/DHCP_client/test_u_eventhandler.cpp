@@ -49,7 +49,7 @@ Test_U_EventHandler::~Test_U_EventHandler ()
 }
 
 void
-Test_U_EventHandler::start (unsigned int sessionID_in,
+Test_U_EventHandler::start (Stream_SessionId_t sessionID_in,
                             const Test_U_StreamSessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::start"));
@@ -79,7 +79,49 @@ Test_U_EventHandler::start (unsigned int sessionID_in,
 }
 
 void
-Test_U_EventHandler::notify (unsigned int sessionID_in,
+Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
+                             const Stream_SessionMessageType& sessionEvent_in)
+{
+  STREAM_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
+
+  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionEvent_in);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+  ACE_NOTREACHED (return;)
+}
+
+void
+Test_U_EventHandler::end (Stream_SessionId_t sessionID_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::end"));
+
+  // sanity check(s)
+  ACE_ASSERT (CBData_);
+  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionID_in);
+  ACE_ASSERT (iterator != sessionDataMap_.end ());
+
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->lock);
+
+  CBData_->eventStack.push_back (TEST_U_GTKEVENT_END);
+
+  guint event_source_id = g_idle_add (idle_end_UI_cb,
+                                      CBData_);
+  if (event_source_id == 0)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to g_idle_add(idle_end_UI_cb): \"%m\", returning\n")));
+    return;
+  } // end IF
+  CBData_->eventSourceIds.insert (event_source_id);
+
+  sessionDataMap_.erase (iterator);
+}
+
+void
+Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
                              const Test_U_Message& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
@@ -95,7 +137,7 @@ Test_U_EventHandler::notify (unsigned int sessionID_in,
   CBData_->eventStack.push_back (TEST_U_GTKEVENT_DATA);
 }
 void
-Test_U_EventHandler::notify (unsigned int sessionID_in,
+Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
                              const Test_U_SessionMessage& sessionMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
@@ -144,31 +186,4 @@ Test_U_EventHandler::notify (unsigned int sessionID_in,
     }
   } // end SWITCH
   CBData_->eventStack.push_back (event);
-}
-
-void
-Test_U_EventHandler::end (unsigned int sessionID_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::end"));
-
-  // sanity check(s)
-  ACE_ASSERT (CBData_);
-  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionID_in);
-  ACE_ASSERT (iterator != sessionDataMap_.end ());
-
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->lock);
-
-  CBData_->eventStack.push_back (TEST_U_GTKEVENT_END);
-
-  guint event_source_id = g_idle_add (idle_end_UI_cb,
-                                      CBData_);
-  if (event_source_id == 0)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_end_UI_cb): \"%m\", returning\n")));
-    return;
-  } // end IF
-  CBData_->eventSourceIds.insert (event_source_id);
-
-  sessionDataMap_.erase (iterator);
 }

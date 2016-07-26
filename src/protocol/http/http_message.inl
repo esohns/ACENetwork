@@ -20,8 +20,8 @@
 
 #include <sstream>
 
-#include "ace/Message_Block.h"
 #include "ace/Malloc_Base.h"
+#include "ace/Message_Block.h"
 
 #include "net_macros.h"
 
@@ -29,8 +29,12 @@
 #include "http_tools.h"
 
 template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType,
           typename DataType>
 HTTP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType,
                DataType>::HTTP_Message_T (unsigned int requestedSize_in)
  : inherited (requestedSize_in)
 {
@@ -39,8 +43,12 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType,
           typename DataType>
 HTTP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType,
                DataType>::HTTP_Message_T (const HTTP_Message_T& message_in)
  : inherited (message_in)
 {
@@ -49,8 +57,12 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType,
           typename DataType>
 HTTP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType,
                DataType>::HTTP_Message_T (ACE_Data_Block* dataBlock_in,
                                           ACE_Allocator* messageAllocator_in,
                                           bool incrementMessageCounter_in)
@@ -64,7 +76,7 @@ HTTP_Message_T<AllocatorConfigurationType,
 
 // HTTP_Message_T::HTTP_Message_T(ACE_Allocator* messageAllocator_in)
 //  : inherited(messageAllocator_in,
-//              true), // usually, we want to increment the running message counter...
+//              true), // usually, we want to increment the running message counter
 //    myIsInitialized(false) // not initialized --> call init() !
 // {
 //   NETWORK_TRACE(ACE_TEXT("HTTP_Message_T::HTTP_Message_T"));
@@ -72,8 +84,12 @@ HTTP_Message_T<AllocatorConfigurationType,
 // }
 
 template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType,
           typename DataType>
 HTTP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType,
                DataType>::~HTTP_Message_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::~HTTP_Message_T"));
@@ -82,15 +98,19 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType,
           typename DataType>
 HTTP_Method_t
 HTTP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType,
                DataType>::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::command"));
 
   // sanity check(s)
-  if (!inherited::initialized_)
+  if (!inherited::isInitialized_)
     return HTTP_Codes::HTTP_METHOD_INVALID;
   ACE_ASSERT (inherited::data_);
 
@@ -98,9 +118,13 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType,
           typename DataType>
 std::string
 HTTP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType,
                DataType>::Command2String (HTTP_Method_t method_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::Command2String"));
@@ -110,9 +134,13 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType,
           typename DataType>
 void
 HTTP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType,
                DataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::dump_state"));
@@ -147,9 +175,13 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType,
           typename DataType>
 void
 HTTP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType,
                DataType>::crunch ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::crunch"));
@@ -218,9 +250,13 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType,
           typename DataType>
 ACE_Message_Block*
 HTTP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType,
                DataType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::duplicate"));
@@ -241,8 +277,7 @@ HTTP_Message_T<AllocatorConfigurationType,
       dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
     ACE_ASSERT (allocator_p);
 allocate:
-    try
-    {
+    try {
       // *NOTE*: the argument to malloc SHOULDN'T really matter, as this will be
       //         a "shallow" copy which just references our data block...
       // *IMPORTANT NOTE*: cached allocators require the object size as argument
@@ -253,9 +288,7 @@ allocate:
                                //static_cast<HTTP_Message_T*>(message_block_allocator_->malloc(capacity())),
                                static_cast<HTTP_Message_T*> (inherited::message_block_allocator_->calloc (sizeof (HTTP_Message_T))),
                                HTTP_Message_T (*this));
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), aborting\n"),
                   sizeof (HTTP_Message_T)));
@@ -301,7 +334,7 @@ allocate:
     } // end IF
   } // end IF
 
-  // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
+  // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)
 
   return message_p;
 }

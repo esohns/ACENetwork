@@ -56,20 +56,20 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  DHCP_Configuration,
                                  DHCP_ConnectionState,
                                  DHCP_RuntimeStatistic_t,
-                                 ////////
+                                 /////////
                                  DHCP_Stream_UserData> DHCP_IConnection_Manager_t;
 
-typedef Common_INotify_T<unsigned int,
-                         DHCP_Stream_SessionData,
-                         DHCP_Record,
-                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
+//typedef Common_INotify_T<unsigned int,
+//                         DHCP_Stream_SessionData,
+//                         DHCP_Record,
+//                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
 
 struct DHCP_SocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
 {
   inline DHCP_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
-   //////////////////////////////////////
+   ///////////////////////////////////////
    , userData (NULL)
   {
     PDUSize = DHCP_BUFFER_SIZE;
@@ -110,7 +110,7 @@ struct DHCP_ModuleHandlerConfiguration
 {
   inline DHCP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
-   //////////////////////////////////////
+   ///////////////////////////////////////
 //   , connection (NULL)
    , printFinalReport (true)
    , printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)

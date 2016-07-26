@@ -32,6 +32,7 @@
 
 #include "stream_common.h"
 #include "stream_data_base.h"
+#include "stream_isessionnotify.h"
 
 #include "net_common.h"
 
@@ -44,10 +45,13 @@ struct DHCP_Record;
 class DHCP_SessionMessage;
 struct DHCP_Stream_SessionData;
 struct DHCP_Stream_UserData;
-typedef Common_INotify_T<unsigned int,
-                         DHCP_Stream_SessionData,
-                         DHCP_Record,
-                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
+
+typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
+                                    DHCP_Stream_SessionData,
+                                    Stream_SessionMessageType,
+                                    DHCP_Record,
+                                    DHCP_SessionMessage> DHCP_ISessionNotify_t;
+
 typedef Stream_Statistic DHCP_RuntimeStatistic_t;
 
 // convenient type definitions

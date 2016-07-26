@@ -38,14 +38,11 @@
 class Net_Module_EventHandler
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
- 
                                          Stream_ModuleHandlerConfiguration,
-
                                          ACE_Message_Block,
                                          Net_Message,
                                          Net_SessionMessage,
-
-                                         unsigned int,
+                                         Stream_SessionId_t,
                                          Net_StreamSessionData_t>
 {
  public:
@@ -58,14 +55,11 @@ class Net_Module_EventHandler
  private:
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
- 
                                          Stream_ModuleHandlerConfiguration,
-
                                          ACE_Message_Block,
                                          Net_Message,
                                          Net_SessionMessage,
-
-                                         unsigned int,
+                                         Stream_SessionId_t,
                                          Net_StreamSessionData_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler (const Net_Module_EventHandler&))
@@ -73,10 +67,10 @@ class Net_Module_EventHandler
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                      // task synch type
-                              Common_TimePolicy_t,               // time policy
-                              Stream_ModuleConfiguration,        // module configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Net_StreamSessionData,             // session data type
+                              Stream_SessionMessageType,         // session event type
                               Stream_ModuleHandlerConfiguration, // module handler configuration type
+                              Net_IStreamNotify_t,               // stream notification interface type
                               Net_Module_EventHandler);          // writer type
 
 #endif

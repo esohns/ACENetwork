@@ -35,29 +35,31 @@
 // forward declarations
 struct HTTP_ConnectionState;
 struct HTTP_ModuleHandlerConfiguration;
-template <typename AllocatorConfigurationType,
-          typename DataType>
-class HTTP_Message_T;
-class HTTP_SessionMessage;
-template <typename StreamStateType,
-          typename ConfigurationType,
-          typename StatisticContainerType,
-          typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-class HTTP_Stream_T;
+//template <typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename SessionMessageType,
+//          typename DataType>
+//class HTTP_Message_T;
+//class HTTP_SessionMessage;
+//template <typename StreamStateType,
+//          typename ConfigurationType,
+//          typename StatisticContainerType,
+//          typename ModuleHandlerConfigurationType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType>
+//class HTTP_Stream_T;
 struct HTTP_StreamConfiguration;
 
 //typedef Stream_IModuleHandler_T<HTTP_ModuleHandlerConfiguration> HTTP_IModuleHandler_t;
-typedef Stream_IModule_T<ACE_MT_SYNCH,
-                         Common_TimePolicy_t,
-                         Stream_ModuleConfiguration,
-                         HTTP_ModuleHandlerConfiguration> HTTP_IModule_t;
-typedef HTTP_Message_T<Stream_AllocatorConfiguration,
-                       HTTP_MessageData_t> HTTP_Message_t;
+//typedef Stream_IModule_T<ACE_MT_SYNCH,
+//                         Common_TimePolicy_t,
+//                         Stream_ModuleConfiguration,
+//                         HTTP_ModuleHandlerConfiguration> HTTP_IModule_t;
+//typedef HTTP_Message_T<Stream_AllocatorConfiguration,
+//                       HTTP_MessageData_t> HTTP_Message_t;
 
 struct HTTP_Stream_SessionData
  : Stream_SessionData
@@ -102,19 +104,20 @@ struct HTTP_StreamState
 
 typedef Stream_SessionData_T<HTTP_Stream_SessionData> HTTP_Stream_SessionData_t;
 
-typedef Common_INotify_T<unsigned int,
-                         HTTP_Stream_SessionData,
-                         HTTP_Record,
-                         HTTP_SessionMessage> HTTP_IStreamNotify_t;
+//typedef Common_INotify_T<unsigned int,
+//                         HTTP_Stream_SessionData,
+//                         HTTP_Record,
+//                         HTTP_SessionMessage> HTTP_IStreamNotify_t;
+typedef Stream_INotify_T<Stream_SessionMessageType> HTTP_Stream_INotify_t;
 
-typedef HTTP_Stream_T<HTTP_StreamState,
-                      HTTP_StreamConfiguration,
-                      HTTP_RuntimeStatistic_t,
-                      HTTP_ModuleHandlerConfiguration,
-                      HTTP_Stream_SessionData,
-                      HTTP_Stream_SessionData_t,
-                      ACE_Message_Block,
-                      HTTP_Message_t,
-                      HTTP_SessionMessage> HTTP_Stream_t;
+//typedef HTTP_Stream_T<HTTP_StreamState,
+//                      HTTP_StreamConfiguration,
+//                      HTTP_RuntimeStatistic_t,
+//                      HTTP_ModuleHandlerConfiguration,
+//                      HTTP_Stream_SessionData,
+//                      HTTP_Stream_SessionData_t,
+//                      ACE_Message_Block,
+//                      HTTP_Message_t,
+//                      HTTP_SessionMessage> HTTP_Stream_t;
 
 #endif

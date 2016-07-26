@@ -128,7 +128,7 @@ Test_U_Message::command () const
   NETWORK_TRACE (ACE_TEXT ("Test_U_Message::command"));
 
   // sanity check(s)
-  if (!inherited::initialized_)
+  if (!inherited::isInitialized_)
     return HTTP_Codes::HTTP_METHOD_INVALID;
   ACE_ASSERT (inherited::data_);
 

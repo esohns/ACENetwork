@@ -415,9 +415,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   // step0b: notify upstream (if any) ?
   Stream_Base_t* stream_p = stream_.upStream ();
   if (stream_p &&
-      ((inherited3::state_.status == NET_CONNECTION_STATUS_CLOSED) ||
+      ((inherited3::state_.status == NET_CONNECTION_STATUS_CLOSED)     ||
        (inherited3::state_.status == NET_CONNECTION_STATUS_PEER_CLOSED)))
-    stream_.notify (NET_STREAM_SESSION_MESSAGE_CLOSE,
+    stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
                     true);
 
   // step1: shut down the processing stream
@@ -908,7 +908,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 #endif
   } // end IF
 
-  switch (result_in.bytes_transferred ())
+  switch (static_cast<int> (result_in.bytes_transferred ()))
   {
     case -1:
     {

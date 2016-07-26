@@ -48,20 +48,15 @@ class HTTP_SessionMessage;
 
 typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
-
                              HTTP_ModuleHandlerConfiguration,
-
                              ACE_Message_Block,
                              HTTP_Message_T<Stream_AllocatorConfiguration,
                                             HTTP_Record>,
                              HTTP_SessionMessage,
-                             
                              HTTP_Record> HTTP_Module_Parser;
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
-
                                HTTP_ModuleHandlerConfiguration,
-
                                ACE_Message_Block,
                                HTTP_Message_T<Stream_AllocatorConfiguration,
                                               HTTP_Record>,
@@ -69,26 +64,20 @@ typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
 
 typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-
                                           HTTP_ModuleHandlerConfiguration,
-
                                           ACE_Message_Block,
                                           HTTP_Message_T<Stream_AllocatorConfiguration,
                                                          HTTP_Record>,
                                           HTTP_SessionMessage,
-
                                           HTTP_Method_t,
                                           HTTP_RuntimeStatistic_t> HTTP_Module_Statistic_ReaderTask_t;
 typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-
                                           HTTP_ModuleHandlerConfiguration,
-
                                           ACE_Message_Block,
                                           HTTP_Message_T<Stream_AllocatorConfiguration,
                                                          HTTP_Record>,
                                           HTTP_SessionMessage,
-
                                           HTTP_Method_t,
                                           HTTP_RuntimeStatistic_t> HTTP_Module_Statistic_WriterTask_t;
 

@@ -237,13 +237,10 @@ Net_SocketConnectionBase_T<HandlerType,
   } // end IF
 
   bool result_2 = false;
-  try
-  {
+  try {
     result_2 = istatemachine_p->wait (state_in,
                                       timeValue_in);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s:%s: caught exception in Stream_IStateMachine_t::wait(%d,%T#), continuing\n"),
                 ACE_TEXT (inherited::stream_.name ().c_str ()),
@@ -919,13 +916,10 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
   } // end IF
 
   bool result_2 = false;
-  try
-  {
+  try {
     result_2 = istatemachine_p->wait (state_in,
                                       timeValue_in);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s:%s: caught exception in Stream_IStateMachine_t::wait(%d,%T#), continuing\n"),
                 ACE_TEXT (inherited::stream_.name ().c_str ()),

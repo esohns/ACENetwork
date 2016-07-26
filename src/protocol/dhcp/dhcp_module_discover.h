@@ -27,7 +27,7 @@
 #include "stream_statistichandler.h"
 #include "stream_task_base_asynch.h"
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           ////////////////////////////////
           typename ControlMessageType,
@@ -40,14 +40,14 @@ template <typename SynchStrategyType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
 class DHCP_Module_Discover_T
- : public Stream_TaskBaseAsynch_T<SynchStrategyType,
+ : public Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
-                                  ////////
                                   ConfigurationType,
-                                  ////////
                                   ControlMessageType,
                                   DataMessageType,
-                                  SessionMessageType>
+                                  SessionMessageType,
+                                  Stream_SessionId_t,
+                                  Stream_SessionMessageType>
  //, public Stream_IModuleHandler_T<ConfigurationType>
 {
  public:
@@ -68,14 +68,14 @@ class DHCP_Module_Discover_T
   typename SessionMessageType::DATA_T* sessionData_;
 
  private:
-  typedef Stream_TaskBaseAsynch_T<SynchStrategyType,
+  typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
-                                  ////////
                                   ConfigurationType,
-                                  ////////
                                   ControlMessageType,
                                   DataMessageType,
-                                  SessionMessageType> inherited;
+                                  SessionMessageType,
+                                  Stream_SessionId_t,
+                                  Stream_SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T (const DHCP_Module_Discover_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T& operator= (const DHCP_Module_Discover_T&))
@@ -96,7 +96,7 @@ class DHCP_Module_Discover_T
 
 template <typename LockType,
           ////////////////////////////////
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -114,22 +114,17 @@ template <typename LockType,
           typename StatisticContainerType>
 class DHCP_Module_DiscoverH_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
-                                      SynchStrategyType,
+                                      ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType>
 {
  public:
@@ -141,7 +136,7 @@ class DHCP_Module_DiscoverH_T
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
   using Stream_HeadModuleTaskBase_T<LockType,
-                                    SynchStrategyType,
+                                    ACE_SYNCH_USE,
                                     TimePolicyType,
                                     ControlMessageType,
                                     DataMessageType,
@@ -170,22 +165,17 @@ class DHCP_Module_DiscoverH_T
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
-                                      SynchStrategyType,
+                                      ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_DiscoverH_T ())
@@ -204,7 +194,7 @@ class DHCP_Module_DiscoverH_T
   bool sendRequestOnOffer_;
 };
 
-// include template implementation
+// include template definition
 #include "dhcp_module_discover.inl"
 
 #endif

@@ -37,14 +37,11 @@
 class Test_U_Module_EventHandler
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-
                                          Test_U_StreamModuleHandlerConfiguration,
-
                                          ACE_Message_Block,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
-
-                                         unsigned int,
+                                         Stream_SessionId_t,
                                          Test_U_StreamSessionData_t>
 {
  public:
@@ -57,14 +54,11 @@ class Test_U_Module_EventHandler
  private:
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-
                                          Test_U_StreamModuleHandlerConfiguration,
-
                                          ACE_Message_Block,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
-
-                                         unsigned int,
+                                         Stream_SessionId_t,
                                          Test_U_StreamSessionData_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler (const Test_U_Module_EventHandler&))
@@ -72,10 +66,10 @@ class Test_U_Module_EventHandler
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                            // task synch type
-                              Common_TimePolicy_t,                     // time policy
-                              Stream_ModuleConfiguration,              // module configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Test_U_StreamSessionData,                // session data type
+                              Stream_SessionMessageType,               // session event type
                               Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+                              Test_U_IStreamNotify_t,                  // stream notification interface type
                               Test_U_Module_EventHandler);             // writer type
 
 #endif

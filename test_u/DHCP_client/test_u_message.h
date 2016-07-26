@@ -27,7 +27,7 @@
 
 #include "dhcp_message.h"
 
-#include "test_u_common.h"
+#include "test_u_dhcp_client_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;
@@ -35,16 +35,18 @@ class ACE_Data_Block;
 class ACE_Message_Block;
 class Test_U_SessionMessage;
 template <typename AllocatorConfigurationType,
-          ///////////////////////////////
-          typename MessageType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_Message
- : public DHCP_Message_T<Test_U_AllocatorConfiguration>
+ : public DHCP_Message_T<Test_U_AllocatorConfiguration,
+                         Test_U_ControlMessage_t,
+                         Test_U_SessionMessage>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
-
+                                                 Test_U_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
 
@@ -63,7 +65,9 @@ class Test_U_Message
   Test_U_Message (const Test_U_Message&);
 
  private:
-  typedef DHCP_Message_T<Test_U_AllocatorConfiguration> inherited;
+  typedef DHCP_Message_T<Test_U_AllocatorConfiguration,
+                         Test_U_ControlMessage_t,
+                         Test_U_SessionMessage> inherited;
 //  typedef Stream_DataMessageBase_2<Test_U_AllocatorConfiguration,
 //                                   Test_U_MessageData_t,
 //                                   DHCP_MessageType_t> inherited;

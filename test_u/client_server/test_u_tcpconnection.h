@@ -34,7 +34,7 @@
 #include "net_tcpconnection_base.h"
 
 #include "test_u_configuration.h"
-#include "test_u_connection_common.h"
+//#include "test_u_connection_common.h"
 #include "test_u_socket_common.h"
 #include "test_u_stream_common.h"
 
@@ -43,14 +43,11 @@ class Net_Stream;
 
 class Net_TCPConnection
  : public Net_TCPConnectionBase_T<Net_TCPHandler_t,
-                                  ///////
                                   Net_Configuration,
                                   Net_ConnectionState,
                                   Net_RuntimeStatistic_t,
                                   Net_Stream,
-                                  ///////
                                   Net_SocketHandlerConfiguration,
-                                  ///////
                                   Net_UserData>
 {
   friend class ACE_Acceptor<Net_TCPConnection, ACE_SOCK_ACCEPTOR>;
@@ -61,7 +58,6 @@ class Net_TCPConnection
                                    Net_Configuration,
                                    Net_ConnectionState,
                                    Net_RuntimeStatistic_t,
-                                   /////
                                    Net_UserData> ICONNECTION_MANAGER_T;
 
   Net_TCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
@@ -70,14 +66,11 @@ class Net_TCPConnection
 
  private:
   typedef Net_TCPConnectionBase_T<Net_TCPHandler_t,
-                                  ///////
                                   Net_Configuration,
                                   Net_ConnectionState,
                                   Net_RuntimeStatistic_t,
                                   Net_Stream,
-                                  ///////
                                   Net_SocketHandlerConfiguration,
-                                  ///////
                                   Net_UserData> inherited;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
@@ -88,18 +81,15 @@ class Net_TCPConnection
   ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection& operator= (const Net_TCPConnection&))
 };
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 class Net_AsynchTCPConnection
  : public Net_AsynchTCPConnectionBase_T<Net_AsynchTCPHandler_t,
-
                                         Net_Configuration,
                                         Net_ConnectionState,
                                         Net_RuntimeStatistic_t,
                                         Net_Stream,
-
                                         Net_SocketHandlerConfiguration,
-
                                         Net_UserData>
 {
  friend class ACE_Asynch_Acceptor<Net_AsynchTCPConnection>;
@@ -110,7 +100,6 @@ class Net_AsynchTCPConnection
                                    Net_Configuration,
                                    Net_ConnectionState,
                                    Net_RuntimeStatistic_t,
-                                   //////
                                    Net_UserData> ICONNECTION_MANAGER_T;
 
   Net_AsynchTCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
@@ -119,14 +108,11 @@ class Net_AsynchTCPConnection
 
  private:
   typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPHandler_t,
-
                                         Net_Configuration,
                                         Net_ConnectionState,
                                         Net_RuntimeStatistic_t,
                                         Net_Stream,
-
                                         Net_SocketHandlerConfiguration,
-
                                         Net_UserData> inherited;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.

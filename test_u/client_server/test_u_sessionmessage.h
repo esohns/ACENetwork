@@ -18,39 +18,46 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_SESSIONMESSAGE_H
-#define NET_SESSIONMESSAGE_H
+#ifndef TEST_U_SESSIONMESSAGE_H
+#define TEST_U_SESSIONMESSAGE_H
 
 #include "ace/Global_Macros.h"
 
+#include "stream_common.h"
+#include "stream_messageallocatorheap_base.h"
 #include "stream_session_message_base.h"
 
-#include "test_u_stream_common.h"
+#include "test_u_common.h"
+
+#include "net_client_common.h"
 
 // forward declarations
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-// class Net_StreamMessageAllocator;
-//template <typename MessageType,
-//          typename SessionMessageType> class Stream_MessageAllocatorHeapBase;
+class Net_Message;
 
 class Net_SessionMessage
  : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      ///
+                                      Stream_SessionMessageType,
                                       Net_StreamSessionData_t,
-                                      Net_UserData>
+                                      Net_UserData,
+                                      Net_ControlMessage_t,
+                                      Net_Message>
 {
-//  // enable access to private ctor(s)...
+//  // enable access to private ctor(s)
 //  friend class Net_StreamMessageAllocator;
-//  friend class Stream_MessageAllocatorHeapBase<Net_Message, Net_SessionMessage>;
+  friend class Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
+                                                 Net_ControlMessage_t,
+                                                 Net_Message,
+                                                 Net_SessionMessage>;
 
  public:
   // *NOTE*: assumes responsibility for the second argument !
   Net_SessionMessage (Stream_SessionMessageType, // session message type
                       Net_StreamSessionData_t*&, // session data handle
                       Net_UserData*);            // user data handle
-    // *NOTE*: to be used by message allocators...
+    // *NOTE*: to be used by message allocators
   Net_SessionMessage (ACE_Allocator*); // message allocator
   Net_SessionMessage (ACE_Data_Block*, // data block
                       ACE_Allocator*); // message allocator
@@ -62,9 +69,11 @@ class Net_SessionMessage
 
  private:
   typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      ///
+                                      Stream_SessionMessageType,
                                       Net_StreamSessionData_t,
-                                      Net_UserData> inherited;
+                                      Net_UserData,
+                                      Net_ControlMessage_t,
+                                      Net_Message> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage ())
   // copy ctor (to be used by duplicate())

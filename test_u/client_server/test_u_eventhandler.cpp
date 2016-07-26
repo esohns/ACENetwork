@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include "test_u_stream.h"
 #include "test_u_eventhandler.h"
 
 #include "ace/Guard_T.h"
@@ -43,7 +44,7 @@ Net_EventHandler::~Net_EventHandler ()
 }
 
 void
-Net_EventHandler::start (unsigned int sessionID_in,
+Net_EventHandler::start (Stream_SessionId_t sessionID_in,
                          const Net_StreamSessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::start"));
@@ -57,7 +58,34 @@ Net_EventHandler::start (unsigned int sessionID_in,
 }
 
 void
-Net_EventHandler::notify (unsigned int sessionID_in,
+Net_EventHandler::notify (Stream_SessionId_t sessionID_in,
+                          const Stream_SessionMessageType& sessionEvent_in)
+{
+  STREAM_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
+
+  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionEvent_in);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+  ACE_NOTREACHED (return;)
+}
+
+void
+Net_EventHandler::end (Stream_SessionId_t sessionID_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::end"));
+
+  ACE_UNUSED_ARG (sessionID_in);
+
+  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
+
+  CBData_->eventStack.push_back (NET_GTKEVENT_DISCONNECT);
+}
+
+void
+Net_EventHandler::notify (Stream_SessionId_t sessionID_in,
                           const Net_Message& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
@@ -69,7 +97,7 @@ Net_EventHandler::notify (unsigned int sessionID_in,
   CBData_->eventStack.push_back (NET_GTKEVENT_DATA);
 }
 void
-Net_EventHandler::notify (unsigned int sessionID_in,
+Net_EventHandler::notify (Stream_SessionId_t sessionID_in,
                           const Net_SessionMessage& sessionMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
@@ -83,16 +111,4 @@ Net_EventHandler::notify (unsigned int sessionID_in,
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 
   CBData_->eventStack.push_back (event);
-}
-
-void
-Net_EventHandler::end (unsigned int sessionID_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::end"));
-
-  ACE_UNUSED_ARG (sessionID_in);
-
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
-
-  CBData_->eventStack.push_back (NET_GTKEVENT_DISCONNECT);
 }

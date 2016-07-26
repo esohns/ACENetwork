@@ -145,8 +145,8 @@ set (IRC_client_SRCS
      IRC_client_defines.h
      IRC_client_inputhandler.cpp
      IRC_client_inputhandler.h
-     IRC_client_messageallocator.cpp
-     IRC_client_messageallocator.h
+#     IRC_client_messageallocator.cpp
+#     IRC_client_messageallocator.h
      IRC_client_module_IRChandler.cpp
      IRC_client_module_IRChandler.h
      IRC_client_network.h
@@ -178,6 +178,7 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
+ target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
 elseif (WIN32)
@@ -251,8 +252,8 @@ set (IRC_client_gui_SRCS
      IRC_client_gui_messagehandler.h
      IRC_client_gui_tools.cpp
      IRC_client_gui_tools.h
-     IRC_client_messageallocator.cpp
-     IRC_client_messageallocator.h
+#     IRC_client_messageallocator.cpp
+#     IRC_client_messageallocator.h
      IRC_client_module_IRChandler.cpp
      IRC_client_module_IRChandler.h
      IRC_client_network.h
@@ -273,7 +274,7 @@ add_executable (${EXECUTABLE_GUI} ${IRC_client_gui_SRCS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_GUI} Common)
-add_dependencies (${EXECUTABLE_GUI} Common)
+add_dependencies (${EXECUTABLE_GUI} CommonUI)
 add_dependencies (${EXECUTABLE_GUI} ACEStream)
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
@@ -281,6 +282,7 @@ add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 if (UNIX)
+ target_link_libraries (${EXECUTABLE_GUI} rt)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK_GLADE_LIBRARIES})
 elseif (WIN32)

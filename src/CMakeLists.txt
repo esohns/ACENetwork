@@ -38,7 +38,7 @@ endif ()
 if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
 else ()
- message (STATUS "found ACE library \"${ACE_LIBRARY}\"")
+ message (STATUS "Found ACE library \"${ACE_LIBRARY}\"")
 endif ()
 add_definitions (-DACE_HAS_DLL)
 
@@ -202,7 +202,7 @@ if (WIN32)
  endif ()
 endif ()
 
-add_library (${PROJECT_NAME} SHARED ${ACENetwork_LIB_SRCS})
+add_library (${PROJECT_NAME} STATIC ${ACENetwork_LIB_SRCS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${PROJECT_NAME} Common)
@@ -219,7 +219,7 @@ endif ()
 
 # add PCH
 set_target_properties (${PROJECT_NAME} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-cotire (${PROJECT_NAME})
+#cotire (${PROJECT_NAME})
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}
@@ -298,4 +298,3 @@ install (TARGETS ${PROJECT_NAME}
 
 add_subdirectory (client_server)
 add_subdirectory (protocol)
-

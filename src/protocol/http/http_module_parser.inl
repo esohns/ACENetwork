@@ -29,14 +29,14 @@
 #include "http_defines.h"
 #include "http_tools.h"
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
           typename RecordType>
-HTTP_Module_Parser_T<SynchStrategyType,
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
@@ -63,14 +63,14 @@ HTTP_Module_Parser_T<SynchStrategyType,
 
 }
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
           typename RecordType>
-HTTP_Module_Parser_T<SynchStrategyType,
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
@@ -87,7 +87,7 @@ HTTP_Module_Parser_T<SynchStrategyType,
     dataContainer_->decrease ();
 }
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
@@ -95,7 +95,7 @@ template <typename SynchStrategyType,
           typename SessionMessageType,
           typename RecordType>
 bool
-HTTP_Module_Parser_T<SynchStrategyType,
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
@@ -188,7 +188,7 @@ HTTP_Module_Parser_T<SynchStrategyType,
   return true;
 }
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
@@ -196,7 +196,7 @@ template <typename SynchStrategyType,
           typename SessionMessageType,
           typename RecordType>
 void
-HTTP_Module_Parser_T<SynchStrategyType,
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
@@ -498,7 +498,7 @@ error:
   } // end IF
 }
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
@@ -506,7 +506,7 @@ template <typename SynchStrategyType,
           typename SessionMessageType,
           typename RecordType>
 void
-HTTP_Module_Parser_T<SynchStrategyType,
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
@@ -559,7 +559,7 @@ HTTP_Module_Parser_T<SynchStrategyType,
   } // end SWITCH
 }
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
@@ -567,7 +567,7 @@ template <typename SynchStrategyType,
           typename SessionMessageType,
           typename RecordType>
 DataMessageType*
-HTTP_Module_Parser_T<SynchStrategyType,
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
@@ -583,13 +583,10 @@ HTTP_Module_Parser_T<SynchStrategyType,
   if (allocator_)
   {
 allocate:
-    try
-    {
+    try {
       message_p =
         static_cast<DataMessageType*> (allocator_->malloc (requestedSize_in));
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
                   requestedSize_in));
@@ -648,11 +645,10 @@ HTTP_Module_ParserH_T<LockType,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
-                      RecordType>::HTTP_Module_ParserH_T (LockType* lock_in,
-                                                          bool autoStart_in)
- : inherited (lock_in,      // lock handle
-              autoStart_in, // auto-start ?
-              true)         // generate sesssion messages ?
+                      RecordType>::HTTP_Module_ParserH_T ()
+ : inherited (NULL,  // lock handle
+              false, // auto-start ?
+              true)  // generate sesssion messages ?
  , sessionData_ (NULL)
  /////////////////////////////////////////
  , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
@@ -738,12 +734,10 @@ HTTP_Module_ParserH_T<LockType,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::initialize"));
 
-  bool result = false;
-
   // sanity check(s)
   ACE_ASSERT (configuration_in.streamConfiguration);
 
-  if (inherited::initialized_)
+  if (inherited::isInitialized_)
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
@@ -763,6 +757,8 @@ HTTP_Module_ParserH_T<LockType,
       dataContainer_->decrease ();
       dataContainer_ = NULL;
     } // end IF
+
+    inherited::isInitialized_ = false;
   } // end IF
 
   debugScanner_ = configuration_in.traceScanning;
@@ -804,16 +800,7 @@ HTTP_Module_ParserH_T<LockType,
     return false;
   } // end IF
 
-  // OK: all's well...
-  result = inherited::initialize (configuration_in);
-  if (!result)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-
-  return result;
+  return inherited::initialize (configuration_in);
 }
 
 template <typename LockType,
@@ -852,7 +839,7 @@ HTTP_Module_ParserH_T<LockType,
   int result = -1;
   DATA_CONTAINER_T* data_container_p = NULL;
   DataMessageType* message_p = message_inout;
-  HTTP_Record* record_p = NULL;
+  RecordType* record_p = NULL;
 
   if (driver_.hasFinished ())
   {
@@ -860,7 +847,7 @@ HTTP_Module_ParserH_T<LockType,
     dataContainer_->increase ();
     data_container_p = dataContainer_;
     // *TODO*: need to merge message data here
-    message_inout->initialize (*data_container_p,
+    message_inout->initialize (data_container_p,
                                NULL);
     return; // done
   } // end IF
@@ -951,7 +938,7 @@ HTTP_Module_ParserH_T<LockType,
   {
     dataContainer_->increase ();
     data_container_p = dataContainer_;
-    headFragment_->initialize (*data_container_p,
+    headFragment_->initialize (data_container_p,
                                NULL);
     DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
     record_p = data_r.HTTPRecord;
@@ -998,7 +985,7 @@ HTTP_Module_ParserH_T<LockType,
     dataContainer_->increase ();
     data_container_p = dataContainer_;
     // *TODO*: need to merge message data here
-    message_p->initialize (*data_container_p,
+    message_p->initialize (data_container_p,
                            NULL);
     message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
@@ -1068,12 +1055,22 @@ HTTP_Module_ParserH_T<LockType,
       const SessionDataType& session_data_r = session_data_container_r.get ();
       ACE_ASSERT (inherited::streamState_);
       ACE_ASSERT (inherited::streamState_->currentSessionData);
-      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (*(inherited::streamState_->currentSessionData->lock));
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->currentSessionData->lock));
       inherited::streamState_->currentSessionData->sessionID =
           session_data_r.sessionID;
 
       // start profile timer...
       //profile_.start ();
+
+      break;
+    }
+    // *NOTE*: the stream has been link()ed, the message contains the (merged)
+    //         upstream session data --> retain a reference
+    case STREAM_SESSION_MESSAGE_LINK:
+    {
+      // *NOTE*: relax the concurrency policy in this case
+      // *TODO*: this isn't very reliable
+      inherited::allowConcurrency_ = true;
 
       break;
     }

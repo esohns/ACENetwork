@@ -46,7 +46,7 @@ class IRC_Client_GUI_MessageHandler;
   @author Erik Sohns <eriksohns@123mail.org>
 */
 class IRC_Client_GUI_Connection
- : public IRC_Client_IStreamNotify_t
+ : public IRC_Client_ISessionNotify_t
  , public Common_IGet_T<IRC_Client_GTK_ConnectionCBData>
 {
   friend class IRC_Client_GUI_MessageHandler;
@@ -67,14 +67,16 @@ class IRC_Client_GUI_Connection
   void finalize (bool = true); // locked access ?
   void close ();
 
-  // implement IRC_Client_IStreamNotify_t
-  virtual void start (unsigned int,
+  // implement IRC_Client_ISessionNotify_t
+  virtual void start (Stream_SessionId_t,
                       const IRC_Client_SessionData&);
-  virtual void notify (unsigned int,
+  virtual void notify (Stream_SessionId_t,
+                       const Stream_SessionMessageType&);
+  virtual void end (Stream_SessionId_t);
+  virtual void notify (Stream_SessionId_t,
                        const IRC_Message&);
-  virtual void notify (unsigned int,
+  virtual void notify (Stream_SessionId_t,
                        const IRC_Client_SessionMessage&);
-  virtual void end (unsigned int);
 
   // implement Common_IGet_T
   virtual const IRC_Client_GTK_ConnectionCBData& get () const;

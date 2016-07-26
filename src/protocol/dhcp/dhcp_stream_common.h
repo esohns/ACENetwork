@@ -21,41 +21,44 @@
 #ifndef DHCP_STREAM_COMMON_H
 #define DHCP_STREAM_COMMON_H
 
-#include "ace/Synch_Traits.h"
+//#include "ace/Synch_Traits.h"
 
-#include "common_inotify.h"
-#include "common_time_common.h"
+//#include "common_inotify.h"
+//#include "common_time_common.h"
 
-#include "stream_common.h"
-#include "stream_imodule.h"
+//#include "stream_common.h"
+//#include "stream_imodule.h"
+#include "stream_inotify.h"
 #include "stream_session_data.h"
 
-#include "dhcp_common.h"
+//#include "dhcp_common.h"
 
 // forward declarations
 struct DHCP_ConnectionState;
 struct DHCP_ModuleHandlerConfiguration;
-template <typename AllocatorConfigurationType>
-class DHCP_Message_T;
-class DHCP_SessionMessage;
-template <typename StreamStateType,
-          typename ConfigurationType,
-          typename StatisticContainerType,
-          typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-class DHCP_Stream_T;
+//template <typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename SessionMessageType>
+//class DHCP_Message_T;
+//class DHCP_SessionMessage;
+//template <typename StreamStateType,
+//          typename ConfigurationType,
+//          typename StatisticContainerType,
+//          typename ModuleHandlerConfigurationType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType>
+//class DHCP_Stream_T;
 struct DHCP_StreamConfiguration;
 
 //typedef Stream_IModuleHandler_T<DHCP_ModuleHandlerConfiguration> DHCP_IModuleHandler_t;
-typedef Stream_IModule_T<ACE_MT_SYNCH,
-                         Common_TimePolicy_t,
-                         Stream_ModuleConfiguration,
-                         DHCP_ModuleHandlerConfiguration> DHCP_IModule_t;
-typedef DHCP_Message_T<Stream_AllocatorConfiguration> DHCP_Message_t;
+//typedef Stream_IModule_T<ACE_MT_SYNCH,
+//                         Common_TimePolicy_t,
+//                         Stream_ModuleConfiguration,
+//                         DHCP_ModuleHandlerConfiguration> DHCP_IModule_t;
+//typedef DHCP_Message_T<Stream_AllocatorConfiguration> DHCP_Message_t;
 
 struct DHCP_Stream_SessionData
  : Stream_SessionData
@@ -98,21 +101,22 @@ struct DHCP_StreamState
   DHCP_Stream_UserData*    userData;
 };
 
-typedef Stream_SessionData_T<DHCP_Stream_SessionData> DHCP_Stream_SessionData_t;
+//typedef Stream_SessionData_T<DHCP_Stream_SessionData> DHCP_Stream_SessionData_t;
 
-typedef Common_INotify_T<unsigned int,
-                         DHCP_Stream_SessionData,
-                         DHCP_Record,
-                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
+//typedef Common_INotify_T<unsigned int,
+//                         DHCP_Stream_SessionData,
+//                         DHCP_Record,
+//                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
+typedef Stream_INotify_T<Stream_SessionMessageType> DHCP_Stream_INotify_t;
 
-typedef DHCP_Stream_T<DHCP_StreamState,
-                      DHCP_StreamConfiguration,
-                      DHCP_RuntimeStatistic_t,
-                      DHCP_ModuleHandlerConfiguration,
-                      DHCP_Stream_SessionData,
-                      DHCP_Stream_SessionData_t,
-                      ACE_Message_Block,
-                      DHCP_Message_t,
-                      DHCP_SessionMessage> DHCP_Stream_t;
+//typedef DHCP_Stream_T<DHCP_StreamState,
+//                      DHCP_StreamConfiguration,
+//                      DHCP_RuntimeStatistic_t,
+//                      DHCP_ModuleHandlerConfiguration,
+//                      DHCP_Stream_SessionData,
+//                      DHCP_Stream_SessionData_t,
+//                      ACE_Message_Block,
+//                      DHCP_Message_t,
+//                      DHCP_SessionMessage> DHCP_Stream_t;
 
 #endif

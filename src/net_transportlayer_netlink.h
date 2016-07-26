@@ -25,7 +25,8 @@
 #include "net_exports.h"
 #include "net_transportlayer_base.h"
 
-class Net_Export Net_TransportLayer_Netlink
+//class Net_Export Net_TransportLayer_Netlink
+class Net_TransportLayer_Netlink
  : public Net_NetlinkTransportLayer_Base
 {
  public:

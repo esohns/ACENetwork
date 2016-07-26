@@ -41,7 +41,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              HandlerConfigurationType,
                              UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                                           const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ ()
+ : configuration_ (NULL)
  , connectHandle_ (ACE_INVALID_HANDLE)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
@@ -103,7 +103,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::initialize"));
 
-  configuration_ = configuration_in;
+  configuration_ = &const_cast<HandlerConfigurationType&> (configuration_in);
 
   return true;
 }
@@ -128,7 +128,10 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
 
-  return configuration_;
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+
+  return *configuration_;
 }
 
 template <typename HandlerType,
@@ -597,7 +600,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                              HandlerConfigurationType,
                              UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                                           const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ ()
+ : configuration_ (NULL)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -668,7 +671,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::initialize"));
 
-  configuration_ = configuration_in;
+  configuration_ = &const_cast<HandlerConfigurationType&> (configuration_in);
 
   return true;
 }
@@ -698,7 +701,10 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
 
-  return configuration_;
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+
+  return *configuration_;
 }
 
 template <typename HandlerType,
@@ -945,7 +951,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              HandlerConfigurationType,
                              UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                                           const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ ()
+ : configuration_ (NULL)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -1004,7 +1010,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::initialize"));
 
-  configuration_ = configuration_in;
+  configuration_ = &const_cast<HandlerConfigurationType&> (configuration_in);
 
   return true;
 }
@@ -1028,7 +1034,10 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
 
-  return configuration_;
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+
+  return *configuration_;
 }
 
 template <typename HandlerType,

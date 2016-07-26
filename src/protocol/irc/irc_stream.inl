@@ -56,20 +56,6 @@ IRC_Stream_T<StreamStateType,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::IRC_Stream_T"));
 
-  // remember the ones we "own"...
-  // *TODO*: clean this up
-  // *NOTE*: one problem is that we need to explicitly close() all
-  // modules which we have NOT enqueued onto the stream (e.g. because init()
-  // failed...)
-  inherited::modules_.push_front (&marshal_);
-  inherited::modules_.push_front (&parser_);
-  inherited::modules_.push_front (&runtimeStatistic_);
-
-  // *TODO*: fix ACE bug: modules should initialize their "next" member to NULL
-  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
-       iterator != inherited::modules_.end ();
-       iterator++)
-    (*iterator)->next (NULL);
 }
 
 template <typename StreamStateType,
@@ -95,6 +81,35 @@ IRC_Stream_T<StreamStateType,
 
   // *NOTE*: this implements an ordered shutdown on destruction...
   inherited::shutdown ();
+}
+
+template <typename StreamStateType,
+          typename ConfigurationType,
+          typename StatisticContainerType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+bool
+IRC_Stream_T<StreamStateType,
+             ConfigurationType,
+             StatisticContainerType,
+             ModuleHandlerConfigurationType,
+             SessionDataType,
+             SessionDataContainerType,
+             ControlMessageType,
+             DataMessageType,
+             SessionMessageType>::load (Stream_ModuleList_t& modules_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::load"));
+
+  modules_out.push_back (&runtimeStatistic_);
+  modules_out.push_back (&parser_);
+  modules_out.push_back (&marshal_);
+
+  return true;
 }
 
 template <typename StreamStateType,

@@ -74,6 +74,7 @@ set (${PROJECT_NAME}_Protocol_DHCP_SRCS
      dhcp_network.h
      dhcp_sessionmessage.cpp
      dhcp_sessionmessage.h
+     dhcp_sessionmessage.inl
      dhcp_stream.cpp
      dhcp_stream.h
      dhcp_stream.inl
@@ -114,7 +115,7 @@ endif ()
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-cotire (${PROJECT_NAME}_Protocol_DHCP)
+#cotire (${PROJECT_NAME}_Protocol_DHCP)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_DHCP
@@ -145,6 +146,7 @@ install (FILES
          dhcp_module_streamer.inl
          dhcp_network.h
          dhcp_sessionmessage.h
+         dhcp_sessionmessage.inl
          dhcp_stream.h
          dhcp_stream.inl
          dhcp_stream_common.h

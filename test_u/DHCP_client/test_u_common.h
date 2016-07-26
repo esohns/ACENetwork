@@ -24,7 +24,6 @@
 #include <algorithm>
 #include <deque>
 #include <limits>
-#include <list>
 #include <map>
 #include <set>
 #include <string>
@@ -34,7 +33,6 @@
 #include "ace/Time_Value.h"
 
 #include "common.h"
-#include "common_inotify.h"
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 #include "common_time_common.h"
@@ -44,7 +42,7 @@
 #include "stream_base.h"
 #include "stream_common.h"
 #include "stream_data_base.h"
-#include "stream_messageallocatorheap_base.h"
+#include "stream_inotify.h"
 #include "stream_session_data.h"
 
 #include "net_defines.h"
@@ -57,8 +55,6 @@
 #include "dhcp_defines.h"
 
 #include "test_u_defines.h"
-//#include "test_u_message.h"
-//#include "test_u_session_message.h"
 
 struct Test_U_AllocatorConfiguration
  : Stream_AllocatorConfiguration
@@ -74,8 +70,6 @@ struct Test_U_AllocatorConfiguration
 
 // forward declarations
 class Stream_IAllocator;
-class Test_U_Message;
-class Test_U_SessionMessage;
 struct Test_U_Configuration;
 struct Test_U_StreamConfiguration;
 struct Test_U_UserData
@@ -335,19 +329,8 @@ struct Test_U_Configuration
 };
 
 //typedef Stream_IModuleHandler_T<Test_U_StreamModuleHandlerConfiguration> Test_U_IModuleHandler_t;
-typedef Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
 
-                                          Test_U_Message,
-                                          Test_U_SessionMessage> Test_U_MessageAllocator_t;
-
-typedef Common_INotify_T<unsigned int,
-                         Test_U_StreamSessionData,
-                         Test_U_Message,
-                         Test_U_SessionMessage> Test_U_IStreamNotify_t;
-typedef std::list<Test_U_IStreamNotify_t*> Test_U_Subscribers_t;
-typedef Test_U_Subscribers_t::iterator Test_U_SubscribersIterator_t;
-
-typedef Common_ISubscribe_T<Test_U_IStreamNotify_t> Test_U_ISubscribe_t;
+typedef Stream_INotify_T<Stream_SessionMessageType> Test_U_IStreamNotify_t;
 
 typedef std::map<guint, ACE_Thread_ID> Test_U_PendingActions_t;
 typedef Test_U_PendingActions_t::iterator Test_U_PendingActionsIterator_t;
@@ -396,18 +379,13 @@ struct Test_U_GTK_CBData
    , logStack ()
    , progressData ()
    , progressEventSourceID (0)
-   , subscribers ()
-//   , subscribersLock ()
   {};
 
-  Test_U_Configuration*     configuration;
-  Test_U_GTK_Events_t       eventStack;
-  Common_MessageStack_t     logStack;
-  Test_U_GTK_ProgressData   progressData;
-  guint                     progressEventSourceID;
-  Test_U_Subscribers_t      subscribers;
-  // *NOTE*: use Common_UI_GTKState.lock instead
-//  ACE_SYNCH_RECURSIVE_MUTEX subscribersLock;
+  Test_U_Configuration*   configuration;
+  Test_U_GTK_Events_t     eventStack;
+  Common_MessageStack_t   logStack;
+  Test_U_GTK_ProgressData progressData;
+  guint                   progressEventSourceID;
 };
 
 struct Test_U_ThreadData

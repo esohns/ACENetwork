@@ -26,8 +26,10 @@
 
 #include "common_inotify.h"
 
-#include "stream_common.h"
+//#include "stream_common.h"
+#include "stream_control_message.h"
 #include "stream_data_base.h"
+#include "stream_isessionnotify.h"
 
 #include "net_common.h"
 
@@ -39,10 +41,23 @@ struct HTTP_Record;
 class HTTP_SessionMessage;
 struct HTTP_Stream_SessionData;
 struct HTTP_Stream_UserData;
-typedef Common_INotify_T<unsigned int,
-                         HTTP_Stream_SessionData,
-                         HTTP_Record,
-                         HTTP_SessionMessage> HTTP_IStreamNotify_t;
+//template <typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename SessionMessageType,
+//          typename DataType>
+//class HTTP_Message_T;
+
+//typedef Stream_ControlMessage_T<Stream_ControlType,
+//                                Stream_AllocatorConfiguration,
+//                                HTTP_Message_t,
+//                                HTTP_SessionMessage> HTTP_ControlMessage_t;
+
+typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
+                                    HTTP_Stream_SessionData,
+                                    Stream_SessionMessageType,
+                                    HTTP_Record,
+                                    HTTP_SessionMessage> IRC_ISessionNotify_t;
+
 typedef Stream_Statistic HTTP_RuntimeStatistic_t;
 
 typedef std::map<std::string, std::string> HTTP_Headers_t;

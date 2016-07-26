@@ -27,7 +27,7 @@
 #include "ace/Time_Value.h"
 
 #include "common_defines.h"
-#include "common_inotify.h"
+//#include "common_inotify.h"
 
 #include "stream_common.h"
 
@@ -57,13 +57,12 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  IRC_Configuration,
                                  IRC_ConnectionState,
                                  IRC_RuntimeStatistic_t,
-                                 ////////
                                  IRC_Stream_UserData> IRC_IConnection_Manager_t;
 
-typedef Common_INotify_T<unsigned int,
-                         IRC_Stream_SessionData,
-                         IRC_Record,
-                         IRC_SessionMessage> IRC_IStreamNotify_t;
+//typedef Common_INotify_T<unsigned int,
+//                         IRC_Stream_SessionData,
+//                         IRC_Record,
+//                         IRC_SessionMessage> IRC_IStreamNotify_t;
 //typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 
 struct IRC_SocketHandlerConfiguration

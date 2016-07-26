@@ -35,7 +35,7 @@
 // forward declaration(s)
 class Stream_IAllocator;
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           ////////////////////////////////
           typename ConfigurationType,
@@ -46,14 +46,14 @@ template <typename SynchStrategyType,
           ////////////////////////////////
           typename RecordType>
 class HTTP_Module_Parser_T
- : public Stream_TaskBaseAsynch_T<SynchStrategyType,
+ : public Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
-                                  ////////
                                   ConfigurationType,
-                                  ////////
                                   ControlMessageType,
                                   DataMessageType,
-                                  SessionMessageType>
+                                  SessionMessageType,
+                                  Stream_SessionId_t,
+                                  Stream_SessionMessageType>
 {
  public:
   HTTP_Module_Parser_T ();
@@ -65,8 +65,6 @@ class HTTP_Module_Parser_T
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
                                   bool&);                // return value: pass message downstream ?
-
-  // catch the session ID...
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
@@ -74,14 +72,14 @@ class HTTP_Module_Parser_T
   typename SessionMessageType::DATA_T::DATA_T* sessionData_;
 
  private:
-  typedef Stream_TaskBaseAsynch_T<SynchStrategyType,
+  typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
-                                  ////////
                                   ConfigurationType,
-                                  ////////
                                   ControlMessageType,
                                   DataMessageType,
-                                  SessionMessageType> inherited;
+                                  SessionMessageType,
+                                  Stream_SessionId_t,
+                                  Stream_SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T (const HTTP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T& operator= (const HTTP_Module_Parser_T&))
@@ -114,7 +112,7 @@ class HTTP_Module_Parser_T
 
 template <typename LockType,
           ////////////////////////////////
-          typename TaskSynchType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           ////////////////////////////////
           typename ControlMessageType,
@@ -135,35 +133,27 @@ template <typename LockType,
           typename RecordType>
 class HTTP_Module_ParserH_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
-                                      TaskSynchType,
+                                      ACE_SYNCH_USE,
                                       TimePolicyType,
-                                      ////
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType>
 {
  public:
-  HTTP_Module_ParserH_T (LockType* = NULL, // lock handle (state machine)
-                         /////////////////
-                         bool = false);    // auto-start ?
+  HTTP_Module_ParserH_T ();
   virtual ~HTTP_Module_ParserH_T ();
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
   using Stream_HeadModuleTaskBase_T<LockType,
-                                    TaskSynchType,
+                                    ACE_SYNCH_USE,
                                     TimePolicyType,
                                     ControlMessageType,
                                     DataMessageType,
@@ -181,9 +171,7 @@ class HTTP_Module_ParserH_T
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
-                                  bool&);                // return value: pass message downstream ?
-
-  // catch the session ID...
+                                  bool&);            // return value: pass message downstream ?
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
@@ -197,26 +185,19 @@ class HTTP_Module_ParserH_T
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
-                                      TaskSynchType,
+                                      ACE_SYNCH_USE,
                                       TimePolicyType,
-                                      ////
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T (const HTTP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T& operator= (const HTTP_Module_ParserH_T&))
 
@@ -241,7 +222,7 @@ class HTTP_Module_ParserH_T
   DATA_CONTAINER_T* dataContainer_;
 };
 
-// include template implementation
+// include template definition
 #include "http_module_parser.inl"
 
 #endif

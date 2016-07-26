@@ -56,7 +56,7 @@ IRC_Module_Bisector_T<LockType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::IRC_Module_Bisector_T (LockType* lock_in)
+                      StatisticContainerType>::IRC_Module_Bisector_T (typename LockType::MUTEX* lock_in)
  : inherited (lock_in, // lock handle
               false,   // auto-start ?
               true)    // generate sesssion messages ?
@@ -150,7 +150,7 @@ IRC_Module_Bisector_T<LockType,
   // sanity check(s)
   ACE_ASSERT (configuration_in.streamConfiguration);
 
-  if (inherited::initialized_)
+  if (inherited::isInitialized_)
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
@@ -167,6 +167,8 @@ IRC_Module_Bisector_T<LockType,
     buffer_ = NULL;
     messageLength_ = 0;
 //     currentBufferIsResized_ = false;
+
+    inherited::isInitialized_ = false;
   } // end IF
 
   //// initialize scanner context
@@ -238,7 +240,7 @@ IRC_Module_Bisector_T<LockType,
   passMessageDownstream_out = false;
 
   // sanity check(s)
-  ACE_ASSERT (inherited::initialized_);
+  ACE_ASSERT (inherited::isInitialized_);
 
   // perhaps part of this message has already been received ?
   if (buffer_)
@@ -475,7 +477,7 @@ IRC_Module_Bisector_T<LockType,
 
   // sanity check(s)
   ACE_ASSERT (message_inout);
-  ACE_ASSERT (inherited::initialized_);
+  ACE_ASSERT (inherited::isInitialized_);
 
   switch (message_inout->type ())
   {
@@ -536,7 +538,7 @@ IRC_Module_Bisector_T<LockType,
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::collect"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::initialized_);
+  ACE_ASSERT (inherited::isInitialized_);
 
   // step1: initialize info container POD
   data_out.bytes = 0.0;

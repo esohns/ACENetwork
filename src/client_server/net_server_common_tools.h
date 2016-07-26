@@ -32,7 +32,8 @@
 // forward declaration(s)
 struct dirent;
 
-class Net_Server_Export Net_Server_Common_Tools
+//class Net_Server_Export Net_Server_Common_Tools
+class Net_Server_Common_Tools
 {
  public:
   // *NOTE*: implements log rotation

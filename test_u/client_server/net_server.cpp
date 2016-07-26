@@ -61,23 +61,23 @@
 #include "net_common_tools.h"
 #include "net_macros.h"
 
-#include "net_server_common.h"
-#include "net_server_common_tools.h"
-#include "net_server_listener_common.h"
-
 #ifdef HAVE_CONFIG_H
 #include "libACENetwork_config.h"
 #endif
-
-#include "net_server_defines.h"
-#include "net_server_signalhandler.h"
 
 #include "test_u_callbacks.h"
 #include "test_u_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
+#include "test_u_stream.h"
 #include "test_u_eventhandler.h"
 #include "test_u_module_eventhandler.h"
+
+#include "net_server_common.h"
+#include "net_server_common_tools.h"
+#include "net_server_defines.h"
+#include "net_server_listener_common.h"
+#include "net_server_signalhandler.h"
 
 // globals
 unsigned int random_seed;
@@ -462,7 +462,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
-         Net_GTK_CBData& CBData_in,
+         Net_Server_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -989,10 +989,9 @@ ACE_TMAIN (int argc_in,
                             print_version_and_exit,
                             number_of_dispatch_threads))
   {
-    // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
-    // *PORTABILITY*: on Windows, finalize ACE...
+    // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
     if (result == -1)
@@ -1041,7 +1040,7 @@ ACE_TMAIN (int argc_in,
   } // end IF
   if (number_of_dispatch_threads == 0) number_of_dispatch_threads = 1;
 
-  Net_GTK_CBData gtk_cb_user_data;
+  Net_Server_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.allowUserRuntimeStatistic =
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting

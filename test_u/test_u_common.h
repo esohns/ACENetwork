@@ -18,10 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_NET_COMMON_H
-#define TEST_U_NET_COMMON_H
+#ifndef TEST_U_COMMON_H
+#define TEST_U_COMMON_H
 
 #include <deque>
+#include <list>
 
 #include "ace/Synch_Traits.h"
 
@@ -55,7 +56,7 @@ enum Net_GTK_Event
   NET_GTKEVENT_DATA,
   NET_GTKEVENT_DISCONNECT,
   NET_GTKEVENT_STATISTIC,
-  // ----------------------
+  // -------------------------------------
   NET_GTKEVENT_MAX
 };
 typedef std::deque<Net_GTK_Event> Net_GTK_Events_t;
@@ -91,8 +92,6 @@ struct Net_GTK_CBData
    , progressEventSourceID (0)
    , serverConfiguration (NULL)
    , stackLock ()
-   , subscribers ()
-   , subscribersLock ()
   {};
 
   bool                       allowUserRuntimeStatistic;
@@ -103,8 +102,6 @@ struct Net_GTK_CBData
   guint                      progressEventSourceID;
   Net_Server_Configuration*  serverConfiguration;
   ACE_SYNCH_RECURSIVE_MUTEX  stackLock;
-  Net_Subscribers_t          subscribers;
-  ACE_SYNCH_RECURSIVE_MUTEX  subscribersLock;
 };
 
 #endif

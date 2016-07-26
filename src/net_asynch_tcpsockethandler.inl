@@ -545,7 +545,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
 #endif
   } // end IF
 
-  switch (bytes_transferred)
+  switch (static_cast<int> (bytes_transferred))
   {
     case -1:
     {

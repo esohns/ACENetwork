@@ -75,7 +75,7 @@ IRC_Message::command () const
   NETWORK_TRACE (ACE_TEXT ("IRC_Message::command"));
 
   // sanity check(s)
-  if (!inherited::initialized_)
+  if (!inherited::isInitialized_)
     return IRC_Record::IRC_COMMANDTYPE_INVALID;
 
   switch (data_.command_.discriminator)
@@ -151,8 +151,7 @@ IRC_Message::duplicate (void) const
       dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
     ACE_ASSERT (allocator_p);
 allocate:
-    try
-    {
+    try {
       // *NOTE*: the argument to malloc SHOULDN'T really matter, as this will be
       //         a "shallow" copy which just references our data block...
       // *IMPORTANT NOTE*: cached allocators require the object size as argument
@@ -160,12 +159,10 @@ allocate:
       // *TODO*: (depending on the allocator implementation) this senselessly
       // allocates a datablock anyway, only to immediately release it again...
       ACE_NEW_MALLOC_NORETURN (message_p,
-                               //                           static_cast<IRC_Message*>(message_block_allocator_->malloc(capacity())),
+//                           static_cast<IRC_Message*>(message_block_allocator_->malloc(capacity())),
                                static_cast<IRC_Message*> (inherited::message_block_allocator_->calloc (sizeof (IRC_Message))),
                                IRC_Message (*this));
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), aborting\n"),
                   sizeof (IRC_Message)));

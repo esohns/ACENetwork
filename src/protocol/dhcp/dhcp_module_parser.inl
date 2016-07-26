@@ -26,13 +26,13 @@
 #include "dhcp_common.h"
 #include "dhcp_defines.h"
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
-DHCP_Module_Parser_T<SynchStrategyType,
+DHCP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
@@ -50,13 +50,13 @@ DHCP_Module_Parser_T<SynchStrategyType,
 
 }
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
-DHCP_Module_Parser_T<SynchStrategyType,
+DHCP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
@@ -67,14 +67,14 @@ DHCP_Module_Parser_T<SynchStrategyType,
 
 }
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
 bool
-DHCP_Module_Parser_T<SynchStrategyType,
+DHCP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
@@ -105,14 +105,14 @@ DHCP_Module_Parser_T<SynchStrategyType,
   return initialized_;
 }
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
 void
-DHCP_Module_Parser_T<SynchStrategyType,
+DHCP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
@@ -179,14 +179,14 @@ DHCP_Module_Parser_T<SynchStrategyType,
   isDriverInitialized_ = false;
 }
 
-template <typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
 void
-DHCP_Module_Parser_T<SynchStrategyType,
+DHCP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,

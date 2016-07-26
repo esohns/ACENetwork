@@ -50,7 +50,7 @@ Net_Module_SocketHandler_T<LockType,
                            SessionDataType,
                            SessionDataContainerType,
                            StatisticContainerType,
-                           ProtocolHeaderType>::Net_Module_SocketHandler_T (LockType* lock_in)
+                           ProtocolHeaderType>::Net_Module_SocketHandler_T (typename LockType::MUTEX* lock_in)
  : inherited (lock_in, // lock handle
               false,   // auto-start ?
               true)    // generate sesssion messages ?
@@ -123,16 +123,18 @@ Net_Module_SocketHandler_T<LockType,
 
   bool result = false;
 
-  if (inherited::initialized_)
+  if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
+    //ACE_DEBUG ((LM_WARNING,
+    //            ACE_TEXT ("re-initializing...\n")));
 
     currentMessageLength_ = 0;
     if (currentMessage_)
       currentMessage_->release ();
     currentMessage_ = NULL;
     currentBuffer_ = NULL;
+
+    inherited::isInitialized_ = false;
   } // end IF
 
   result = inherited::initialize (configuration_in);
@@ -181,7 +183,7 @@ Net_Module_SocketHandler_T<LockType,
   passMessageDownstream_out = false;
 
   // sanity check(s)
-  ACE_ASSERT (inherited::initialized_);
+  ACE_ASSERT (inherited::isInitialized_);
 
   // perhaps part of this message has already arrived ?
   if (currentBuffer_)
@@ -250,7 +252,7 @@ Net_Module_SocketHandler_T<LockType,
   // *TODO*: remove type inference
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->streamConfiguration);
-  ACE_ASSERT (inherited::initialized_);
+  ACE_ASSERT (inherited::isInitialized_);
 
   switch (message_inout->type ())
   {
@@ -335,7 +337,7 @@ Net_Module_SocketHandler_T<LockType,
   NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::collect"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::initialized_);
+  ACE_ASSERT (inherited::isInitialized_);
 
   // step0: initialize container
 //  data_out.dataMessages = 0;

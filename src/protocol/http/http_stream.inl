@@ -56,25 +56,6 @@ HTTP_Stream_T<StreamStateType,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::HTTP_Stream_T"));
 
-  // remember the ones we "own"...
-  // *TODO*: clean this up
-  // *NOTE*: one problem is that we need to explicitly close() all
-  // modules which we have NOT enqueued onto the stream (e.g. because init()
-  // failed...)
-  inherited::availableModules_.push_front (&marshal_);
-  //inherited::availableModules_.push_front (&parser_);
-  inherited::availableModules_.push_front (&runtimeStatistic_);
-
-  // *TODO*: fix ACE bug: modules should initialize their "next" member to NULL
-  //inherited::MODULE_T* module_p = NULL;
-  //for (ACE_DLList_Iterator<inherited::MODULE_T> iterator (inherited::availableModules_);
-  //     iterator.next (module_p);
-  //     iterator.advance ())
-  //  module_p->next (NULL);
-  for (Stream_ModuleListIterator_t iterator = inherited::availableModules_.begin ();
-       iterator != inherited::availableModules_.end ();
-       iterator++)
-    (*iterator)->next (NULL);
 }
 
 template <typename StreamStateType,
@@ -100,6 +81,36 @@ HTTP_Stream_T<StreamStateType,
 
   // *NOTE*: this implements an ordered shutdown on destruction...
   inherited::shutdown ();
+}
+
+template <typename StreamStateType,
+          typename ConfigurationType,
+          typename StatisticContainerType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+bool
+HTTP_Stream_T<StreamStateType,
+              ConfigurationType,
+              StatisticContainerType,
+              ModuleHandlerConfigurationType,
+              SessionDataType,
+              SessionDataContainerType,
+              ControlMessageType,
+              DataMessageType,
+              SessionMessageType>::load (Stream_ModuleList_t& modules_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::load"));
+
+  modules_out.push_back (&runtimeStatistic_);
+  //modules_out.push_back (&parser_);
+  modules_out.push_back (&marshal_);
+  //modules_out.push_back (&handler_);
+
+  return true;
 }
 
 template <typename StreamStateType,

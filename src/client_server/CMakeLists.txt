@@ -30,7 +30,7 @@ set (${PROJECT_NAME}_Client_LIB_SRCS
      net_client_defines.h
      net_client_exports.h)
 
-add_library (${PROJECT_NAME}_Client SHARED ${ACENetwork_Client_LIB_SRCS})
+add_library (${PROJECT_NAME}_Client STATIC ${ACENetwork_Client_LIB_SRCS})
 
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES DEFINE_SYMBOL NET_CLIENT_BUILD_DLL)
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
@@ -58,7 +58,7 @@ set (${PROJECT_NAME}_Server_LIB_SRCS
      net_server_ssl_listener.h
      net_server_ssl_listener.inl)
 
-add_library (${PROJECT_NAME}_Server SHARED ${ACENetwork_Server_LIB_SRCS})
+add_library (${PROJECT_NAME}_Server STATIC ${ACENetwork_Server_LIB_SRCS})
 
 if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Server ${ACE_LIBRARY})

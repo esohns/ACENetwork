@@ -28,26 +28,40 @@
 #include "dhcp_defines.h"
 #include "dhcp_tools.h"
 
-template <typename AllocatorConfigurationType>
-DHCP_Message_T<AllocatorConfigurationType>::DHCP_Message_T (unsigned int requestedSize_in)
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType>
+DHCP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType>::DHCP_Message_T (unsigned int requestedSize_in)
  : inherited (requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::DHCP_Message_T"));
 
 }
 
-template <typename AllocatorConfigurationType>
-DHCP_Message_T<AllocatorConfigurationType>::DHCP_Message_T (const DHCP_Message_T& message_in)
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType>
+DHCP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType>::DHCP_Message_T (const DHCP_Message_T<AllocatorConfigurationType,
+                                                                         ControlMessageType,
+                                                                         SessionMessageType>& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::DHCP_Message_T"));
 
 }
 
-template <typename AllocatorConfigurationType>
-DHCP_Message_T<AllocatorConfigurationType>::DHCP_Message_T (ACE_Data_Block* dataBlock_in,
-                                                            ACE_Allocator* messageAllocator_in,
-                                                            bool incrementMessageCounter_in)
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType>
+DHCP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType>::DHCP_Message_T (ACE_Data_Block* dataBlock_in,
+                                                    ACE_Allocator* messageAllocator_in,
+                                                    bool incrementMessageCounter_in)
  : inherited (dataBlock_in,               // use (don't own !) this data block
               messageAllocator_in,        // allocator
               incrementMessageCounter_in) // increment message counter ?
@@ -58,29 +72,37 @@ DHCP_Message_T<AllocatorConfigurationType>::DHCP_Message_T (ACE_Data_Block* data
 
 // DHCP_Message_T::DHCP_Message_T(ACE_Allocator* messageAllocator_in)
 //  : inherited(messageAllocator_in,
-//              true), // usually, we want to increment the running message counter...
+//              true), // usually, we want to increment the running message counter
 //    myIsInitialized(false) // not initialized --> call init() !
 // {
 //   NETWORK_TRACE(ACE_TEXT("DHCP_Message_T::DHCP_Message_T"));
 //
 // }
 
-template <typename AllocatorConfigurationType>
-DHCP_Message_T<AllocatorConfigurationType>::~DHCP_Message_T ()
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType>
+DHCP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType>::~DHCP_Message_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::~DHCP_Message_T"));
 
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType>
 DHCP_MessageType_t
-DHCP_Message_T<AllocatorConfigurationType>::command () const
+DHCP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType>::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::command"));
 
   // sanity check(s)
-  if (!inherited::initialized_)
+  if (!inherited::isInitialized_)
     return DHCP_Codes::DHCP_MESSAGE_INVALID;
 
   DHCP_OptionsIterator_t iterator =
@@ -90,18 +112,26 @@ DHCP_Message_T<AllocatorConfigurationType>::command () const
   return DHCP_Tools::MessageType2Type ((*iterator).second);
 }
 
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType>
 std::string
-DHCP_Message_T<AllocatorConfigurationType>::Command2String (DHCP_MessageType_t type_in)
+DHCP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType>::Command2String (DHCP_MessageType_t type_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::Command2String"));
 
   return DHCP_Tools::MessageType2String (type_in);
 }
 
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType>
 void
-DHCP_Message_T<AllocatorConfigurationType>::dump_state () const
+DHCP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::dump_state"));
 
@@ -133,13 +163,17 @@ DHCP_Message_T<AllocatorConfigurationType>::dump_state () const
               ACE_TEXT (DHCP_Tools::dump (inherited::data_).c_str ())));
 }
 
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType>
 ACE_Message_Block*
-DHCP_Message_T<AllocatorConfigurationType>::duplicate (void) const
+DHCP_Message_T<AllocatorConfigurationType,
+               ControlMessageType,
+               SessionMessageType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::duplicate"));
 
-  DHCP_Message_T* message_p = NULL;
+  OWN_TYPE_T* message_p = NULL;
 
   // create a new DHCP_Message_T that contains unique copies of
   // the message block fields, but a (reference counted) shallow duplicate of
@@ -148,32 +182,28 @@ DHCP_Message_T<AllocatorConfigurationType>::duplicate (void) const
   // if there is no allocator, use the standard new and delete calls.
   if (!inherited::message_block_allocator_)
     ACE_NEW_NORETURN (message_p,
-                      DHCP_Message_T (*this)); // invoke copy ctor
+                      OWN_TYPE_T (*this)); // invoke copy ctor
   else // otherwise, use the existing message_block_allocator
   {
     Stream_IAllocator* allocator_p =
       dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
     ACE_ASSERT (allocator_p);
 allocate:
-    try
-    {
+    try {
       // *NOTE*: the argument to malloc SHOULDN'T really matter, as this will be
-      //         a "shallow" copy which just references our data block...
+      //         a "shallow" copy which just references the data block
       // *IMPORTANT NOTE*: cached allocators require the object size as argument
       //                   to malloc() (instead of its internal "capacity()" !)
       // *TODO*: (depending on the allocator implementation) this senselessly
-      // allocates a datablock anyway, only to immediately release it again...
+      // allocates a datablock anyway, only to immediately release it again
       ACE_NEW_MALLOC_NORETURN (message_p,
                                //static_cast<DHCP_Message_T*>(message_block_allocator_->malloc(capacity())),
-                               static_cast<DHCP_Message_T*> (inherited::message_block_allocator_->calloc (sizeof (DHCP_Message_T))),
-                               DHCP_Message_T (*this));
-    }
-    catch (...)
-    {
+                               static_cast<OWN_TYPE_T*> (inherited::message_block_allocator_->calloc (sizeof (DHCP_Message_T))),
+                               OWN_TYPE_T (*this));
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), aborting\n"),
+                  ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), continuing\n"),
                   sizeof (DHCP_Message_T)));
-      return NULL;
     }
 
     // keep retrying ?
@@ -215,7 +245,7 @@ allocate:
     } // end IF
   } // end IF
 
-  // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
+  // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)
 
   return message_p;
 }

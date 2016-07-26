@@ -47,22 +47,6 @@ Test_U_Stream::Test_U_Stream (const std::string& name_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::Test_U_Stream"));
 
-  // remember the "owned" ones...
-  // *TODO*: clean this up
-  // *NOTE*: one problem is that all modules which have NOT enqueued onto the
-  //         stream (e.g. because initialize() failed...) need to be explicitly
-  //         close()d
-  inherited::modules_.push_front (&IO_);
-  inherited::modules_.push_front (&dump_);
-  inherited::modules_.push_front (&marshal_);
-  inherited::modules_.push_front (&runtimeStatistic_);
-  inherited::modules_.push_front (&fileWriter_);
-
-  // *TODO* fix ACE bug: modules should initialize their "next" member to NULL
-  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
-       iterator != inherited::modules_.end ();
-       iterator++)
-     (*iterator)->next (NULL);
 }
 
 Test_U_Stream::~Test_U_Stream ()
@@ -71,6 +55,23 @@ Test_U_Stream::~Test_U_Stream ()
 
   // *NOTE*: this implements an ordered shutdown on destruction...
   inherited::shutdown ();
+}
+
+bool
+Test_U_Stream::load (Stream_ModuleList_t& modules_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::load"));
+
+  // *NOTE*: one problem is that any module that was NOT enqueued onto the
+  //         stream (e.g. because initialize() failed) needs to be explicitly
+  //         close()d
+  modules_out.push_back (&fileWriter_);
+  modules_out.push_back (&runtimeStatistic_);
+  modules_out.push_back (&marshal_);
+  modules_out.push_back (&dump_);
+  modules_out.push_back (&IO_);
+
+  return true;
 }
 
 bool
@@ -141,100 +142,15 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   // *TODO*: remove type inferences
   ACE_ASSERT (configuration_in.moduleConfiguration);
 
-  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl_p = NULL;
-  Test_U_Module_Parser* parser_impl_p = NULL;
   READER_T* IOReader_impl_p = NULL;
   WRITER_T* IOWriter_impl_p = NULL;
   std::string buffer;
 
-  // ******************* File Writer ************************
-  //fileWriter_.initialize (*configuration_in.moduleConfiguration);
-  //Test_U_Module_FileWriter* fileWriter_impl_p =
-  //  dynamic_cast<Test_U_Module_FileWriter*> (fileWriter_.writer ());
-  //if (!fileWriter_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Test_U_Module_FileWriter*> failed, aborting\n")));
-  //  goto error;
-  //} // end IF
-  //if (!fileWriter_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              fileWriter_.name ()));
-  //  goto error;
-  //} // end IF
-
-  // ******************* Runtime Statistics ************************
-  //runtimeStatistic_.initialize (*configuration_in.moduleConfiguration);
-  //runtimeStatistic_impl_p =
-  //  dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
-  //if (!runtimeStatistic_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Test_U_Module_Statistic_WriterTask_T*> failed, aborting\n")));
-  //  goto error;
-  //} // end IF
-  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval, // reporting interval (seconds)
-  //                                          true,                                        // push statistic messages downstream ?
-  //                                          configuration_in.printFinalReport,           // print final report ?
-  //                                          configuration_in.messageAllocator))          // message allocator handle
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              runtimeStatistic_.name ()));
-  //  goto error;
-  //} // end IF
-
-  // ******************* Marshal ************************
-  //marshal_.initialize (*configuration_in.moduleConfiguration);
-  //parser_impl_p =
-  //  dynamic_cast<Test_U_Module_Parser*> (marshal_.writer ());
-  //if (!parser_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Test_U_Module_Parser*> failed, aborting\n")));
-  //  goto error;
-  //} // end IF
-  //if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              marshal_.name ()));
-  //  goto error;
-  //} // end IF
-
-  // ******************* Dump ************************
-  //dump_.initialize (*configuration_in.moduleConfiguration);
-  //fileWriter_impl_p =
-  //  dynamic_cast<Test_U_Module_FileWriter*> (dump_.writer ());
-  //if (!fileWriter_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Test_U_Module_FileWriterH*> failed, aborting\n")));
-  //  goto error;
-  //} // end IF
-  //buffer =
-  //    configuration_in.moduleHandlerConfiguration->targetFileName;
-  //configuration_in.moduleHandlerConfiguration->targetFileName =
-  //    configuration_in.moduleHandlerConfiguration->dumpFileName;
-  //if (!fileWriter_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              dump_.name ()));
-
-  //  // clean up
-  //  const_cast<Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration->targetFileName =
-  //      buffer;
-
-  //  goto error;
-  //} // end IF
   const_cast<Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration->targetFileName =
       buffer;
 
   // ******************* IO ************************
-  IO_.initialize (*configuration_in.moduleConfiguration);
+//  IO_.initialize (*configuration_in.moduleConfiguration);
   IOWriter_impl_p = dynamic_cast<WRITER_T*> (IO_.writer ());
   if (!IOWriter_impl_p)
   {
@@ -242,13 +158,13 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
                 ACE_TEXT ("dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n")));
     goto error;
   } // end IF
-  if (!IOWriter_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to initialize Stream_Module_Net_IOWriter_T, aborting\n"),
-                IO_.name ()));
-    goto error;
-  } // end IF
+//  if (!IOWriter_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("%s: failed to initialize Stream_Module_Net_IOWriter_T, aborting\n"),
+//                IO_.name ()));
+//    goto error;
+//  } // end IF
   if (!IOWriter_impl_p->initialize (inherited::state_))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -271,13 +187,6 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
                 IO_.name ()));
     goto error;
   } // end IF
-  //if (!IOReader_impl_p->initialize (inherited::state_))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("%s: failed to initialize Stream_Module_Net_IOReader_T, aborting\n"),
-  //              IO_.name ()));
-  //  return false;
-  //} // end IF
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)

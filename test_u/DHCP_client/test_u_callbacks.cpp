@@ -45,12 +45,12 @@
 #include "net_macros.h"
 
 #include "test_u_common.h"
+#include "test_u_session_message.h"
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_connection_stream.h"
 #include "test_u_defines.h"
 #include "test_u_message.h"
-#include "test_u_session_message.h"
 
 #include "test_u_dhcp_client_common.h"
 

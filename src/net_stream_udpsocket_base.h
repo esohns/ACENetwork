@@ -43,18 +43,18 @@
 #include "net_udpsockethandler.h"
 
 template <typename HandlerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename HandlerConfigurationType>
 class Net_StreamUDPSocketBase_T
  : public HandlerType
@@ -63,7 +63,6 @@ class Net_StreamUDPSocketBase_T
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType>
 {
   friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerType,
@@ -116,7 +115,6 @@ class Net_StreamUDPSocketBase_T
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType> CONNECTION_BASE_T;
 
  protected:
@@ -124,9 +122,11 @@ class Net_StreamUDPSocketBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Stream_IModule_T<ACE_MT_SYNCH,
+  typedef Stream_IModule_T<Stream_SessionId_t,
+                           typename StreamType::SESSION_DATA_T,
+                           Stream_SessionMessageType,
+                           ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            ModuleConfigurationType,
                            ModuleHandlerConfigurationType> IMODULE_T;
@@ -160,7 +160,6 @@ class Net_StreamUDPSocketBase_T
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType> inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
@@ -179,27 +178,23 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename HandlerConfigurationType>
 class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                                        HandlerConfigurationType>,
-                                /////////
                                 AddressType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
                                 StreamType,
-                                /////////
                                 UserDataType,
-                                /////////
                                 ModuleConfigurationType,
                                 ModuleHandlerConfigurationType,
-                                /////////
                                 HandlerConfigurationType>
  : public Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                  HandlerConfigurationType>
@@ -208,23 +203,18 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType>
 {
   friend class ACE_Connector<Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                                                               HandlerConfigurationType>,
-
                                                        AddressType,
                                                        ConfigurationType,
                                                        StateType,
                                                        StatisticContainerType,
                                                        StreamType,
-
                                                        UserDataType,
-
                                                        ModuleConfigurationType,
                                                        ModuleHandlerConfigurationType,
-
                                                        HandlerConfigurationType>,
                              ACE_SOCK_CONNECTOR>;
 
@@ -266,7 +256,6 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType> CONNECTION_BASE_T;
 
  protected:
@@ -274,9 +263,11 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Stream_IModule_T<ACE_MT_SYNCH,
+  typedef Stream_IModule_T<Stream_SessionId_t,
+                           typename StreamType::SESSION_DATA_T,
+                           Stream_SessionMessageType,
+                           ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            ModuleConfigurationType,
                            ModuleHandlerConfigurationType> IMODULE_T;
@@ -305,7 +296,6 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType> inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
@@ -326,26 +316,22 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename HandlerConfigurationType>
 class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                                /////////
                                 AddressType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
                                 StreamType,
-                                /////////
                                 UserDataType,
-                                /////////
                                 ModuleConfigurationType,
                                 ModuleHandlerConfigurationType,
-                                /////////
                                 HandlerConfigurationType>
  : public Net_NetlinkSocketHandler_T<HandlerConfigurationType>
  , public Net_ConnectionBase_T<AddressType,
@@ -353,22 +339,17 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType>
 {
   friend class ACE_Connector<Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-
                                                        AddressType,
                                                        ConfigurationType,
                                                        StateType,
                                                        StatisticContainerType,
                                                        StreamType,
-
                                                        UserDataType,
-
                                                        ModuleConfigurationType,
                                                        ModuleHandlerConfigurationType,
-
                                                        HandlerConfigurationType>,
                              ACE_SOCK_CONNECTOR>;
 
@@ -410,7 +391,6 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType> CONNECTION_BASE_T;
 
  protected:
@@ -418,9 +398,11 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Stream_IModule_T<ACE_MT_SYNCH,
+  typedef Stream_IModule_T<Stream_SessionId_t,
+                           typename StreamType::SESSION_DATA_T,
+                           Stream_SessionMessageType,
+                           ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            ModuleConfigurationType,
                            ModuleHandlerConfigurationType> IMODULE_T;
@@ -448,7 +430,6 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType> inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.

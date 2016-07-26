@@ -40,15 +40,15 @@
 #include "net_iconnectionmanager.h"
 
 template <typename HandlerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
 class Net_StreamTCPSocketBase_T
@@ -58,7 +58,6 @@ class Net_StreamTCPSocketBase_T
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType>
 {
   //friend class ACE_Acceptor<Net_StreamTCPSocketBase_T<HandlerType,
@@ -133,7 +132,6 @@ class Net_StreamTCPSocketBase_T
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType> CONNECTION_BASE_T;
 
  protected:
@@ -143,9 +141,11 @@ class Net_StreamTCPSocketBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Stream_IModule_T<ACE_MT_SYNCH,
+  typedef Stream_IModule_T<Stream_SessionId_t,
+                           typename StreamType::SESSION_DATA_T,
+                           Stream_SessionMessageType,
+                           ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            ModuleConfigurationType,
                            ModuleHandlerConfigurationType> IMODULE_T;
@@ -172,7 +172,6 @@ class Net_StreamTCPSocketBase_T
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType> inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.

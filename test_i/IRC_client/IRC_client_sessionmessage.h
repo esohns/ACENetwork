@@ -35,11 +35,13 @@ class ACE_Message_Block;
 
 class IRC_Client_SessionMessage
  : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      ///
+                                      Stream_SessionMessageType,
                                       IRC_Client_SessionData_t,
-                                      IRC_Client_UserData>
+                                      IRC_Client_UserData,
+                                      IRC_ControlMessage_t,
+                                      IRC_Message>
 {
-//  // enable access to private ctor(s)...
+//  // enable access to private ctor(s)
 //  friend class Net_StreamMessageAllocator;
 //  friend class Stream_MessageAllocatorHeapBase<Net_Message, Net_SessionMessage>;
 
@@ -48,7 +50,7 @@ class IRC_Client_SessionMessage
   IRC_Client_SessionMessage (Stream_SessionMessageType,  // session message type
                              IRC_Client_SessionData_t*&, // session data container handle
                              IRC_Client_UserData*);      // user data handle
-    // *NOTE*: to be used by message allocators...
+  // *NOTE*: to be used by message allocators
   IRC_Client_SessionMessage (ACE_Allocator*); // message allocator
   IRC_Client_SessionMessage (ACE_Data_Block*, // data block
                              ACE_Allocator*); // message allocator
@@ -60,9 +62,11 @@ class IRC_Client_SessionMessage
 
  private:
   typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      ///
+                                      Stream_SessionMessageType,
                                       IRC_Client_SessionData_t,
-                                      IRC_Client_UserData> inherited;
+                                      IRC_Client_UserData,
+                                      IRC_ControlMessage_t,
+                                      IRC_Message> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_SessionMessage ())
   // copy ctor (to be used by duplicate())

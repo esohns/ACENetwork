@@ -638,7 +638,7 @@ IRC_Client_GUI_Connection::finalize (bool lockedAccess_in)
 }
 
 void
-IRC_Client_GUI_Connection::start (unsigned int sessionID_in,
+IRC_Client_GUI_Connection::start (Stream_SessionId_t sessionID_in,
                                   const IRC_Client_SessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::start"));
@@ -673,7 +673,50 @@ IRC_Client_GUI_Connection::start (unsigned int sessionID_in,
 }
 
 void
-IRC_Client_GUI_Connection::notify (unsigned int sessionID_in,
+IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
+                                   const Stream_SessionMessageType& sessionEvent_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::notify"));
+
+  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionEvent_in);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+  ACE_NOTREACHED (return;)
+}
+
+void
+IRC_Client_GUI_Connection::end (Stream_SessionId_t sessionID_in)
+{
+  NETWORK_TRACE(ACE_TEXT("IRC_Client_GUI_Connection::end"));
+
+  ACE_UNUSED_ARG (sessionID_in);
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connection \"%s\" closed/lost\n"),
+              ACE_TEXT (CBData_.label.c_str ())));
+
+//  // *NOTE*: this is the final invocation from the controller
+//  //         --> unsubscribe anyway
+//  if (CBData_.controller)
+//  {
+//    try {
+//      CBData_.controller->unsubscribe (this);
+//    } catch (...) {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("caught exception in IRC_IControl::unsubscribe(%@), continuing\n"),
+//                  this));
+//    }
+//    CBData_.controller = NULL;
+//  } // end IF
+
+  close ();
+}
+
+void
+IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
                                    const IRC_Message& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::notify"));
@@ -1597,44 +1640,13 @@ IRC_Client_GUI_Connection::notify (unsigned int sessionID_in,
   } // end SWITCH
 }
 void
-IRC_Client_GUI_Connection::notify (unsigned int sessionID_in,
+IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
                                    const IRC_Client_SessionMessage& sessionMessage_in)
 {
   NETWORK_TRACE(ACE_TEXT("IRC_Client_GUI_Connection::notify"));
 
   ACE_UNUSED_ARG (sessionID_in);
   ACE_UNUSED_ARG (sessionMessage_in);
-}
-
-void
-IRC_Client_GUI_Connection::end (unsigned int sessionID_in)
-{
-  NETWORK_TRACE(ACE_TEXT("IRC_Client_GUI_Connection::end"));
-
-  ACE_UNUSED_ARG (sessionID_in);
-
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connection \"%s\" closed/lost\n"),
-              ACE_TEXT (CBData_.label.c_str ())));
-
-//  // *NOTE*: this is the final invocation from the controller
-//  //         --> unsubscribe anyway
-//  if (CBData_.controller)
-//  {
-//    try
-//    {
-//      CBData_.controller->unsubscribe (this);
-//    }
-//    catch (...)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("caught exception in IRC_IControl::unsubscribe(%@), continuing\n"),
-//                  this));
-//    }
-//    CBData_.controller = NULL;
-//  } // end IF
-
-  close ();
 }
 
 const IRC_Client_GTK_ConnectionCBData&

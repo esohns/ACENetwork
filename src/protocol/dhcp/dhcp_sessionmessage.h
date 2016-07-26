@@ -18,13 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef DHCP_SESSIONMESSAGE_H
-#define DHCP_SESSIONMESSAGE_H
+#ifndef DHCP_SessionMessage_T_H
+#define DHCP_SessionMessage_T_H
 
 #include "ace/Global_Macros.h"
 
 #include "stream_session_message_base.h"
 
+#include "dhcp_common.h"
 #include "dhcp_exports.h"
 #include "dhcp_stream_common.h"
 
@@ -33,25 +34,36 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 
-class DHCP_SessionMessage
+template <typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionDataType>
+class DHCP_SessionMessage_T
  : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      DHCP_Stream_SessionData_t,
-                                      DHCP_Stream_UserData>
+                                      Stream_SessionMessageType,
+                                      SessionDataType,
+                                      DHCP_Stream_UserData,
+                                      ControlMessageType,
+                                      DataMessageType>
 {
-//  // enable access to private ctor(s)...
+//  // enable access to private ctor(s)
 //  friend class Net_StreamMessageAllocator;
 //  friend class Stream_MessageAllocatorHeapBase<Net_Message, Net_SessionMessage>;
 
  public:
+  // convenient types
+  typedef DHCP_SessionMessage_T<ControlMessageType,
+                                DataMessageType,
+                                SessionDataType> OWN_TYPE_T;
+
   // *NOTE*: assume lifetime responsibility for the second argument !
-  DHCP_SessionMessage (Stream_SessionMessageType,  // session message type
-                       DHCP_Stream_SessionData_t*&, // session data container handle
-                       DHCP_Stream_UserData*);      // user data handle
-    // *NOTE*: to be used by message allocators...
-  DHCP_SessionMessage (ACE_Allocator*); // message allocator
-  DHCP_SessionMessage (ACE_Data_Block*, // data block
-                       ACE_Allocator*); // message allocator
-  virtual ~DHCP_SessionMessage ();
+  DHCP_SessionMessage_T (Stream_SessionMessageType, // session message type
+                         SessionDataType*&,         // session data container handle
+                         DHCP_Stream_UserData*);    // user data handle
+  // *NOTE*: to be used by message allocators
+  DHCP_SessionMessage_T (ACE_Allocator*); // message allocator
+  DHCP_SessionMessage_T (ACE_Data_Block*, // data block
+                         ACE_Allocator*); // message allocator
+  virtual ~DHCP_SessionMessage_T ();
 
   // override from ACE_Message_Block
   // *WARNING*: any children need to override this as well
@@ -59,13 +71,19 @@ class DHCP_SessionMessage
 
  private:
   typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      DHCP_Stream_SessionData_t,
-                                      DHCP_Stream_UserData> inherited;
+                                      Stream_SessionMessageType,
+                                      SessionDataType,
+                                      DHCP_Stream_UserData,
+                                      ControlMessageType,
+                                      DataMessageType> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (DHCP_SessionMessage ())
+  ACE_UNIMPLEMENTED_FUNC (DHCP_SessionMessage_T ())
   // copy ctor (to be used by duplicate())
-  DHCP_SessionMessage (const DHCP_SessionMessage&);
-  ACE_UNIMPLEMENTED_FUNC (DHCP_SessionMessage& operator= (const DHCP_SessionMessage&))
+  DHCP_SessionMessage_T (const DHCP_SessionMessage_T&);
+  ACE_UNIMPLEMENTED_FUNC (DHCP_SessionMessage_T& operator= (const DHCP_SessionMessage_T&))
 };
+
+// include template definition
+#include "dhcp_sessionmessage.inl"
 
 #endif

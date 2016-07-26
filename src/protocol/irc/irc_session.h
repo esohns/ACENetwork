@@ -104,14 +104,16 @@ class IRC_Session_T
   // implement Net_ISession_T
   //virtual const IRC_SessionState& state () const;
 
-  // implement Common_INotify_T
-  virtual void start (unsigned int,
+  // implement Stream_ISessionDataNotify_T
+  virtual void start (Stream_SessionId_t,
                       const SessionDataType&);
-  virtual void notify (unsigned int,
+  virtual void notify (Stream_SessionId_t,
+                       const Stream_SessionMessageType&);
+  virtual void end (Stream_SessionId_t);
+  virtual void notify (Stream_SessionId_t,
                        const MessageType&);
-  virtual void notify (unsigned int,
+  virtual void notify (Stream_SessionId_t,
                        const SessionMessageType&);
-  virtual void end (unsigned int);
 
   // override some task-based members
   // *TODO*: make these private

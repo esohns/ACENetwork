@@ -27,25 +27,27 @@
 #include "stream_common.h"
 #include "stream_session_message_base.h"
 
-#include "test_u_common.h"
+#include "test_u_dhcp_client_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;
 class Test_U_Message;
 template <typename AllocatorConfigurationType,
-          ///////////////////////////////
-          typename MessageType,
+          typename ControlMessageType,
+          typename DataMessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_SessionMessage
  : public Stream_SessionMessageBase_T<Test_U_AllocatorConfiguration,
-                                      ///
+                                      Stream_SessionMessageType,
                                       Test_U_StreamSessionData_t,
-                                      Test_U_UserData>
+                                      Test_U_UserData,
+                                      Test_U_ControlMessage_t,
+                                      Test_U_SessionMessage>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
-
+                                                 Test_U_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
 
@@ -62,9 +64,11 @@ class Test_U_SessionMessage
 
  private:
   typedef Stream_SessionMessageBase_T<Test_U_AllocatorConfiguration,
-                                      ///
+                                      Stream_SessionMessageType,
                                       Test_U_StreamSessionData_t,
-                                      Test_U_UserData> inherited;
+                                      Test_U_UserData,
+                                      Test_U_ControlMessage_t,
+                                      Test_U_SessionMessage> inherited;
 
   // copy ctor to be used by duplicate()
   Test_U_SessionMessage (const Test_U_SessionMessage&);

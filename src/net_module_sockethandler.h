@@ -52,26 +52,21 @@ template <typename LockType,                 // connection stream state machine 
           typename ProtocolHeaderType>
 class Net_Module_SocketHandler_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType>
 {
  public:
-  Net_Module_SocketHandler_T (LockType* = NULL); // lock handle (state machine)
+  Net_Module_SocketHandler_T (typename LockType::MUTEX* = NULL); // lock handle (state machine)
   virtual ~Net_Module_SocketHandler_T ();
 
 #if defined (__GNUG__) || defined (_MSC_VER)
@@ -113,22 +108,17 @@ class Net_Module_SocketHandler_T
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType> inherited;
 
 //  ACE_UNIMPLEMENTED_FUNC (Net_Module_SocketHandler_T ())
@@ -166,22 +156,17 @@ template <typename LockType,
           typename StatisticContainerType>
 class Net_Module_UDPSocketHandler_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType>
 {
  public:
@@ -208,22 +193,17 @@ class Net_Module_UDPSocketHandler_T
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType> inherited;
 
 //  ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T ())
@@ -234,7 +214,7 @@ class Net_Module_UDPSocketHandler_T
   //bool putStatisticMessage (const StatisticContainerType&) const; // statistics info
 };
 
-// include template implementation
+// include template definition
 #include "net_module_sockethandler.inl"
 
 #endif

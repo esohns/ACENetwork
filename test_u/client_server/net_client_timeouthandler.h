@@ -31,6 +31,8 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
+#include "test_u_stream.h"
+
 #include "net_client_connector_common.h"
 
 class Net_Client_TimeoutHandler

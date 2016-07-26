@@ -67,8 +67,8 @@ IRC_StateMachine_Registration::change (IRC_RegistrationState newState_in)
   // sanity check(s)
   ACE_ASSERT (inherited::stateLock_);
 
-  // synchronize access to state machine...
-  ACE_Guard<ACE_SYNCH_NULL_MUTEX> aGuard (*inherited::stateLock_);
+  // synchronize access to state machine
+  ACE_Guard<ACE_Null_Mutex> aGuard (*inherited::stateLock_);
 
   switch (inherited::state_)
   {

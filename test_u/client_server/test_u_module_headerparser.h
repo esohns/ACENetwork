@@ -29,6 +29,8 @@
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
+#include "test_u_stream_common.h"
+
 // forward declaration(s)
 class Net_Message;
 class Net_SessionMessage;
@@ -36,12 +38,12 @@ class Net_SessionMessage;
 class Net_Module_HeaderParser
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 /////////
                                  Stream_ModuleHandlerConfiguration,
-                                 /////////
                                  ACE_Message_Block,
                                  Net_Message,
-                                 Net_SessionMessage>
+                                 Net_SessionMessage,
+                                 Stream_SessionId_t,
+                                 Net_StreamSessionData>
 {
  public:
   Net_Module_HeaderParser ();
@@ -60,12 +62,12 @@ class Net_Module_HeaderParser
  private:
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 /////////
                                  Stream_ModuleHandlerConfiguration,
-                                 /////////
                                  ACE_Message_Block,
                                  Net_Message,
-                                 Net_SessionMessage> inherited;
+                                 Net_SessionMessage,
+                                 Stream_SessionId_t,
+                                 Net_StreamSessionData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Module_HeaderParser (const Net_Module_HeaderParser&));
   ACE_UNIMPLEMENTED_FUNC (Net_Module_HeaderParser& operator= (const Net_Module_HeaderParser&));
@@ -74,10 +76,10 @@ class Net_Module_HeaderParser
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                      // task synch type
-                              Common_TimePolicy_t,               // time policy type
-                              Stream_ModuleConfiguration,        // module configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Net_StreamSessionData,             // session data type
+                              Stream_SessionMessageType,         // session event type
                               Stream_ModuleHandlerConfiguration, // module handler configuration type
+                              Net_IStreamNotify_t,               // stream notification interface type
                               Net_Module_HeaderParser);          // writer type
 
 #endif

@@ -21,4 +21,27 @@
 #ifndef TEST_U_HTTP_DECODER_COMMON_H
 #define TEST_U_HTTP_DECODER_COMMON_H
 
+#include "stream_common.h"
+#include "stream_control_message.h"
+
+#include "test_u_common.h"
+
+//#include "test_u_message.h"
+//#include "test_u_session_message.h"
+
+// forward declarations
+class Test_U_SessionMessage;
+class Test_U_Message;
+
+typedef Stream_ControlMessage_T<Stream_ControlMessageType,
+                                Test_U_AllocatorConfiguration,
+                                Test_U_Message,
+                                Test_U_SessionMessage> Test_U_ControlMessage_t;
+
+//typedef Stream_IModuleHandler_T<Test_U_ModuleHandlerConfiguration> Test_U_IModuleHandler_t;
+typedef Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
+                                          Test_U_ControlMessage_t,
+                                          Test_U_Message,
+                                          Test_U_SessionMessage> Test_U_MessageAllocator_t;
+
 #endif

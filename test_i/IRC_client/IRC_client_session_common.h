@@ -38,32 +38,26 @@
 
 typedef Net_Client_Connector_T<IRC_Client_TCPConnection_t,
                                ACE_SOCK_CONNECTOR,
-                               //////////
                                ACE_INET_Addr,
                                IRC_Client_Configuration,
                                IRC_Client_SessionState,
                                IRC_RuntimeStatistic_t,
                                IRC_Client_Stream,
-                               //////////
                                IRC_Client_SocketHandlerConfiguration,
-                               //////////
                                IRC_Client_UserData> IRC_Client_Connector_t;
 typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchTCPConnection_t,
-                                     ////
                                      ACE_INET_Addr,
                                      IRC_Client_Configuration,
                                      IRC_Client_SessionState,
                                      IRC_RuntimeStatistic_t,
                                      IRC_Client_Stream,
-                                     ////
                                      IRC_Client_SocketHandlerConfiguration,
-                                     ////
                                      IRC_Client_UserData> IRC_Client_AsynchConnector_t;
 
 typedef IRC_Session_T<IRC_Client_TCPConnection_t,
                       IRC_Client_SessionData,
 //                      IRC_IControl,
-                      IRC_Client_IStreamNotify_t,
+                      IRC_Client_ISessionNotify_t,
                       IRC_Client_Configuration,
                       IRC_Message,
                       IRC_Client_SessionMessage,
@@ -77,7 +71,7 @@ typedef IRC_Session_T<IRC_Client_TCPConnection_t,
 typedef IRC_Session_T<IRC_Client_AsynchTCPConnection_t,
                       IRC_Client_SessionData,
 //                      IRC_IControl,
-                      IRC_Client_IStreamNotify_t,
+                      IRC_Client_ISessionNotify_t,
                       IRC_Client_Configuration,
                       IRC_Message,
                       IRC_Client_SessionMessage,
@@ -91,26 +85,20 @@ typedef IRC_Session_T<IRC_Client_AsynchTCPConnection_t,
 
 typedef Net_Client_Connector_T<IRC_Client_IRCSession_t,
                                ACE_SOCK_CONNECTOR,
-                               //////////
                                ACE_INET_Addr,
                                IRC_Client_Configuration,
                                IRC_Client_SessionState,
                                IRC_RuntimeStatistic_t,
                                IRC_Client_Stream,
-                               //////////
                                IRC_Client_SocketHandlerConfiguration,
-                               //////////
                                IRC_Client_UserData> IRC_Client_SessionConnector_t;
 typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchIRCSession_t,
-                                     ////
                                      ACE_INET_Addr,
                                      IRC_Client_Configuration,
                                      IRC_Client_SessionState,
                                      IRC_RuntimeStatistic_t,
                                      IRC_Client_Stream,
-                                     ////
                                      IRC_Client_SocketHandlerConfiguration,
-                                     ////
                                      IRC_Client_UserData> IRC_Client_AsynchSessionConnector_t;
 
 #endif

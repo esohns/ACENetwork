@@ -28,35 +28,54 @@
 #include "stream_data_message_base.h"
 
 #include "dhcp_common.h"
-#include "dhcp_exports.h"
+//#include "dhcp_exports.h"
 
 // forward declaration(s)
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-class DHCP_SessionMessage;
+//class DHCP_SessionMessage;
 template <typename AllocatorConfigurationType,
-          typename MessageType,
-          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+class Stream_MessageAllocatorHeapBase_T;
 template <typename AllocatorConfigurationType,
-          typename MessageType,
-          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+class Stream_CachedMessageAllocator_T;
 
-template <typename AllocatorConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename SessionMessageType>
 class DHCP_Message_T
  : public Stream_DataMessageBase_T<AllocatorConfigurationType,
+                                   ControlMessageType,
+                                   SessionMessageType,
                                    DHCP_Record,
                                    DHCP_MessageType_t>
 {
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<AllocatorConfigurationType,
-                                                 DHCP_Message_T<AllocatorConfigurationType>,
-                                                 DHCP_SessionMessage>;
+                                                 ControlMessageType,
+                                                 DHCP_Message_T<AllocatorConfigurationType,
+                                                                ControlMessageType,
+                                                                SessionMessageType>,
+                                                 SessionMessageType>;
   friend class Stream_CachedMessageAllocator_T<AllocatorConfigurationType,
-                                               DHCP_Message_T<AllocatorConfigurationType>,
-                                               DHCP_SessionMessage>;
+                                               ControlMessageType,
+                                               DHCP_Message_T<AllocatorConfigurationType,
+                                                              ControlMessageType,
+                                                              SessionMessageType>,
+                                               SessionMessageType>;
 
  public:
+  // convenient types
+  typedef DHCP_Message_T<AllocatorConfigurationType,
+                         ControlMessageType,
+                         SessionMessageType> OWN_TYPE_T;
+
   DHCP_Message_T (unsigned int); // size
   virtual ~DHCP_Message_T ();
 
@@ -72,18 +91,20 @@ class DHCP_Message_T
   virtual ACE_Message_Block* duplicate (void) const;
 
  protected:
-   // *NOTE*: to be used by allocators...
-   DHCP_Message_T (ACE_Data_Block*, // data block to use
-                   ACE_Allocator*,  // message allocator
-                   bool = true);    // increment running message counter ?
-   //   DHCP_Message_T (ACE_Allocator*); // message allocator
+  // *NOTE*: to be used by allocators
+  DHCP_Message_T (ACE_Data_Block*, // data block to use
+                  ACE_Allocator*,  // message allocator
+                  bool = true);    // increment running message counter ?
+//   DHCP_Message_T (ACE_Allocator*); // message allocator
 
-  // copy ctor to be used by duplicate() and child classes
+  // copy ctor to be used by duplicate() and derived classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")
-  DHCP_Message_T (const DHCP_Message_T&);
+  DHCP_Message_T (const OWN_TYPE_T&);
 
  private:
   typedef Stream_DataMessageBase_T<AllocatorConfigurationType,
+                                   ControlMessageType,
+                                   SessionMessageType,
                                    DHCP_Record,
                                    DHCP_MessageType_t> inherited;
 
@@ -91,7 +112,7 @@ class DHCP_Message_T
   ACE_UNIMPLEMENTED_FUNC (DHCP_Message_T& operator= (const DHCP_Message_T&))
 };
 
-// include template implementation
+// include template definition
 #include "dhcp_message.inl"
 
 #endif

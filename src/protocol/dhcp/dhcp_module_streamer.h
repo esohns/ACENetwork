@@ -36,12 +36,12 @@ template <typename SynchStrategyType,
 class DHCP_Module_Streamer_T
  : public Stream_TaskBaseSynch_T<SynchStrategyType,
                                  TimePolicyType,
-                                 /////////
                                  ConfigurationType,
-                                 /////////
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType>
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 Stream_SessionMessageType>
 {
  public:
   DHCP_Module_Streamer_T ();
@@ -54,18 +54,18 @@ class DHCP_Module_Streamer_T
  private:
   typedef Stream_TaskBaseSynch_T<SynchStrategyType,
                                  TimePolicyType,
-                                 /////////
                                  ConfigurationType,
-                                 /////////
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType> inherited;
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 Stream_SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Streamer_T (const DHCP_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Streamer_T& operator= (const DHCP_Module_Streamer_T&))
 };
 
-// include template implementation
+// include template definition
 #include "dhcp_module_streamer.inl"
 
 #endif

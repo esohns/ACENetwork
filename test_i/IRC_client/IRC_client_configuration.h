@@ -60,7 +60,6 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  IRC_Client_Configuration,
                                  IRC_Client_SessionState,
                                  IRC_RuntimeStatistic_t,
-                                 ////////
                                  IRC_Client_UserData> IRC_Client_IConnection_Manager_t;
 
 //struct IRC_Client_ConnectorConfiguration
@@ -83,7 +82,7 @@ struct IRC_Client_SocketHandlerConfiguration
 {
   inline IRC_Client_SocketHandlerConfiguration ()
    : IRC_SocketHandlerConfiguration ()
-   //////////////////////////////////////
+   ///////////////////////////////////////
    , userData (NULL)
   {};
 
@@ -95,14 +94,14 @@ struct IRC_Client_ModuleHandlerConfiguration
 {
   inline IRC_Client_ModuleHandlerConfiguration ()
    : IRC_ModuleHandlerConfiguration ()
-   //////////////////////////////////////
+   ///////////////////////////////////////
    , subscriber (NULL)
    , userData (NULL)
   {};
 
   /* handler */
-  IRC_Client_IStreamNotify_t* subscriber; // (initial) subscriber
-  IRC_Client_UserData*        userData;
+  IRC_Client_ISessionNotify_t* subscriber; // (initial) subscriber
+  IRC_Client_UserData*         userData;
 };
 
 struct IRC_Client_StreamConfiguration
@@ -141,12 +140,12 @@ struct IRC_Client_Configuration
   inline IRC_Client_Configuration ()
    : socketConfiguration ()
    , socketHandlerConfiguration ()
-   //////////////////////////////////////
+   ///////////////////////////////////////
    , streamConfiguration ()
    , userData ()
-   //////////////////////////////////////
+   ///////////////////////////////////////
    , protocolConfiguration ()
-   //////////////////////////////////////
+   ///////////////////////////////////////
    , cursesState (NULL)
    , encoding (IRC_PRT_DEFAULT_ENCODING)
    , groupID (COMMON_EVENT_THREAD_GROUP_ID)

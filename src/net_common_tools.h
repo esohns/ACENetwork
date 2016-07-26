@@ -24,13 +24,13 @@
 #include <limits>
 #include <string>
 
-#include "ace/Basic_Types.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
 #include "net_exports.h"
 
-class Net_Export Net_Common_Tools
+//class Net_Export Net_Common_Tools
+class Net_Common_Tools
 {
  public:
   // --- general tools ---

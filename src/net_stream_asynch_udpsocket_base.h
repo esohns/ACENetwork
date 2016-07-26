@@ -109,7 +109,10 @@ class Net_StreamAsynchUDPSocketBase_T
                                    StatisticContainerType,
                                    //////
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Stream_IModule_T<ACE_MT_SYNCH,
+  typedef Stream_IModule_T<Stream_SessionId_t,
+                           typename StreamType::SESSION_DATA_T,
+                           Stream_SessionMessageType,
+                           ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            ModuleConfigurationType,
                            ModuleHandlerConfigurationType> IMODULE_T;

@@ -25,6 +25,7 @@
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
+#include "net_common.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -32,8 +33,10 @@
 #include "net_netlinksockethandler.h"
 #endif
 
-#include "test_u_common.h"
-#include "test_u_configuration.h"
+// forward declarations
+struct Net_Configuration;
+struct Net_ConnectionState;
+struct Net_UserData;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -41,14 +44,12 @@ typedef Net_IConnectionManager_T<Net_Netlink_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 ////////
                                  Net_UserData> Net_INetlinkConnectionManager_t;
 #endif
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 ////////
                                  Net_UserData> Net_IInetConnectionManager_t;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -57,14 +58,12 @@ typedef Net_Connection_Manager_T<Net_Netlink_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 ////////
                                  Net_UserData> Net_NetlinkConnectionManager_t;
 #endif
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  Net_Configuration,
                                  Net_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 ////////
                                  Net_UserData> Net_InetConnectionManager_t;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

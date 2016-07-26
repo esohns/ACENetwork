@@ -33,7 +33,8 @@
 // forward declarations
 enum Common_DispatchType;
 
-class Net_Export Net_TransportLayer_IP_Broadcast
+//class Net_Export Net_TransportLayer_IP_Broadcast
+class Net_TransportLayer_IP_Broadcast
  : public Net_InetTransportLayer_Base
 // , public ACE_SOCK_Dgram_Bcast
 {
@@ -54,7 +55,8 @@ class Net_Export Net_TransportLayer_IP_Broadcast
 
 /////////////////////////////////////////
 
-class Net_Export Net_TransportLayer_IP_Multicast
+//class Net_Export Net_TransportLayer_IP_Multicast
+class Net_TransportLayer_IP_Multicast
  : public Net_InetTransportLayer_Base
 // , public ACE_SOCK_Dgram_Mcast
 {

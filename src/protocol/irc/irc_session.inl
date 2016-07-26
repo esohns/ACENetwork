@@ -148,6 +148,15 @@ IRC_Session_T<ConnectionType,
   } // end IF
 }
 
+//template <typename ConnectionType>
+//const IRC_ConnectionState&
+//IRC_Session_T<ConnectionType>::state () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::state"));
+//
+//  return inherited::state_;
+//}
+
 template <typename ConnectionType,
           typename SessionDataType,
 //          typename ControllerType,
@@ -176,7 +185,7 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::start (unsigned int sessionID_in,
+              LogOutputType>::start (Stream_SessionId_t sessionID_in,
                                      const SessionDataType& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::start"));
@@ -317,14 +326,47 @@ IRC_Session_T<ConnectionType,
   } // end IF
 }
 
-//template <typename ConnectionType>
-//const IRC_ConnectionState&
-//IRC_Session_T<ConnectionType>::state () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::state"));
-//
-//  return inherited::state_;
-//}
+template <typename ConnectionType,
+          typename SessionDataType,
+//          typename ControllerType,
+          typename NotificationType,
+          typename ConfigurationType,
+          typename MessageType,
+          typename SessionMessageType,
+          typename SocketHandlerConfigurationType,
+          typename ModuleHandlerConfigurationType,
+          typename StateType,
+          typename ConnectionManagerType,
+          typename InputHandlerType,
+          typename InputHandlerConfigurationType,
+          typename LogOutputType>
+void
+IRC_Session_T<ConnectionType,
+              SessionDataType,
+//              ControllerType,
+              NotificationType,
+              ConfigurationType,
+              MessageType,
+              SessionMessageType,
+              SocketHandlerConfigurationType,
+              ModuleHandlerConfigurationType,
+              StateType,
+              ConnectionManagerType,
+              InputHandlerType,
+              InputHandlerConfigurationType,
+              LogOutputType>::notify (Stream_SessionId_t sessionID_in,
+                                      const Stream_SessionMessageType& sessionEvent_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
+
+  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionEvent_in);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+  ACE_NOTREACHED (return;)
+}
 
 template <typename ConnectionType,
           typename SessionDataType,
@@ -354,7 +396,58 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::notify (unsigned int sessionID_in,
+              LogOutputType>::end (Stream_SessionId_t sessionID_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::end"));
+
+  ACE_UNUSED_ARG (sessionID_in);
+
+  int result = -1;
+
+  // --> raise a signal
+  if (shutDownOnEnd_)
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("connection %u closed/lost, shutting down\n"),
+                inherited::id ()));
+
+    result = ACE_OS::raise (SIGINT);
+    if (result == -1)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("failed to ACE_OS::raise(%S): \"%m\", continuing\n"),
+                  SIGINT));
+  } // end IF
+}
+
+template <typename ConnectionType,
+          typename SessionDataType,
+//          typename ControllerType,
+          typename NotificationType,
+          typename ConfigurationType,
+          typename MessageType,
+          typename SessionMessageType,
+          typename SocketHandlerConfigurationType,
+          typename ModuleHandlerConfigurationType,
+          typename StateType,
+          typename ConnectionManagerType,
+          typename InputHandlerType,
+          typename InputHandlerConfigurationType,
+          typename LogOutputType>
+void
+IRC_Session_T<ConnectionType,
+              SessionDataType,
+//              ControllerType,
+              NotificationType,
+              ConfigurationType,
+              MessageType,
+              SessionMessageType,
+              SocketHandlerConfigurationType,
+              ModuleHandlerConfigurationType,
+              StateType,
+              ConnectionManagerType,
+              InputHandlerType,
+              InputHandlerConfigurationType,
+              LogOutputType>::notify (Stream_SessionId_t sessionID_in,
                                       const MessageType& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
@@ -870,64 +963,13 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::notify (unsigned int sessionID_in,
+              LogOutputType>::notify (Stream_SessionId_t sessionID_in,
                                       const SessionMessageType& sessionrecord_r)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
 
   ACE_UNUSED_ARG (sessionID_in);
   ACE_UNUSED_ARG (sessionrecord_r);
-}
-
-template <typename ConnectionType,
-          typename SessionDataType,
-//          typename ControllerType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename SocketHandlerConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename StateType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
-void
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-//              ControllerType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              SocketHandlerConfigurationType,
-              ModuleHandlerConfigurationType,
-              StateType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::end (unsigned int sessionID_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::end"));
-
-  ACE_UNUSED_ARG (sessionID_in);
-
-  int result = -1;
-
-  // --> raise a signal
-  if (shutDownOnEnd_)
-  {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("connection %u closed/lost, shutting down\n"),
-                inherited::id ()));
-
-    result = ACE_OS::raise (SIGINT);
-    if (result == -1)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("failed to ACE_OS::raise(%S): \"%m\", continuing\n"),
-                  SIGINT));
-  } // end IF
 }
 
 template <typename ConnectionType,

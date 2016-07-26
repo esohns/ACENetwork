@@ -38,12 +38,12 @@ enum IRC_RegistrationState
   REGISTRATION_STATE_NICK,
   REGISTRATION_STATE_USER,
   REGISTRATION_STATE_FINISHED,
-  /////////////////////////////////////
+  ////////////////////////////////////////
   REGISTRATION_STATE_MAX
 };
 
 class IRC_Export IRC_StateMachine_Registration
- : public Common_StateMachine_Base_T<ACE_SYNCH_NULL_MUTEX,
+ : public Common_StateMachine_Base_T<ACE_NULL_SYNCH,
                                      IRC_RegistrationState>
 {
  public:
@@ -61,7 +61,7 @@ class IRC_Export IRC_StateMachine_Registration
   virtual bool change (IRC_RegistrationState); // new state
 
  private:
-  typedef Common_StateMachine_Base_T<ACE_SYNCH_NULL_MUTEX,
+  typedef Common_StateMachine_Base_T<ACE_NULL_SYNCH,
                                      IRC_RegistrationState> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_StateMachine_Registration (const IRC_StateMachine_Registration&))

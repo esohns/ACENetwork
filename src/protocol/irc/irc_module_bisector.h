@@ -40,7 +40,7 @@ typedef struct yy_buffer_state* YY_BUFFER_STATE;
 
 template <typename LockType,
           ////////////////////////////////
-          typename SynchStrategyType,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -58,32 +58,27 @@ template <typename LockType,
           typename StatisticContainerType>
 class IRC_Module_Bisector_T
  : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
-                                      SynchStrategyType,
+                                      ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType>
 {
  public:
-  IRC_Module_Bisector_T (LockType* = NULL); // lock handle (state machine)
+  IRC_Module_Bisector_T (typename LockType::MUTEX* = NULL); // lock handle (state machine)
   virtual ~IRC_Module_Bisector_T ();
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
   using Stream_HeadModuleTaskBase_T<LockType,
-                                    SynchStrategyType,
+                                    ACE_SYNCH_USE,
                                     TimePolicyType,
                                     ControlMessageType,
                                     DataMessageType,
@@ -112,22 +107,17 @@ class IRC_Module_Bisector_T
 
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ////
-                                      SynchStrategyType,
+                                      ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
                                       SessionMessageType,
-                                      ////
                                       ConfigurationType,
-                                      ////
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      ////
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      ////
                                       StatisticContainerType> inherited;
 
 //  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Bisector_T ())
@@ -155,7 +145,7 @@ class IRC_Module_Bisector_T
   unsigned int       messageLength_;
 };
 
-// include template implementation
+// include template definition
 #include "irc_module_bisector.inl"
 
 #endif

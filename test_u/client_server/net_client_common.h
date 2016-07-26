@@ -21,7 +21,19 @@
 #ifndef NET_CLIENT_COMMON_H
 #define NET_CLIENT_COMMON_H
 
+#include <list>
+
 #include "ace/INET_Addr.h"
+#include "ace/Synch_Traits.h"
+
+#include "common_isubscribe.h"
+
+#include "stream_common.h"
+#include "stream_control_message.h"
+#include "stream_isessionnotify.h"
+#include "stream_messageallocatorheap_base.h"
+
+#include "test_u_common.h"
 
 #include "test_u_configuration.h"
 #include "test_u_connection_manager_common.h"
@@ -31,6 +43,8 @@
 // forward declaration(s)
 class Stream_IAllocator;
 struct Net_SocketHandlerConfiguration;
+class Net_SessionMessage;
+class Net_Message;
 class Net_Client_TimeoutHandler;
 
 struct Net_Client_ConnectorConfiguration
@@ -78,6 +92,39 @@ struct Net_Client_Configuration
 
   Net_Client_SignalHandlerConfiguration signalHandlerConfiguration;
   Net_Client_TimeoutHandler*            timeoutHandler;
+};
+
+typedef Stream_ControlMessage_T<Stream_ControlMessageType,
+                                Stream_AllocatorConfiguration,
+                                Net_Message,
+                                Net_SessionMessage> Net_ControlMessage_t;
+
+typedef Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
+                                          Net_ControlMessage_t,
+                                          Net_Message,
+                                          Net_SessionMessage> Net_StreamMessageAllocator_t;
+
+typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
+                                    Net_StreamSessionData,
+                                    Stream_SessionMessageType,
+                                    Net_Message,
+                                    Net_SessionMessage> Net_ISessionNotify_t;
+typedef std::list<Net_ISessionNotify_t*> Net_Subscribers_t;
+typedef Net_Subscribers_t::iterator Net_SubscribersIterator_t;
+
+typedef Common_ISubscribe_T<Net_ISessionNotify_t> Net_ISubscribe_t;
+
+struct Net_Client_GTK_CBData
+ : Net_GTK_CBData
+{
+  inline Net_Client_GTK_CBData ()
+   : Net_GTK_CBData ()
+   , subscribers ()
+   , subscribersLock ()
+  {};
+
+  Net_Subscribers_t         subscribers;
+  ACE_SYNCH_RECURSIVE_MUTEX subscribersLock;
 };
 
 #endif

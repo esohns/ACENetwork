@@ -55,9 +55,7 @@ class Net_SocketConnectionBase_T
                                   StatisticContainerType,
                                   StreamType,
                                   StreamStatusType,
-                                  ///////
                                   SocketConfigurationType,
-                                  ///////
                                   HandlerConfigurationType>
 {
  public:
@@ -104,7 +102,6 @@ class Net_SocketConnectionBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   Net_SocketConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
@@ -153,9 +150,7 @@ class Net_AsynchSocketConnectionBase_T
                                   StatisticContainerType,
                                   StreamType,
                                   StreamStatusType,
-                                  ///////
                                   SocketConfigurationType,
-                                  ///////
                                   HandlerConfigurationType>
 {
  public:
@@ -214,6 +209,7 @@ class Net_AsynchSocketConnectionBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T& operator= (const Net_AsynchSocketConnectionBase_T&))
 };
 
+// include template definition
 #include "net_socketconnection_base.inl"
 
 #endif

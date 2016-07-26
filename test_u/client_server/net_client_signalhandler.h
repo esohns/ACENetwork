@@ -27,6 +27,8 @@
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
+#include "test_u_stream.h"
+
 #include "net_client_common.h"
 
 class Net_Client_SignalHandler

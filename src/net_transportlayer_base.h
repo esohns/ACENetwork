@@ -29,7 +29,8 @@
 #include "net_exports.h"
 #include "net_itransportlayer.h"
 
-class Net_Export Net_InetTransportLayer_Base
+//class Net_Export Net_InetTransportLayer_Base
+class Net_InetTransportLayer_Base
  : virtual public Net_ITransportLayer_T<Net_SocketConfiguration>
 {
  public:
@@ -59,7 +60,8 @@ class Net_Export Net_InetTransportLayer_Base
   ACE_UNIMPLEMENTED_FUNC (Net_InetTransportLayer_Base& operator= (const Net_InetTransportLayer_Base&))
 };
 
-class Net_Export Net_NetlinkTransportLayer_Base
+//class Net_Export Net_NetlinkTransportLayer_Base
+class Net_NetlinkTransportLayer_Base
  : virtual public Net_ITransportLayer_T<Net_SocketConfiguration>
 {
  public:
