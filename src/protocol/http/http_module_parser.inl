@@ -44,8 +44,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      SessionMessageType,
                      RecordType>::HTTP_Module_Parser_T ()
  : inherited ()
- , sessionData_ (NULL)
- /////////////////////////////////////////
  , allocator_ (NULL)
  , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
@@ -55,9 +53,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
  , isDriverInitialized_ (false)
  //, lock_ ()
 //, condtion_ (lock_)
- , crunchMessages_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
+ , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
  , dataContainer_ (NULL)
- , initialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::HTTP_Module_Parser_T"));
 
@@ -110,18 +107,16 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (configuration_in.streamConfiguration);
 
-  if (initialized_)
+  if (inherited::isInitialized_)
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("re-initializing...\n")));
 
-    ACE_Message_Queue_Base* queue_p = inherited::msg_queue ();
-    result = queue_p->activate ();
+    ACE_ASSERT (inherited::msg_queue_);
+    result = inherited::msg_queue_->activate ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Queue_Base::activate(): \"%m\", continuing\n")));
-
-    sessionData_ = NULL;
 
     allocator_ = NULL;
     debugScanner_ = NET_PROTOCOL_DEFAULT_LEX_TRACE;
@@ -133,13 +128,14 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     } // end IF
     isDriverInitialized_ = false;
 
-    crunchMessages_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
+    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
     if (dataContainer_)
     {
       dataContainer_->decrease ();
       dataContainer_ = NULL;
     } // end IF
-    initialized_ = false;
+
+    inherited::isInitialized_ = false;
   } // end IF
 
   // *NOTE*: need to clean up timer beyond this point !
@@ -148,7 +144,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   debugScanner_ = configuration_in.traceScanning;
   debugParser_ = configuration_in.traceParsing;
 
-  crunchMessages_ = configuration_in.crunchMessages;
+  crunch_ = configuration_in.crunchMessages;
   DATA_T* data_p = NULL;
   ACE_NEW_NORETURN (data_p,
                     DATA_T ());
@@ -183,9 +179,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
     return false;
   } // end IF
-  initialized_ = true;
 
-  return true;
+  return inherited::initialize (configuration_in);
 }
 
 template <ACE_SYNCH_DECL,
@@ -291,49 +286,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   message_inout = NULL;
   release_inbound_message = false;
 
-//  // "crunch" messages for easier parsing ?
-//  if (crunchMessages_ &&
-//      headFragment_->cont ())
-//  {
-////     message->dump_state();
-//
-//    // step1: get a new message buffer
-//    message_p = allocateMessage (HTTP_BUFFER_SIZE);
-//    if (!message_p)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("%s: failed to allocate message(%u), returning\n"),
-//                  inherited::mod_->name (),
-//                  HTTP_BUFFER_SIZE));
-//      goto error;
-//    } // end IF
-//
-//    // step2: copy available data
-//    for (ACE_Message_Block* message_block_p = headFragment_;
-//         message_block_p;
-//         message_block_p = message_block_p->cont ())
-//    {
-//      ACE_ASSERT (message_block_p->length () <= message_p->space ());
-//      result = message_p->copy (message_block_p->rd_ptr (),
-//                                message_block_p->length ());
-//      if (result == -1)
-//      {
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("%s: failed to ACE_Message_Block::copy(): \"%m\", returning\n"),
-//                    inherited::mod_->name ()));
-//
-//        // clean up
-//        message_p->release ();
-//
-//        goto error;
-//      } // end IF
-//    } // end FOR
-//
-//    // clean up
-//    headFragment_->release ();
-//    headFragment_ = message_p;
-//  } // end IF
-
   { // *NOTE*: protect scanner/parser state
     //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
@@ -351,8 +303,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       driver_.initialize (*data_r.HTTPRecord,
                           debugScanner_,
                           debugParser_,
-                          inherited::msg_queue (),
-                          crunchMessages_,
+                          inherited::msg_queue_,
+                          true,
                           true);
       isDriverInitialized_ = true;
     } // end IF
@@ -383,18 +335,21 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
     // sanity check(s)
     ACE_ASSERT (data_r.HTTPRecord);
-    ACE_ASSERT (sessionData_);
+    ACE_ASSERT (inherited::sessionData_);
+
+    typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
 
     HTTP_HeadersIterator_t iterator =
       data_r.HTTPRecord->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
     if (iterator != data_r.HTTPRecord->headers.end ())
     {
-      sessionData_->format =
+      session_data_r.format =
         HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%s: set compression format: \"%s\"\n"),
                   inherited::mod_->name (),
-                  ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (sessionData_->format).c_str ())));
+                  ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (session_data_r.format).c_str ())));
     } // end IF
 
     // make sure the whole fragment chain references the same data record
@@ -517,40 +472,23 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::handleSessionMessage"));
 
-  int result = -1;
+  //int result = -1;
 
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
-  // sanity check(s)
-  ACE_ASSERT (message_inout);
-
   switch (message_inout->type ())
   {
-    case STREAM_SESSION_MESSAGE_BEGIN:
-    {
-      // sanity check(s)
-      ACE_ASSERT (!sessionData_);
-
-      const typename SessionMessageType::DATA_T& session_data_container_r =
-        message_inout->get ();
-      sessionData_ =
-        &const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_data_container_r.get ());
-
-      break;
-    }
     case STREAM_SESSION_MESSAGE_END:
     {
-      // *NOTE*: a parser thread may be waiting for additional (entity)
-      //         fragments to arrive
-      //         --> tell it to return
-      ACE_Message_Queue_Base* queue_p = inherited::msg_queue ();
-      result = queue_p->pulse ();
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
-
-      sessionData_ = NULL;
+      //// *NOTE*: (in a 'passive' scenario,) a parser thread may be waiting for
+      ////         additional (entity) fragments to arrive
+      ////         --> tell it to return
+      //ACE_ASSERT (inherited::msg_queue_);
+      //result = inherited::msg_queue_->pulse ();
+      //if (result == -1)
+      //  ACE_DEBUG ((LM_ERROR,
+      //              ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
 
       break;
     }
@@ -649,15 +587,13 @@ HTTP_Module_ParserH_T<LockType,
  : inherited (NULL,  // lock handle
               false, // auto-start ?
               true)  // generate sesssion messages ?
- , sessionData_ (NULL)
- /////////////////////////////////////////
  , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
  , driver_ (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
             NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
  , headFragment_ (NULL)
  , isDriverInitialized_ (false)
- , crunchMessages_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
+ , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
  , dataContainer_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::HTTP_Module_ParserH_T"));
@@ -751,7 +687,7 @@ HTTP_Module_ParserH_T<LockType,
     } // end IF
     isDriverInitialized_ = false;
 
-    crunchMessages_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
+    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
     if (dataContainer_)
     {
       dataContainer_->decrease ();
@@ -764,7 +700,7 @@ HTTP_Module_ParserH_T<LockType,
   debugScanner_ = configuration_in.traceScanning;
   debugParser_ = configuration_in.traceParsing;
 
-  crunchMessages_ = configuration_in.crunchMessages;
+  crunch_ = configuration_in.crunchMessages;
   DATA_T* data_p = NULL;
   ACE_NEW_NORETURN (data_p,
                     DATA_T ());
@@ -838,19 +774,17 @@ HTTP_Module_ParserH_T<LockType,
 
   int result = -1;
   DATA_CONTAINER_T* data_container_p = NULL;
-  DataMessageType* message_p = message_inout;
-  RecordType* record_p = NULL;
+  DataMessageType* message_p = NULL;
+  DataMessageType* message_2 = NULL;
+//  RecordType* record_p = NULL;
+  bool release_inbound_message = true; // message_inout
+  bool release_message = false; // message_p
 
-  if (driver_.hasFinished ())
-  {
-    ACE_ASSERT (dataContainer_);
-    dataContainer_->increase ();
-    data_container_p = dataContainer_;
-    // *TODO*: need to merge message data here
-    message_inout->initialize (data_container_p,
-                               NULL);
-    return; // done
-  } // end IF
+  // initialize return value(s)
+  passMessageDownstream_out = false;
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::mod_);
 
   // append the "\0\0"-sequence, as required by flex
   ACE_ASSERT (message_inout->capacity () - message_inout->length () >=
@@ -859,152 +793,234 @@ HTTP_Module_ParserH_T<LockType,
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-  if (!headFragment_)
-    headFragment_ = message_inout;
-  else
   {
-    ACE_Message_Block* message_2 = headFragment_;
-    for (;
-         message_2->cont ();
-         message_2 = message_2->cont ());
-    message_2->cont (message_inout);
-  } // end IF
-  ACE_ASSERT (headFragment_);
-  message_inout = NULL;
-  passMessageDownstream_out = false;
+    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
-  // "crunch" messages for easier parsing ?
-  if (crunchMessages_ &&
-      headFragment_->cont ())
-  {
-//     message->dump_state();
-
-    // step1: get a new message buffer
-    message_p = inherited::allocateMessage (HTTP_BUFFER_SIZE);
-    if (!message_p)
+    if (!headFragment_)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to allocate message(%u), returning\n"),
-                  HTTP_BUFFER_SIZE));
-      goto error;
+      headFragment_ = message_inout;
+      //message_2 = headFragment_;
     } // end IF
-
-    // step2: copy available data
-    for (ACE_Message_Block* message_block_p = headFragment_;
-         message_block_p;
-         message_block_p = message_block_p->cont ())
+    else
     {
-      ACE_ASSERT (message_block_p->length () <= message_p->space ());
-      result = message_p->copy (message_block_p->rd_ptr (),
-                                message_block_p->length ());
-      if (result == -1)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", returning\n")));
+      for (message_2 = headFragment_;
+           message_2->cont ();
+           message_2 = dynamic_cast<DataMessageType*> (message_2->cont ()));
+      message_2->cont (message_inout);
 
-        // clean up
-        message_p->release ();
+      //// just signal the parser (see below for an explanation)
+      //result = condition_.broadcast ();
+      //if (result == -1)
+      //  ACE_DEBUG ((LM_ERROR,
+      //              ACE_TEXT ("%s: failed to ACE_SYNCH_CONDITION::broadcast(): \"%s\", continuing\n"),
+      //              inherited::mod_->name ()));
+    } // end ELSE
+    //ACE_ASSERT (message_2);
 
-        goto error;
-      } // end IF
-    } // end FOR
+    message_p = headFragment_;
+    //  dynamic_cast<DataMessageType*> (message_2->duplicate ());
+    //if (!message_p)
+    //{
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("%s: failed to ACE_Message_Block::duplicate(): \"%s\", returning\n"),
+    //              inherited::mod_->name ()));
+    //  goto error;
+    //} // end IF
+    //release_message = true;
 
-    // clean up
-    headFragment_->release ();
-    headFragment_ = message_p;
-  } // end IF
+    // sanity check(s)
+    ACE_ASSERT (dataContainer_);
 
-  if (headFragment_->isInitialized ())
-  {
-    dataContainer_->decrease ();
-    dataContainer_ =
-        &const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-    dataContainer_->increase ();
-    DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-    if (!data_r.HTTPRecord)
+    if (message_p->isInitialized ())
     {
-      ACE_NEW_NORETURN (data_r.HTTPRecord,
-                        HTTP_Record ());
+      dataContainer_->decrease ();
+      dataContainer_ =
+        &const_cast<DATA_CONTAINER_T&> (message_p->get ());
+      dataContainer_->increase ();
+      DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
       if (!data_r.HTTPRecord)
       {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory, aborting\n")));
-        goto error;
+        ACE_NEW_NORETURN (data_r.HTTPRecord,
+                          RecordType ());
+        if (!data_r.HTTPRecord)
+        {
+          ACE_DEBUG ((LM_CRITICAL,
+                      ACE_TEXT ("%s: failed to allocate memory, aborting\n"),
+                      inherited::mod_->name ()));
+          goto error;
+        } // end IF
       } // end IF
     } // end IF
-    record_p = data_r.HTTPRecord;
-  } // end IF
-  else
-  {
-    dataContainer_->increase ();
+  } // end lock scope
+  ACE_ASSERT (message_p);
+  message_inout = NULL;
+  release_inbound_message = false;
+
+  { // *NOTE*: protect scanner/parser state
+    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+
+    // sanity check(s)
+    ACE_ASSERT (dataContainer_);
+
+    // initialize driver ?
+    if (!isDriverInitialized_)
+    {
+      DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
+      ACE_ASSERT (data_r.HTTPRecord);
+  
+      // *TODO*: find a way to resume parsing after end-of-file to support
+      //         passive parser modules
+      driver_.initialize (*data_r.HTTPRecord,
+                          debugScanner_,
+                          debugParser_,
+                          inherited::msg_queue_,
+                          true,
+                          true);
+      isDriverInitialized_ = true;
+    } // end IF
+
+    // OK: parse the message (fragment)
+
+    //  ACE_DEBUG ((LM_DEBUG,
+    //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
+    //              message_p->getID (),
+    //              message_p->length ()));
+
+    if (!driver_.parse (message_p))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: failed to HTTP_ParserDriver::parse() (message ID was: %d), returning\n"),
+                  inherited::mod_->name (),
+                  message_p->getID ()));
+      goto error;
+    } // end IF
+    // the message fragment has been parsed successfully
+
+    if (!driver_.hasFinished ())
+      goto continue_; // --> wait for more data to arrive
+
+    // set session data
+    // *TODO*: move this somewhere else
+    DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
+
+    // sanity check(s)
+    ACE_ASSERT (data_r.HTTPRecord);
+    ACE_ASSERT (inherited::sessionData_);
+
+    typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+
+    HTTP_HeadersIterator_t iterator =
+      data_r.HTTPRecord->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
+    if (iterator != data_r.HTTPRecord->headers.end ())
+    {
+      session_data_r.format =
+        HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: set compression format: \"%s\"\n"),
+                  inherited::mod_->name (),
+                  ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (session_data_r.format).c_str ())));
+    } // end IF
+
+    // make sure the whole fragment chain references the same data record
     data_container_p = dataContainer_;
     headFragment_->initialize (data_container_p,
                                NULL);
-    DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-    record_p = data_r.HTTPRecord;
-  } // end IF
-  ACE_ASSERT (record_p);
+    message_2 = dynamic_cast<DataMessageType*> (headFragment_->cont ());
+    while (message_2)
+    {
+      dataContainer_->increase ();
+      data_container_p = dataContainer_;
+      message_2->initialize (data_container_p,
+                             NULL);
+      message_2 = dynamic_cast<DataMessageType*> (message_2->cont ());
 
-  // initialize driver ?
-  if (!isDriverInitialized_)
+      // *NOTE*: new data fragments may have arrived by now
+      if (message_2 == message_p)
+        break;
+    } // end WHILE
+    isDriverInitialized_ = false;
+    dataContainer_ = NULL;
+
+    // allocate a new data record
+    DATA_T* data_p = NULL;
+    ACE_NEW_NORETURN (data_p,
+                      DATA_T ());
+    if (!data_p)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("%s: failed to allocate memory, returning\n"),
+                  inherited::mod_->name ()));
+      goto error;
+    } // end IF
+    ACE_NEW_NORETURN (data_p->HTTPRecord,
+                      HTTP_Record ());
+    if (!data_p->HTTPRecord)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("%s: failed to allocate memory, returning\n"),
+                  inherited::mod_->name ()));
+
+      // clean up
+      delete data_p;
+
+      goto error;
+    } // end IF
+    // *IMPORTANT NOTE*: fire-and-forget API (data_p)
+    ACE_NEW_NORETURN (dataContainer_,
+                      DATA_CONTAINER_T (data_p));
+    if (!dataContainer_)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("%s: failed to allocate memory, returning\n"),
+                  inherited::mod_->name ()));
+
+      // clean up
+      delete data_p;
+
+      goto error;
+    } // end IF
+  } // end lock scope
+
+  // *NOTE*: the message has been parsed successfully
+  //         --> pass the data (chain) downstream
   {
-    driver_.initialize (*record_p,
-                        debugScanner_,
-                        debugParser_,
-                        inherited::msg_queue (),
-                        crunchMessages_);
-    isDriverInitialized_ = true;
-  } // end IF
+    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
-  // OK: parse this message
+    //// *NOTE*: new data fragments may have arrived by now
+    ////         --> set the next head fragment ?
+    //message_2 = dynamic_cast<DataMessageType*> (message_p->cont ());
+    //if (message_2)
+    //  message_p->cont (NULL);
 
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-//              message_p->getID (),
-//              message_p->length ()));
+    result = inherited::put_next (headFragment_, NULL);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
+                  inherited::mod_->name ()));
 
-  if (!driver_.parse (headFragment_))
-  { // *NOTE*: most probable cause: need more data
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("failed to HTTP_ParserDriver::parse() (message ID: %d), returning\n"),
-//                message_p->getID ()));
-    goto done;
-  } // end IF
+      // clean up
+      headFragment_->release ();
 
-  // *NOTE*: the (chained) fragment has been parsed, the read pointer has been
-  //         advanced to the entity body
-  //         --> pass message (and following) downstream
-  //ACE_ASSERT (driver_.record ());
-//  driver_.record ()->dump_state ();
+      goto error;
+    } // end IF
+    headFragment_ = (message_2 ? message_2 : NULL);
+  } // end lock scope
 
-  // make sure the chain references the same data
-  message_p = dynamic_cast<DataMessageType*> (headFragment_->cont ());
-
-  while (message_p)
-  {
-    dataContainer_->increase ();
-    data_container_p = dataContainer_;
-    // *TODO*: need to merge message data here
-    message_p->initialize (data_container_p,
-                           NULL);
-    message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
-  } // end WHILE
-
-  result = inherited::put_next (headFragment_, NULL);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Task_T::put_next(): \"%m\", continuing\n")));
-    goto error;
-  } // end IF
-  headFragment_ = NULL;
-
-done:
-  return;
-
+continue_:
 error:
-  headFragment_->release ();
-  headFragment_ = NULL;
+  if (release_inbound_message)
+  {
+    ACE_ASSERT (message_inout);
+    message_inout->release ();
+    message_inout = NULL;
+  } // end IF
+  if (release_message)
+  {
+    ACE_ASSERT (message_p);
+    message_p->release ();
+  } // end IF
 }
 
 template <typename LockType,
@@ -1049,10 +1065,12 @@ HTTP_Module_ParserH_T<LockType,
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
+      // sanity check(s)
+      ACE_ASSERT (inherited::sessionData_);
+
+      const SessionDataType& session_data_r = inherited::sessionData_->get ();
+
       // retain session ID for reporting
-      const SessionDataContainerType& session_data_container_r =
-          message_inout->get ();
-      const SessionDataType& session_data_r = session_data_container_r.get ();
       ACE_ASSERT (inherited::streamState_);
       ACE_ASSERT (inherited::streamState_->currentSessionData);
       ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->currentSessionData->lock));
@@ -1064,34 +1082,37 @@ HTTP_Module_ParserH_T<LockType,
 
       break;
     }
-    // *NOTE*: the stream has been link()ed, the message contains the (merged)
-    //         upstream session data --> retain a reference
-    case STREAM_SESSION_MESSAGE_LINK:
-    {
-      // *NOTE*: relax the concurrency policy in this case
-      // *TODO*: this isn't very reliable
-      inherited::allowConcurrency_ = true;
+    //// *NOTE*: the stream has been link()ed, the message contains the (merged)
+    ////         upstream session data --> retain a reference
+    //case STREAM_SESSION_MESSAGE_LINK:
+    //{
+    //  // *NOTE*: relax the concurrency policy in this case
+    //  // *TODO*: this isn't very reliable
+    //  inherited::concurrent_ = true;
 
-      break;
-    }
+    //  break;
+    //}
     case STREAM_SESSION_MESSAGE_END:
     {
-      // *NOTE*: a parser thread may be waiting for additional (entity)
-      //         fragments to arrive
-      //         --> tell it to return
-      ACE_Message_Queue_Base* queue_p = inherited::msg_queue ();
-      result = queue_p->pulse ();
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
+      // *NOTE*: only process the first 'session end' message (see above: 2566)
+      {
+        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (inherited::lock_);
+
+        if (inherited::sessionEndProcessed_) break; // done
+        inherited::sessionEndProcessed_ = true;
+      } // end lock scope
+
+      // *NOTE*: in passive 'concurrent' scenarios, there is no 'worker' thread
+      //         running svc()
+      //         --> do not signal completion in this case
+      // *TODO*: remove type inference
+      if (inherited::thr_count_ || inherited::runSvcOnStart_)
+        inherited::shutdown ();
 
       break;
     }
     default:
-    {
-      // don't do anything...
       break;
-    }
   } // end SWITCH
 }
 
@@ -1129,13 +1150,10 @@ HTTP_Module_ParserH_T<LockType,
 //  if (inherited::configuration_->streamConfiguration->messageAllocator)
 //  {
 //allocate:
-//    try
-//    {
+//    try {
 //      message_p =
 //        static_cast<DataMessageType*> (inherited::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
-//    }
-//    catch (...)
-//    {
+//    } catch (...) {
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
 //                  requestedSize_in));
@@ -1305,7 +1323,7 @@ HTTP_Module_ParserH_T<LockType,
 ////    return false;
 ////  } // end IF
 //
-//  // step3: send the data downstream...
+//  // step3: send the data downstream
 //  // *NOTE*: fire-and-forget session_data_container_p
 //  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
 //                                       *inherited::sessionData_,

@@ -17,6 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
 #include "ace/Message_Queue.h"
@@ -48,7 +49,7 @@ HTTP_ParserDriver<RecordType,
  , bufferState_ (NULL)
  , messageQueue_ (NULL)
  , useYYScanBuffer_ (HTTP_DEFAULT_USE_YY_SCAN_BUFFER)
- , initialized_ (false)
+ , isInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::HTTP_ParserDriver"));
 
@@ -94,7 +95,7 @@ HTTP_ParserDriver<RecordType,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::initialize"));
 
-  if (initialized_)
+  if (isInitialized_)
   {
     finished_ = false;
     fragment_ = NULL;
@@ -105,7 +106,7 @@ HTTP_ParserDriver<RecordType,
     isFirst_ = true;
     //trace_ = traceParsing_in;
 
-    initialized_ = false;
+    isInitialized_ = false;
   } // end IF
 
   record_ = &record_in;
@@ -124,7 +125,7 @@ HTTP_ParserDriver<RecordType,
   useYYScanBuffer_ = useYYScanBuffer_in;
 
   // OK
-  initialized_ = true;
+  isInitialized_ = true;
 }
 
 template <typename RecordType,
@@ -166,12 +167,9 @@ HTTP_ParserDriver<RecordType,
   ACE_ASSERT (head);
   Common_IDumpState* idump_state_p = dynamic_cast<Common_IDumpState*> (head);
   ACE_ASSERT (idump_state_p);
-  try
-  {
+  try {
     idump_state_p->dump_state ();
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
   }
@@ -317,6 +315,7 @@ HTTP_ParserDriver<RecordType,
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
+
   ACE_NOTREACHED (return;)
 }
 
@@ -329,7 +328,7 @@ HTTP_ParserDriver<RecordType,
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::parse"));
 
   // sanity check(s)
-  ACE_ASSERT (initialized_);
+  ACE_ASSERT (isInitialized_);
   ACE_ASSERT (data_in);
 
   // retain a handle to the 'current' fragment
@@ -353,12 +352,9 @@ HTTP_ParserDriver<RecordType,
   } // end IF
 
   // parse data fragment
-  try
-  {
+  try {
     result = ::yyparse (this, scannerState_);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
     result = 1;
@@ -387,14 +383,11 @@ HTTP_ParserDriver<RecordType,
     // sanity check(s)
     ACE_ASSERT (record_);
 
-    try
-    {
+    try {
       ACE_DEBUG ((LM_INFO,
                   ACE_TEXT ("%s"),
                   ACE_TEXT (HTTP_Tools::dump (*record_).c_str ())));
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in HTTP_Tools::dump(), continuing\n")));
     }
@@ -440,12 +433,9 @@ HTTP_ParserDriver<RecordType,
   ACE_ASSERT (head);
   Common_IDumpState* idump_state_p = dynamic_cast<Common_IDumpState*> (head);
   ACE_ASSERT (idump_state_p);
-  try
-  {
+  try {
     idump_state_p->dump_state ();
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
   }

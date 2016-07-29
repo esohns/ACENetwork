@@ -422,10 +422,11 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // step1: shut down the processing stream
   stream_.finished (false); // finish upstream (if any)
-  stream_.flush (false, // do not flush inbound data
-                 true); // flush upstream (if any)
-  stream_.waitForCompletion (true,   // wait for worker(s) (if any)
-                             false); // wait for upstream (if any)
+  //stream_.flush (false, // do not flush inbound data
+  //               true); // flush upstream (if any)
+  stream_.wait (true,   // wait for worker(s) (if any)
+                false,  // wait for upstream (if any)
+                false); // wait for downstream (if any)
 
   // *NOTE*: pending socket operations are notified by the kernel and will
   //         return automatically
@@ -710,8 +711,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::waitForCompletion"));
 
   // step1: wait until the stream becomes idle
-  stream_.waitForCompletion (false,  // don't wait for any worker thread(s)
-                             false); // don't wait for upstream modules
+  stream_.wait (false,  // don't wait for any worker thread(s)
+                false,  // don't wait for upstream modules
+                false); // don't wait for downstream modules
   // --> stream data has been processed
 
   // step2: wait for any asynchronous operations to complete ?
@@ -736,8 +738,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // step3: wait for stream processing to complete ?
   if (waitForThreads_in)
-    stream_.waitForCompletion (true,
-                               false); // don't wait for upstream modules
+    stream_.wait (true,
+                  false,  // don't wait for upstream modules
+                  false); // don't wait for downstream modules
   // --> stream processing has finished
 }
 

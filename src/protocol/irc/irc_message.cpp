@@ -285,7 +285,7 @@ IRC_Message::CommandType2String(const IRC_CommandType_t& commandType_in)
     case IRC_Record::PONG:
       result = ACE_TEXT_ALWAYS_CHAR ("PONG"); break;
 #if defined ACE_WIN32 || defined ACE_WIN64
-#pragma message("applying quirk code for this compiler...")
+#pragma message("applying quirk code for this compiler")
     case IRC_Record::__QUIRK__ERROR:
 #else
     case IRC_Record::ERROR:

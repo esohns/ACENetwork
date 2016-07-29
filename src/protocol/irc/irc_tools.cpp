@@ -214,7 +214,7 @@ IRC_Tools::Command2Type (const std::string& commandString_in)
     return IRC_Record::PONG;
   else if (commandString_in == ACE_TEXT_ALWAYS_CHAR ("ERROR"))
 #if defined ACE_WIN32 || defined ACE_WIN64
-#pragma message("applying quirk code for this compiler...")
+#pragma message("applying quirk code for this compiler")
     return IRC_Record::__QUIRK__ERROR;
 #else
     return IRC_Record::ERROR;
@@ -1493,7 +1493,7 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
         case IRC_Record::INVITE:
         case IRC_Record::KICK:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#pragma message("applying quirk code for this compiler...")
+#pragma message("applying quirk code for this compiler")
     case IRC_Record::__QUIRK__ERROR:
 #else
         case IRC_Record::ERROR:

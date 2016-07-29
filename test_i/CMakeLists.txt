@@ -18,4 +18,11 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
  endif ()
 endif ()
 
+set (${PROJECT_NAME}_Test_I_SRCS
+     http_common_modules.h
+     http_configuration.h)
+#install (FILES
+#         ${PROJECT_NAME}_Test_I_SRCS
+#         DESTINATION include)
+
 add_subdirectory (IRC_client)

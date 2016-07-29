@@ -718,8 +718,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // step1: wait for the stream to flush
   //        --> all data has been dispatched (here: to the proactor/kernel)
-  stream_.waitForCompletion (waitForThreads_in,
-                             false);            // don't wait for upstream modules
+  stream_.wait (waitForThreads_in,
+                false,             // don't wait for upstream modules
+                false);            // don't wait for downstream modules
 
   // step2: wait for the asynchronous operations to complete
   inherited::counter_.wait (0);

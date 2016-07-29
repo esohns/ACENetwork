@@ -24,22 +24,14 @@
 //#include "ace/Default_Constants.h"
 
 // stream
+// *TODO*: this makes no sense, remove ASAP
 #define HTTP_BUFFER_SIZE                          16384
 
-// "crunch" messages for easier parsing ?
-// *NOTE*: this comes at the cost of alloc/free, memcopy and locking per
-//         (fragmented) message, i.e. should probably be avoided ...
-//         OTOH, setting up the buffer correctly allows using the
-//         yy_scan_buffer() (instead of yy_scan_bytes()) method, avoiding a copy
-//         of the data at that stage --> adding the easier/more robust parsing,
-//         this MAY be a viable tradeoff...
-// *NOTE*: the current implementation uses both approaches in different phases:
-//         - yy_scan_bytes (extra copy) for bisecting the frames
-//         - yy_scan_buffer (crunching) during parsing/analysis
-// *TODO*: write a (robust) flex-scanner/bison parser that can handle
-//         switching of buffers/"backing-up" reliably and stress-test the
-//         application to see which option proves to be more efficient...
-#define HTTP_DEFAULT_CRUNCH_MESSAGES              true
+// (strip protocol data and) 'crunch' parsed messages for easier downstream
+// processing ?
+// *NOTE*: this comes at the cost of malloc/free and memcpy per
+//         (fragmented) message, i.e. should probably be avoided.
+#define HTTP_DEFAULT_CRUNCH_MESSAGES              false
 // *IMPORTANT NOTE*: scans buffers in-place (avoids a copy,
 //         see: http://flex.sourceforge.net/manual/Multiple-Input-Buffers.html)
 //         --> in order to use yy_scan_buffer(), the buffer needs to have been

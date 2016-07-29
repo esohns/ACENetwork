@@ -52,8 +52,9 @@
 #include "net_iconnectionmanager.h"
 
 #include "http_common.h"
-#include "http_configuration.h"
 #include "http_defines.h"
+
+#include "http_configuration.h"
 
 #include "test_u_defines.h"
 
@@ -119,6 +120,7 @@ struct Test_U_StreamSessionData
     Stream_SessionData::operator= (rhs_in);
 
     connectionState = (connectionState ? connectionState : rhs_in.connectionState);
+    format = rhs_in.format;
     targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
                                               : targetFileName);
     userData = (userData ? userData : rhs_in.userData);

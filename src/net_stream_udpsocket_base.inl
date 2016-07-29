@@ -1146,8 +1146,9 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // wait for the stream to flush
   // --> all data has been dispatched (here: to the reactor/kernel)
-  stream_.waitForCompletion (waitForThreads_in,
-                             true);
+  stream_.wait (waitForThreads_in,
+                false,
+                false);
 }
 
 template <typename HandlerType,
@@ -2599,8 +2600,9 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   // wait for the stream to flush
   // --> all data has been dispatched (here: to the reactor/kernel)
-  stream_.waitForCompletion (waitForThreads_in,
-                             true);
+  stream_.wait (waitForThreads_in,
+                false,
+                false);
 }
 
 template <typename AddressType,

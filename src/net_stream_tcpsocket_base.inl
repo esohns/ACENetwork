@@ -388,8 +388,9 @@ Net_StreamTCPSocketBase_T<HandlerType,
     }
     case NET_CONNECTION_CLOSE_REASON_USER_ABORT:
     {
-      // step1: shutdown operations, release any connection resources
       ACE_HANDLE handle = inherited::get_handle ();
+
+      // step1: shutdown operations, release any connection resources
       // *NOTE*: may 'delete this'
       result = handle_close (handle,
                              ACE_Event_Handler::ALL_EVENTS_MASK);
@@ -816,9 +817,13 @@ Net_StreamTCPSocketBase_T<HandlerType,
                                              //     user abort
     {
       // step1: signal completion and wait for all processing
+      // *IMPORTANT NOTE*: when the socket closes, any dispatching threads
+      //                   currently servicing the socket handle will call
+      //                   handle_close()
       stream_.finished (true);
-      stream_.waitForCompletion (true,   // wait for worker(s) (if any)
-                                 false); // wait for upstream (if any)
+      stream_.wait (true,   // wait for worker(s) (if any)
+                    false,  // wait for upstream (if any)
+                    false); // wait for downstream (if any)
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
@@ -1179,8 +1184,9 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // step1: wait for the stream to flush
   //        --> all data has been dispatched (here: to the reactor/kernel)
-  stream_.waitForCompletion (waitForThreads_in,
-                             false);            // wait for upstream ?
+  stream_.wait (waitForThreads_in,
+                false,            // wait for upstream ?
+                false);           // wait for downstream ?
 
   // *TODO*: different platforms may implement methods by which successful
   //         placing of the data onto the wire can be established

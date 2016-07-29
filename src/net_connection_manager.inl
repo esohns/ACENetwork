@@ -106,39 +106,49 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
-void
+bool
 Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::lock ()
+                         UserDataType>::lock (bool block_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::lock"));
+
+  ACE_UNUSED_ARG (block_in);
 
   int result = lock_.acquire ();
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
-}
+                ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", aborting\n")));
 
+  return (result == 0);
+}
 template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
-void
+int
 Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::unlock ()
+                         UserDataType>::unlock (bool unblock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::unlock"));
 
+  ACE_UNUSED_ARG (unblock_in);
+
   int result = lock_.release ();
   if (result == -1)
+  {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", aborting\n")));
+    return -1;
+  } // end IF
+
+  return 0;
 }
 
 template <typename AddressType,

@@ -50,8 +50,6 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_bisector.h
      http_codes.h
      http_common.h
-     http_common_modules.h
-     http_configuration.h
      http_defines.h
      http_exports.h
      http_message.cpp
@@ -136,8 +134,6 @@ install (FILES
          http_bisector.h
          http_codes.h
          http_common.h
-         http_common_modules.h
-         http_configuration.h
          http_defines.h
          http_exports.h
          http_message.h

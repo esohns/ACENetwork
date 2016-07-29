@@ -388,7 +388,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
           break;
         }
 #if defined ACE_WIN32 || defined ACE_WIN64
-#pragma message("applying quirk code for this compiler...")
+#pragma message("applying quirk code for this compiler")
     case IRC_Record::__QUIRK__ERROR:
 #else
         case IRC_Record::ERROR:

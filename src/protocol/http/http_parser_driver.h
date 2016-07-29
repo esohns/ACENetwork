@@ -106,10 +106,10 @@ class HTTP_ParserDriver
   ACE_Message_Queue_Base* messageQueue_;
   bool                    useYYScanBuffer_;
 
-  bool                    initialized_;
+  bool                    isInitialized_;
 };
 
-// include template implementation
+// include template definition
 #include "http_parser_driver.inl"
 
 #endif

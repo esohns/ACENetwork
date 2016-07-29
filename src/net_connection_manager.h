@@ -116,8 +116,8 @@ class Net_Connection_Manager_T
   virtual bool isRunning () const;
 
   // implement Common_ILock
-  virtual void lock ();
-  virtual void unlock ();
+  virtual bool lock (bool = true); // block ?
+  virtual int unlock (bool = false); // unblock ?
 
   // implement (part of) Common_IStatistic_T
   virtual void report () const;
@@ -149,7 +149,7 @@ class Net_Connection_Manager_T
   ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T& operator= (const Net_Connection_Manager_T&))
   virtual ~Net_Connection_Manager_T ();
 
-  // implement blocking wait...
+  // implement blocking wait
   mutable ACE_SYNCH_RECURSIVE_CONDITION condition_;
   ConfigurationType                     configuration_; // default-
   CONNECTION_CONTAINER_T                connections_;
