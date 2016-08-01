@@ -52,6 +52,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
  , inherited3 (interfaceHandle_in,
                statisticCollectionInterval_in)
  , stream_ (std::string (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME)))
+ , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::Net_StreamAsynchTCPSocketBase_T"));
 
@@ -412,13 +413,13 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   if (inherited3::state_.status != NET_CONNECTION_STATUS_CLOSED)
     inherited3::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
-  // step0b: notify upstream (if any) ?
-  Stream_Base_t* stream_p = stream_.upStream ();
-  if (stream_p &&
-      ((inherited3::state_.status == NET_CONNECTION_STATUS_CLOSED)     ||
-       (inherited3::state_.status == NET_CONNECTION_STATUS_PEER_CLOSED)))
+  // step0b: notify stream ?
+  if (notify_)
+  {
+    notify_ = false;
     stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
                     true);
+  } // end IF
 
   // step1: shut down the processing stream
   stream_.finished (false); // finish upstream (if any)
@@ -1042,13 +1043,12 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
 //  int result = -1;
 //  size_t bytes_to_write = result_in.bytes_to_write ();
-  ACE_Message_Block* message_block_p = &result_in.message_block ();
 
+  // *NOTE*: the message block is released by the base class
   inherited::handle_write_stream (result_in);
 
   // partial write ?
-//  if ((bytes_to_write != message_block_p->total_length ())
-  if (message_block_p->length () == 0)
+  if (inherited::partialWrite_)
       goto continue_;
 
   // reschedule ?
@@ -1080,8 +1080,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 //#endif
 //    } // end IF
   } // end IF
-
-  message_block_p->release ();
 
 continue_:
   this->decrease ();

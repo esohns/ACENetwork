@@ -317,8 +317,9 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     //              message_p->length ()));
 
     if (!driver_.parse (message_p))
-    {
-      ACE_DEBUG ((LM_ERROR,
+    { // *NOTE*: most probable reason: connection
+      //         has been closed --> session end
+      ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%s: failed to HTTP_ParserDriver::parse() (message ID was: %d), returning\n"),
                   inherited::mod_->name (),
                   message_p->getID ()));
@@ -887,8 +888,9 @@ HTTP_Module_ParserH_T<LockType,
     //              message_p->length ()));
 
     if (!driver_.parse (message_p))
-    {
-      ACE_DEBUG ((LM_ERROR,
+    { // *NOTE*: most probable reason: connection
+      //         has been closed --> session end
+      ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%s: failed to HTTP_ParserDriver::parse() (message ID was: %d), returning\n"),
                   inherited::mod_->name (),
                   message_p->getID ()));

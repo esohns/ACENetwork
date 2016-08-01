@@ -659,7 +659,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                      //         has been closed --> session end
                                      ACE_DEBUG ((LM_DEBUG,
                                                  ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
-                                     yyterminate();
+                                     return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
                                    } // end IF
                                    message_p = driver->buffer ();
 

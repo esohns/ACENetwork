@@ -15,7 +15,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 35
+#define YY_FLEX_SUBMINOR_VERSION 39
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -182,6 +182,11 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
+
 /* %if-not-reentrant */
 /* %endif */
 
@@ -189,11 +194,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 /* %if-not-reentrant */
 /* %endif */
 /* %endif */
-
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
@@ -217,7 +217,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	int yy_n_chars;
+	yy_size_t yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -273,7 +273,7 @@ void HTTP_Bisector_pop_buffer_state (yyscan_t yyscanner );
 
 YY_BUFFER_STATE HTTP_Bisector__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
 YY_BUFFER_STATE HTTP_Bisector__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Bisector__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
 
 /* %endif */
 
@@ -284,7 +284,7 @@ void HTTP_Bisector_free (void * ,yyscan_t yyscanner );
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
 
-#define HTTP_Bisector_wrap(n) 1
+#define HTTP_Bisector_wrap(yyscanner) 1
 #define YY_SKIP_YYWRAP
 
 #define FLEX_DEBUG
@@ -355,13 +355,17 @@ FILE *HTTP_Bisector_get_out (yyscan_t yyscanner );
 
 void HTTP_Bisector_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-int HTTP_Bisector_get_leng (yyscan_t yyscanner );
+yy_size_t HTTP_Bisector_get_leng (yyscan_t yyscanner );
 
 char *HTTP_Bisector_get_text (yyscan_t yyscanner );
 
 int HTTP_Bisector_get_lineno (yyscan_t yyscanner );
 
 void HTTP_Bisector_set_lineno (int line_number ,yyscan_t yyscanner );
+
+int HTTP_Bisector_get_column  (yyscan_t yyscanner );
+
+void HTTP_Bisector_set_column (int column_no ,yyscan_t yyscanner );
 
 /* %if-bison-bridge */
 /* %endif */
@@ -460,9 +464,9 @@ extern int HTTP_Bisector_lex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 69 "./../scripts/bisector.l"
+#line 68 "./../scripts/bisector.l"
 
 
-#line 467 "http_bisector.h"
+#line 471 "http_bisector.h"
 #undef HTTP_Bisector_IN_HEADER
 #endif /* HTTP_Bisector_HEADER_H */

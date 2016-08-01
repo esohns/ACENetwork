@@ -65,7 +65,8 @@ HTTP_ParserDriver<RecordType,
 #if YYDEBUG
   //parser_.set_debug_level (traceParsing_in ? 1
   //                                         : 0); // binary (see bison manual)
-  yydebug = (traceParsing_in ? 1 : 0);
+  //yydebug = (trace_ ? 1 : 0);
+  yysetdebug (trace_ ? 1 : 0);
 #endif
 }
 
@@ -100,11 +101,29 @@ HTTP_ParserDriver<RecordType,
     finished_ = false;
     fragment_ = NULL;
     offset_ = 0;
-    //record_ = NULL;
+    record_ = NULL;
 
-    //blockInParse_ = false;
+    blockInParse_ = false;
     isFirst_ = true;
-    //trace_ = traceParsing_in;
+    trace_ = STREAM_DEFAULT_YACC_TRACE;
+
+    if (bufferState_)
+    {
+      ACE_ASSERT (scannerState_);
+      HTTP_Scanner__delete_buffer (bufferState_,
+                                   scannerState_);
+      bufferState_ = NULL;
+    } // end IF
+    //if (scannerState_)
+    //{
+    //  if (HTTP_Scanner_lex_destroy (scannerState_))
+    //    ACE_DEBUG ((LM_ERROR,
+    //                ACE_TEXT ("failed to yylex_destroy: \"%m\", continuing\n")));
+    //  scannerState_ = NULL;
+    //} // end IF
+
+    messageQueue_ = NULL;
+    useYYScanBuffer_ = HTTP_DEFAULT_USE_YY_SCAN_BUFFER;
 
     isInitialized_ = false;
   } // end IF
@@ -113,6 +132,9 @@ HTTP_ParserDriver<RecordType,
 
   blockInParse_ = blockInParse_in;
   trace_ = traceParsing_in;
+  messageQueue_ = messageQueue_in;
+  useYYScanBuffer_ = useYYScanBuffer_in;
+
   HTTP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
                           scannerState_);
 #if YYDEBUG
@@ -121,8 +143,6 @@ HTTP_ParserDriver<RecordType,
   //yydebug = (trace_ ? 1 : 0);
   yysetdebug (trace_ ? 1 : 0);
 #endif
-  messageQueue_ = messageQueue_in;
-  useYYScanBuffer_ = useYYScanBuffer_in;
 
   // OK
   isInitialized_ = true;
@@ -154,18 +174,18 @@ HTTP_ParserDriver<RecordType,
               location_in.first_line, location_in.first_column,
               location_in.last_line, location_in.last_column,
               ACE_TEXT (message_in.c_str ())));
-  //   ACE_DEBUG((LM_ERROR,
-  //              ACE_TEXT("failed to parse \"%s\" (@%s): \"%s\"\n"),
-  //              std::string(fragment_->rd_ptr(), fragment_->length()).c_str(),
-  //              converter.str().c_str(),
-  //              message_in.c_str()));
+  //   ACE_DEBUG ((LM_ERROR,
+  //               ACE_TEXT ("failed to parse \"%s\" (@%s): \"%s\"\n"),
+  //               std::string (fragment_->rd_ptr (), fragment_->length ()).c_str (),
+  //               converter.str ().c_str (),
+  //               message_in.c_str ()));
 
   // dump message
-  ACE_Message_Block* head = fragment_;
-  while (head->prev ())
-    head = head->prev ();
-  ACE_ASSERT (head);
-  Common_IDumpState* idump_state_p = dynamic_cast<Common_IDumpState*> (head);
+  ACE_Message_Block* message_block_p = fragment_;
+  while (message_block_p->prev ()) message_block_p = message_block_p->prev ();
+  ACE_ASSERT (message_block_p);
+  Common_IDumpState* idump_state_p =
+    dynamic_cast<Common_IDumpState*> (message_block_p);
   ACE_ASSERT (idump_state_p);
   try {
     idump_state_p->dump_state ();
@@ -174,7 +194,7 @@ HTTP_ParserDriver<RecordType,
                 ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
   }
 
-  //   std::clog << location_in << ": " << message_in << std::endl;
+  //std::clog << location_in << ": " << message_in << std::endl;
 }
 
 template <typename RecordType,
@@ -247,6 +267,7 @@ HTTP_ParserDriver<RecordType,
   SessionMessageType* session_message_p = NULL;
   Stream_SessionMessageType session_message_type =
     STREAM_SESSION_MESSAGE_INVALID;
+  bool is_data = false;
 
   // *IMPORTANT NOTE*: 'this' is the parser thread currently blocked in yylex()
 
@@ -269,15 +290,26 @@ HTTP_ParserDriver<RecordType,
     } // end IF
     ACE_ASSERT (message_block_p);
 
-    if (message_block_p->msg_type () == ACE_Message_Block::MB_DATA)
-      break;
-    session_message_p = dynamic_cast<SessionMessageType*> (message_block_p);
-    if (!session_message_p)
-      break;
-
-    session_message_type = session_message_p->type ();
-    if (session_message_type == STREAM_SESSION_MESSAGE_END)
-      done = true; // session has finished --> abort
+    switch (message_block_p->msg_type ())
+    {
+      case ACE_Message_Block::MB_DATA:
+      case ACE_Message_Block::MB_PROTO:
+        is_data = true; break;
+      case ACE_Message_Block::MB_USER:
+      {
+        session_message_p = dynamic_cast<SessionMessageType*> (message_block_p);
+        if (session_message_p)
+        {
+          session_message_type = session_message_p->type ();
+          if (session_message_type == STREAM_SESSION_MESSAGE_END)
+            done = true; // session has finished --> abort
+        } // end IF
+        break;
+      }
+      default:
+        break;
+    } // end SWITCH
+    if (is_data) break;
 
     // requeue message
     result = messageQueue_->enqueue_tail (message_block_p, NULL);
@@ -291,7 +323,7 @@ HTTP_ParserDriver<RecordType,
     message_block_p = NULL;
   } while (!done);
 
-  // 2. enqueue data ?
+  // 2. append data ?
   if (message_block_p)
   {
     // sanity check(s)
@@ -365,8 +397,9 @@ HTTP_ParserDriver<RecordType,
       break; // done/need more data
     case 1:
     default:
-    {
-      ACE_DEBUG ((LM_ERROR,
+    { // *NOTE*: most probable reason: connection
+      //         has been closed --> session end
+      ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("failed to parse HTTP PDU (result was: %d), aborting\n"),
                   result));
       goto error;

@@ -69,6 +69,7 @@ class HTTP_ParserDriver
 
   virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer ();
+  // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void wait ();
 
   virtual void dump_state () const;

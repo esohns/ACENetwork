@@ -37,15 +37,15 @@
 #include "net_iconnectionmanager.h"
 
 template <typename HandlerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename AddressType,
           typename ConfigurationType,
           typename StateType, // (connection) state
           typename StatisticContainerType,
           typename StreamType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
 class Net_StreamAsynchTCPSocketBase_T
@@ -56,7 +56,6 @@ class Net_StreamAsynchTCPSocketBase_T
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType>
 {
  public:
@@ -65,7 +64,6 @@ class Net_StreamAsynchTCPSocketBase_T
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchTCPSocketBase_T ();
@@ -101,7 +99,6 @@ class Net_StreamAsynchTCPSocketBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<Stream_SessionId_t,
                            typename StreamType::SESSION_DATA_T,
@@ -128,12 +125,13 @@ class Net_StreamAsynchTCPSocketBase_T
                                StateType,
                                StatisticContainerType,
                                StreamType,
-                               //////////
                                UserDataType> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T& operator= (const Net_StreamAsynchTCPSocketBase_T&))
+
+  bool       notify_;
 };
 
 // include template definition
