@@ -32,6 +32,8 @@
 class NET_PROTOCOL_DHCP_Export DHCP_Tools
 {
  public:
+  inline virtual ~DHCP_Tools () {};
+
   // debug info
   static std::string dump (const DHCP_Record&);
 
@@ -49,7 +51,7 @@ class NET_PROTOCOL_DHCP_Export DHCP_Tools
 
  private:
   ACE_UNIMPLEMENTED_FUNC (DHCP_Tools ())
-  ACE_UNIMPLEMENTED_FUNC (~DHCP_Tools ())
+  //ACE_UNIMPLEMENTED_FUNC (~DHCP_Tools ())
   ACE_UNIMPLEMENTED_FUNC (DHCP_Tools (const DHCP_Tools&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Tools& operator= (const DHCP_Tools&))
 };

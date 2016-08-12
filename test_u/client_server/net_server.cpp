@@ -1048,8 +1048,8 @@ ACE_TMAIN (int argc_in,
   gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
 
   // step1d: initialize logging and/or tracing
-  Common_Logger logger (&gtk_cb_user_data.logStack,
-                        &gtk_cb_user_data.lock);
+  Common_Logger_t logger (&gtk_cb_user_data.logStack,
+                          &gtk_cb_user_data.lock);
   std::string log_file_name;
   if (log_to_file)
     log_file_name =

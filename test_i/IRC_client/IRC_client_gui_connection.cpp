@@ -470,7 +470,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
                                     FALSE);
 
   { // synch access
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
 
     CBData_.GTKState->builders[CBData_.timeStamp] =
         std::make_pair (ui_definition_filename, builder_p);
@@ -489,7 +489,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
 
     // clean up
     g_object_unref (G_OBJECT (builder_p));
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
     CBData_.GTKState->builders.erase (CBData_.timeStamp);
 
     return;
@@ -513,7 +513,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
       // clean up
       delete message_handler_p;
       g_object_unref (G_OBJECT (builder_p));
-      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
       CBData_.GTKState->builders.erase (CBData_.timeStamp);
 
       return;
@@ -521,7 +521,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (Common_UI_GTKState* GTKSta
   } // end lock scope
 
   { // synch access
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
 
     CBData_.eventSourceID =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -598,7 +598,7 @@ IRC_Client_GUI_Connection::finalize (bool lockedAccess_in)
   GtkButton* button_p = NULL;
 //  gdk_threads_enter ();
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     for (MESSAGE_HANDLERSITERATOR_T iterator_2 = messageHandlers_.begin ();
          iterator_2 != messageHandlers_.end ();
          ++iterator_2)
@@ -646,7 +646,7 @@ IRC_Client_GUI_Connection::start (Stream_SessionId_t sessionID_in,
   ACE_UNUSED_ARG (sessionID_in);
   ACE_UNUSED_ARG (sessionData_in);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     CBData_.GTKState->builders.find (CBData_.timeStamp);
@@ -726,7 +726,7 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
   // sanity check(s)
   ACE_ASSERT (CBData_.GTKState);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
       CBData_.GTKState->builders.find (CBData_.timeStamp);
@@ -1846,7 +1846,7 @@ IRC_Client_GUI_Connection::forward (const std::string& channel_in,
 
   // retrieve message handler
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
     if (closing_)
       return; // done
@@ -1874,7 +1874,7 @@ IRC_Client_GUI_Connection::log (const std::string& message_in)
 
   // retrieve message handler
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
     if (closing_)
       return; // done
@@ -1895,7 +1895,7 @@ IRC_Client_GUI_Connection::log (const IRC_Record& message_in)
 
   // retrieve message handler
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
     if (closing_)
       return; // done
@@ -1967,10 +1967,10 @@ IRC_Client_GUI_Connection::exists (const std::string& id_in,
   // sanity check(s)
   ACE_ASSERT (CBData_.GTKState);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock, result);
 
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, result);
 
     // sanity check
     if (messageHandlers_.empty ())
@@ -2034,7 +2034,7 @@ IRC_Client_GUI_Connection::channels (string_list_t& channels_out)
   channels_out.clear ();
 
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     for (MESSAGE_HANDLERSITERATOR_T iterator = messageHandlers_.begin ();
          iterator != messageHandlers_.end ();
          iterator++)
@@ -2097,7 +2097,7 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
     goto clean_up;
   } // end IF
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     messageHandlers_.insert (std::make_pair (id_in, message_handler_p));
 
     // check whether this is the first channel of the first connection
@@ -2150,7 +2150,7 @@ IRC_Client_GUI_Connection::terminateMessageHandler (const std::string& id_in,
   // retrieve message handler
   IRC_Client_GTK_HandlerCBData* cb_data_p = NULL;
   { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     MESSAGE_HANDLERSITERATOR_T iterator_2 = messageHandlers_.find (id_in);
     if (iterator_2 == messageHandlers_.end ())
     {

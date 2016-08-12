@@ -412,7 +412,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 
   // step5: initialize updates
   {
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->lock);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
 
     // schedule asynchronous updates of the log view
     guint event_source_id = g_timeout_add_seconds (1,
@@ -637,7 +637,7 @@ idle_update_progress_client_cb (gpointer userData_in)
   ACE_ASSERT (data_p->GTKState);
 
   // synch access
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
 
 //  int result = -1;
   Common_UI_GTKBuildersIterator_t iterator =
@@ -792,16 +792,16 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   if (!font_description_p)
   {
     ACE_DEBUG ((LM_ERROR,
-      ACE_TEXT ("failed to pango_font_description_from_string(\"%s\"): \"%m\", aborting\n"),
-      ACE_TEXT (NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION)));
+                ACE_TEXT ("failed to pango_font_description_from_string(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION)));
     return G_SOURCE_REMOVE;
   } // end IF
-    // apply font
+  // apply font
   GtkRcStyle* rc_style_p = gtk_rc_style_new ();
   if (!rc_style_p)
   {
     ACE_DEBUG ((LM_ERROR,
-      ACE_TEXT ("failed to gtk_rc_style_new(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to gtk_rc_style_new(): \"%m\", aborting\n")));
     return G_SOURCE_REMOVE;
   } // end IF
   rc_style_p->font_desc = font_description_p;
@@ -814,14 +814,14 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   rc_style_p->text[GTK_STATE_NORMAL] = text_colour;
   rc_style_p->color_flags[GTK_STATE_NORMAL] =
     static_cast<GtkRcFlags>(GTK_RC_BASE |
-      GTK_RC_TEXT);
+                            GTK_RC_TEXT);
   gtk_widget_modify_style (GTK_WIDGET (view_p),
     rc_style_p);
   gtk_rc_style_unref (rc_style_p);
 
   // step4: initialize updates
   {
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->lock);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
 
     // schedule asynchronous updates of the log view
     guint event_source_id = g_timeout_add_seconds (1,
@@ -832,7 +832,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
     else
     {
       ACE_DEBUG ((LM_ERROR,
-        ACE_TEXT ("failed to g_timeout_add_seconds(): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to g_timeout_add_seconds(): \"%m\", aborting\n")));
       return G_SOURCE_REMOVE;
     } // end ELSE
       // schedule asynchronous updates of the info view
@@ -844,7 +844,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
     else
     {
       ACE_DEBUG ((LM_ERROR,
-        ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
       return G_SOURCE_REMOVE;
     } // end ELSE
   } // end lock scope
@@ -995,7 +995,7 @@ idle_update_progress_server_cb (gpointer userData_in)
   ACE_ASSERT (data_p->GTKState);
 
   // synch access
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -1483,7 +1483,7 @@ spinbutton_connections_value_changed_cb (GtkWidget* widget_in,
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
 
   {
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->lock);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, FALSE);
 
     data_p->progressEventSourceID =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)

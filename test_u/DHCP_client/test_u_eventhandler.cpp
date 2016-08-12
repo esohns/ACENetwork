@@ -62,7 +62,7 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionID_in,
   sessionDataMap_.insert (std::make_pair (sessionID_in,
                                           &const_cast<Test_U_StreamSessionData&> (sessionData_in)));
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
 //  CBData_->progressData.transferred = 0;
   CBData_->eventStack.push_back (TEST_U_GTKEVENT_START);
@@ -103,7 +103,7 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionID_in)
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionID_in);
   ACE_ASSERT (iterator != sessionDataMap_.end ());
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
   CBData_->eventStack.push_back (TEST_U_GTKEVENT_END);
 
@@ -131,7 +131,7 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
   // sanity check(s)
   ACE_ASSERT (CBData_);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
   CBData_->progressData.transferred += message_in.total_length ();
   CBData_->eventStack.push_back (TEST_U_GTKEVENT_DATA);
@@ -149,7 +149,7 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionID_in);
   ACE_ASSERT (iterator != sessionDataMap_.end ());
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
   Test_U_GTK_Event event = TEST_U_GKTEVENT_INVALID;
   switch (sessionMessage_in.type ())

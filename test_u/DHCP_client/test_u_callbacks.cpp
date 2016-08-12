@@ -364,7 +364,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   // step5: initialize updates
   guint event_source_id = 0;
   {
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->lock);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
 
     // schedule asynchronous updates of the log view
     event_source_id = g_timeout_add_seconds (1,
@@ -740,7 +740,7 @@ idle_reset_UI_cb (gpointer userData_in)
   gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
 
   {
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->lock);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
 
     data_p->progressData.transferred = 0;
   } // end lock scope
@@ -776,8 +776,7 @@ idle_update_progress_cb (gpointer userData_in)
   float speed = 0.0F;
 
   {
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
-
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_CONTINUE);
     speed = data_p->statistic.bytesPerSecond;
   } // end lock scope
   std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
@@ -807,7 +806,7 @@ idle_update_progress_cb (gpointer userData_in)
   return G_SOURCE_CONTINUE;
 }
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 gboolean
 idle_finalize_UI_cb (gpointer userData_in)
@@ -833,7 +832,7 @@ idle_update_info_display_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -943,7 +942,7 @@ idle_update_log_display_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
 
   Common_UI_GTKBuildersIterator_t iterator =
       data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -1986,7 +1985,7 @@ continue_:
 
     ACE_ASSERT (!data_p->progressEventSourceID);
     {
-      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->lock);
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
 
       data_p->progressEventSourceID =
         //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -2036,7 +2035,7 @@ continue_:
     // stop progress reporting
     ACE_ASSERT (data_p->progressEventSourceID);
     {
-      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->lock);
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
 
       if (!g_source_remove (data_p->progressEventSourceID))
         ACE_DEBUG ((LM_ERROR,

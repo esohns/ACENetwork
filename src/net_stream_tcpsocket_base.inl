@@ -821,6 +821,9 @@ Net_StreamTCPSocketBase_T<HandlerType,
       //                   currently servicing the socket handle will call
       //                   handle_close()
       stream_.finished (true);
+      stream_.flush (false,  // flush inbound ?
+                     false,  // flush session messages ?
+                     false); // flush upstream ?
       stream_.wait (true,   // wait for worker(s) (if any)
                     false,  // wait for upstream (if any)
                     false); // wait for downstream (if any)

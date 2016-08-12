@@ -135,7 +135,11 @@ connection_setup_function (void* arg_in)
 
     // clean up
 //    gdk_threads_leave ();
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->GTKState.lock, result);
+#else
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->GTKState.lock, std::numeric_limits<void*>::max ());
+#endif
     data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
     delete data_p;
 
@@ -355,7 +359,11 @@ connection_failed:
   connection_p->initialize (&const_cast<IRC_Client_SessionState&> (connection_2->state ()),
                             icontrol_p);
   { // synch access
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->GTKState.lock, result);
+#else
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->GTKState.lock, std::numeric_limits<void*>::max ());
+#endif
     // *TODO*: who deletes the module ? (the stream won't do it !)
     data_p->CBData->connections.insert (std::make_pair (connection_p->get ().timeStamp,
                                                         connection_p));
@@ -365,13 +373,10 @@ connection_failed:
   //              ACE_TEXT("registering...\n")));
 
   // step4: register connection with the server
-  try
-  {
+  try {
     // *NOTE*: this entails a little delay (waiting for the welcome notice...)
     result_2 = icontrol_p->registerc (data_p->loginOptions);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_IControl::registerc(), continuing\n")));
   }
@@ -383,7 +388,11 @@ connection_failed:
     // clean up
     connection_2->close ();
     connection_2->decrease ();
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->GTKState.lock, result);
+#else
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->GTKState.lock, std::numeric_limits<void*>::max ());
+#endif
     data_p->CBData->connections.erase (connection_p->get ().timeStamp);
 
     goto remove_page;
@@ -408,7 +417,11 @@ remove_page:
 
 done:
   { // synch access
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->CBData->GTKState.lock);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->GTKState.lock, result);
+#else
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->GTKState.lock, std::numeric_limits<void*>::max ());
+#endif
     data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
   } // end lock scope
 
@@ -434,7 +447,7 @@ is_entry_sensitive (GtkCellLayout*   layout_in,
                 NULL);
 }
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 gboolean
 idle_add_channel_cb (gpointer userData_in)
@@ -461,7 +474,7 @@ idle_add_channel_cb (gpointer userData_in)
   GtkNotebook* notebook_p = NULL;
   gint page_number = -1;
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (data_p->builderLabel);
@@ -581,9 +594,8 @@ idle_add_channel_cb (gpointer userData_in)
   if (IRC_Tools::isValidChannelName (data_p->id))
   {
     // *IMPORTANT NOTE*: release lock while switching pages
-    ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> reverse_lock (data_p->GTKState->lock);
-    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> > aGuard_2 (reverse_lock);
-
+    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
+    ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard_2, reverse_lock, G_SOURCE_REMOVE);
     gtk_notebook_set_current_page (notebook_p,
                                    page_number);
   } // end IF
@@ -592,7 +604,7 @@ clean_up:
   data_p->GTKState->eventSourceIds.erase (data_p->eventSourceID);
   data_p->eventSourceID = 0;
 
-  return FALSE; // G_SOURCE_REMOVE
+  return G_SOURCE_REMOVE;
 }
 
 gboolean
@@ -617,7 +629,7 @@ idle_add_connection_cb (gpointer userData_in)
   GtkNotebook* notebook_p = NULL;
   gint page_number = -1;
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -747,7 +759,7 @@ idle_finalize_UI_cb (gpointer userData_in)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("removed %u queued event(s)...\n"),
                 removed_events));
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState.lock, G_SOURCE_REMOVE);
   //ACE_ASSERT (removed_events == data_p->GTKState.eventSourceIds.size ());
   data_p->GTKState.eventSourceIds.clear ();
 
@@ -967,7 +979,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 //              ACE_TEXT ("idle_update_display_cb: %d\n"),
 //              event_source_id));
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState.lock, G_SOURCE_REMOVE);
   data_p->GTKState.eventSourceIds.clear ();
   data_p->GTKState.eventSourceIds.insert (event_source_id);
 
@@ -995,7 +1007,7 @@ idle_remove_channel_cb (gpointer userData_in)
   gint page_number = -1;
   gint number_of_pages = 0;
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (data_p->timeStamp);
@@ -1037,8 +1049,8 @@ idle_remove_channel_cb (gpointer userData_in)
   if (gtk_notebook_get_current_page (notebook_p) == page_number)
   { // flip away from "this" page ?
     // *IMPORTANT NOTE*: release lock while switching pages
-    ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> reverse_lock (data_p->GTKState->lock);
-    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> > aGuard_2 (reverse_lock);
+    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
+    ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard_2, reverse_lock, G_SOURCE_REMOVE);
 
     gtk_notebook_prev_page (notebook_p);
   } // end IF
@@ -1090,7 +1102,7 @@ idle_remove_connection_cb (gpointer userData_in)
   GtkWindow* window_p = NULL;
   Common_UI_GTKBuildersIterator_t iterator, iterator_2;
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
 
   IRC_Client_GUI_ConnectionsConstIterator_t iterator_3 =
       data_p->connections->end ();
@@ -1129,8 +1141,8 @@ idle_remove_connection_cb (gpointer userData_in)
   if (gtk_notebook_get_current_page (notebook_p) == page_number)
   {
     // *IMPORTANT NOTE*: release lock while switching pages
-    ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> reverse_lock (data_p->GTKState->lock);
-    ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_RECURSIVE_MUTEX> > aGuard_2 (reverse_lock);
+    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
+    ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard_2, reverse_lock, G_SOURCE_REMOVE);
 
     gtk_notebook_prev_page (notebook_p);
   } // end IF
@@ -1176,7 +1188,7 @@ idle_update_channel_modes_cb (gpointer userData_in)
   GtkToggleButton* toggle_button_p = NULL;
   GtkHBox* hbox_p = NULL;
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (data_p->builderLabel);
@@ -1285,7 +1297,7 @@ idle_update_display_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState.lock, G_SOURCE_REMOVE);
   if (data_p->connections.empty ())
     return G_SOURCE_CONTINUE;
 
@@ -1303,12 +1315,9 @@ idle_update_display_cb (gpointer userData_in)
   if (!message_handler_p) // *NOTE*: most probable cause: no server page (yet)
     return G_SOURCE_CONTINUE;
 
-  try
-  {
+  try {
     message_handler_p->update ();
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_GUI_MessageHandler::update(), continuing\n")));
   }
@@ -1344,7 +1353,7 @@ idle_update_progress_cb (gpointer userData_in)
   ACE_ASSERT (thread_manager_p);
   // synch access
   {
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
 
     for (IRC_Client_GUI_CompletedActionsIterator_t iterator_2 = data_p->completedActions.begin ();
          iterator_2 != data_p->completedActions.end ();
@@ -1428,7 +1437,7 @@ idle_update_user_modes_cb (gpointer userData_in)
   IRC_Client_GUI_ConnectionsConstIterator_t iterator_2;
   const IRC_Client_SessionState* connection_state_p = NULL;
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
 
   iterator = data_p->GTKState->builders.find (data_p->timeStamp);
   // sanity check(s)
@@ -1503,7 +1512,7 @@ clean_up:
   return G_SOURCE_REMOVE;
 }
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 void
 button_about_clicked_cb (GtkWidget* widget_in,
@@ -1718,7 +1727,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
     // sanity check: nickname already in use ?
     nick_name_taken = false;
     { // synch access
-      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState.lock);
 
       for (IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 = data_p->connections.begin ();
            iterator_2 != data_p->connections.end ();
@@ -1868,7 +1877,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   gtk_progress_bar_set_pulse_step (progress_bar_p,
                                    1.0 / static_cast<double> (width));
   { // synch access
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState.lock);
 
     gtk_widget_show (GTK_WIDGET (progress_bar_p));
 
@@ -1980,7 +1989,7 @@ button_send_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState.lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState.lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -2089,24 +2098,18 @@ button_send_clicked_cb (GtkWidget* widget_in,
   const IRC_Client_GTK_ConnectionCBData& connection_data_r =
     connection_p->get ();
   ACE_ASSERT (connection_data_r.controller);
-  try
-  {
+  try {
     connection_data_r.controller->send (receivers,
                                         message_string);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::send(), continuing\n")));
   }
 
   // step4: echo data locally...
-  try
-  {
+  try {
     message_handler_p->queueForDisplay (string_p);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_GUI_MessageHandler::queueForDisplay(), continuing\n")));
   }
@@ -2175,18 +2178,15 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p->controller);
   ACE_ASSERT (data_p->GTKState);
 
-  try
-  {
+  try {
     data_p->controller->quit (ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_LEAVE_REASON));
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::quit(), continuing\n")));
   }
 
   // update widgets
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock);
 
   // *NOTE*: the server should close the connection after this...
   //         --> the connection notebook page cleans itself (see end ())
@@ -2308,12 +2308,9 @@ nickname_clicked_cb (GtkWidget* widget_in,
   if (nickname_string.size () > IRC_PRT_MAXIMUM_NICKNAME_LENGTH)
     nickname_string.resize (IRC_PRT_MAXIMUM_NICKNAME_LENGTH);
 
-  try
-  {
+  try {
     data_p->controller->nick (nickname_string);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::nick(), continuing\n")));
   }
@@ -2382,7 +2379,7 @@ usersbox_changed_cb (GtkWidget* widget_in,
 
   // *TODO*: if a conversation exists, simply activate the corresponding page
   { // synch access
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock);
 
     IRC_Client_GUI_ConnectionsConstIterator_t iterator =
       data_p->connections->find (data_p->timeStamp);
@@ -2429,12 +2426,9 @@ refresh_users_clicked_cb (GtkWidget* widget_in,
   // *NOTE*: empty parameter (or "0") --> ALL users
   // (see RFC1459 section 4.5.1)
   std::string name (ACE_TEXT_ALWAYS_CHAR ("0"));
-  try
-  {
+  try {
     data_p->controller->who (name, false);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::who(), continuing\n")));
   }
@@ -2550,12 +2544,9 @@ join_clicked_cb (GtkWidget* widget_in,
   // *TODO*: support channel keys/multi-join ?
   string_list_t channels, keys;
   channels.push_back (channel_string);
-  try
-  {
+  try {
     data_p->controller->join (channels, keys);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::join(), continuing\n")));
   }
@@ -2638,12 +2629,9 @@ channelbox_changed_cb (GtkWidget* widget_in,
   string_list_t channels;
   channels.push_back (channel_string);
   string_list_t keys;
-  try
-  {
+  try {
     data_p->controller->join (channels, keys);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::join(), continuing\n")));
   }
@@ -2665,12 +2653,9 @@ refresh_channels_clicked_cb (GtkWidget* widget_in,
 
   // *NOTE*: empty list --> list them all !
   string_list_t channel_list;
-  try
-  {
+  try {
     data_p->controller->list (channel_list);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::list(), continuing\n")));
   }
@@ -2767,7 +2752,7 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   ACE_ASSERT (data_p->controller);
   ACE_ASSERT (data_p->GTKState);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock);
 
   IRC_Client_GUI_ConnectionsConstIterator_t iterator =
     data_p->connections->find (data_p->timeStamp);
@@ -2790,15 +2775,12 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   gtk_toggle_button_set_inconsistent (toggleButton_in, TRUE);
 
   string_list_t parameters;
-  try
-  {
+  try {
     data_p->controller->mode (connection_state_r.nickName,               // user mode
                               IRC_Tools::UserMode2Char (mode),           // corresponding mode char
                               !connection_state_r.userModes.test (mode), // enable ?
                               parameters);                               // parameters
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::mode(\"%s\"), continuing\n"),
                 ACE_TEXT (IRC_Tools::UserMode2String (mode).c_str ())));
@@ -2822,7 +2804,7 @@ switch_channel_cb (GtkNotebook* notebook_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->GTKState);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -2852,7 +2834,7 @@ action_away_cb (GtkAction* action_in,
   ACE_ASSERT (data_p->controller);
   ACE_ASSERT (data_p->GTKState);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -2945,12 +2927,9 @@ action_away_cb (GtkAction* action_in,
     } // end IF
   } // end IF
 
-  try
-  {
+  try {
     data_p->controller->away (away_message);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::away(\"%s\"), continuing\n"),
                 ACE_TEXT (away_message.c_str ())));
@@ -3218,15 +3197,12 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
     parameters.push_back (value);
   } // end IF
 
-  try
-  {
+  try {
     data_p->controller->mode (data_p->id,                         // channel name
                               IRC_Tools::ChannelMode2Char (mode), // corresponding mode char
                               !data_p->channelModes.test (mode),  // enable ?
                               parameters);                        // parameters
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::mode(\"%s\"), continuing\n"),
                 ACE_TEXT (IRC_Tools::ChannelMode2String (mode).c_str ())));
@@ -3320,13 +3296,10 @@ topic_clicked_cb (GtkWidget* widget_in,
   gtk_widget_hide (GTK_WIDGET (dialog_p));
 
   std::string topic_string = gtk_entry_get_text (entry_p);
-  try
-  {
+  try {
     data_p->controller->topic (data_p->id,
                                topic_string);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::topic(), continuing\n")));
   }
@@ -3359,12 +3332,9 @@ part_clicked_cb (GtkWidget* widget_in,
   { // --> inform the server
     string_list_t channels;
     channels.push_back (data_p->id);
-    try
-    {
+    try {
       data_p->controller->part (channels);
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in IRC_Client_IIRCControl::part(), continuing\n")));
     }
@@ -3393,7 +3363,7 @@ members_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p->connection);
   ACE_ASSERT (data_p->GTKState);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->GTKState->lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, TRUE);
 
   Common_UI_GTKBuildersIterator_t iterator =
     data_p->GTKState->builders.find (data_p->builderLabel);
@@ -3683,13 +3653,10 @@ action_invite_cb (GtkAction* action_in,
        iterator_2 != data_p->parameters.end ();
        iterator_2++)
   {
-    try
-    {
+    try {
       data_p->controller->invite (*iterator_2,
                                   channel_string);
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in IRC_Client_IIRCControl::invite(), continuing\n")));
     }
@@ -3710,12 +3677,9 @@ action_info_cb (GtkAction* action_in,
   ACE_ASSERT (data_p->controller);
   ACE_ASSERT (!data_p->parameters.empty ());
 
-  try
-  {
+  try {
     data_p->controller->userhost (data_p->parameters);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::userhost(), continuing\n")));
   }
@@ -3740,14 +3704,11 @@ action_kick_cb (GtkAction* action_in,
        iterator != data_p->parameters.end ();
        iterator++)
   {
-    try
-    {
+    try {
       data_p->controller->kick (data_p->id,
                                 *iterator,
                                 ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_KICK_REASON));
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in IRC_Client_IIRCControl::kick(), continuing\n")));
     }
@@ -3782,15 +3743,12 @@ action_ban_cb (GtkAction* action_in,
     ban_mask_string += ACE_TEXT_ALWAYS_CHAR ("!*@*");
     parameters.push_back (ban_mask_string);
 
-    try
-    {
+    try {
       data_p->controller->mode (data_p->id,
                                 IRC_Tools::ChannelMode2Char (CHANNELMODE_BAN),
                                 true,
                                 parameters);
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in IRC_IControl_T::mode(), continuing\n")));
     }

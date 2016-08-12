@@ -37,7 +37,6 @@
 #include "IRC_client_stream_common.h"
 
 // forward declaration(s)
-class ACE_Thread_Mutex;
 class IRC_Client_GUI_Connection;
 class IRC_Client_GUI_MessageHandler;
 

@@ -80,13 +80,12 @@ struct Test_U_DHCPClient_GTK_CBData
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()
-//   , subscribersLock ()
+   , subscribersLock ()
   {};
 
   Test_U_DHCPClient_Configuration* configuration;
   Test_U_Subscribers_t             subscribers;
-  // *NOTE*: use Common_UI_GTKState.lock instead
-//  ACE_SYNCH_RECURSIVE_MUTEX subscribersLock;
+  ACE_SYNCH_RECURSIVE_MUTEX        subscribersLock;
 };
 
 //struct Test_U_DHCPClient_ThreadData

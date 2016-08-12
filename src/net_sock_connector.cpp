@@ -51,6 +51,9 @@ Net_SOCK_Connector::connect (ACE_SOCK_Stream& stream_in,
 {
   NET_TRACE (ACE_TEXT ("Net_SOCK_Connector::connect"));
 
+  ACE_UNUSED_ARG (flags_in);
+  ACE_UNUSED_ARG (permissions_in);
+
   // *NOTE*: essentially follows functionality of ACE_SOCK_Connector,
   //         overriding shared_connect_start()
   int result = -1;

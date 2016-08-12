@@ -25,7 +25,6 @@
 
 #include "ace/Global_Macros.h"
 
-#include "ace/Recursive_Thread_Mutex.h"
 #include "common_ui_common.h"
 
 #include "IRC_client_gui_common.h"

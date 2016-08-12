@@ -35,6 +35,8 @@
 class HTTP_Export HTTP_Tools
 {
  public:
+  inline virtual ~HTTP_Tools () {};
+
   // debug info
   static std::string dump (const HTTP_Record&);
 
@@ -57,7 +59,7 @@ class HTTP_Export HTTP_Tools
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_Tools ())
-  ACE_UNIMPLEMENTED_FUNC (~HTTP_Tools ())
+  //ACE_UNIMPLEMENTED_FUNC (~HTTP_Tools ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Tools (const HTTP_Tools&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Tools& operator= (const HTTP_Tools&))
 };

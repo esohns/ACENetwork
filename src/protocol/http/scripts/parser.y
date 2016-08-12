@@ -92,9 +92,12 @@ typedef union YYSTYPE
 
 typedef void* yyscan_t;
 
+// *NOTE*: on current versions of bison, this needs to be inserted into the
+//         header manually, as there is no way to add the export symbol to
+//         the declaration
 #define YYDEBUG 1
 extern int HTTP_Export yydebug;
-//#define YYERROR_VERBOSE
+#define YYERROR_VERBOSE
 }
 
 // calling conventions / parameter passing
@@ -187,10 +190,10 @@ using namespace std;
 %type  <ival> status_line_rest1 status_line_rest2
 
 %code provides {
-extern void yysetdebug (int);
-void yyerror (YYLTYPE*, Net_IParser<HTTP_Record>*, yyscan_t, const char*);
-int yyparse (Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner);
-void yyprint (FILE*, yytokentype, YYSTYPE);
+void HTTP_Export yysetdebug (int);
+void HTTP_Export yyerror (YYLTYPE*, Net_IParser<HTTP_Record>*, yyscan_t, const char*);
+int HTTP_Export yyparse (Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner);
+void HTTP_Export yyprint (FILE*, yytokentype, YYSTYPE);
 
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
 // *TODO*: remove this ASAP

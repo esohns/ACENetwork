@@ -734,20 +734,21 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              return yytokentype::CHUNK;
                              /* return yy::HTTP_Parser::token::CHUNK; */ }
 } // end <chunk>
-<<EOF>>                    { yyterminate(); }
+<<EOF>>                    { yyterminate(); } // *NOTE*: yywrap returned non-zero
 <*>{OCTET}                 { /* *TODO*: use (?s:.) ? */
-                             // debug info
-                             std::string error_message =
-                               ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");
-                             error_message += yytext[0];
-                             error_message += ACE_TEXT_ALWAYS_CHAR ("\", returning");
-                             driver->error (*yylloc, error_message);
+                             if (!driver->isBlocking ())
+                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
 
-                             /* *NOTE*: should not be reached, unless something
-                                        went terribly wrong */
-                             ACE_ASSERT (false);
-
-                             yyterminate(); }
+                             // wait for more data fragment(s)
+                             if (!driver->switchBuffer ())
+                             { // *NOTE*: most probable reason: connection
+                               //         has been closed --> session end
+                               ACE_DEBUG ((LM_DEBUG,
+                                           ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
+                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                             } // end IF
+                             yyless (0);
+                           }
 %%
 #ifdef __cplusplus
 extern "C"
@@ -778,34 +779,33 @@ HTTP_Scanner_wrap (yyscan_t yyscanner)
   // 4. continue scanning
 
   // step1
-  std::string the_rest;
-  the_rest.append (yytext, yyleng);
+  //std::string the_rest;
+  //the_rest.append (yytext, yyleng);
 //  for (char c = yyinput (yyscanner);
 //       c != EOF;
 //       c = yyinput (yyscanner));
-  yyg->yy_c_buf_p += yyleng;
-  yyg->yy_hold_char = *yyg->yy_c_buf_p;
-  if (yy_flex_debug)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("the rest: \"%s\" (%d byte(s))\n"),
-                ACE_TEXT (the_rest.c_str ()),
-                the_rest.size ()));
+  //yyg->yy_c_buf_p += yyleng;
+  //yyg->yy_hold_char = *yyg->yy_c_buf_p;
+  //if (yy_flex_debug)
+  //  ACE_DEBUG ((LM_DEBUG,
+  //              ACE_TEXT ("the rest: \"%s\" (%d byte(s))\n"),
+  //              ACE_TEXT (the_rest.c_str ()),
+  //              the_rest.size ()));
 
   // step2
   if (!driver->switchBuffer ())
   {
     // *NOTE*: most probable reason: received session end message
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to Net_IParser::switchBuffer() [remaining data was: \"%s\"], aborting\n"),
-                ACE_TEXT (the_rest.c_str ())));
+                ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
     return 1;
   } // end IF
 
   // step3
-  for (std::string::reverse_iterator iterator = the_rest.rbegin ();
-       iterator != the_rest.rend ();
-       ++iterator)
-    unput (*iterator);
+  //for (std::string::reverse_iterator iterator = the_rest.rbegin ();
+  //     iterator != the_rest.rend ();
+  //     ++iterator)
+  //  unput (*iterator);
 
   // step4
   //yyg->yy_did_buffer_switch_on_eof = 1;

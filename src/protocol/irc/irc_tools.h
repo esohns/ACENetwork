@@ -43,6 +43,8 @@ struct IRC_ModuleHandlerConfiguration;
 class IRC_Export IRC_Tools
 {
  public:
+  inline virtual ~IRC_Tools () {};
+
   // debug info
   static std::string dump (const IRC_Record&);
   static std::string dump (const IRC_UserModes_t&);
@@ -73,7 +75,7 @@ class IRC_Export IRC_Tools
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Tools ())
-  ACE_UNIMPLEMENTED_FUNC (~IRC_Tools ())
+  //ACE_UNIMPLEMENTED_FUNC (~IRC_Tools ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Tools (const IRC_Tools&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Tools& operator= (const IRC_Tools&))
 

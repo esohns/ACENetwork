@@ -66,7 +66,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   CBData_.timeStamp = timeStamp_in;
 
   // step1: retrieve server log view
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_.GTKState->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
     CBData_.GTKState->builders.find (CBData_.timeStamp);

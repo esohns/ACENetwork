@@ -560,8 +560,7 @@ do_work (bool requestBroadcastReplies_in,
     return;
   } // end IF
   event_handler_p->initialize (&CBData_in.subscribers,
-                               &CBData_in.lock);
-//                               &CBData_in.subscribersLock);
+                               &CBData_in.subscribersLock);
   event_handler_p->subscribe (&ui_event_handler);
 
   Test_U_ConnectionManager_t* connection_manager_p =
@@ -1431,8 +1430,8 @@ ACE_TMAIN (int argc_in,
   Test_U_DHCPClient_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
   // step1d: initialize logging and/or tracing
-  Common_Logger logger (&gtk_cb_user_data.logStack,
-                        &gtk_cb_user_data.lock);
+  Common_Logger_t logger (&gtk_cb_user_data.logStack,
+                          &gtk_cb_user_data.lock);
   std::string log_file_name;
   if (log_to_file)
   {
