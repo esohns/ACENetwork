@@ -109,7 +109,7 @@ struct Net_SocketHandlerConfiguration
    , socketConfiguration (NULL)
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
                                  0)
-   //////////////////////////////////////
+   ///////////////////////////////////////
    , userData (NULL)
   {};
 

@@ -112,13 +112,10 @@ struct IRC_ModuleHandlerConfiguration
 {
   inline IRC_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
-   //////////////////////////////////////
-   , active (false)
-   //////////////////////////////////////
    , crunchMessages (IRC_DEFAULT_CRUNCH_MESSAGES)
+   , inbound (false)
    , traceParsing (IRC_DEFAULT_YACC_TRACE)
    , traceScanning (IRC_DEFAULT_LEX_TRACE)
-   //////////////////////////////////////
    , printFinalReport (true)
    , printProgressDot (false)
    , pushStatisticMessages (true)
@@ -126,23 +123,22 @@ struct IRC_ModuleHandlerConfiguration
    , streamConfiguration (NULL)
   {};
 
-  /* socket handler */
-  bool                       active;
-
-  /* splitter */
   // *NOTE*: this option may be useful for (downstream) parsers that only work
   //         on CONTIGUOUS buffers (i.e. cannot parse chained message blocks)
   // *WARNING*: currently, this does NOT work with multithreaded streams
   //            --> USE WITH CAUTION !
-  bool                       crunchMessages;
-  bool                       traceParsing;       // debug yacc (bison) ?
-  bool                       traceScanning;      // debug (f)lex ?
+  bool                       crunchMessages; // parser module(s)
 
-  bool                       printFinalReport;
+  bool                       inbound; // statistic/IO module
+
+  bool                       traceParsing; // parser module(s)
+  bool                       traceScanning; // parser module(s)
+
+  bool                       printFinalReport; // statistic module
   bool                       printProgressDot; // file writer module
-  bool                       pushStatisticMessages;
-  IRC_ProtocolConfiguration* protocolConfiguration;
+  bool                       pushStatisticMessages; // statistic module
 
+  IRC_ProtocolConfiguration* protocolConfiguration;
   Stream_Configuration*      streamConfiguration;
 };
 

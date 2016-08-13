@@ -65,17 +65,18 @@ struct Net_ModuleHandlerConfiguration
 {
   inline Net_ModuleHandlerConfiguration ()
    : active (false)
+   , inbound (false)
    , printFinalReport (true)
    , printProgressDot (false)
    , pushStatisticMessages (true)
    , sessionData (NULL)
   {};
 
-  bool                active;
-
-  bool                printFinalReport;
+  bool                active; // head module
+  bool                inbound; // statistic/IO module
+  bool                printFinalReport; // statistic module
   bool                printProgressDot; // file writer module
-  bool                pushStatisticMessages;
+  bool                pushStatisticMessages; // statistic module
 
   // *TODO*: remove this (--> session message data)
   Stream_SessionData* sessionData;
