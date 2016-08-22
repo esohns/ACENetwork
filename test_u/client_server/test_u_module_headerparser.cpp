@@ -29,24 +29,24 @@
 
 #include "test_u_message.h"
 
-Net_Module_HeaderParser::Net_Module_HeaderParser ()
+Test_U_Module_HeaderParser::Test_U_Module_HeaderParser ()
  : //inherited(),
    isInitialized_ (false)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_HeaderParser::Net_Module_HeaderParser"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::Test_U_Module_HeaderParser"));
 
 }
 
-Net_Module_HeaderParser::~Net_Module_HeaderParser()
+Test_U_Module_HeaderParser::~Test_U_Module_HeaderParser()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_HeaderParser::~Net_Module_HeaderParser"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::~Test_U_Module_HeaderParser"));
 
 }
 
 bool
-Net_Module_HeaderParser::initialize ()
+Test_U_Module_HeaderParser::initialize ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_HeaderParser::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::initialize"));
 
   // sanity check(s)
   if (isInitialized_)
@@ -63,10 +63,10 @@ Net_Module_HeaderParser::initialize ()
 }
 
 void
-Net_Module_HeaderParser::handleDataMessage (Net_Message*& message_inout,
-                                            bool& passMessageDownstream_out)
+Test_U_Module_HeaderParser::handleDataMessage (Test_U_Message*& message_inout,
+                                               bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_HeaderParser::handleDataMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::handleDataMessage"));
 
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -82,9 +82,9 @@ Net_Module_HeaderParser::handleDataMessage (Net_Message*& message_inout,
 }
 
 void
-Net_Module_HeaderParser::dump_state () const
+Test_U_Module_HeaderParser::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_HeaderParser::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::dump_state"));
 
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT (" ***** MODULE: \"%s\" state *****\n"),

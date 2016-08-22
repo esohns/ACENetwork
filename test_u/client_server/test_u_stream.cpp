@@ -32,25 +32,25 @@
 #include "test_u_module_headerparser.h"
 #include "test_u_module_protocolhandler.h"
 
-Net_Stream::Net_Stream (const std::string& name_in)
+Test_U_Stream::Test_U_Stream (const std::string& name_in)
  : inherited (name_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Stream::Net_Stream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::Test_U_Stream"));
 
 }
 
-Net_Stream::~Net_Stream ()
+Test_U_Stream::~Test_U_Stream ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Stream::~Net_Stream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::~Test_U_Stream"));
 
   // *NOTE*: this implements an ordered shutdown on destruction
   inherited::shutdown ();
 }
 
 bool
-Net_Stream::load (Stream_ModuleList_t& modules_out)
+Test_U_Stream::load (Stream_ModuleList_t& modules_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Stream::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::load"));
 
   // initialize return value(s)
   for (Stream_ModuleListIterator_t iterator = modules_out.begin ();
@@ -66,30 +66,30 @@ Net_Stream::load (Stream_ModuleList_t& modules_out)
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Net_Module_ProtocolHandler_Module (ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler"),
+                  Test_U_Module_ProtocolHandler_Module (ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler"),
+                                                        NULL,
+                                                        false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_U_Module_RuntimeStatistic_Module (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
+                                                         NULL,
+                                                         false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_U_Module_HeaderParser_Module (ACE_TEXT_ALWAYS_CHAR ("HeaderParser"),
                                                      NULL,
                                                      false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Net_Module_RuntimeStatistic_Module (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
+                  Test_U_Module_SocketHandler_Module (ACE_TEXT_ALWAYS_CHAR ("SocketHandler"),
                                                       NULL,
                                                       false),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Net_Module_HeaderParser_Module (ACE_TEXT_ALWAYS_CHAR ("HeaderParser"),
-                                                  NULL,
-                                                  false),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Net_Module_SocketHandler_Module (ACE_TEXT_ALWAYS_CHAR ("SocketHandler"),
-                                                   NULL,
-                                                   false),
                   false);
   modules_out.push_back (module_p);
 
@@ -97,11 +97,11 @@ Net_Stream::load (Stream_ModuleList_t& modules_out)
 }
 
 bool
-Net_Stream::initialize (const Net_StreamConfiguration& configuration_in,
-                        bool setupPipeline_in,
-                        bool resetSessionData_in)
+Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
+                           bool setupPipeline_in,
+                           bool resetSessionData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Stream::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.protocolConfiguration);
@@ -118,8 +118,8 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in,
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
 
-  Net_StreamSessionData& session_data_r =
-      const_cast<Net_StreamSessionData&> (inherited::sessionData_->get ());
+  Test_U_StreamSessionData& session_data_r =
+      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
   session_data_r.sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
@@ -137,12 +137,12 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in,
     return false;
   } // end IF
   //  socketHandler_.initialize (configuration_in.moduleConfiguration_2);
-  Net_Module_SocketHandler* socketHandler_impl_p =
-    dynamic_cast<Net_Module_SocketHandler*> (module_p->writer ());
+  Test_U_Module_SocketHandler* socketHandler_impl_p =
+    dynamic_cast<Test_U_Module_SocketHandler*> (module_p->writer ());
   if (!socketHandler_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_SocketHandler> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_SocketHandler> failed, aborting\n")));
     return false;
   } // end IF
 //  if (!socketHandler_impl_p->initialize (configuration_in.moduleHandlerConfiguration_2))
@@ -185,9 +185,9 @@ Net_Stream::initialize (const Net_StreamConfiguration& configuration_in,
 }
 
 void
-Net_Stream::ping ()
+Test_U_Stream::ping ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Stream::ping"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::ping"));
 
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler")));
@@ -198,13 +198,13 @@ Net_Stream::ping ()
                 ACE_TEXT ("ProtocolHandler")));
     return;
   } // end IF
-  Net_Module_ProtocolHandler* protocolHandler_impl_p = NULL;
+  Test_U_Module_ProtocolHandler* protocolHandler_impl_p = NULL;
   protocolHandler_impl_p =
-    dynamic_cast<Net_Module_ProtocolHandler*> (module_p->writer ());
+    dynamic_cast<Test_U_Module_ProtocolHandler*> (module_p->writer ());
   if (!protocolHandler_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_ProtocolHandler> failed, returning\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_ProtocolHandler> failed, returning\n")));
     return;
   } // end IF
 
@@ -213,9 +213,9 @@ Net_Stream::ping ()
 }
 
 bool
-Net_Stream::collect (Net_RuntimeStatistic_t& data_out)
+Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Stream::collect"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::collect"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::sessionData_);
@@ -231,18 +231,18 @@ Net_Stream::collect (Net_RuntimeStatistic_t& data_out)
                 ACE_TEXT ("RuntimeStatistic")));
     return false;
   } // end IF
-  Net_Module_Statistic_WriterTask_t* runtimeStatistic_impl =
-    dynamic_cast<Net_Module_Statistic_WriterTask_t*> (module_p->writer ());
+  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl =
+    dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (module_p->writer ());
   if (!runtimeStatistic_impl)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_t> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_Statistic_WriterTask_t> failed, aborting\n")));
     return false;
   } // end IF
 
   // synch access
-  Net_StreamSessionData& session_data_r =
-      const_cast<Net_StreamSessionData&> (inherited::sessionData_->get ());
+  Test_U_StreamSessionData& session_data_r =
+      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
   if (session_data_r.lock)
   {
     result = session_data_r.lock->acquire ();
@@ -282,9 +282,9 @@ Net_Stream::collect (Net_RuntimeStatistic_t& data_out)
 }
 
 void
-Net_Stream::report () const
+Test_U_Stream::report () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Stream::report"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::report"));
 
 //   Net_Module_Statistic_ReaderTask_t* runtimeStatistic_impl = NULL;
 //   runtimeStatistic_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());

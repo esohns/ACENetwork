@@ -25,8 +25,6 @@
 
 #include <iostream>
 
-//#include "ace/streams.h"
-
 #include "common_timer_manager_common.h"
 
 #include "stream_iallocator.h"
@@ -35,7 +33,7 @@
 
 #include "test_u_message.h"
 
-Net_Module_ProtocolHandler::Net_Module_ProtocolHandler ()
+Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler ()
  : inherited ()
  , pingHandler_ (this,  // dispatch ourselves
                  false) // ping peer at regular intervals...
@@ -48,13 +46,13 @@ Net_Module_ProtocolHandler::Net_Module_ProtocolHandler ()
  , printPongDot_ (false)
  , sessionID_ (0)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_ProtocolHandler::Net_Module_ProtocolHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler"));
 
 }
 
-Net_Module_ProtocolHandler::~Net_Module_ProtocolHandler ()
+Test_U_Module_ProtocolHandler::~Test_U_Module_ProtocolHandler ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_ProtocolHandler::~Net_Module_ProtocolHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::~Test_U_Module_ProtocolHandler"));
 
   int result = -1;
 
@@ -79,12 +77,12 @@ Net_Module_ProtocolHandler::~Net_Module_ProtocolHandler ()
 }
 
 bool
-Net_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
+Test_U_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
                                         const ACE_Time_Value& pingInterval_in,
                                         bool autoAnswerPings_in,
                                         bool printPongDot_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_ProtocolHandler::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::initialize"));
 
   int result = -1;
 
@@ -136,10 +134,10 @@ Net_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
 }
 
 void
-Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
-                                               bool& passMessageDownstream_out)
+Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout,
+                                                  bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_ProtocolHandler::handleDataMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::handleDataMessage"));
 
   int result = -1;
 
@@ -159,7 +157,7 @@ Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
 
         // step0: create reply structure
         // --> get a message buffer
-        Net_Message* message_p =
+        Test_U_Message* message_p =
             allocateMessage (sizeof (Net_Remote_Comm::PongMessage));
         if (!message_p)
         {
@@ -213,17 +211,17 @@ Net_Module_ProtocolHandler::handleDataMessage (Net_Message*& message_inout,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: unknown/invalid message type (was: \"%s\"), returning\n"),
                   message_inout->getID (),
-                  ACE_TEXT (Net_Message::CommandType2String (message_header.messageType).c_str ())));
+                  ACE_TEXT (Test_U_Message::CommandType2String (message_header.messageType).c_str ())));
       return;
     }
   } // end SWITCH
 }
 
 void
-Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_inout,
-                                                  bool& passMessageDownstream_out)
+Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& message_inout,
+                                                     bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_ProtocolHandler::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::handleSessionMessage"));
 
   // don't care (implies yes per default, when part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -238,9 +236,9 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // retain session ID for reporting...
-      const Net_StreamSessionData_t& session_data_container_r =
+      const Test_U_StreamSessionData_t& session_data_container_r =
           message_inout->get ();
-      const Net_StreamSessionData& session_data_r =
+      const Test_U_StreamSessionData& session_data_r =
           session_data_container_r.get ();
       sessionID_ = session_data_r.sessionID;
 
@@ -299,14 +297,14 @@ Net_Module_ProtocolHandler::handleSessionMessage (Net_SessionMessage*& message_i
 }
 
 void
-Net_Module_ProtocolHandler::handleTimeout (const void* arg_in)
+Test_U_Module_ProtocolHandler::handleTimeout (const void* arg_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_ProtocolHandler::handleTimeout"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::handleTimeout"));
 
   ACE_UNUSED_ARG (arg_in);
 
   // step0: get a message buffer
-  Net_Message* message_p =
+  Test_U_Message* message_p =
       allocateMessage (sizeof (Net_Remote_Comm::PingMessage));
   if (!message_p)
   {
@@ -345,9 +343,9 @@ Net_Module_ProtocolHandler::handleTimeout (const void* arg_in)
 }
 
 void
-Net_Module_ProtocolHandler::dump_state () const
+Test_U_Module_ProtocolHandler::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_ProtocolHandler::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::dump_state"));
 
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT (" ***** MODULE: \"%s\" state *****\n"),
@@ -358,24 +356,21 @@ Net_Module_ProtocolHandler::dump_state () const
 //               ACE_TEXT (inherited::name ())));
 }
 
-Net_Message*
-Net_Module_ProtocolHandler::allocateMessage (unsigned int requestedSize_in)
+Test_U_Message*
+Test_U_Module_ProtocolHandler::allocateMessage (unsigned int requestedSize_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_ProtocolHandler::allocateMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::allocateMessage"));
 
   // initialize return value(s)
-  Net_Message* message_p = NULL;
+  Test_U_Message* message_p = NULL;
 
   // sanity check(s)
   ACE_ASSERT (allocator_);
 
-  try
-  {
+  try {
     message_p =
-      static_cast<Net_Message*> (allocator_->malloc (requestedSize_in));
-  }
-  catch (...)
-  {
+      static_cast<Test_U_Message*> (allocator_->malloc (requestedSize_in));
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
                 requestedSize_in));

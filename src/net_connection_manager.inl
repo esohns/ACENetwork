@@ -39,11 +39,12 @@ Net_Connection_Manager_T<AddressType,
                          StatisticContainerType,
                          UserDataType>::Net_Connection_Manager_T ()
  : condition_ (lock_)
- , configuration_ ()
  , connections_ ()
  , isActive_ (true)
  , isInitialized_ (false)
- , maxNumConnections_ (NET_CONNECTION_MAXIMUM_NUMBER_OF_OPEN)
+ , lock_ ()
+ , maximumNumberOfConnections_ (NET_CONNECTION_MAXIMUM_NUMBER_OF_OPEN)
+ , configuration_ (NULL)
  , userData_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::Net_Connection_Manager_T"));
@@ -90,15 +91,15 @@ Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::initialize (unsigned int maxNumConnections_in)
+                         UserDataType>::initialize (unsigned int maximumNumberOfConnections_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::initialize"));
 
-  maxNumConnections_ = maxNumConnections_in;
+  maximumNumberOfConnections_ = maximumNumberOfConnections_in;
 
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT ("set maximum # connections: %u\n"),
-//               maxNumConnections_));
+//               maximumNumberOfConnections_));
 }
 
 template <typename AddressType,
@@ -168,7 +169,7 @@ Net_Connection_Manager_T<AddressType,
 
   //ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
-  configuration_ = configuration_in;
+  configuration_ = &const_cast<ConfigurationType&> (configuration_in);
   userData_ = userData_in;
 
   isInitialized_ = true;
@@ -194,7 +195,7 @@ Net_Connection_Manager_T<AddressType,
 
   //ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
-  configuration_out = &configuration_;
+  configuration_out = configuration_;
   userData_out = userData_;
 }
 
@@ -362,7 +363,7 @@ Net_Connection_Manager_T<AddressType,
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
 
   if (!isActive_ || // --> currently rejecting new connections...
-      (connections_.size () >= maxNumConnections_))
+      (connections_.size () >= maximumNumberOfConnections_))
     return false;
 
   try

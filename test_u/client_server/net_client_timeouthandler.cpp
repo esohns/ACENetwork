@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "net_client_timeouthandler.h"
+#include "net_client_timeoutHandler.h"
 
 #include "ace/Log_Msg.h"
 
@@ -32,10 +32,10 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
 
-Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
-                                                      unsigned int maximumNumberOfConnections_in,
-                                                      const ACE_INET_Addr& remoteSAP_in,
-                                                      Net_IConnector_t* connector_in)
+Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler (ActionMode_t mode_in,
+                                                            unsigned int maximumNumberOfConnections_in,
+                                                            const ACE_INET_Addr& remoteSAP_in,
+                                                            Test_U_IConnector_t* connector_in)
  : inherited (NULL,                           // default reactor
               ACE_Event_Handler::LO_PRIORITY) // priority
  , alternatingModeState_ (ALTERNATING_STATE_CONNECT)
@@ -53,7 +53,7 @@ Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
  , randomEngine_ ()
  , randomGenerator_ ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::Net_Client_TimeoutHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -75,16 +75,16 @@ Net_Client_TimeoutHandler::Net_Client_TimeoutHandler (ActionMode_t mode_in,
   randomGenerator_ = std::bind (randomDistribution_, randomEngine_);
 }
 
-Net_Client_TimeoutHandler::~Net_Client_TimeoutHandler ()
+Test_U_Client_TimeoutHandler::~Test_U_Client_TimeoutHandler ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::~Net_Client_TimeoutHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::~Test_U_Client_TimeoutHandler"));
 
 }
 
 void
-Net_Client_TimeoutHandler::mode (ActionMode_t mode_in)
+Test_U_Client_TimeoutHandler::mode (ActionMode_t mode_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::mode"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::mode"));
 
   ACE_ASSERT (mode_in < ACTION_MAX);
 
@@ -95,10 +95,10 @@ Net_Client_TimeoutHandler::mode (ActionMode_t mode_in)
   } // end lock scope
 }
 
-Net_Client_TimeoutHandler::ActionMode_t
-Net_Client_TimeoutHandler::mode () const
+Test_U_Client_TimeoutHandler::ActionMode_t
+Test_U_Client_TimeoutHandler::mode () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::mode"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::mode"));
 
   // initialize return value(s)
   ActionMode_t result = ACTION_INVALID;
@@ -113,10 +113,10 @@ Net_Client_TimeoutHandler::mode () const
 }
 
 int
-Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
-                                           const void* arg_in)
+Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
+                                              const void* arg_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_TimeoutHandler::handle_timeout"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::handle_timeout"));
 
   int result = -1;
 
@@ -124,15 +124,15 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
   ACE_UNUSED_ARG (arg_in);
 
   int index = 0;
-  Net_InetConnectionManager_t::CONNECTION_T* abort_connection_p = NULL;
-  Net_InetConnectionManager_t::CONNECTION_T* ping_connection_p = NULL;
+  Test_U_InetConnectionManager_t::CONNECTION_T* abort_connection_p = NULL;
+  Test_U_InetConnectionManager_t::CONNECTION_T* ping_connection_p = NULL;
   bool do_abort = false;
   bool do_abort_oldest = false;
   bool do_abort_youngest = false;
   bool do_connect = false;
   bool do_ping = false;
-  Net_IInetConnectionManager_t* connection_manager_p =
-    NET_CONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_IInetConnectionManager_t* connection_manager_p =
+    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->lock ();
   unsigned int number_of_connections = connection_manager_p->count ();
@@ -154,7 +154,8 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         // *PORTABILITY*: outside glibc, this is not very portable...
         // *TODO*: use STL funcionality instead
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        index = (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections);
+        index =
+          (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections);
 #else
         result = ::random_r (&randomState_, &index);
         if (result == -1)
@@ -261,7 +262,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         // cycle mode
         int temp = alternatingModeState_;
         alternatingModeState_ =
-          static_cast<Net_Client_TimeoutHandler::AlternatingModeState_t> (++temp);
+          static_cast<Test_U_Client_TimeoutHandler::AlternatingModeState_t> (++temp);
         if (alternatingModeState_ == ALTERNATING_STATE_MAX)
           alternatingModeState_ = ALTERNATING_STATE_CONNECT;
 
@@ -304,7 +305,7 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
                       ACE_TEXT ("failed to ::random_r(): \"%s\", aborting\n")));
 
           // clean up
-          NET_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
+          TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
 
           return -1;
         } // end IF
@@ -342,17 +343,14 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
   } // end lock scope
   connection_manager_p->unlock ();
 
-  // ------------------------------------
+  // -------------------------------------
 
   if (do_abort)
   {
     ACE_ASSERT (abort_connection_p);
-    try
-    {
+    try {
       abort_connection_p->close ();
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnection_T::close(), aborting\n")));
 
@@ -378,12 +376,9 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
   {
     ACE_ASSERT (connector_);
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    try
-    {
+    try {
       handle = connector_->connect (peerAddress_);
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_Client_IConnector_t::connect(), aborting\n")));
 
@@ -424,12 +419,9 @@ Net_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
       return -1;
     } // end IF
 
-    try
-    {
+    try {
       transportlayer_p->ping ();
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_ITransportLayer_t::ping(), aborting\n")));
 

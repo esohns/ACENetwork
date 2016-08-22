@@ -77,15 +77,13 @@ Net_ConnectionBase_T<AddressType,
   // initialize configuration/user data
   if (manager_)
   {
-    try
-    { // (try to) get (default) configuration/user data from the connection
+    try {
+      // (try to) get (default) configuration/user data from the connection
       // manager
       // *TODO*: remove type inference
       manager_->get (configuration_,
                      state_.userData);
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnectionManager_T::get(), continuing\n")));
     }

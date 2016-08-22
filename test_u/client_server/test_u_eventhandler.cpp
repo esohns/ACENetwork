@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "test_u_stream.h"
 #include "test_u_eventhandler.h"
 
 #include "ace/Guard_T.h"
@@ -28,40 +27,40 @@
 
 #include "net_macros.h"
 
-#include "test_u_common.h"
+#include "test_u_stream.h"
 
-Net_EventHandler::Net_EventHandler (Net_GTK_CBData* CBData_in)
+Test_U_EventHandler::Test_U_EventHandler (Test_U_GTK_CBData* CBData_in)
  : CBData_ (CBData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::Net_EventHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::Test_U_EventHandler"));
 
 }
 
-Net_EventHandler::~Net_EventHandler ()
+Test_U_EventHandler::~Test_U_EventHandler ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::~Net_EventHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::~Test_U_EventHandler"));
 
 }
 
 void
-Net_EventHandler::start (Stream_SessionId_t sessionID_in,
-                         const Net_StreamSessionData& sessionData_in)
+Test_U_EventHandler::start (Stream_SessionId_t sessionID_in,
+                            const Test_U_StreamSessionData& sessionData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::start"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::start"));
 
   ACE_UNUSED_ARG (sessionID_in);
   ACE_UNUSED_ARG (sessionData_in);
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 
-  CBData_->eventStack.push_back (NET_GTKEVENT_CONNECT);
+  CBData_->eventStack.push_back (TEST_U_GTKEVENT_CONNECT);
 }
 
 void
-Net_EventHandler::notify (Stream_SessionId_t sessionID_in,
-                          const Stream_SessionMessageType& sessionEvent_in)
+Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
+                             const Stream_SessionMessageType& sessionEvent_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
+  STREAM_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionID_in);
   ACE_UNUSED_ARG (sessionEvent_in);
@@ -73,40 +72,40 @@ Net_EventHandler::notify (Stream_SessionId_t sessionID_in,
 }
 
 void
-Net_EventHandler::end (Stream_SessionId_t sessionID_in)
+Test_U_EventHandler::end (Stream_SessionId_t sessionID_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::end"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::end"));
 
   ACE_UNUSED_ARG (sessionID_in);
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 
-  CBData_->eventStack.push_back (NET_GTKEVENT_DISCONNECT);
+  CBData_->eventStack.push_back (TEST_U_GTKEVENT_DISCONNECT);
 }
 
 void
-Net_EventHandler::notify (Stream_SessionId_t sessionID_in,
-                          const Net_Message& message_in)
+Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
+                             const Test_U_Message& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionID_in);
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 
-  CBData_->eventStack.push_back (NET_GTKEVENT_DATA);
+  CBData_->eventStack.push_back (TEST_U_GTKEVENT_DATA);
 }
 void
-Net_EventHandler::notify (Stream_SessionId_t sessionID_in,
-                          const Net_SessionMessage& sessionMessage_in)
+Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
+                             const Test_U_SessionMessage& sessionMessage_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_EventHandler::notify"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionID_in);
 
-  Net_GTK_Event event =
-    ((sessionMessage_in.type () == STREAM_SESSION_MESSAGE_STATISTIC) ? NET_GTKEVENT_STATISTIC
-                                                                     : NET_GKTEVENT_INVALID);
+  Test_U_GTK_Event event =
+    ((sessionMessage_in.type () == STREAM_SESSION_MESSAGE_STATISTIC) ? TEST_U_GTKEVENT_STATISTIC
+                                                                     : TEST_U_GKTEVENT_INVALID);
 
   ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
 

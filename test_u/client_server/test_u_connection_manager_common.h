@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_CONNECTION_MANAGER_COMMON_H
-#define NET_CONNECTION_MANAGER_COMMON_H
+#ifndef TEST_U_CONNECTION_MANAGER_COMMON_H
+#define TEST_U_CONNECTION_MANAGER_COMMON_H
 
 #include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
@@ -34,44 +34,44 @@
 #endif
 
 // forward declarations
-struct Net_Configuration;
-struct Net_ConnectionState;
-struct Net_UserData;
+struct Test_U_Configuration;
+struct Test_U_ConnectionState;
+struct Test_U_UserData;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 typedef Net_IConnectionManager_T<Net_Netlink_Addr,
-                                 Net_Configuration,
-                                 Net_ConnectionState,
+                                 Test_U_Configuration,
+                                 Test_U_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Net_UserData> Net_INetlinkConnectionManager_t;
+                                 Test_U_UserData> Test_U_INetlinkConnectionManager_t;
 #endif
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Net_Configuration,
-                                 Net_ConnectionState,
+                                 Test_U_Configuration,
+                                 Test_U_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Net_UserData> Net_IInetConnectionManager_t;
+                                 Test_U_UserData> Test_U_IInetConnectionManager_t;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 typedef Net_Connection_Manager_T<Net_Netlink_Addr,
-                                 Net_Configuration,
-                                 Net_ConnectionState,
+                                 Test_U_Configuration,
+                                 Test_U_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Net_UserData> Net_NetlinkConnectionManager_t;
+                                 Test_U_UserData> Test_U_NetlinkConnectionManager_t;
 #endif
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
-                                 Net_Configuration,
-                                 Net_ConnectionState,
+                                 Test_U_Configuration,
+                                 Test_U_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Net_UserData> Net_InetConnectionManager_t;
+                                 Test_U_UserData> Test_U_InetConnectionManager_t;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-typedef ACE_Singleton<Net_NetlinkConnectionManager_t,
-                      ACE_SYNCH_MUTEX> NET_NETLINKCONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<Test_U_NetlinkConnectionManager_t,
+                      ACE_SYNCH_MUTEX> TEST_U_NETLINKCONNECTIONMANAGER_SINGLETON;
 #endif
-typedef ACE_Singleton<Net_InetConnectionManager_t,
-                      ACE_SYNCH_MUTEX> NET_CONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<Test_U_InetConnectionManager_t,
+                      ACE_SYNCH_MUTEX> TEST_U_CONNECTIONMANAGER_SINGLETON;
 
 #endif

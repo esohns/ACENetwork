@@ -30,12 +30,12 @@ gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_update_log_display_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 gboolean idle_initialize_client_UI_cb (gpointer);
 gboolean idle_update_progress_client_cb (gpointer);
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 gboolean idle_initialize_server_UI_cb (gpointer);
 gboolean idle_update_progress_server_cb (gpointer);
@@ -61,9 +61,13 @@ G_MODULE_EXPORT gint button_report_clicked_cb (GtkWidget*, gpointer);
 
 /////////////////////////////////////////
 
-G_MODULE_EXPORT gint spinbutton_connections_value_changed_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT gint spinbutton_connections_value_changed_client_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT gint spinbutton_ping_interval_value_changed_client_cb (GtkWidget*, gpointer);
+
+G_MODULE_EXPORT gint spinbutton_connections_value_changed_server_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT gint spinbutton_ping_interval_value_changed_server_cb (GtkWidget*, gpointer);
+
 //G_MODULE_EXPORT gint spinbutton_messages_value_changed_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gint spinbutton_ping_interval_value_changed_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT gint spinbutton_session_messages_value_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_clear_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_about_clicked_cb (GtkWidget*, gpointer);

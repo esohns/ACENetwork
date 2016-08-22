@@ -106,32 +106,24 @@ enum Net_Connection_Status
 typedef Stream_Statistic Net_RuntimeStatistic_t;
 typedef Net_ITransportLayer_T<Net_SocketConfiguration> Net_ITransportLayer_t;
 
-struct Net_Configuration;
 struct Net_UserData
 {
   inline Net_UserData ()
-   : configuration (NULL)
-   , userData (NULL)
+   : userData (NULL)
   {};
 
-  Net_Configuration* configuration;
-
-  void*              userData;
+  void* userData;
 };
 
 struct Net_ConnectionState
 {
   inline Net_ConnectionState ()
-   : configuration (NULL)
-   , status (NET_CONNECTION_STATUS_INVALID)
+   : status (NET_CONNECTION_STATUS_INVALID)
    , currentStatistic ()
    , lastCollectionTimestamp (ACE_Time_Value::zero)
    , lock ()
    , userData (NULL)
   {};
-
-  // *TODO*: consider making this a separate entity (i.e. a pointer)
-  Net_Configuration*     configuration;
 
   Net_Connection_Status  status;
 

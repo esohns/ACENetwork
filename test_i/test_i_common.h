@@ -18,22 +18,40 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_CONNECTION_COMMON_H
-#define TEST_U_CONNECTION_COMMON_H
+#ifndef TEST_I_COMMON_H
+#define TEST_I_COMMON_H
+
+#include "ace/Synch_Traits.h"
+
+#include "common.h"
 
 #include "net_common.h"
 
-#include "test_u_common.h"
+struct Net_Configuration;
+struct Test_I_UserData
+ : Net_UserData
+{
+  inline Test_I_UserData
+   : Net_UserData ()
+   , configuration (NULL)
+  {};
 
-struct Test_U_ConnectionState
+  Net_Configuration* configuration;
+};
+
+struct Test_I_ConnectionState
  : Net_ConnectionState
 {
-  inline Test_U_ConnectionState ()
+  inline Test_I_ConnectionState ()
    : Net_ConnectionState ()
+   , configuration (NULL)
    , userData (NULL)
   {};
 
-  Test_U_UserData* userData;
+  // *TODO*: consider making this a separate entity (i.e. a pointer)
+  Net_Configuration* configuration;
+
+  Test_I_UserData*   userData;
 };
 
 #endif

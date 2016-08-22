@@ -36,38 +36,38 @@
 #include "test_u_configuration.h"
 
 // forward declarations
-class Net_Message;
-class Net_SessionMessage;
+class Test_U_Message;
+class Test_U_SessionMessage;
 
-class Net_Stream
+class Test_U_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
-                        Net_StreamState,
-                        Net_StreamConfiguration,
+                        Test_U_StreamState,
+                        Test_U_StreamConfiguration,
                         Net_RuntimeStatistic_t,
                         Stream_ModuleConfiguration,
                         Stream_ModuleHandlerConfiguration,
-                        Net_StreamSessionData,   // session data
-                        Net_StreamSessionData_t, // session data container (reference counted)
+                        Test_U_StreamSessionData,   // session data
+                        Test_U_StreamSessionData_t, // session data container (reference counted)
                         ACE_Message_Block,
-                        Net_Message,
-                        Net_SessionMessage>
+                        Test_U_Message,
+                        Test_U_SessionMessage>
 {
  public:
-  Net_Stream (const std::string&); // name
-  virtual ~Net_Stream ();
+  Test_U_Stream (const std::string&); // name
+  virtual ~Test_U_Stream ();
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ModuleList_t&); // return value: module list
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Net_StreamConfiguration&, // configuration
-                           bool = true,                    // setup pipeline ?
-                           bool = true);                   // reset session data ?
+  virtual bool initialize (const Test_U_StreamConfiguration&, // configuration
+                           bool = true,                       // setup pipeline ?
+                           bool = true);                      // reset session data ?
 
   // *TODO*: re-consider this API
   void ping ();
@@ -84,25 +84,24 @@ class Net_Stream
                         int,
                         Stream_SessionMessageType,
                         Stream_StateMachine_ControlState,
-                        Net_StreamState,
-                        Net_StreamConfiguration,
+                        Test_U_StreamState,
+                        Test_U_StreamConfiguration,
                         Net_RuntimeStatistic_t,
                         Stream_ModuleConfiguration,
                         Stream_ModuleHandlerConfiguration,
-                        Net_StreamSessionData,
-                        Net_StreamSessionData_t,
+                        Test_U_StreamSessionData,
+                        Test_U_StreamSessionData_t,
                         ACE_Message_Block,
-                        Net_Message,
-                        Net_SessionMessage> inherited;
+                        Test_U_Message,
+                        Test_U_SessionMessage> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Stream ())
-  ACE_UNIMPLEMENTED_FUNC (Net_Stream (const Net_Stream&))
-  ACE_UNIMPLEMENTED_FUNC (Net_Stream& operator= (const Net_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream ())
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream& operator= (const Test_U_Stream&))
 
-  // finalize stream
-  // *NOTE*: need this to clean up queued modules if something goes wrong during
-  //         initialize () !
-  bool finalize (const Stream_Configuration&); // configuration
+  //// finalize stream
+  //// *NOTE*: remove queued modules if something goes wrong during initialize ()
+  //bool finalize (const Test_U_StreamConfiguration&); // configuration
 };
 
 #endif

@@ -27,77 +27,74 @@
 
 #include "net_macros.h"
 
-Net_SessionMessage::Net_SessionMessage (Stream_SessionMessageType messageType_in,
-                                        Net_StreamSessionData_t*& sessionData_inout,
-                                        Net_UserData* userData_in)
+Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionMessageType messageType_in,
+                                              Test_U_StreamSessionData_t*& sessionData_inout,
+                                              Test_U_UserData* userData_in)
  : inherited (messageType_in,
               sessionData_inout,
               userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_SessionMessage::Net_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
 
 }
 
-Net_SessionMessage::Net_SessionMessage (const Net_SessionMessage& message_in)
+Test_U_SessionMessage::Test_U_SessionMessage (const Test_U_SessionMessage& message_in)
  : inherited (message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_SessionMessage::Net_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
 
 }
 
-Net_SessionMessage::Net_SessionMessage (ACE_Allocator* messageAllocator_in)
+Test_U_SessionMessage::Test_U_SessionMessage (ACE_Allocator* messageAllocator_in)
  : inherited (messageAllocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_SessionMessage::Net_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
 
 }
 
-Net_SessionMessage::Net_SessionMessage (ACE_Data_Block* dataBlock_in,
-                                        ACE_Allocator* messageAllocator_in)
+Test_U_SessionMessage::Test_U_SessionMessage (ACE_Data_Block* dataBlock_in,
+                                              ACE_Allocator* messageAllocator_in)
  : inherited (dataBlock_in,
               messageAllocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_SessionMessage::Net_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
 
 }
 
-Net_SessionMessage::~Net_SessionMessage ()
+Test_U_SessionMessage::~Test_U_SessionMessage ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_SessionMessage::~Net_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SessionMessage::~Test_U_SessionMessage"));
 
 }
 
 ACE_Message_Block*
-Net_SessionMessage::duplicate (void) const
+Test_U_SessionMessage::duplicate (void) const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_SessionMessage::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SessionMessage::duplicate"));
 
-  Net_SessionMessage* message_p = NULL;
+  Test_U_SessionMessage* message_p = NULL;
 
-  // *NOTE*: create a new Net_SessionMessage that contains unique copies of
+  // *NOTE*: create a new Test_U_SessionMessage that contains unique copies of
   // the message block fields, but a reference counted duplicate of
   // the ACE_Data_Block
 
   // if there is no allocator, use the standard new and delete calls.
   if (!inherited::message_block_allocator_)
     ACE_NEW_NORETURN (message_p,
-                      Net_SessionMessage (*this));
+                      Test_U_SessionMessage (*this));
   else
   {
     Stream_IAllocator* allocator_p =
       dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
     ACE_ASSERT (allocator_p);
 allocate:
-    try
-    {
+    try {
       // *NOTE*: instruct the allocator to return a session message by passing 0 as
       //         argument to malloc()...
       ACE_NEW_MALLOC_NORETURN (message_p,
-                               static_cast<Net_SessionMessage*> (inherited::message_block_allocator_->calloc (0)),
-                               Net_SessionMessage (*this));
-    }
-    catch (...)
-    {
+                               static_cast<Test_U_SessionMessage*> (inherited::message_block_allocator_->calloc (0)),
+                               Test_U_SessionMessage (*this));
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::calloc(0), aborting\n")));
       return NULL;
@@ -118,11 +115,11 @@ allocate:
 
       if (allocator_p->block ())
         ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate Net_SessionMessage: \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to allocate Test_U_SessionMessage: \"%m\", aborting\n")));
     } // end IF
     else
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate Net_SessionMessage: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to allocate Test_U_SessionMessage: \"%m\", aborting\n")));
 
     return NULL;
   } // end IF

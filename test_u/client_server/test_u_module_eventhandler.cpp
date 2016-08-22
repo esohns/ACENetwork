@@ -19,55 +19,54 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "test_u_stream.h"
 #include "test_u_module_eventhandler.h"
 
 #include "net_macros.h"
 
-Net_Module_EventHandler::Net_Module_EventHandler ()
+Test_U_Module_EventHandler::Test_U_Module_EventHandler ()
  : inherited ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_EventHandler::Net_Module_EventHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::Test_U_Module_EventHandler"));
 
 }
 
-Net_Module_EventHandler::~Net_Module_EventHandler ()
+Test_U_Module_EventHandler::~Test_U_Module_EventHandler ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_EventHandler::~Net_Module_EventHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::~Test_U_Module_EventHandler"));
 
 }
 
 Stream_Module_t*
-Net_Module_EventHandler::clone ()
+Test_U_Module_EventHandler::clone ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_EventHandler::clone"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::clone"));
 
   // initialize return value(s)
   Stream_Module_t* module_p = NULL;
 
   ACE_NEW_NORETURN (module_p,
-                    Net_Module_EventHandler_Module (ACE_TEXT_ALWAYS_CHAR (inherited::name ()),
-                                                    NULL,
-                                                    true));
+                    Test_U_Module_EventHandler_Module (ACE_TEXT_ALWAYS_CHAR (inherited::name ()),
+                                                       NULL,
+                                                       true));
   if (!module_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
   else
   {
-    Net_Module_EventHandler* eventHandler_impl = NULL;
-    eventHandler_impl =
-      dynamic_cast<Net_Module_EventHandler*> (module_p->writer ());
+    Test_U_Module_EventHandler* eventHandler_impl =
+      dynamic_cast<Test_U_Module_EventHandler*> (module_p->writer ());
     if (!eventHandler_impl)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("dynamic_cast<Net_Module_EventHandler> failed, aborting\n")));
+                  ACE_TEXT ("dynamic_cast<Test_U_Module_EventHandler> failed, aborting\n")));
 
       // clean up
       delete module_p;
 
       return NULL;
     } // end IF
-    eventHandler_impl->initialize (inherited::subscribers_, inherited::lock_);
+    eventHandler_impl->initialize (inherited::subscribers_,
+                                   inherited::lock_);
   } // end ELSE
 
   return module_p;

@@ -576,7 +576,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   return handler_p;
 }
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 template <typename HandlerType,
           typename ConfigurationType,

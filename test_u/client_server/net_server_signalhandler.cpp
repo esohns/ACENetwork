@@ -39,28 +39,28 @@
 
 #include "test_u_connection_manager_common.h"
 
-Net_Server_SignalHandler::Net_Server_SignalHandler ()
+Test_U_Server_SignalHandler::Test_U_Server_SignalHandler ()
  : inherited (this) // event handler handle
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::Net_Server_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Server_SignalHandler::Test_U_Server_SignalHandler"));
 
 //  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
-Net_Server_SignalHandler::~Net_Server_SignalHandler ()
+Test_U_Server_SignalHandler::~Test_U_Server_SignalHandler ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::~Net_Server_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Server_SignalHandler::~Test_U_Server_SignalHandler"));
 
 }
 
 bool
-Net_Server_SignalHandler::handleSignal (int signal_in)
+Test_U_Server_SignalHandler::handleSignal (int signal_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_SignalHandler::handleSignal"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Server_SignalHandler::handleSignal"));
 
   int result = -1;
-  Net_IInetConnectionManager_t* iconnection_manager_p =
-      NET_CONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_IInetConnectionManager_t* iconnection_manager_p =
+      TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
 
   bool shutdown = false;
@@ -106,7 +106,7 @@ Net_Server_SignalHandler::handleSignal (int signal_in)
     }
   } // end SWITCH
 
-  // ------------------------------------
+  // -------------------------------------
 
   // report ?
   if (report &&

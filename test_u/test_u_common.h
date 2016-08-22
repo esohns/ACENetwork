@@ -31,16 +31,12 @@
 #include "common_ui_common.h"
 
 #include "net_common.h"
+#include "net_configuration.h"
 
-//#include "test_u_configuration.h"
 #include "test_u_stream_common.h"
-
-//#include "net_server_common.h"
 
 // forward declarations
 class Stream_IAllocator;
-struct Net_Client_Configuration;
-class Net_Client_TimeoutHandler;
 struct Net_Server_Configuration;
 
 extern unsigned int random_seed;
@@ -49,22 +45,47 @@ extern struct random_data random_data;
 extern char random_state_buffer[];
 #endif
 
-enum Net_GTK_Event
+struct Test_U_Configuration;
+struct Test_U_UserData
+ : Net_UserData
 {
-  NET_GKTEVENT_INVALID = -1,
-  NET_GTKEVENT_CONNECT = 0,
-  NET_GTKEVENT_DATA,
-  NET_GTKEVENT_DISCONNECT,
-  NET_GTKEVENT_STATISTIC,
-  // -------------------------------------
-  NET_GTKEVENT_MAX
-};
-typedef std::deque<Net_GTK_Event> Net_GTK_Events_t;
-typedef Net_GTK_Events_t::const_iterator Net_GTK_EventsIterator_t;
+  inline Test_U_UserData ()
+   : Net_UserData ()
+   , configuration (NULL)
+  {};
 
-struct Net_GTK_ProgressData
+  Test_U_Configuration* configuration;
+};
+
+struct Test_U_SocketHandlerConfiguration
+ : Net_SocketHandlerConfiguration
 {
-  inline Net_GTK_ProgressData ()
+  inline Test_U_SocketHandlerConfiguration ()
+   : Net_SocketHandlerConfiguration ()
+   , userData (NULL)
+  {};
+
+  Test_U_UserData* userData;
+};
+
+//////////////////////////////////////////
+
+enum Test_U_GTK_Event
+{
+  TEST_U_GKTEVENT_INVALID = -1,
+  TEST_U_GTKEVENT_CONNECT = 0,
+  TEST_U_GTKEVENT_DATA,
+  TEST_U_GTKEVENT_DISCONNECT,
+  TEST_U_GTKEVENT_STATISTIC,
+  // -------------------------------------
+  TEST_U_GTKEVENT_MAX
+};
+typedef std::deque<Test_U_GTK_Event> Test_U_GTK_Events_t;
+typedef Test_U_GTK_Events_t::const_iterator Test_U_GTK_EventsIterator_t;
+
+struct Test_U_GTK_ProgressData
+{
+  inline Test_U_GTK_ProgressData ()
    : /*cursorType (GDK_LAST_CURSOR)
    ,*/ GTKState (NULL)
    , statistic ()
@@ -79,28 +100,24 @@ struct Net_GTK_ProgressData
   size_t              size; // bytes
 };
 
-struct Net_GTK_CBData
+struct Test_U_GTK_CBData
  : Common_UI_GTKState
 {
-  inline Net_GTK_CBData ()
+  inline Test_U_GTK_CBData ()
    : Common_UI_GTKState ()
    , allowUserRuntimeStatistic (true)
-   , clientConfiguration (NULL)
    , eventStack ()
    , logStack ()
    , progressData ()
    , progressEventSourceID (0)
-   , serverConfiguration (NULL)
    , stackLock ()
   {};
 
   bool                       allowUserRuntimeStatistic;
-  Net_Client_Configuration*  clientConfiguration;
-  Net_GTK_Events_t           eventStack;
+  Test_U_GTK_Events_t        eventStack;
   Common_MessageStack_t      logStack;
-  Net_GTK_ProgressData       progressData;
+  Test_U_GTK_ProgressData    progressData;
   guint                      progressEventSourceID;
-  Net_Server_Configuration*  serverConfiguration;
   ACE_SYNCH_RECURSIVE_MUTEX  stackLock;
 };
 

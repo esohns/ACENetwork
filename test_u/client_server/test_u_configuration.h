@@ -30,24 +30,26 @@
 #include "stream_common.h"
 #include "stream_iallocator.h"
 
-#include "net_common.h"
 #include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 
 #include "net_server_defines.h"
 
-// forward declarations
-struct Net_Configuration;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Net_Configuration,
-                                 Net_ConnectionState,
-                                 Net_RuntimeStatistic_t,
-                                 Net_UserData> Net_IInetConnectionManager_t;
+#include "test_u_common.h"
 
-struct Net_ProtocolConfiguration
+// forward declarations
+struct Test_U_Configuration;
+struct Test_U_ConnectionState;
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                 Test_U_Configuration,
+                                 Test_U_ConnectionState,
+                                 Net_RuntimeStatistic_t,
+                                 Test_U_UserData> Test_U_IInetConnectionManager_t;
+
+struct Test_U_ProtocolConfiguration
 {
-  inline Net_ProtocolConfiguration ()
+  inline Test_U_ProtocolConfiguration ()
    : PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , pingInterval (ACE_Time_Value::zero)
    , pingAutoAnswer (true)
@@ -60,11 +62,11 @@ struct Net_ProtocolConfiguration
   bool           printPongMessages;
 };
 
-struct Net_ModuleHandlerConfiguration
+struct Test_U_ModuleHandlerConfiguration
  : public Stream_ModuleHandlerConfiguration
 {
-  inline Net_ModuleHandlerConfiguration ()
-   : active (false)
+  inline Test_U_ModuleHandlerConfiguration ()
+   : Stream_ModuleHandlerConfiguration ()
    , inbound (false)
    , printFinalReport (true)
    , printProgressDot (false)
@@ -72,7 +74,6 @@ struct Net_ModuleHandlerConfiguration
    , sessionData (NULL)
   {};
 
-  bool                active; // head module
   bool                inbound; // statistic/IO module
   bool                printFinalReport; // statistic module
   bool                printProgressDot; // file writer module
@@ -82,10 +83,10 @@ struct Net_ModuleHandlerConfiguration
   Stream_SessionData* sessionData;
 };
 
-struct Net_StreamConfiguration
+struct Test_U_StreamConfiguration
  : Stream_Configuration
 {
-  inline Net_StreamConfiguration ()
+  inline Test_U_StreamConfiguration ()
    : Stream_Configuration ()
    , moduleConfiguration_2 ()
    , moduleHandlerConfiguration_2 ()
@@ -95,16 +96,16 @@ struct Net_StreamConfiguration
     bufferSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
   };
 
-  Stream_ModuleConfiguration     moduleConfiguration_2;        // module configuration
-  Net_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
-  Net_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
+  Stream_ModuleConfiguration        moduleConfiguration_2;        // module configuration
+  Test_U_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
+  Test_U_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
 
-  Net_UserData*                  userData;                     // user data
+  Test_U_UserData*                  userData;                     // user data
 };
 
-struct Net_Configuration
+struct Test_U_Configuration
 {
-  inline Net_Configuration ()
+  inline Test_U_Configuration ()
    : socketConfiguration ()
    , socketHandlerConfiguration ()
    , streamConfiguration ()
@@ -113,13 +114,14 @@ struct Net_Configuration
   {};
 
   // **************************** socket data **********************************
-  Net_SocketConfiguration        socketConfiguration;
-  Net_SocketHandlerConfiguration socketHandlerConfiguration;
+  Net_SocketConfiguration           socketConfiguration;
+  Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
   // **************************** stream data **********************************
-  Net_StreamConfiguration        streamConfiguration;
+  Test_U_StreamConfiguration        streamConfiguration;
   // *************************** protocol data *********************************
-  Net_ProtocolConfiguration      protocolConfiguration;
-  Net_UserData                   userData;
+  Test_U_ProtocolConfiguration      protocolConfiguration;
+
+  Test_U_UserData                   userData;
 };
 
 #endif

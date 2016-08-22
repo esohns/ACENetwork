@@ -137,7 +137,7 @@ class Net_Client_AsynchConnector_T
                        const void* = 0);                                               // ACT
 };
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 // partial specialization (for UDP)
 template <typename HandlerType,
@@ -260,7 +260,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 };
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else

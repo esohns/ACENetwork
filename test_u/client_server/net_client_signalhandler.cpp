@@ -19,41 +19,43 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "net_client_signalhandler.h"
+#include "net_client_signalHandler.h"
 
 #include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
-//#include "common_timer_manager.h"
+#include "common_timer_manager_common.h"
 #include "common_tools.h"
 
 #include "common_ui_gtk_manager.h"
 
 #include "net_macros.h"
 
+//#include "test_u_stream.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_sessionmessage.h"
 
-Net_Client_SignalHandler::Net_Client_SignalHandler ()
+Test_U_Client_SignalHandler::Test_U_Client_SignalHandler ()
  : inherited (this) // event handler handle
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::Net_Client_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::Test_U_Client_SignalHandler"));
 
 }
 
-Net_Client_SignalHandler::~Net_Client_SignalHandler ()
+Test_U_Client_SignalHandler::~Test_U_Client_SignalHandler ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::~Net_Client_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::~Test_U_Client_SignalHandler"));
 
 }
 
 bool
-Net_Client_SignalHandler::handleSignal (int signal_in)
+Test_U_Client_SignalHandler::handleSignal (int signal_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_SignalHandler::handleSignal"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::handleSignal"));
 
   int result = -1;
-  Net_IInetConnectionManager_t* iconnection_manager_p =
-      NET_CONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_IInetConnectionManager_t* iconnection_manager_p =
+      TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
 
   bool abort = false;
@@ -111,7 +113,7 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
     }
   } // end SWITCH
 
-  // ------------------------------------
+  // -------------------------------------
 
   // abort ?
   if (abort)
@@ -193,7 +195,7 @@ Net_Client_SignalHandler::handleSignal (int signal_in)
         // *PORTABILITY*: tracing in a signal handler context is not portable
         // *TODO*
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_Client_IConnector_t::abort(), continuing\n")));
+                    ACE_TEXT ("caught exception in Test_U_Client_IConnector_t::abort(), continuing\n")));
       }
     } // end IF
 

@@ -22,7 +22,6 @@
 #define TEST_U_STREAM_COMMON_H
 
 //#include "ace/Synch_Traits.h"
-//#include "ace/Time_Value.h"
 
 //#include "common_time_common.h"
 
@@ -33,14 +32,13 @@
 
 // forward declarations
 typedef Stream_Statistic Net_RuntimeStatistic_t;
-struct Net_Configuration;
 struct Net_ConnectionState;
-struct Net_UserData;
+struct Test_U_UserData;
 
-struct Net_StreamSessionData
+struct Test_U_StreamSessionData
  : Stream_SessionData
 {
-  inline Net_StreamSessionData ()
+  inline Test_U_StreamSessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
    , currentStatistic ()
@@ -51,30 +49,29 @@ struct Net_StreamSessionData
 
   Net_RuntimeStatistic_t currentStatistic;
 
-  Net_UserData*          userData;
+  Test_U_UserData*       userData;
 };
+typedef Stream_SessionData_T<Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 
-struct Net_StreamState
+struct Test_U_StreamState
  : Stream_State
 {
-  inline Net_StreamState ()
+  inline Test_U_StreamState ()
    : Stream_State ()
    , currentSessionData (NULL)
    , userData (NULL)
   {};
 
-  Net_StreamSessionData* currentSessionData;
-  Net_UserData*          userData;
+  Test_U_StreamSessionData* currentSessionData;
+  Test_U_UserData*          userData;
 };
 
-typedef Stream_SessionData_T<Net_StreamSessionData> Net_StreamSessionData_t;
-
-//typedef Stream_IModuleHandler_T<Stream_ModuleHandlerConfiguration> Net_IModuleHandler_t;
+//typedef Stream_IModuleHandler_T<Test_U_ModuleHandlerConfiguration> Test_U_IModuleHandler_t;
 //typedef Stream_IModule_T<ACE_MT_SYNCH,
 //                         Common_TimePolicy_t,
 //                         Stream_ModuleConfiguration,
-//                         Stream_ModuleHandlerConfiguration> Net_IModule_t;
+//                         Test_U_ModuleHandlerConfiguration> Test_U_IModule_t;
 
-typedef Stream_INotify_T<Stream_SessionMessageType> Net_IStreamNotify_t;
+typedef Stream_INotify_T<Stream_SessionMessageType> Test_U_IStreamNotify_t;
 
 #endif

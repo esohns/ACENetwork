@@ -23,12 +23,13 @@
 
 #include <string>
 
+#include "ace/Global_Macros.h"
+
+#include "stream_common.h"
 #include "stream_message_base.h"
 #include "stream_messageallocatorheap_base.h"
 
 #include "net_remote_comm.h"
-
-#include "test_u_common.h"
 
 #include "net_client_common.h"
 
@@ -36,24 +37,24 @@
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-class Net_SessionMessage;
+class Test_U_SessionMessage;
 
-class Net_Message
+class Test_U_Message
  : public Stream_MessageBase_2<Stream_AllocatorConfiguration,
-                               Net_ControlMessage_t,
-                               Net_SessionMessage,
+                               Test_U_ControlMessage_t,
+                               Test_U_SessionMessage,
                                Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t>
 {
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
-                                                 Net_ControlMessage_t,
-                                                 Net_Message,
-                                                 Net_SessionMessage>;
+                                                 Test_U_ControlMessage_t,
+                                                 Test_U_Message,
+                                                 Test_U_SessionMessage>;
 
  public:
-  Net_Message (unsigned int); // size
-  virtual ~Net_Message ();
+  Test_U_Message (unsigned int); // size
+  virtual ~Test_U_Message ();
 
   virtual Net_MessageType_t command () const; // return value: message type
   static std::string CommandType2String (Net_MessageType_t);
@@ -69,21 +70,21 @@ class Net_Message
  protected:
   // copy ctor to be used by duplicate() and derived classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")
-  Net_Message (const Net_Message&);
+  Test_U_Message (const Test_U_Message&);
 
  private:
   typedef Stream_MessageBase_2<Stream_AllocatorConfiguration,
-                               Net_ControlMessage_t,
-                               Net_SessionMessage,
+                               Test_U_ControlMessage_t,
+                               Test_U_SessionMessage,
                                Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Message ())
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
   // *NOTE*: to be used by allocators
-  Net_Message (ACE_Data_Block*, // data block to use
-               ACE_Allocator*); // message allocator
-//   Net_Message (ACE_Allocator*); // message allocator
-  ACE_UNIMPLEMENTED_FUNC (Net_Message& operator= (const Net_Message&))
+  Test_U_Message (ACE_Data_Block*, // data block to use
+                  ACE_Allocator*); // message allocator
+//   Test_U_Message (ACE_Allocator*); // message allocator
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Message& operator= (const Test_U_Message&))
 };
 
 #endif

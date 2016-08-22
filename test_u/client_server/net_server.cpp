@@ -462,30 +462,30 @@ do_work (unsigned int maximumNumberOfConnections_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
-         Net_Server_GTK_CBData& CBData_in,
+         Test_U_Server_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
-         Net_Server_SignalHandler& signalHandler_in)
+         Test_U_Server_SignalHandler& signalHandler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
 
   // step0a: initialize configuration
-  Net_Server_Configuration configuration;
-  CBData_in.serverConfiguration = &configuration;
+  Test_U_Server_Configuration configuration;
+  CBData_in.configuration = &configuration;
 
-  Net_EventHandler ui_event_handler (&CBData_in);
-  Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
-                                                NULL,
-                                                true);
-  Net_Module_EventHandler* event_handler_p =
-    dynamic_cast<Net_Module_EventHandler*> (event_handler.writer ());
+  Test_U_EventHandler ui_event_handler (&CBData_in);
+  Test_U_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
+                                                   NULL,
+                                                   true);
+  Test_U_Module_EventHandler* event_handler_p =
+    dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_EventHandler> failed, returning\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_EventHandler> failed, returning\n")));
     return;
   } // end IF
   event_handler_p->initialize (&CBData_in.subscribers,
@@ -493,9 +493,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
   event_handler_p->subscribe (&ui_event_handler);
 
   Stream_AllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator;
-  Net_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
-                                                  &heap_allocator,         // heap allocator handle
-                                                  true);                   // block ?
+  Test_U_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
+                                                     &heap_allocator,         // heap allocator handle
+                                                     true);                   // block ?
 
   // ******************** protocol configuration data **************************
   configuration.protocolConfiguration.pingInterval = pingInterval_in;
@@ -563,7 +563,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
   Stream_StatisticHandler_Reactor_t statistic_handler (ACTION_REPORT,
-                                                       NET_CONNECTIONMANAGER_SINGLETON::instance (),
+                                                       TEST_U_CONNECTIONMANAGER_SINGLETON::instance (),
                                                        false);
   long timer_id = -1;
   if (statisticReportingInterval_in)
@@ -590,16 +590,16 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // step2: signal handling
   if (useReactor_in)
-    CBData_in.serverConfiguration->listener =
-      NET_SERVER_LISTENER_SINGLETON::instance ();
+    CBData_in.configuration->listener =
+      TEST_U_SERVER_LISTENER_SINGLETON::instance ();
   else
-    CBData_in.serverConfiguration->listener =
-      NET_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
-  Net_Server_SignalHandlerConfiguration signal_handler_configuration;
+    CBData_in.configuration->listener =
+      TEST_U_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
+  Test_U_Server_SignalHandlerConfiguration signal_handler_configuration;
   signal_handler_configuration.listener =
-    CBData_in.serverConfiguration->listener;
+    CBData_in.configuration->listener;
   signal_handler_configuration.statisticReportingHandler =
-      NET_CONNECTIONMANAGER_SINGLETON::instance ();
+      TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   signal_handler_configuration.statisticReportingTimerID = timer_id;
   signal_handler_configuration.useReactor = useReactor_in;
   if (!signalHandler_in.initialize (signal_handler_configuration))
@@ -627,10 +627,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 
   // step3: initialize connection manager
-  NET_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (maximumNumberOfConnections_in);
-  Net_UserData user_data;
-  NET_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
-                                                     &user_data);
+  TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (maximumNumberOfConnections_in);
+  Test_U_UserData user_data;
+  TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
+                                                        &user_data);
 
   // step4: handle events (signals, incoming connections/data, timers, ...)
   // reactor/proactor event loop:
@@ -741,12 +741,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
     configuration.listenerConfiguration.address.set_port_number (listeningPortNumber_in,
                                                                  1);
   configuration.listenerConfiguration.connectionManager =
-    NET_CONNECTIONMANAGER_SINGLETON::instance ();
+    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   configuration.listenerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
   //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
 
-  if (!CBData_in.serverConfiguration->listener->initialize (configuration.listenerConfiguration))
+  if (!CBData_in.configuration->listener->initialize (configuration.listenerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize listener, returning\n")));
@@ -769,8 +769,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
     return;
   } // end IF
-  CBData_in.serverConfiguration->listener->start ();
-  if (!CBData_in.serverConfiguration->listener->isRunning ())
+  CBData_in.configuration->listener->start ();
+  if (!CBData_in.configuration->listener->isRunning ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start listener (port: %u), returning\n"),
@@ -1040,7 +1040,7 @@ ACE_TMAIN (int argc_in,
   } // end IF
   if (number_of_dispatch_threads == 0) number_of_dispatch_threads = 1;
 
-  Net_Server_GTK_CBData gtk_cb_user_data;
+  Test_U_Server_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.allowUserRuntimeStatistic =
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
@@ -1124,7 +1124,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  Net_Server_SignalHandler signal_handler;
+  Test_U_Server_SignalHandler signal_handler;
 
   // step1f: handle specific program modes
   if (print_version_and_exit)

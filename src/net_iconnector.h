@@ -27,19 +27,29 @@
 #include "common_iget.h"
 #include "common_iinitialize.h"
 
-template <typename AddressType,
-          typename ConfigurationType>
-class Net_IConnector_T
- : public Common_IGet_T<ConfigurationType>
- , public Common_IInitialize_T<ConfigurationType>
+template <typename AddressType>
+class Net_IConnectorBase_T
 {
  public:
-  virtual ~Net_IConnector_T () {};
+  virtual ~Net_IConnectorBase_T () {};
 
   virtual bool useReactor () const = 0; // ? : uses proactor
 
   virtual void abort () = 0; // shutdown
   virtual ACE_HANDLE connect (const AddressType&) = 0;
+};
+
+//////////////////////////////////////////
+
+template <typename AddressType,
+          typename ConfigurationType>
+class Net_IConnector_T
+ : public Net_IConnectorBase_T<AddressType>
+ , public Common_IGet_T<ConfigurationType>
+ , public Common_IInitialize_T<ConfigurationType>
+{
+ public:
+  virtual ~Net_IConnector_T () {};
 };
 
 //template <typename AddressType,
@@ -54,5 +64,9 @@ class Net_IConnector_T
 //  virtual void abort () = 0; // shutdown
 //  virtual connect (const AddressType&) = 0;
 //};
+
+//////////////////////////////////////////
+
+typedef Net_IConnectorBase_T<ACE_INET_Addr> Net_Inet_IConnector_t;
 
 #endif

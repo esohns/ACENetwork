@@ -28,34 +28,34 @@
 #include "net_client_asynchconnector.h"
 #include "net_client_connector.h"
 
-#include "test_u_common.h"
 #include "test_u_configuration.h"
+#include "test_u_connection_common.h"
 #include "test_u_tcpconnection.h"
 
 // forward declarations
-class Net_Stream;
+class Test_U_Stream;
 
 //////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         Net_SocketHandlerConfiguration> Net_IConnector_t;
+                         Test_U_SocketHandlerConfiguration> Test_U_IConnector_t;
 
-typedef Net_Client_AsynchConnector_T<Net_AsynchTCPConnection,
+typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection,
                                      ACE_INET_Addr,
-                                     Net_Configuration,
-                                     Net_ConnectionState,
+                                     Test_U_Configuration,
+                                     Test_U_ConnectionState,
                                      Net_RuntimeStatistic_t,
-                                     Net_Stream,
-                                     Net_SocketHandlerConfiguration,
-                                     Net_UserData> Net_Client_AsynchConnector_t;
-typedef Net_Client_Connector_T<Net_TCPConnection,
+                                     Test_U_Stream,
+                                     Test_U_SocketHandlerConfiguration,
+                                     Test_U_UserData> Test_U_Client_AsynchConnector_t;
+typedef Net_Client_Connector_T<Test_U_TCPConnection,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
-                               Net_Configuration,
-                               Net_ConnectionState,
+                               Test_U_Configuration,
+                               Test_U_ConnectionState,
                                Net_RuntimeStatistic_t,
-                               Net_Stream,
-                               Net_SocketHandlerConfiguration,
-                               Net_UserData> Net_Client_Connector_t;
+                               Test_U_Stream,
+                               Test_U_SocketHandlerConfiguration,
+                               Test_U_UserData> Test_U_Client_Connector_t;
 
 #endif

@@ -35,33 +35,33 @@
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-class Net_Message;
+class Test_U_Message;
 
-class Net_SessionMessage
+class Test_U_SessionMessage
  : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
                                       Stream_SessionMessageType,
-                                      Net_StreamSessionData_t,
-                                      Net_UserData,
-                                      Net_ControlMessage_t,
-                                      Net_Message>
+                                      Test_U_StreamSessionData_t,
+                                      Test_U_UserData,
+                                      Test_U_ControlMessage_t,
+                                      Test_U_Message>
 {
 //  // enable access to private ctor(s)
 //  friend class Net_StreamMessageAllocator;
   friend class Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
-                                                 Net_ControlMessage_t,
-                                                 Net_Message,
-                                                 Net_SessionMessage>;
+                                                 Test_U_ControlMessage_t,
+                                                 Test_U_Message,
+                                                 Test_U_SessionMessage>;
 
  public:
   // *NOTE*: assumes responsibility for the second argument !
-  Net_SessionMessage (Stream_SessionMessageType, // session message type
-                      Net_StreamSessionData_t*&, // session data handle
-                      Net_UserData*);            // user data handle
+  Test_U_SessionMessage (Stream_SessionMessageType,    // session message type
+                         Test_U_StreamSessionData_t*&, // session data handle
+                         Test_U_UserData*);            // user data handle
     // *NOTE*: to be used by message allocators
-  Net_SessionMessage (ACE_Allocator*); // message allocator
-  Net_SessionMessage (ACE_Data_Block*, // data block
-                      ACE_Allocator*); // message allocator
-  virtual ~Net_SessionMessage ();
+  Test_U_SessionMessage (ACE_Allocator*); // message allocator
+  Test_U_SessionMessage (ACE_Data_Block*, // data block
+                         ACE_Allocator*); // message allocator
+  virtual ~Test_U_SessionMessage ();
 
   // override from ACE_Message_Block
   // *WARNING*: any children need to override this as well
@@ -70,15 +70,15 @@ class Net_SessionMessage
  private:
   typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
                                       Stream_SessionMessageType,
-                                      Net_StreamSessionData_t,
-                                      Net_UserData,
-                                      Net_ControlMessage_t,
-                                      Net_Message> inherited;
+                                      Test_U_StreamSessionData_t,
+                                      Test_U_UserData,
+                                      Test_U_ControlMessage_t,
+                                      Test_U_Message> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage ())
+  ACE_UNIMPLEMENTED_FUNC (Test_U_SessionMessage ())
   // copy ctor (to be used by duplicate())
-  Net_SessionMessage (const Net_SessionMessage&);
-  ACE_UNIMPLEMENTED_FUNC (Net_SessionMessage& operator= (const Net_SessionMessage&))
+  Test_U_SessionMessage (const Test_U_SessionMessage&);
+  ACE_UNIMPLEMENTED_FUNC (Test_U_SessionMessage& operator= (const Test_U_SessionMessage&))
 };
 
 #endif

@@ -27,50 +27,50 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-Net_TCPConnection::Net_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                      const ACE_Time_Value& statisticCollectionInterval_in)
+Test_U_TCPConnection::Test_U_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                            const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::Test_U_TCPConnection"));
 
 }
 
-Net_TCPConnection::Net_TCPConnection ()
+Test_U_TCPConnection::Test_U_TCPConnection ()
  : inherited (NULL,
               ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::Net_TCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::Test_U_TCPConnection"));
 
 }
 
-Net_TCPConnection::~Net_TCPConnection ()
+Test_U_TCPConnection::~Test_U_TCPConnection ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnection::~Net_TCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::~Test_U_TCPConnection"));
 
 }
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
-Net_AsynchTCPConnection::Net_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                  const ACE_Time_Value& statisticCollectionInterval_in)
+Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                        const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
 
 }
 
-Net_AsynchTCPConnection::Net_AsynchTCPConnection ()
+Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection ()
  : inherited (NULL,
               ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::Net_AsynchTCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
 
 }
 
-Net_AsynchTCPConnection::~Net_AsynchTCPConnection ()
+Test_U_AsynchTCPConnection::~Test_U_AsynchTCPConnection ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnection::~Net_AsynchTCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::~Test_U_AsynchTCPConnection"));
 
 }

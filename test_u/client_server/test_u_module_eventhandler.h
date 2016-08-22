@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_MODULE_EVENTHANDLER_H
-#define NET_MODULE_EVENTHANDLER_H
+#ifndef TEST_U_MODULE_EVENTHANDLER_H
+#define TEST_U_MODULE_EVENTHANDLER_H
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
@@ -35,19 +35,19 @@
 #include "test_u_sessionmessage.h"
 #include "test_u_stream_common.h"
 
-class Net_Module_EventHandler
+class Test_U_Module_EventHandler
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          Stream_ModuleHandlerConfiguration,
                                          ACE_Message_Block,
-                                         Net_Message,
-                                         Net_SessionMessage,
+                                         Test_U_Message,
+                                         Test_U_SessionMessage,
                                          Stream_SessionId_t,
-                                         Net_StreamSessionData_t>
+                                         Test_U_StreamSessionData_t>
 {
  public:
-  Net_Module_EventHandler ();
-  virtual ~Net_Module_EventHandler ();
+  Test_U_Module_EventHandler ();
+  virtual ~Test_U_Module_EventHandler ();
 
   // implement Common_IClone_T
   virtual Stream_Module_t* clone ();
@@ -57,20 +57,20 @@ class Net_Module_EventHandler
                                          Common_TimePolicy_t,
                                          Stream_ModuleHandlerConfiguration,
                                          ACE_Message_Block,
-                                         Net_Message,
-                                         Net_SessionMessage,
+                                         Test_U_Message,
+                                         Test_U_SessionMessage,
                                          Stream_SessionId_t,
-                                         Net_StreamSessionData_t> inherited;
+                                         Test_U_StreamSessionData_t> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler (const Net_Module_EventHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_EventHandler& operator= (const Net_Module_EventHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler (const Test_U_Module_EventHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler& operator= (const Test_U_Module_EventHandler&))
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (Net_StreamSessionData,             // session data type
+DATASTREAM_MODULE_INPUT_ONLY (Test_U_StreamSessionData,          // session data type
                               Stream_SessionMessageType,         // session event type
                               Stream_ModuleHandlerConfiguration, // module handler configuration type
-                              Net_IStreamNotify_t,               // stream notification interface type
-                              Net_Module_EventHandler);          // writer type
+                              Test_U_IStreamNotify_t,            // stream notification interface type
+                              Test_U_Module_EventHandler);       // writer type
 
 #endif

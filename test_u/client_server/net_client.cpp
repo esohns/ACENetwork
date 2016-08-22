@@ -453,7 +453,7 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
 }
 
 void
-do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
+do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
          unsigned int maxNumConnections_in,
          const std::string& UIDefinitionFile_in,
          bool useThreadPool_in,
@@ -464,11 +464,11 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
          const ACE_Time_Value& pingInterval_in,
          unsigned int numberOfDispatchThreads_in,
          bool useUDP_in,
-         Net_Client_GTK_CBData& CBData_in,
+         Test_U_Client_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
-         Net_Client_SignalHandler& signalHandler_in)
+         Test_U_Client_SignalHandler& signalHandler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
@@ -478,15 +478,15 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   Common_Tools::initialize ();
 
   // step0a: initialize configuration
-  Net_Client_Configuration configuration;
-  CBData_in.clientConfiguration = &configuration;
+  Test_U_Client_Configuration configuration;
+  CBData_in.configuration = &configuration;
 
-  Net_EventHandler ui_event_handler (&CBData_in);
-  Net_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
+  Test_U_EventHandler ui_event_handler (&CBData_in);
+  Test_U_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
                                                 NULL,
                                                 true);
-  Net_Module_EventHandler* event_handler_p =
-    dynamic_cast<Net_Module_EventHandler*> (event_handler.writer ());
+  Test_U_Module_EventHandler* event_handler_p =
+    dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -498,13 +498,13 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   event_handler_p->subscribe (&ui_event_handler);
 
   Stream_AllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator;
-  Net_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
-                                                  &heap_allocator,         // heap allocator handle
-                                                  true);                   // block ?
+  Test_U_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
+                                                     &heap_allocator,         // heap allocator handle
+                                                     true);                   // block ?
   // ********************* protocol configuration data *************************
   configuration.protocolConfiguration.pingInterval =
-    ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? ACE_Time_Value::zero
-                                                                 : pingInterval_in);
+    ((actionMode_in == Test_U_Client_TimeoutHandler::ACTION_STRESS) ? ACE_Time_Value::zero
+                                                                    : pingInterval_in);
   configuration.protocolConfiguration.printPongMessages =
     UIDefinitionFile_in.empty ();
   // ********************** stream configuration data **************************
@@ -569,16 +569,16 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   } // end IF
 
   // step0c: initialize connector
-  Net_InetConnectionManager_t* connection_manager_p =
-    NET_CONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_InetConnectionManager_t* connection_manager_p =
+    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  Net_IInetConnectionManager_t* iconnection_manager_p =
+  Test_U_IInetConnectionManager_t* iconnection_manager_p =
     connection_manager_p;
-  Net_Client_Connector_t connector (iconnection_manager_p,
-                                    configuration.streamConfiguration.statisticReportingInterval);
-  Net_Client_AsynchConnector_t asynch_connector (iconnection_manager_p,
-                                                 configuration.streamConfiguration.statisticReportingInterval);
-  Net_IConnector_t* connector_p = NULL;
+  Test_U_Client_Connector_t connector (iconnection_manager_p,
+                                       configuration.streamConfiguration.statisticReportingInterval);
+  Test_U_Client_AsynchConnector_t asynch_connector (iconnection_manager_p,
+                                                    configuration.streamConfiguration.statisticReportingInterval);
+  Test_U_IConnector_t* connector_p = NULL;
   if (useReactor_in)
     connector_p = &connector;
   else
@@ -609,10 +609,10 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
     return;
   } // end IF
 
-  Net_Client_TimeoutHandler timeout_handler (actionMode_in,
-                                             maxNumConnections_in,
-                                             configuration.signalHandlerConfiguration.peerAddress,
-                                             connector_p);
+  Test_U_Client_TimeoutHandler timeout_handler (actionMode_in,
+                                                maxNumConnections_in,
+                                                configuration.signalHandlerConfiguration.peerAddress,
+                                                connector_p);
   configuration.timeoutHandler = &timeout_handler;
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
@@ -624,10 +624,10 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   {
     // schedule action interval timer
     ACE_Event_Handler* handler_p = &timeout_handler;
-    ACE_Time_Value interval (((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? (NET_CLIENT_DEF_SERVER_STRESS_INTERVAL / 1000)
-                                                                                          : connectionInterval_in),
-                             ((actionMode_in == Net_Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000)
-                                                                                          : 0));
+    ACE_Time_Value interval (((actionMode_in == Test_U_Client_TimeoutHandler::ACTION_STRESS) ? (NET_CLIENT_DEF_SERVER_STRESS_INTERVAL / 1000)
+                                                                                             : connectionInterval_in),
+                             ((actionMode_in == Test_U_Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000)
+                                                                                             : 0));
     configuration.signalHandlerConfiguration.actionTimerId =
         timer_manager_p->schedule_timer (handler_p,                  // event handler
                                          NULL,                       // ACT
@@ -765,7 +765,7 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
                     &one_second));
-      if (NET_CONNECTIONMANAGER_SINGLETON::instance ()->count () != 1)
+      if (TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->count () != 1)
         result_2 = false;
     } // end IF
 
@@ -823,11 +823,11 @@ do_work (Net_Client_TimeoutHandler::ActionMode_t actionMode_in,
   timer_manager_p->stop ();
 
 //  connection_manager_p->abort ();
-  NET_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
+  TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
   // *IMPORTANT NOTE*: as long as connections are inactive (i.e. events are
   // dispatched by reactor thread(s), there is no real reason to wait here)
 //  connection_manager_p->wait ();
-  NET_CONNECTIONMANAGER_SINGLETON::instance ()->wait ();
+  TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->wait ();
 
 //  { // synch access
 //    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
@@ -963,8 +963,8 @@ ACE_TMAIN (int argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
-  Net_Client_TimeoutHandler::ActionMode_t action_mode =
-   Net_Client_TimeoutHandler::ACTION_NORMAL;
+  Test_U_Client_TimeoutHandler::ActionMode_t action_mode =
+    Test_U_Client_TimeoutHandler::ACTION_NORMAL;
   bool alternating_mode = false;
   unsigned int maximum_number_of_connections =
    NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS;
@@ -1074,11 +1074,11 @@ ACE_TMAIN (int argc_in,
   if (number_of_dispatch_threads == 0)
     number_of_dispatch_threads = 1;
   if (alternating_mode)
-    action_mode = Net_Client_TimeoutHandler::ACTION_ALTERNATING;
+    action_mode = Test_U_Client_TimeoutHandler::ACTION_ALTERNATING;
   if (run_stress_test)
-    action_mode = Net_Client_TimeoutHandler::ACTION_STRESS;
+    action_mode = Test_U_Client_TimeoutHandler::ACTION_STRESS;
 
-  Net_Client_GTK_CBData gtk_cb_user_data;
+  Test_U_Client_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
   // step1d: initialize logging and/or tracing
   Common_Logger_t logger (&gtk_cb_user_data.logStack,
@@ -1155,7 +1155,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  Net_Client_SignalHandler signal_handler;
+  Test_U_Client_SignalHandler signal_handler;
 
   // step1f: handle specific program modes
   if (print_version_and_exit)

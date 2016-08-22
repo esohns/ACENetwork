@@ -33,37 +33,39 @@
 #include "stream_isessionnotify.h"
 #include "stream_messageallocatorheap_base.h"
 
+#include "net_iconnector.h"
+
 #include "test_u_common.h"
 
 #include "test_u_configuration.h"
-#include "test_u_connection_manager_common.h"
-
-#include "net_client_connector_common.h"
+//#include "test_u_connection_manager_common.h"
 
 // forward declaration(s)
 class Stream_IAllocator;
-struct Net_SocketHandlerConfiguration;
-class Net_SessionMessage;
-class Net_Message;
-class Net_Client_TimeoutHandler;
+struct Test_U_SocketHandlerConfiguration;
+class Test_U_SessionMessage;
+class Test_U_Message;
+class Test_U_Client_TimeoutHandler;
+typedef Net_IConnector_T<ACE_INET_Addr,
+                         Test_U_SocketHandlerConfiguration> Test_U_IConnector_t;
 
-struct Net_Client_ConnectorConfiguration
+struct Test_U_Client_ConnectorConfiguration
 {
- inline Net_Client_ConnectorConfiguration ()
-  : connectionManager (NULL)
-  , socketHandlerConfiguration (NULL)
-  //, statisticCollectionInterval (0)
+  inline Test_U_Client_ConnectorConfiguration ()
+   : connectionManager (NULL)
+   , socketHandlerConfiguration (NULL)
+   //, statisticCollectionInterval (0)
   {};
 
-  Net_IInetConnectionManager_t*   connectionManager;
-  Net_SocketHandlerConfiguration* socketHandlerConfiguration;
+  Test_U_IInetConnectionManager_t*   connectionManager;
+  Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
   //unsigned int                    statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
-struct Net_Client_SignalHandlerConfiguration
+struct Test_U_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  inline Net_Client_SignalHandlerConfiguration ()
+  inline Test_U_Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , actionTimerId (-1)
    , connector (NULL)
@@ -73,58 +75,65 @@ struct Net_Client_SignalHandlerConfiguration
    , statisticReportingInterval (0)
   {};
 
-  long                            actionTimerId;
-  Net_IConnector_t*               connector;
-  Stream_IAllocator*              messageAllocator;
-  ACE_INET_Addr                   peerAddress;
-  Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  unsigned int                    statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
+  long                               actionTimerId;
+  Test_U_IConnector_t*               connector;
+  Stream_IAllocator*                 messageAllocator;
+  ACE_INET_Addr                      peerAddress;
+  Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
+  unsigned int                       statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
-struct Net_Client_Configuration
- : Net_Configuration
+struct Test_U_Client_Configuration
+ : Test_U_Configuration
 {
-  inline Net_Client_Configuration ()
-   : Net_Configuration ()
+  inline Test_U_Client_Configuration ()
+   : Test_U_Configuration ()
    , signalHandlerConfiguration ()
    , timeoutHandler (NULL)
+   , userData ()
   {};
 
-  Net_Client_SignalHandlerConfiguration signalHandlerConfiguration;
-  Net_Client_TimeoutHandler*            timeoutHandler;
+  Test_U_Client_SignalHandlerConfiguration signalHandlerConfiguration;
+  Test_U_Client_TimeoutHandler*            timeoutHandler;
+
+  Test_U_UserData                          userData;
 };
 
 typedef Stream_ControlMessage_T<Stream_ControlMessageType,
                                 Stream_AllocatorConfiguration,
-                                Net_Message,
-                                Net_SessionMessage> Net_ControlMessage_t;
+                                Test_U_Message,
+                                Test_U_SessionMessage> Test_U_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
-                                          Net_ControlMessage_t,
-                                          Net_Message,
-                                          Net_SessionMessage> Net_StreamMessageAllocator_t;
+                                          Test_U_ControlMessage_t,
+                                          Test_U_Message,
+                                          Test_U_SessionMessage> Test_U_StreamMessageAllocator_t;
+
+//////////////////////////////////////////
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    Net_StreamSessionData,
+                                    Test_U_StreamSessionData,
                                     Stream_SessionMessageType,
-                                    Net_Message,
-                                    Net_SessionMessage> Net_ISessionNotify_t;
-typedef std::list<Net_ISessionNotify_t*> Net_Subscribers_t;
-typedef Net_Subscribers_t::iterator Net_SubscribersIterator_t;
+                                    Test_U_Message,
+                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
+typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
+typedef Test_U_Subscribers_t::iterator Test_U_SubscribersIterator_t;
 
-typedef Common_ISubscribe_T<Net_ISessionNotify_t> Net_ISubscribe_t;
+typedef Common_ISubscribe_T<Test_U_ISessionNotify_t> Test_U_ISubscribe_t;
 
-struct Net_Client_GTK_CBData
- : Net_GTK_CBData
+struct Test_U_Client_GTK_CBData
+ : Test_U_GTK_CBData
 {
-  inline Net_Client_GTK_CBData ()
-   : Net_GTK_CBData ()
+  inline Test_U_Client_GTK_CBData ()
+   : Test_U_GTK_CBData ()
+   , configuration (NULL)
    , subscribers ()
    , subscribersLock ()
   {};
 
-  Net_Subscribers_t         subscribers;
-  ACE_SYNCH_RECURSIVE_MUTEX subscribersLock;
+  Test_U_Client_Configuration* configuration;
+  Test_U_Subscribers_t         subscribers;
+  ACE_SYNCH_RECURSIVE_MUTEX    subscribersLock;
 };
 
 #endif

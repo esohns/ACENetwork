@@ -22,9 +22,32 @@
 #define NET_ICONNECTIONMANAGER_H
 
 #include "common_icontrol.h"
+#include "common_idumpstate.h"
 #include "common_ilock.h"
 
 #include "net_iconnection.h"
+
+class Net_IConnectionManagerBase
+ : public Common_IControl
+ , public Common_IDumpState
+ , public Common_ILock
+{
+ public:
+  inline virtual ~Net_IConnectionManagerBase () {};
+
+  virtual void abort (bool = false) = 0; // wait for completion ? (see wait())
+  virtual unsigned int count () const = 0; // return value: # of connections
+  // *IMPORTANT NOTE*: this API really makes sense only AFTER stop() has been
+  //                   invoked, i.e. when new connections will be rejected;
+  //                   otherwise this may block indefinetly
+  virtual void wait () const = 0;
+
+  // debugging
+  virtual void abortLeastRecent () = 0;
+  virtual void abortMostRecent () = 0;
+};
+
+//////////////////////////////////////////
 
 template <typename AddressType,
           typename ConfigurationType,
@@ -33,8 +56,7 @@ template <typename AddressType,
           ////////////////////////////////
           typename UserDataType>
 class Net_IConnectionManager_T
- : public Common_IControl
- , public Common_ILock
+ : public Net_IConnectionManagerBase
 {
  public:
   // convenience types
@@ -61,17 +83,6 @@ class Net_IConnectionManager_T
   // *NOTE*: 'register' is a reserved keyword
   virtual bool registerc (CONNECTION_T*) = 0; // connection handle
   virtual bool deregister (CONNECTION_T*) = 0; // connection handle
-
-  virtual void abort (bool = false) = 0; // wait for completion ? (see wait())
-  virtual unsigned int count () const = 0; // return value: # of connections
-  // *IMPORTANT NOTE*: this API really makes sense only AFTER stop() has been
-  //                   invoked, i.e. when new connections will be rejected;
-  //                   otherwise this may block indefinetly
-  virtual void wait () const = 0;
-
-  // debugging
-  virtual void abortLeastRecent () = 0;
-  virtual void abortMostRecent () = 0;
 };
 
 #endif

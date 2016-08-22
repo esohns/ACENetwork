@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_CLIENT_TIMEOUTHANDLER_H
-#define NET_CLIENT_TIMEOUTHANDLER_H
+#ifndef TEST_U_CLIENT_TIMEOUTHANDLER_H
+#define TEST_U_CLIENT_TIMEOUTHANDLER_H
 
 #include <functional>
 #include <random>
@@ -35,7 +35,7 @@
 
 #include "net_client_connector_common.h"
 
-class Net_Client_TimeoutHandler
+class Test_U_Client_TimeoutHandler
  : public ACE_Event_Handler
 {
  public:
@@ -44,9 +44,9 @@ class Net_Client_TimeoutHandler
     ACTION_NORMAL = 0,
     ACTION_ALTERNATING,
     ACTION_STRESS,
-    //// ---------------------
+    //// ---------------------------------
     //ACTION_GTK, // dispatch UI events
-    // ---------------------
+    // -----------------------------------
     ACTION_MAX,
     ACTION_INVALID = -1
   };
@@ -55,16 +55,16 @@ class Net_Client_TimeoutHandler
   {
     ALTERNATING_STATE_CONNECT = 0,
     ALTERNATING_STATE_ABORT,
-    // ---------------------
+    // -----------------------------------
     ALTERNATING_STATE_MAX,
     ALTERNATING_STATE_INVALID = -1
   };
 
-  Net_Client_TimeoutHandler (ActionMode_t,         // mode
-                             unsigned int,         // max #connections
-                             const ACE_INET_Addr&, // remote SAP
-                             Net_IConnector_t*);   // connector
-  virtual ~Net_Client_TimeoutHandler ();
+  Test_U_Client_TimeoutHandler (ActionMode_t,          // mode
+                                unsigned int,          // max #connections
+                                const ACE_INET_Addr&,  // remote SAP
+                                Test_U_IConnector_t*); // connector
+  virtual ~Test_U_Client_TimeoutHandler ();
 
   void mode (ActionMode_t);
   ActionMode_t mode () const;
@@ -76,12 +76,12 @@ class Net_Client_TimeoutHandler
  private:
   typedef ACE_Event_Handler inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler ())
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler (const Net_Client_TimeoutHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_TimeoutHandler& operator= (const Net_Client_TimeoutHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Client_TimeoutHandler ())
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Client_TimeoutHandler (const Test_U_Client_TimeoutHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Client_TimeoutHandler& operator= (const Test_U_Client_TimeoutHandler&))
 
   AlternatingModeState_t             alternatingModeState_;
-  Net_IConnector_t*                  connector_;
+  Test_U_IConnector_t*               connector_;
   mutable ACE_SYNCH_MUTEX            lock_;
   unsigned int                       maximumNumberOfConnections_;
   ActionMode_t                       mode_;

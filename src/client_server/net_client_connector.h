@@ -69,22 +69,18 @@ class Net_Client_Connector_T
                                   StatisticContainerType,
                                   StreamType,
                                   Stream_StateMachine_ControlState,
-                                  ////////
                                   Net_SocketConfiguration,
-                                  ////////
                                   HandlerConfigurationType> ISOCKET_CONNECTION_T;
 
   typedef Net_Connection_Manager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   ///////
                                    UserDataType> CONNECTION_MANAGER_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   ///////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   typedef Net_IConnector_T<AddressType,
@@ -124,7 +120,7 @@ class Net_Client_Connector_T
   ACE_Time_Value            statisticCollectionInterval_;
 };
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 // (partial) specializations (for UDP)
 template <typename HandlerType,
@@ -144,20 +140,15 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                      StateType,
                                                      StatisticContainerType,
                                                      StreamType,
-
                                                      HandlerConfigurationType,
-
                                                      UserDataType>,
                              ConnectorType,
-                             /////////////
                              ACE_INET_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
                              StreamType,
-                             /////////////
                              HandlerConfigurationType,
-                             /////////////
                              UserDataType>
  : public Net_IConnector_T<ACE_INET_Addr,
                            HandlerConfigurationType>
@@ -170,14 +161,11 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef Net_UDPConnectionBase_T<HandlerType,
-                                  ////////
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
                                   StreamType,
-                                  ////////
                                   HandlerConfigurationType,
-                                  ////////
                                   UserDataType> CONNECTION_T;
   typedef Net_ISocketConnection_T<ACE_INET_Addr,
                                   ConfigurationType,
@@ -185,22 +173,18 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                   StatisticContainerType,
                                   StreamType,
                                   Stream_StateMachine_ControlState,
-                                  ////////
                                   Net_SocketConfiguration,
-                                  ////////
                                   HandlerConfigurationType> ISOCKET_CONNECTION_T;
 
   typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   ///////
                                    UserDataType> CONNECTION_MANAGER_T;
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   ///////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   typedef Net_IConnector_T<ACE_INET_Addr,
@@ -261,7 +245,7 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   ACE_Time_Value            statisticCollectionInterval_;
 };
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -279,15 +263,12 @@ template <typename HandlerType,
           typename UserDataType>
 class Net_Client_Connector_T<HandlerType,
                              ConnectorType,
-                             /////////////
                              Net_Netlink_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
                              StreamType,
-                             /////////////
                              HandlerConfigurationType,
-                             /////////////
                              UserDataType>
  : public Net_IConnector_T<Net_Netlink_Addr,
                            HandlerConfigurationType>
@@ -305,22 +286,18 @@ class Net_Client_Connector_T<HandlerType,
                                   StatisticContainerType,
                                   StreamType,
                                   Stream_StateMachine_ControlState,
-                                  ////////
                                   Net_SocketConfiguration,
-                                  ////////
                                   HandlerConfigurationType> ISOCKET_CONNECTION_T;
 
   typedef Net_Connection_Manager_T<Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   ///////
                                    UserDataType> CONNECTION_MANAGER_T;
   typedef Net_IConnectionManager_T<Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   ///////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   typedef Net_IConnector_T<Net_Netlink_Addr,
@@ -356,7 +333,7 @@ class Net_Client_Connector_T<HandlerType,
 };
 #endif
 
-// include template implementation
+// include template definition
 #include "net_client_connector.inl"
 
 #endif

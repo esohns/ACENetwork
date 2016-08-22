@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_TCPCONNECTION_H
-#define NET_TCPCONNECTION_H
+#ifndef TEST_U_TCPCONNECTION_H
+#define TEST_U_TCPCONNECTION_H
 
 #include "ace/Acceptor.h"
 #include "ace/Asynch_Acceptor.h"
@@ -34,93 +34,92 @@
 #include "net_tcpconnection_base.h"
 
 #include "test_u_configuration.h"
-//#include "test_u_connection_common.h"
+#include "test_u_connection_common.h"
 #include "test_u_socket_common.h"
-#include "test_u_stream_common.h"
 
 // forward declarations
-class Net_Stream;
+class Test_U_Stream;
 
-class Net_TCPConnection
- : public Net_TCPConnectionBase_T<Net_TCPHandler_t,
-                                  Net_Configuration,
-                                  Net_ConnectionState,
+class Test_U_TCPConnection
+ : public Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
+                                  Test_U_Configuration,
+                                  Test_U_ConnectionState,
                                   Net_RuntimeStatistic_t,
-                                  Net_Stream,
-                                  Net_SocketHandlerConfiguration,
-                                  Net_UserData>
+                                  Test_U_Stream,
+                                  Test_U_SocketHandlerConfiguration,
+                                  Test_U_UserData>
 {
-  friend class ACE_Acceptor<Net_TCPConnection, ACE_SOCK_ACCEPTOR>;
-  friend class ACE_Connector<Net_TCPConnection, ACE_SOCK_CONNECTOR>;
+  friend class ACE_Acceptor<Test_U_TCPConnection, ACE_SOCK_ACCEPTOR>;
+  friend class ACE_Connector<Test_U_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   Net_Configuration,
-                                   Net_ConnectionState,
+                                   Test_U_Configuration,
+                                   Test_U_ConnectionState,
                                    Net_RuntimeStatistic_t,
-                                   Net_UserData> ICONNECTION_MANAGER_T;
+                                   Test_U_UserData> ICONNECTION_MANAGER_T;
 
-  Net_TCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                     const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  virtual ~Net_TCPConnection ();
+  Test_U_TCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                        const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  virtual ~Test_U_TCPConnection ();
 
  private:
-  typedef Net_TCPConnectionBase_T<Net_TCPHandler_t,
-                                  Net_Configuration,
-                                  Net_ConnectionState,
+  typedef Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
+                                  Test_U_Configuration,
+                                  Test_U_ConnectionState,
                                   Net_RuntimeStatistic_t,
-                                  Net_Stream,
-                                  Net_SocketHandlerConfiguration,
-                                  Net_UserData> inherited;
+                                  Test_U_Stream,
+                                  Test_U_SocketHandlerConfiguration,
+                                  Test_U_UserData> inherited;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded
   //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
-  Net_TCPConnection ();
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection (const Net_TCPConnection&))
-  ACE_UNIMPLEMENTED_FUNC (Net_TCPConnection& operator= (const Net_TCPConnection&))
+  Test_U_TCPConnection ();
+  ACE_UNIMPLEMENTED_FUNC (Test_U_TCPConnection (const Test_U_TCPConnection&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_TCPConnection& operator= (const Test_U_TCPConnection&))
 };
 
 //////////////////////////////////////////
 
-class Net_AsynchTCPConnection
- : public Net_AsynchTCPConnectionBase_T<Net_AsynchTCPHandler_t,
-                                        Net_Configuration,
-                                        Net_ConnectionState,
+class Test_U_AsynchTCPConnection
+ : public Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
+                                        Test_U_Configuration,
+                                        Test_U_ConnectionState,
                                         Net_RuntimeStatistic_t,
-                                        Net_Stream,
-                                        Net_SocketHandlerConfiguration,
-                                        Net_UserData>
+                                        Test_U_Stream,
+                                        Test_U_SocketHandlerConfiguration,
+                                        Test_U_UserData>
 {
- friend class ACE_Asynch_Acceptor<Net_AsynchTCPConnection>;
- friend class ACE_Asynch_Connector<Net_AsynchTCPConnection>;
+ friend class ACE_Asynch_Acceptor<Test_U_AsynchTCPConnection>;
+ friend class ACE_Asynch_Connector<Test_U_AsynchTCPConnection>;
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   Net_Configuration,
-                                   Net_ConnectionState,
+                                   Test_U_Configuration,
+                                   Test_U_ConnectionState,
                                    Net_RuntimeStatistic_t,
-                                   Net_UserData> ICONNECTION_MANAGER_T;
+                                   Test_U_UserData> ICONNECTION_MANAGER_T;
 
-  Net_AsynchTCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  virtual ~Net_AsynchTCPConnection ();
+  Test_U_AsynchTCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
+                              const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  virtual ~Test_U_AsynchTCPConnection ();
 
  private:
-  typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPHandler_t,
-                                        Net_Configuration,
-                                        Net_ConnectionState,
+  typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
+                                        Test_U_Configuration,
+                                        Test_U_ConnectionState,
                                         Net_RuntimeStatistic_t,
-                                        Net_Stream,
-                                        Net_SocketHandlerConfiguration,
-                                        Net_UserData> inherited;
+                                        Test_U_Stream,
+                                        Test_U_SocketHandlerConfiguration,
+                                        Test_U_UserData> inherited;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded
   //         make_handler() method of ACE_AsynchConnector/ACE_AsynchAcceptor
-  Net_AsynchTCPConnection ();
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection (const Net_AsynchTCPConnection&))
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnection& operator= (const Net_AsynchTCPConnection&))
+  Test_U_AsynchTCPConnection ();
+  ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchTCPConnection (const Test_U_AsynchTCPConnection&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchTCPConnection& operator= (const Test_U_AsynchTCPConnection&))
 };
 
 #endif

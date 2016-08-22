@@ -36,100 +36,106 @@
 #include "net_iconnectionmanager.h"
 #include "net_ilistener.h"
 
-#include "test_u_common.h"
-
+#include "test_u_connection_common.h"
 #include "test_u_configuration.h"
 #include "test_u_connection_manager_common.h"
 
-typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Net_Server_StatisticReportingHandler_t;
+typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Test_U_Server_StatisticReportingHandler_t;
 
 // forward declarations
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Net_Configuration,
-                                 Net_ConnectionState,
+                                 Test_U_Configuration,
+                                 Test_U_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Net_UserData> Net_IInetConnectionManager_t;
-class Net_SessionMessage;
-class Net_Message;
-struct Net_Server_ListenerConfiguration;
-typedef Net_IListener_T<Net_Server_ListenerConfiguration,
-                        Net_SocketHandlerConfiguration> Net_IListener_t;
+                                 Test_U_UserData> Test_U_IInetConnectionManager_t;
+class Test_U_SessionMessage;
+class Test_U_Message;
+struct Test_U_Server_ListenerConfiguration;
+typedef Net_IListener_T<Test_U_Server_ListenerConfiguration,
+                        Test_U_SocketHandlerConfiguration> Test_U_IListener_t;
 
 //////////////////////////////////////////
 
-struct Net_Server_SignalHandlerConfiguration
+struct Test_U_Server_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  inline Net_Server_SignalHandlerConfiguration ()
+  inline Test_U_Server_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , listener (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerID (-1)
   {};
 
-  Net_IListener_t*                        listener;
-  Net_Server_StatisticReportingHandler_t* statisticReportingHandler;
-  long                                    statisticReportingTimerID;
+  Test_U_IListener_t*                        listener;
+  Test_U_Server_StatisticReportingHandler_t* statisticReportingHandler;
+  long                                       statisticReportingTimerID;
 };
 
-struct Net_Server_ListenerConfiguration
+struct Test_U_Server_ListenerConfiguration
  : Net_ListenerConfiguration
 {
-  inline Net_Server_ListenerConfiguration ()
+  inline Test_U_Server_ListenerConfiguration ()
    : Net_ListenerConfiguration ()
    , connectionManager (NULL)
+   , socketHandlerConfiguration (NULL)
 //   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
-  Net_IInetConnectionManager_t* connectionManager;
+  Test_U_IInetConnectionManager_t*   connectionManager;
+  Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
 //  bool                            useLoopBackDevice;
 };
 
-struct Net_Server_Configuration
- : Net_Configuration
+struct Test_U_Server_Configuration
+ : Test_U_Configuration
 {
-  inline Net_Server_Configuration ()
-   : Net_Configuration ()
+  inline Test_U_Server_Configuration ()
+   : Test_U_Configuration ()
    , listener (NULL)
    , listenerConfiguration ()
    , signalHandlerConfiguration ()
+   //, socketHandlerConfiguration ()
   {};
 
-  Net_IListener_t*                      listener;
-  Net_Server_ListenerConfiguration      listenerConfiguration;
+  Test_U_IListener_t*                      listener;
+  Test_U_Server_ListenerConfiguration      listenerConfiguration;
 
-  Net_Server_SignalHandlerConfiguration signalHandlerConfiguration;
+  Test_U_Server_SignalHandlerConfiguration signalHandlerConfiguration;
 };
 
 typedef Stream_ControlMessage_T<Stream_ControlMessageType,
                                 Stream_AllocatorConfiguration,
-                                Net_Message,
-                                Net_SessionMessage> Net_ControlMessage_t;
+                                Test_U_Message,
+                                Test_U_SessionMessage> Test_U_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
-                                          Net_ControlMessage_t,
-                                          Net_Message,
-                                          Net_SessionMessage> Net_StreamMessageAllocator_t;
+                                          Test_U_ControlMessage_t,
+                                          Test_U_Message,
+                                          Test_U_SessionMessage> Test_U_StreamMessageAllocator_t;
+
+//////////////////////////////////////////
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    Net_StreamSessionData,
+                                    Test_U_StreamSessionData,
                                     Stream_SessionMessageType,
-                                    Net_Message,
-                                    Net_SessionMessage> Net_ISessionNotify_t;
-typedef std::list<Net_ISessionNotify_t*> Net_Subscribers_t;
-typedef Net_Subscribers_t::iterator Net_SubscribersIterator_t;
+                                    Test_U_Message,
+                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
+typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
+typedef Test_U_Subscribers_t::iterator Test_U_SubscribersIterator_t;
 
-struct Net_Server_GTK_CBData
- : Net_GTK_CBData
+struct Test_U_Server_GTK_CBData
+ : Test_U_GTK_CBData
 {
-  inline Net_Server_GTK_CBData ()
-   : Net_GTK_CBData ()
+  inline Test_U_Server_GTK_CBData ()
+   : Test_U_GTK_CBData ()
+   , configuration (NULL)
    , subscribers ()
    , subscribersLock ()
   {};
 
-  Net_Subscribers_t         subscribers;
-  ACE_SYNCH_RECURSIVE_MUTEX subscribersLock;
+  Test_U_Server_Configuration* configuration;
+  Test_U_Subscribers_t         subscribers;
+  ACE_SYNCH_RECURSIVE_MUTEX    subscribersLock;
 };
 
 #endif

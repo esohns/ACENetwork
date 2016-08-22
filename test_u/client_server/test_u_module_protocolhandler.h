@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_MODULE_PROTOCOLHANDLER_H
-#define NET_MODULE_PROTOCOLHANDLER_H
+#ifndef TEST_U_MODULE_PROTOCOLHANDLER_H
+#define TEST_U_MODULE_PROTOCOLHANDLER_H
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
@@ -37,23 +37,23 @@
 
 // forward declaration(s)
 class Stream_IAllocator;
-class Net_Message;
-class Net_SessionMessage;
+class Test_U_Message;
+class Test_U_SessionMessage;
 
-class Net_Module_ProtocolHandler
+class Test_U_Module_ProtocolHandler
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  Stream_ModuleHandlerConfiguration,
                                  ACE_Message_Block,
-                                 Net_Message,
-                                 Net_SessionMessage,
+                                 Test_U_Message,
+                                 Test_U_SessionMessage,
                                  Stream_SessionId_t,
-                                 Net_StreamSessionData>
+                                 Test_U_StreamSessionData>
  , public Common_ITimerHandler
 {
  public:
-  Net_Module_ProtocolHandler ();
-  virtual ~Net_Module_ProtocolHandler ();
+  Test_U_Module_ProtocolHandler ();
+  virtual ~Test_U_Module_ProtocolHandler ();
 
   // initialization
   bool initialize (Stream_IAllocator*,                           // allocator
@@ -62,10 +62,10 @@ class Net_Module_ProtocolHandler
                    bool = false);                                // '.' to stdout for every received "pong" ?
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (Net_Message*&, // data message handle
-                                  bool&);        // return value: pass message downstream ?
-  virtual void handleSessionMessage (Net_SessionMessage*&, // session message handle
-                                     bool&);               // return value: pass message downstream ?
+  virtual void handleDataMessage (Test_U_Message*&, // data message handle
+                                  bool&);           // return value: pass message downstream ?
+  virtual void handleSessionMessage (Test_U_SessionMessage*&, // session message handle
+                                     bool&);                  // return value: pass message downstream ?
 
   // implement Common_ITimerHandler
   virtual void handleTimeout (const void*); // asynchronous completion token
@@ -78,16 +78,16 @@ class Net_Module_ProtocolHandler
                                  Common_TimePolicy_t,
                                  Stream_ModuleHandlerConfiguration,
                                  ACE_Message_Block,
-                                 Net_Message,
-                                 Net_SessionMessage,
+                                 Test_U_Message,
+                                 Test_U_SessionMessage,
                                  Stream_SessionId_t,
-                                 Net_StreamSessionData> inherited;
+                                 Test_U_StreamSessionData> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_ProtocolHandler (const Net_Module_ProtocolHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_ProtocolHandler& operator= (const Net_Module_ProtocolHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler (const Test_U_Module_ProtocolHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler& operator= (const Test_U_Module_ProtocolHandler&))
 
   // helper methods
-  Net_Message* allocateMessage (unsigned int); // requested size
+  Test_U_Message* allocateMessage (unsigned int); // requested size
 
   // timer
   Common_TimerHandler pingHandler_;
@@ -103,10 +103,10 @@ class Net_Module_ProtocolHandler
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (Net_StreamSessionData,             // session data type
+DATASTREAM_MODULE_INPUT_ONLY (Test_U_StreamSessionData,          // session data type
                               Stream_SessionMessageType,         // session event type
                               Stream_ModuleHandlerConfiguration, // module handler configuration type
-                              Net_IStreamNotify_t,               // stream notification interface type
-                              Net_Module_ProtocolHandler);       // writer type
+                              Test_U_IStreamNotify_t,            // stream notification interface type
+                              Test_U_Module_ProtocolHandler);    // writer type
 
 #endif

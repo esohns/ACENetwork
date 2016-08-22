@@ -18,35 +18,32 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_CLIENT_SIGNALHANDLER_H
-#define NET_CLIENT_SIGNALHANDLER_H
+#ifndef TEST_U_CLIENT_SIGNALHANDLER_H
+#define TEST_U_CLIENT_SIGNALHANDLER_H
 
 #include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
 
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
-#include "test_u_stream.h"
-
 #include "net_client_common.h"
 
-class Net_Client_SignalHandler
- : public Common_SignalHandler_T<Net_Client_SignalHandlerConfiguration>
+class Test_U_Client_SignalHandler
+ : public Common_SignalHandler_T<Test_U_Client_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
-  Net_Client_SignalHandler ();
-  virtual ~Net_Client_SignalHandler ();
+  Test_U_Client_SignalHandler ();
+  virtual ~Test_U_Client_SignalHandler ();
 
   // implement Common_ISignal
   virtual bool handleSignal (int); // signal
 
  private:
-  typedef Common_SignalHandler_T<Net_Client_SignalHandlerConfiguration> inherited;
+  typedef Common_SignalHandler_T<Test_U_Client_SignalHandlerConfiguration> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler (const Net_Client_SignalHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_SignalHandler& operator= (const Net_Client_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Client_SignalHandler (const Test_U_Client_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Client_SignalHandler& operator= (const Test_U_Client_SignalHandler&))
 };
 
 #endif

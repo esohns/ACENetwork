@@ -26,7 +26,6 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
-#include "common_idumpstate.h"
 #include "common_istatistic.h"
 
 #include "net_iconnection.h"
@@ -45,7 +44,6 @@ class Net_Connection_Manager_T
                                    StatisticContainerType,
                                    UserDataType>
  , public Common_IStatistic_T<StatisticContainerType>
- , public Common_IDumpState
 {
   // singleton has access to the ctor/dtors
   friend class ACE_Singleton<Net_Connection_Manager_T<AddressType,
@@ -97,6 +95,7 @@ class Net_Connection_Manager_T
   virtual bool registerc (ICONNECTION_T*); // connection handle
   virtual bool deregister (ICONNECTION_T*); // connection handle
 
+  // implement Net_IConnectionManagerBase
   virtual void abort (bool = false); // wait for completion ? (see wait())
   virtual unsigned int count () const; // return value: # of connections
   // *IMPORTANT NOTE*: this API really makes sense only AFTER stop() has been
@@ -151,13 +150,14 @@ class Net_Connection_Manager_T
 
   // implement blocking wait
   mutable ACE_SYNCH_RECURSIVE_CONDITION condition_;
-  ConfigurationType                     configuration_; // default-
   CONNECTION_CONTAINER_T                connections_;
   bool                                  isActive_;
   bool                                  isInitialized_;
   // *NOTE*: MUST be recursive, otherwise asynchronous abort is not feasible
   mutable ACE_SYNCH_RECURSIVE_MUTEX     lock_;
-  unsigned int                          maxNumConnections_;
+  unsigned int                          maximumNumberOfConnections_;
+
+  ConfigurationType*                    configuration_; // default-
   UserDataType*                         userData_;
 };
 

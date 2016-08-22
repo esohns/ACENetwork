@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_COMMON_MODULES_H
-#define NET_COMMON_MODULES_H
+#ifndef TEST_U_COMMON_MODULES_H
+#define TEST_U_COMMON_MODULES_H
 
 #include "ace/Message_Block.h"
 #include "ace/Synch_Traits.h"
@@ -37,54 +37,54 @@
 #include "test_u_configuration.h"
 
 // forward declarations
-class Net_Message;
-class Net_SessionMessage;
+class Test_U_Message;
+class Test_U_SessionMessage;
 
 // declare module(s)
 typedef Net_Module_SocketHandler_T<ACE_MT_SYNCH,
                                    ACE_Message_Block,
-                                   Net_Message,
-                                   Net_SessionMessage,
-                                   Net_ModuleHandlerConfiguration,
+                                   Test_U_Message,
+                                   Test_U_SessionMessage,
+                                   Test_U_ModuleHandlerConfiguration,
                                    int,
                                    Stream_SessionMessageType,
-                                   Net_StreamState,
-                                   Net_StreamSessionData,   // session data
-                                   Net_StreamSessionData_t, // session message payload (reference counted)
+                                   Test_U_StreamState,
+                                   Test_U_StreamSessionData,
+                                   Test_U_StreamSessionData_t,
                                    Net_RuntimeStatistic_t,
-                                   Net_Remote_Comm::MessageHeader> Net_Module_SocketHandler;
-DATASTREAM_MODULE_INPUT_ONLY (Net_StreamSessionData,          // session data type
-                              Stream_SessionMessageType,      // session event type
-                              Net_ModuleHandlerConfiguration, // module handler configuration type
-                              Net_IStreamNotify_t,            // stream notification interface type
-                              Net_Module_SocketHandler);      // writer type
+                                   Net_Remote_Comm::MessageHeader> Test_U_Module_SocketHandler;
+DATASTREAM_MODULE_INPUT_ONLY (Test_U_StreamSessionData,          // session data type
+                              Stream_SessionMessageType,         // session event type
+                              Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                              Test_U_IStreamNotify_t,            // stream notification interface type
+                              Test_U_Module_SocketHandler);      // writer type
 
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             Net_ModuleHandlerConfiguration,
+                                             Test_U_ModuleHandlerConfiguration,
                                              ACE_Message_Block,
-                                             Net_Message,
-                                             Net_SessionMessage,
+                                             Test_U_Message,
+                                             Test_U_SessionMessage,
                                              Net_MessageType_t,
                                              Net_RuntimeStatistic_t,
-                                             Net_StreamSessionData,
-                                             Net_StreamSessionData_t> Net_Module_Statistic_ReaderTask_t;
+                                             Test_U_StreamSessionData,
+                                             Test_U_StreamSessionData_t> Test_U_Module_Statistic_ReaderTask_t;
 typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             Net_ModuleHandlerConfiguration,
+                                             Test_U_ModuleHandlerConfiguration,
                                              ACE_Message_Block,
-                                             Net_Message,
-                                             Net_SessionMessage,
+                                             Test_U_Message,
+                                             Test_U_SessionMessage,
                                              Net_MessageType_t,
                                              Net_RuntimeStatistic_t,
-                                             Net_StreamSessionData,
-                                             Net_StreamSessionData_t> Net_Module_Statistic_WriterTask_t;
-DATASTREAM_MODULE_DUPLEX (Net_StreamSessionData,             // session data type
-                          Stream_SessionMessageType,         // session event type
-                          Stream_ModuleHandlerConfiguration, // module handler configuration type
-                          Net_IStreamNotify_t,               // stream notification interface type
-                          Net_Module_Statistic_ReaderTask_t, // reader type
-                          Net_Module_Statistic_WriterTask_t, // writer type
-                          Net_Module_RuntimeStatistic);      // name
+                                             Test_U_StreamSessionData,
+                                             Test_U_StreamSessionData_t> Test_U_Module_Statistic_WriterTask_t;
+DATASTREAM_MODULE_DUPLEX (Test_U_StreamSessionData,             // session data type
+                          Stream_SessionMessageType,            // session event type
+                          Stream_ModuleHandlerConfiguration,    // module handler configuration type
+                          Test_U_IStreamNotify_t,               // stream notification interface type
+                          Test_U_Module_Statistic_ReaderTask_t, // reader type
+                          Test_U_Module_Statistic_WriterTask_t, // writer type
+                          Test_U_Module_RuntimeStatistic);      // name
 
 #endif

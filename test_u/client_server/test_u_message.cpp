@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "test_u_stream.h"
 #include "test_u_message.h"
 
 #include "ace/Log_Msg.h"
@@ -27,41 +26,41 @@
 
 #include "net_macros.h"
 
-Net_Message::Net_Message (unsigned int requestedSize_in)
+Test_U_Message::Test_U_Message (unsigned int requestedSize_in)
  : inherited (requestedSize_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Message::Net_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
 
 }
 
 // *NOTE*: this is implicitly invoked by duplicate() as well...
-Net_Message::Net_Message (const Net_Message& message_in)
+Test_U_Message::Test_U_Message (const Test_U_Message& message_in)
  : inherited (message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Message::Net_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
 
 }
 
-Net_Message::Net_Message (ACE_Data_Block* dataBlock_in,
-                          ACE_Allocator* messageAllocator_in)
+Test_U_Message::Test_U_Message (ACE_Data_Block* dataBlock_in,
+                                ACE_Allocator* messageAllocator_in)
  : inherited (dataBlock_in,        // use (don't own !) this data block
               messageAllocator_in) // use this when destruction is imminent...
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Message::Net_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
 
 }
 
-Net_Message::~Net_Message ()
+Test_U_Message::~Test_U_Message ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Message::~Net_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::~Test_U_Message"));
 
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
 Net_MessageType_t
-Net_Message::command () const
+Test_U_Message::command () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Message::command"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::command"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::total_length () >= sizeof (Net_MessageHeader_t));
@@ -98,9 +97,9 @@ Net_Message::command () const
 }
 
 std::string
-Net_Message::CommandType2String (Net_MessageType_t messageType_in)
+Test_U_Message::CommandType2String (Net_MessageType_t messageType_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Message::CommandType2String"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::CommandType2String"));
 
   std::string result = ACE_TEXT ("INVALID");
 
@@ -123,28 +122,27 @@ Net_Message::CommandType2String (Net_MessageType_t messageType_in)
 }
 
 ACE_Message_Block*
-Net_Message::duplicate (void) const
+Test_U_Message::duplicate (void) const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Message::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::duplicate"));
 
-  Net_Message* message_p = NULL;
+  Test_U_Message* message_p = NULL;
 
-  // create a new Net_Message that contains unique copies of
+  // create a new Test_U_Message that contains unique copies of
   // the message block fields, but a (reference counted) "shallow" duplicate of
   // the datablock
 
   // if there is no allocator, use the standard new and delete calls.
   if (!inherited::message_block_allocator_)
     ACE_NEW_NORETURN (message_p,
-                      Net_Message (*this));
+                      Test_U_Message (*this));
   else // otherwise, use the existing message_block_allocator
   {
     Stream_IAllocator* allocator_p =
       dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
     ACE_ASSERT (allocator_p);
 allocate:
-    try
-    {
+    try {
       // *NOTE*: the argument to malloc SHOULDN'T really matter, as this will be
       //         a "shallow" copy which just references our data block...
       // *IMPORTANT NOTE*: cached allocators require the object size as argument
@@ -152,14 +150,12 @@ allocate:
       // *TODO*: (depending on the allocator implementation) this senselessly
       // allocates a datablock anyway, only to immediately release it again...
       ACE_NEW_MALLOC_NORETURN (message_p,
-                               static_cast<Net_Message*> (inherited::message_block_allocator_->calloc (sizeof (Net_Message))),
-                               Net_Message (*this));
-    }
-    catch (...)
-    {
+                               static_cast<Test_U_Message*> (inherited::message_block_allocator_->calloc (sizeof (Test_U_Message))),
+                               Test_U_Message (*this));
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), aborting\n"),
-                  sizeof (Net_Message)));
+                  sizeof (Test_U_Message)));
       return NULL;
     }
 
@@ -178,11 +174,11 @@ allocate:
 
       if (allocator_p->block ())
         ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate Net_Message: \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", aborting\n")));
     } // end IF
     else
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate Net_Message: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", aborting\n")));
     return NULL;
   } // end IF
 
@@ -193,7 +189,7 @@ allocate:
     if (!message_p->cont_)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Message::duplicate(): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to Test_U_Message::duplicate(): \"%m\", aborting\n")));
 
       // clean up
       message_p->release ();
@@ -208,9 +204,9 @@ allocate:
 }
 
 void
-Net_Message::dump_state () const
+Test_U_Message::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Message::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::dump_state"));
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("***** Message (ID: %u) *****\n"),

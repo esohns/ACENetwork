@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_SERVER_SIGNALHANDLER_H
-#define NET_SERVER_SIGNALHANDLER_H
+#ifndef TEST_U_SERVER_SIGNALHANDLER_H
+#define TEST_U_SERVER_SIGNALHANDLER_H
 
 #include "ace/Global_Macros.h"
 
@@ -33,22 +33,22 @@
 
 #include "net_server_common.h"
 
-class Net_Server_SignalHandler
- : public Common_SignalHandler_T<Net_Server_SignalHandlerConfiguration>
+class Test_U_Server_SignalHandler
+ : public Common_SignalHandler_T<Test_U_Server_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
-  Net_Server_SignalHandler ();
-  virtual ~Net_Server_SignalHandler ();
+  Test_U_Server_SignalHandler ();
+  virtual ~Test_U_Server_SignalHandler ();
 
   // implement Common_ISignal
   virtual bool handleSignal (int); // signal
 
  private:
-  typedef Common_SignalHandler_T<Net_Server_SignalHandlerConfiguration> inherited;
+  typedef Common_SignalHandler_T<Test_U_Server_SignalHandlerConfiguration> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler (const Net_Server_SignalHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Net_Server_SignalHandler& operator= (const Net_Server_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Server_SignalHandler (const Test_U_Server_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Server_SignalHandler& operator= (const Test_U_Server_SignalHandler&))
 };
 
 #endif
