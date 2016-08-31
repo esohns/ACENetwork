@@ -89,15 +89,17 @@ struct Net_ListenerConfiguration
               static_cast<ACE_UINT32> (INADDR_ANY))
    , addressFamily (ACE_ADDRESS_FAMILY_INET)
 //   , connectionManager (NULL)
+   , messageAllocator (NULL)
    , socketHandlerConfiguration (NULL)
-//   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
+   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
   ACE_INET_Addr                   address;
   int                             addressFamily;
 //  Net_IInetConnectionManager_t*   connectionManager;
+  Stream_IAllocator*              messageAllocator;
   Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  bool                            useLoopBackDevice;
+  bool                            useLoopBackDevice;
 };
 
 struct Net_SocketHandlerConfiguration

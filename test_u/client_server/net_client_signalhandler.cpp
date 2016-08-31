@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "net_client_signalHandler.h"
+#include "net_client_signalhandler.h"
 
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"

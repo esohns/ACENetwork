@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "net_client_timeoutHandler.h"
+#include "net_client_timeouthandler.h"
 
 #include "ace/Log_Msg.h"
 
