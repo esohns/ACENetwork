@@ -36,17 +36,19 @@
 #include "test_u_common.h"
 #include "test_u_configuration.h"
 
+#include "net_client_common.h"
+
 // forward declarations
 class Test_U_Message;
 class Test_U_SessionMessage;
 
 // declare module(s)
 typedef Net_Module_SocketHandler_T<ACE_MT_SYNCH,
-                                   ACE_Message_Block,
+                                   Test_U_ControlMessage_t,
                                    Test_U_Message,
                                    Test_U_SessionMessage,
                                    Test_U_ModuleHandlerConfiguration,
-                                   int,
+                                   Stream_ControlType,
                                    Stream_SessionMessageType,
                                    Test_U_StreamState,
                                    Test_U_StreamSessionData,
@@ -62,7 +64,7 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_U_StreamSessionData,          // session data
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
                                              Test_U_ModuleHandlerConfiguration,
-                                             ACE_Message_Block,
+                                             Test_U_ControlMessage_t,
                                              Test_U_Message,
                                              Test_U_SessionMessage,
                                              Net_MessageType_t,
@@ -72,7 +74,7 @@ typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
 typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
                                              Test_U_ModuleHandlerConfiguration,
-                                             ACE_Message_Block,
+                                             Test_U_ControlMessage_t,
                                              Test_U_Message,
                                              Test_U_SessionMessage,
                                              Net_MessageType_t,

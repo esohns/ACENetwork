@@ -56,7 +56,7 @@ class IRC_Client_Module_IRCHandler
                                          IRC_Message,
                                          IRC_Client_SessionMessage,
                                          Stream_SessionId_t,
-                                         IRC_Client_SessionData_t>
+                                         IRC_Client_SessionData>
  , public IRC_StateMachine_Registration
  , public IRC_IControl
 {
@@ -127,7 +127,7 @@ class IRC_Client_Module_IRCHandler
                                          IRC_Message,
                                          IRC_Client_SessionMessage,
                                          Stream_SessionId_t,
-                                         IRC_Client_SessionData_t> inherited;
+                                         IRC_Client_SessionData> inherited;
   typedef IRC_StateMachine_Registration inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler (const IRC_Client_Module_IRCHandler&))
