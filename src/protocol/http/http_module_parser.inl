@@ -1109,7 +1109,8 @@ HTTP_Module_ParserH_T<LockType,
       //         --> do not signal completion in this case
       // *TODO*: remove type inference
       if (inherited::thr_count_ || inherited::runSvcOnStart_)
-        inherited::shutdown ();
+        inherited::stop (false, // wait ?
+                         true); // locked access (N/A)
 
       break;
     }
