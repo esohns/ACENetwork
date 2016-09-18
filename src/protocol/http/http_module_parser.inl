@@ -1058,7 +1058,7 @@ HTTP_Module_ParserH_T<LockType,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleSessionMessage"));
 
-  int result = -1;
+//  int result = -1;
 
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);

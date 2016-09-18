@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 2.8)
-
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -28,7 +26,7 @@ if (UNIX)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/dec)
-
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/dev)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src)
 
