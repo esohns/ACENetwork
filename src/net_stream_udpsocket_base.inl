@@ -557,7 +557,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
     }
   } // end SWITCH
 
-  // push the buffer onto our stream for processing
+  // push the buffer onto the stream for processing
   // *NOTE*: the stream assumes ownership of the buffer
   int result = -1;
   if (enqueue)
@@ -577,7 +577,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
     } // end IF
-    session_data_r.currentStatistic.droppedMessages++;
+    session_data_r.currentStatistic.droppedFrames++;
     if (session_data_r.lock)
     {
       result = session_data_r.lock->release ();

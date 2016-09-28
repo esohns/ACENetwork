@@ -1219,9 +1219,10 @@ HTTP_Module_ParserH_T<LockType,
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::collect"));
 
   // step1: initialize info container POD
+  data_out.capturedFrames = 0;
+  data_out.droppedFrames = 0;
   data_out.bytes = 0.0;
   data_out.dataMessages = 0;
-  data_out.droppedMessages = 0;
   data_out.timeStamp = COMMON_TIME_NOW;
 
   // *NOTE*: information is collected by the statistic module (if any)
