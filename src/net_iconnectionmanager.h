@@ -21,16 +21,16 @@
 #ifndef NET_ICONNECTIONMANAGER_H
 #define NET_ICONNECTIONMANAGER_H
 
-#include "common_icontrol.h"
 #include "common_idumpstate.h"
 #include "common_ilock.h"
+#include "common_itask.h"
 
 #include "net_iconnection.h"
 
 class Net_IConnectionManagerBase
- : public Common_IControl
- , public Common_IDumpState
+ : public Common_ITaskControl_T<ACE_MT_SYNCH>
  , public Common_ILock
+ , public Common_IDumpState
 {
  public:
   inline virtual ~Net_IConnectionManagerBase () {};

@@ -21,14 +21,14 @@
 #ifndef NET_ILISTENER_H
 #define NET_ILISTENER_H
 
-#include "common_icontrol.h"
 #include "common_iget.h"
 #include "common_iinitialize.h"
+#include "common_itask.h"
 
 template <typename ConfigurationType,
           typename HandlerConfigurationType>
 class Net_IListener_T
- : public Common_IControl
+ : public Common_ITaskControl_T<ACE_MT_SYNCH>
  , public Common_IGet_T<HandlerConfigurationType>
  //, public Common_IInitialize_T<HandlerConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
