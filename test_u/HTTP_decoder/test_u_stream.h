@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include "ace/Global_Macros.h"
-#include "ace/Synch_Traits.h"
+#include <ace/Global_Macros.h>
+#include <ace/Synch_Traits.h>
 
 #include "common_time_common.h"
 
@@ -139,11 +139,11 @@ class Test_U_Stream
   bool finalize (const Stream_Configuration&); // configuration
 
   // modules
-  IO_MODULE_T                           IO_;
-  Test_U_Module_FileWriter_Module       dump_; // <-- raw HTTP output
-  Test_U_Module_Marshal_Module          marshal_;
-  Test_U_Module_RuntimeStatistic_Module runtimeStatistic_;
-  Test_U_Module_FileWriter_Module       fileWriter_; // <-- entity (HTML) output
+  IO_MODULE_T                          IO_;
+  Test_U_Module_FileWriter_Module      dump_; // <-- raw HTTP output
+  Test_U_Module_Marshal_Module         marshal_;
+  Test_U_Module_StatisticReport_Module statisticReport_;
+  Test_U_Module_FileWriter_Module      fileWriter_; // <-- entity (HTML) output
 };
 
 #endif

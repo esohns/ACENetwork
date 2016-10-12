@@ -543,7 +543,7 @@ IRC_Module_Bisector_T<LockType,
   // step1: initialize info container POD
   data_out.bytes = 0.0;
   data_out.dataMessages = 0;
-  data_out.droppedMessages = 0;
+  data_out.droppedFrames = 0;
   data_out.timeStamp = COMMON_TIME_NOW;
 
   // *NOTE*: information is collected by the statistic module (if any)

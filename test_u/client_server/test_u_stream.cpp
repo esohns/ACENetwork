@@ -73,9 +73,9 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out)
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_RuntimeStatistic_Module (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
-                                                         NULL,
-                                                         false),
+                  Test_U_Module_StatisticReport_Module (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                                                        NULL,
+                                                        false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
@@ -231,12 +231,12 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
                 ACE_TEXT ("RuntimeStatistic")));
     return false;
   } // end IF
-  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl =
-    dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (module_p->writer ());
+  Test_U_Module_StatisticReport_WriterTask_t* runtimeStatistic_impl =
+    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
   if (!runtimeStatistic_impl)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_Statistic_WriterTask_t> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
     return false;
   } // end IF
 

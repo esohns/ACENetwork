@@ -77,9 +77,9 @@ Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out)
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_RuntimeStatistic_Module (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
-                                                         NULL,
-                                                         false),
+                  Test_U_Module_StatisticReport_Module (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                                                        NULL,
+                                                        false),
                   false);
   modules_out.push_back (module_p);
 //  module_p = NULL;
@@ -221,20 +221,20 @@ Test_U_InboundConnectionStream::collect (Test_U_RuntimeStatistic_t& data_out)
     const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
 
   Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT ("RuntimeStatistic")));
+                ACE_TEXT ("StatisticReport")));
     return false;
   } // end IF
-  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl =
-    dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (module_p->writer ());
+  Test_U_Module_StatisticReport_WriterTask_t* runtimeStatistic_impl =
+    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
   if (!runtimeStatistic_impl)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_InboundConnectionStream_Module_Statistic_WriterTask_t> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
     return false;
   } // end IF
 
@@ -348,9 +348,9 @@ Test_U_OutboundConnectionStream::load (Stream_ModuleList_t& modules_out)
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_RuntimeStatistic_Module (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
-                                                         NULL,
-                                                         false),
+                  Test_U_Module_StatisticReport_Module (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                                                        NULL,
+                                                        false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
@@ -484,20 +484,20 @@ Test_U_OutboundConnectionStream::collect (Test_U_RuntimeStatistic_t& data_out)
     const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
 
   Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT ("RuntimeStatistic")));
+                ACE_TEXT ("StatisticReport")));
     return false;
   } // end IF
-  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl =
-    dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (module_p->writer ());
+  Test_U_Module_StatisticReport_WriterTask_t* runtimeStatistic_impl =
+    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
   if (!runtimeStatistic_impl)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_OutboundConnectionStream_Module_Statistic_WriterTask_t> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
     return false;
   } // end IF
 

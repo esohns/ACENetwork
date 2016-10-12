@@ -666,12 +666,13 @@ IRC_Client_GUI_MessageHandler::update ()
 //   gdk_window_invalidate_region(GTK_WIDGET(dialog)->window,
 //                                region,
 //                                TRUE);
-  gdk_window_invalidate_rect (GTK_WIDGET (text_view_p)->window,
+  gdk_window_invalidate_rect (gtk_widget_get_window (GTK_WIDGET (text_view_p)),
                               NULL,
                               TRUE);
 //   gdk_region_destroy(region);
 //   gtk_widget_queue_draw(GTK_WIDGET(view_));
-  gdk_window_process_updates (GTK_WIDGET (text_view_p)->window, TRUE);
+  gdk_window_process_updates (gtk_widget_get_window (GTK_WIDGET (text_view_p)),
+                              TRUE);
 //   gdk_window_process_all_updates();
 
 //  gdk_threads_leave ();

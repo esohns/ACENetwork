@@ -21,9 +21,9 @@
 #ifndef IRC_CLIENT_GUI_CALLBACKS_H
 #define IRC_CLIENT_GUI_CALLBACKS_H
 
-#include "ace/config-macros.h"
+#include <ace/config-macros.h>
 
-#include "gtk/gtk.h"
+#include <gtk/gtk.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -73,7 +73,8 @@ G_MODULE_EXPORT void join_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void channelbox_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void refresh_channels_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void user_mode_toggled_cb (GtkToggleButton*, gpointer);
-G_MODULE_EXPORT void switch_channel_cb (GtkNotebook*, GtkNotebookPage*, guint, gpointer);
+//G_MODULE_EXPORT void switch_channel_cb (GtkNotebook*, GtkNotebookPage*, guint, gpointer);
+G_MODULE_EXPORT void switch_channel_cb (GtkNotebook*, GtkWidget*, guint, gpointer);
 G_MODULE_EXPORT void action_away_cb (GtkAction*, gpointer);
 
 // IRC_Client_GUI_MessageHandler

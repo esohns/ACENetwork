@@ -18,15 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_CONTROLLER_BASE_H
-#define Net_CONTROLLER_BASE_H
+#ifndef NET_CONTROLLER_BASE_H
+#define NET_CONTROLLER_BASE_H
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
+#include <ace/Synch_Traits.h>
 
-#include "common_icontrol.h"
+#include "common_itask.h"
+//#include "common_itaskcontrol.h"
 
 class Net_Controller_Base
- : public Common_IControl
+ //: public Common_ITaskControl
+ : public Common_ITaskControl_T<ACE_MT_SYNCH>
 {
  public:
   Net_Controller_Base ();
@@ -34,11 +37,13 @@ class Net_Controller_Base
 
   // implement Common_IControl
   virtual void start ();
-  virtual void stop ();
+  virtual void stop (bool = true,  // wait for completion ?
+                     bool = true); // locked access ?
   virtual bool isRunning () const;
 
  private:
-  typedef Common_IControl inherited;
+  //typedef Common_ITaskControl inherited;
+  typedef Common_ITaskControl_T<ACE_MT_SYNCH> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Controller_Base (const Net_Controller_Base&));
   ACE_UNIMPLEMENTED_FUNC (Net_Controller_Base& operator= (const Net_Controller_Base&));

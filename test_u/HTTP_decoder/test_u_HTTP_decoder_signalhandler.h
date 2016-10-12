@@ -21,7 +21,7 @@
 #ifndef TEST_U_PROTOCOL_SIGNALHANDLER_H
 #define TEST_U_PROTOCOL_SIGNALHANDLER_H
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 #include "common_isignal.h"
 #include "common_signalhandler.h"
@@ -37,7 +37,7 @@ class Test_U_Protocol_SignalHandler
   virtual ~Test_U_Protocol_SignalHandler ();
 
   // implement Common_ISignal
-  virtual bool handleSignal (int); // signal
+  virtual void handle (int); // signal
 
  private:
   typedef Common_SignalHandler_T<Test_U_SignalHandlerConfiguration> inherited;

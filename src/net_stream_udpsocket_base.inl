@@ -2032,7 +2032,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
     } // end IF
-    session_data_r.currentStatistic.droppedMessages++;
+    session_data_r.currentStatistic.droppedFrames++;
     if (session_data_r.lock)
     {
       result = session_data_r.lock->release ();

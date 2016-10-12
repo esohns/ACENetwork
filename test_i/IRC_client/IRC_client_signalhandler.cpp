@@ -21,11 +21,11 @@
 
 #include "IRC_client_signalhandler.h"
 
-#include "ace/Guard_T.h"
-#include "ace/Log_Msg.h"
-//#include "ace/Proactor.h"
-//#include "ace/Reactor.h"
-#include "ace/Synch_Traits.h"
+#include <ace/Guard_T.h>
+#include <ace/Log_Msg.h>
+//#include <ace/Proactor.h>
+//#include <ace/Reactor.h>
+#include <ace/Synch_Traits.h>
 
 #include "common_tools.h"
 
@@ -49,8 +49,8 @@ IRC_Client_SignalHandler::~IRC_Client_SignalHandler ()
 
 }
 
-bool
-IRC_Client_SignalHandler::handleSignal (int signal_in)
+void
+IRC_Client_SignalHandler::handle (int signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::handleSignal"));
 
@@ -108,9 +108,9 @@ IRC_Client_SignalHandler::handleSignal (int signal_in)
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown signal: \"%S\", aborting\n"),
+                  ACE_TEXT ("invalid/unknown signal: \"%S\", returning\n"),
                   signal_in));
-      return false;
+      return;
     }
   } // end SWITCH
 
@@ -185,6 +185,4 @@ done_connect:
                                          !inherited::configuration_->useReactor, // stop proactor ?
                                          -1);                                    // group ID (--> don't block !)
   } // end IF
-
-  return true;
 }

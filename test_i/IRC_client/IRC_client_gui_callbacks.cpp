@@ -2789,7 +2789,8 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
 
 void
 switch_channel_cb (GtkNotebook* notebook_in,
-                   GtkNotebookPage* page_in,
+                   //GtkNotebookPage* page_in,
+                   GtkWidget* page_in,
                    guint pageNum_in,
                    gpointer userData_in)
 {

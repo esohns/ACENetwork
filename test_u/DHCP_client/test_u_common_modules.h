@@ -21,8 +21,8 @@
 #ifndef TEST_U_COMMON_MODULES_H
 #define TEST_U_COMMON_MODULES_H
 
-#include "ace/INET_Addr.h"
-#include "ace/Synch_Traits.h"
+#include <ace/INET_Addr.h>
+#include <ace/Synch_Traits.h>
 
 #include "common_time_common.h"
 
@@ -30,7 +30,7 @@
 #include "stream_streammodule_base.h"
 
 #include "stream_misc_dump.h"
-#include "stream_misc_runtimestatistic.h"
+#include "stream_misc_statistic_report.h"
 
 #include "stream_module_io.h"
 
@@ -139,26 +139,26 @@ typedef DHCP_Module_Parser_T<ACE_MT_SYNCH,
 //                              Test_U_StreamSessionData_t,
 //                              Test_U_RuntimeStatistic_t> Test_U_Module_Parser;
 
-typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
-                                             Common_TimePolicy_t,
-                                             Test_U_StreamModuleHandlerConfiguration,
-                                             ACE_Message_Block,
-                                             Test_U_Message,
-                                             Test_U_SessionMessage,
-                                             DHCP_MessageType_t,
-                                             Test_U_RuntimeStatistic_t,
-                                             Test_U_StreamSessionData,
-                                             Test_U_StreamSessionData_t> Test_U_Module_Statistic_ReaderTask_t;
-typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
-                                             Common_TimePolicy_t,
-                                             Test_U_StreamModuleHandlerConfiguration,
-                                             ACE_Message_Block,
-                                             Test_U_Message,
-                                             Test_U_SessionMessage,
-                                             DHCP_MessageType_t,
-                                             Test_U_RuntimeStatistic_t,
-                                             Test_U_StreamSessionData,
-                                             Test_U_StreamSessionData_t> Test_U_Module_Statistic_WriterTask_t;
+typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                   Common_TimePolicy_t,
+                                                   Test_U_StreamModuleHandlerConfiguration,
+                                                   ACE_Message_Block,
+                                                   Test_U_Message,
+                                                   Test_U_SessionMessage,
+                                                   DHCP_MessageType_t,
+                                                   Test_U_RuntimeStatistic_t,
+                                                   Test_U_StreamSessionData,
+                                                   Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
+typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                   Common_TimePolicy_t,
+                                                   Test_U_StreamModuleHandlerConfiguration,
+                                                   ACE_Message_Block,
+                                                   Test_U_Message,
+                                                   Test_U_SessionMessage,
+                                                   DHCP_MessageType_t,
+                                                   Test_U_RuntimeStatistic_t,
+                                                   Test_U_StreamSessionData,
+                                                   Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
 
 typedef Stream_Module_Dump_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
@@ -210,13 +210,13 @@ DATASTREAM_MODULE_DUPLEX (Test_U_StreamSessionData,                // session da
 //                              Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
 //                              Test_U_Module_Parser);                   // writer type
 
-DATASTREAM_MODULE_DUPLEX (Test_U_StreamSessionData,                // session data type
-                          Stream_SessionMessageType,               // session event type
-                          Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
-                          Test_U_IStreamNotify_t,                  // stream notification interface type
-                          Test_U_Module_Statistic_ReaderTask_t,    // reader type
-                          Test_U_Module_Statistic_WriterTask_t,    // writer type
-                          Test_U_Module_RuntimeStatistic);         // name
+DATASTREAM_MODULE_DUPLEX (Test_U_StreamSessionData,                   // session data type
+                          Stream_SessionMessageType,                  // session event type
+                          Test_U_StreamModuleHandlerConfiguration,    // module handler configuration type
+                          Test_U_IStreamNotify_t,                     // stream notification interface type
+                          Test_U_Module_StatisticReport_ReaderTask_t, // reader type
+                          Test_U_Module_StatisticReport_WriterTask_t, // writer type
+                          Test_U_Module_StatisticReport);             // name
 
 DATASTREAM_MODULE_INPUT_ONLY (Test_U_StreamSessionData,                // session data type
                               Stream_SessionMessageType,               // session event type

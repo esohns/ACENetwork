@@ -400,7 +400,8 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                              GTK_RC_TEXT);
   gtk_widget_modify_style (GTK_WIDGET (view_p),
                            rc_style_p);
-  gtk_rc_style_unref (rc_style_p);
+  //gtk_rc_style_unref (rc_style_p);
+  g_object_unref (rc_style_p);
 
   //  GtkTextIter iterator;
   //  gtk_text_buffer_get_end_iter (buffer_p,
@@ -819,7 +820,8 @@ idle_initialize_server_UI_cb (gpointer userData_in)
                             GTK_RC_TEXT);
   gtk_widget_modify_style (GTK_WIDGET (view_p),
                            rc_style_p);
-  gtk_rc_style_unref (rc_style_p);
+  //gtk_rc_style_unref (rc_style_p);
+  g_object_unref (rc_style_p);
 
   // step4: initialize updates
   {

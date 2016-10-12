@@ -21,14 +21,14 @@
 #ifndef TEST_U_COMMON_MODULES_H
 #define TEST_U_COMMON_MODULES_H
 
-#include "ace/Message_Block.h"
-#include "ace/Synch_Traits.h"
+#include <ace/Message_Block.h>
+#include <ace/Synch_Traits.h>
 
 #include "common_time_common.h"
 
 #include "stream_streammodule_base.h"
 
-#include "stream_misc_runtimestatistic.h"
+#include "stream_misc_statistic_report.h"
 
 #include "net_module_sockethandler.h"
 #include "net_remote_comm.h"
@@ -61,32 +61,32 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_U_StreamSessionData,          // session data
                               Test_U_IStreamNotify_t,            // stream notification interface type
                               Test_U_Module_SocketHandler);      // writer type
 
-typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
-                                             Common_TimePolicy_t,
-                                             Test_U_ModuleHandlerConfiguration,
-                                             Test_U_ControlMessage_t,
-                                             Test_U_Message,
-                                             Test_U_SessionMessage,
-                                             Net_MessageType_t,
-                                             Net_RuntimeStatistic_t,
-                                             Test_U_StreamSessionData,
-                                             Test_U_StreamSessionData_t> Test_U_Module_Statistic_ReaderTask_t;
-typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
-                                             Common_TimePolicy_t,
-                                             Test_U_ModuleHandlerConfiguration,
-                                             Test_U_ControlMessage_t,
-                                             Test_U_Message,
-                                             Test_U_SessionMessage,
-                                             Net_MessageType_t,
-                                             Net_RuntimeStatistic_t,
-                                             Test_U_StreamSessionData,
-                                             Test_U_StreamSessionData_t> Test_U_Module_Statistic_WriterTask_t;
-DATASTREAM_MODULE_DUPLEX (Test_U_StreamSessionData,             // session data type
-                          Stream_SessionMessageType,            // session event type
-                          Stream_ModuleHandlerConfiguration,    // module handler configuration type
-                          Test_U_IStreamNotify_t,               // stream notification interface type
-                          Test_U_Module_Statistic_ReaderTask_t, // reader type
-                          Test_U_Module_Statistic_WriterTask_t, // writer type
-                          Test_U_Module_RuntimeStatistic);      // name
+typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                   Common_TimePolicy_t,
+                                                   Test_U_ModuleHandlerConfiguration,
+                                                   Test_U_ControlMessage_t,
+                                                   Test_U_Message,
+                                                   Test_U_SessionMessage,
+                                                   Net_MessageType_t,
+                                                   Net_RuntimeStatistic_t,
+                                                   Test_U_StreamSessionData,
+                                                   Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
+typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                   Common_TimePolicy_t,
+                                                   Test_U_ModuleHandlerConfiguration,
+                                                   Test_U_ControlMessage_t,
+                                                   Test_U_Message,
+                                                   Test_U_SessionMessage,
+                                                   Net_MessageType_t,
+                                                   Net_RuntimeStatistic_t,
+                                                   Test_U_StreamSessionData,
+                                                   Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
+DATASTREAM_MODULE_DUPLEX (Test_U_StreamSessionData,                   // session data type
+                          Stream_SessionMessageType,                  // session event type
+                          Stream_ModuleHandlerConfiguration,          // module handler configuration type
+                          Test_U_IStreamNotify_t,                     // stream notification interface type
+                          Test_U_Module_StatisticReport_ReaderTask_t, // reader type
+                          Test_U_Module_StatisticReport_WriterTask_t, // writer type
+                          Test_U_Module_StatisticReport);             // name
 
 #endif

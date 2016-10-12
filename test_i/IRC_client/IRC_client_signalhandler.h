@@ -21,8 +21,7 @@
 #ifndef IRC_CLIENT_SIGNALHANDLER_H
 #define IRC_CLIENT_SIGNALHANDLER_H
 
-#include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
+#include <ace/Global_Macros.h>
 
 #include "common_isignal.h"
 #include "common_signalhandler.h"
@@ -40,7 +39,7 @@ class IRC_Client_SignalHandler
   virtual ~IRC_Client_SignalHandler ();
 
   // implement Common_ISignal
-  virtual bool handleSignal (int); // signal
+  virtual void handle (int); // signal
 
  private:
   typedef Common_SignalHandler_T<IRC_Client_SignalHandlerConfiguration> inherited;

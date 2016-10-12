@@ -38,9 +38,9 @@ Test_U_Stream::Test_U_Stream (const std::string& name_in)
  , marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
              NULL,
              false)
- , runtimeStatistic_ (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
-                      NULL,
-                      false)
+ , statisticReport_ (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                     NULL,
+                     false)
  , fileWriter_ (ACE_TEXT_ALWAYS_CHAR ("FileWriter"),
                 NULL,
                 false)
@@ -66,7 +66,7 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out)
   //         stream (e.g. because initialize() failed) needs to be explicitly
   //         close()d
   modules_out.push_back (&fileWriter_);
-  modules_out.push_back (&runtimeStatistic_);
+  modules_out.push_back (&statisticReport_);
   modules_out.push_back (&marshal_);
   modules_out.push_back (&dump_);
   modules_out.push_back (&IO_);
@@ -242,12 +242,12 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
 
   int result = -1;
 
-  Test_U_Module_Statistic_WriterTask_t* runtimeStatistic_impl =
-    dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> (runtimeStatistic_.writer ());
-  if (!runtimeStatistic_impl)
+  Test_U_Module_StatisticReport_WriterTask_t* statisticReport_impl =
+    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (statisticReport_.writer ());
+  if (!statisticReport_impl)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_Statistic_WriterTask_t*> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> failed, aborting\n")));
     return false;
   } // end IF
 
@@ -269,12 +269,9 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
 
   // delegate to the statistics module...
   bool result_2 = false;
-  try
-  {
-    result_2 = runtimeStatistic_impl->collect (data_out);
-  }
-  catch (...)
-  {
+  try {
+    result_2 = statisticReport_impl->collect (data_out);
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
   }

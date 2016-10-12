@@ -47,9 +47,13 @@ Net_Controller_Base::start ()
 }
 
 void
-Net_Controller_Base::stop ()
+Net_Controller_Base::stop (bool waitForCompletion_in,
+                           bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Controller_Base::stop"));
+
+  ACE_UNUSED_ARG (waitForCompletion_in);
+  ACE_UNUSED_ARG (lockedAccess_in);
 
   ACE_DEBUG ((LM_NOTICE,
               ACE_TEXT ("%D: stopping...\n")));

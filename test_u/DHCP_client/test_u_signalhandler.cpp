@@ -19,10 +19,10 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
+#include <ace/Synch.h>
 #include "test_u_signalhandler.h"
 
-#include "ace/Log_Msg.h"
+#include <ace/Log_Msg.h>
 
 //#include "common_timer_manager.h"
 #include "common_tools.h"
@@ -44,8 +44,8 @@ Test_U_SignalHandler::~Test_U_SignalHandler ()
 
 }
 
-bool
-Test_U_SignalHandler::handleSignal (int signal_in)
+void
+Test_U_SignalHandler::handle (int signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_SignalHandler::handleSignal"));
 
@@ -99,12 +99,12 @@ Test_U_SignalHandler::handleSignal (int signal_in)
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("received invalid/unknown signal (was: %d --> \"%S\"), aborting\n"),
+                  ACE_TEXT ("received invalid/unknown signal (was: %d --> \"%S\"), returning\n"),
                   signal_in, signal_in));
 
       ACE_OS::last_error (EINVAL);
 
-      return false;
+      return;
     }
   } // end SWITCH
 
@@ -113,12 +113,9 @@ Test_U_SignalHandler::handleSignal (int signal_in)
   // print statistic ?
   if (statistic)
   {
-    try
-    {
+    try {
       //handle = configuration_.connector->connect (configuration_.peerAddress);
-    }
-    catch (...)
-    {
+    } catch (...) {
       //// *PORTABILITY*: tracing in a signal handler context is not portable
       //// *TODO*
       //ACE_DEBUG ((LM_ERROR,
@@ -166,6 +163,4 @@ Test_U_SignalHandler::handleSignal (int signal_in)
 
     // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF
-
-  return true;
 }

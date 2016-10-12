@@ -24,10 +24,10 @@
 #include <sstream>
 #include <string>
 
-#include "ace/Assert.h"
-#include "ace/Log_Msg.h"
-#include "ace/Proactor.h"
-#include "ace/Reactor.h"
+#include <ace/Assert.h>
+#include <ace/Log_Msg.h>
+#include <ace/Proactor.h>
+#include <ace/Reactor.h>
 
 #include "common_icontrol.h"
 #include "common_timer_manager_common.h"
@@ -53,10 +53,10 @@ Test_U_Server_SignalHandler::~Test_U_Server_SignalHandler ()
 
 }
 
-bool
-Test_U_Server_SignalHandler::handleSignal (int signal_in)
+void
+Test_U_Server_SignalHandler::handle (int signal_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Server_SignalHandler::handleSignal"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Server_SignalHandler::handle"));
 
   int result = -1;
   Test_U_IInetConnectionManager_t* iconnection_manager_p =
@@ -100,9 +100,9 @@ Test_U_Server_SignalHandler::handleSignal (int signal_in)
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("received invalid/unknown signal: \"%S\", aborting\n"),
+                  ACE_TEXT ("received invalid/unknown signal: \"%S\", returning\n"),
                   signal_in));
-      return false;
+      return;
     }
   } // end SWITCH
 
@@ -116,8 +116,8 @@ Test_U_Server_SignalHandler::handleSignal (int signal_in)
       inherited::configuration_->statisticReportingHandler->report ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
-      return false;
+                  ACE_TEXT ("caught exception in Common_IStatistic::report(), returning\n")));
+      return;
     }
   } // end IF
 
@@ -142,8 +142,8 @@ Test_U_Server_SignalHandler::handleSignal (int signal_in)
         inherited::configuration_->listener->stop ();
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Common_IControl::stop(), aborting\n")));
-        return false;
+                    ACE_TEXT ("caught exception in Common_IControl::stop(), returning\n")));
+        return;
       }
     } // end IF
 
@@ -157,13 +157,13 @@ Test_U_Server_SignalHandler::handleSignal (int signal_in)
       if (result <= 0)
       {
         ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", aborting\n"),
+                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", returning\n"),
                     inherited::configuration_->statisticReportingTimerID));
 
         // clean up
         inherited::configuration_->statisticReportingTimerID = -1;
 
-        return false;
+        return;
       } // end IF
       inherited::configuration_->statisticReportingTimerID = -1;
     } // end IF
@@ -177,6 +177,4 @@ Test_U_Server_SignalHandler::handleSignal (int signal_in)
                                          !inherited::configuration_->useReactor, // stop proactor ?
                                          -1);                                    // group ID (--> don't block)
   } // end IF
-
-  return true;
 }
