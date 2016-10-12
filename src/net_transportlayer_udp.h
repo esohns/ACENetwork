@@ -21,6 +21,8 @@
 #ifndef NET_TRANSPORTLAYER_UDP_H
 #define NET_TRANSPORTLAYER_UDP_H
 
+#include <ace/Global_Macros.h>
+
 #include "net_exports.h"
 #include "net_transportlayer_base.h"
 

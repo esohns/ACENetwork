@@ -21,6 +21,8 @@
 #ifndef Net_TRANSPORTLAYER_TCP_H
 #define Net_TRANSPORTLAYER_TCP_H
 
+#include <ace/Global_Macros.h>
+
 #include "net_common.h"
 #include "net_exports.h"
 #include "net_transportlayer_base.h"

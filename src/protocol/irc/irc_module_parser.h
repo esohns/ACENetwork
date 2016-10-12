@@ -21,7 +21,7 @@
 #ifndef IRC_MODULE_PARSER_H
 #define IRC_MODULE_PARSER_H
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 #include "stream_task_base_synch.h"
 

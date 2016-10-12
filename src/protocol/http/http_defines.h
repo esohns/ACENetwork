@@ -21,8 +21,6 @@
 #ifndef HTTP_DEFINES_H
 #define HTTP_DEFINES_H
 
-//#include "ace/Default_Constants.h"
-
 // stream
 // *TODO*: this makes no sense, remove ASAP
 #define HTTP_BUFFER_SIZE                          16384

@@ -21,8 +21,8 @@
 #ifndef TEST_U_MODULE_PROTOCOLHANDLER_H
 #define TEST_U_MODULE_PROTOCOLHANDLER_H
 
-#include "ace/Global_Macros.h"
-#include "ace/Synch_Traits.h"
+#include <ace/Global_Macros.h>
+#include <ace/Synch_Traits.h>
 
 #include "common_itimerhandler.h"
 #include "common_time_common.h"

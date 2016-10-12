@@ -21,14 +21,14 @@
 #ifndef Net_TRANSPORTLAYER_IP_CAST_H
 #define Net_TRANSPORTLAYER_IP_CAST_H
 
+#include <ace/Global_Macros.h>
+//#include <ace/INET_Addr.h>
+//#include <ace/SOCK_Dgram_Bcast.h>
+//#include <ace/SOCK_Dgram_Mcast.h>
+
 //#include "net_common.h"
 #include "net_exports.h"
 #include "net_transportlayer_base.h"
-
-#include "ace/Global_Macros.h"
-//#include "ace/INET_Addr.h"
-//#include "ace/SOCK_Dgram_Bcast.h"
-//#include "ace/SOCK_Dgram_Mcast.h"
 
 // forward declarations
 enum Common_DispatchType;

@@ -24,10 +24,10 @@
 
 #include "Streambuf_alt.h"
 
-#  include "ace/Global_Macros.h"
-#  include "ace/iosfwd.h"
-#  include "ace/OS_NS_errno.h"
-#  include "ace/OS_Memory.h"
+#  include <ace/Global_Macros.h>
+#  include <ace/iosfwd.h>
+#  include <ace/OS_NS_errno.h>
+#  include <ace/OS_Memory.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

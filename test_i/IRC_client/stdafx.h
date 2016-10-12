@@ -28,8 +28,8 @@ using namespace std;
 // System Library Header Files
 //#include "ace/iosfwd.h"
 //#include "ace/streams.h"
-//#include "ace/Log_Msg.h"
-//#include "ace/OS.h"
+#include <ace/Log_Msg.h>
+#include <ace/OS.h>
 //#include "ace/Synch_Traits.h"
 
 // Local Header Files

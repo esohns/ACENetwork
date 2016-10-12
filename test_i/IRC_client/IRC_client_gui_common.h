@@ -25,9 +25,9 @@
 #include <string>
 #include <vector>
 
-#include "ace/OS.h"
+#include <ace/OS.h>
 
-#include "gtk/gtk.h"
+#include <gtk/gtk.h>
 
 #include "common_ui_common.h"
 

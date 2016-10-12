@@ -19,12 +19,12 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <sstream>
-
 #include "dhcp_tools.h"
 
-#include "ace/Log_Msg.h"
-#include "ace/OS.h"
+#include <sstream>
+
+#include <ace/Log_Msg.h>
+#include <ace/OS.h>
 
 #include "common_tools.h"
 

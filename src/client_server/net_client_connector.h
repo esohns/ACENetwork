@@ -21,10 +21,10 @@
 #ifndef NET_CLIENT_CONNECTOR_H
 #define NET_CLIENT_CONNECTOR_H
 
-#include "ace/Connector.h"
-#include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
-#include "ace/Time_Value.h"
+#include <ace/Connector.h>
+#include <ace/Global_Macros.h>
+#include <ace/INET_Addr.h>
+#include <ace/Time_Value.h>
 
 #include "stream_statemachine_control.h"
 

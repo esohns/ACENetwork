@@ -34,10 +34,10 @@
 #include <ifaddrs.h>
 #endif
 
-#include "ace/Dirent_Selector.h"
-#include "ace/INET_Addr.h"
-#include "ace/Log_Msg.h"
-#include "ace/OS.h"
+#include <ace/Dirent_Selector.h>
+#include <ace/INET_Addr.h>
+#include <ace/Log_Msg.h>
+#include <ace/OS.h>
 
 #include "common_defines.h"
 #include "common_file_tools.h"

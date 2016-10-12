@@ -21,14 +21,6 @@
 #ifndef NET_DEFINES_H
 #define NET_DEFINES_H
 
-//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-//#include "linux/netlink.h"
-//#endif
-
-//#include "ace/Default_Constants.h"
-
-//#include "stream_defines.h"
-
 // interface
 // *PORTABILITY*: nic device names are not portable
 //                --> (on Windows) let the user choose the interface from a list

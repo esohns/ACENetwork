@@ -21,9 +21,9 @@
 
 #include "IRC_client_tools.h"
 
-#include "ace/Configuration.h"
-#include "ace/Configuration_Import_Export.h"
-#include "ace/Log_Msg.h"
+#include <ace/Configuration.h>
+#include <ace/Configuration_Import_Export.h>
+#include <ace/Log_Msg.h>
 
 #include "stream_iallocator.h"
 

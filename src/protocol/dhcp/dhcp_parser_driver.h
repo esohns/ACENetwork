@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include "ace/Global_Macros.h"
-#include "ace/Message_Block.h"
+#include <ace/Global_Macros.h>
+#include <ace/Message_Block.h>
 
 #include "location.hh"
 

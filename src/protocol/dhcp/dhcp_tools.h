@@ -23,7 +23,7 @@
 
 #include <string>
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 #include "dhcp_codes.h"
 #include "dhcp_common.h"

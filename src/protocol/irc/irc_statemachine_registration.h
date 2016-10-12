@@ -23,9 +23,9 @@
 
 #include <string>
 
-#include "ace/Global_Macros.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Null_Mutex.h"
+#include <ace/Global_Macros.h>
+#include <ace/Synch_Traits.h>
+#include <ace/Null_Mutex.h>
 
 #include "common_statemachine_base.h"
 

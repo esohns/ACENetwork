@@ -21,6 +21,8 @@
 #ifndef NET_TRANSPORTLAYER_NETLINK_H
 #define NET_TRANSPORTLAYER_NETLINK_H
 
+#include <ace/Global_Macros.h>
+
 #include "net_common.h"
 #include "net_exports.h"
 #include "net_transportlayer_base.h"

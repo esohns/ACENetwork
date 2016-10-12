@@ -21,12 +21,12 @@
 #ifndef TEST_U_SOCKET_COMMON_H
 #define TEST_U_SOCKET_COMMON_H
 
-#include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
-#include "ace/SOCK_Dgram.h"
-//#include "ace/SOCK_Stream.h"
-#include "ace/SOCK_Dgram_Bcast.h"
-#include "ace/SOCK_Dgram_Mcast.h"
+#include <ace/Global_Macros.h>
+#include <ace/INET_Addr.h>
+#include <ace/SOCK_Dgram.h>
+//#include <ace/SOCK_Stream.h>
+#include <ace/SOCK_Dgram_Bcast.h>
+#include <ace/SOCK_Dgram_Mcast.h>
 
 #include "stream_common.h"
 

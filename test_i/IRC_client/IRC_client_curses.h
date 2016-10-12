@@ -24,18 +24,18 @@
 #include <map>
 #include <string>
 
-#include "ace/Synch_Traits.h"
+#include <ace/Synch_Traits.h>
 
 #if defined (_MSC_VER)
-#include "curses.h"
+#include <curses.h>
 #else
-#include "ncurses.h"
+#include <ncurses.h>
 // *NOTE*: the ncurses "timeout" macros conflicts with
 //         ACE_Synch_Options::timeout. Since not currently used, it's safe to
 //         undefine
 #undef timeout
 #endif
-#include "panel.h"
+#include <panel.h>
 
 #include "IRC_client_common.h"
 #include "IRC_client_stream_common.h"

@@ -21,7 +21,7 @@
 #ifndef DHCP_MODULE_DISCOVER_H
 #define DHCP_MODULE_DISCOVER_H
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 #include "stream_headmoduletask_base.h"
 #include "stream_statistichandler.h"

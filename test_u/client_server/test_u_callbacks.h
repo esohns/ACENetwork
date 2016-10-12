@@ -21,7 +21,7 @@
 #ifndef NET_CALLBACKS_H
 #define NET_CALLBACKS_H
 
-#include "gtk/gtk.h"
+#include <gtk/gtk.h>
 
 //------------------------------------------------------------------------------
 

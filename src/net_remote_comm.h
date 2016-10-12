@@ -21,7 +21,7 @@
 #ifndef NET_REMOTE_COMM_H
 #define NET_REMOTE_COMM_H
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 class Net_Remote_Comm
 {

@@ -21,7 +21,7 @@
 #ifndef HTTP_MODULE_BISECTOR_H
 #define HTTP_MODULE_BISECTOR_H
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 #include "stream_headmoduletask_base.h"
 

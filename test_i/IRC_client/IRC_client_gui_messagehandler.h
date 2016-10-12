@@ -23,10 +23,10 @@
 
 #include <string>
 
-#include "gtk/gtk.h"
+#include <gtk/gtk.h>
 
-#include "ace/Global_Macros.h"
-#include "ace/Synch_Traits.h"
+#include <ace/Global_Macros.h>
+#include <ace/Synch_Traits.h>
 
 #include "common_iget.h"
 

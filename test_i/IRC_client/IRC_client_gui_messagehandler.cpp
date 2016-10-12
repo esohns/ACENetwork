@@ -21,6 +21,8 @@
 
 #include "IRC_client_gui_messagehandler.h"
 
+#include <ace/Log_Msg.h>
+
 #include "common_file_tools.h"
 
 #include "common_ui_tools.h"

@@ -21,7 +21,7 @@
 #ifndef DHCP_COMMON_MODULES_H
 #define DHCP_COMMON_MODULES_H
 
-#include "ace/Synch_Traits.h"
+#include <ace/Synch_Traits.h>
 
 #include "common_time_common.h"
 

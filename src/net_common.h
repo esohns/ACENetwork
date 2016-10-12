@@ -21,8 +21,8 @@
 #ifndef NET_COMMON_H
 #define NET_COMMON_H
 
-#include "ace/Synch_Traits.h"
-#include "ace/Time_Value.h"
+#include <ace/Synch_Traits.h>
+#include <ace/Time_Value.h>
 
 #include "stream_common.h"
 

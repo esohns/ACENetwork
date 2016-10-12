@@ -31,8 +31,8 @@
 #endif
 #include <sstream>
 
-#include "ace/Guard_T.h"
-#include "ace/Synch_Traits.h"
+#include <ace/Guard_T.h>
+#include <ace/Synch_Traits.h>
 
 #include "common_file_tools.h"
 #include "common_timer_manager.h"

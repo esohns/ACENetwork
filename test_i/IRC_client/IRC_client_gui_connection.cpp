@@ -23,7 +23,8 @@
 
 #include <sstream>
 
-#include "ace/ACE.h"
+#include <ace/ACE.h>
+#include <ace/Log_Msg.h>
 
 #include "common_file_tools.h"
 

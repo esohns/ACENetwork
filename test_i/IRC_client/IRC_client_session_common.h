@@ -21,8 +21,8 @@
 #ifndef IRC_CLIENT_SESSION_COMMON_H
 #define IRC_CLIENT_SESSION_COMMON_H
 
-#include "ace/INET_Addr.h"
-#include "ace/SOCK_Connector.h"
+#include <ace/INET_Addr.h>
+#include <ace/SOCK_Connector.h>
 
 #include "irc_common.h"
 #include "irc_configuration.h"

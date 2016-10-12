@@ -21,8 +21,8 @@
 #ifndef NET_CONNECTION_BASE_H
 #define NET_CONNECTION_BASE_H
 
-#include "ace/Global_Macros.h"
-#include "ace/Time_Value.h"
+#include <ace/Global_Macros.h>
+#include <ace/Time_Value.h>
 
 #include "common_referencecounter_base.h"
 

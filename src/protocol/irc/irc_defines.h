@@ -21,12 +21,6 @@
 #ifndef IRC_DEFINES_H
 #define IRC_DEFINES_H
 
-//#include "ace/Default_Constants.h"
-
-//#include "common_defines.h"
-
-//#include "irc_common.h"
-
 // protocol
 // "\0\0"
 #define YY_END_OF_BUFFER_CHAR                  0

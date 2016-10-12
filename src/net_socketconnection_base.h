@@ -21,12 +21,12 @@
 #ifndef NET_SOCKETCONNECTION_BASE_H
 #define NET_SOCKETCONNECTION_BASE_H
 
-#include "ace/config-macros.h"
-//#include "ace/Connector.h"
-#include "ace/Global_Macros.h"
-#include "ace/Message_Block.h"
-//#include "ace/SOCK_Connector.h"
-#include "ace/Time_Value.h"
+#include <ace/config-macros.h>
+//#include <ace/Connector.h>
+#include <ace/Global_Macros.h>
+#include <ace/Message_Block.h>
+//#include <ace/SOCK_Connector.h>
+#include <ace/Time_Value.h>
 
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"

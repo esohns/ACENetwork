@@ -21,7 +21,7 @@
 #ifndef DHCP_MODULE_PARSER_H
 #define DHCP_MODULE_PARSER_H
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 #include "stream_headmoduletask_base.h"
 #include "stream_statistichandler.h"

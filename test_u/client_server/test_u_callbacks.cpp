@@ -21,7 +21,8 @@
 
 #include "test_u_callbacks.h"
 
-#include "ace/Synch_Traits.h"
+#include <ace/Log_Msg.h>
+#include <ace/Synch_Traits.h>
 
 #include "common_timer_manager.h"
 

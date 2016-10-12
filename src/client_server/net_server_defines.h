@@ -21,10 +21,6 @@
 #ifndef NET_SERVER_DEFINES_H
 #define NET_SERVER_DEFINES_H
 
-//#include <limits>
-
-//#include "ace/ACE.h"
-
 // *** trace log ***
 #define NET_SERVER_LOG_FILENAME_PREFIX                   "net_server"
 

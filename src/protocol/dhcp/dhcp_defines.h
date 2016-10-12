@@ -21,8 +21,6 @@
 #ifndef DHCP_DEFINES_H
 #define DHCP_DEFINES_H
 
-//#include "ace/Default_Constants.h"
-
 // parser
 // "\0\0"
 #define YY_END_OF_BUFFER_CHAR                     0

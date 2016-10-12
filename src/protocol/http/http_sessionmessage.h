@@ -21,7 +21,7 @@
 #ifndef HTTP_SessionMessage_H
 #define HTTP_SessionMessage_H
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 #include "stream_session_message_base.h"
 

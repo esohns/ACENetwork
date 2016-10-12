@@ -21,9 +21,9 @@
 
 #include "test_u_eventhandler.h"
 
-#include "ace/Guard_T.h"
-#include "ace/Log_Msg.h"
-#include "ace/Synch_Traits.h"
+#include <ace/Guard_T.h>
+#include <ace/Log_Msg.h>
+#include <ace/Synch_Traits.h>
 
 #include "net_macros.h"
 

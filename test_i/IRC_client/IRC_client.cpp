@@ -33,23 +33,23 @@ using namespace std;
 //                       prevent ace/iosfwd.h from causing any harm
 #define ACE_IOSFWD_H
 
-#include "ace/Get_Opt.h"
-#include "ace/High_Res_Timer.h"
-#include "ace/iosfwd.h"
+#include <ace/Get_Opt.h>
+#include <ace/High_Res_Timer.h>
+#include <ace/iosfwd.h>
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include "ace/Init_ACE.h"
+#include <ace/Init_ACE.h>
 #endif
-#include "ace/POSIX_Proactor.h"
-#include "ace/Proactor.h"
-#include "ace/Profile_Timer.h"
-#include "ace/Sig_Handler.h"
-#include "ace/Signal.h"
-#include "ace/Version.h"
+#include <ace/POSIX_Proactor.h>
+#include <ace/Proactor.h>
+#include <ace/Profile_Timer.h>
+#include <ace/Sig_Handler.h>
+#include <ace/Signal.h>
+#include <ace/Version.h>
 
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
-#include "curses.h"
+#include <curses.h>
 #else
-#include "ncurses.h"
+#include <ncurses.h>
 // *NOTE*: the ncurses "timeout" macros conflicts with
 //         ACE_Synch_Options::timeout. Since not currently being used, it's safe
 //         to undefine...

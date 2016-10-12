@@ -29,7 +29,7 @@
 #ifndef ACE_STREAMBUF_ALT_H
 #define ACE_STREAMBUF_ALT_H
 
-#include /**/ "ace/pre.h"
+#include /**/ <ace/pre.h>
 //#include /**/ "ace/ACE_export.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -38,10 +38,10 @@
 
 // Needed on Windows for streambuf
 // FUZZ: disable check_for_streams_include
-#include "ace/streams.h"
-//#include "ace/iosfwd.h"
+#include <ace/streams.h>
+//#include <ace/iosfwd.h>
 
-#include "ace/Time_Value.h"
+#include <ace/Time_Value.h>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -24,10 +24,10 @@
 #include <map>
 #include <string>
 
-#include "ace/Global_Macros.h"
-#include "ace/Synch_Traits.h"
+#include <ace/Global_Macros.h>
+#include <ace/Synch_Traits.h>
 
-#include "gtk/gtk.h"
+#include <gtk/gtk.h>
 
 #include "common_iget.h"
 

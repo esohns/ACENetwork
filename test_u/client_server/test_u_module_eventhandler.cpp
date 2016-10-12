@@ -21,6 +21,9 @@
 
 #include "test_u_module_eventhandler.h"
 
+#include <ace/Log_Msg.h>
+#include <ace/OS_Memory.h>
+
 #include "net_macros.h"
 
 Test_U_Module_EventHandler::Test_U_Module_EventHandler ()

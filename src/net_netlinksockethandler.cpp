@@ -24,7 +24,7 @@
 #if defined (ACE_HAS_NETLINK)
 #include <cmath>
 
-#include "ace/OS.h"
+#include <ace/OS.h>
 
 int
 Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_in[],

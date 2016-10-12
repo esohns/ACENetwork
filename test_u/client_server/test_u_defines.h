@@ -21,10 +21,6 @@
 #ifndef TEST_U_NET_DEFINES_H
 #define TEST_U_NET_DEFINES_H
 
-//#include "ace/Default_Constants.h"
-
-//#include "net_client_timeouthandler.h"
-
 // glade/GTKBuilder definitions
 #define NET_UI_GTK_UI_FILE_DIRECTORY                    "etc"
 

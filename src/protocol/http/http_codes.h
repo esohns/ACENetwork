@@ -21,7 +21,7 @@
 #ifndef HTTP_CODES_H
 #define HTTP_CODES_H
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 class HTTP_Codes
 {

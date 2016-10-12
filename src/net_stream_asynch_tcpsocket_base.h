@@ -21,13 +21,13 @@
 #ifndef NET_STREAM_ASYNCH_TCPSOCKET_BASE_H
 #define NET_STREAM_ASYNCH_TCPSOCKET_BASE_H
 
-#include "ace/config-lite.h"
-#include "ace/Asynch_IO.h"
-#include "ace/Event_Handler.h"
-#include "ace/Global_Macros.h"
-#include "ace/Message_Block.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Time_Value.h"
+#include <ace/config-lite.h>
+#include <ace/Asynch_IO.h>
+#include <ace/Event_Handler.h>
+#include <ace/Global_Macros.h>
+#include <ace/Message_Block.h>
+#include <ace/Synch_Traits.h>
+#include <ace/Time_Value.h>
 
 #include "common_time_common.h"
 

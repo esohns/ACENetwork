@@ -21,8 +21,8 @@
 #ifndef TEST_U_SESSION_MESSAGE_H
 #define TEST_U_SESSION_MESSAGE_H
 
-#include "ace/Global_Macros.h"
-#include "ace/Message_Block.h"
+#include <ace/Global_Macros.h>
+#include <ace/Message_Block.h>
 
 #include "stream_common.h"
 #include "stream_session_message_base.h"

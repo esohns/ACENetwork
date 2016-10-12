@@ -23,7 +23,7 @@
 
 #include <string>
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 #include "irc_common.h"
 #include "irc_common_modules.h"

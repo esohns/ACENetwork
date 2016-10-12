@@ -21,10 +21,10 @@
 #ifndef IRC_CLIENT_NETWORK_H
 #define IRC_CLIENT_NETWORK_H
 
-#include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
-#include "ace/Singleton.h"
-#include "ace/Synch_Traits.h"
+#include <ace/Global_Macros.h>
+#include <ace/INET_Addr.h>
+#include <ace/Singleton.h>
+#include <ace/Synch_Traits.h>
 
 #include "irc_network.h"
 

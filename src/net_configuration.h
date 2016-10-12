@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include "ace/INET_Addr.h"
-#include "ace/Time_Value.h"
+#include <ace/INET_Addr.h>
+#include <ace/Time_Value.h>
 
 #include "net_defines.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

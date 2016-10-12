@@ -21,8 +21,8 @@
 #ifndef Net_IPCONNECTION_H
 #define Net_IPCONNECTION_H
 
-//#include "ace/Global_Macros.h"
-//#include "ace/INET_Addr.h"
+//#include <ace/Global_Macros.h>
+//#include <ace/INET_Addr.h>
 
 //#include "net_connection_manager_common.h"
 //#include "net_exports.h"

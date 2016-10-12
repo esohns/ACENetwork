@@ -24,8 +24,8 @@
 #include <bitset>
 #include <string>
 
-#include "ace/Synch_Traits.h"
-#include "ace/Time_Value.h"
+#include <ace/Synch_Traits.h>
+#include <ace/Time_Value.h>
 
 //#include "stream_common.h"
 #include "stream_control_message.h"

@@ -21,7 +21,7 @@
 #ifndef IRC_MODULE_BISECTOR_H
 #define IRC_MODULE_BISECTOR_H
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 #include "stream_headmoduletask_base.h"
 #include "stream_streammodule_base.h"

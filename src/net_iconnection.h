@@ -21,8 +21,8 @@
 #ifndef NET_ICONNECTION_H
 #define NET_ICONNECTION_H
 
-#include "ace/config-macros.h"
-#include "ace/Message_Block.h"
+#include <ace/config-macros.h>
+#include <ace/Message_Block.h>
 
 #include "common_idumpstate.h"
 #include "common_iget.h"

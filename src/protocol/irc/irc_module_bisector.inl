@@ -17,9 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ace/config-macros.h"
-#include "ace/OS_Memory.h"
-#include "ace/Synch_Traits.h"
+
+#include <ace/config-macros.h>
+#include <ace/OS_Memory.h>
+#include <ace/Synch_Traits.h>
 
 #include "common_timer_manager_common.h"
 

@@ -21,7 +21,7 @@
 #ifndef TEST_U_SESSIONMESSAGE_H
 #define TEST_U_SESSIONMESSAGE_H
 
-#include "ace/Global_Macros.h"
+#include <ace/Global_Macros.h>
 
 #include "stream_common.h"
 #include "stream_messageallocatorheap_base.h"

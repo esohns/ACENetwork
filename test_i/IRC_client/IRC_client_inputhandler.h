@@ -21,8 +21,8 @@
 #ifndef IRC_CLIENT_INPUTHANDLER_H
 #define IRC_CLIENT_INPUTHANDLER_H
 
-#include "ace/Event_Handler.h"
-#include "ace/Global_Macros.h"
+#include <ace/Event_Handler.h>
+#include <ace/Global_Macros.h>
 
 #include "common_iinitialize.h"
 

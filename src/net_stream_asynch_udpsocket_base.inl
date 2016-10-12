@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "ace/Log_Msg.h"
-#include "ace/Stream.h"
+#include <ace/Log_Msg.h>
+#include <ace/Stream.h>
 
 #include "common_tools.h"
 
