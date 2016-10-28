@@ -314,7 +314,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
     //  ACE_DEBUG ((LM_DEBUG,
     //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-    //              message_p->getID (),
+    //              message_p->id (),
     //              message_p->length ()));
 
     if (!driver_.parse (message_p))
@@ -323,7 +323,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%s: failed to HTTP_ParserDriver::parse() (message ID was: %d), returning\n"),
                   inherited::mod_->name (),
-                  message_p->getID ()));
+                  message_p->id ()));
       goto error;
     } // end IF
     // the message fragment has been parsed successfully
@@ -885,7 +885,7 @@ HTTP_Module_ParserH_T<LockType,
 
     //  ACE_DEBUG ((LM_DEBUG,
     //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-    //              message_p->getID (),
+    //              message_p->id (),
     //              message_p->length ()));
 
     if (!driver_.parse (message_p))
@@ -894,7 +894,7 @@ HTTP_Module_ParserH_T<LockType,
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%s: failed to HTTP_ParserDriver::parse() (message ID was: %d), returning\n"),
                   inherited::mod_->name (),
-                  message_p->getID ()));
+                  message_p->id ()));
       goto error;
     } // end IF
     // the message fragment has been parsed successfully

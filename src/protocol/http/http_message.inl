@@ -30,12 +30,10 @@
 
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
-          typename SessionMessageType,
-          typename DataType>
+          typename SessionMessageType>
 HTTP_Message_T<AllocatorConfigurationType,
                ControlMessageType,
-               SessionMessageType,
-               DataType>::HTTP_Message_T (unsigned int requestedSize_in)
+               SessionMessageType>::HTTP_Message_T (unsigned int requestedSize_in)
  : inherited (requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::HTTP_Message_T"));
@@ -44,12 +42,10 @@ HTTP_Message_T<AllocatorConfigurationType,
 
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
-          typename SessionMessageType,
-          typename DataType>
+          typename SessionMessageType>
 HTTP_Message_T<AllocatorConfigurationType,
                ControlMessageType,
-               SessionMessageType,
-               DataType>::HTTP_Message_T (const HTTP_Message_T& message_in)
+               SessionMessageType>::HTTP_Message_T (const HTTP_Message_T& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::HTTP_Message_T"));
@@ -58,14 +54,12 @@ HTTP_Message_T<AllocatorConfigurationType,
 
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
-          typename SessionMessageType,
-          typename DataType>
+          typename SessionMessageType>
 HTTP_Message_T<AllocatorConfigurationType,
                ControlMessageType,
-               SessionMessageType,
-               DataType>::HTTP_Message_T (ACE_Data_Block* dataBlock_in,
-                                          ACE_Allocator* messageAllocator_in,
-                                          bool incrementMessageCounter_in)
+               SessionMessageType>::HTTP_Message_T (ACE_Data_Block* dataBlock_in,
+                                                    ACE_Allocator* messageAllocator_in,
+                                                    bool incrementMessageCounter_in)
  : inherited (dataBlock_in,               // use (don't own !) this data block
               messageAllocator_in,        // allocator
               incrementMessageCounter_in) // increment message counter ?
@@ -85,12 +79,10 @@ HTTP_Message_T<AllocatorConfigurationType,
 
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
-          typename SessionMessageType,
-          typename DataType>
+          typename SessionMessageType>
 HTTP_Message_T<AllocatorConfigurationType,
                ControlMessageType,
-               SessionMessageType,
-               DataType>::~HTTP_Message_T ()
+               SessionMessageType>::~HTTP_Message_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::~HTTP_Message_T"));
 
@@ -99,13 +91,11 @@ HTTP_Message_T<AllocatorConfigurationType,
 
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
-          typename SessionMessageType,
-          typename DataType>
+          typename SessionMessageType>
 HTTP_Method_t
 HTTP_Message_T<AllocatorConfigurationType,
                ControlMessageType,
-               SessionMessageType,
-               DataType>::command () const
+               SessionMessageType>::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::command"));
 
@@ -119,13 +109,11 @@ HTTP_Message_T<AllocatorConfigurationType,
 
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
-          typename SessionMessageType,
-          typename DataType>
+          typename SessionMessageType>
 std::string
 HTTP_Message_T<AllocatorConfigurationType,
                ControlMessageType,
-               SessionMessageType,
-               DataType>::Command2String (HTTP_Method_t method_in)
+               SessionMessageType>::Command2String (HTTP_Method_t method_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::Command2String"));
 
@@ -135,13 +123,11 @@ HTTP_Message_T<AllocatorConfigurationType,
 
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
-          typename SessionMessageType,
-          typename DataType>
+          typename SessionMessageType>
 void
 HTTP_Message_T<AllocatorConfigurationType,
                ControlMessageType,
-               SessionMessageType,
-               DataType>::dump_state () const
+               SessionMessageType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::dump_state"));
 
@@ -167,7 +153,7 @@ HTTP_Message_T<AllocatorConfigurationType,
   } // end FOR
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s"),
-              this->getID (),
+              inherited::id (),
               inherited::total_length (),
               ACE_TEXT (info.c_str ())));
   // delegate to base
@@ -176,13 +162,11 @@ HTTP_Message_T<AllocatorConfigurationType,
 
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
-          typename SessionMessageType,
-          typename DataType>
+          typename SessionMessageType>
 void
 HTTP_Message_T<AllocatorConfigurationType,
                ControlMessageType,
-               SessionMessageType,
-               DataType>::crunch ()
+               SessionMessageType>::crunch ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::crunch"));
 
@@ -251,13 +235,11 @@ HTTP_Message_T<AllocatorConfigurationType,
 
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
-          typename SessionMessageType,
-          typename DataType>
+          typename SessionMessageType>
 ACE_Message_Block*
 HTTP_Message_T<AllocatorConfigurationType,
                ControlMessageType,
-               SessionMessageType,
-               DataType>::duplicate (void) const
+               SessionMessageType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::duplicate"));
 

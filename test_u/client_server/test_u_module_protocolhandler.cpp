@@ -212,7 +212,7 @@ Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: unknown/invalid message type (was: \"%s\"), returning\n"),
-                  message_inout->getID (),
+                  message_inout->id (),
                   ACE_TEXT (Test_U_Message::CommandType2String (message_header.messageType).c_str ())));
       return;
     }

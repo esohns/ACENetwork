@@ -58,7 +58,7 @@ class Net_TCPSocketHandler_T
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T& operator= (const Net_TCPSocketHandler_T&))
 };
 
-// include template implementation
+// include template definition
 #include "net_tcpsockethandler.inl"
 
 #endif

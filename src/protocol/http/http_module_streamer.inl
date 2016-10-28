@@ -210,7 +210,7 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("[%u]: not enough buffer space (was: %d/%d), aborting\n"),
-                message_inout->getID (),
+                message_inout->id (),
                 message_inout->space (), buffer.size ()));
 
     // clean up
@@ -245,7 +245,7 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("[%u]: not enough buffer space (was: %d/%d), aborting\n"),
-                message_inout->getID (),
+                message_inout->id (),
                 message_inout->space (), content_buffer.size ()));
 
     // clean up
@@ -274,7 +274,7 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
 continue_:
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT ("[%u]: streamed [%u byte(s)]...\n"),
-//               message_inout->getID (),
+//               message_inout->id (),
 //               message_inout->length ()));
 
   return;

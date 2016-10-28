@@ -1,0 +1,644 @@
+<?xml version="1.0"?>
+<interface>
+  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-naming-policy project-wide -->
+  <object class="GtkTextTagTable" id="texttagtable_page_channel"/>
+  <object class="GtkListStore" id="liststore_page_channel">
+    <columns>
+      <!-- column-name nickname -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkWindow" id="window_page_channel">
+    <property name="focus_on_map">False</property>
+    <property name="decorated">False</property>
+    <property name="deletable">False</property>
+    <child>
+      <object class="GtkVBox" id="vbox_page_channel">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkFrame" id="frame_page_channel_mode">
+            <property name="visible">True</property>
+            <property name="label_xalign">0</property>
+            <property name="shadow_type">etched-out</property>
+            <child>
+              <object class="GtkAlignment" id="alignment_page_channel_mode">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkVBox" id="vbox_page_channel_mode">
+                    <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkHBox" id="hbox_page_channel_mode">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_anonymous">
+                            <property name="label" translatable="yes">_anonymous</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_ban">
+                            <property name="label" translatable="yes">_ban</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">b</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_inviteonly">
+                            <property name="label" translatable="yes">_invite</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">invite-only (i)</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_key">
+                            <property name="label" translatable="yes">_key</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">k</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_userlimit">
+                            <property name="label" translatable="yes">_limit</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">user limit (l)</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_moderated">
+                            <property name="label" translatable="yes">_moderated</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">m</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_blockforeign">
+                            <property name="label" translatable="yes">foreig_n</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">block foreign messages (n)</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_operator">
+                            <property name="label" translatable="yes">_operator</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">o</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">7</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_private">
+                            <property name="label" translatable="yes">_private</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">p</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">8</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_quiet">
+                            <property name="label" translatable="yes">_quiet</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">q</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">9</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_reop">
+                            <property name="label" translatable="yes">_reop</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">r</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">10</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_secret">
+                            <property name="label" translatable="yes">_secret</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">s</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">11</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_restricttopic">
+                            <property name="label" translatable="yes">_topic</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">restrict topic (t)</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">12</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton_voice">
+                            <property name="label" translatable="yes">_voice</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">v</property>
+                            <property name="relief">none</property>
+                            <property name="use_underline">True</property>
+                            <property name="focus_on_click">False</property>
+                            <signal name="toggled" handler="channel_mode_toggled_cb"/>
+                          </object>
+                          <packing>
+                            <property name="position">13</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkHBox" id="hbox_page_channel_mode_key">
+                        <child>
+                          <object class="GtkLabel" id="label_page_channel_mode_key_1">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_page_channel_mode_key_2">
+                            <property name="visible">True</property>
+                            <property name="xalign">0.50999999046325684</property>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_page_channel_mode_key_3">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_page_channel_mode_key_4">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_page_channel_mode_key_5">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkLabel" id="label_page_channel_mode">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">&lt;b&gt;&lt;i&gt;channel mode&lt;/i&gt;&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFrame" id="frame_page_channel">
+            <property name="visible">True</property>
+            <property name="label_xalign">0</property>
+            <property name="shadow_type">etched-out</property>
+            <child>
+              <object class="GtkAlignment" id="alignment_page_channel">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkHPaned" id="hpaned_page_channel">
+                    <property name="visible">True</property>
+                    <property name="position">470</property>
+                    <property name="position_set">True</property>
+                    <child>
+                      <object class="GtkScrolledWindow" id="scrolledwindow_page_channel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="events">GDK_EXPOSURE_MASK | GDK_STRUCTURE_MASK | GDK_SCROLL_MASK</property>
+                        <property name="hscrollbar_policy">automatic</property>
+                        <property name="vscrollbar_policy">automatic</property>
+                        <property name="window_placement_set">True</property>
+                        <property name="shadow_type">etched-out</property>
+                        <child>
+                          <object class="GtkTextView" id="textview_page_channel">
+                            <property name="visible">True</property>
+                            <property name="events">GDK_STRUCTURE_MASK | GDK_SCROLL_MASK</property>
+                            <property name="editable">False</property>
+                            <property name="wrap_mode">word</property>
+                            <property name="cursor_visible">False</property>
+                            <property name="buffer">textbuffer_page_channel</property>
+                            <property name="accepts_tab">False</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="resize">False</property>
+                        <property name="shrink">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkTreeView" id="treeview_page_channel">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">liststore_page_channel</property>
+                        <property name="headers_visible">False</property>
+                        <property name="headers_clickable">False</property>
+                        <property name="search_column">0</property>
+                        <property name="show_expanders">False</property>
+                        <property name="rubber_banding">True</property>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="treeviewcolumn_page_channel">
+                            <property name="sizing">autosize</property>
+                            <property name="title">members</property>
+                            <property name="expand">True</property>
+                            <property name="sort_indicator">True</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="cellrenderertext_page_channel"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="resize">False</property>
+                        <property name="shrink">False</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkEventBox" id="eventbox_page_channel_topic">
+                <property name="visible">True</property>
+                <property name="visible_window">False</property>
+                <property name="above_child">True</property>
+                <signal name="button_press_event" handler="topic_clicked_cb"/>
+                <child>
+                  <object class="GtkLabel" id="label_page_channel_topic">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">no topic</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="window_tab_channel">
+    <property name="resizable">False</property>
+    <property name="focus_on_map">False</property>
+    <property name="decorated">False</property>
+    <property name="deletable">False</property>
+    <child>
+      <object class="GtkHBox" id="hbox_tab_channel">
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkLabel" id="label_tab_channel">
+            <property name="visible">True</property>
+          </object>
+          <packing>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_close">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="receives_default">False</property>
+            <property name="image">image_button_tab_channel_close</property>
+            <property name="relief">half</property>
+            <property name="focus_on_click">False</property>
+            <property name="image_position">right</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="image_button_tab_channel_close">
+    <property name="visible">True</property>
+    <property name="stock">gtk-close</property>
+    <property name="icon-size">1</property>
+  </object>
+  <object class="GtkDialog" id="dialog_page_channel_entry">
+    <property name="title" translatable="yes">please insert data...</property>
+    <property name="modal">True</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <property name="deletable">False</property>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="vbox_dialog_page_channel_entry">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkEntry" id="entry_dialog_page_channel_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="has_focus">True</property>
+            <property name="is_focus">True</property>
+            <property name="invisible_char">&#x25CF;</property>
+            <property name="activates_default">True</property>
+            <property name="truncate_multiline">True</property>
+            <property name="shadow_type">etched-out</property>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="hbuttonbox_dialog_page_channel_entry">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button_accept">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
+                <property name="is_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="related_action">action_accept</property>
+                <property name="use_action_appearance">True</property>
+                <property name="use_stock">True</property>
+                <property name="focus_on_click">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_cancel">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="related_action">action_cancel</property>
+                <property name="use_action_appearance">True</property>
+                <property name="use_stock">True</property>
+                <property name="focus_on_click">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="0">button_accept</action-widget>
+      <action-widget response="1">button_cancel</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkAction" id="action_cancel">
+    <property name="name">Cancel</property>
+    <property name="label">Cancel</property>
+    <property name="short_label">Cancel</property>
+    <property name="stock_id">gtk-cancel</property>
+  </object>
+  <object class="GtkAction" id="action_accept">
+    <property name="name">Accept</property>
+    <property name="label">Accept</property>
+    <property name="short_label">Accept</property>
+    <property name="stock_id">gtk-ok</property>
+  </object>
+  <object class="GtkMenu" id="menu_page_channel">
+    <property name="take_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="menuitem_info">
+        <property name="visible">True</property>
+        <property name="related_action">action_info</property>
+        <property name="use_action_appearance">True</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="menuitem_msg">
+        <property name="visible">True</property>
+        <property name="related_action">action_msg</property>
+        <property name="use_action_appearance">True</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menuitem_invite">
+        <property name="visible">True</property>
+        <property name="related_action">action_invite</property>
+        <property name="use_action_appearance">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="menuitem_separator">
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menuitem_kick">
+        <property name="visible">True</property>
+        <property name="related_action">action_kick</property>
+        <property name="use_action_appearance">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="menuitem_ban">
+        <property name="visible">True</property>
+        <property name="related_action">action_ban</property>
+        <property name="use_action_appearance">True</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+  </object>
+  <object class="GtkAction" id="action_msg">
+    <property name="label">Dialogue...</property>
+    <property name="short_label">Dialogue...</property>
+    <property name="stock_id">gtk-open</property>
+    <signal name="activate" handler="action_msg_cb"/>
+  </object>
+  <object class="GtkAction" id="action_kick">
+    <property name="label">Eject</property>
+    <property name="short_label">Eject</property>
+    <property name="stock_id">gtk-close</property>
+    <signal name="activate" handler="action_kick_cb"/>
+  </object>
+  <object class="GtkAction" id="action_ban">
+    <property name="label">Lock out...</property>
+    <property name="short_label">Lock out...</property>
+    <property name="stock_id">gtk-dialog-error</property>
+    <signal name="activate" handler="action_ban_cb"/>
+  </object>
+  <object class="GtkAction" id="action_invite">
+    <property name="label">Invite</property>
+    <property name="short_label">Invite</property>
+    <property name="stock_id">gtk-add</property>
+    <signal name="activate" handler="action_invite_cb"/>
+  </object>
+  <object class="GtkMenu" id="menu_page_channel_invite">
+    <property name="visible">True</property>
+    <property name="take_focus">False</property>
+  </object>
+  <object class="GtkAction" id="action_info">
+    <property name="label">Info...</property>
+    <property name="short_label">Info...</property>
+    <property name="stock_id">gtk-about</property>
+    <signal name="activate" handler="action_info_cb"/>
+  </object>
+  <object class="GtkTextBuffer" id="textbuffer_page_channel">
+    <property name="tag_table">texttagtable_page_channel</property>
+  </object>
+</interface>

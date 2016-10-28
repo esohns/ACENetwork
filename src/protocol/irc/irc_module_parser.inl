@@ -221,8 +221,8 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
 
 //   ACE_DEBUG((LM_DEBUG,
 //              ACE_TEXT("parsing message(ID: %u, %u byte(s))\n\"%s\"\n"),
-//              message_p->getID(),
-//              message_p->length(),
+//              message_p->id (),
+//              message_p->length (),
 //              std::string(message_p->rd_ptr(), message_p->length()).c_str()));
 
   driver_.initialize (const_cast<IRC_Record&> (message_p->get ()),
@@ -233,7 +233,7 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_ParserDriver::parse(ID: %u), returning\n"),
-                message_p->getID ()));
+                message_p->id ()));
     goto error;
   } // end IF
 

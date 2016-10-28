@@ -1,0 +1,248 @@
+Grammar
+
+    0 $accept: session "end"
+
+    1 session: "handshake" messages
+
+    2 messages: message messages
+    3         | %empty
+
+    4 message: "bitfield"
+    5        | "cancel"
+    6        | "choke"
+    7        | "have"
+    8        | "interested"
+    9        | "keep-alive"
+   10        | "not_interested"
+   11        | "piece"
+   12        | "port"
+   13        | "request"
+   14        | "unchoke"
+   15        | "end_of_fragment"
+
+
+Terminals, with rules where they appear
+
+"end" (0) 0
+error (256)
+"handshake" (258) 1
+"bitfield" (259) 4
+"cancel" (260) 5
+"choke" (261) 6
+"have" (262) 7
+"interested" (263) 8
+"keep-alive" (264) 9
+"not_interested" (265) 10
+"piece" (266) 11
+"port" (267) 12
+"request" (268) 13
+"unchoke" (269) 14
+"end_of_fragment" (270) 15
+
+
+Nonterminals, with rules where they appear
+
+$accept (16)
+    on left: 0
+session (17)
+    on left: 1, on right: 0
+messages (18)
+    on left: 2 3, on right: 1 2
+message (19)
+    on left: 4 5 6 7 8 9 10 11 12 13 14 15, on right: 2
+
+
+State 0
+
+    0 $accept: . session "end"
+    1 session: . "handshake" messages
+
+    "handshake"  shift, and go to state 1
+
+    session  go to state 2
+
+
+State 1
+
+    1 session: "handshake" . messages
+    2 messages: . message messages
+    3         | . %empty  ["end"]
+    4 message: . "bitfield"
+    5        | . "cancel"
+    6        | . "choke"
+    7        | . "have"
+    8        | . "interested"
+    9        | . "keep-alive"
+   10        | . "not_interested"
+   11        | . "piece"
+   12        | . "port"
+   13        | . "request"
+   14        | . "unchoke"
+   15        | . "end_of_fragment"
+
+    "bitfield"         shift, and go to state 3
+    "cancel"           shift, and go to state 4
+    "choke"            shift, and go to state 5
+    "have"             shift, and go to state 6
+    "interested"       shift, and go to state 7
+    "keep-alive"       shift, and go to state 8
+    "not_interested"   shift, and go to state 9
+    "piece"            shift, and go to state 10
+    "port"             shift, and go to state 11
+    "request"          shift, and go to state 12
+    "unchoke"          shift, and go to state 13
+    "end_of_fragment"  shift, and go to state 14
+
+    $default  reduce using rule 3 (messages)
+
+    messages  go to state 15
+    message   go to state 16
+
+
+State 2
+
+    0 $accept: session . "end"
+
+    "end"  shift, and go to state 17
+
+
+State 3
+
+    4 message: "bitfield" .
+
+    $default  reduce using rule 4 (message)
+
+
+State 4
+
+    5 message: "cancel" .
+
+    $default  reduce using rule 5 (message)
+
+
+State 5
+
+    6 message: "choke" .
+
+    $default  reduce using rule 6 (message)
+
+
+State 6
+
+    7 message: "have" .
+
+    $default  reduce using rule 7 (message)
+
+
+State 7
+
+    8 message: "interested" .
+
+    $default  reduce using rule 8 (message)
+
+
+State 8
+
+    9 message: "keep-alive" .
+
+    $default  reduce using rule 9 (message)
+
+
+State 9
+
+   10 message: "not_interested" .
+
+    $default  reduce using rule 10 (message)
+
+
+State 10
+
+   11 message: "piece" .
+
+    $default  reduce using rule 11 (message)
+
+
+State 11
+
+   12 message: "port" .
+
+    $default  reduce using rule 12 (message)
+
+
+State 12
+
+   13 message: "request" .
+
+    $default  reduce using rule 13 (message)
+
+
+State 13
+
+   14 message: "unchoke" .
+
+    $default  reduce using rule 14 (message)
+
+
+State 14
+
+   15 message: "end_of_fragment" .
+
+    $default  reduce using rule 15 (message)
+
+
+State 15
+
+    1 session: "handshake" messages .
+
+    $default  reduce using rule 1 (session)
+
+
+State 16
+
+    2 messages: . message messages
+    2         | message . messages
+    3         | . %empty  ["end"]
+    4 message: . "bitfield"
+    5        | . "cancel"
+    6        | . "choke"
+    7        | . "have"
+    8        | . "interested"
+    9        | . "keep-alive"
+   10        | . "not_interested"
+   11        | . "piece"
+   12        | . "port"
+   13        | . "request"
+   14        | . "unchoke"
+   15        | . "end_of_fragment"
+
+    "bitfield"         shift, and go to state 3
+    "cancel"           shift, and go to state 4
+    "choke"            shift, and go to state 5
+    "have"             shift, and go to state 6
+    "interested"       shift, and go to state 7
+    "keep-alive"       shift, and go to state 8
+    "not_interested"   shift, and go to state 9
+    "piece"            shift, and go to state 10
+    "port"             shift, and go to state 11
+    "request"          shift, and go to state 12
+    "unchoke"          shift, and go to state 13
+    "end_of_fragment"  shift, and go to state 14
+
+    $default  reduce using rule 3 (messages)
+
+    messages  go to state 18
+    message   go to state 16
+
+
+State 17
+
+    0 $accept: session "end" .
+
+    $default  accept
+
+
+State 18
+
+    2 messages: message messages .
+
+    $default  reduce using rule 2 (messages)

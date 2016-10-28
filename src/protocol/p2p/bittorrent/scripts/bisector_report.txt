@@ -1,0 +1,20 @@
+flex version 2.5.39 usage statistics:
+  scanner options: -bdps--reentrantvB8 -CaF -ohttp_bisector.cpp -PHTTP_Bisector_
+  27/2000 NFA states
+  10/1000 DFA states (34 words)
+  6 rules
+  No backing up
+  2/40 start conditions
+  21 epsilon states, 9 double epsilon states
+  4/100 character classes needed 514/750 words of storage, 0 reused
+  1532 state/nextstate pairs created
+  12/1520 unique/duplicate transitions
+  10/1000 base-def entries created
+  1557/2000 (peak 0) nxt-chk entries created
+  0/2500 (peak 0) template nxt-chk entries created
+  0 empty table entries
+  0 protos created
+  0 templates created, 0 uses
+  0 (2 saved) hash collisions, 6 DFAs equal
+  1 sets of reallocations needed
+  3134 total table entries needed

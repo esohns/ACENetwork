@@ -164,14 +164,14 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
 
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-//              message_p->getID (),
+//              message_p->id (),
 //              message_p->length ()));
 
   if (!driver_.parse (message_inout))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to DHCP_ParserDriver::parse() (message ID: %d), returning\n"),
-                message_inout->getID ()));
+                message_inout->id ()));
     return;
   } // end IF
   message_inout->rd_ptr (message_inout->base ());
@@ -409,14 +409,14 @@ DHCP_Module_ParserH_T<LockType,
 
     //  ACE_DEBUG ((LM_DEBUG,
     //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-    //              message_p->getID (),
+    //              message_p->id (),
     //              message_p->length ()));
 
   if (!driver_.parse (message_inout))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to DHCP_ParserDriver::parse() (message ID: %d), returning\n"),
-                message_inout->getID ()));
+                message_inout->id ()));
     return;
   } // end IF
 }

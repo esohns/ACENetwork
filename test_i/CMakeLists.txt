@@ -19,10 +19,10 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
 endif ()
 
 set (${PROJECT_NAME}_Test_I_SRCS
-     http_common_modules.h
-     http_configuration.h)
+     test_i_common.h)
 #install (FILES
 #         ${PROJECT_NAME}_Test_I_SRCS
 #         DESTINATION include)
 
+add_subdirectory (bittorrent_client)
 add_subdirectory (IRC_client)

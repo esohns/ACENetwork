@@ -155,7 +155,7 @@ DHCP_Message_T<AllocatorConfigurationType,
   } // end FOR
   ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s"),
-              this->getID (),
+              inherited::id (),
               inherited::total_length (),
               ACE_TEXT (info.c_str ())));
   ACE_DEBUG ((LM_INFO,

@@ -28,6 +28,7 @@
 #include "stream_data_message_base.h"
 
 #include "http_codes.h"
+#include "http_common.h"
 #include "http_exports.h"
 
 // forward declaration(s)
@@ -46,13 +47,12 @@ template <typename AllocatorConfigurationType,
 
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
-          typename SessionMessageType,
-          typename DataType>
+          typename SessionMessageType>
 class HTTP_Message_T
  : public Stream_DataMessageBase_T<AllocatorConfigurationType,
                                    ControlMessageType,
                                    SessionMessageType,
-                                   DataType,
+                                   struct HTTP_Record,
                                    HTTP_Method_t>
 {
   // enable access to specific private ctors
@@ -60,15 +60,13 @@ class HTTP_Message_T
                                                  ControlMessageType,
                                                  HTTP_Message_T<AllocatorConfigurationType,
                                                                 ControlMessageType,
-                                                                SessionMessageType,
-                                                                DataType>,
+                                                                SessionMessageType>,
                                                  SessionMessageType>;
   friend class Stream_CachedMessageAllocator_T<AllocatorConfigurationType,
                                                ControlMessageType,
                                                HTTP_Message_T<AllocatorConfigurationType,
                                                               ControlMessageType,
-                                                              SessionMessageType,
-                                                              DataType>,
+                                                              SessionMessageType>,
                                                SessionMessageType>;
 
  public:
@@ -118,7 +116,7 @@ class HTTP_Message_T
   typedef Stream_DataMessageBase_T<AllocatorConfigurationType,
                                    ControlMessageType,
                                    SessionMessageType,
-                                   DataType,
+                                   struct HTTP_Record,
                                    HTTP_Method_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Message_T ())

@@ -123,7 +123,7 @@ IRC_Message::dump_state () const
   } // end FOR
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s"),
-              getID (),
+              id (),
               total_length (),
               ACE_TEXT (info.c_str ())));
   // delegate to base

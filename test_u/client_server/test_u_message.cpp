@@ -210,7 +210,7 @@ Test_U_Message::dump_state () const
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("***** Message (ID: %u) *****\n"),
-              inherited::getID ()));
+              inherited::id ()));
 
 //   // step1: dump individual header types & offsets
 //   std::string protocol_layer;
@@ -401,7 +401,7 @@ Test_U_Message::dump_state () const
 //
 //         ACE_DEBUG ((LM_ERROR,
 //                     ACE_TEXT ("message (ID: %u) contains unknown protocol header type \"%s\" at offset: %u --> check implementation, continuing\n"),
-//                     inherited::getID (),
+//                     inherited::id (),
 //                     protocol_layer.c_str (),
 //                     iter->second));
 //
@@ -413,7 +413,7 @@ Test_U_Message::dump_state () const
 //   // step3: dump total size
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT ("--> total message (ID: %u) size: %u byte(s) (%u header byte(s))\n"),
-//               inherited::getID (),
+//               inherited::id (),
 //               (inherited::length () + sum_header_size),
 //               sum_header_size));
 }

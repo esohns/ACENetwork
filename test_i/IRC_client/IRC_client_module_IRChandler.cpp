@@ -145,7 +145,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
     {
 //       ACE_DEBUG((LM_DEBUG,
 //                  ACE_TEXT("[%u]: received \"%s\" [%u]\n"),
-//                  message_inout->getID(),
+//                  message_inout->id (),
 //                  IRC_Client_Tools::IRCCode2String(message_inout->getData()->command.numeric).c_str(),
 //                  message_inout->getData()->command.numeric));
 
@@ -218,7 +218,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("[%u]: received unknown (numeric) command/reply: \"%s\" (%u), continuing\n"),
-                      message_inout->getID (),
+                      message_inout->id (),
                       ACE_TEXT (IRC_Tools::Command2String (data_r.command_.numeric).c_str ()),
                       data_r.command_.numeric));
           break;
@@ -235,7 +235,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"NICK\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id (),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -243,7 +243,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"QUIT\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id (),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -251,7 +251,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"JOIN\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -259,7 +259,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"PART\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -267,7 +267,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"MODE\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -275,7 +275,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"TOPIC\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -283,7 +283,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"NAMES\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -291,7 +291,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"LIST\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -299,7 +299,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"INVITE\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -307,7 +307,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"KICK\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -315,7 +315,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"PRIVMSG\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -323,7 +323,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"NOTICE\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
 
           // remember first contact
@@ -336,7 +336,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"PING\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
 
           // auto-answer ?
@@ -383,7 +383,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"PONG\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      data_r.parameters_.back().c_str()));
           break;
         }
@@ -396,7 +396,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"ERROR\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      data_r.parameters_.back().c_str()));
           break;
         }
@@ -404,7 +404,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"AWAY\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -412,7 +412,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"USERS\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -420,7 +420,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"USERHOST\": \"%s\"\n"),
-//                      message_inout->getID(),
+//                      message_inout->id(),
 //                      message_inout->getData()->parameters_.back().c_str()));
           break;
         }
@@ -428,7 +428,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         {
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("[%u]: received unknown command (was: \"%s\"), continuing\n"),
-                      message_inout->getID (),
+                      message_inout->id (),
                       ACE_TEXT (data_r.command_.string->c_str ())));
           break;
         }
@@ -440,7 +440,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: invalid command type (was: %u), continuing\n"),
-                  message_inout->getID (),
+                  message_inout->id (),
                   data_r.command_.discriminator));
       break;
     }

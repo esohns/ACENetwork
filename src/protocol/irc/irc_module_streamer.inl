@@ -138,7 +138,7 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("[%u]: out of buffer space (\"%s\", %u), aborting\n"),
-                    message_inout->getID (),
+                    message_inout->id (),
                     ACE_TEXT (std::string (message_inout->rd_ptr (),
                                            message_inout->length ()).c_str ()),
                     message_inout->length ()));
@@ -180,7 +180,7 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("[%u]: out of buffer space (\"%s\", %u), aborting\n"),
-                    message_inout->getID (),
+                    message_inout->id (),
                     ACE_TEXT (std::string (message_inout->rd_ptr (),
                                            message_inout->length ()).c_str ()),
                     message_inout->length ()));
@@ -219,7 +219,7 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: out of buffer space (\"%s\", %u), aborting\n"),
-                  message_inout->getID (),
+                  message_inout->id (),
                   ACE_TEXT (std::string (message_inout->rd_ptr (),
                                          message_inout->length ()).c_str ()),
                   message_inout->length ()));
@@ -246,7 +246,7 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("[%u]: out of buffer space (\"%s\", %u), aborting\n"),
-                    message_inout->getID (),
+                    message_inout->id (),
                     ACE_TEXT (std::string (message_inout->rd_ptr (),
                                            message_inout->length ()).c_str ()),
                     message_inout->length ()));
@@ -306,7 +306,7 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: invalid command type (was: %d), aborting\n"),
-                  message_inout->getID (),
+                  message_inout->id (),
                   data_r.command_.discriminator));
 
       // clean up
@@ -326,7 +326,7 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: out of buffer space (\"%s\", %u), aborting\n"),
-                  message_inout->getID (),
+                  message_inout->id (),
                   ACE_TEXT (std::string (message_inout->rd_ptr (),
                                          message_inout->length ()).c_str ()),
                   message_inout->length ()));
@@ -383,7 +383,7 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("[%u]: out of buffer space (\"%s\", %u), aborting\n"),
-                    message_inout->getID (),
+                    message_inout->id (),
                     ACE_TEXT (std::string (message_inout->rd_ptr (),
                                            message_inout->length ()).c_str ()),
                     message_inout->length ()));
@@ -425,7 +425,7 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("[%u]: out of buffer space (\"%s\", %u), aborting\n"),
-                    message_inout->getID (),
+                    message_inout->id (),
                     ACE_TEXT (std::string (message_inout->rd_ptr (),
                                            message_inout->length ()).c_str ()),
                     message_inout->length ()));
@@ -447,7 +447,7 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("[%u]: out of buffer space (\"%s\", %u), aborting\n"),
-                message_inout->getID (),
+                message_inout->id (),
                 ACE_TEXT (std::string (message_inout->rd_ptr (),
                                        message_inout->length ()).c_str ()),
                 message_inout->length ()));
@@ -466,6 +466,6 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
 
 //   ACE_DEBUG((LM_DEBUG,
 //              ACE_TEXT("[%u]: streamed [%u byte(s)]...\n"),
-//              message_inout->getID(),
+//              message_inout->id(),
 //              message_inout->length()));
 }

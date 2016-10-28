@@ -266,7 +266,7 @@ HTTP_ParserDriver<RecordType,
   bool done = false;
   SessionMessageType* session_message_p = NULL;
   Stream_SessionMessageType session_message_type =
-    STREAM_SESSION_MESSAGE_INVALID;
+      STREAM_SESSION_MESSAGE_INVALID;
   bool is_data = false;
 
   // *IMPORTANT NOTE*: 'this' is the parser thread currently blocked in yylex()
