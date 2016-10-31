@@ -117,7 +117,8 @@ class IRC_Client_Module_IRCHandler
   //virtual bool initialize (const IRC_Client_ModuleHandlerConfiguration&);
 
   // override Common_IClone_T
-  virtual Stream_Module_t* clone ();
+  virtual ACE_Task<ACE_MT_SYNCH,
+                   Common_TimePolicy_t>* clone ();
 
  private:
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,

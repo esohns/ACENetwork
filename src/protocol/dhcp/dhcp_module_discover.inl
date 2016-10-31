@@ -458,9 +458,9 @@ continue_:
   message_p->initialize (DHCP_record,
                          NULL);
 
-  typename ConnectorType::ISOCKET_CONNECTION_T* isocket_connection_p =
-    dynamic_cast<typename ConnectorType::ISOCKET_CONNECTION_T*> (session_data_r.broadcastConnection);
-  if (!isocket_connection_p)
+  typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =
+    dynamic_cast<typename ConnectorType::ISTREAM_CONNECTION_T*> (session_data_r.broadcastConnection);
+  if (!istream_connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<Net_ISocketConnection_T> (%@): \"%m\", returning\n"),
@@ -472,7 +472,7 @@ continue_:
     return;
   } // end IF
   ACE_Message_Block* message_block_p = message_p;
-  isocket_connection_p->send (message_block_p);
+  istream_connection_p->send (message_block_p);
 }
 
 template <typename SynchStrategyType,
@@ -914,9 +914,9 @@ DHCP_Module_Discover_T<SynchStrategyType,
   ACE_Time_Value deadline = ACE_Time_Value::zero;
   ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
   Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
-  typename ConnectorTypeBcast::ISOCKET_CONNECTION_T* isocket_connection_p =
+  typename ConnectorTypeBcast::ISTREAM_CONNECTION_T* istream_connection_p =
       NULL;
-  typename ConnectorType::ISOCKET_CONNECTION_T* isocket_connection_2 = NULL;
+  typename ConnectorType::ISTREAM_CONNECTION_T* isocket_connection_2 = NULL;
 
   bool is_broadcast = (address_in.get_ip_address () == INADDR_BROADCAST);
   typename ConnectorType::ICONNECTOR_T* iconnector_p = NULL;
@@ -997,26 +997,26 @@ DHCP_Module_Discover_T<SynchStrategyType,
   //         this module, this will always time out
   if (is_broadcast)
   {
-    isocket_connection_p =
-        dynamic_cast<typename ConnectorTypeBcast::ISOCKET_CONNECTION_T*> (iconnection_p);
-    if (!isocket_connection_p)
+    istream_connection_p =
+        dynamic_cast<typename ConnectorTypeBcast::ISTREAM_CONNECTION_T*> (iconnection_p);
+    if (!istream_connection_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to dynamic_cast<ConnectorTypeBcast::ISOCKET_CONNECTION_T>(0x%@), aborting\n"),
+                  ACE_TEXT ("failed to dynamic_cast<ConnectorTypeBcast::ISTREAM_CONNECTION_T>(0x%@), aborting\n"),
                   iconnection_p));
       goto error;
     } // end IF
-    isocket_connection_p->wait (STREAM_STATE_RUNNING,
+    istream_connection_p->wait (STREAM_STATE_RUNNING,
                                 NULL); // <-- block
   } // end IF
   else
   {
     isocket_connection_2 =
-        dynamic_cast<typename ConnectorType::ISOCKET_CONNECTION_T*> (iconnection_p);
+        dynamic_cast<typename ConnectorType::ISTREAM_CONNECTION_T*> (iconnection_p);
     if (!isocket_connection_2)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to dynamic_cast<ConnectorType::ISOCKET_CONNECTION_T>(0x%@), aborting\n"),
+                  ACE_TEXT ("failed to dynamic_cast<ConnectorType::ISTREAM_CONNECTION_T>(0x%@), aborting\n"),
                   iconnection_p));
       goto error;
     } // end IF

@@ -32,47 +32,41 @@
 #include "net_common.h"
 #include "net_iconnectionmanager.h"
 #include "net_netlinksockethandler.h"
-#include "net_socketconnection_base.h"
+#include "net_streamconnection_base.h"
 #include "net_transportlayer_netlink.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 template <typename HandlerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          ////////////////////////////////
+          typename HandlerConfigurationType, // socket-
+          ////////////////////////////////
           typename StreamType,
-          ///////////////////////////////
-          typename HandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_NetlinkConnection_T
- : public Net_SocketConnectionBase_T<HandlerType,
-                                     ////
+ : public Net_StreamConnectionBase_T<HandlerType,
                                      Net_Netlink_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     StreamType,
-                                     Stream_StateMachine_ControlState,
-                                     ////
-                                     Net_SocketConfiguration,
-                                     ////
+                                     struct Net_SocketConfiguration,
                                      HandlerConfigurationType,
-                                     ////
+                                     StreamType,
+                                     enum Stream_StateMachine_ControlState,
                                      UserDataType>
  , public Net_TransportLayer_Netlink
 {
   friend class ACE_Connector<Net_NetlinkConnection_T<HandlerType,
-
                                                      ConfigurationType,
                                                      StateType,
                                                      StatisticContainerType,
-                                                     StreamType,
-
                                                      HandlerConfigurationType,
-
+                                                     StreamType,
                                                      UserDataType>,
                              ACE_SOCK_CONNECTOR>;
 
@@ -81,7 +75,6 @@ class Net_NetlinkConnection_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
    Net_NetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
@@ -107,23 +100,19 @@ class Net_NetlinkConnection_T
    virtual void info (ACE_HANDLE&,              // return value: handle
                       Net_Netlink_Addr&,        // return value: local SAP
                       Net_Netlink_Addr&) const; // return value: remote SAP
-   virtual size_t id () const;
+   virtual Net_ConnectionId_t id () const;
    virtual void dump_state () const;
 
  private:
-  typedef Net_SocketConnectionBase_T<HandlerType,
-                                     ////
+  typedef Net_StreamConnectionBase_T<HandlerType,
                                      Net_Netlink_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     StreamType,
-                                     Stream_StateMachine_ControlState,
-                                     ////
-                                     Net_SocketConfiguration,
-                                     ////
+                                     struct Net_SocketConfiguration,
                                      HandlerConfigurationType,
-                                     ////
+                                     StreamType,
+                                     enum Stream_StateMachine_ControlState,
                                      UserDataType> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 
@@ -134,44 +123,38 @@ class Net_NetlinkConnection_T
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T& operator= (const Net_NetlinkConnection_T&))
 };
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 template <typename HandlerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename HandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
+          typename StreamType,
+          ////////////////////////////////
           typename UserDataType>
 class Net_AsynchNetlinkConnection_T
- : public Net_AsynchSocketConnectionBase_T<HandlerType,
-                                           ////
+ : public Net_AsynchStreamConnectionBase_T<HandlerType,
                                            Net_Netlink_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           StreamType,
-                                           Stream_StateMachine_ControlState,
-                                           ////
-                                           Net_SocketConfiguration,
-                                           ////
+                                           struct Net_SocketConfiguration,
                                            HandlerConfigurationType,
-                                           ////
+                                           StreamType,
+                                           enum Stream_StateMachine_ControlState,
                                            UserDataType>
  , public Net_TransportLayer_Netlink
 {
   friend class ACE_Asynch_Connector<Net_AsynchNetlinkConnection_T<HandlerType,
-
                                                                   ConfigurationType,
                                                                   StateType,
                                                                   StatisticContainerType,
-                                                                  StreamType,
-
                                                                   HandlerConfigurationType,
-
+                                                                  StreamType,
                                                                   UserDataType> >;
 
  public:
@@ -179,7 +162,6 @@ class Net_AsynchNetlinkConnection_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
@@ -194,7 +176,7 @@ class Net_AsynchNetlinkConnection_T
 //  virtual void info (ACE_HANDLE&,              // return value: handle
 //                     Net_Netlink_Addr&,        // return value: local SAP
 //                     Net_Netlink_Addr&) const; // return value: remote SAP
-  virtual size_t id () const;
+  virtual Net_ConnectionId_t id () const;
   virtual void dump_state () const;
 
   // override some ACE_Service_Handler members
@@ -210,19 +192,15 @@ class Net_AsynchNetlinkConnection_T
                               ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef Net_AsynchSocketConnectionBase_T<HandlerType,
-                                           ////
+  typedef Net_AsynchStreamConnectionBase_T<HandlerType,
                                            Net_Netlink_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           StreamType,
-                                           Stream_StateMachine_ControlState,
-                                           ////
-                                           Net_SocketConfiguration,
-                                           ////
+                                           struct Net_SocketConfiguration,
                                            HandlerConfigurationType,
-                                           ////
+                                           StreamType,
+                                           enum Stream_StateMachine_ControlState,
                                            UserDataType> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 
@@ -233,7 +211,7 @@ class Net_AsynchNetlinkConnection_T
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T& operator= (const Net_AsynchNetlinkConnection_T&))
 };
 
-// include template implementation
+// include template definition
 #include "net_netlinkconnection.inl"
 #endif
 

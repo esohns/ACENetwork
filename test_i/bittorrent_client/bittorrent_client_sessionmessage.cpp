@@ -19,68 +19,68 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "IRC_client_sessionmessage.h"
+#include "bittorrent_client_sessionmessage.h"
 
 #include <ace/Log_Msg.h>
 #include <ace/Malloc_Base.h>
 
 #include "net_macros.h"
 
-IRC_Client_SessionMessage::IRC_Client_SessionMessage (Stream_SessionMessageType messageType_in,
-                                                      IRC_Client_SessionData_t*& sessionData_inout,
-                                                      IRC_Client_UserData* userData_in)
+BitTorrent_Client_SessionMessage::BitTorrent_Client_SessionMessage (enum Stream_SessionMessageType messageType_in,
+                                                                    BitTorrent_Client_SessionData_t*& sessionData_inout,
+                                                                    struct BitTorrent_Client_UserData* userData_in)
  : inherited (messageType_in,
               sessionData_inout,
               userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SessionMessage::IRC_Client_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SessionMessage::BitTorrent_Client_SessionMessage"));
 
 }
 
-IRC_Client_SessionMessage::IRC_Client_SessionMessage (const IRC_Client_SessionMessage& message_in)
+BitTorrent_Client_SessionMessage::BitTorrent_Client_SessionMessage (const BitTorrent_Client_SessionMessage& message_in)
  : inherited (message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SessionMessage::IRC_Client_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SessionMessage::BitTorrent_Client_SessionMessage"));
 
 }
 
-IRC_Client_SessionMessage::IRC_Client_SessionMessage (ACE_Allocator* messageAllocator_in)
+BitTorrent_Client_SessionMessage::BitTorrent_Client_SessionMessage (ACE_Allocator* messageAllocator_in)
  : inherited (messageAllocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SessionMessage::IRC_Client_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SessionMessage::BitTorrent_Client_SessionMessage"));
 
 }
 
-IRC_Client_SessionMessage::IRC_Client_SessionMessage (ACE_Data_Block* dataBlock_in,
-                                                      ACE_Allocator* messageAllocator_in)
+BitTorrent_Client_SessionMessage::BitTorrent_Client_SessionMessage (ACE_Data_Block* dataBlock_in,
+                                                                    ACE_Allocator* messageAllocator_in)
  : inherited (dataBlock_in,
               messageAllocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SessionMessage::IRC_Client_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SessionMessage::BitTorrent_Client_SessionMessage"));
 
 }
 
-IRC_Client_SessionMessage::~IRC_Client_SessionMessage ()
+BitTorrent_Client_SessionMessage::~BitTorrent_Client_SessionMessage ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SessionMessage::~IRC_Client_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SessionMessage::~BitTorrent_Client_SessionMessage"));
 
 }
 
 ACE_Message_Block*
-IRC_Client_SessionMessage::duplicate (void) const
+BitTorrent_Client_SessionMessage::duplicate (void) const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SessionMessage::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SessionMessage::duplicate"));
 
-  IRC_Client_SessionMessage* message_p = NULL;
+  BitTorrent_Client_SessionMessage* message_p = NULL;
 
-  // *NOTE*: create a new IRC_Client_SessionMessage that contains unique copies of
+  // *NOTE*: create a new BitTorrent_Client_SessionMessage that contains unique copies of
   // the message block fields, but a reference counted duplicate of
   // the ACE_Data_Block
 
   // if there is no allocator, use the standard new and delete calls
   if (!inherited::message_block_allocator_)
     ACE_NEW_NORETURN (message_p,
-                      IRC_Client_SessionMessage (*this));
+                      BitTorrent_Client_SessionMessage (*this));
   else
   {
     Stream_IAllocator* allocator_p =
@@ -95,8 +95,8 @@ allocate:
       // *TODO*: (depending on the allocator implementation) this senselessly
       // allocates a datablock anyway, only to immediately release it again
       ACE_NEW_MALLOC_NORETURN (message_p,
-                               static_cast<IRC_Client_SessionMessage*> (inherited::message_block_allocator_->calloc (0)),
-                               IRC_Client_SessionMessage (*this));
+                               static_cast<BitTorrent_Client_SessionMessage*> (inherited::message_block_allocator_->calloc (0)),
+                               BitTorrent_Client_SessionMessage (*this));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::calloc(0), aborting\n")));
@@ -118,11 +118,11 @@ allocate:
 
       if (allocator_p->block ())
         ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate IRC_Client_SessionMessage: \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to allocate BitTorrent_Client_SessionMessage: \"%m\", aborting\n")));
     } // end IF
     else
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate IRC_Client_SessionMessage: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to allocate BitTorrent_Client_SessionMessage: \"%m\", aborting\n")));
     return NULL;
   } // end IF
 

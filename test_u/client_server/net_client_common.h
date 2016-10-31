@@ -47,7 +47,7 @@ class Test_U_SessionMessage;
 class Test_U_Message;
 class Test_U_Client_TimeoutHandler;
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         Test_U_SocketHandlerConfiguration> Test_U_IConnector_t;
+                         struct Test_U_SocketHandlerConfiguration> Test_U_IConnector_t;
 
 struct Test_U_Client_ConnectorConfiguration
 {

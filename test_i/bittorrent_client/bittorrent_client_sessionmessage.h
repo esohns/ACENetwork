@@ -34,11 +34,11 @@ class ACE_Data_Block;
 class ACE_Message_Block;
 
 class BitTorrent_Client_SessionMessage
- : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
+ : public Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
                                       BitTorrent_Client_SessionData_t,
-                                      BitTorrent_Client_UserData,
-                                      BitTorrent_ControlMessage_t,
+                                      struct BitTorrent_Client_UserData,
+                                      BitTorrent_Client_ControlMessage_t,
                                       BitTorrent_Message>
 {
 //  // enable access to private ctor(s)
@@ -47,9 +47,9 @@ class BitTorrent_Client_SessionMessage
 
  public:
   // *NOTE*: assume lifetime responsibility for the second argument !
-  BitTorrent_Client_SessionMessage (Stream_SessionMessageType,  // session message type
-                                    BitTorrent_Client_SessionData_t*&, // session data container handle
-                                    BitTorrent_Client_UserData*);      // user data handle
+  BitTorrent_Client_SessionMessage (enum Stream_SessionMessageType,      // session message type
+                                    BitTorrent_Client_SessionData_t*&,   // session data container handle
+                                    struct BitTorrent_Client_UserData*); // user data handle
   // *NOTE*: to be used by message allocators
   BitTorrent_Client_SessionMessage (ACE_Allocator*); // message allocator
   BitTorrent_Client_SessionMessage (ACE_Data_Block*, // data block
@@ -61,11 +61,11 @@ class BitTorrent_Client_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
+  typedef Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
                                       BitTorrent_Client_SessionData_t,
-                                      BitTorrent_Client_UserData,
-                                      BitTorrent_ControlMessage_t,
+                                      struct BitTorrent_Client_UserData,
+                                      BitTorrent_Client_ControlMessage_t,
                                       BitTorrent_Message> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SessionMessage ())

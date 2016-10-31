@@ -23,21 +23,27 @@
 
 #include <string>
 
-#include "common_isubscribe.h"
+#include "common_ui_common.h"
 
-#include "bittorrent_common.h"
+// forward declarations
+class BitTorrent_ISession;
 
-template <typename NotificationType>
-class BitTorrent_IControl_T
- : public Common_ISubscribe_T<NotificationType>
+class BitTorrent_IControl
 {
  public:
-  inline virtual ~BitTorrent_IControl_T () {};
+  inline virtual ~BitTorrent_IControl () {};
 
-  virtual void download (const std::string&) = 0; // metainfo (aka '.torrent') file
-  virtual void seed (const std::string&) = 0; // metainfo (aka '.torrent') file
+  virtual BitTorrent_ISession* download (const std::string&) = 0; // metainfo (aka '.torrent') file URI
+  // *NOTE*: blocks until all active sessions have gone
+  virtual void stop (const std::string&) = 0; // metainfo (aka '.torrent') file URI (empty ? all)
+  virtual BitTorrent_ISession* upload (const std::string&) = 0; // metainfo (aka '.torrent') file URI
 
-  virtual void notify (const std::string&) = 0; // nick
+  ////////////////////////////////////////
+  // callbacks
+  // *TODO*: remove ASAP
+
+  virtual void notify (const std::string&,        // metainfo (aka '.torrent') file URI
+                       enum Common_UI_Event) = 0; // event
 };
 
 #endif

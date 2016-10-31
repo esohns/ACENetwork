@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_CLIENT_GUI_TOOLS_H
-#define IRC_CLIENT_GUI_TOOLS_H
+#ifndef BITTORRENT_CLIENT_GUI_TOOLS_H
+#define BITTORRENT_CLIENT_GUI_TOOLS_H
 
 #include <string>
 
@@ -27,29 +27,29 @@
 
 #include "common_ui_common.h"
 
-#include "IRC_client_gui_common.h"
+#include "bittorrent_client_gui_common.h"
 
 // forward declarations
-class IRC_Client_GUI_Connection;
+class BitTorrent_Client_GUI_Connection;
 
-class IRC_Client_UI_Tools
+class BitTorrent_Client_UI_Tools
 {
  public:
   // *WARNING*: these members must be called with
-  //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
+  //            BitTorrent_Client_GTK_CBData::Common_UI_GTKState::lock held !
   static bool current (const std::string&,                  // (connection-) timestamp
-                       const IRC_Client_GUI_Connections_t&, // connections
+                       const BitTorrent_Client_GUI_Connections_t&, // connections
                        std::string&,                        // return value: nickname
                        std::string&);                       // return value: channel
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
-  static IRC_Client_GUI_Connection* current (const Common_UI_GTKState&,            // GTK state
-                                             const IRC_Client_GUI_Connections_t&); // connections
+  static BitTorrent_Client_GUI_Connection* current (const Common_UI_GTKState&,            // GTK state
+                                                    const BitTorrent_Client_GUI_Connections_t&); // connections
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_UI_Tools ())
-  ACE_UNIMPLEMENTED_FUNC (~IRC_Client_UI_Tools ())
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_UI_Tools (const IRC_Client_UI_Tools&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_UI_Tools& operator= (const IRC_Client_UI_Tools&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_UI_Tools ())
+  ACE_UNIMPLEMENTED_FUNC (~BitTorrent_Client_UI_Tools ())
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_UI_Tools (const BitTorrent_Client_UI_Tools&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_UI_Tools& operator= (const BitTorrent_Client_UI_Tools&))
 };
 
 #endif

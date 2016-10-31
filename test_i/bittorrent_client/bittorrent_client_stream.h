@@ -31,29 +31,31 @@
 #include "bittorrent_stream_common.h"
 
 #include "bittorrent_client_common_modules.h"
-#include "bittorrent_client_configuration.h"
 #include "bittorrent_client_sessionmessage.h"
 #include "bittorrent_client_stream_common.h"
 
+#include "test_i_gtk_common.h"
+
 class BitTorrent_Client_Stream
- : public BitTorrent_Stream_T<BitTorrent_Client_StreamState,
-                              BitTorrent_Client_StreamConfiguration,
+ : public BitTorrent_Stream_T<struct BitTorrent_Client_StreamState,
+                              struct BitTorrent_Client_StreamConfiguration,
                               BitTorrent_RuntimeStatistic_t,
-                              BitTorrent_Client_ModuleHandlerConfiguration,
-                              BitTorrent_Client_SessionData,
+                              struct BitTorrent_Client_ModuleHandlerConfiguration,
+                              struct BitTorrent_Client_SessionData,
                               BitTorrent_Client_SessionData_t,
-                              ACE_Message_Block,
+                              BitTorrent_Client_ControlMessage_t,
                               BitTorrent_Message,
-                              BitTorrent_Client_SessionMessage>
+                              BitTorrent_Client_SessionMessage,
+                              Test_I_GTK_CBData>
 {
  public:
   BitTorrent_Client_Stream (const std::string&); // name
   virtual ~BitTorrent_Client_Stream ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const BitTorrent_Client_StreamConfiguration&, // configuration
-                           bool = true,                           // setup pipeline ?
-                           bool = true);                          // reset session data ?
+  virtual bool initialize (const struct BitTorrent_Client_StreamConfiguration&, // configuration
+                           bool = true,                                         // setup pipeline ?
+                           bool = true);                                        // reset session data ?
 
   //// implement Common_IStatistic_T
   //// *NOTE*: delegate this to rntimeStatistic_
@@ -61,32 +63,21 @@ class BitTorrent_Client_Stream
   //// this is just a dummy (use statisticsReportingInterval instead)
   //virtual void report () const;
 
-  // *TODO*: remove this API
-//  void ping ();
-
  private:
-  typedef BitTorrent_Stream_T<BitTorrent_Client_StreamState,
-                              BitTorrent_Client_StreamConfiguration,
+  typedef BitTorrent_Stream_T<struct BitTorrent_Client_StreamState,
+                              struct BitTorrent_Client_StreamConfiguration,
                               BitTorrent_RuntimeStatistic_t,
-                              BitTorrent_Client_ModuleHandlerConfiguration,
-                              BitTorrent_Client_SessionData,
+                              struct BitTorrent_Client_ModuleHandlerConfiguration,
+                              struct BitTorrent_Client_SessionData,
                               BitTorrent_Client_SessionData_t,
-                              ACE_Message_Block,
+                              BitTorrent_Client_ControlMessage_t,
                               BitTorrent_Message,
-                              BitTorrent_Client_SessionMessage> inherited;
+                              BitTorrent_Client_SessionMessage,
+                              Test_I_GTK_CBData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_Stream ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_Stream (const BitTorrent_Client_Stream&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_Stream& operator= (const BitTorrent_Client_Stream&))
-
-  // modules
-  //BitTorrent_Client_Module_Marshal_Module   marshal_;
-  //BitTorrent_Module_Parser_Module           parser_;
-  //BitTorrent_Module_RuntimeStatistic_Module runtimeStatistic_;
-  // *NOTE*: the final module needs to be supplied to the stream from outside,
-  //         otherwise data might be lost if event dispatch runs in (a) separate
-  //         thread(s)
-  //   BitTorrent_Client_Module_Handler_Module handler_;
 };
 
 #endif

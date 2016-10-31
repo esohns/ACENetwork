@@ -720,7 +720,7 @@ do_work (bool requestBroadcastReplies_in,
   ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
 
   Test_U_IConnection_t* iconnection_p = NULL;
-  Test_U_ISocketConnection_t* isocket_connection_p = NULL;
+  Test_U_IStreamConnection_t* istream_connection_p = NULL;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
 //  Test_U_MessageData* message_data_p = NULL;
@@ -902,16 +902,16 @@ do_work (bool requestBroadcastReplies_in,
     return;
   } // end IF
   // step1c: wait for the connection stream to finish initializing
-  isocket_connection_p =
-    dynamic_cast<Test_U_ISocketConnection_t*> (configuration.moduleHandlerConfiguration.broadcastConnection);
-  if (!isocket_connection_p)
+  istream_connection_p =
+    dynamic_cast<Test_U_IStreamConnection_t*> (configuration.moduleHandlerConfiguration.broadcastConnection);
+  if (!istream_connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<Test_U_ISocketConnection_t>(0x%@), returning\n"),
+                ACE_TEXT ("failed to dynamic_cast<Test_U_IStreamConnection_t>(0x%@), returning\n"),
                 configuration.moduleHandlerConfiguration.broadcastConnection));
     return;
   } // end IF
-  isocket_connection_p->wait (STREAM_STATE_RUNNING,
+  istream_connection_p->wait (STREAM_STATE_RUNNING,
                               NULL); // <-- block
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: connected to \"%s\"...\n"),
@@ -1111,17 +1111,17 @@ allocate:
     message_p->initialize (DHCP_record,
                            NULL);
 
-    Test_U_ISocketConnection_t* isocket_connection_p =
-      dynamic_cast<Test_U_ISocketConnection_t*> (configuration.moduleHandlerConfiguration.broadcastConnection);
-    ACE_ASSERT (isocket_connection_p);
+    Test_U_IStreamConnection_t* istream_connection_p =
+      dynamic_cast<Test_U_IStreamConnection_t*> (configuration.moduleHandlerConfiguration.broadcastConnection);
+    ACE_ASSERT (istream_connection_p);
 
     Test_U_ConnectionState& state_r =
-        const_cast<Test_U_ConnectionState&> (isocket_connection_p->state ());
+        const_cast<Test_U_ConnectionState&> (istream_connection_p->state ());
     state_r.timeStamp = COMMON_TIME_NOW;
     state_r.xid = DHCP_record.xid;
 
     Test_U_OutboundConnectionStream& stream_r =
-        const_cast<Test_U_OutboundConnectionStream&> (isocket_connection_p->stream ());
+        const_cast<Test_U_OutboundConnectionStream&> (istream_connection_p->stream ());
     const Test_U_StreamSessionData_t* session_data_container_p =
         stream_r.get ();
     ACE_ASSERT (session_data_container_p);
@@ -1131,7 +1131,7 @@ allocate:
     session_data_r.xid = DHCP_record.xid;
 
     ACE_Message_Block* message_block_p = message_p;
-    isocket_connection_p->send (message_block_p);
+    istream_connection_p->send (message_block_p);
   } // end IF
 
   // *NOTE*: from this point on, clean up any remote connections !

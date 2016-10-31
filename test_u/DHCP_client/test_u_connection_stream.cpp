@@ -45,16 +45,13 @@ Test_U_InboundConnectionStream::~Test_U_InboundConnectionStream ()
 }
 
 bool
-Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out)
+Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
+                                      bool& deleteModules_out)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_InboundConnectionStream::load"));
 
   // initialize return value(s)
-  for (Stream_ModuleListIterator_t iterator = modules_out.begin ();
-       iterator != modules_out.end ();
-       iterator++)
-    delete *iterator;
-  modules_out.clear ();
+  deleteModules_out = true;
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
@@ -330,21 +327,13 @@ Test_U_OutboundConnectionStream::~Test_U_OutboundConnectionStream ()
 }
 
 bool
-Test_U_OutboundConnectionStream::load (Stream_ModuleList_t& modules_out)
+Test_U_OutboundConnectionStream::load (Stream_ModuleList_t& modules_out,
+                                       bool& deleteModules_out)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_OutboundConnectionStream::load"));
 
   // initialize return value(s)
-  for (Stream_ModuleListIterator_t iterator = modules_out.begin ();
-       iterator != modules_out.end ();
-       iterator++)
-    delete *iterator;
-  modules_out.clear ();
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-  // *TODO*: remove type inference
-  ACE_ASSERT (inherited::configuration_->moduleHandlerConfiguration);
+  deleteModules_out = true;
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,

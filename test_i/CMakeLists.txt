@@ -19,7 +19,9 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
 endif ()
 
 set (${PROJECT_NAME}_Test_I_SRCS
-     test_i_common.h)
+     test_i_common.h
+     test_i_defines.h
+     test_i_gtk_common.h)
 #install (FILES
 #         ${PROJECT_NAME}_Test_I_SRCS
 #         DESTINATION include)

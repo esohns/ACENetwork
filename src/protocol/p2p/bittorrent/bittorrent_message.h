@@ -25,16 +25,19 @@
 
 #include <ace/Global_Macros.h>
 
+#include "stream_control_message.h"
 #include "stream_data_message_base.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_exports.h"
+#include "bittorrent_stream_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-//class BitTorrent_SessionMessage_T;
+template <typename SessionDataType>
+class BitTorrent_SessionMessage_T;
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -44,29 +47,32 @@ template <typename AllocatorConfigurationType,
           typename DataMessageType,
           typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
-template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+template <typename SessionDataType>
 class BitTorrent_Message_T
- : public Stream_DataMessageBase_T<AllocatorConfigurationType,
-                                   ControlMessageType,
-                                   SessionMessageType,
+ : public Stream_DataMessageBase_T<struct Stream_AllocatorConfiguration,
+                                   Stream_ControlMessage_T<enum Stream_ControlType,
+                                                           struct Stream_AllocatorConfiguration,
+                                                           BitTorrent_Message_T<SessionDataType>,
+                                                           BitTorrent_SessionMessage_T<SessionDataType> >,
+                                   BitTorrent_SessionMessage_T<SessionDataType>,
                                    struct BitTorrent_Record,
                                    enum BitTorrent_MessageType>
 {
   // enable access to specific private ctors
-  friend class Stream_MessageAllocatorHeapBase_T<AllocatorConfigurationType,
-                                                 ControlMessageType,
-                                                 BitTorrent_Message_T<AllocatorConfigurationType,
-                                                                      ControlMessageType,
-                                                                      SessionMessageType>,
-                                                 SessionMessageType>;
-  friend class Stream_CachedMessageAllocator_T<AllocatorConfigurationType,
-                                               ControlMessageType,
-                                               BitTorrent_Message_T<AllocatorConfigurationType,
-                                                                    ControlMessageType,
-                                                                    SessionMessageType>,
-                                               SessionMessageType>;
+  friend class Stream_MessageAllocatorHeapBase_T<struct Stream_AllocatorConfiguration,
+                                                 Stream_ControlMessage_T<enum Stream_ControlType,
+                                                                         struct Stream_AllocatorConfiguration,
+                                                                         BitTorrent_Message_T<SessionDataType>,
+                                                                         BitTorrent_SessionMessage_T<SessionDataType> >,
+                                                 BitTorrent_Message_T<SessionDataType>,
+                                                 BitTorrent_SessionMessage_T<SessionDataType> >;
+  friend class Stream_CachedMessageAllocator_T<struct Stream_AllocatorConfiguration,
+                                               Stream_ControlMessage_T<enum Stream_ControlType,
+                                                                       struct Stream_AllocatorConfiguration,
+                                                                       BitTorrent_Message_T<SessionDataType>,
+                                                                       BitTorrent_SessionMessage_T<SessionDataType> >,
+                                               BitTorrent_Message_T<SessionDataType>,
+                                               BitTorrent_SessionMessage_T<SessionDataType> >;
 
  public:
   BitTorrent_Message_T (unsigned int); // size
@@ -93,7 +99,7 @@ class BitTorrent_Message_T
   // - our peer keeps to the standard and doesn't send oversized messages (!)
   // --> THEN this measure ensures that EVERY single buffer contains a CONTIGUOUS
   //     and COMPLETE message...
-  void crunch ();
+  virtual int crunch (void);
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -105,18 +111,24 @@ class BitTorrent_Message_T
   BitTorrent_Message_T (ACE_Data_Block*, // data block to use
                         ACE_Allocator*,  // message allocator
                         bool = true);    // increment running message counter ?
-  //   BitTorrent_Message_T (ACE_Allocator*); // message allocator
+  //   BitTorrent_Message (ACE_Allocator*); // message allocator
 
   // copy ctor to be used by duplicate() and child classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")
   BitTorrent_Message_T (const BitTorrent_Message_T&);
 
  private:
-  typedef Stream_DataMessageBase_T<AllocatorConfigurationType,
-                                   ControlMessageType,
-                                   SessionMessageType,
+  typedef Stream_DataMessageBase_T<struct Stream_AllocatorConfiguration,
+                                   Stream_ControlMessage_T<enum Stream_ControlType,
+                                                           struct Stream_AllocatorConfiguration,
+                                                           BitTorrent_Message_T<SessionDataType>,
+                                                           BitTorrent_SessionMessage_T<SessionDataType> >,
+                                   BitTorrent_SessionMessage_T<SessionDataType>,
                                    struct BitTorrent_Record,
                                    enum BitTorrent_MessageType> inherited;
+
+  // convenient types
+  typedef BitTorrent_Message_T<SessionDataType> OWN_TYPE_T;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Message_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Message_T& operator= (const BitTorrent_Message_T&))

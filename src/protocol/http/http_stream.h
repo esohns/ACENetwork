@@ -60,12 +60,12 @@ class HTTP_Stream_T
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
                         StreamStateType,
                         ConfigurationType,
                         StatisticContainerType,
-                        Stream_ModuleConfiguration,
+                        struct Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
                         SessionDataContainerType,
@@ -78,28 +78,31 @@ class HTTP_Stream_T
   virtual ~HTTP_Stream_T ();
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&); // return value: module list
+  virtual bool load (Stream_ModuleList_t&, // return value: module list
+                     bool&);               // return value: delete modules ?
 
-  // implement Common_IInitialize_T
-  virtual bool initialize (const ConfigurationType&); // configuration
+  // override Common_IInitialize_T
+  virtual bool initialize (const ConfigurationType&, // configuration
+                           bool = true,              // setup pipeline ?
+                           bool = true);             // reset session data ?
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to rntimeStatistic_
   virtual bool collect (StatisticContainerType&); // return value: statistic data
-  // this is just a dummy (use statisticsReportingInterval instead)
-  virtual void report () const;
+  // just a dummy (set statisticReportingInterval instead)
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
  private:
   typedef Stream_Base_T<ACE_SYNCH_MUTEX,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
                         StreamStateType,
                         ConfigurationType,
                         StatisticContainerType,
-                        Stream_ModuleConfiguration,
+                        struct Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
                         SessionDataContainerType,
@@ -131,12 +134,12 @@ class HTTP_Stream_T
                                 SessionMessageType,
                                 ModuleHandlerConfigurationType,
                                 int,
-                                Stream_SessionMessageType,
+                                enum Stream_SessionMessageType,
                                 StreamStateType,
                                 SessionDataType,
                                 SessionDataContainerType,
                                 StatisticContainerType,
-                                HTTP_Record> PARSER_T;
+                                struct HTTP_Record> PARSER_T;
   //typedef Stream_StreamModule_T<ACE_MT_SYNCH,
   //                              Common_TimePolicy_t,
   //                              Stream_ModuleConfiguration,
@@ -147,8 +150,8 @@ class HTTP_Stream_T
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,             // session id type
                                 SessionDataType,                // session data type
-                                Stream_SessionMessageType,      // session event type
-                                Stream_ModuleConfiguration,
+                                enum Stream_SessionMessageType, // session event type
+                                struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
                                 HTTP_Stream_INotify_t,          // stream notification interface type
                                 STREAMER_T,
@@ -184,8 +187,8 @@ class HTTP_Stream_T
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,             // session id type
                                 SessionDataType,                // session data type
-                                Stream_SessionMessageType,      // session event type
-                                Stream_ModuleConfiguration,
+                                enum Stream_SessionMessageType, // session event type
+                                struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
                                 HTTP_Stream_INotify_t,          // stream notification interface type
                                 STATISTIC_READER_T,
@@ -194,18 +197,6 @@ class HTTP_Stream_T
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T (const HTTP_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T& operator= (const HTTP_Stream_T&))
-
-  // *TODO*: remove this API
-  void ping ();
-
-  // modules
-  MODULE_MARSHAL_T   marshal_;
-  //MODULE_PARSER_T    parser_;
-  MODULE_STATISTIC_T runtimeStatistic_;
-  // *NOTE*: the final module needs to be supplied to the stream from outside,
-  //         otherwise data might be lost if event dispatch runs in (a) separate
-  //         thread(s)
-  //   HTTP_Module_Handler_Module handler_;
 };
 
 // include template definition

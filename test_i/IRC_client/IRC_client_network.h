@@ -36,68 +36,54 @@
 
 //////////////////////////////////////////
 
-typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<IRC_Client_SocketHandlerConfiguration,
+typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct IRC_Client_SocketHandlerConfiguration,
                                                          ACE_SOCK_STREAM>,
-                                  ////////
                                   ACE_INET_Addr,
-                                  IRC_Client_Configuration,
-                                  IRC_Client_SessionState,
+                                  struct IRC_Client_Configuration,
+                                  struct IRC_Client_SessionState,
                                   IRC_RuntimeStatistic_t,
                                   IRC_Client_Stream,
-                                  ////////
-                                  IRC_Client_UserData,
-                                  ////////
-                                  Stream_ModuleConfiguration,
-                                  IRC_Client_ModuleHandlerConfiguration> IRC_Client_TCPHandler_t;
-typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<IRC_Client_SocketHandlerConfiguration>,
-                                        //
+                                  struct IRC_Client_UserData,
+                                  struct Stream_ModuleConfiguration,
+                                  struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_TCPHandler_t;
+typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct IRC_Client_SocketHandlerConfiguration>,
                                         ACE_INET_Addr,
-                                        IRC_Client_Configuration,
-                                        IRC_Client_SessionState,
+                                        struct IRC_Client_Configuration,
+                                        struct IRC_Client_SessionState,
                                         IRC_RuntimeStatistic_t,
                                         IRC_Client_Stream,
-                                        //
-                                        IRC_Client_UserData,
-                                        //
-                                        Stream_ModuleConfiguration,
-                                        IRC_Client_ModuleHandlerConfiguration> IRC_Client_AsynchTCPHandler_t;
+                                        struct IRC_Client_UserData,
+                                        struct Stream_ModuleConfiguration,
+                                        struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_AsynchTCPHandler_t;
 typedef Net_TCPConnectionBase_T<IRC_Client_TCPHandler_t,
-                                //////////
-                                IRC_Client_Configuration,
-                                IRC_Client_SessionState,
+                                struct IRC_Client_Configuration,
+                                struct IRC_Client_SessionState,
                                 IRC_RuntimeStatistic_t,
+                                struct IRC_Client_SocketHandlerConfiguration,
                                 IRC_Client_Stream,
-                                //////////
-                                IRC_Client_SocketHandlerConfiguration,
-                                //////////
-                                IRC_Client_UserData> IRC_Client_TCPConnection_t;
+                                struct IRC_Client_UserData> IRC_Client_TCPConnection_t;
 typedef Net_AsynchTCPConnectionBase_T<IRC_Client_AsynchTCPHandler_t,
-                                      ////
-                                      IRC_Client_Configuration,
-                                      IRC_Client_SessionState,
+                                      struct IRC_Client_Configuration,
+                                      struct IRC_Client_SessionState,
                                       IRC_RuntimeStatistic_t,
+                                      struct IRC_Client_SocketHandlerConfiguration,
                                       IRC_Client_Stream,
-                                      ////
-                                      IRC_Client_SocketHandlerConfiguration,
-                                      ////
-                                      IRC_Client_UserData> IRC_Client_AsynchTCPConnection_t;
+                                      struct IRC_Client_UserData> IRC_Client_AsynchTCPConnection_t;
 
 //////////////////////////////////////////
 
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          IRC_Client_Configuration,
-                          IRC_Client_SessionState,
+                          struct IRC_Client_Configuration,
+                          struct IRC_Client_SessionState,
                           IRC_RuntimeStatistic_t> IRC_Client_IConnection_t;
-typedef Net_ISocketConnection_T<ACE_INET_Addr,
-                                IRC_Client_Configuration,
-                                IRC_Client_SessionState,
+typedef Net_IStreamConnection_T<ACE_INET_Addr,
+                                struct IRC_Client_Configuration,
+                                struct IRC_Client_SessionState,
                                 IRC_RuntimeStatistic_t,
+                                struct Net_SocketConfiguration,
+                                struct IRC_Client_SocketHandlerConfiguration,
                                 IRC_Client_Stream,
-                                Stream_StateMachine_ControlState,
-                                //////////
-                                Net_SocketConfiguration,
-                                //////////
-                                IRC_Client_SocketHandlerConfiguration> IRC_Client_ISocketConnection_t;
+                                enum Stream_StateMachine_ControlState> IRC_Client_IStreamConnection_t;
 //typedef Net_ISession_T<ACE_INET_Addr,
 //                       Net_SocketConfiguration,
 //                       IRC_Client_Configuration,
@@ -108,47 +94,39 @@ typedef Net_ISocketConnection_T<ACE_INET_Addr,
 //////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         IRC_Client_SocketHandlerConfiguration> IRC_Client_IConnector_t;
+                         struct IRC_Client_SocketHandlerConfiguration> IRC_Client_IConnector_t;
 //typedef Net_IConnector_T<ACE_INET_Addr,
-//                         IRC_Client_ConnectorConfiguration> IRC_Client_IConnector_t;
+//                         struct IRC_Client_ConnectorConfiguration> IRC_Client_IConnector_t;
 typedef Net_Client_Connector_T<IRC_Client_TCPConnection_t,
                                ACE_SOCK_CONNECTOR,
-                               ///////////
                                ACE_INET_Addr,
-                               IRC_Client_Configuration,
-                               IRC_Client_SessionState,
+                               struct IRC_Client_Configuration,
+                               struct IRC_Client_SessionState,
                                IRC_RuntimeStatistic_t,
+                               struct IRC_Client_SocketHandlerConfiguration,
                                IRC_Client_Stream,
-                               ///////////
-                               IRC_Client_SocketHandlerConfiguration,
-                               ///////////
-                               IRC_Client_UserData> IRC_Client_Connector_t;
+                               struct IRC_Client_UserData> IRC_Client_Connector_t;
 typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchTCPConnection_t,
-                                     /////
                                      ACE_INET_Addr,
-                                     IRC_Client_Configuration,
-                                     IRC_Client_SessionState,
+                                     struct IRC_Client_Configuration,
+                                     struct IRC_Client_SessionState,
                                      IRC_RuntimeStatistic_t,
+                                     struct IRC_Client_SocketHandlerConfiguration,
                                      IRC_Client_Stream,
-                                     /////
-                                     IRC_Client_SocketHandlerConfiguration,
-                                     /////
-                                     IRC_Client_UserData> IRC_Client_AsynchConnector_t;
+                                     struct IRC_Client_UserData> IRC_Client_AsynchConnector_t;
 
 //////////////////////////////////////////
 
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 IRC_Client_Configuration,
-                                 IRC_Client_SessionState,
+                                 struct IRC_Client_Configuration,
+                                 struct IRC_Client_SessionState,
                                  IRC_RuntimeStatistic_t,
-                                 /////////
-                                 IRC_Client_UserData> IRC_Client_IConnection_Manager_t;
+                                 struct IRC_Client_UserData> IRC_Client_IConnection_Manager_t;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
-                                 IRC_Client_Configuration,
-                                 IRC_Client_SessionState,
+                                 struct IRC_Client_Configuration,
+                                 struct IRC_Client_SessionState,
                                  IRC_RuntimeStatistic_t,
-                                 /////////
-                                 IRC_Client_UserData> IRC_Client_Connection_Manager_t;
+                                 struct IRC_Client_UserData> IRC_Client_Connection_Manager_t;
 
 typedef ACE_Singleton<IRC_Client_Connection_Manager_t,
                       ACE_SYNCH_MUTEX> IRC_CLIENT_CONNECTIONMANAGER_SINGLETON;

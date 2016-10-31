@@ -21,9 +21,8 @@
 #ifndef TEST_I_COMMON_H
 #define TEST_I_COMMON_H
 
-#include "ace/Synch_Traits.h"
-
-#include "common.h"
+#include "stream_common.h"
+#include "stream_inotify.h"
 
 #include "net_common.h"
 
@@ -31,7 +30,7 @@ struct Net_Configuration;
 struct Test_I_UserData
  : Net_UserData
 {
-  inline Test_I_UserData
+  inline Test_I_UserData ()
    : Net_UserData ()
    , configuration (NULL)
   {};
@@ -53,5 +52,7 @@ struct Test_I_ConnectionState
 
   Test_I_UserData*   userData;
 };
+
+typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_I_IStreamNotify_t;
 
 #endif

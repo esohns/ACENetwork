@@ -539,7 +539,7 @@ template <typename HandlerType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
-size_t
+Net_ConnectionId_t
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
                                 ConfigurationType,
@@ -553,9 +553,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::id"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<size_t> (inherited::handle ());
+  return reinterpret_cast<Net_ConnectionId_t> (inherited::handle ());
 #else
-  return static_cast<size_t> (inherited::handle ());
+  return static_cast<Net_ConnectionId_t> (inherited::handle ());
 #endif
 }
 

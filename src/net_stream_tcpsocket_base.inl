@@ -1088,7 +1088,7 @@ template <typename HandlerType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
-size_t
+Net_ConnectionId_t
 Net_StreamTCPSocketBase_T<HandlerType,
                           AddressType,
                           ConfigurationType,
@@ -1102,9 +1102,9 @@ Net_StreamTCPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::id"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<size_t> (inherited::get_handle ());
+  return reinterpret_cast<Net_ConnectionId_t> (inherited::get_handle ());
 #else
-  return static_cast<size_t> (inherited::get_handle ());
+  return static_cast<Net_ConnectionId_t> (inherited::get_handle ());
 #endif
 }
 

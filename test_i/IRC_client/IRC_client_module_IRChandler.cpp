@@ -1421,47 +1421,22 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
 //              ACE_TEXT("pushed message...\n")));
 }
 
-Stream_Module_t*
+ACE_Task<ACE_MT_SYNCH,
+         Common_TimePolicy_t>*
 IRC_Client_Module_IRCHandler::clone ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::clone"));
 
   // initialize return value(s)
-  Stream_Module_t* module_p = NULL;
+  ACE_Task<ACE_MT_SYNCH,
+           Common_TimePolicy_t>* task_p = NULL;
 
-  ACE_NEW_NORETURN (module_p,
-                    IRC_Client_Module_IRCHandler_Module (ACE_TEXT_ALWAYS_CHAR (inherited::name ()),
-                                                         NULL,
-                                                         true));
-  if (!module_p)
+  ACE_NEW_NORETURN (task_p,
+                    IRC_Client_Module_IRCHandler ());
+  if (!task_p)
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-  else
-  {
-    IRC_Client_Module_IRCHandler* handler_p = NULL;
-    handler_p =
-      dynamic_cast<IRC_Client_Module_IRCHandler*> (module_p->writer ());
-    if (!handler_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, aborting\n")));
+                ACE_TEXT ("%s: failed to allocate memory: \"%m\", aborting\n"),
+                inherited::mod_->name ()));
 
-      // clean up
-      delete module_p;
-
-      return NULL;
-    } // end IF
-//    if (!handler_p->initialize (configuration_))
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::initialize(), aborting\n")));
-
-//      // clean up
-//      delete module_p;
-
-//      return NULL;
-//    } // end IF
-  } // end ELSE
-
-  return module_p;
+  return task_p;
 }

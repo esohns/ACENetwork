@@ -34,23 +34,23 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
                                 AddressType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                            const ACE_Time_Value& statisticCollectionInterval_in)
+                                ModuleHandlerConfigurationType>::Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                                  const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited4 (interfaceHandle_in,
                statisticCollectionInterval_in)
  , stream_ (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME))
@@ -65,22 +65,22 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
                                 AddressType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::~Net_StreamAsynchUDPSocketBase_T ()
+                                ModuleHandlerConfigurationType>::~Net_StreamAsynchUDPSocketBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
 
@@ -92,11 +92,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -104,12 +104,12 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::open (ACE_HANDLE handle_in,
-                                                                 ACE_Message_Block& messageBlock_in)
+                                ModuleHandlerConfigurationType>::open (ACE_HANDLE handle_in,
+                                                                       ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::open"));
 
@@ -331,11 +331,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 int
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -343,11 +343,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::handle_output (ACE_HANDLE handle_in)
+                                ModuleHandlerConfigurationType>::handle_output (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_output"));
 
@@ -412,11 +412,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 int
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -424,12 +424,12 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::handle_close (ACE_HANDLE handle_in,
-                                                                         ACE_Reactor_Mask mask_in)
+                                ModuleHandlerConfigurationType>::handle_close (ACE_HANDLE handle_in,
+                                                                               ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_close"));
 
@@ -492,11 +492,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -504,13 +504,13 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::info (ACE_HANDLE& handle_out,
-                                                                 AddressType& localSAP_out,
-                                                                 AddressType& remoteSAP_out) const
+                                ModuleHandlerConfigurationType>::info (ACE_HANDLE& handle_out,
+                                                                       AddressType& localSAP_out,
+                                                                       AddressType& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::info"));
 
@@ -537,30 +537,30 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
-size_t
+          typename ModuleHandlerConfigurationType>
+Net_ConnectionId_t
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
                                 AddressType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::id () const
+                                ModuleHandlerConfigurationType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<size_t> (inherited::handle ());
+  return reinterpret_cast<Net_ConnectionId_t> (inherited::handle ());
 #else
-  return static_cast<size_t> (inherited::handle ());
+  return static_cast<Net_ConnectionId_t> (inherited::handle ());
 #endif
 }
 
@@ -570,11 +570,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 ACE_Notification_Strategy*
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -582,11 +582,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::notification ()
+                                ModuleHandlerConfigurationType>::notification ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::notification"));
 
@@ -599,11 +599,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 int
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -611,11 +611,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::close (u_long arg_in)
+                                ModuleHandlerConfigurationType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::close"));
 
@@ -633,11 +633,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -645,11 +645,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::close ()
+                                ModuleHandlerConfigurationType>::close ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::close"));
 
@@ -696,11 +696,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -708,11 +708,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::waitForCompletion (bool waitForThreads_in)
+                                ModuleHandlerConfigurationType>::waitForCompletion (bool waitForThreads_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::waitForCompletion"));
 
@@ -732,11 +732,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -744,11 +744,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::dump_state () const
+                                ModuleHandlerConfigurationType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::dump_state"));
 
@@ -792,11 +792,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 bool
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -804,20 +804,17 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::collect (StatisticContainerType& data_out)
+                                ModuleHandlerConfigurationType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::collect"));
 
-  try
-  {
+  try {
     return stream_.collect (data_out);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic::collect(), aborting\n")));
   }
@@ -831,11 +828,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -843,20 +840,17 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::report () const
+                                ModuleHandlerConfigurationType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::report"));
 
-  try
-  {
+  try {
     return stream_.report ();
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
   }
@@ -868,11 +862,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -880,11 +874,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::handle_read_dgram (const ACE_Asynch_Read_Dgram::Result& result_in)
+                                ModuleHandlerConfigurationType>::handle_read_dgram (const ACE_Asynch_Read_Dgram::Result& result_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_read_dgram"));
 
@@ -1007,11 +1001,11 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 SocketType,
@@ -1019,11 +1013,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::handle_write_dgram (const ACE_Asynch_Write_Dgram::Result& result_in)
+                                ModuleHandlerConfigurationType>::handle_write_dgram (const ACE_Asynch_Write_Dgram::Result& result_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_write_dgram"));
 
@@ -1031,7 +1025,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   this->decrease ();
 }
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -1039,23 +1033,23 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
                                 AddressType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                            const ACE_Time_Value& statisticCollectionInterval_in)
+                                ModuleHandlerConfigurationType>::Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                                                                  const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited4 (interfaceHandle_in,
                statisticCollectionInterval_in)
 // , buffer_ (NULL)
@@ -1070,22 +1064,22 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
                                 AddressType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::~Net_StreamAsynchUDPSocketBase_T ()
+                                ModuleHandlerConfigurationType>::~Net_StreamAsynchUDPSocketBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
 
@@ -1097,11 +1091,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1109,12 +1103,12 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::open (ACE_HANDLE handle_in,
-                                                                 ACE_Message_Block& messageBlock_in)
+                                ModuleHandlerConfigurationType>::open (ACE_HANDLE handle_in,
+                                                                       ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::open"));
 
@@ -1262,11 +1256,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 int
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1274,11 +1268,11 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::handle_output (ACE_HANDLE handle_in)
+                                ModuleHandlerConfigurationType>::handle_output (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_output"));
 
@@ -1338,11 +1332,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 int
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1350,12 +1344,12 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::handle_close (ACE_HANDLE handle_in,
-                                                                         ACE_Reactor_Mask mask_in)
+                                ModuleHandlerConfigurationType>::handle_close (ACE_HANDLE handle_in,
+                                                                               ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_close"));
 
@@ -1408,11 +1402,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1420,13 +1414,13 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::info (ACE_HANDLE& handle_out,
-                                                                 AddressType& localSAP_out,
-                                                                 AddressType& remoteSAP_out) const
+                                ModuleHandlerConfigurationType>::info (ACE_HANDLE& handle_out,
+                                                                       AddressType& localSAP_out,
+                                                                       AddressType& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::info"));
 
@@ -1455,38 +1449,38 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
-size_t
+          typename ModuleHandlerConfigurationType>
+Net_ConnectionId_t
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
                                 AddressType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::id () const
+                                ModuleHandlerConfigurationType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
 
-  return static_cast<size_t> (inherited::handle ());
+  return static_cast<Net_ConnectionId_t> (inherited::handle ());
 }
 
 template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 ACE_Notification_Strategy*
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1494,11 +1488,11 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::notification ()
+                                ModuleHandlerConfigurationType>::notification ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::notification"));
 
@@ -1509,11 +1503,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 int
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1521,11 +1515,11 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::close (u_long arg_in)
+                                ModuleHandlerConfigurationType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::close"));
 
@@ -1539,11 +1533,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1551,12 +1545,12 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
 //                                ModuleConfigurationType>::close (u_long arg_in)
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::close ()
+                                ModuleHandlerConfigurationType>::close ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::close"));
 
@@ -1591,11 +1585,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1603,11 +1597,11 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::waitForCompletion (bool waitForThreads_in)
+                                ModuleHandlerConfigurationType>::waitForCompletion (bool waitForThreads_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::waitForCompletion"));
 
@@ -1624,11 +1618,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 bool
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1636,20 +1630,17 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::collect (StatisticContainerType& data_out)
+                                ModuleHandlerConfigurationType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::collect"));
 
-  try
-  {
+  try {
     return stream_.collect (data_out);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic::collect(), aborting\n")));
   }
@@ -1661,11 +1652,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1673,20 +1664,17 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::report () const
+                                ModuleHandlerConfigurationType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::report"));
 
-  try
-  {
+  try {
     return stream_.report ();
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
   }
@@ -1696,11 +1684,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1708,11 +1696,11 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::dump_state () const
+                                ModuleHandlerConfigurationType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::dump_state"));
 
@@ -1753,11 +1741,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                 Net_SOCK_Netlink,
@@ -1765,11 +1753,11 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
-                                ModuleHandlerConfigurationType,
-                                HandlerConfigurationType>::handle_read_dgram (const ACE_Asynch_Read_Dgram::Result& result_in)
+                                ModuleHandlerConfigurationType>::handle_read_dgram (const ACE_Asynch_Read_Dgram::Result& result_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_read_dgram"));
 

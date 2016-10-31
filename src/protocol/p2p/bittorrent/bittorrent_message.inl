@@ -23,43 +23,34 @@
 #include <ace/Malloc_Base.h>
 #include <ace/Message_Block.h>
 
+#include "stream_iallocator.h"
+
 #include "net_macros.h"
 
 #include "bittorrent_defines.h"
 #include "bittorrent_tools.h"
 
-template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
-BitTorrent_Message_T<AllocatorConfigurationType,
-                     ControlMessageType,
-                     SessionMessageType>::BitTorrent_Message_T (unsigned int requestedSize_in)
+
+template <typename SessionDataType>
+BitTorrent_Message_T<SessionDataType>::BitTorrent_Message_T (unsigned int requestedSize_in)
  : inherited (requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::BitTorrent_Message_T"));
 
 }
 
-template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
-BitTorrent_Message_T<AllocatorConfigurationType,
-               ControlMessageType,
-               SessionMessageType>::BitTorrent_Message_T (const BitTorrent_Message_T& message_in)
+template <typename SessionDataType>
+BitTorrent_Message_T<SessionDataType>::BitTorrent_Message_T (const BitTorrent_Message_T& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::BitTorrent_Message_T"));
 
 }
 
-template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
-BitTorrent_Message_T<AllocatorConfigurationType,
-                     ControlMessageType,
-                     SessionMessageType>::BitTorrent_Message_T (ACE_Data_Block* dataBlock_in,
-                                                                ACE_Allocator* messageAllocator_in,
-                                                                bool incrementMessageCounter_in)
+template <typename SessionDataType>
+BitTorrent_Message_T<SessionDataType>::BitTorrent_Message_T (ACE_Data_Block* dataBlock_in,
+                                                             ACE_Allocator* messageAllocator_in,
+                                                             bool incrementMessageCounter_in)
  : inherited (dataBlock_in,               // use (don't own !) this data block
               messageAllocator_in,        // allocator
               incrementMessageCounter_in) // increment message counter ?
@@ -77,56 +68,39 @@ BitTorrent_Message_T<AllocatorConfigurationType,
 //
 // }
 
-template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
-BitTorrent_Message_T<AllocatorConfigurationType,
-                     ControlMessageType,
-                     SessionMessageType>::~BitTorrent_Message_T ()
+template <typename SessionDataType>
+BitTorrent_Message_T<SessionDataType>::~BitTorrent_Message_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::~BitTorrent_Message_T"));
 
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
-template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+template <typename SessionDataType>
 enum BitTorrent_MessageType
-BitTorrent_Message_T<AllocatorConfigurationType,
-                     ControlMessageType,
-                     SessionMessageType>::command () const
+BitTorrent_Message_T<SessionDataType>::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::command"));
 
   // sanity check(s)
   if (!inherited::isInitialized_)
     return BITTORRENT_MESSAGETYPE_INVALID;
-  ACE_ASSERT (inherited::data_);
 
-  return inherited::data_->type;
+  return inherited::data_.type;
 }
 
-template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+template <typename SessionDataType>
 std::string
-BitTorrent_Message_T<AllocatorConfigurationType,
-                     ControlMessageType,
-                     SessionMessageType>::Command2String (enum BitTorrent_MessageType type_in)
+BitTorrent_Message_T<SessionDataType>::Command2String (enum BitTorrent_MessageType type_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::Command2String"));
 
   return BitTorrent_Tools::Type2String (type_in);
 }
 
-template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+template <typename SessionDataType>
 void
-BitTorrent_Message_T<AllocatorConfigurationType,
-                     ControlMessageType,
-                     SessionMessageType>::dump_state () const
+BitTorrent_Message_T<SessionDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::dump_state"));
 
@@ -134,16 +108,12 @@ BitTorrent_Message_T<AllocatorConfigurationType,
               ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s"),
               inherited::id (),
               inherited::total_length (),
-              ACE_TEXT (BitTorrent_Tools::dump (*inherited::data_).c_str ())));
+              ACE_TEXT (BitTorrent_Tools::Record2String (inherited::data_).c_str ())));
 }
 
-template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
-void
-BitTorrent_Message_T<AllocatorConfigurationType,
-                     ControlMessageType,
-                     SessionMessageType>::crunch ()
+template <typename SessionDataType>
+int
+BitTorrent_Message_T<SessionDataType>::crunch (void)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::crunch"));
 
@@ -164,8 +134,8 @@ BitTorrent_Message_T<AllocatorConfigurationType,
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Message_Block::crunch(): \"%m\", returning\n")));
-    return;
+                ACE_TEXT ("failed to ACE_Message_Block::crunch(): \"%m\", aborting\n")));
+    return -1;
   } // end IF
 
   // step2: copy (part of) the data
@@ -182,8 +152,8 @@ BitTorrent_Message_T<AllocatorConfigurationType,
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", returning\n")));
-      return;
+                  ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+      return -1;
     } // end IF
 
     // adjust read pointer accordingly
@@ -208,19 +178,17 @@ BitTorrent_Message_T<AllocatorConfigurationType,
       obsolete_p->release ();
     } // end IF
   } while (true);
+
+  return 0;
 }
 
-template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+template <typename SessionDataType>
 ACE_Message_Block*
-BitTorrent_Message_T<AllocatorConfigurationType,
-                     ControlMessageType,
-                     SessionMessageType>::duplicate (void) const
+BitTorrent_Message_T<SessionDataType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::duplicate"));
 
-  BitTorrent_Message_T* message_p = NULL;
+  OWN_TYPE_T* message_p = NULL;
 
   // create a new BitTorrent_Message_T that contains unique copies of
   // the message block fields, but a (reference counted) shallow duplicate of
@@ -229,7 +197,7 @@ BitTorrent_Message_T<AllocatorConfigurationType,
   // if there is no allocator, use the standard new and delete calls.
   if (!inherited::message_block_allocator_)
     ACE_NEW_NORETURN (message_p,
-                      BitTorrent_Message_T (*this)); // invoke copy ctor
+                      OWN_TYPE_T (*this)); // invoke copy ctor
   else // otherwise, use the existing message_block_allocator
   {
     Stream_IAllocator* allocator_p =
@@ -245,8 +213,8 @@ allocate:
       // allocates a datablock anyway, only to immediately release it again...
       ACE_NEW_MALLOC_NORETURN (message_p,
                                //static_cast<BitTorrent_Message_T*>(message_block_allocator_->malloc(capacity())),
-                               static_cast<BitTorrent_Message_T*> (inherited::message_block_allocator_->calloc (sizeof (BitTorrent_Message_T))),
-                               BitTorrent_Message_T (*this));
+                               static_cast<OWN_TYPE_T*> (inherited::message_block_allocator_->calloc (sizeof (BitTorrent_Message_T))),
+                               OWN_TYPE_T (*this));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), aborting\n"),

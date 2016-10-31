@@ -30,7 +30,7 @@
 #include "bittorrent_client_common.h"
 #include "bittorrent_client_configuration.h"
 #include "bittorrent_client_curses.h" // *TODO*: remove this ASAP
-#include "bittorrent_client_inputhandler.h"
+//#include "bittorrent_client_inputhandler.h"
 #include "bittorrent_client_network.h"
 #include "bittorrent_client_stream.h"
 #include "bittorrent_client_stream_common.h"
@@ -38,66 +38,36 @@
 typedef Net_Client_Connector_T<BitTorrent_Client_TCPConnection_t,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
-                               BitTorrent_Client_Configuration,
-                               BitTorrent_Client_SessionState,
+                               struct BitTorrent_Client_Configuration,
+                               struct BitTorrent_Client_ConnectionState,
                                BitTorrent_RuntimeStatistic_t,
                                BitTorrent_Client_Stream,
-                               BitTorrent_Client_SocketHandlerConfiguration,
-                               BitTorrent_Client_UserData> BitTorrent_Client_Connector_t;
+                               struct BitTorrent_Client_SocketHandlerConfiguration,
+                               struct BitTorrent_Client_UserData> BitTorrent_Client_Connector_t;
 typedef Net_Client_AsynchConnector_T<BitTorrent_Client_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
-                                     BitTorrent_Client_Configuration,
-                                     BitTorrent_Client_SessionState,
+                                     struct BitTorrent_Client_Configuration,
+                                     struct BitTorrent_Client_ConnectionState,
                                      BitTorrent_RuntimeStatistic_t,
                                      BitTorrent_Client_Stream,
-                                     BitTorrent_Client_SocketHandlerConfiguration,
-                                     BitTorrent_Client_UserData> BitTorrent_Client_AsynchConnector_t;
+                                     struct BitTorrent_Client_SocketHandlerConfiguration,
+                                     struct BitTorrent_Client_UserData> BitTorrent_Client_AsynchConnector_t;
 
-typedef BitTorrent_Session_T<BitTorrent_Client_TCPConnection_t,
-                             BitTorrent_Client_SessionData,
-//                      BitTorrent_IControl,
-                             BitTorrent_Client_ISessionNotify_t,
-                             BitTorrent_Client_Configuration,
-                             BitTorrent_Message,
+typedef BitTorrent_Session_T<struct BitTorrent_Client_ModuleHandlerConfiguration,
+                             struct BitTorrent_Client_SessionData,
                              BitTorrent_Client_SessionMessage,
-                             BitTorrent_Client_SocketHandlerConfiguration,
-                             BitTorrent_Client_ModuleHandlerConfiguration,
-                             BitTorrent_Client_CursesState,
+                             struct BitTorrent_Client_SocketHandlerConfiguration,
+                             BitTorrent_Client_TCPConnection_t,
                              BitTorrent_Client_IConnection_Manager_t,
-                             BitTorrent_Client_InputHandler,
-                             BitTorrent_Client_InputHandlerConfiguration,
-                             BitTorrent_Client_IOStream_t> BitTorrent_Client_Session_t;
-typedef BitTorrent_Session_T<BitTorrent_Client_AsynchTCPConnection_t,
-                             BitTorrent_Client_SessionData,
-//                      BitTorrent_IControl,
-                             BitTorrent_Client_ISessionNotify_t,
-                             BitTorrent_Client_Configuration,
-                             BitTorrent_Message,
+                             BitTorrent_Client_TCPConnection_t,
+                             BitTorrent_Client_IConnection_Manager_t> BitTorrent_Client_Session_t;
+typedef BitTorrent_Session_T<struct BitTorrent_Client_ModuleHandlerConfiguration,
+                             struct BitTorrent_Client_SessionData,
                              BitTorrent_Client_SessionMessage,
-                             BitTorrent_Client_SocketHandlerConfiguration,
-                             BitTorrent_Client_ModuleHandlerConfiguration,
-                             BitTorrent_Client_CursesState,
+                             struct BitTorrent_Client_SocketHandlerConfiguration,
+                             BitTorrent_Client_AsynchTCPConnection_t,
                              BitTorrent_Client_IConnection_Manager_t,
-                             BitTorrent_Client_InputHandler,
-                             BitTorrent_Client_InputHandlerConfiguration,
-                             BitTorrent_Client_IOStream_t> BitTorrent_Client_AsynchSession_t;
-
-typedef Net_Client_Connector_T<BitTorrent_Client_Session_t,
-                               ACE_SOCK_CONNECTOR,
-                               ACE_INET_Addr,
-                               BitTorrent_Client_Configuration,
-                               BitTorrent_Client_SessionState,
-                               BitTorrent_RuntimeStatistic_t,
-                               BitTorrent_Client_Stream,
-                               BitTorrent_Client_SocketHandlerConfiguration,
-                               BitTorrent_Client_UserData> BitTorrent_Client_SessionConnector_t;
-typedef Net_Client_AsynchConnector_T<BitTorrent_Client_AsynchSession_t,
-                                     ACE_INET_Addr,
-                                     BitTorrent_Client_Configuration,
-                                     BitTorrent_Client_SessionState,
-                                     BitTorrent_RuntimeStatistic_t,
-                                     BitTorrent_Client_Stream,
-                                     BitTorrent_Client_SocketHandlerConfiguration,
-                                     BitTorrent_Client_UserData> BitTorrent_Client_AsynchSessionConnector_t;
+                             BitTorrent_Client_AsynchTCPConnection_t,
+                             BitTorrent_Client_IConnection_Manager_t> BitTorrent_Client_AsynchSession_t;
 
 #endif

@@ -39,9 +39,10 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           ////////////////////////////////
           typename HandlerConfigurationType,
+          ////////////////////////////////
+          typename StreamType,
           ////////////////////////////////
           typename UserDataType>
 class Net_Client_SSL_Connector_T
@@ -56,28 +57,30 @@ class Net_Client_SSL_Connector_T
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_ISocketConnection_T<AddressType,
+//  typedef Net_ISocketConnection_T<AddressType,
+//                                  ConfigurationType,
+//                                  StateType,
+//                                  StatisticContainerType,
+//                                  struct Net_SocketConfiguration,
+//                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
+  typedef Net_IStreamConnection_T<AddressType,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
+                                  struct Net_SocketConfiguration,
+                                  HandlerConfigurationType,
                                   StreamType,
-                                  Stream_StateMachine_ControlState,
-                                  ////////
-                                  Net_SocketConfiguration,
-                                  ////////
-                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
+                                  enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
   typedef Net_Connection_Manager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   ///////
                                    UserDataType> CONNECTION_MANAGER_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   ///////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   typedef Net_IConnector_T<AddressType,
@@ -116,7 +119,7 @@ class Net_Client_SSL_Connector_T
   ACE_Time_Value            statisticCollectionInterval_;
 };
 
-// include template implementation
+// include template definition
 #include "net_client_ssl_connector.inl"
 
 #endif

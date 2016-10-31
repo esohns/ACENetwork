@@ -32,12 +32,14 @@
 #include <ace/Synch_Traits.h>
 #include <ace/Time_Value.h>
 
+#include <gtk/gtk.h>
+
 #include "common.h"
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 #include "common_time_common.h"
 
-#include "common_ui_common.h"
+#include "common_ui_gtk_common.h"
 
 #include "stream_base.h"
 #include "stream_common.h"

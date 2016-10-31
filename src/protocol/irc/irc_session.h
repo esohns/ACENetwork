@@ -140,7 +140,7 @@ class IRC_Session_T
   StateType*        UIState_;
 };
 
-// include template implementation
+// include template definition
 #include "irc_session.inl"
 
 #endif

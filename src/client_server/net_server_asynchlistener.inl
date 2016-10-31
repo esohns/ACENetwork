@@ -44,15 +44,15 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::Net_Server_AsynchListener_T ()
  : inherited ()
  //, addressFamily_ (ACE_ADDRESS_FAMILY_INET)
@@ -69,15 +69,15 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::~Net_Server_AsynchListener_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::~Net_Server_AsynchListener_T"));
@@ -97,16 +97,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 int
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::validate_connection (const ACE_Asynch_Accept::Result& result_in,
                                                                 const ACE_INET_Addr& remoteAddress_in,
                                                                 const ACE_INET_Addr& localAddress_in)
@@ -141,16 +141,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 int
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::accept (size_t bytesToRead_in,
                                                    const void* act_in)
 {
@@ -290,16 +290,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 int
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::should_reissue_accept ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::should_reissue_accept"));
@@ -312,16 +312,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 const HandlerConfigurationType&
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::get () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::get"));
@@ -359,16 +359,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 bool
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::useReactor () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::useReactor"));
@@ -380,16 +380,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 bool
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::initialize"));
@@ -410,16 +410,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 int
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::open (const ACE_INET_Addr& listenAddress_in,
                                                  size_t numberOfBytesToRead_in,
                                                  bool passAddresses_in,
@@ -653,16 +653,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 bool
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::isInitialized () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::isInitialized"));
@@ -674,16 +674,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::initialize ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::initialize"));
@@ -697,16 +697,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::start"));
@@ -789,16 +789,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::stop (bool waitForCompletion_in,
                                                  bool lockedAccess_in)
 {
@@ -861,16 +861,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 bool
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::isRunning () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::isRunning"));
@@ -882,16 +882,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::dump_state"));
@@ -904,16 +904,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::handle_accept (const ACE_Asynch_Accept::Result &result)
 {
   ACE_TRACE ("Net_Server_AsynchListener_T::handle_accept");
@@ -1031,16 +1031,16 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 HandlerType*
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            StreamType,
                             HandlerConfigurationType,
+                            StreamType,
                             UserDataType>::make_handler (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::make_handler"));

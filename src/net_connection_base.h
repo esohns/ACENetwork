@@ -39,8 +39,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_ConnectionBase_T
  : public Common_ReferenceCounterBase
@@ -56,9 +55,6 @@ class Net_ConnectionBase_T
   virtual const StateType& state () const;
   virtual Net_Connection_Status status () const;
 
-  // convenient types
-  typedef StreamType STREAM_T;
-
  protected:
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
@@ -68,7 +64,6 @@ class Net_ConnectionBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   Net_ConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
@@ -101,13 +96,11 @@ class Net_ConnectionBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&))
 
-  // convenience types
+  // convenient types
   typedef Net_ConnectionBase_T<AddressType,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
-                               //////////
                                UserDataType> OWN_TYPE_T;
 
   // timer
@@ -115,7 +108,7 @@ class Net_ConnectionBase_T
   long                              statisticCollectHandlerID_;
 };
 
-// include template implementation
+// include template definition
 #include "net_connection_base.inl"
 
 #endif

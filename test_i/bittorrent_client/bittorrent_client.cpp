@@ -69,14 +69,17 @@ using namespace std;
 
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
+#include "bittorrent_icontrol.h"
 
 #include "bittorrent_client_configuration.h"
 #include "bittorrent_client_curses.h"
 #include "bittorrent_client_defines.h"
-#include "bittorrent_client_module_bittorrenthandler.h"
+#include "bittorrent_client_network.h"
 #include "bittorrent_client_session_common.h"
 #include "bittorrent_client_signalhandler.h"
 #include "bittorrent_client_tools.h"
+
+#include "test_i_defines.h"
 
 void
 do_printUsage (const std::string& programName_in)
@@ -101,7 +104,7 @@ do_printUsage (const std::string& programName_in)
   std::cout << ACE_TEXT ("currently available options:") << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
+  path += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
   std::cout << ACE_TEXT ("-c [FILE] : configuration file")
             << ACE_TEXT (" [\"")
             << path
@@ -114,20 +117,20 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::cout << ACE_TEXT ("-l        : log to a file")
             << ACE_TEXT (" [")
-            << IRC_CLIENT_SESSION_DEFAULT_LOG
+            << TEST_I_DEFAULT_SESSION_LOG
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-n        : use (PD|n)curses library [")
-            << IRC_CLIENT_SESSION_USE_CURSES
+            << TEST_I_SESSION_USE_CURSES
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-r        : use reactor [")
-            << IRC_CLIENT_DEFAULT_USE_REACTOR
+            << NET_EVENT_USE_REACTOR
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-s [VALUE]: reporting interval (seconds: 0 --> OFF)")
             << ACE_TEXT (" [")
-            << IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL
+            << TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-t        : trace information")
@@ -141,7 +144,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-x [VALUE]: #thread pool threads ([")
-            << IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS
+            << TEST_I_DEFAULT_NUMBER_OF_TP_THREADS
             << ACE_TEXT ("]")
             << std::endl;
 } // end print_usage
@@ -172,17 +175,17 @@ do_processArguments (int argc_in,
   // initialize configuration
   configurationFile_out          = configuration_path;
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configurationFile_out         += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
+  configurationFile_out         += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
 
   debugParser_out                = false;
-  logToFile_out                  = IRC_CLIENT_SESSION_DEFAULT_LOG;
-  useCursesLibrary_out           = IRC_CLIENT_SESSION_USE_CURSES;
+  logToFile_out                  = TEST_I_DEFAULT_SESSION_LOG;
+  useCursesLibrary_out           = TEST_I_SESSION_USE_CURSES;
   useReactor_out                 = NET_EVENT_USE_REACTOR;
   statisticReportingInterval_out =
-      IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+      TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out           = false;
   printVersionAndExit_out        = false;
-  numThreadPoolThreads_out       = IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
+  numThreadPoolThreads_out       = TEST_I_DEFAULT_NUMBER_OF_TP_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
@@ -393,6 +396,8 @@ connection_setup_curses_function (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::connection_setup_curses_function"));
 
+  ACE_UNUSED_ARG (arg_in);
+
   ACE_THR_FUNC_RETURN return_value;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   return_value = -1;
@@ -400,27 +405,25 @@ connection_setup_curses_function (void* arg_in)
   return_value = arg_in;
 #endif
 
-  IRC_Client_InputThreadData* thread_data_p =
-    static_cast<IRC_Client_InputThreadData*> (arg_in);
+  BitTorrent_Client_ThreadData* thread_data_p =
+    static_cast<BitTorrent_Client_ThreadData*> (arg_in);
 
   // sanity check(s)
   ACE_ASSERT (thread_data_p);
 
   int result = -1;
-  ACE_Time_Value delay (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
+  ACE_Time_Value delay (TEST_I_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
 
-  IRC_Client_IConnection_t* connection_p = NULL;
-  IRC_Client_ISocketConnection_t* socket_connection_p = NULL;
+  BitTorrent_Client_IConnection_t* connection_p = NULL;
+  BitTorrent_Client_ISocketConnection_t* socket_connection_p = NULL;
   bool result_2 = false;
   const Stream_Module_t* module_p = NULL;
-  const IRC_Client_Stream* stream_p = NULL;
-  IRC_IControl* icontrol_p = NULL;
-  IRC_IRegistrationStateMachine_t* iregistration_p = NULL;
+  const BitTorrent_Client_Stream* stream_p = NULL;
+  BitTorrent_IControl* icontrol_p = NULL;
   ACE_Time_Value deadline = ACE_Time_Value::zero;
   std::string channel_string;
-  string_list_t channels, keys;
-  IRC_Client_IConnection_Manager_t* connection_manager_p =
-    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  BitTorrent_Client_IConnection_Manager_t* connection_manager_p =
+    BITTORRENT_CLIENT_PEER_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
 
   // step1: wait for connection ?
@@ -428,7 +431,7 @@ connection_setup_curses_function (void* arg_in)
   {
     ACE_Time_Value deadline =
       (COMMON_TIME_NOW +
-       ACE_Time_Value (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT, 0));
+       ACE_Time_Value (TEST_I_CONNECTION_ASYNCH_TIMEOUT, 0));
 
     do
     {
@@ -451,7 +454,7 @@ connection_setup_curses_function (void* arg_in)
   if (!connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_IConnection_Manager_t::operator[0]: \"%m\", aborting\n")));
+                ACE_TEXT ("failed to BitTorrent_Client_IConnection_Manager_t::operator[0]: \"%m\", aborting\n")));
     goto clean_up;
   } // end IF
 
@@ -461,11 +464,11 @@ connection_setup_curses_function (void* arg_in)
               ACE_TEXT ("registering IRC connection...\n")));
 
   socket_connection_p =
-    dynamic_cast<IRC_Client_ISocketConnection_t*> (connection_p);
+    dynamic_cast<BitTorrent_Client_ISocketConnection_t*> (connection_p);
   if (!socket_connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<IRC_Client_ISocketConnection_t>(%@): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to dynamic_cast<BitTorrent_Client_ISocketConnection_t>(%@): \"%m\", aborting\n"),
                 connection_p));
     goto clean_up;
   } // end IF
@@ -474,110 +477,101 @@ connection_setup_curses_function (void* arg_in)
        (iterator.next (module_p) != 0);
        iterator.advance ())
     if (ACE_OS::strcmp (module_p->name (),
-                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME)) == 0)
+                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)) == 0)
       break;
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("module \"%s\" not found, aborting\n"),
-                ACE_TEXT (IRC_CLIENT_HANDLER_MODULE_NAME)));
+                ACE_TEXT (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)));
     goto clean_up;
   } // end IF
   icontrol_p =
-    dynamic_cast<IRC_IControl*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+    dynamic_cast<BitTorrent_IControl*> (const_cast<Stream_Module_t*> (module_p)->writer ());
   if (!icontrol_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<IRC_IControl*>(0x%@), aborting\n"),
+                ACE_TEXT ("failed to dynamic_cast<BitTorrent_IControl*>(0x%@), aborting\n"),
                 connection_p));
     goto clean_up;
   } // end IF
-  try
-  {
+  try {
     result_2 =
-      icontrol_p->registerc (thread_data_p->configuration->protocolConfiguration.loginOptions);
-  }
-  catch (...)
-  {
+      icontrol_p->download (thread_data_p->URI);
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in IRC_IControl::registerc(), continuing\n")));
+                ACE_TEXT ("caught exception in BitTorrent_IControl::download(), continuing\n")));
   }
   if (!result_2)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_IControl::registerc(), aborting\n")));
+                ACE_TEXT ("failed to BitTorrent_IControl::download(), aborting\n")));
     goto clean_up;
   } // end IF
 
-  // step3: wait for registration to complete
-  iregistration_p =
-    dynamic_cast<IRC_IRegistrationStateMachine_t*> (const_cast<Stream_Module_t*> (module_p)->writer ());
-  if (!iregistration_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<IRC_IRegistrationStateMachine_t*>: \"%m\", aborting\n")));
-    goto clean_up;
-  } // end ELSE
-  // *NOTE*: this entails a little delay (waiting for connection registration...)
-  delay.set (IRC_MAXIMUM_WELCOME_DELAY, 0);
-  // *NOTE*: cannot use COMMON_TIME_NOW, as this is a high precision monotonous
-  //         clock... --> use standard getimeofday
-  deadline = ACE_OS::gettimeofday () + delay;
-  try
-  {
-    result_2 = iregistration_p->wait (REGISTRATION_STATE_FINISHED,
-                                      &deadline);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in IRC_Client_IRegistration_t::wait(%#T), continuing\n"),
-                &delay));
-    result_2 = false;
-  }
-  if (!result_2 ||
-      (iregistration_p->current () != REGISTRATION_STATE_FINISHED))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_IRegistration_t::wait(%#T), aborting\n"),
-                &delay));
-    goto clean_up;
-  } // end IF
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registering IRC connection...DONE\n")));
+//  // step3: wait for registration to complete
+//  iregistration_p =
+//    dynamic_cast<IRC_IRegistrationStateMachine_t*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+//  if (!iregistration_p)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to dynamic_cast<IRC_IRegistrationStateMachine_t*>: \"%m\", aborting\n")));
+//    goto clean_up;
+//  } // end ELSE
+//  // *NOTE*: this entails a little delay (waiting for connection registration...)
+//  delay.set (IRC_MAXIMUM_WELCOME_DELAY, 0);
+//  // *NOTE*: cannot use COMMON_TIME_NOW, as this is a high precision monotonous
+//  //         clock... --> use standard getimeofday
+//  deadline = ACE_OS::gettimeofday () + delay;
+//  try {
+//    result_2 = iregistration_p->wait (REGISTRATION_STATE_FINISHED,
+//                                      &deadline);
+//  } catch (...) {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("caught exception in BitTorrent_Client_IRegistration_t::wait(%#T), continuing\n"),
+//                &delay));
+//    result_2 = false;
+//  }
+//  if (!result_2 ||
+//      (iregistration_p->current () != REGISTRATION_STATE_FINISHED))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to BitTorrent_Client_IRegistration_t::wait(%#T), aborting\n"),
+//                &delay));
+//    goto clean_up;
+//  } // end IF
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("registering IRC connection...DONE\n")));
 
-  // step4: join a channel
-  channel_string =
-    thread_data_p->configuration->protocolConfiguration.loginOptions.channel;
-  // sanity check(s): has '#' prefix ?
-  if (channel_string.find ('#', 0) != 0)
-    channel_string.insert (channel_string.begin (), '#');
-  // sanity check(s): larger than IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH characters ?
-  // *TODO*: support the CHANNELLEN=xxx "feature" of the server...
-  if (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH)
-    channel_string.resize (IRC_PRT_MAXIMUM_CHANNEL_LENGTH);
-  channels.push_back (channel_string);
-  try
-  {
-    icontrol_p->join (channels, keys);
-  }
-  catch (...)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in IRC_Client_IIRCControl::join(\"%s\"), aborting\n"),
-                ACE_TEXT (channel_string.c_str ())));
-    goto clean_up;
-  }
+//  // step4: join a channel
+//  channel_string =
+//    thread_data_p->configuration->protocolConfiguration.loginOptions.channel;
+//  // sanity check(s): has '#' prefix ?
+//  if (channel_string.find ('#', 0) != 0)
+//    channel_string.insert (channel_string.begin (), '#');
+//  // sanity check(s): larger than BitTorrent_Client_CNF_IRC_MAX_CHANNEL_LENGTH characters ?
+//  // *TODO*: support the CHANNELLEN=xxx "feature" of the server...
+//  if (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH)
+//    channel_string.resize (IRC_PRT_MAXIMUM_CHANNEL_LENGTH);
+//  channels.push_back (channel_string);
+//  try {
+//    icontrol_p->join (channels, keys);
+//  } catch (...) {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("caught exception in BitTorrent_Client_IIRCControl::join(\"%s\"), aborting\n"),
+//                ACE_TEXT (channel_string.c_str ())));
+//    goto clean_up;
+//  }
 
   // step5: run curses event dispatch ?
   if (thread_data_p->cursesState)
   {
-    //IRC_Client_ISession_t* session_p =
-    //  dynamic_cast<IRC_Client_ISession_t*> (connection_p);
+    //BitTorrent_Client_ISession_t* session_p =
+    //  dynamic_cast<BitTorrent_Client_ISession_t*> (connection_p);
     //if (!session_p)
     //{
     //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to dynamic_cast<IRC_Client_ISession_t*>(0x%@), aborting\n"),
+    //              ACE_TEXT ("failed to dynamic_cast<BitTorrent_Client_ISession_t*>(0x%@), aborting\n"),
     //              connection_p));
 
     //  // clean up
@@ -588,11 +582,12 @@ connection_setup_curses_function (void* arg_in)
 
     //  goto clean_up;
     //} // end IF
-    //const IRC_Client_ConnectionState& connection_state_r = session_p->state ();
-    const IRC_Client_SessionState& session_state_r =
+    //const BitTorrent_Client_ConnectionState& connection_state_r = session_p->state ();
+    const BitTorrent_Client_ConnectionState& connection_state_r =
       connection_p->state ();
+    ACE_ASSERT (connection_state_r.session);
     thread_data_p->cursesState->sessionState =
-      &const_cast<IRC_Client_SessionState&> (session_state_r);
+      &const_cast<BitTorrent_Client_SessionState&> (connection_state_r.session->state ());
 
     // step6: clean up
     connection_p->decrease ();
@@ -640,21 +635,21 @@ done:
 }
 
 void
-do_work (IRC_Client_Configuration& configuration_in,
+do_work (BitTorrent_Client_Configuration& configuration_in,
          bool useCursesLibrary_in,
          const std::string& serverHostname_in,
          unsigned short serverPortNumber_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
-         IRC_Client_SignalHandler& signalHandler_in,
+         BitTorrent_Client_SignalHandler& signalHandler_in,
          unsigned int numberOfDispatchThreads_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
   // *TODO*: clean this up
-  IRC_Client_CursesState curses_state;
+  BitTorrent_Client_CursesState curses_state;
   if (useCursesLibrary_in)
     configuration_in.cursesState = &curses_state;
 
@@ -667,24 +662,24 @@ do_work (IRC_Client_Configuration& configuration_in,
       &configuration_in.moduleHandlerConfiguration;
   configuration_in.streamConfiguration.moduleConfiguration =
       &configuration_in.moduleConfiguration;
-  IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
-                                                   NULL);
-  IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
-  IRCHandler_impl_p =
-    dynamic_cast<IRC_Client_Module_IRCHandler*> (IRC_handler.writer ());
-  if (!IRCHandler_impl_p)
+  BitTorrent_Client_Handler_Module handler (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
+                                            NULL);
+  BitTorrent_Client_Handler_t* handler_impl_p = NULL;
+  handler_impl_p =
+    dynamic_cast<BitTorrent_Client_Handler_t*> (handler.writer ());
+  if (!handler_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
+                ACE_TEXT ("dynamic_cast<BitTorrent_Client_Handler_T> failed, returning\n")));
     return;
   } // end IF
   configuration_in.streamConfiguration.cloneModule = true;
   configuration_in.streamConfiguration.deleteModule = false;
   configuration_in.streamConfiguration.module = &IRC_handler;
-  if (!IRCHandler_impl_p->initialize (configuration_in.moduleHandlerConfiguration))
+  if (!handler_impl_p->initialize (configuration_in.moduleHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler_Module::initialize(), returning\n")));
+                ACE_TEXT ("failed to BitTorrent_Client_Handler_T::initialize(), returning\n")));
     return;
   } // end IF
 
@@ -705,9 +700,9 @@ do_work (IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step3: initialize client connector
-  //IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
+  //BitTorrent_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
   //ACE_NEW_NORETURN (socket_handler_configuration_p,
-  //                  IRC_Client_SocketHandlerConfiguration ());
+  //                  BitTorrent_Client_SocketHandlerConfiguration ());
   //if (!socket_handler_configuration_p)
   //{
   //  ACE_DEBUG ((LM_CRITICAL,
@@ -715,27 +710,27 @@ do_work (IRC_Client_Configuration& configuration_in,
   //  return;
   //} // end IF
   //configuration_in.socketHandlerConfiguration.bufferSize =
-  //  IRC_CLIENT_BUFFER_SIZE;
+  //  BitTorrent_Client_BUFFER_SIZE;
   configuration_in.socketHandlerConfiguration.messageAllocator =
     configuration_in.streamConfiguration.messageAllocator;
   configuration_in.socketHandlerConfiguration.socketConfiguration =
     &configuration_in.socketConfiguration;
   configuration_in.socketHandlerConfiguration.statisticReportingInterval =
     configuration_in.streamConfiguration.statisticReportingInterval;
-  //IRC_Client_SessionState session_state;
+  //BitTorrent_Client_SessionState session_state;
   //session_state.configuration = configuration_in;
-  //IRC_Client_ConnectorConfiguration connector_configuration;
-  IRC_Client_Connection_Manager_t* connection_manager_p =
-    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  //BitTorrent_Client_ConnectorConfiguration connector_configuration;
+  BitTorrent_Client_Connection_Manager_t* connection_manager_p =
+    BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   //connector_configuration.connectionManager = connection_manager_p;
   //connector_configuration.userData = &configuration_in.streamUserData;
   //connector_configuration.socketHandlerConfiguration =
   //  &configuration_in.socketHandlerConfiguration;
-  IRC_Client_SessionConnector_t connector (connection_manager_p,
+  BitTorrent_Client_SessionConnector_t connector (connection_manager_p,
                                            configuration_in.streamConfiguration.statisticReportingInterval);
-  IRC_Client_AsynchSessionConnector_t asynch_connector (connection_manager_p,
+  BitTorrent_Client_AsynchSessionConnector_t asynch_connector (connection_manager_p,
                                                         configuration_in.streamConfiguration.statisticReportingInterval);
-  IRC_Client_IConnector_t* connector_p = NULL;
+  BitTorrent_Client_IConnector_t* connector_p = NULL;
   if (configuration_in.useReactor)
     connector_p = &connector;
   else
@@ -749,7 +744,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step3: initialize signal handling
-  IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
+  struct BitTorrent_Client_SignalHandlerConfiguration signal_handler_configuration;
   signal_handler_configuration.connector = connector_p;
   signal_handler_configuration.cursesState = &curses_state;
   result =
@@ -766,7 +761,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_SignalHandler::initialize(), returning\n")));
+                ACE_TEXT ("failed to BitTorrent_Client_SignalHandler::initialize(), returning\n")));
     return;
   } // end IF
   if (!Common_Tools::initializeSignals (signalSet_in,
@@ -828,14 +823,14 @@ do_work (IRC_Client_Configuration& configuration_in,
 
   // step6a: wait for connection / setup
 
-  IRC_Client_InputThreadData input_thread_data;
-  input_thread_data.configuration = &configuration_in;
-  input_thread_data.groupID = configuration_in.groupID;
-  input_thread_data.moduleHandlerConfiguration =
-      &configuration_in.moduleHandlerConfiguration;
-  if (useCursesLibrary_in)
-    input_thread_data.cursesState = &curses_state;
-  input_thread_data.useReactor = configuration_in.useReactor;
+//  BitTorrent_Client_InputThreadData input_thread_data;
+//  input_thread_data.configuration = &configuration_in;
+//  input_thread_data.groupID = configuration_in.groupID;
+//  input_thread_data.moduleHandlerConfiguration =
+//      &configuration_in.moduleHandlerConfiguration;
+//  if (useCursesLibrary_in)
+//    input_thread_data.cursesState = &curses_state;
+//  input_thread_data.useReactor = configuration_in.useReactor;
   ACE_thread_t thread_id = -1;
   ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
   //char thread_name[BUFSIZ];
@@ -862,7 +857,8 @@ do_work (IRC_Client_Configuration& configuration_in,
   ACE_ASSERT (thread_manager_p);
   result =
     thread_manager_p->spawn (::connection_setup_curses_function, // function
-                             &input_thread_data,                 // argument
+//                             &input_thread_data,                 // argument
+                             NULL,
                              (THR_NEW_LWP      |
                               THR_JOINABLE     |
                               THR_INHERIT_SCHED),                // flags
@@ -1038,18 +1034,18 @@ ACE_TMAIN (int argc_in,
   std::string configuration_file_name        = configuration_path;
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
-      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
+      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
 
   bool debug_parser                          = false;
-  bool log_to_file                           = IRC_CLIENT_SESSION_DEFAULT_LOG;
-  bool use_curses_library                    = IRC_CLIENT_SESSION_USE_CURSES;
-  bool use_reactor                           = IRC_CLIENT_DEFAULT_USE_REACTOR;
+  bool log_to_file                           = TEST_I_DEFAULT_SESSION_LOG;
+  bool use_curses_library                    = TEST_I_SESSION_USE_CURSES;
+  bool use_reactor                           = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval  =
-      IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+      TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information                     = false;
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads =
-      IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
+      TEST_I_DEFAULT_NUMBER_OF_TP_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
                             configuration_file_name,
@@ -1062,7 +1058,6 @@ ACE_TMAIN (int argc_in,
                             print_version_and_exit,
                             number_of_thread_pool_threads))
   {
-    // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
 //    // *PORTABILITY*: on Windows, fini ACE...
@@ -1163,7 +1158,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  IRC_Client_SignalHandler signal_handler (use_reactor);
+  BitTorrent_Client_SignalHandler signal_handler (use_reactor);
 
   // step5: handle specific program modes
   if (print_version_and_exit)
@@ -1189,11 +1184,11 @@ ACE_TMAIN (int argc_in,
 
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                              IRC_BUFFER_SIZE);
-  IRC_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                   &heap_allocator);
+                                                                              BITTORRENT_BUFFER_SIZE);
+  BitTorrent_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                          &heap_allocator);
 
-  IRC_Client_Configuration configuration;
+  BitTorrent_Client_Configuration configuration;
   ////////////////////////////////////////
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.statisticReportingInterval =
@@ -1246,19 +1241,19 @@ ACE_TMAIN (int argc_in,
                                     configuration.protocolConfiguration.loginOptions.user.realName);
 
   // step7: parse configuration file(s) (if any)
-  host_name = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEFAULT_SERVER_HOSTNAME);
-  unsigned short port_number = IRC_DEFAULT_SERVER_PORT;
+  host_name = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_SERVER_HOSTNAME);
+  unsigned short port_number = BITTORRENT_DEFAULT_SERVER_PORT;
   if (!configuration_file_name.empty ())
   {
-    IRC_Client_Connections_t connections;
-    IRC_Client_Tools::parseConfigurationFile (configuration_file_name,
+    BitTorrent_Client_Connections_t connections;
+    BitTorrent_Client_Tools::parseConfigurationFile (configuration_file_name,
                                               configuration.protocolConfiguration.loginOptions,
                                               connections);
     if (!connections.empty ())
     {
-      IRC_Client_ConnectionsIterator_t iterator = connections.begin ();
+      BitTorrent_Client_ConnectionsIterator_t iterator = connections.begin ();
       host_name = (*iterator).hostName;
-      IRC_Client_PortRangesIterator_t iterator_2 = (*iterator).ports.begin ();
+      BitTorrent_Client_PortRangesIterator_t iterator_2 = (*iterator).ports.begin ();
       port_number = (*iterator_2).first;
     } // end IF
   } // end IF

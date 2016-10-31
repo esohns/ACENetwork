@@ -151,12 +151,15 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_sock_acceptor.h
      net_sock_connector.cpp
      net_sock_connector.h
-     net_socketconnection_base.cpp
-     net_socketconnection_base.h
-     net_socketconnection_base.inl
+#     net_socketconnection_base.cpp
+#     net_socketconnection_base.h
+#     net_socketconnection_base.inl
      net_sockethandler_base.cpp
      net_sockethandler_base.h
      net_sockethandler_base.inl
+     net_streamconnection_base.cpp
+     net_streamconnection_base.h
+     net_streamconnection_base.inl
      net_stream_asynch_tcpsocket_base.cpp
      net_stream_asynch_tcpsocket_base.h
      net_stream_asynch_tcpsocket_base.inl
@@ -263,10 +266,12 @@ install (FILES
          net_remote_comm.h
          net_sock_acceptor.h
          net_sock_connector.h
-         net_socketconnection_base.h
-         net_socketconnection_base.inl
+#         net_socketconnection_base.h
+#         net_socketconnection_base.inl
          net_sockethandler_base.h
          net_sockethandler_base.inl
+         net_streamconnection_base.h
+         net_streamconnection_base.inl
          net_stream_asynch_tcpsocket_base.h
          net_stream_asynch_tcpsocket_base.inl
          net_stream_asynch_udpsocket_base.h

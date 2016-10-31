@@ -29,13 +29,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename UserDataType>
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     StreamType,
                      UserDataType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                           const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (1,    // initial count
@@ -99,13 +97,11 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename UserDataType>
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     StreamType,
                      UserDataType>::~Net_ConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
@@ -139,14 +135,12 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename UserDataType>
 bool
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     StreamType,
 //#if defined (__GNUG__)
                      UserDataType>::registerc (ICONNECTION_T* connection_in)
 //#else
@@ -166,12 +160,9 @@ Net_ConnectionBase_T<AddressType,
 //#endif
   if (manager_)
   {
-    try
-    {
+    try {
       isRegistered_ = manager_->registerc (iconnection_p);
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnectionManager_T::registerc(), continuing\n")));
       isRegistered_ = false;
@@ -191,8 +182,7 @@ Net_ConnectionBase_T<AddressType,
     ACE_OS::memset (buffer, 0, sizeof (buffer));
     std::string local_address_string;
     AddressType local_address, remote_address;
-    try
-    {
+    try {
 //#if defined (__GNUG__)
       // *WORKAROUND*: see header
       ICONNECTION_T* connection_p = (connection_in ? connection_in
@@ -206,9 +196,7 @@ Net_ConnectionBase_T<AddressType,
 //                  local_address,
 //                  remote_address);
 //#endif
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnection_T::info(), aborting\n")));
       return false;
@@ -253,14 +241,12 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename UserDataType>
 void
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     StreamType,
                      UserDataType>::deregister ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::deregister"));
@@ -269,14 +255,11 @@ Net_ConnectionBase_T<AddressType,
   {
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
     AddressType local_address, remote_address;
-    try
-    {
+    try {
       this->info (handle,
                   local_address,
                   remote_address);
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
     }
@@ -287,12 +270,9 @@ Net_ConnectionBase_T<AddressType,
     // (try to) de-register with the connection manager
     isRegistered_ = false;
     // *IMPORTANT NOTE*: may delete 'this'
-    try
-    {
+    try {
       manager_->deregister (this);
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnectionManager_T::deregister(), continuing\n")));
     }
@@ -316,14 +296,12 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename UserDataType>
 const ConfigurationType&
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     StreamType,
                      UserDataType>::get () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::get"));
@@ -338,14 +316,12 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename UserDataType>
 bool
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     StreamType,
                      UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));
@@ -361,14 +337,12 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename UserDataType>
 const StateType&
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     StreamType,
                      UserDataType>::state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::state"));
@@ -380,14 +354,12 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename UserDataType>
 Net_Connection_Status
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     StreamType,
                      UserDataType>::status () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::status"));

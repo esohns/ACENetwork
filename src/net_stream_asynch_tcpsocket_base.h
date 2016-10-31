@@ -55,7 +55,6 @@ class Net_StreamAsynchTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
                                UserDataType>
 {
  public:
@@ -63,7 +62,6 @@ class Net_StreamAsynchTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
                                UserDataType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchTCPSocketBase_T ();
@@ -83,7 +81,7 @@ class Net_StreamAsynchTCPSocketBase_T
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
-  virtual size_t id () const;
+  virtual Net_ConnectionId_t id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
@@ -124,7 +122,6 @@ class Net_StreamAsynchTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
                                UserDataType> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T ())

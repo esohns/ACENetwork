@@ -34,18 +34,15 @@
 #include "net_ilistener.h"
 
 template <typename HandlerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
-          typename StreamStatusType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SocketConfigurationType,
-          ///////////////////////////////
           typename HandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_SocketConnectionBase_T
  : public HandlerType
@@ -53,8 +50,6 @@ class Net_SocketConnectionBase_T
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  StreamType,
-                                  StreamStatusType,
                                   SocketConfigurationType,
                                   HandlerConfigurationType>
 {
@@ -68,12 +63,9 @@ class Net_SocketConnectionBase_T
 
   // implement (part of) Net_ISocketConnection_T
   //virtual const HandlerConfigurationType& get () const;
-  virtual const StreamType& stream () const;
   // *IMPORTANT NOTE*: fire-and-forget API
   //virtual bool send (ACE_Message_Block*&);
   virtual void send (ACE_Message_Block*&);
-  virtual bool wait (StreamStatusType,
-                     const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
   virtual const HandlerConfigurationType& get ();
   virtual bool initialize (const HandlerConfigurationType&); // handler configuration
 
@@ -126,21 +118,18 @@ class Net_SocketConnectionBase_T
 //  void shutdown ();
 };
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 template <typename HandlerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
-          typename StreamStatusType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SocketConfigurationType,
-          ///////////////////////////////
           typename HandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_AsynchSocketConnectionBase_T
  : public HandlerType
@@ -148,8 +137,6 @@ class Net_AsynchSocketConnectionBase_T
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  StreamType,
-                                  StreamStatusType,
                                   SocketConfigurationType,
                                   HandlerConfigurationType>
 {
@@ -164,11 +151,8 @@ class Net_AsynchSocketConnectionBase_T
 
   // implement (part of) Net_ISocketConnection_T
   //virtual const HandlerConfigurationType& get () const;
-  virtual const StreamType& stream () const;
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
-  virtual bool wait (StreamStatusType,
-                     const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
   virtual const HandlerConfigurationType& get ();
   virtual bool initialize (const HandlerConfigurationType&); // handler configuration
 
@@ -188,7 +172,6 @@ class Net_AsynchSocketConnectionBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   Net_AsynchSocketConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle

@@ -27,15 +27,15 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        StreamType,
                         HandlerConfigurationType,
+                        StreamType,
                         UserDataType>::Net_NetlinkConnection_T ()
  : inherited (NULL,
               0)
@@ -48,15 +48,15 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        StreamType,
                         HandlerConfigurationType,
+                        StreamType,
                         UserDataType>::Net_NetlinkConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                 unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
@@ -70,15 +70,15 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        StreamType,
                         HandlerConfigurationType,
+                        StreamType,
                         UserDataType>::~Net_NetlinkConnection_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::~Net_NetlinkConnection_T"));
@@ -220,16 +220,16 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        StreamType,
                         HandlerConfigurationType,
+                        StreamType,
                         UserDataType>::info (ACE_HANDLE& handle_out,
                                              Net_Netlink_Addr& localSAP_out,
                                              Net_Netlink_Addr& remoteSAP_out) const
@@ -249,16 +249,16 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
-size_t
+Net_ConnectionId_t
 Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        StreamType,
                         HandlerConfigurationType,
+                        StreamType,
                         UserDataType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::id"));
@@ -269,23 +269,23 @@ Net_NetlinkConnection_T<HandlerType,
         local_address,
         peer_address);
 
-  return static_cast<size_t> (handle);
+  return static_cast<Net_ConnectionId_t> (handle);
 }
 
 template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        StreamType,
                         HandlerConfigurationType,
+                        StreamType,
                         UserDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::dump_state"));
@@ -560,16 +560,16 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 int
 Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        StreamType,
                         HandlerConfigurationType,
+                        StreamType,
                         UserDataType>::handle_close (ACE_HANDLE handle_in,
                                                      ACE_Reactor_Mask mask_in)
 {
@@ -688,21 +688,21 @@ Net_NetlinkConnection_T<HandlerType,
 //  // *NOTE*: defer waiting for any worker(s) to the dtor
 //}
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              StreamType,
                               HandlerConfigurationType,
+                              StreamType,
                               UserDataType>::Net_AsynchNetlinkConnection_T ()
  : inherited (NULL,
               0)
@@ -715,15 +715,15 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              StreamType,
                               HandlerConfigurationType,
+                              StreamType,
                               UserDataType>::Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                             unsigned int statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
@@ -737,15 +737,15 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              StreamType,
                               HandlerConfigurationType,
+                              StreamType,
                               UserDataType>::~Net_AsynchNetlinkConnection_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::~Net_AsynchNetlinkConnection_T"));
@@ -1022,16 +1022,16 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
-size_t
+Net_ConnectionId_t
 Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              StreamType,
                               HandlerConfigurationType,
+                              StreamType,
                               UserDataType>::id () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::id"));
@@ -1042,23 +1042,23 @@ Net_AsynchNetlinkConnection_T<HandlerType,
               local_netlink_address,
               peer_netlink_address);
 
-  return static_cast<size_t> (handle);
+  return static_cast<Net_ConnectionId_t> (handle);
 }
 
 template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              StreamType,
                               HandlerConfigurationType,
+                              StreamType,
                               UserDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::dump_state"));
@@ -1100,16 +1100,16 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              StreamType,
                               HandlerConfigurationType,
+                              StreamType,
                               UserDataType>::open (ACE_HANDLE handle_in,
                                                    ACE_Message_Block& messageBlock_in)
 {
@@ -1126,14 +1126,11 @@ Net_AsynchNetlinkConnection_T<HandlerType,
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   std::string local_address;
   Net_Netlink_Addr local_SAP, remote_SAP;
-  try
-  {
+  try {
     this->info (handle,
                 local_SAP,
                 remote_SAP);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ITransportLayer_T::info(), returning\n")));
 
@@ -1178,16 +1175,16 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 int
 Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              StreamType,
                               HandlerConfigurationType,
+                              StreamType,
                               UserDataType>::handle_close (ACE_HANDLE handle_in,
                                                            ACE_Reactor_Mask mask_in)
 {

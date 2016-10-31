@@ -19,9 +19,9 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "IRC_client_stream.h"
+#include "bittorrent_client_stream.h"
 
-IRC_Client_Stream::IRC_Client_Stream (const std::string& name_in)
+BitTorrent_Client_Stream::BitTorrent_Client_Stream (const std::string& name_in)
  : inherited (name_in)
  //, marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
  //            NULL,
@@ -36,7 +36,7 @@ IRC_Client_Stream::IRC_Client_Stream (const std::string& name_in)
 //            NULL,
 //            false)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::IRC_Client_Stream"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_Stream::BitTorrent_Client_Stream"));
 
   // remember the ones we "own"...
   // *TODO*: clean this up
@@ -59,20 +59,20 @@ IRC_Client_Stream::IRC_Client_Stream (const std::string& name_in)
     (*iterator)->next (NULL);
 }
 
-IRC_Client_Stream::~IRC_Client_Stream ()
+BitTorrent_Client_Stream::~BitTorrent_Client_Stream ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::~IRC_Client_Stream"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_Stream::~BitTorrent_Client_Stream"));
 
-  // *NOTE*: this implements an ordered shutdown on destruction...
+  // *NOTE*: this implements an ordered shutdown on destruction
   inherited::shutdown ();
 }
 
 bool
-IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configuration_in,
-                               bool setupPipeline_in,
-                               bool resetSessionData_in)
+BitTorrent_Client_Stream::initialize (const struct BitTorrent_Client_StreamConfiguration& configuration_in,
+                                      bool setupPipeline_in,
+                                      bool resetSessionData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_Stream::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
@@ -93,8 +93,8 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
   // - create modules (done for the ones "owned" by the stream itself)
   // - initialize modules
   // - push them onto the stream (tail-first) !
-//  IRC_Client_SessionData& session_data_r =
-//      const_cast<IRC_Client_SessionData&> (inherited::sessionData_->get ());
+//  BitTorrent_Client_SessionData& session_data_r =
+//      const_cast<BitTorrent_Client_SessionData&> (inherited::sessionData_->get ());
 //  session_data_r.sessionID = configuration_in.sessionID;
 
 //  ACE_ASSERT (configuration_in.moduleConfiguration);
@@ -209,9 +209,9 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
 }
 
 //bool
-//IRC_Client_Stream::collect (IRC_RuntimeStatistic_t& data_out)
+//BitTorrent_Client_Stream::collect (IRC_RuntimeStatistic_t& data_out)
 //{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::collect"));
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_Stream::collect"));
 //
 //  IRC_Module_Statistic_WriterTask_t* runtimeStatistic_impl = NULL;
 //  runtimeStatistic_impl =
@@ -228,9 +228,9 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
 //}
 //
 //void
-//IRC_Client_Stream::report () const
+//BitTorrent_Client_Stream::report () const
 //{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::report"));
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_Stream::report"));
 //
 ////   Net_Module_RuntimeStatistic* runtimeStatistic_impl = NULL;
 ////   runtimeStatistic_impl = dynamic_cast<Net_Module_RuntimeStatistic*> (//                                            myRuntimeStatistic.writer());
@@ -250,54 +250,3 @@ IRC_Client_Stream::initialize (const IRC_Client_StreamConfiguration& configurati
 //
 //  ACE_NOTREACHED (return;)
 //}
-
-void
-IRC_Client_Stream::ping ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::ping"));
-
-  // delegate to the head module, skip over ACE_Stream_Head
-  typename inherited::MODULE_T* module_p = inherited::head ();
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("no head module found, returning\n")));
-    return;
-  } // end IF
-  module_p = module_p->next ();
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("no head module found, returning\n")));
-    return;
-  } // end IF
-
-  // sanity check: head == tail ? --> no modules have been push()ed (yet) !
-  if (module_p == inherited::tail ())
-  {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("no modules have been enqueued yet --> nothing to do !, returning\n")));
-    return;
-  } // end IF
-
-  typename inherited::ISTREAM_CONTROL_T* control_impl_p = NULL;
-  control_impl_p =
-    dynamic_cast<typename inherited::ISTREAM_CONTROL_T*> (module_p->reader ());
-  if (!control_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Stream_IStreamControl> failed, returning\n"),
-                module_p->name ()));
-    return;
-  } // end IF
-
-  // *TODO*
-  try {
-//    control_impl->stop ();
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Stream_IStreamControl::stop (module: \"%s\"), returning\n"),
-                module_p->name ()));
-    return;
-  }
-}

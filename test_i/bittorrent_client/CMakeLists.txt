@@ -128,6 +128,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/p2p/bittorrent)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
@@ -141,14 +142,12 @@ set (bittorrent_client_SRCS
      bittorrent_client_curses.cpp
      bittorrent_client_curses.h
      bittorrent_client_defines.h
-     bittorrent_client_inputhandler.cpp
-     bittorrent_client_inputhandler.h
-     bittorrent_client_module_bittorrenthandler.cpp
-     bittorrent_client_module_bittorrenthandler.h
+#     bittorrent_client_inputhandler.cpp
+#     bittorrent_client_inputhandler.h
      bittorrent_client_network.h
      bittorrent_client_session_common.h
-     bittorrent_client_sessionmessage.cpp
-     bittorrent_client_sessionmessage.h
+ #    bittorrent_client_sessionmessage.cpp
+ #    bittorrent_client_sessionmessage.h
      bittorrent_client_signalhandler.cpp
      bittorrent_client_signalhandler.h
      bittorrent_client_stream.cpp
@@ -238,11 +237,9 @@ set (bittorrent_client_gui_SRCS
      bittorrent_client_gui_messagehandler.h
      bittorrent_client_gui_tools.cpp
      bittorrent_client_gui_tools.h
-     bittorrent_client_module_bittorrenthandler.cpp
-     bittorrent_client_module_bittorrenthandler.h
      bittorrent_client_network.h
-     bittorrent_client_sessionmessage.cpp
-     bittorrent_client_sessionmessage.h
+#     bittorrent_client_sessionmessage.cpp
+#     bittorrent_client_sessionmessage.h
      bittorrent_client_signalhandler.cpp
      bittorrent_client_signalhandler.h
      bittorrent_client_stream.cpp

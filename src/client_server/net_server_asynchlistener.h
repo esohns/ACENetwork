@@ -35,14 +35,15 @@
 #include "net_ilistener.h"
 
 template <typename HandlerType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
+          ////////////////////////////////
+          typename HandlerConfigurationType, // socket-
+          ////////////////////////////////
           typename StreamType,
-          ///////////////////////////////
-          typename HandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_Server_AsynchListener_T
  : public ACE_Asynch_Acceptor<HandlerType>
@@ -52,14 +53,11 @@ class Net_Server_AsynchListener_T
 {
   // singleton needs access to the ctor/dtors
   friend class ACE_Singleton<Net_Server_AsynchListener_T<HandlerType,
-
                                                          AddressType,
                                                          ConfigurationType,
                                                          StateType,
-                                                         StreamType,
-
                                                          HandlerConfigurationType,
-
+                                                         StreamType,
                                                          UserDataType>,
                              ACE_SYNCH_RECURSIVE_MUTEX>;
 
@@ -142,7 +140,7 @@ class Net_Server_AsynchListener_T
   bool                      isListening_;
 };
 
-// include template implementation
+// include template definition
 #include "net_server_asynchlistener.inl"
 
 #endif

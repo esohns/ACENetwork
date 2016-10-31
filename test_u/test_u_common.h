@@ -26,9 +26,11 @@
 
 #include "ace/Synch_Traits.h"
 
+#include "gtk/gtk.h"
+
 #include "common.h"
 
-#include "common_ui_common.h"
+#include "common_ui_gtk_common.h"
 
 #include "net_common.h"
 #include "net_configuration.h"
@@ -72,7 +74,7 @@ struct Test_U_SocketHandlerConfiguration
 
 enum Test_U_GTK_Event
 {
-  TEST_U_GKTEVENT_INVALID = -1,
+  TEST_U_GTKEVENT_INVALID = -1,
   TEST_U_GTKEVENT_CONNECT = 0,
   TEST_U_GTKEVENT_DATA,
   TEST_U_GTKEVENT_DISCONNECT,
@@ -107,18 +109,14 @@ struct Test_U_GTK_CBData
    : Common_UI_GTKState ()
    , allowUserRuntimeStatistic (true)
    , eventStack ()
-   , logStack ()
    , progressData ()
    , progressEventSourceID (0)
-   , stackLock ()
   {};
 
-  bool                       allowUserRuntimeStatistic;
-  Test_U_GTK_Events_t        eventStack;
-  Common_MessageStack_t      logStack;
-  Test_U_GTK_ProgressData    progressData;
-  guint                      progressEventSourceID;
-  ACE_SYNCH_RECURSIVE_MUTEX  stackLock;
+  bool                    allowUserRuntimeStatistic;
+  Test_U_GTK_Events_t     eventStack;
+  Test_U_GTK_ProgressData progressData;
+  guint                   progressEventSourceID;
 };
 
 #endif

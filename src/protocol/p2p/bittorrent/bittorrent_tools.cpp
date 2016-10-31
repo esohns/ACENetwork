@@ -21,8 +21,6 @@
 
 #include "bittorrent_tools.h"
 
-#include <locale>
-#include <regex>
 #include <sstream>
 
 #include <ace/Log_Msg.h>
@@ -32,9 +30,9 @@
 #include "bittorrent_defines.h"
 
 std::string
-BitTorrent_Tools::dump (const BitTorrent_Record& record_in)
+BitTorrent_Tools::Record2String (const struct BitTorrent_Record& record_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::dump"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::Record2String"));
 
   std::string result;
   std::ostringstream converter;

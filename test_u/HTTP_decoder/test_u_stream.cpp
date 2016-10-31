@@ -58,9 +58,13 @@ Test_U_Stream::~Test_U_Stream ()
 }
 
 bool
-Test_U_Stream::load (Stream_ModuleList_t& modules_out)
+Test_U_Stream::load (Stream_ModuleList_t& modules_out,
+                     bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::load"));
+
+  // initialize return value(s)
+  deleteModules_out = false;
 
   // *NOTE*: one problem is that any module that was NOT enqueued onto the
   //         stream (e.g. because initialize() failed) needs to be explicitly

@@ -34,7 +34,7 @@ class BitTorrent_Export BitTorrent_Tools
   inline virtual ~BitTorrent_Tools () {};
 
   // debug info
-  static std::string dump (const BitTorrent_Record&);
+  static std::string Record2String (const struct BitTorrent_Record&);
 
   static std::string Type2String (enum BitTorrent_MessageType&);
 

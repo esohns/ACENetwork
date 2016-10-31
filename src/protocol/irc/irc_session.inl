@@ -196,11 +196,11 @@ IRC_Session_T<ConnectionType,
   int result = -1;
 
   // step0a: retrieve controller handle
-  const typename inherited::CONNECTION_BASE_T::STREAM_T& stream_r =
+  const typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T& stream_r =
       inherited::stream ();
-  const typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T* module_p =
+  const typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T::MODULE_T* module_p =
       NULL;
-  for (typename inherited::CONNECTION_BASE_T::STREAM_T::ITERATOR_T iterator (stream_r);
+  for (typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T::ITERATOR_T iterator (stream_r);
        (iterator.next (module_p) != 0);
        iterator.advance ())
     if (ACE_OS::strcmp (module_p->name (),
@@ -219,7 +219,7 @@ IRC_Session_T<ConnectionType,
   } // end IF
   inherited::state_.controller =
 //    dynamic_cast<ControllerType*> (const_cast<typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
-      dynamic_cast<IRC_IControl*> (const_cast<typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
+      dynamic_cast<IRC_IControl*> (const_cast<typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
   if (!inherited::state_.controller)
   {
     ACE_DEBUG ((LM_ERROR,

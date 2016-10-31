@@ -26,23 +26,26 @@
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
+#include "net_defines.h"
+
 #include "bittorrent_client_common.h"
-#include "bittorrent_client_defines.h"
+
+#include "test_i_defines.h"
 
 class BitTorrent_Client_SignalHandler
- : public Common_SignalHandler_T<BitTorrent_Client_SignalHandlerConfiguration>
+ : public Common_SignalHandler_T<struct BitTorrent_Client_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
-  BitTorrent_Client_SignalHandler (bool = BITTORRENT_CLIENT_DEFAULT_USE_REACTOR, // use reactor ?
-                                   bool = BITTORRENT_CLIENT_SESSION_USE_CURSES); // use curses library ?
+  BitTorrent_Client_SignalHandler (bool = NET_EVENT_USE_REACTOR,      // use reactor ?
+                                   bool = TEST_I_SESSION_USE_CURSES); // use curses library ?
   virtual ~BitTorrent_Client_SignalHandler ();
 
   // implement Common_ISignal
   virtual void handle (int); // signal
 
  private:
-  typedef Common_SignalHandler_T<BitTorrent_Client_SignalHandlerConfiguration> inherited;
+  typedef Common_SignalHandler_T<struct BitTorrent_Client_SignalHandlerConfiguration> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SignalHandler (const BitTorrent_Client_SignalHandler&))

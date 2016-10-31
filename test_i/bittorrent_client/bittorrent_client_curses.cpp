@@ -45,18 +45,20 @@ using namespace std;
 
 #include "bittorrent_client_network.h"
 
+#include "test_i_defines.h"
+
 bool
-curses_join (const std::string& channel_in,
-             BitTorrent_Client_CursesState& state_in)
+curses_start (const std::string& URI_in,
+              BitTorrent_Client_CursesState& state_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_join"));
 
-  ACE_UNUSED_ARG (channel_in);
+  ACE_UNUSED_ARG (URI_in);
 
   ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_in.lock);
 
   int result = -1;
-  BitTorrent_Client_CursesChannelsIterator_t iterator =
+  BitTorrent_Client_CursesSessionsIterator_t iterator =
       state_in.panels.find (std::string ());
   ACE_ASSERT (iterator != state_in.panels.end ());
   PANEL* panel_p = (*iterator).second;
@@ -97,10 +99,10 @@ curses_join (const std::string& channel_in,
                   ACE_TEXT ("failed to delwin(), continuing\n")));
     return false;
   } // end IF
-  state_in.panels[channel_in] = panel_p;
+  state_in.panels[URI_in] = panel_p;
 
   // switch to channel, refresh
-  state_in.activePanel = state_in.panels.find (channel_in);
+  state_in.activePanel = state_in.panels.find (URI_in);
   ACE_ASSERT (state_in.activePanel != state_in.panels.end ());
   wbkgdset (window_p, COLOR_PAIR (0));
   result = werase (window_p);
@@ -126,7 +128,7 @@ curses_join (const std::string& channel_in,
 }
 
 void
-curses_log (const std::string& channel_in,
+curses_log (const std::string& URI_in,
             const std::string& text_in,
             BitTorrent_Client_CursesState& state_in,
             bool lockedAccess_in)
@@ -144,14 +146,14 @@ curses_log (const std::string& channel_in,
                   ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
   } // end IF
 
-  BitTorrent_Client_CursesChannelsIterator_t iterator =
-      state_in.panels.find (channel_in);
+  BitTorrent_Client_CursesSessionsIterator_t iterator =
+      state_in.panels.find (URI_in);
   if (iterator == state_in.panels.end ())
   {
     // not connected yet/not on a channel --> store
-    BitTorrent_Client_MessageQueue_t message_queue;
-    message_queue.push_front (text_in);
-    state_in.backLog.insert (std::make_pair (channel_in, message_queue));
+    Common_MessageStack_t message_stack;
+    message_stack.push_front (text_in);
+    state_in.backLog.insert (std::make_pair (URI_in, message_stack));
     goto release;
   } // end IF
   ACE_ASSERT ((*iterator).second);
@@ -187,8 +189,8 @@ curses_log (const std::string& channel_in,
   // switch to channel, refresh
   ACE_ASSERT (state_in.log);
   result = wbkgd (state_in.log,
-                  (channel_in.empty () ? COLOR_PAIR (BitTorrent_Client_CURSES_COLOR_LOG)
-                                       : COLOR_PAIR (0)));
+                  (URI_in.empty () ? COLOR_PAIR (TEST_I_CURSES_COLOR_LOG)
+                                   : COLOR_PAIR (0)));
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wbkgd(), continuing\n")));
@@ -224,7 +226,6 @@ curses_main (BitTorrent_Client_CursesState& state_in,
   int result = ERR;
   int ch = -1;
   std::string message_text;
-  string_list_t receivers;
   bool release = false;
   ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (state_in.lock,
                                                   ACE_Acquire_Method::ACE_REGULAR);
@@ -301,7 +302,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
       goto close;
     } // end IF
 
-    result = init_pair (BitTorrent_Client_CURSES_COLOR_LOG,
+    result = init_pair (TEST_I_CURSES_COLOR_LOG,
                         COLOR_GREEN, COLOR_BLACK); // green-on-black
     if (result == ERR)
     {
@@ -309,7 +310,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
                   ACE_TEXT ("failed to init_pair(), aborting\n")));
       goto close;
     } // end IF
-    result = init_pair (BitTorrent_Client_CURSES_COLOR_STATUS,
+    result = init_pair (TEST_I_CURSES_COLOR_STATUS,
                         COLOR_BLACK, COLOR_WHITE); // black-on-white
     if (result == ERR)
     {
@@ -319,12 +320,12 @@ curses_main (BitTorrent_Client_CursesState& state_in,
     } // end IF
   } // end IF
 
-  result = curs_set (BitTorrent_Client_CURSES_CURSOR_MODE); // cursor mode
+  result = curs_set (TEST_I_CURSES_CURSOR_MODE); // cursor mode
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to curs_set(%d), aborting\n"),
-                BitTorrent_Client_CURSES_CURSOR_MODE));
+                TEST_I_CURSES_CURSOR_MODE));
     goto close;
   } // end IF
   result = nonl ();
@@ -354,7 +355,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
     goto clean;
   } // end IF
   immedok (window_p, TRUE); // immediate refresh
-  wbkgdset (window_p, COLOR_PAIR (BitTorrent_Client_CURSES_COLOR_LOG));
+  wbkgdset (window_p, COLOR_PAIR (TEST_I_CURSES_COLOR_LOG));
   result = box (window_p, 0, 0);
   if (result == ERR)
   {
@@ -409,7 +410,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
     goto clean;
   } // end IF
   immedok (window_p, TRUE); // immediate refresh
-  wbkgdset (window_p, COLOR_PAIR (BitTorrent_Client_CURSES_COLOR_LOG));
+  wbkgdset (window_p, COLOR_PAIR (TEST_I_CURSES_COLOR_LOG));
 
   // status window
   state_in.status = newwin (1, COLS,
@@ -422,7 +423,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
     goto clean;
   } // end IF
   immedok (state_in.status, TRUE);
-  result = wbkgd (state_in.status, COLOR_PAIR (BitTorrent_Client_CURSES_COLOR_STATUS));
+  result = wbkgd (state_in.status, COLOR_PAIR (TEST_I_CURSES_COLOR_STATUS));
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -497,7 +498,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
     for (BitTorrent_Client_CursesMessagesIterator_t iterator = state_in.backLog.begin ();
          iterator != state_in.backLog.end ();
          ++iterator)
-      for (BitTorrent_Client_MessageQueueReverseIterator_t iterator_2 = (*iterator).second.rbegin ();
+      for (Common_MessageStackConstReverseIterator_t iterator_2 = (*iterator).second.rbegin ();
            iterator_2 != (*iterator).second.rend ();
            ++iterator_2)
       curses_log ((*iterator).first,
@@ -508,7 +509,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
 
     // step3bc: get user input
     { // *IMPORTANT NOTE*: release lock while waiting for input
-      ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_MUTEX> > aGuard (reverse_lock);
+      ACE_GUARD (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard, reverse_lock);
 
       ch = wgetch (state_in.input);
     } // end lock scope
@@ -517,7 +518,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
       case 27: // ESC
       {
         // close connection --> closes session --> closes program
-        BitTorrent_Client_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
+        BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
         break;
       }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -538,7 +539,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
         ACE_ASSERT (state_in.log);
         result =
             wbkgd (state_in.log,
-                   ((*state_in.activePanel).first.empty () ? COLOR_PAIR (BitTorrent_Client_CURSES_COLOR_LOG)
+                   ((*state_in.activePanel).first.empty () ? COLOR_PAIR (TEST_I_CURSES_COLOR_LOG)
                                                            : COLOR_PAIR (0)));
         if (result == ERR)
           ACE_DEBUG ((LM_ERROR,
@@ -569,7 +570,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
 
         // step1: send the message
         {
-          ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_in.sessionState->lock);
+          ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_in.sessionState->lock);
 
           // sanity check (s)
           if (state_in.sessionState->channel.empty ())
@@ -578,16 +579,10 @@ curses_main (BitTorrent_Client_CursesState& state_in,
                         ACE_TEXT ("not in a channel, continuing\n")));
             break;
           } // end IF
-
-          receivers.clear ();
-          receivers.push_front (state_in.sessionState->channel);
         } // end lock scope
-        try
-        {
+        try {
           controller_in->send (receivers, message_text);
-        }
-        catch (...)
-        {
+        } catch (...) {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("caught exception in BitTorrent_Client_IIRCControl::send(), aborting\n")));
           goto clean;
@@ -651,7 +646,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
 
   // clean up
 clean:
-  for (BitTorrent_Client_CursesChannelsIterator_t iterator = state_in.panels.begin ();
+  for (BitTorrent_Client_CursesSessionsIterator_t iterator = state_in.panels.begin ();
        iterator != state_in.panels.end ();
        iterator++)
   {
@@ -715,16 +710,16 @@ close:
 }
 
 bool
-curses_part (const std::string& channel_in,
+curses_stop (const std::string& URI_in,
              BitTorrent_Client_CursesState& state_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::curses_part"));
+  NETWORK_TRACE (ACE_TEXT ("::curses_stop"));
 
   int result = ERR;
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_in.lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_in.lock);
 
-  BitTorrent_Client_CursesChannelsIterator_t iterator =
+  BitTorrent_Client_CursesSessionsIterator_t iterator =
       state_in.panels.find (channel_in);
   ACE_ASSERT (iterator != state_in.panels.end ());
   WINDOW* window_p = (*iterator).second->win;
@@ -743,7 +738,7 @@ curses_part (const std::string& channel_in,
   ACE_ASSERT (state_in.activePanel != state_in.panels.end ());
   ACE_ASSERT (state_in.log);
   result =
-      wbkgd (state_in.log, BitTorrent_Client_CURSES_COLOR_LOG);
+      wbkgd (state_in.log, TEST_I_CURSES_COLOR_LOG);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wbkgd(), continuing\n")));

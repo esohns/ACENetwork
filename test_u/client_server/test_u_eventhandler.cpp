@@ -51,7 +51,7 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionID_in,
   ACE_UNUSED_ARG (sessionID_in);
   ACE_UNUSED_ARG (sessionData_in);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
   CBData_->eventStack.push_back (TEST_U_GTKEVENT_CONNECT);
 }
@@ -78,7 +78,7 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionID_in)
 
   ACE_UNUSED_ARG (sessionID_in);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
   CBData_->eventStack.push_back (TEST_U_GTKEVENT_DISCONNECT);
 }
@@ -91,7 +91,7 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
 
   ACE_UNUSED_ARG (sessionID_in);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
   CBData_->eventStack.push_back (TEST_U_GTKEVENT_DATA);
 }
@@ -105,9 +105,9 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
 
   Test_U_GTK_Event event =
     ((sessionMessage_in.type () == STREAM_SESSION_MESSAGE_STATISTIC) ? TEST_U_GTKEVENT_STATISTIC
-                                                                     : TEST_U_GKTEVENT_INVALID);
+                                                                     : TEST_U_GTKEVENT_INVALID);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (CBData_->stackLock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
   CBData_->eventStack.push_back (event);
 }

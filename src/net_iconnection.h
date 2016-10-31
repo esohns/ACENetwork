@@ -30,11 +30,14 @@
 #include "common_ireferencecount.h"
 #include "common_istatistic.h"
 
+#include "net_common.h"
 #include "net_itransportlayer.h"
 
 // forward declarations
 class ACE_Notification_Strategy;
 enum Net_Connection_Status;
+
+//////////////////////////////////////////
 
 template <typename AddressType,
           typename ConfigurationType,
@@ -53,7 +56,7 @@ class Net_IConnection_T
   virtual void info (ACE_HANDLE&,             // return value: I/O handle
                      AddressType&,            // return value: local SAP
                      AddressType&) const = 0; // return value: remote SAP
-  virtual size_t id () const = 0;
+  virtual Net_ConnectionId_t id () const = 0;
 
   virtual ACE_Notification_Strategy* notification () = 0;
   virtual const StateType& state () const = 0;
@@ -87,21 +90,19 @@ class Net_IConnection_T
                                                     // thread(s) ?
 };
 
+//////////////////////////////////////////
+
 template <typename AddressType,
           typename ConfigurationType,
-          typename StateType,
+          typename ConnectionStateType,
           typename StatisticContainerType,
-          ///////////////////////////////
-          typename StreamType,
-          typename StreamStatusType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename SocketConfigurationType,
-          ///////////////////////////////
-          typename HandlerConfigurationType>
+          typename HandlerConfigurationType> // socket-
 class Net_ISocketConnection_T
  : virtual public Net_IConnection_T<AddressType,
                                     ConfigurationType,
-                                    StateType,
+                                    ConnectionStateType,
                                     StatisticContainerType>
  , virtual public Net_ITransportLayer_T<SocketConfigurationType>
  // *NOTE*: this next line wouldn't compile (with MSVC)
@@ -124,41 +125,83 @@ class Net_ISocketConnection_T
  , public Common_IInitialize_T<HandlerConfigurationType>
 {
  public:
-  // convenience types
-  typedef StreamType STREAM_T;
-
   virtual ~Net_ISocketConnection_T () {};
 
-  virtual const StreamType& stream () const = 0;
-
-  // *TODO*: remove type inference
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&) = 0;
-  virtual bool wait (StreamStatusType,
-                     const ACE_Time_Value* = NULL) = 0; // timeout (absolute) ? : block
 
   // *TODO*: see above
   virtual const HandlerConfigurationType& get () = 0;
 };
 
-//template <typename AddressType,
-//          typename SocketConfigurationType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StatisticContainerType,
-//          typename StreamType>
-//class Net_ISession_T
+//////////////////////////////////////////
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename ConnectionStateType,
+          typename StatisticContainerType,
+          ////////////////////////////////
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType, // socket-
+          ////////////////////////////////
+          typename StreamType,
+          typename StreamStatusType>
+class Net_IStreamConnection_T
+ : virtual public Net_ISocketConnection_T<AddressType,
+                                          ConfigurationType,
+                                          ConnectionStateType,
+                                          StatisticContainerType,
+                                          SocketConfigurationType,
+                                          HandlerConfigurationType>
+{
+ public:
+  // convenience types
+  typedef StreamType STREAM_T;
+
+  virtual ~Net_IStreamConnection_T () {};
+
+  virtual const StreamType& stream () const = 0;
+
+  virtual bool wait (StreamStatusType,
+                     const ACE_Time_Value* = NULL) = 0; // timeout (absolute) ? : block
+};
+
+//////////////////////////////////////////
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename ConnectionStateType,
+          typename StatisticContainerType,
+          ////////////////////////////////
+          typename StreamType,
+          typename StreamStatusType,
+          ////////////////////////////////
+          typename SocketConfigurationType,
+          ////////////////////////////////
+          typename HandlerConfigurationType,
+          ////////////////////////////////
+          typename SessionStateType>
+class Net_ISession_T
 // : virtual public Net_ISocketConnection_T<AddressType,
-//                                          SocketConfigurationType,
 //                                          ConfigurationType,
-//                                          StateType,
+//                                          ConnectionStateType,
 //                                          StatisticContainerType,
-//                                          StreamType>
-//{
-// public:
-//  virtual ~Net_ISession_T () {};
-//
-//  virtual const StateType& state () const = 0;
-//};
+//                                          StreamType,
+//                                          StreamStatusType,
+//                                          SocketConfigurationType,
+//                                          HandlerConfigurationType>
+{
+ public:
+  virtual ~Net_ISession_T () {};
+
+  virtual const SessionStateType& state () const = 0;
+
+  ////////////////////////////////////////
+  // callbacks
+  // *TODO*: remove ASAP
+
+  virtual void connect (Net_ConnectionId_t) = 0;    // connection id
+  virtual void disconnect (Net_ConnectionId_t) = 0; // connection id
+};
 
 #endif

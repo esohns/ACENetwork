@@ -61,11 +61,11 @@ G_MODULE_EXPORT gint button_report_clicked_cb (GtkWidget*, gpointer);
 
 /////////////////////////////////////////
 
-G_MODULE_EXPORT gint spinbutton_connections_value_changed_client_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gint spinbutton_ping_interval_value_changed_client_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void spinbutton_connections_value_changed_client_cb (GtkSpinButton*, gpointer);
+G_MODULE_EXPORT void spinbutton_ping_interval_value_changed_client_cb (GtkSpinButton*, gpointer);
 
-G_MODULE_EXPORT gint spinbutton_connections_value_changed_server_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gint spinbutton_ping_interval_value_changed_server_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void spinbutton_connections_value_changed_server_cb (GtkSpinButton*, gpointer);
+G_MODULE_EXPORT void spinbutton_ping_interval_value_changed_server_cb (GtkSpinButton*, gpointer);
 
 //G_MODULE_EXPORT gint spinbutton_messages_value_changed_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT gint spinbutton_session_messages_value_changed_cb (GtkWidget*, gpointer);

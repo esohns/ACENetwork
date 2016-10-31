@@ -62,7 +62,6 @@
 #include "bittorrent_client_gui_callbacks.h"
 #include "bittorrent_client_gui_common.h"
 #include "bittorrent_client_gui_defines.h"
-#include "bittorrent_client_module_bittorrenthandler.h"
 #include "bittorrent_client_network.h"
 #include "bittorrent_client_signalhandler.h"
 #include "bittorrent_client_tools.h"

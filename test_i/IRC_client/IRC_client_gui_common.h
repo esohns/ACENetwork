@@ -29,7 +29,7 @@
 
 #include <gtk/gtk.h>
 
-#include "common_ui_common.h"
+#include "common_ui_gtk_common.h"
 
 #include "irc_message.h"
 

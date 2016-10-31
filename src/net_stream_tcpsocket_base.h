@@ -57,32 +57,25 @@ class Net_StreamTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
                                UserDataType>
 {
   //friend class ACE_Acceptor<Net_StreamTCPSocketBase_T<HandlerType,
-
   //                                                    AddressType,
   //                                                    ConfigurationType,
   //                                                    StateType,
   //                                                    StatisticContainerType,
   //                                                    StreamType,
-
   //                                                    UserDataType,
-
   //                                                    ModuleConfigurationType,
   //                                                    ModuleHandlerConfigurationType>,
   //                          ACE_SOCK_ACCEPTOR>;
   //friend class ACE_Connector<Net_StreamTCPSocketBase_T<HandlerType,
-
   //                                                     AddressType,
   //                                                     ConfigurationType,
   //                                                     StateType,
   //                                                     StatisticContainerType,
   //                                                     StreamType,
-
   //                                                     UserDataType,
-
   //                                                     ModuleConfigurationType,
   //                                                     ModuleHandlerConfigurationType>,
   //                           ACE_SOCK_CONNECTOR>;
@@ -115,7 +108,7 @@ class Net_StreamTCPSocketBase_T
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
-  virtual size_t id () const;
+  virtual Net_ConnectionId_t id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
@@ -131,7 +124,6 @@ class Net_StreamTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
                                UserDataType> CONNECTION_BASE_T;
 
  protected:
@@ -144,7 +136,7 @@ class Net_StreamTCPSocketBase_T
                                    UserDataType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<Stream_SessionId_t,
                            typename StreamType::SESSION_DATA_T,
-                           Stream_SessionMessageType,
+                           enum Stream_SessionMessageType,
                            ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            ModuleConfigurationType,
@@ -171,7 +163,6 @@ class Net_StreamTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
                                UserDataType> inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
@@ -182,7 +173,7 @@ class Net_StreamTCPSocketBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T& operator= (const Net_StreamTCPSocketBase_T&))
 };
 
-// include template implementation
+// include template definition
 #include "net_stream_tcpsocket_base.inl"
 
 #endif

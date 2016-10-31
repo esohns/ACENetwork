@@ -40,9 +40,18 @@
 
 #define BITTORRENT_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
 
+// connection
 #define BITTORRENT_DEFAULT_SERVER_HOSTNAME              ACE_LOCALHOST
 #define BITTORRENT_DEFAULT_SERVER_PORT                  80
 
 // protocol
+
+
+// session
+#define BITTORRENT_SESSION_LOG_FILENAME_PREFIX          "bittorrent_session"
+#define BITTORRENT_DEFAULT_SESSION_LOG                  false // log to file ? : stdout
+
+// client
+#define BITTORRENT_DEFAULT_HANDLER_MODULE_NAME          "Handler"
 
 #endif

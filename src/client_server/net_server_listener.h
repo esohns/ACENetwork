@@ -32,14 +32,15 @@
 
 template <typename HandlerType,
           typename AcceptorType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
+          ////////////////////////////////
+          typename HandlerConfigurationType, // socket-
+          ////////////////////////////////
           typename StreamType,
-          ///////////////////////////////
-          typename HandlerConfigurationType,
-          ///////////////////////////////
+          ////////////////////////////////
           typename UserDataType>
 class Net_Server_Listener_T
  : public ACE_Acceptor<HandlerType,
@@ -51,14 +52,11 @@ class Net_Server_Listener_T
   // singleton needs access to the ctor/dtors
   friend class ACE_Singleton<Net_Server_Listener_T<HandlerType,
                                                    AcceptorType,
-
                                                    AddressType,
                                                    ConfigurationType,
                                                    StateType,
-                                                   StreamType,
-
                                                    HandlerConfigurationType,
-
+                                                   StreamType,
                                                    UserDataType>,
                              ACE_SYNCH_RECURSIVE_MUTEX>;
 
@@ -124,7 +122,7 @@ class Net_Server_Listener_T
   bool                      isSuspended_;
 };
 
-// include template implementation
+// include template definition
 #include "net_server_listener.inl"
 
 #endif

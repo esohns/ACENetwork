@@ -30,8 +30,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_Client_Connector_T<HandlerType,
                        ConnectorType,
@@ -39,8 +39,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                               const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (ACE_Reactor::instance (), // default reactor
@@ -65,8 +65,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_Client_Connector_T<HandlerType,
                        ConnectorType,
@@ -74,8 +74,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
@@ -88,8 +88,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 bool
 Net_Client_Connector_T<HandlerType,
@@ -98,8 +98,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::initialize"));
@@ -116,8 +116,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 const HandlerConfigurationType&
 Net_Client_Connector_T<HandlerType,
@@ -126,8 +126,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::get () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::get"));
@@ -144,8 +144,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 bool
 Net_Client_Connector_T<HandlerType,
@@ -154,8 +154,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::useReactor () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
@@ -169,8 +169,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_Client_Connector_T<HandlerType,
@@ -179,8 +179,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
@@ -197,8 +197,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 ACE_HANDLE
 Net_Client_Connector_T<HandlerType,
@@ -207,8 +207,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::connect (const AddressType& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
@@ -254,8 +254,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 int
 Net_Client_Connector_T<HandlerType,
@@ -264,8 +264,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::activate_svc_handler (HandlerType* handler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::activate_svc_handler"));
@@ -310,8 +310,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 int
 Net_Client_Connector_T<HandlerType,
@@ -320,8 +320,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::make_svc_handler (HandlerType*& handler_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
@@ -347,23 +347,23 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
-                                               StreamType,
                                                HandlerConfigurationType,
+                                               StreamType,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                               const ACE_Time_Value& statisticCollectionInterval_in)
  : configuration_ (NULL)
@@ -381,23 +381,23 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
-                                               StreamType,
                                                HandlerConfigurationType,
+                                               StreamType,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
@@ -409,24 +409,24 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 bool
 Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
-                                               StreamType,
                                                HandlerConfigurationType,
+                                               StreamType,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::initialize"));
@@ -442,24 +442,24 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 const HandlerConfigurationType&
 Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
-                                               StreamType,
                                                HandlerConfigurationType,
+                                               StreamType,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::get () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::get"));
@@ -475,24 +475,24 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 bool
 Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
-                                               StreamType,
                                                HandlerConfigurationType,
+                                               StreamType,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::useReactor () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
@@ -505,24 +505,24 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
-                                               StreamType,
                                                HandlerConfigurationType,
+                                               StreamType,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
@@ -537,24 +537,24 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 ACE_HANDLE
 Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
-                                               StreamType,
                                                HandlerConfigurationType,
+                                               StreamType,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::connect (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
@@ -596,24 +596,24 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 int
 Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
-                                               StreamType,
                                                HandlerConfigurationType,
+                                               StreamType,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::activate_svc_handler (CONNECTION_T* handler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::activate_svc_handler"));
@@ -657,24 +657,24 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 int
 Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
-                                               StreamType,
                                                HandlerConfigurationType,
+                                               StreamType,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::make_svc_handler (CONNECTION_T*& handler_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
@@ -788,8 +788,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_Client_Connector_T<HandlerType,
                        ConnectorType,
@@ -797,8 +797,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                               const ACE_Time_Value& statisticCollectionInterval_in)
  : configuration_ (NULL)
@@ -816,8 +816,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 Net_Client_Connector_T<HandlerType,
                        ConnectorType,
@@ -825,8 +825,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::~Net_Client_Connector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
@@ -838,8 +838,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 bool
 Net_Client_Connector_T<HandlerType,
@@ -848,8 +848,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::initialize"));
@@ -865,8 +865,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 const HandlerConfigurationType&
 Net_Client_Connector_T<HandlerType,
@@ -875,8 +875,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::get () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::get"));
@@ -892,8 +892,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 bool
 Net_Client_Connector_T<HandlerType,
@@ -902,8 +902,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::useReactor () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
@@ -916,8 +916,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 void
 Net_Client_Connector_T<HandlerType,
@@ -926,8 +926,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::abort ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
@@ -942,8 +942,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 ACE_HANDLE
 Net_Client_Connector_T<HandlerType,
@@ -952,8 +952,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::connect (const Net_Netlink_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect"));
@@ -995,8 +995,8 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           typename HandlerConfigurationType,
+          typename StreamType,
           typename UserDataType>
 int
 Net_Client_Connector_T<HandlerType,
@@ -1005,8 +1005,8 @@ Net_Client_Connector_T<HandlerType,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       StreamType,
                        HandlerConfigurationType,
+                       StreamType,
                        UserDataType>::make_svc_handler (HandlerType*& handler_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));

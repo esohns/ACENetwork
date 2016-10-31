@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "IRC_client_signalhandler.h"
+#include "bittorrent_client_signalhandler.h"
 
 #include <ace/Guard_T.h>
 #include <ace/Log_Msg.h>
@@ -31,28 +31,28 @@
 
 #include "net_macros.h"
 
-#include "IRC_client_curses.h"
-#include "IRC_client_network.h"
+#include "bittorrent_client_curses.h"
+#include "bittorrent_client_network.h"
 
-IRC_Client_SignalHandler::IRC_Client_SignalHandler (bool useReactor_in,
-                                                    bool useCursesLibrary_in)
+BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler (bool useReactor_in,
+                                                                  bool useCursesLibrary_in)
  : inherited (this) // event handler handle
  , useCursesLibrary_ (useCursesLibrary_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::IRC_Client_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler"));
 
 }
 
-IRC_Client_SignalHandler::~IRC_Client_SignalHandler ()
+BitTorrent_Client_SignalHandler::~BitTorrent_Client_SignalHandler ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::~IRC_Client_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SignalHandler::~BitTorrent_Client_SignalHandler"));
 
 }
 
 void
-IRC_Client_SignalHandler::handle (int signal_in)
+BitTorrent_Client_SignalHandler::handle (int signal_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::handleSignal"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SignalHandler::handleSignal"));
 
   int result = -1;
 
@@ -116,7 +116,7 @@ IRC_Client_SignalHandler::handle (int signal_in)
 
   // ...abort ?
   if (abort)
-    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
+    BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
 
   // ...connect ?
   if (connect)
@@ -163,7 +163,7 @@ IRC_Client_SignalHandler::handle (int signal_in)
                   buffer));
 
       // release an existing connection, maybe that helps...
-      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
+      BitTorrent_Client_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
     } // end IF
   } // end IF
 done_connect:

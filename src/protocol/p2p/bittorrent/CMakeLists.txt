@@ -1,3 +1,17 @@
+#option (GTK3_SUPPORT "compile Gtk3 support"
+#        ON)
+
+#include (FindPkgConfig)
+#if (UNIX)
+# #pkg_check_modules (PKG_ACE REQUIRED ACE)
+# if (GTK3_SUPPORT)
+#  pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
+# else ()
+## pkg_check_modules (PKG_GTK_GLADE REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
+#  pkg_check_modules (PKG_GTK2 REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0)
+# endif ()
+#endif ()
+
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -22,23 +36,46 @@ add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
+# if (GTK3_SUPPORT)
+#  include_directories (${PKG_GTK3_INCLUDE_DIRS})
+# else ()
+#  include_directories (${PKG_GTK2_INCLUDE_DIRS})
+# endif ()
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libCommon/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libCommon/src/ui)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src/modules/dec)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src/modules/dev)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src/modules/misc)
 elseif (WIN32)
+# *TODO*: repair pkgconfig support
+# include_directories (${PKG_GTK_GLADE_INCLUDE_DIRS})
+# gtk
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/atk-1.0)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/gdk-pixbuf-2.0)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/cairo)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/pango-1.0)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/lib/glib-2.0/include)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/glib-2.0)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/gtk-3.0)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libCommon/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libCommon/src/ui)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src/modules/dec)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src/modules/dev)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src/modules/misc)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party)
 endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../client_server)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../http)
 #include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
 
 ########### next target ###############
@@ -65,6 +102,9 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
 #     bittorrent_module_bisector.cpp
 #     bittorrent_module_bisector.h
 #     bittorrent_module_bisector.inl
+     bittorrent_module_handler.cpp
+     bittorrent_module_handler.h
+     bittorrent_module_handler.inl
      bittorrent_module_parser.cpp
      bittorrent_module_parser.h
      bittorrent_module_parser.inl
@@ -82,6 +122,9 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      bittorrent_stream.h
      bittorrent_stream.inl
      bittorrent_stream_common.h
+     bittorrent_streamhandler.cpp
+     bittorrent_streamhandler.h
+     bittorrent_streamhandler.inl
      bittorrent_tools.cpp
      bittorrent_tools.h)
 set (${PROJECT_NAME}_Protocol_BitTorrent_SCRIPTS
@@ -145,6 +188,8 @@ install (FILES
          bittorrent_message.inl
 #         bittorrent_module_bisector.h
 #         bittorrent_module_bisector.inl
+         bittorrent_module_handler.h
+         bittorrent_module_handler.inl
          bittorrent_module_parser.h
          bittorrent_module_parser.inl
          bittorrent_module_streamer.h
@@ -156,6 +201,8 @@ install (FILES
          bittorrent_sessionmessage.inl
          bittorrent_stream.h
          bittorrent_stream.inl
+         bittorrent_streamhandler.h
+         bittorrent_streamhandler.inl
          bittorrent_stream_common.h
          bittorrent_tools.h
          DESTINATION include)

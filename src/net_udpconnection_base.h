@@ -31,7 +31,7 @@
 #include "stream_statemachine_control.h"
 
 #include "net_iconnectionmanager.h"
-#include "net_socketconnection_base.h"
+#include "net_streamconnection_base.h"
 #include "net_transportlayer_udp.h"
 
 template <typename HandlerType,
@@ -39,21 +39,22 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           ////////////////////////////////
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
+          ////////////////////////////////
+          typename StreamType,
           ////////////////////////////////
           typename UserDataType>
 class Net_UDPConnectionBase_T
- : public Net_SocketConnectionBase_T<HandlerType,
+ : public Net_StreamConnectionBase_T<HandlerType,
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     StreamType,
-                                     Stream_StateMachine_ControlState,
-                                     Net_SocketConfiguration,
+                                     struct Net_SocketConfiguration,
                                      HandlerConfigurationType,
+                                     StreamType,
+                                     enum Stream_StateMachine_ControlState,
                                      UserDataType>
  , public Net_TransportLayer_UDP
 {
@@ -61,12 +62,23 @@ class Net_UDPConnectionBase_T
                                                      ConfigurationType,
                                                      StateType,
                                                      StatisticContainerType,
-                                                     StreamType,
                                                      HandlerConfigurationType,
+                                                     StreamType,
                                                      UserDataType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
+  typedef Net_StreamConnectionBase_T<HandlerType,
+                                     ACE_INET_Addr,
+                                     ConfigurationType,
+                                     StateType,
+                                     StatisticContainerType,
+                                     struct Net_SocketConfiguration,
+                                     HandlerConfigurationType,
+                                     StreamType,
+                                     enum Stream_StateMachine_ControlState,
+                                     UserDataType> STREAM_CONNECTION_BASE_T;
+
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
@@ -98,15 +110,15 @@ class Net_UDPConnectionBase_T
   //virtual int close (u_long = 0); // reason
 
  private:
-  typedef Net_SocketConnectionBase_T<HandlerType,
+  typedef Net_StreamConnectionBase_T<HandlerType,
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     StreamType,
-                                     Stream_StateMachine_ControlState,
-                                     Net_SocketConfiguration,
+                                     struct Net_SocketConfiguration,
                                      HandlerConfigurationType,
+                                     StreamType,
+                                     enum Stream_StateMachine_ControlState,
                                      UserDataType> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
@@ -125,21 +137,22 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           ////////////////////////////////
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
+          ////////////////////////////////
+          typename StreamType,
           ////////////////////////////////
           typename UserDataType>
 class Net_AsynchUDPConnectionBase_T
- : public Net_AsynchSocketConnectionBase_T<HandlerType,
+ : public Net_AsynchStreamConnectionBase_T<HandlerType,
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           StreamType,
-                                           Stream_StateMachine_ControlState,
-                                           Net_SocketConfiguration,
+                                           struct Net_SocketConfiguration,
                                            HandlerConfigurationType,
+                                           StreamType,
+                                           enum Stream_StateMachine_ControlState,
                                            UserDataType>
  , public Net_TransportLayer_UDP
 {
@@ -147,11 +160,22 @@ class Net_AsynchUDPConnectionBase_T
                                                                   ConfigurationType,
                                                                   StateType,
                                                                   StatisticContainerType,
-                                                                  StreamType,
                                                                   HandlerConfigurationType,
+                                                                  StreamType,
                                                                   UserDataType> >;
 
  public:
+  typedef Net_AsynchStreamConnectionBase_T<HandlerType,
+                                           ACE_INET_Addr,
+                                           ConfigurationType,
+                                           StateType,
+                                           StatisticContainerType,
+                                           struct Net_SocketConfiguration,
+                                           HandlerConfigurationType,
+                                           StreamType,
+                                           enum Stream_StateMachine_ControlState,
+                                           UserDataType> STREAM_CONNECTION_BASE_T;
+
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
@@ -171,15 +195,15 @@ class Net_AsynchUDPConnectionBase_T
   //                   ACE_INET_Addr&) const; // return value: remote SAP
 
  private:
-  typedef Net_AsynchSocketConnectionBase_T<HandlerType,
+  typedef Net_AsynchStreamConnectionBase_T<HandlerType,
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           StreamType,
-                                           Stream_StateMachine_ControlState,
-                                           Net_SocketConfiguration,
+                                           struct Net_SocketConfiguration,
                                            HandlerConfigurationType,
+                                           StreamType,
+                                           enum Stream_StateMachine_ControlState,
                                            UserDataType> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 

@@ -45,9 +45,10 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           ////////////////////////////////
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
+          ////////////////////////////////
+          typename StreamType,
           ////////////////////////////////
           typename UserDataType>
 class Net_Client_Connector_T
@@ -63,14 +64,20 @@ class Net_Client_Connector_T
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_ISocketConnection_T<AddressType,
+//  typedef Net_ISocketConnection_T<AddressType,
+//                                  ConfigurationType,
+//                                  StateType,
+//                                  StatisticContainerType,
+//                                  struct Net_SocketConfiguration,
+//                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
+  typedef Net_IStreamConnection_T<AddressType,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
+                                  struct Net_SocketConfiguration,
+                                  HandlerConfigurationType,
                                   StreamType,
-                                  Stream_StateMachine_ControlState,
-                                  Net_SocketConfiguration,
-                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
+                                  enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
   typedef Net_Connection_Manager_T<AddressType,
                                    ConfigurationType,
@@ -129,26 +136,26 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           ////////////////////////////////
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
+          ////////////////////////////////
+          typename StreamType,
           ////////////////////////////////
           typename UserDataType>
 class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
-
                                                      ConfigurationType,
                                                      StateType,
                                                      StatisticContainerType,
-                                                     StreamType,
                                                      HandlerConfigurationType,
+                                                     StreamType,
                                                      UserDataType>,
                              ConnectorType,
                              ACE_INET_Addr,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             StreamType,
                              HandlerConfigurationType,
+                             StreamType,
                              UserDataType>
  : public Net_IConnector_T<ACE_INET_Addr,
                            HandlerConfigurationType>
@@ -164,17 +171,23 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  StreamType,
                                   HandlerConfigurationType,
+                                  StreamType,
                                   UserDataType> CONNECTION_T;
-  typedef Net_ISocketConnection_T<ACE_INET_Addr,
+//  typedef Net_ISocketConnection_T<ACE_INET_Addr,
+//                                  ConfigurationType,
+//                                  StateType,
+//                                  StatisticContainerType,
+//                                  struct Net_SocketConfiguration,
+//                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
+  typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
+                                  struct Net_SocketConfiguration,
+                                  HandlerConfigurationType,
                                   StreamType,
-                                  Stream_StateMachine_ControlState,
-                                  Net_SocketConfiguration,
-                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
+                                  enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
   typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                    ConfigurationType,
@@ -256,9 +269,10 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StreamType,
           ////////////////////////////////
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
+          ////////////////////////////////
+          typename StreamType,
           ////////////////////////////////
           typename UserDataType>
 class Net_Client_Connector_T<HandlerType,
@@ -267,8 +281,8 @@ class Net_Client_Connector_T<HandlerType,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             StreamType,
                              HandlerConfigurationType,
+                             StreamType,
                              UserDataType>
  : public Net_IConnector_T<Net_Netlink_Addr,
                            HandlerConfigurationType>
@@ -280,14 +294,20 @@ class Net_Client_Connector_T<HandlerType,
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_ISocketConnection_T<Net_Netlink_Addr,
+//  typedef Net_ISocketConnection_T<Net_Netlink_Addr,
+//                                  ConfigurationType,
+//                                  StateType,
+//                                  StatisticContainerType,
+//                                  struct Net_SocketConfiguration,
+//                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
+  typedef Net_IStreamConnection_T<Net_Netlink_Addr,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
+                                  struct Net_SocketConfiguration,
+                                  HandlerConfigurationType,
                                   StreamType,
-                                  Stream_StateMachine_ControlState,
-                                  Net_SocketConfiguration,
-                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
+                                  enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
   typedef Net_Connection_Manager_T<Net_Netlink_Addr,
                                    ConfigurationType,

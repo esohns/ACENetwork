@@ -411,7 +411,7 @@ connection_setup_curses_function (void* arg_in)
   ACE_Time_Value delay (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
 
   IRC_Client_IConnection_t* connection_p = NULL;
-  IRC_Client_ISocketConnection_t* socket_connection_p = NULL;
+  IRC_Client_IStreamConnection_t* istream_connection_p = NULL;
   bool result_2 = false;
   const Stream_Module_t* module_p = NULL;
   const IRC_Client_Stream* stream_p = NULL;
@@ -461,16 +461,16 @@ connection_setup_curses_function (void* arg_in)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registering IRC connection...\n")));
 
-  socket_connection_p =
-    dynamic_cast<IRC_Client_ISocketConnection_t*> (connection_p);
-  if (!socket_connection_p)
+  istream_connection_p =
+    dynamic_cast<IRC_Client_IStreamConnection_t*> (connection_p);
+  if (!istream_connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<IRC_Client_ISocketConnection_t>(%@): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to dynamic_cast<IRC_Client_IStreamConnection_t>(%@): \"%m\", aborting\n"),
                 connection_p));
     goto clean_up;
   } // end IF
-  stream_p = &socket_connection_p->stream ();
+  stream_p = &istream_connection_p->stream ();
   for (Stream_Iterator_t iterator (*stream_p);
        (iterator.next (module_p) != 0);
        iterator.advance ())

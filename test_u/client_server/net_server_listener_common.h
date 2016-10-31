@@ -40,22 +40,22 @@ class Test_U_Stream;
 
 typedef Net_Server_AsynchListener_T<Test_U_AsynchTCPConnection,
                                     ACE_INET_Addr,
-                                    Test_U_Server_ListenerConfiguration,
-                                    Test_U_ConnectionState,
+                                    struct Test_U_Server_ListenerConfiguration,
+                                    struct Test_U_ConnectionState,
+                                    struct Test_U_SocketHandlerConfiguration,
                                     Test_U_Stream,
-                                    Test_U_SocketHandlerConfiguration,
-                                    Test_U_UserData> Test_U_Server_AsynchListener_t;
+                                    struct Test_U_UserData> Test_U_Server_AsynchListener_t;
 typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               ACE_SOCK_ACCEPTOR,
                               ACE_INET_Addr,
-                              Test_U_Server_ListenerConfiguration,
-                              Test_U_ConnectionState,
+                              struct Test_U_Server_ListenerConfiguration,
+                              struct Test_U_ConnectionState,
+                              struct Test_U_SocketHandlerConfiguration,
                               Test_U_Stream,
-                              Test_U_SocketHandlerConfiguration,
-                              Test_U_UserData> Test_U_Server_Listener_t;
+                              struct Test_U_UserData> Test_U_Server_Listener_t;
 
 typedef ACE_Singleton<Test_U_Server_AsynchListener_t,
-                      ACE_Recursive_Thread_Mutex> TEST_U_SERVER_ASYNCHLISTENER_SINGLETON;
+                      ACE_SYNCH_RECURSIVE_MUTEX> TEST_U_SERVER_ASYNCHLISTENER_SINGLETON;
 typedef ACE_Singleton<Test_U_Server_Listener_t,
                       ACE_SYNCH_RECURSIVE_MUTEX> TEST_U_SERVER_LISTENER_SINGLETON;
 

@@ -690,7 +690,7 @@ do_work (unsigned int bufferSize_in,
 
   Test_U_IConnector_t* iconnector_p = NULL;
   Test_U_IConnection_t* connection_p = NULL;
-  Test_U_ISocketConnection_t* isocket_connection_p = NULL;
+  Test_U_IStreamConnection_t* istream_connection_p = NULL;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
   ACE_Time_Value deadline;
@@ -778,12 +778,12 @@ do_work (unsigned int bufferSize_in,
     goto clean_up;
   } // end IF
   // step1c: wait for the connection stream to finish initializing
-  isocket_connection_p =
-    dynamic_cast<Test_U_ISocketConnection_t*> (connection_p);
-  if (!isocket_connection_p)
+  istream_connection_p =
+    dynamic_cast<Test_U_IStreamConnection_t*> (connection_p);
+  if (!istream_connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<Test_U_ISocketConnection_t>(0x%@), returning\n"),
+                ACE_TEXT ("failed to dynamic_cast<Test_U_IStreamConnection_t>(0x%@), returning\n"),
                 connection_p));
 
     // clean up
@@ -792,7 +792,7 @@ do_work (unsigned int bufferSize_in,
 
     goto clean_up;
   } // end IF
-  isocket_connection_p->wait (STREAM_STATE_RUNNING,
+  istream_connection_p->wait (STREAM_STATE_RUNNING,
                               NULL); // <-- block
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connected to \"%s\"...\n"),
@@ -868,7 +868,7 @@ allocate:
                          NULL);
   // *IMPORTANT NOTE*: fire-and-forget API (message_p)
   message_block_p = message_p;
-  isocket_connection_p->send (message_block_p);
+  istream_connection_p->send (message_block_p);
 
   connection_manager_p->wait ();
 

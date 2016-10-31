@@ -48,14 +48,15 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          ///////////////////////////////
+          typename HandlerConfigurationType, // socket-
+          ///////////////////////////////
           typename StreamType,
           ///////////////////////////////
           typename UserDataType,
           ///////////////////////////////
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          ///////////////////////////////
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 class Net_StreamAsynchUDPSocketBase_T
  : public HandlerType
  , public SocketType
@@ -64,8 +65,6 @@ class Net_StreamAsynchUDPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
-                               //////////
                                UserDataType>
 {
  public:
@@ -73,8 +72,6 @@ class Net_StreamAsynchUDPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
-                               //////////
                                UserDataType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchUDPSocketBase_T ();
@@ -91,7 +88,7 @@ class Net_StreamAsynchUDPSocketBase_T
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
-  virtual size_t id () const;
+  virtual Net_ConnectionId_t id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
@@ -107,11 +104,10 @@ class Net_StreamAsynchUDPSocketBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
   typedef Stream_IModule_T<Stream_SessionId_t,
                            typename StreamType::SESSION_DATA_T,
-                           Stream_SessionMessageType,
+                           enum Stream_SessionMessageType,
                            ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            ModuleConfigurationType,
@@ -136,8 +132,6 @@ class Net_StreamAsynchUDPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
-                               //////////
                                UserDataType> inherited4;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ())
@@ -145,7 +139,7 @@ class Net_StreamAsynchUDPSocketBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&))
 };
 
-/////////////////////////////////////////
+//////////////////////////////////////////
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -154,29 +148,26 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          ///////////////////////////////
+          typename HandlerConfigurationType, // socket-
+          ///////////////////////////////
           typename StreamType,
           ///////////////////////////////
           typename UserDataType,
           ///////////////////////////////
           typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          ///////////////////////////////
-          typename HandlerConfigurationType>
+          typename ModuleHandlerConfigurationType>
 class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
                                       Net_SOCK_Netlink,
-                                      ///
                                       AddressType,
                                       ConfigurationType,
                                       StateType,
                                       StatisticContainerType,
+                                      HandlerConfigurationType,
                                       StreamType,
-                                      ///
                                       UserDataType,
-                                      ///
                                       ModuleConfigurationType,
-                                      ModuleHandlerConfigurationType,
-                                      ///
-                                      HandlerConfigurationType>
+                                      ModuleHandlerConfigurationType>
  : public Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>
  , public Net_SOCK_Netlink
  , public ACE_Event_Handler
@@ -184,8 +175,6 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
-                               //////////
                                UserDataType>
 {
  public:
@@ -193,8 +182,6 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
-                               //////////
                                UserDataType> CONNECTION_BASE_T;
 
   virtual ~Net_StreamAsynchUDPSocketBase_T ();
@@ -211,7 +198,7 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
-  virtual size_t id () const;
+  virtual Net_ConnectionId_t id () const;
   virtual ACE_Notification_Strategy* notification ();
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
@@ -227,7 +214,6 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
@@ -248,8 +234,6 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StreamType,
-                               //////////
                                UserDataType> inherited4;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ())

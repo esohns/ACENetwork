@@ -22,6 +22,8 @@
 
 #include "net_macros.h"
 
+#include "bittorrent_defines.h"
+
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
@@ -30,31 +32,29 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
-BitTorrent_Stream_T<StreamStateType,
-                    ConfigurationType,
-                    StatisticContainerType,
-                    ModuleHandlerConfigurationType,
-                    SessionDataType,
-                    SessionDataContainerType,
-                    ControlMessageType,
-                    DataMessageType,
-                    SessionMessageType>::BitTorrent_Stream_T (const std::string& name_in)
+          typename SessionMessageType,
+          typename ConnectionConfigurationType,
+          typename ConnectionStateType,
+          typename HandlerConfigurationType,
+          typename SessionStateType,
+          typename CBDataType>
+BitTorrent_PeerStream_T<StreamStateType,
+                        ConfigurationType,
+                        StatisticContainerType,
+                        ModuleHandlerConfigurationType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        ControlMessageType,
+                        DataMessageType,
+                        SessionMessageType,
+                        ConnectionConfigurationType,
+                        ConnectionStateType,
+                        HandlerConfigurationType,
+                        SessionStateType,
+                        CBDataType>::BitTorrent_PeerStream_T (const std::string& name_in)
  : inherited (name_in)
- , marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
-             NULL,
-             false)
- //, parser_ (ACE_TEXT_ALWAYS_CHAR ("Parser"),
- //           NULL,
- //           false)
- , runtimeStatistic_ (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
-                      NULL,
-                      false)
-//, handler_ (ACE_TEXT_ALWAYS_CHAR ("Handler"),
-//            NULL,
-//            false)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Stream_T::BitTorrent_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::BitTorrent_PeerStream_T"));
 
 }
 
@@ -66,20 +66,30 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
-BitTorrent_Stream_T<StreamStateType,
-                    ConfigurationType,
-                    StatisticContainerType,
-                    ModuleHandlerConfigurationType,
-                    SessionDataType,
-                    SessionDataContainerType,
-                    ControlMessageType,
-                    DataMessageType,
-                    SessionMessageType>::~BitTorrent_Stream_T ()
+          typename SessionMessageType,
+          typename ConnectionConfigurationType,
+          typename ConnectionStateType,
+          typename HandlerConfigurationType,
+          typename SessionStateType,
+          typename CBDataType>
+BitTorrent_PeerStream_T<StreamStateType,
+                        ConfigurationType,
+                        StatisticContainerType,
+                        ModuleHandlerConfigurationType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        ControlMessageType,
+                        DataMessageType,
+                        SessionMessageType,
+                        ConnectionConfigurationType,
+                        ConnectionStateType,
+                        HandlerConfigurationType,
+                        SessionStateType,
+                        CBDataType>::~BitTorrent_PeerStream_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Stream_T::~BitTorrent_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::~BitTorrent_PeerStream_T"));
 
-  // *NOTE*: this implements an ordered shutdown on destruction...
+  // *NOTE*: this implements an ordered shutdown on destruction
   inherited::shutdown ();
 }
 
@@ -91,24 +101,55 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ConnectionConfigurationType,
+          typename ConnectionStateType,
+          typename HandlerConfigurationType,
+          typename SessionStateType,
+          typename CBDataType>
 bool
-BitTorrent_Stream_T<StreamStateType,
-                    ConfigurationType,
-                    StatisticContainerType,
-                    ModuleHandlerConfigurationType,
-                    SessionDataType,
-                    SessionDataContainerType,
-                    ControlMessageType,
-                    DataMessageType,
-                    SessionMessageType>::load (Stream_ModuleList_t& modules_out)
+BitTorrent_PeerStream_T<StreamStateType,
+                        ConfigurationType,
+                        StatisticContainerType,
+                        ModuleHandlerConfigurationType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        ControlMessageType,
+                        DataMessageType,
+                        SessionMessageType,
+                        ConnectionConfigurationType,
+                        ConnectionStateType,
+                        HandlerConfigurationType,
+                        SessionStateType,
+                        CBDataType>::load (Stream_ModuleList_t& modules_out,
+                                           bool& deleteModules_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Stream_T::load"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::load"));
 
-  modules_out.push_back (&runtimeStatistic_);
-  //modules_out.push_back (&parser_);
-  modules_out.push_back (&marshal_);
-  //modules_out.push_back (&handler_);
+  // initialize return value(s)
+  deleteModules_out = true;
+
+  Stream_Module_t* module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  MODULE_HANDLER_T (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
+                                    NULL,
+                                    false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  MODULE_STATISTIC_T (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                                      NULL,
+                                      false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  MODULE_MARSHAL_T (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                                    NULL,
+                                    false),
+                  false);
+  modules_out.push_back (module_p);
 
   return true;
 }
@@ -121,19 +162,31 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ConnectionConfigurationType,
+          typename ConnectionStateType,
+          typename HandlerConfigurationType,
+          typename SessionStateType,
+          typename CBDataType>
 bool
-BitTorrent_Stream_T<StreamStateType,
-                    ConfigurationType,
-                    StatisticContainerType,
-                    ModuleHandlerConfigurationType,
-                    SessionDataType,
-                    SessionDataContainerType,
-                    ControlMessageType,
-                    DataMessageType,
-                    SessionMessageType>::initialize (const ConfigurationType& configuration_in)
+BitTorrent_PeerStream_T<StreamStateType,
+                        ConfigurationType,
+                        StatisticContainerType,
+                        ModuleHandlerConfigurationType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        ControlMessageType,
+                        DataMessageType,
+                        SessionMessageType,
+                        ConnectionConfigurationType,
+                        ConnectionStateType,
+                        HandlerConfigurationType,
+                        SessionStateType,
+                        CBDataType>::initialize (const ConfigurationType& configuration_in,
+                                                 bool setupPipeline_in,
+                                                 bool resetSessionData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Stream_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
@@ -141,86 +194,56 @@ BitTorrent_Stream_T<StreamStateType,
   ACE_ASSERT (configuration_in.moduleConfiguration);
   ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
 
+//  int result = -1;
+  SessionDataType* session_data_p = NULL;
+  typename inherited::MODULE_T* module_p = NULL;
+  PARSER_T* parser_impl_p = NULL;
+
   // allocate a new session state, reset stream
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              false,
+                              resetSessionData_in))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_Base_T::initialize(), aborting\n")));
-    return false;
+                ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
+                ACE_TEXT (inherited::name ().c_str ())));
+    goto error;
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
+  session_data_p =
+    &const_cast<SessionDataType&> (inherited::sessionData_->get ());
 
-  // things to be done here:
-  // - create modules (done for the ones "owned" by the stream itself)
-  // - initialize modules
-  // - push them onto the stream (tail-first) !
-  SessionDataType& session_data_r =
-      const_cast<SessionDataType&> (inherited::sessionData_->get ());
-  session_data_r.sessionID = configuration_in.sessionID;
+  session_data_p->sessionID = configuration_in.sessionID;
 
-  int result = -1;
-  typename inherited::MODULE_T* module_p = NULL;
-  //if (configuration_in.notificationStrategy)
-  //{
-  //  module_p = inherited::head ();
-  //  if (!module_p)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("no head module found, aborting\n")));
-  //    return false;
-  //  } // end IF
-  //  typename inherited::TASK_T* task_p = module_p->reader ();
-  //  if (!task_p)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("no head module reader task found, aborting\n")));
-  //    return false;
-  //  } // end IF
-  //  typename inherited::QUEUE_T* queue_p = task_p->msg_queue ();
-  //  if (!queue_p)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("no head module reader task queue found, aborting\n")));
-  //    return false;
-  //  } // end IF
-  //  queue_p->notification_strategy (configuration_in.notificationStrategy);
-  //} // end IF
+  // ---------------------------------------------------------------------------
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.moduleConfiguration);
 
-//  ACE_ASSERT (configuration_in.moduleConfiguration);
-//  configuration_in.moduleConfiguration->streamState = &inherited::state_;
+  //  configuration_in.moduleConfiguration.streamState = &state_;
 
   // ---------------------------------------------------------------------------
 
-  //   // ******************* Handler ************************
-  //   IRC_Module_Handler* handler_impl = NULL;
-  //   handler_impl = dynamic_cast<IRC_Module_Handler*> (handler_.writer ());
-  //   if (!handler_impl)
-  //   {
-  //     ACE_DEBUG ((LM_ERROR,
-  //                 ACE_TEXT ("dynamic_cast<IRC_Module_Handler> failed, aborting\n")));
-  //     return false;
-  //   } // end IF
-  //   if (!handler_impl->initialize (configuration_in.messageAllocator,
-  //                                  (configuration_in.clientPingInterval ? false // servers shouldn't receive "pings" in the first place
-  //                                                                       : NET_DEF_PING_PONG), // auto-answer "ping" as a client ?...
-  //                                  (configuration_in.clientPingInterval == 0))) // clients print ('.') dots for received "pings"...
-  //   {
-  //     ACE_DEBUG ((LM_ERROR,
-  //                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //                 handler_.name ()));
-  //     return false;
-  //   } // end IF
-  //
-  //   // enqueue the module...
-  //   if (inherited::push (&handler_))
-  //   {
-  //     ACE_DEBUG ((LM_ERROR,
-  //                 ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-  //                 handler_.name ()));
-  //     return false;
-  //   } // end IF
+//  // ******************* Handler ************************
+//  IRC_Module_Handler* handler_impl = NULL;
+//  handler_impl = dynamic_cast<IRC_Module_Handler*> (handler_.writer ());
+//  if (!handler_impl)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("dynamic_cast<IRC_Module_Handler> failed, aborting\n")));
+//    return false;
+//  } // end IF
+//  if (!handler_impl->initialize (configuration_in.messageAllocator,
+//                                 (configuration_in.clientPingInterval ? false // servers shouldn't receive "pings" in the first place
+//                                  : NET_DEF_PING_PONG), // auto-answer "ping" as a client ?...
+//                                 (configuration_in.clientPingInterval == 0))) // clients print ('.') dots for received "pings"...
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+//                handler_.name ()));
+//    return false;
+//  } // end IF
 
-  // ******************* Runtime Statistics ************************
+  // ******************* Statistic Report ************************
   //STATISTIC_WRITER_T* runtimeStatistic_impl_p =
   //  dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
   //if (!runtimeStatistic_impl_p)
@@ -234,16 +257,6 @@ BitTorrent_Stream_T<StreamStateType,
   //{
   //  ACE_DEBUG ((LM_ERROR,
   //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              runtimeStatistic_.name ()));
-  //  return false;
-  //} // end IF
-
-  //// enqueue the module...
-  //result = inherited::push (&runtimeStatistic_);
-  //if (result == -1)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
   //              runtimeStatistic_.name ()));
   //  return false;
   //} // end IF
@@ -269,62 +282,51 @@ BitTorrent_Stream_T<StreamStateType,
   //  return false;
   //} // end IF
 
-  //// enqueue the module...
-  //result = inherited::push (&parser_);
-  //if (result == -1)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-  //              parser_.name ()));
-  //  return false;
-  //} // end IF
-
   // ******************* Marshal ************************
-  PARSER_T* parser_impl_p = dynamic_cast<PARSER_T*> (marshal_.writer ());
+  module_p =
+      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
+  ACE_ASSERT (module_p);
+  parser_impl_p = dynamic_cast<PARSER_T*> (module_p->writer ());
   if (!parser_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<BitTorrent_Module_Parser_T*> failed, aborting\n")));
-    return false;
+    goto error;
   } // end IF
-  if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                marshal_.name ()));
-    return false;
-  } // end IF
+//  if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+//                marshal_.name ()));
+//    return false;
+//  } // end IF
   if (!parser_impl_p->initialize (inherited::state_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                marshal_.name ()));
-    return false;
+                ACE_TEXT ("%s: failed to initialize writer task, aborting\n"),
+                module_p->name ()));
+    goto error;
   } // end IF
 
-  // enqueue the module...
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
-  marshal_.arg (inherited::sessionData_);
-  //result = inherited::push (&marshal_);
-  //if (result == -1)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-  //              marshal_.name ()));
-  //  return false;
-  //} // end IF
+  module_p->arg (inherited::sessionData_);
 
-  // set (session) message allocator
-  // *TODO*: clean this up ! --> sanity check
-  ACE_ASSERT (configuration_in.messageAllocator);
-  //inherited::allocator_ = configuration_in.messageAllocator;
+  if (setupPipeline_in)
+    if (!inherited::setup (NULL))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to set up pipeline, aborting\n")));
+      goto error;
+    } // end IF
 
   inherited::isInitialized_ = true;
-//   inherited::dump_state();
 
   return true;
+
+error:
+  return false;
 }
 
 template <typename StreamStateType,
@@ -335,32 +337,88 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ConnectionConfigurationType,
+          typename ConnectionStateType,
+          typename HandlerConfigurationType,
+          typename SessionStateType,
+          typename CBDataType>
 bool
-BitTorrent_Stream_T<StreamStateType,
-                    ConfigurationType,
-                    StatisticContainerType,
-                    ModuleHandlerConfigurationType,
-                    SessionDataType,
-                    SessionDataContainerType,
-                    ControlMessageType,
-                    DataMessageType,
-                    SessionMessageType>::collect (StatisticContainerType& data_out)
+BitTorrent_PeerStream_T<StreamStateType,
+                        ConfigurationType,
+                        StatisticContainerType,
+                        ModuleHandlerConfigurationType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        ControlMessageType,
+                        DataMessageType,
+                        SessionMessageType,
+                        ConnectionConfigurationType,
+                        ConnectionStateType,
+                        HandlerConfigurationType,
+                        SessionStateType,
+                        CBDataType>::collect (StatisticContainerType& data_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Stream_T::collect"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::collect"));
 
-  STATISTIC_WRITER_T* runtimeStatistic_impl_p = NULL;
-  runtimeStatistic_impl_p =
-    dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
-  if (!runtimeStatistic_impl_p)
+  typename inherited::MODULE_T* module_p = NULL;
+  module_p =
+      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
+  if (!module_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: module \"%s\" not found, aborting\n"),
+                inherited::name (),
+                ACE_TEXT ("StatisticReport")));
+    return false;
+  } // end IF
+  STATISTIC_WRITER_T* statisticReport_impl_p = NULL;
+  statisticReport_impl_p =
+      dynamic_cast<STATISTIC_WRITER_T*> (module_p->writer ());
+  if (!statisticReport_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
     return false;
   } // end IF
 
-  // delegate to this module
-  return runtimeStatistic_impl_p->collect (data_out);
+  return statisticReport_impl_p->collect (data_out);
+}
+
+//////////////////////////////////////////
+
+template <typename StreamStateType,
+          typename ConfigurationType,
+          typename StatisticContainerType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ConnectionConfigurationType,
+          typename ConnectionStateType,
+          typename HandlerConfigurationType,
+          typename SessionStateType,
+          typename CBDataType>
+BitTorrent_TrackerStream_T<StreamStateType,
+                           ConfigurationType,
+                           StatisticContainerType,
+                           ModuleHandlerConfigurationType,
+                           SessionDataType,
+                           SessionDataContainerType,
+                           ControlMessageType,
+                           DataMessageType,
+                           SessionMessageType,
+                           ConnectionConfigurationType,
+                           ConnectionStateType,
+                           HandlerConfigurationType,
+                           SessionStateType,
+                           CBDataType>::BitTorrent_TrackerStream_T (const std::string& name_in)
+ : inherited (name_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::BitTorrent_TrackerStream_T"));
+
 }
 
 template <typename StreamStateType,
@@ -371,37 +429,254 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
-void
-BitTorrent_Stream_T<StreamStateType,
-                    ConfigurationType,
-                    StatisticContainerType,
-                    ModuleHandlerConfigurationType,
-                    SessionDataType,
-                    SessionDataContainerType,
-                    ControlMessageType,
-                    DataMessageType,
-                    SessionMessageType>::report () const
+          typename SessionMessageType,
+          typename ConnectionConfigurationType,
+          typename ConnectionStateType,
+          typename HandlerConfigurationType,
+          typename SessionStateType,
+          typename CBDataType>
+BitTorrent_TrackerStream_T<StreamStateType,
+                           ConfigurationType,
+                           StatisticContainerType,
+                           ModuleHandlerConfigurationType,
+                           SessionDataType,
+                           SessionDataContainerType,
+                           ControlMessageType,
+                           DataMessageType,
+                           SessionMessageType,
+                           ConnectionConfigurationType,
+                           ConnectionStateType,
+                           HandlerConfigurationType,
+                           SessionStateType,
+                           CBDataType>::~BitTorrent_TrackerStream_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Stream_T::report"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::~BitTorrent_TrackerStream_T"));
 
-//   RPG_Net_Module_RuntimeStatistic* runtimeStatistic_impl = NULL;
-//   runtimeStatistic_impl = dynamic_cast<RPG_Net_Module_RuntimeStatistic*> (//                                            myRuntimeStatistic.writer());
-//   if (!runtimeStatistic_impl)
-//   {
-//     ACE_DEBUG((LM_ERROR,
-//                ACE_TEXT("dynamic_cast<RPG_Net_Module_RuntimeStatistic) failed> (aborting\n")));
-//
-//     return;
-//   } // end IF
-//
-//   // delegate to this module...
-//   return (runtimeStatistic_impl->report());
+  // *NOTE*: this implements an ordered shutdown on destruction
+  inherited::shutdown ();
+}
 
-  // just a dummy
-  ACE_ASSERT (false);
+template <typename StreamStateType,
+          typename ConfigurationType,
+          typename StatisticContainerType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ConnectionConfigurationType,
+          typename ConnectionStateType,
+          typename HandlerConfigurationType,
+          typename SessionStateType,
+          typename CBDataType>
+bool
+BitTorrent_TrackerStream_T<StreamStateType,
+                           ConfigurationType,
+                           StatisticContainerType,
+                           ModuleHandlerConfigurationType,
+                           SessionDataType,
+                           SessionDataContainerType,
+                           ControlMessageType,
+                           DataMessageType,
+                           SessionMessageType,
+                           ConnectionConfigurationType,
+                           ConnectionStateType,
+                           HandlerConfigurationType,
+                           SessionStateType,
+                           CBDataType>::load (Stream_ModuleList_t& modules_out,
+                                              bool& deleteModules_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::load"));
 
-  ACE_NOTREACHED (return;)
+  // initialize return value(s)
+  deleteModules_out = true;
+
+  Stream_Module_t* module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  MODULE_HANDLER_T (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
+                                    NULL,
+                                    false),
+                  false);
+  modules_out.push_back (module_p);
+
+  return inherited::load (modules_out,
+                          deleteModules_out);
+}
+
+template <typename StreamStateType,
+          typename ConfigurationType,
+          typename StatisticContainerType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ConnectionConfigurationType,
+          typename ConnectionStateType,
+          typename HandlerConfigurationType,
+          typename SessionStateType,
+          typename CBDataType>
+bool
+BitTorrent_TrackerStream_T<StreamStateType,
+                           ConfigurationType,
+                           StatisticContainerType,
+                           ModuleHandlerConfigurationType,
+                           SessionDataType,
+                           SessionDataContainerType,
+                           ControlMessageType,
+                           DataMessageType,
+                           SessionMessageType,
+                           ConnectionConfigurationType,
+                           ConnectionStateType,
+                           HandlerConfigurationType,
+                           SessionStateType,
+                           CBDataType>::initialize (const ConfigurationType& configuration_in,
+                                                    bool setupPipeline_in,
+                                                    bool resetSessionData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::initialize"));
+
+  // sanity check(s)
+  ACE_ASSERT (!inherited::isInitialized_);
+  ACE_ASSERT (!inherited::isRunning ());
+  ACE_ASSERT (configuration_in.moduleConfiguration);
+  ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
+
+//  int result = -1;
+//  SessionDataType* session_data_p = NULL;
+//  typename inherited::MODULE_T* module_p = NULL;
+//  PARSER_T* parser_impl_p = NULL;
+
+  // allocate a new session state, reset stream
+  if (!inherited::initialize (configuration_in,
+                              false,
+                              resetSessionData_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
+                ACE_TEXT (inherited::name ().c_str ())));
+    goto error;
+  } // end IF
+  ACE_ASSERT (inherited::sessionData_);
+//  session_data_p =
+//    &const_cast<SessionDataType&> (inherited::sessionData_->get ());
+
+//  session_data_p->sessionID = configuration_in.sessionID;
+
+//  // ---------------------------------------------------------------------------
+//  // sanity check(s)
+//  ACE_ASSERT (configuration_in.moduleConfiguration);
+
+  //  configuration_in.moduleConfiguration.streamState = &state_;
+
+  // ---------------------------------------------------------------------------
+
+//  // ******************* Handler ************************
+//  IRC_Module_Handler* handler_impl = NULL;
+//  handler_impl = dynamic_cast<IRC_Module_Handler*> (handler_.writer ());
+//  if (!handler_impl)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("dynamic_cast<IRC_Module_Handler> failed, aborting\n")));
+//    return false;
+//  } // end IF
+//  if (!handler_impl->initialize (configuration_in.messageAllocator,
+//                                 (configuration_in.clientPingInterval ? false // servers shouldn't receive "pings" in the first place
+//                                  : NET_DEF_PING_PONG), // auto-answer "ping" as a client ?...
+//                                 (configuration_in.clientPingInterval == 0))) // clients print ('.') dots for received "pings"...
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+//                handler_.name ()));
+//    return false;
+//  } // end IF
+
+  // ******************* Statistic Report ************************
+  //STATISTIC_WRITER_T* runtimeStatistic_impl_p =
+  //  dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
+  //if (!runtimeStatistic_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
+  //  return false;
+  //} // end IF
+  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
+  //                                          configuration_in.messageAllocator))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              runtimeStatistic_.name ()));
+  //  return false;
+  //} // end IF
+
+  //// ******************* Parser ************************
+  //PARSER_T* parser_impl_p = NULL;
+  //parser_impl_p =
+  //  dynamic_cast<PARSER_T*> (parser_.writer ());
+  //if (!parser_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<IRC_Module_Parser_T*> failed, aborting\n")));
+  //  return false;
+  //} // end IF
+  //if (!parser_impl_p->initialize (configuration_in.messageAllocator,                            // message allocator
+  //                                configuration_in.moduleHandlerConfiguration_2.crunchMessages, // "crunch" messages ?
+  //                                configuration_in.moduleHandlerConfiguration_2.traceScanning,  // debug scanner ?
+  //                                configuration_in.moduleHandlerConfiguration_2.traceParsing))  // debug parser ?
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+  //              parser_.name ()));
+  //  return false;
+  //} // end IF
+
+//  // ******************* Marshal ************************
+//  module_p =
+//      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
+//  ACE_ASSERT (module_p);
+//  parser_impl_p = dynamic_cast<PARSER_T*> (module_p->writer ());
+//  if (!parser_impl_p)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("dynamic_cast<BitTorrent_Module_Parser_T*> failed, aborting\n")));
+//    goto error;
+//  } // end IF
+////  if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+////  {
+////    ACE_DEBUG ((LM_ERROR,
+////                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
+////                marshal_.name ()));
+////    return false;
+////  } // end IF
+//  if (!parser_impl_p->initialize (inherited::state_))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("%s: failed to initialize writer task, aborting\n"),
+//                module_p->name ()));
+//    goto error;
+//  } // end IF
+
+//  // *NOTE*: push()ing the module will open() it
+//  //         --> set the argument that is passed along (head module expects a
+//  //             handle to the session data)
+//  module_p->arg (inherited::sessionData_);
+
+//  if (setupPipeline_in)
+//    if (!inherited::setup (NULL))
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to set up pipeline, aborting\n")));
+//      goto error;
+//    } // end IF
+
+  inherited::isInitialized_ = true;
+
+  return true;
+
+error:
+  return false;
 }
 
 //template <typename StreamStateType,
@@ -412,62 +687,50 @@ BitTorrent_Stream_T<StreamStateType,
 //          typename SessionDataContainerType,
 //          typename ControlMessageType,
 //          typename DataMessageType,
-//          typename SessionMessageType>
-//void
-//BitTorrent_Stream_T<StreamStateType,
-//                    ConfigurationType,
-//                    StatisticContainerType,
-//                    ModuleHandlerConfigurationType,
-//                    SessionDataType,
-//                    SessionDataContainerType,
-//                    ControlMessageType,
-//                    DataMessageType,
-//                    SessionMessageType>::ping ()
+//          typename SessionMessageType,
+//          typename ConnectionConfigurationType,
+//          typename ConnectionStateType,
+//          typename HandlerConfigurationType,
+//          typename SessionStateType,
+//          typename CBDataType>
+//bool
+//BitTorrent_TrackerStream_T<StreamStateType,
+//                           ConfigurationType,
+//                           StatisticContainerType,
+//                           ModuleHandlerConfigurationType,
+//                           SessionDataType,
+//                           SessionDataContainerType,
+//                           ControlMessageType,
+//                           DataMessageType,
+//                           SessionMessageType,
+//                           ConnectionConfigurationType,
+//                           ConnectionStateType,
+//                           HandlerConfigurationType,
+//                           SessionStateType,
+//                           CBDataType>::collect (StatisticContainerType& data_out)
 //{
-//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Stream_T::ping"));
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::collect"));
 
-//  // delegate to the head module, skip over ACE_Stream_Head...
-//  typename inherited::MODULE_T* module_p = inherited::head ();
+//  typename inherited::MODULE_T* module_p = NULL;
+//  module_p =
+//      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
 //  if (!module_p)
 //  {
 //    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("no head module found, returning\n")));
-//    return;
+//                ACE_TEXT ("%s: module \"%s\" not found, aborting\n"),
+//                inherited::name (),
+//                ACE_TEXT ("StatisticReport")));
+//    return false;
 //  } // end IF
-//  module_p = module_p->next ();
-//  if (!module_p)
+//  STATISTIC_WRITER_T* statisticReport_impl_p = NULL;
+//  statisticReport_impl_p =
+//      dynamic_cast<STATISTIC_WRITER_T*> (module_p->writer ());
+//  if (!statisticReport_impl_p)
 //  {
 //    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("no head module found, returning\n")));
-//    return;
+//                ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
+//    return false;
 //  } // end IF
 
-//  // sanity check: head == tail ? --> no modules have been push()ed (yet) !
-//  if (module_p == inherited::tail ())
-//  {
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("no modules have been enqueued yet --> nothing to do !, returning\n")));
-//    return;
-//  } // end IF
-
-//  typename inherited::ISTREAM_CONTROL_T* control_impl = NULL;
-//  control_impl =
-//    dynamic_cast<typename inherited::ISTREAM_CONTROL_T*> (module_p->reader ());
-//  if (!control_impl)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("%s: dynamic_cast<Stream_IStreamControl> failed, returning\n"),
-//                module_p->name ()));
-//    return;
-//  } // end IF
-
-//  // *TODO*
-//  try {
-////    control_impl->stop ();
-//  } catch (...) {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("caught exception in Stream_IStreamControl::stop (module: \"%s\"), returning\n"),
-//                module_p->name ()));
-//    return;
-//  }
+//  return statisticReport_impl_p->collect (data_out);
 //}

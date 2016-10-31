@@ -82,7 +82,7 @@ idle_update_log_display_cb (gpointer userData_in)
 
   gchar* converted_text = NULL;
   { // synch access
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->stackLock);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
 
     // sanity check
     if (data_p->logStack.empty ())
@@ -152,7 +152,7 @@ idle_update_info_display_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (data_p->stackLock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
 
   if (data_p->eventStack.empty ())
     return G_SOURCE_CONTINUE;
@@ -1423,8 +1423,8 @@ button_report_clicked_cb (GtkWidget* widget_in,
 
 // -----------------------------------------------------------------------------
 
-G_MODULE_EXPORT gint
-spinbutton_connections_value_changed_client_cb (GtkWidget* widget_in,
+G_MODULE_EXPORT void
+spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
                                                 gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_connections_value_changed_client_cb"));
@@ -1433,6 +1433,7 @@ spinbutton_connections_value_changed_client_cb (GtkWidget* widget_in,
     static_cast<Test_U_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
+  ACE_ASSERT (spinButton_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTKBuildersIterator_t iterator =
@@ -1440,11 +1441,7 @@ spinbutton_connections_value_changed_client_cb (GtkWidget* widget_in,
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  GtkSpinButton* spin_button_p = GTK_SPIN_BUTTON (widget_in);
-  ACE_ASSERT (spin_button_p);
-
-  gint value =
-    gtk_spin_button_get_value_as_int (spin_button_p);
+  gint value = gtk_spin_button_get_value_as_int (spinButton_in);
   if (value == 0)
     data_p->progressEventSourceID = 0;
 
@@ -1475,7 +1472,7 @@ spinbutton_connections_value_changed_client_cb (GtkWidget* widget_in,
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
 
   {
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, FALSE);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
 
     data_p->progressEventSourceID =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -1518,11 +1515,9 @@ continue_:
     ACE_ASSERT (spin_button_p);
     gtk_spin_button_set_value (spin_button_p, 0.0);
   } // end IF
-
-  return FALSE;
 } // spinbutton_connections_value_changed_client_cb
-G_MODULE_EXPORT gint
-spinbutton_connections_value_changed_server_cb (GtkWidget* widget_in,
+G_MODULE_EXPORT void
+spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
                                                 gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_connections_value_changed_server_cb"));
@@ -1531,6 +1526,7 @@ spinbutton_connections_value_changed_server_cb (GtkWidget* widget_in,
     static_cast<Test_U_Server_GTK_CBData*> (userData_in);
 
   // sanity check(s)
+  ACE_ASSERT (spinButton_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTKBuildersIterator_t iterator =
@@ -1538,11 +1534,7 @@ spinbutton_connections_value_changed_server_cb (GtkWidget* widget_in,
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  GtkSpinButton* spin_button_p = GTK_SPIN_BUTTON (widget_in);
-  ACE_ASSERT (spin_button_p);
-
-  gint value =
-    gtk_spin_button_get_value_as_int (spin_button_p);
+  gint value = gtk_spin_button_get_value_as_int (spinButton_in);
   if (value == 0)
     data_p->progressEventSourceID = 0;
 
@@ -1560,7 +1552,7 @@ spinbutton_connections_value_changed_server_cb (GtkWidget* widget_in,
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
 
   {
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, FALSE);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
 
     data_p->progressEventSourceID =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -1603,51 +1595,41 @@ continue_:
     ACE_ASSERT (spin_button_p);
     gtk_spin_button_set_value (spin_button_p, 0.0);
   } // end IF
-
-  return FALSE;
 } // spinbutton_connections_value_changed_server_cb
 
-G_MODULE_EXPORT gint
-spinbutton_ping_interval_value_changed_client_cb (GtkWidget* widget_in,
+G_MODULE_EXPORT void
+spinbutton_ping_interval_value_changed_client_cb (GtkSpinButton* spinButton_in,
                                                   gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_ping_interval_value_changed_client_cb"));
 
-  GtkSpinButton* spin_button_p = GTK_SPIN_BUTTON (widget_in);
   Test_U_Client_GTK_CBData* data_p =
     static_cast<Test_U_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
-  ACE_ASSERT (spin_button_p);
+  ACE_ASSERT (spinButton_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
-  gint value =
-      gtk_spin_button_get_value_as_int (spin_button_p);
+  gint value = gtk_spin_button_get_value_as_int (spinButton_in);
   data_p->configuration->protocolConfiguration.pingInterval.set_msec (value);
-
-  return FALSE;
 } // spinbutton_ping_interval_value_changed_client_cb
-G_MODULE_EXPORT gint
-spinbutton_ping_interval_value_changed_server_cb (GtkWidget* widget_in,
+G_MODULE_EXPORT void
+spinbutton_ping_interval_value_changed_server_cb (GtkSpinButton* spinButton_in,
                                                   gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_ping_interval_value_changed_server_cb"));
 
-  GtkSpinButton* spin_button_p = GTK_SPIN_BUTTON (widget_in);
   Test_U_Server_GTK_CBData* data_p =
     static_cast<Test_U_Server_GTK_CBData*> (userData_in);
 
   // sanity check(s)
-  ACE_ASSERT (spin_button_p);
+  ACE_ASSERT (spinButton_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
-  gint value =
-      gtk_spin_button_get_value_as_int (spin_button_p);
+  gint value = gtk_spin_button_get_value_as_int (spinButton_in);
   data_p->configuration->protocolConfiguration.pingInterval.set_msec (value);
-
-  return FALSE;
 } // spinbutton_ping_interval_value_changed_server_cb
 
 G_MODULE_EXPORT gint

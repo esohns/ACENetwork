@@ -29,6 +29,7 @@
 #include "bittorrent_message.h"
 #include "bittorrent_parser.h"
 #include "bittorrent_scanner.h"
+#include "bittorrent_tools.h"
 
 template <typename SessionMessageType>
 BitTorrent_ParserDriver<SessionMessageType>::BitTorrent_ParserDriver (bool traceScanning_in,
@@ -392,10 +393,10 @@ BitTorrent_ParserDriver<SessionMessageType>::parse (ACE_Message_Block* data_in)
     try {
       ACE_DEBUG ((LM_INFO,
                   ACE_TEXT ("%s"),
-                  ACE_TEXT (BitTorrent_Tools::dump (*record_).c_str ())));
+                  ACE_TEXT (BitTorrent_Tools::Record2String (*record_).c_str ())));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in BitTorrent_Tools::dump(), continuing\n")));
+                  ACE_TEXT ("caught exception in BitTorrent_Tools::Record2String(), continuing\n")));
     }
   } // end IF
 

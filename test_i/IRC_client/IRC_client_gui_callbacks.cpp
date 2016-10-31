@@ -165,7 +165,7 @@ connection_setup_function (void* arg_in)
   unsigned short current_port = 0;
   int result_3 = -1;
   bool done = false;
-  IRC_Client_ISocketConnection_t* socket_connection_p = NULL;
+  IRC_Client_IStreamConnection_t* istream_connection_p = NULL;
 
   // step2a: set up connector
   IRC_Client_IConnection_Manager_t* connection_manager_p =
@@ -318,12 +318,12 @@ connection_failed:
     connection_2 = connection_manager_p->get (handle);
   if (!connection_2)
     goto connection_failed;
-  socket_connection_p =
-      dynamic_cast<IRC_Client_ISocketConnection_t*> (connection_2);
-  if (!socket_connection_p)
+  istream_connection_p =
+      dynamic_cast<IRC_Client_IStreamConnection_t*> (connection_2);
+  if (!istream_connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<IRC_Client_ISocketConnection_t>(%@): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to dynamic_cast<IRC_Client_IStreamConnection_t>(%@): \"%m\", aborting\n"),
                 connection_2));
 
     // clean up
@@ -332,7 +332,7 @@ connection_failed:
 
     goto remove_page;
   } // end IF
-  stream_p = &socket_connection_p->stream ();
+  stream_p = &istream_connection_p->stream ();
   for (Stream_Iterator_t iterator_2 (*stream_p);
        iterator_2.next (current_p) != 0;
        iterator_2.advance ())

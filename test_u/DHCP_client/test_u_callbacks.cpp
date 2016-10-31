@@ -1135,16 +1135,16 @@ allocate:
 
     return;
   } // end IF
-  Test_U_IInboundSocketConnection_t* isocket_connection_2 =
-    dynamic_cast<Test_U_IInboundSocketConnection_t*> (iconnection_p);
-  ACE_ASSERT (isocket_connection_2);
+  Test_U_IInboundStreamConnection_t* istream_connection_2 =
+    dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_2);
   Test_U_ConnectionState& state_r =
-      const_cast<Test_U_ConnectionState&> (isocket_connection_2->state ());
+      const_cast<Test_U_ConnectionState&> (istream_connection_2->state ());
   state_r.timeStamp = COMMON_TIME_NOW;
   state_r.xid = DHCP_record.xid;
 
   Test_U_InboundConnectionStream& stream_r =
-      const_cast<Test_U_InboundConnectionStream&> (isocket_connection_2->stream ());
+      const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const Test_U_StreamSessionData_t* session_data_container_p = stream_r.get ();
   ACE_ASSERT (session_data_container_p);
   Test_U_StreamSessionData& session_data_r =
@@ -1159,12 +1159,12 @@ allocate:
   // sanity check(s)
   ACE_ASSERT (session_data_r.broadcastConnection);
 
-  Test_U_ISocketConnection_t* isocket_connection_p =
-    dynamic_cast<Test_U_ISocketConnection_t*> (session_data_r.broadcastConnection);
-  ACE_ASSERT (isocket_connection_p);
+  Test_U_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<Test_U_IStreamConnection_t*> (session_data_r.broadcastConnection);
+  ACE_ASSERT (istream_connection_p);
 
   ACE_Message_Block* message_block_p = message_p;
-  isocket_connection_p->send (message_block_p);
+  istream_connection_p->send (message_block_p);
 
   return;
 
@@ -1199,14 +1199,14 @@ action_inform_activate_cb (GtkAction* action_in,
   Test_U_IConnection_t* iconnection_p =
     iconnection_manager_p->get (data_p->configuration->handle);
   ACE_ASSERT (iconnection_p);
-  Test_U_IInboundSocketConnection_t* isocket_connection_2 =
-    dynamic_cast<Test_U_IInboundSocketConnection_t*> (iconnection_p);
-  ACE_ASSERT (isocket_connection_2);
+  Test_U_IInboundStreamConnection_t* istream_connection_2 =
+    dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_2);
   Test_U_ConnectionState& state_r =
-    const_cast<Test_U_ConnectionState&> (isocket_connection_2->state ());
+    const_cast<Test_U_ConnectionState&> (istream_connection_2->state ());
 
   Test_U_InboundConnectionStream& stream_r =
-    const_cast<Test_U_InboundConnectionStream&> (isocket_connection_2->stream ());
+    const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const Test_U_StreamSessionData_t* session_data_container_p = stream_r.get ();
   ACE_ASSERT (session_data_container_p);
   Test_U_StreamSessionData& session_data_r =
@@ -1282,12 +1282,12 @@ allocate:
   message_p->initialize (DHCP_record,
                          NULL);
 
-  Test_U_ISocketConnection_t* isocket_connection_p =
-    dynamic_cast<Test_U_ISocketConnection_t*> (iconnection_p);
-  ACE_ASSERT (isocket_connection_p);
+  Test_U_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<Test_U_IStreamConnection_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_p);
 
   ACE_Message_Block* message_block_p = message_p;
-  isocket_connection_p->send (message_block_p);
+  istream_connection_p->send (message_block_p);
 
   return;
 
@@ -1322,14 +1322,14 @@ action_request_activate_cb (GtkAction* action_in,
   Test_U_IConnection_t* iconnection_p =
     iconnection_manager_p->get (data_p->configuration->handle);
   ACE_ASSERT (iconnection_p);
-  Test_U_IInboundSocketConnection_t* isocket_connection_2 =
-    dynamic_cast<Test_U_IInboundSocketConnection_t*> (iconnection_p);
-  ACE_ASSERT (isocket_connection_2);
+  Test_U_IInboundStreamConnection_t* istream_connection_2 =
+    dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_2);
   Test_U_ConnectionState& state_r =
-    const_cast<Test_U_ConnectionState&> (isocket_connection_2->state ());
+    const_cast<Test_U_ConnectionState&> (istream_connection_2->state ());
 
   Test_U_InboundConnectionStream& stream_r =
-    const_cast<Test_U_InboundConnectionStream&> (isocket_connection_2->stream ());
+    const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const Test_U_StreamSessionData_t* session_data_container_p = stream_r.get ();
   ACE_ASSERT (session_data_container_p);
   Test_U_StreamSessionData& session_data_r =
@@ -1389,12 +1389,12 @@ allocate:
   message_p->initialize (DHCP_record,
                          NULL);
 
-  Test_U_ISocketConnection_t* isocket_connection_p =
-    dynamic_cast<Test_U_ISocketConnection_t*> (session_data_r.broadcastConnection);
-  ACE_ASSERT (isocket_connection_p);
+  Test_U_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<Test_U_IStreamConnection_t*> (session_data_r.broadcastConnection);
+  ACE_ASSERT (istream_connection_p);
 
   ACE_Message_Block* message_block_p = message_p;
-  isocket_connection_p->send (message_block_p);
+  istream_connection_p->send (message_block_p);
 
   return;
 
@@ -1429,14 +1429,14 @@ action_release_activate_cb (GtkAction* action_in,
   Test_U_IConnection_t* iconnection_p =
     iconnection_manager_p->get (data_p->configuration->handle);
   ACE_ASSERT (iconnection_p);
-  Test_U_IInboundSocketConnection_t* isocket_connection_2 =
-    dynamic_cast<Test_U_IInboundSocketConnection_t*> (iconnection_p);
-  ACE_ASSERT (isocket_connection_2);
+  Test_U_IInboundStreamConnection_t* istream_connection_2 =
+    dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_2);
   Test_U_ConnectionState& state_r =
-    const_cast<Test_U_ConnectionState&> (isocket_connection_2->state ());
+    const_cast<Test_U_ConnectionState&> (istream_connection_2->state ());
 
   Test_U_InboundConnectionStream& stream_r =
-    const_cast<Test_U_InboundConnectionStream&> (isocket_connection_2->stream ());
+    const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const Test_U_StreamSessionData_t* session_data_container_p = stream_r.get ();
   ACE_ASSERT (session_data_container_p);
   Test_U_StreamSessionData& session_data_r =
@@ -1517,12 +1517,12 @@ allocate:
   message_p->initialize (DHCP_record,
                          NULL);
 
-  Test_U_ISocketConnection_t* isocket_connection_p =
-    dynamic_cast<Test_U_ISocketConnection_t*> (iconnection_p);
-  ACE_ASSERT (isocket_connection_p);
+  Test_U_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<Test_U_IStreamConnection_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_p);
 
   ACE_Message_Block* message_block_p = message_p;
-  isocket_connection_p->send (message_block_p);
+  istream_connection_p->send (message_block_p);
 
   return;
 

@@ -28,23 +28,21 @@
 
 #include "stream_common.h"
 
-#include "bittorrent_client_common.h"
 #include "bittorrent_client_network.h"
 
 class BitTorrent_Client_Tools
 {
  public:
-  static void parseConfigurationFile (const std::string&,
-                                      BitTorrent_LoginOptions&,
-                                      BitTorrent_Client_Connections_t&);
+//  static void parseConfigurationFile (const std::string&,
+//                                      BitTorrent_LoginOptions&,
+//                                      BitTorrent_Client_Connections_t&);
 
   // *NOTE*: iff (delete module == true), fire-and-forget the last argument !
   static ACE_HANDLE connect (BitTorrent_Client_IConnector_t&, // connector handle
-                             const ACE_INET_Addr&,     // peer address
-                             const BitTorrent_LoginOptions&,  // login options
-                             bool,                     // clone module ?
-                             bool,                     // delete module ?
-                             Stream_Module_t*&);       // (final) module handle
+                             const ACE_INET_Addr&,            // peer address
+                             bool,                            // clone module ?
+                             bool,                            // delete module ?
+                             Stream_Module_t*&);              // (final) module handle
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_Tools ())
