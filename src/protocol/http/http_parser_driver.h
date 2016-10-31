@@ -18,14 +18,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef HTTP_PARSER_DRIVER_H
-#define HTTP_PARSER_DRIVER_H
+#ifndef HTTP_PARSER_DRIVER_T_H
+#define HTTP_PARSER_DRIVER_T_H
 
 #include <string>
 
 #include <ace/Global_Macros.h>
 
-#include "net_iparser.h"
+#include "http_iparser.h"
+#include "http_scanner.h"
 
 #include "location.hh"
 
@@ -36,41 +37,35 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 struct YYLTYPE;
 
-template <typename RecordType,
-          typename SessionMessageType>
-class HTTP_ParserDriver
- : public Net_IParser<RecordType>
+template <typename SessionMessageType>
+class HTTP_ParserDriver_T
+ : public HTTP_IParser
 {
  public:
-  HTTP_ParserDriver (bool,  // debug scanning ?
-                     bool); // debug parsing ?
-  virtual ~HTTP_ParserDriver ();
+  HTTP_ParserDriver_T (bool,  // debug scanning ?
+                       bool); // debug parsing ?
+  virtual ~HTTP_ParserDriver_T ();
 
-  // implement Net_IParser
-  virtual void initialize (RecordType&,                                    // target data record
-                           bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,          // debug scanner ?
+  // implement (part of) HTTP_IParser
+  virtual void initialize (bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,          // debug scanner ?
                            bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,         // debug parser ?
                            ACE_Message_Queue_Base* = NULL,                 // data buffer queue (yywrap)
                            bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
                            bool = false);                                  // block in parse() ?
-
   inline virtual ACE_Message_Block* buffer () { return fragment_; };
-  inline virtual RecordType* record () { return record_; };
-  virtual bool debugScanner () const;
+  inline virtual bool debugScanner () const { return HTTP_Scanner_get_debug (scannerState_); };
   inline virtual bool isBlocking () const { return blockInParse_; };
-
   virtual void error (const YYLTYPE&,      // location
                       const std::string&); // message
-  inline virtual void finished () { finished_ = true; };
-  inline virtual bool hasFinished () const { return finished_; };
-
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
   inline virtual unsigned int offset () const { return offset_; };
-
   virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer ();
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void wait ();
+  inline virtual struct HTTP_Record& current () { ACE_ASSERT (record_); return *record_; };
+//  inline virtual void finished () { finished_ = true; };
+  inline virtual bool hasFinished () const { return finished_; };
 
   virtual void dump_state () const;
 
@@ -78,12 +73,13 @@ class HTTP_ParserDriver
   bool                    finished_; // processed the whole entity ?
   ACE_Message_Block*      fragment_;
   unsigned int            offset_; // parsed entity bytes
-  RecordType*             record_;
+  struct HTTP_Record*     record_;
+  bool                    trace_;
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver ())
-  ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver (const HTTP_ParserDriver&))
-  ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver& operator= (const HTTP_ParserDriver&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T ())
+  ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T (const HTTP_ParserDriver_T&))
+  ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T& operator= (const HTTP_ParserDriver_T&))
 
   // helper methods
   bool scan_begin ();
@@ -96,7 +92,6 @@ class HTTP_ParserDriver
 
   bool                    blockInParse_;
   bool                    isFirst_;
-  bool                    trace_;
 
   //// parser
   //yy::HTTP_Parser    parser_;

@@ -86,24 +86,11 @@ struct Test_U_UserData
    , streamConfiguration (NULL)
   {};
 
-  Test_U_Configuration*       configuration;
-  Test_U_StreamConfiguration* streamConfiguration;
+  struct Test_U_Configuration*       configuration;
+  struct Test_U_StreamConfiguration* streamConfiguration;
 };
 
-struct Test_U_MessageData
-{
-  inline Test_U_MessageData ()
-   : HTTPRecord (NULL)
-  {};
-  inline ~Test_U_MessageData ()
-  {
-    if (HTTPRecord)
-      delete HTTPRecord;
-  };
-
-  HTTP_Record* HTTPRecord;
-};
-typedef Stream_DataBase_T<Test_U_MessageData> Test_U_MessageData_t;
+typedef Stream_DataBase_T<struct HTTP_Record> Test_U_MessageData_t;
 
 struct Test_U_StreamSessionData
  : Stream_SessionData
@@ -128,12 +115,12 @@ struct Test_U_StreamSessionData
     return *this;
   }
 
-  HTTP_ConnectionState*                     connectionState;
+  struct HTTP_ConnectionState*              connectionState;
   enum Stream_Decoder_CompressionFormatType format; // decompressor module
   std::string                               targetFileName; // file writer module
-  Test_U_UserData*                          userData;
+  struct Test_U_UserData*                   userData;
 };
-typedef Stream_SessionData_T<Test_U_StreamSessionData> Test_U_StreamSessionData_t;
+typedef Stream_SessionData_T<struct Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 
 struct Test_U_SocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
@@ -144,26 +131,26 @@ struct Test_U_SocketHandlerConfiguration
    , userData (NULL)
   {};
 
-  Test_U_UserData* userData;
+  struct Test_U_UserData* userData;
 };
 
 // forward declarations
 struct Test_U_Configuration;
 struct Test_U_ConnectionState;
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          Test_U_Configuration,
-                          Test_U_ConnectionState,
+                          struct Test_U_Configuration,
+                          struct Test_U_ConnectionState,
                           HTTP_RuntimeStatistic_t> Test_U_IConnection_t;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
-                                 Test_U_Configuration,
-                                 Test_U_ConnectionState,
+                                 struct Test_U_Configuration,
+                                 struct Test_U_ConnectionState,
                                  HTTP_RuntimeStatistic_t,
-                                 Test_U_UserData> Test_U_ConnectionManager_t;
+                                 struct Test_U_UserData> Test_U_ConnectionManager_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Test_U_Configuration,
-                                 Test_U_ConnectionState,
+                                 struct Test_U_Configuration,
+                                 struct Test_U_ConnectionState,
                                  HTTP_RuntimeStatistic_t,
-                                 Test_U_UserData> Test_U_IConnectionManager_t;
+                                 struct Test_U_UserData> Test_U_IConnectionManager_t;
 struct Test_U_ModuleHandlerConfiguration
  : HTTP_ModuleHandlerConfiguration
 {
@@ -182,17 +169,17 @@ struct Test_U_ModuleHandlerConfiguration
    , URL ()
   {};
 
-  Test_U_Configuration*              configuration;
-  Test_U_IConnection_t*              connection; // TCP target/IO module
-  Test_U_IConnectionManager_t*       connectionManager; // TCP IO module
-  std::string                        dumpFileName; // file writer module (HTTP)
-  std::string                        hostName; // net source module
-  bool                               inbound; // net io module
-  bool                               printProgressDot; // file writer module
-  Net_SocketConfiguration*           socketConfiguration;
-  Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-  std::string                        targetFileName; // file writer module (HTML)
-  std::string                        URL;
+  struct Test_U_Configuration*              configuration;
+  Test_U_IConnection_t*                     connection; // TCP target/IO module
+  Test_U_IConnectionManager_t*              connectionManager; // TCP IO module
+  std::string                               dumpFileName; // file writer module (HTTP)
+  std::string                               hostName; // net source module
+  bool                                      inbound; // net io module
+  bool                                      printProgressDot; // file writer module
+  struct Net_SocketConfiguration*           socketConfiguration;
+  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
+  std::string                               targetFileName; // file writer module (HTML)
+  std::string                               URL;
 };
 
 struct Test_U_SignalHandlerConfiguration
@@ -216,7 +203,7 @@ struct Test_U_StreamConfiguration
    , moduleHandlerConfiguration (NULL)
   {};
 
-  Test_U_ModuleHandlerConfiguration* moduleHandlerConfiguration; // stream module handler configuration
+  struct Test_U_ModuleHandlerConfiguration* moduleHandlerConfiguration; // stream module handler configuration
 };
 
 struct Test_U_StreamState
@@ -228,8 +215,8 @@ struct Test_U_StreamState
    , userData (NULL)
   {};
 
-  Test_U_StreamSessionData* currentSessionData;
-  Test_U_UserData*          userData;
+  struct Test_U_StreamSessionData* currentSessionData;
+  struct Test_U_UserData*          userData;
 };
 
 struct Test_U_Configuration
@@ -246,19 +233,19 @@ struct Test_U_Configuration
   {};
 
   // **************************** signal data **********************************
-  Test_U_SignalHandlerConfiguration signalHandlerConfiguration;
+  struct Test_U_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
-  Net_SocketConfiguration           socketConfiguration;
-  Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct Net_SocketConfiguration           socketConfiguration;
+  struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
   // **************************** stream data **********************************
-  Stream_ModuleConfiguration        moduleConfiguration;
-  Test_U_ModuleHandlerConfiguration moduleHandlerConfiguration;
-  Test_U_StreamConfiguration        streamConfiguration;
+  struct Stream_ModuleConfiguration        moduleConfiguration;
+  struct Test_U_ModuleHandlerConfiguration moduleHandlerConfiguration;
+  struct Test_U_StreamConfiguration        streamConfiguration;
   // *************************** protocol data *********************************
-  Test_U_UserData                   userData;
-  bool                              useReactor;
+  struct Test_U_UserData                   userData;
+  bool                                     useReactor;
 };
 
-typedef Stream_INotify_T<Stream_SessionMessageType> Test_U_IStreamNotify_t;
+typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_U_IStreamNotify_t;
 
 #endif

@@ -138,8 +138,7 @@ class HTTP_Stream_T
                                 StreamStateType,
                                 SessionDataType,
                                 SessionDataContainerType,
-                                StatisticContainerType,
-                                struct HTTP_Record> PARSER_T;
+                                StatisticContainerType> PARSER_T;
   //typedef Stream_StreamModule_T<ACE_MT_SYNCH,
   //                              Common_TimePolicy_t,
   //                              Stream_ModuleConfiguration,

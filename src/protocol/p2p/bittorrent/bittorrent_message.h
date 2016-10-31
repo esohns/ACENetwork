@@ -30,7 +30,7 @@
 
 #include "bittorrent_common.h"
 #include "bittorrent_exports.h"
-#include "bittorrent_stream_common.h"
+//#include "bittorrent_stream_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;

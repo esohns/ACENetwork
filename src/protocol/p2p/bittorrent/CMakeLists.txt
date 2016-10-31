@@ -87,6 +87,7 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      bittorrent_common.h
      bittorrent_defines.h
      bittorrent_exports.h
+     bittorrent_iparser.h
      bittorrent_message.cpp
      bittorrent_message.h
      bittorrent_parser.cpp
@@ -179,6 +180,7 @@ install (FILES
          bittorrent_common.h
          bittorrent_defines.h
          bittorrent_exports.h
+         bittorrent_iparser.h
          bittorrent_message.h
          bittorrent_parser.h
          bittorrent_parser_driver.h

@@ -292,10 +292,10 @@ static const unsigned char yytranslate[] =
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const unsigned char yyrline[] =
+static const unsigned short int yyrline[] =
 {
-       0,   212,   212,   213,   214,   215,   216,   217,   218,   219,
-     220,   221,   222,   223,   224,   225,   226
+       0,   213,   213,   223,   224,   225,   240,   248,   256,   264,
+     272,   280,   288,   296,   304,   312,   320
 };
 #endif
 
@@ -538,12 +538,12 @@ yy_location_print_ (FILE *yyo, YYLTYPE const * const yylocp)
 `----------------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   FILE *yyo = yyoutput;
   YYUSE (yyo);
   YYUSE (yylocationp);
-  YYUSE (driver);
+  YYUSE (iparser_p);
   YYUSE (yyscanner);
   if (!yyvaluep)
     return;
@@ -663,14 +663,14 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
 `--------------------------------*/
 
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   YYFPRINTF (yyoutput, "%s %s (",
              yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
 
   YY_LOCATION_PRINT (yyoutput, *yylocationp);
   YYFPRINTF (yyoutput, ": ");
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, driver, yyscanner);
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, iparser_p, yyscanner);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -679,7 +679,7 @@ yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYL
     if (yydebug)                                                        \
       {                                                                 \
         YYFPRINTF (stderr, "%s ", Title);                               \
-        yy_symbol_print (stderr, Type, Value, Location, driver, yyscanner);        \
+        yy_symbol_print (stderr, Type, Value, Location, iparser_p, yyscanner);        \
         YYFPRINTF (stderr, "\n");                                       \
       }                                                                 \
   } while (0)
@@ -914,10 +914,10 @@ static void yyexpandGLRStack (yyGLRStack* yystackp);
 #endif
 
 static _Noreturn void
-yyFail (yyGLRStack* yystackp, YYLTYPE *yylocp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner, const char* yymsg)
+yyFail (yyGLRStack* yystackp, YYLTYPE *yylocp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner, const char* yymsg)
 {
   if (yymsg != YY_NULLPTR)
-    yyerror (yylocp, driver, yyscanner, yymsg);
+    yyerror (yylocp, iparser_p, yyscanner, yymsg);
   YYLONGJMP (yystackp->yyexception_buffer, 1);
 }
 
@@ -989,13 +989,13 @@ yyfill (yyGLRStackItem *yyvsp, int *yylow, int yylow1, yybool yynormal)
 static YYRESULTTAG
 yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
               yyGLRStack* yystackp,
-              YYSTYPE* yyvalp, YYLTYPE *yylocp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+              YYSTYPE* yyvalp, YYLTYPE *yylocp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   yybool yynormal YY_ATTRIBUTE_UNUSED = (yystackp->yysplitPoint == YY_NULLPTR);
   int yylow;
   YYUSE (yyvalp);
   YYUSE (yylocp);
-  YYUSE (driver);
+  YYUSE (iparser_p);
   YYUSE (yyscanner);
   YYUSE (yyrhslen);
 # undef yyerrok
@@ -1014,7 +1014,7 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 # define YYFILL(N) yyfill (yyvsp, &yylow, N, yynormal)
 # undef YYBACKUP
 # define YYBACKUP(Token, Value)                                              \
-  return yyerror (yylocp, driver, yyscanner, YY_("syntax error: cannot back up")),     \
+  return yyerror (yylocp, iparser_p, yyscanner, YY_("syntax error: cannot back up")),     \
          yyerrok, yyerr
 
   yylow = 1;
@@ -1029,7 +1029,16 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
     {
         case 2:
 
-    { ((*yyvalp).size) = 67 + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.size); }
+    { ((*yyvalp).size) = 67 + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.size); // 19 + 8 + 20 + 20
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.handshake));
+                                 struct BitTorrent_PeerHandshake* handshake_p =
+                                   const_cast<struct BitTorrent_PeerHandshake*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.handshake));
+                                 try {
+                                   iparser_p->handshake (handshake_p);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::handshake(), continuing\n")));
+                                 } }
 
     break;
 
@@ -1047,67 +1056,151 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
   case 5:
 
-    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4; }
+    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 BitTorrent_Message& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_Message::DATA_T& data_container_r =
+                                   const_cast<typename BitTorrent_Message::DATA_T&> (message_p->get ());
+                                 data_container_r.set (record_p);
+                                 try {
+                                   iparser_p->message (message_p);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } }
 
     break;
 
   case 6:
 
-    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4; }
+    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 try {
+                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } }
 
     break;
 
   case 7:
 
-    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4; }
+    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 try {
+                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } }
 
     break;
 
   case 8:
 
-    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4; }
+    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 try {
+                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } }
 
     break;
 
   case 9:
 
-    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4; }
+    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 try {
+                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } }
 
     break;
 
   case 10:
 
-    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4; }
+    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 try {
+                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } }
 
     break;
 
   case 11:
 
-    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4; }
+    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 try {
+                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } }
 
     break;
 
   case 12:
 
-    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4; }
+    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 try {
+                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } }
 
     break;
 
   case 13:
 
-    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4; }
+    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 try {
+                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } }
 
     break;
 
   case 14:
 
-    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4; }
+    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 try {
+                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } }
 
     break;
 
   case 15:
 
-    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4; }
+    { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
+                                 ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 try {
+                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } }
 
     break;
 
@@ -1154,11 +1247,11 @@ yyuserMerge (int yyn, YYSTYPE* yy0, YYSTYPE* yy1)
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   YYUSE (yyvaluep);
   YYUSE (yylocationp);
-  YYUSE (driver);
+  YYUSE (iparser_p);
   YYUSE (yyscanner);
   if (!yymsg)
     yymsg = "Deleting";
@@ -1175,73 +1268,73 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocatio
 
     case 3: /* "handshake"  */
 
-      { delete ((*yyvaluep).handshake); ((*yyvaluep).handshake) = NULL; }
+      { ((*yyvaluep).handshake) = NULL; }
 
         break;
 
     case 4: /* "bitfield"  */
 
-      { delete ((*yyvaluep).record); ((*yyvaluep).record) = NULL; }
+      { ((*yyvaluep).record) = NULL; }
 
         break;
 
     case 5: /* "cancel"  */
 
-      { delete ((*yyvaluep).record); ((*yyvaluep).record) = NULL; }
+      { ((*yyvaluep).record) = NULL; }
 
         break;
 
     case 6: /* "choke"  */
 
-      { delete ((*yyvaluep).record); ((*yyvaluep).record) = NULL; }
+      { ((*yyvaluep).record) = NULL; }
 
         break;
 
     case 7: /* "have"  */
 
-      { delete ((*yyvaluep).record); ((*yyvaluep).record) = NULL; }
+      { ((*yyvaluep).record) = NULL; }
 
         break;
 
     case 8: /* "interested"  */
 
-      { delete ((*yyvaluep).record); ((*yyvaluep).record) = NULL; }
+      { ((*yyvaluep).record) = NULL; }
 
         break;
 
     case 9: /* "keep-alive"  */
 
-      { delete ((*yyvaluep).record); ((*yyvaluep).record) = NULL; }
+      { ((*yyvaluep).record) = NULL; }
 
         break;
 
     case 10: /* "not_interested"  */
 
-      { delete ((*yyvaluep).record); ((*yyvaluep).record) = NULL; }
+      { ((*yyvaluep).record) = NULL; }
 
         break;
 
     case 11: /* "piece"  */
 
-      { delete ((*yyvaluep).record); ((*yyvaluep).record) = NULL; }
+      { ((*yyvaluep).record) = NULL; }
 
         break;
 
     case 12: /* "port"  */
 
-      { delete ((*yyvaluep).record); ((*yyvaluep).record) = NULL; }
+      { ((*yyvaluep).record) = NULL; }
 
         break;
 
     case 13: /* "request"  */
 
-      { delete ((*yyvaluep).record); ((*yyvaluep).record) = NULL; }
+      { ((*yyvaluep).record) = NULL; }
 
         break;
 
     case 14: /* "unchoke"  */
 
-      { delete ((*yyvaluep).record); ((*yyvaluep).record) = NULL; }
+      { ((*yyvaluep).record) = NULL; }
 
         break;
 
@@ -1284,11 +1377,11 @@ yyrhsLength (yyRuleNum yyrule)
 }
 
 static void
-yydestroyGLRState (char const *yymsg, yyGLRState *yys, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+yydestroyGLRState (char const *yymsg, yyGLRState *yys, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   if (yys->yyresolved)
     yydestruct (yymsg, yystos[yys->yylrState],
-                &yys->yysemantics.yysval, &yys->yyloc, driver, yyscanner);
+                &yys->yysemantics.yysval, &yys->yyloc, iparser_p, yyscanner);
   else
     {
 #if YYDEBUG
@@ -1310,7 +1403,7 @@ yydestroyGLRState (char const *yymsg, yyGLRState *yys, Net_IParser<BitTorrent_Re
           for (yyrh = yyoption->yystate, yyn = yyrhsLength (yyoption->yyrule);
                yyn > 0;
                yyrh = yyrh->yypred, yyn -= 1)
-            yydestroyGLRState (yymsg, yyrh, driver, yyscanner);
+            yydestroyGLRState (yymsg, yyrh, iparser_p, yyscanner);
         }
     }
 }
@@ -1691,7 +1784,7 @@ do {                                    \
 
 static inline void
 yy_reduce_print (int yynormal, yyGLRStackItem* yyvsp, size_t yyk,
-                 yyRuleNum yyrule, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+                 yyRuleNum yyrule, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   int yynrhs = yyrhsLength (yyrule);
   int yylow = 1;
@@ -1708,7 +1801,7 @@ yy_reduce_print (int yynormal, yyGLRStackItem* yyvsp, size_t yyk,
       yy_symbol_print (stderr,
                        yystos[yyvsp[yyi - yynrhs + 1].yystate.yylrState],
                        &yyvsp[yyi - yynrhs + 1].yystate.yysemantics.yysval
-                       , &(((yyGLRStackItem const *)yyvsp)[YYFILL ((yyi + 1) - (yynrhs))].yystate.yyloc)                       , driver, yyscanner);
+                       , &(((yyGLRStackItem const *)yyvsp)[YYFILL ((yyi + 1) - (yynrhs))].yystate.yyloc)                       , iparser_p, yyscanner);
       if (!yyvsp[yyi - yynrhs + 1].yystate.yyresolved)
         YYFPRINTF (stderr, " (unresolved)");
       YYFPRINTF (stderr, "\n");
@@ -1724,7 +1817,7 @@ yy_reduce_print (int yynormal, yyGLRStackItem* yyvsp, size_t yyk,
  *  for userAction.  */
 static inline YYRESULTTAG
 yydoAction (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
-            YYSTYPE* yyvalp, YYLTYPE *yylocp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+            YYSTYPE* yyvalp, YYLTYPE *yylocp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   int yynrhs = yyrhsLength (yyrule);
 
@@ -1736,9 +1829,9 @@ yydoAction (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
       yystackp->yynextFree -= yynrhs;
       yystackp->yyspaceLeft += yynrhs;
       yystackp->yytops.yystates[0] = & yystackp->yynextFree[-1].yystate;
-      YY_REDUCE_PRINT ((1, yyrhs, yyk, yyrule, driver, yyscanner));
+      YY_REDUCE_PRINT ((1, yyrhs, yyk, yyrule, iparser_p, yyscanner));
       return yyuserAction (yyrule, yynrhs, yyrhs, yystackp,
-                           yyvalp, yylocp, driver, yyscanner);
+                           yyvalp, yylocp, iparser_p, yyscanner);
     }
   else
     {
@@ -1757,9 +1850,9 @@ yydoAction (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
         }
       yyupdateSplit (yystackp, yys);
       yystackp->yytops.yystates[yyk] = yys;
-      YY_REDUCE_PRINT ((0, yyrhsVals + YYMAXRHS + YYMAXLEFT - 1, yyk, yyrule, driver, yyscanner));
+      YY_REDUCE_PRINT ((0, yyrhsVals + YYMAXRHS + YYMAXLEFT - 1, yyk, yyrule, iparser_p, yyscanner));
       return yyuserAction (yyrule, yynrhs, yyrhsVals + YYMAXRHS + YYMAXLEFT - 1,
-                           yystackp, yyvalp, yylocp, driver, yyscanner);
+                           yystackp, yyvalp, yylocp, iparser_p, yyscanner);
     }
 }
 
@@ -1776,7 +1869,7 @@ yydoAction (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
  */
 static inline YYRESULTTAG
 yyglrReduce (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
-             yybool yyforceEval, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+             yybool yyforceEval, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   size_t yyposn = yystackp->yytops.yystates[yyk]->yyposn;
 
@@ -1785,7 +1878,7 @@ yyglrReduce (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
       YYSTYPE yysval;
       YYLTYPE yyloc;
 
-      YYRESULTTAG yyflag = yydoAction (yystackp, yyk, yyrule, &yysval, &yyloc, driver, yyscanner);
+      YYRESULTTAG yyflag = yydoAction (yystackp, yyk, yyrule, &yysval, &yyloc, iparser_p, yyscanner);
       if (yyflag == yyerr && yystackp->yysplitPoint != YY_NULLPTR)
         {
           YYDPRINTF ((stderr, "Parse on stack %lu rejected by rule #%d.\n",
@@ -1986,7 +2079,7 @@ yypreference (yySemanticOption* y0, yySemanticOption* y1)
 }
 
 static YYRESULTTAG yyresolveValue (yyGLRState* yys,
-                                   yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner);
+                                   yyGLRStack* yystackp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner);
 
 
 /** Resolve the previous YYN states starting at and including state YYS
@@ -1996,14 +2089,14 @@ static YYRESULTTAG yyresolveValue (yyGLRState* yys,
  *  data so that yydestroyGLRState can be invoked if necessary.  */
 static YYRESULTTAG
 yyresolveStates (yyGLRState* yys, int yyn,
-                 yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+                 yyGLRStack* yystackp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   if (0 < yyn)
     {
       YYASSERT (yys->yypred);
-      YYCHK (yyresolveStates (yys->yypred, yyn-1, yystackp, driver, yyscanner));
+      YYCHK (yyresolveStates (yys->yypred, yyn-1, yystackp, iparser_p, yyscanner));
       if (! yys->yyresolved)
-        YYCHK (yyresolveValue (yys, yystackp, driver, yyscanner));
+        YYCHK (yyresolveValue (yys, yystackp, iparser_p, yyscanner));
     }
   return yyok;
 }
@@ -2015,17 +2108,17 @@ yyresolveStates (yyGLRState* yys, int yyn,
  *  semantic values if invoked).  */
 static YYRESULTTAG
 yyresolveAction (yySemanticOption* yyopt, yyGLRStack* yystackp,
-                 YYSTYPE* yyvalp, YYLTYPE *yylocp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+                 YYSTYPE* yyvalp, YYLTYPE *yylocp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   yyGLRStackItem yyrhsVals[YYMAXRHS + YYMAXLEFT + 1];
   int yynrhs = yyrhsLength (yyopt->yyrule);
   YYRESULTTAG yyflag =
-    yyresolveStates (yyopt->yystate, yynrhs, yystackp, driver, yyscanner);
+    yyresolveStates (yyopt->yystate, yynrhs, yystackp, iparser_p, yyscanner);
   if (yyflag != yyok)
     {
       yyGLRState *yys;
       for (yys = yyopt->yystate; yynrhs > 0; yys = yys->yypred, yynrhs -= 1)
-        yydestroyGLRState ("Cleanup: popping", yys, driver, yyscanner);
+        yydestroyGLRState ("Cleanup: popping", yys, iparser_p, yyscanner);
       return yyflag;
     }
 
@@ -2042,7 +2135,7 @@ yyresolveAction (yySemanticOption* yyopt, yyGLRStack* yystackp,
     yylloc = yyopt->yyloc;
     yyflag = yyuserAction (yyopt->yyrule, yynrhs,
                            yyrhsVals + YYMAXRHS + YYMAXLEFT - 1,
-                           yystackp, yyvalp, yylocp, driver, yyscanner);
+                           yystackp, yyvalp, yylocp, iparser_p, yyscanner);
     yychar = yychar_current;
     yylval = yylval_current;
     yylloc = yylloc_current;
@@ -2100,7 +2193,7 @@ yyreportTree (yySemanticOption* yyx, int yyindent)
 
 static YYRESULTTAG
 yyreportAmbiguity (yySemanticOption* yyx0,
-                   yySemanticOption* yyx1, YYLTYPE *yylocp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+                   yySemanticOption* yyx1, YYLTYPE *yylocp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   YYUSE (yyx0);
   YYUSE (yyx1);
@@ -2114,7 +2207,7 @@ yyreportAmbiguity (yySemanticOption* yyx0,
   YYFPRINTF (stderr, "\n");
 #endif
 
-  yyerror (yylocp, driver, yyscanner, YY_("syntax is ambiguous"));
+  yyerror (yylocp, iparser_p, yyscanner, YY_("syntax is ambiguous"));
   return yyabort;
 }
 
@@ -2123,11 +2216,11 @@ yyreportAmbiguity (yySemanticOption* yyx0,
  *  The first semantic option of a state is always chosen.  */
 static void
 yyresolveLocations (yyGLRState* yys1, int yyn1,
-                    yyGLRStack *yystackp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+                    yyGLRStack *yystackp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   if (0 < yyn1)
     {
-      yyresolveLocations (yys1->yypred, yyn1 - 1, yystackp, driver, yyscanner);
+      yyresolveLocations (yys1->yypred, yyn1 - 1, yystackp, iparser_p, yyscanner);
       if (!yys1->yyresolved)
         {
           yyGLRStackItem yyrhsloc[1 + YYMAXRHS];
@@ -2140,7 +2233,7 @@ yyresolveLocations (yyGLRState* yys1, int yyn1,
               yyGLRState *yys;
               int yyn;
               yyresolveLocations (yyoption->yystate, yynrhs,
-                                  yystackp, driver, yyscanner);
+                                  yystackp, iparser_p, yyscanner);
               for (yys = yyoption->yystate, yyn = yynrhs;
                    yyn > 0;
                    yys = yys->yypred, yyn -= 1)
@@ -2182,7 +2275,7 @@ yyresolveLocations (yyGLRState* yys1, int yyn1,
  *  result = yyok, YYS has been left with consistent data so that
  *  yydestroyGLRState can be invoked if necessary.  */
 static YYRESULTTAG
-yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   yySemanticOption* yyoptionList = yys->yysemantics.yyfirstVal;
   yySemanticOption* yybest = yyoptionList;
@@ -2206,8 +2299,8 @@ yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, Net_IParser<BitTorrent_Re
           switch (yypreference (yybest, yyp))
             {
             case 0:
-              yyresolveLocations (yys, 1, yystackp, driver, yyscanner);
-              return yyreportAmbiguity (yybest, yyp, yylocp, driver, yyscanner);
+              yyresolveLocations (yys, 1, yystackp, iparser_p, yyscanner);
+              return yyreportAmbiguity (yybest, yyp, yylocp, iparser_p, yyscanner);
               break;
             case 1:
               yymerge = yytrue;
@@ -2232,7 +2325,7 @@ yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, Net_IParser<BitTorrent_Re
     {
       yySemanticOption* yyp;
       int yyprec = yydprec[yybest->yyrule];
-      yyflag = yyresolveAction (yybest, yystackp, &yysval, yylocp, driver, yyscanner);
+      yyflag = yyresolveAction (yybest, yystackp, &yysval, yylocp, iparser_p, yyscanner);
       if (yyflag == yyok)
         for (yyp = yybest->yynext; yyp != YY_NULLPTR; yyp = yyp->yynext)
           {
@@ -2240,12 +2333,12 @@ yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, Net_IParser<BitTorrent_Re
               {
                 YYSTYPE yysval_other;
                 YYLTYPE yydummy;
-                yyflag = yyresolveAction (yyp, yystackp, &yysval_other, &yydummy, driver, yyscanner);
+                yyflag = yyresolveAction (yyp, yystackp, &yysval_other, &yydummy, iparser_p, yyscanner);
                 if (yyflag != yyok)
                   {
                     yydestruct ("Cleanup: discarding incompletely merged value for",
                                 yystos[yys->yylrState],
-                                &yysval, yylocp, driver, yyscanner);
+                                &yysval, yylocp, iparser_p, yyscanner);
                     break;
                   }
                 yyuserMerge (yymerger[yyp->yyrule], &yysval, &yysval_other);
@@ -2253,7 +2346,7 @@ yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, Net_IParser<BitTorrent_Re
           }
     }
   else
-    yyflag = yyresolveAction (yybest, yystackp, &yysval, yylocp, driver, yyscanner);
+    yyflag = yyresolveAction (yybest, yystackp, &yysval, yylocp, iparser_p, yyscanner);
 
   if (yyflag == yyok)
     {
@@ -2266,7 +2359,7 @@ yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, Net_IParser<BitTorrent_Re
 }
 
 static YYRESULTTAG
-yyresolveStack (yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+yyresolveStack (yyGLRStack* yystackp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   if (yystackp->yysplitPoint != YY_NULLPTR)
     {
@@ -2278,7 +2371,7 @@ yyresolveStack (yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driver, yy
            yys = yys->yypred, yyn += 1)
         continue;
       YYCHK (yyresolveStates (yystackp->yytops.yystates[0], yyn, yystackp
-                             , driver, yyscanner));
+                             , iparser_p, yyscanner));
     }
   return yyok;
 }
@@ -2315,7 +2408,7 @@ yycompressStack (yyGLRStack* yystackp)
 
 static YYRESULTTAG
 yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
-                   size_t yyposn, YYLTYPE *yylocp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+                   size_t yyposn, YYLTYPE *yylocp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   while (yystackp->yytops.yystates[yyk] != YY_NULLPTR)
     {
@@ -2336,7 +2429,7 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
               yymarkStackDeleted (yystackp, yyk);
               return yyok;
             }
-          yyflag = yyglrReduce (yystackp, yyk, yyrule, yyimmediate[yyrule], driver, yyscanner);
+          yyflag = yyglrReduce (yystackp, yyk, yyrule, yyimmediate[yyrule], iparser_p, yyscanner);
           if (yyflag == yyerr)
             {
               YYDPRINTF ((stderr,
@@ -2359,7 +2452,7 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
           if (yychar == YYEMPTY)
             {
               YYDPRINTF ((stderr, "Reading a token: "));
-              yychar = yylex (&yylval, &yylloc, driver, yyscanner);
+              yychar = yylex (&yylval, &yylloc, iparser_p, yyscanner);
             }
 
           if (yychar <= YYEOF)
@@ -2384,10 +2477,10 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
                           (unsigned long int) yyk));
               yyflag = yyglrReduce (yystackp, yynewStack,
                                     *yyconflicts,
-                                    yyimmediate[*yyconflicts], driver, yyscanner);
+                                    yyimmediate[*yyconflicts], iparser_p, yyscanner);
               if (yyflag == yyok)
                 YYCHK (yyprocessOneStack (yystackp, yynewStack,
-                                          yyposn, yylocp, driver, yyscanner));
+                                          yyposn, yylocp, iparser_p, yyscanner));
               else if (yyflag == yyerr)
                 {
                   YYDPRINTF ((stderr, "Stack %lu dies.\n",
@@ -2411,7 +2504,7 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
           else
             {
               YYRESULTTAG yyflag = yyglrReduce (yystackp, yyk, -yyaction,
-                                                yyimmediate[-yyaction], driver, yyscanner);
+                                                yyimmediate[-yyaction], iparser_p, yyscanner);
               if (yyflag == yyerr)
                 {
                   YYDPRINTF ((stderr,
@@ -2430,12 +2523,12 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
 }
 
 static void
-yyreportSyntaxError (yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+yyreportSyntaxError (yyGLRStack* yystackp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   if (yystackp->yyerrState != 0)
     return;
 #if ! YYERROR_VERBOSE
-  yyerror (&yylloc, driver, yyscanner, YY_("syntax error"));
+  yyerror (&yylloc, iparser_p, yyscanner, YY_("syntax error"));
 #else
   {
   yySymbol yytoken = yychar == YYEMPTY ? YYEMPTY : YYTRANSLATE (yychar);
@@ -2550,12 +2643,12 @@ yyreportSyntaxError (yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* drive
               yyformat++;
             }
         }
-      yyerror (&yylloc, driver, yyscanner, yymsg);
+      yyerror (&yylloc, iparser_p, yyscanner, yymsg);
       YYFREE (yymsg);
     }
   else
     {
-      yyerror (&yylloc, driver, yyscanner, YY_("syntax error"));
+      yyerror (&yylloc, iparser_p, yyscanner, YY_("syntax error"));
       yyMemoryExhausted (yystackp);
     }
   }
@@ -2567,7 +2660,7 @@ yyreportSyntaxError (yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* drive
    yylval, and yylloc are the syntactic category, semantic value, and location
    of the lookahead.  */
 static void
-yyrecoverSyntaxError (yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+yyrecoverSyntaxError (yyGLRStack* yystackp, BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   size_t yyk;
   int yyj;
@@ -2579,7 +2672,7 @@ yyrecoverSyntaxError (yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driv
       {
         yySymbol yytoken;
         if (yychar == YYEOF)
-          yyFail (yystackp, &yylloc, driver, yyscanner, YY_NULLPTR);
+          yyFail (yystackp, &yylloc, iparser_p, yyscanner, YY_NULLPTR);
         if (yychar != YYEMPTY)
           {
             /* We throw away the lookahead, but the error range
@@ -2591,10 +2684,10 @@ yyrecoverSyntaxError (yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driv
             YYLLOC_DEFAULT ((yys->yyloc), yyerror_range, 2);
             yytoken = YYTRANSLATE (yychar);
             yydestruct ("Error: discarding",
-                        yytoken, &yylval, &yylloc, driver, yyscanner);
+                        yytoken, &yylval, &yylloc, iparser_p, yyscanner);
           }
         YYDPRINTF ((stderr, "Reading a token: "));
-        yychar = yylex (&yylval, &yylloc, driver, yyscanner);
+        yychar = yylex (&yylval, &yylloc, iparser_p, yyscanner);
         if (yychar <= YYEOF)
           {
             yychar = yytoken = YYEOF;
@@ -2623,7 +2716,7 @@ yyrecoverSyntaxError (yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driv
     if (yystackp->yytops.yystates[yyk] != YY_NULLPTR)
       break;
   if (yyk >= yystackp->yytops.yysize)
-    yyFail (yystackp, &yylloc, driver, yyscanner, YY_NULLPTR);
+    yyFail (yystackp, &yylloc, iparser_p, yyscanner, YY_NULLPTR);
   for (yyk += 1; yyk < yystackp->yytops.yysize; yyk += 1)
     yymarkStackDeleted (yystackp, yyk);
   yyremoveDeletes (yystackp);
@@ -2656,13 +2749,13 @@ yyrecoverSyntaxError (yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driv
         }
       yystackp->yyerror_range[1].yystate.yyloc = yys->yyloc;
       if (yys->yypred != YY_NULLPTR)
-        yydestroyGLRState ("Error: popping", yys, driver, yyscanner);
+        yydestroyGLRState ("Error: popping", yys, iparser_p, yyscanner);
       yystackp->yytops.yystates[0] = yys->yypred;
       yystackp->yynextFree -= 1;
       yystackp->yyspaceLeft += 1;
     }
   if (yystackp->yytops.yystates[0] == YY_NULLPTR)
-    yyFail (yystackp, &yylloc, driver, yyscanner, YY_NULLPTR);
+    yyFail (yystackp, &yylloc, iparser_p, yyscanner, YY_NULLPTR);
 }
 
 #define YYCHK1(YYE)                                                          \
@@ -2686,7 +2779,7 @@ yyrecoverSyntaxError (yyGLRStack* yystackp, Net_IParser<BitTorrent_Record>* driv
 `----------*/
 
 int
-yyparse (Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
+yyparse (BitTorrent_IParser* iparser_p, yyscan_t yyscanner)
 {
   int yyresult;
   yyGLRStack yystack;
@@ -2748,10 +2841,10 @@ yyparse (Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
               if (yyrule == 0)
                 {
                yystack.yyerror_range[1].yystate.yyloc = yylloc;
-                  yyreportSyntaxError (&yystack, driver, yyscanner);
+                  yyreportSyntaxError (&yystack, iparser_p, yyscanner);
                   goto yyuser_error;
                 }
-              YYCHK1 (yyglrReduce (&yystack, 0, yyrule, yytrue, driver, yyscanner));
+              YYCHK1 (yyglrReduce (&yystack, 0, yyrule, yytrue, iparser_p, yyscanner));
             }
           else
             {
@@ -2759,7 +2852,7 @@ yyparse (Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
               if (yychar == YYEMPTY)
                 {
                   YYDPRINTF ((stderr, "Reading a token: "));
-                  yychar = yylex (&yylval, &yylloc, driver, yyscanner);
+                  yychar = yylex (&yylval, &yylloc, iparser_p, yyscanner);
                 }
 
               if (yychar <= YYEOF)
@@ -2788,11 +2881,11 @@ yyparse (Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
               else if (yyisErrorAction (yyaction))
                 {
                yystack.yyerror_range[1].yystate.yyloc = yylloc;
-                  yyreportSyntaxError (&yystack, driver, yyscanner);
+                  yyreportSyntaxError (&yystack, iparser_p, yyscanner);
                   goto yyuser_error;
                 }
               else
-                YYCHK1 (yyglrReduce (&yystack, 0, -yyaction, yytrue, driver, yyscanner));
+                YYCHK1 (yyglrReduce (&yystack, 0, -yyaction, yytrue, iparser_p, yyscanner));
             }
         }
 
@@ -2824,17 +2917,17 @@ yyparse (Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
              on yylval in the event of memory exhaustion.  */
 
           for (yys = 0; yys < yystack.yytops.yysize; yys += 1)
-            YYCHK1 (yyprocessOneStack (&yystack, yys, yyposn, &yylloc, driver, yyscanner));
+            YYCHK1 (yyprocessOneStack (&yystack, yys, yyposn, &yylloc, iparser_p, yyscanner));
           yyremoveDeletes (&yystack);
           if (yystack.yytops.yysize == 0)
             {
               yyundeleteLastStack (&yystack);
               if (yystack.yytops.yysize == 0)
-                yyFail (&yystack, &yylloc, driver, yyscanner, YY_("syntax error"));
-              YYCHK1 (yyresolveStack (&yystack, driver, yyscanner));
+                yyFail (&yystack, &yylloc, iparser_p, yyscanner, YY_("syntax error"));
+              YYCHK1 (yyresolveStack (&yystack, iparser_p, yyscanner));
               YYDPRINTF ((stderr, "Returning to deterministic operation.\n"));
            yystack.yyerror_range[1].yystate.yyloc = yylloc;
-              yyreportSyntaxError (&yystack, driver, yyscanner);
+              yyreportSyntaxError (&yystack, iparser_p, yyscanner);
               goto yyuser_error;
             }
 
@@ -2865,7 +2958,7 @@ yyparse (Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
 
           if (yystack.yytops.yysize == 1)
             {
-              YYCHK1 (yyresolveStack (&yystack, driver, yyscanner));
+              YYCHK1 (yyresolveStack (&yystack, iparser_p, yyscanner));
               YYDPRINTF ((stderr, "Returning to deterministic operation.\n"));
               yycompressStack (&yystack);
               break;
@@ -2873,7 +2966,7 @@ yyparse (Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
         }
       continue;
     yyuser_error:
-      yyrecoverSyntaxError (&yystack, driver, yyscanner);
+      yyrecoverSyntaxError (&yystack, iparser_p, yyscanner);
       yyposn = yystack.yytops.yystates[0]->yyposn;
     }
 
@@ -2890,14 +2983,14 @@ yyparse (Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
   goto yyreturn;
 
  yyexhaustedlab:
-  yyerror (&yylloc, driver, yyscanner, YY_("memory exhausted"));
+  yyerror (&yylloc, iparser_p, yyscanner, YY_("memory exhausted"));
   yyresult = 2;
   goto yyreturn;
 
  yyreturn:
   if (yychar != YYEMPTY)
     yydestruct ("Cleanup: discarding lookahead",
-                YYTRANSLATE (yychar), &yylval, &yylloc, driver, yyscanner);
+                YYTRANSLATE (yychar), &yylval, &yylloc, iparser_p, yyscanner);
 
   /* If the stack is well-formed, pop the stack until it is empty,
      destroying its entries as we go.  But free the stack regardless
@@ -2917,7 +3010,7 @@ yyparse (Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner)
                     yyGLRState *yys = yystates[yyk];
                  yystack.yyerror_range[1].yystate.yyloc = yys->yyloc;
                   if (yys->yypred != YY_NULLPTR)
-                      yydestroyGLRState ("Cleanup: popping", yys, driver, yyscanner);
+                      yydestroyGLRState ("Cleanup: popping", yys, iparser_p, yyscanner);
                     yystates[yyk] = yys->yypred;
                     yystack.yynextFree -= 1;
                     yystack.yyspaceLeft += 1;
@@ -3043,7 +3136,7 @@ yysetdebug (int debug_in)
 
 void
 yyerror (YYLTYPE* location_in,
-         Net_IParser<BitTorrent_Record>* driver_in,
+         BitTorrent_IParser* iparser_in,
          yyscan_t context_in,
          const char* message_in)
 {
@@ -3053,9 +3146,9 @@ yyerror (YYLTYPE* location_in,
 
   // sanity check(s)
   ACE_ASSERT (location_in);
-  ACE_ASSERT (driver_in);
+  ACE_ASSERT (iparser_in);
 
-  driver_in->error (*location_in, std::string (message_in));
+  iparser_in->error (*location_in, std::string (message_in));
 }
 
 void

@@ -2,10 +2,8 @@
 #define BitTorrent_Scanner_HEADER_H 1
 #define BitTorrent_Scanner_IN_HEADER 1
 
-#line 2 "./../scripts/scanner.l"
-#include "net_iparser.h"
-
 #include "bittorrent_common.h"
+#include "bittorrent_iparser.h"
 #undef YYTOKENTYPE
 #include "bittorrent_parser.h"
 
@@ -14,13 +12,14 @@
 yy::BitTorrent_Parser::token_type                                           \
 BitTorrent_Scanner_lex (yy::BitTorrent_Parser::semantic_type* yylval_param, \
                         yy::BitTorrent_Parser::location_type* yylloc_param, \
-                        Net_IParser<struct BitTorrent_Record>* driver,      \
-                        yyscan_t yyscanner) */
-#define YY_DECL                                                        \
-yytokentype                                                            \
-BitTorrent_Scanner_lex (YYSTYPE* yylval_param,                         \
-                        YYLTYPE* yylloc_param,                         \
-                        Net_IParser<struct BitTorrent_Record>* driver, \
+                        BitTorrent_IParser* iparser_p,                      \
+                        yyscan_t yyscanner)
+ */
+#define YY_DECL                                        \
+yytokentype                                            \
+BitTorrent_Scanner_lex (YYSTYPE* yylval_param,         \
+                        YYLTYPE* yylloc_param,         \
+                        BitTorrent_IParser* iparser_p, \
                         yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 YY_DECL;
@@ -32,10 +31,6 @@ YY_DECL;
 void BitTorrent_Scanner_set_column (int, yyscan_t);
 
 //#define FLEXINT_H
-
-
-
-#line 39 "bittorrent_scanner.h"
 
 #define  YY_INT_ALIGNED long int
 
@@ -352,7 +347,7 @@ void BitTorrent_Scanner_free (void * ,yyscan_t yyscanner );
 /* %endif */
 #endif
 
-#define YY_EXTRA_TYPE Net_IParser<BitTorrent_Record>*
+#define YY_EXTRA_TYPE BitTorrent_IParser*
 
 /* %if-c-only Reentrant structure and macros (non-C++). */
 /* %if-reentrant */

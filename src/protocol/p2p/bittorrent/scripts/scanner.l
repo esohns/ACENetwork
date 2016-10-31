@@ -1,7 +1,6 @@
 %top{
-#include "net_iparser.h"
-
 #include "bittorrent_common.h"
+#include "bittorrent_iparser.h"
 #undef YYTOKENTYPE
 #include "bittorrent_parser.h"
 
@@ -10,13 +9,14 @@
 yy::BitTorrent_Parser::token_type                                           \
 BitTorrent_Scanner_lex (yy::BitTorrent_Parser::semantic_type* yylval_param, \
                         yy::BitTorrent_Parser::location_type* yylloc_param, \
-                        Net_IParser<struct BitTorrent_Record>* driver,      \
-                        yyscan_t yyscanner) */
-#define YY_DECL                                                        \
-yytokentype                                                            \
-BitTorrent_Scanner_lex (YYSTYPE* yylval_param,                         \
-                        YYLTYPE* yylloc_param,                         \
-                        Net_IParser<struct BitTorrent_Record>* driver, \
+                        BitTorrent_IParser* iparser_p,                      \
+                        yyscan_t yyscanner)
+ */
+#define YY_DECL                                        \
+yytokentype                                            \
+BitTorrent_Scanner_lex (YYSTYPE* yylval_param,         \
+                        YYLTYPE* yylloc_param,         \
+                        BitTorrent_IParser* iparser_p, \
                         yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 YY_DECL;
@@ -72,7 +72,7 @@ void BitTorrent_Scanner_set_column (int, yyscan_t);
 /* *IMPORTANT NOTE*: flex 2.5.4 does not recognize 'reentrant, nounistd,
                      ansi-definitions, ansi-prototypes, header-file extra-type'
 */
-%option extra-type="Net_IParser<BitTorrent_Record>*"
+%option extra-type="BitTorrent_IParser*"
 /* %option nounput */
 
 /* *NOTE*: for protcol specification, see:
@@ -178,14 +178,17 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
   //yy_flex_debug = HTTP_Scanner_get_debug (yyscanner);
 
   unsigned int bitfield_counter = 0;
+
+  ACE_Message_Block* message_block_p = iparser_p->buffer ();
+  ACE_ASSERT (message_block_p);
 %}
 
 <INITIAL>{
 {PEER_HANDSHAKE_PREFIX}   { ACE_ASSERT (yyleng == 19);
-                            driver->offset (yyleng);
+                            iparser_p->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->handshake,
-                                              BitTorrent_PeerHandshake ());
+                                              struct BitTorrent_PeerHandshake ());
                             ACE_ASSERT (yylval->handshake);
                             yylval->handshake->version.append (yytext, 19);
                             BEGIN (state_reserved); }
@@ -193,31 +196,31 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_reserved>{
 {PEER_HANDSHAKE_RESERVED} { ACE_ASSERT (yyleng == 8);
                             ACE_ASSERT (yylval->handshake);
-                            driver->offset (yyleng);
+                            iparser_p->offset (yyleng);
                             ACE_OS::memcpy (yylval->handshake->reserved, yytext, 8);
                             BEGIN (state_hash); }
 } // end <state_reserved>
 <state_hash>{
 {PEER_HANDSHAKE_HASH}     { ACE_ASSERT (yyleng == 20);
                             ACE_ASSERT (yylval->handshake);
-                            driver->offset (yyleng);
+                            iparser_p->offset (yyleng);
                             yylval->handshake->hash.append (yytext, 20);
                             BEGIN (state_peer_id); }
 } // end <state_hash>
 <state_peer_id>{
 {PEER_HANDSHAKE_PEER_ID}  { ACE_ASSERT (yyleng == 20);
                             ACE_ASSERT (yylval->handshake);
-                            driver->offset (yyleng);
+                            iparser_p->offset (yyleng);
                             yylval->handshake->peer_id.append (yytext, 20);
                             BEGIN (state_length);
                             return yytokentype::HANDSHAKE; }
 } // end <state_peer_id>
 <state_length>{
 {LENGTH}                  { ACE_ASSERT (yyleng == 4);
-                            driver->offset (yyleng);
+                            iparser_p->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->record,
-                                              BitTorrent_Record ());
+                                              struct BitTorrent_Record ());
                             ACE_ASSERT (yylval->record);
                             yylval->record->length =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
@@ -228,7 +231,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_length>
 <state_type>{
 {TYPE}                    { ACE_ASSERT (yyleng == 1);
-                            driver->offset (yyleng);
+                            iparser_p->offset (yyleng);
                             yylval->record->type =
                               static_cast<enum BitTorrent_MessageType> (*reinterpret_cast<ACE_UINT8*> (yytext));
                             switch (yylval->record->type)
@@ -273,7 +276,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_type>
 <state_have_payload>{
 {HAVE_PAYLOAD}            { ACE_ASSERT (yyleng == 4);
-                            driver->offset (yyleng);
+                            iparser_p->offset (yyleng);
                             yylval->record->have =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -283,7 +286,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_bitfield_payload>{
 {BITFIELD_PAYLOAD}        { ACE_ASSERT (yyleng == 1);
                             ACE_ASSERT (bitfield_counter);
-                            driver->offset (yyleng);
+                            iparser_p->offset (yyleng);
                             yylval->record->bitfield.push_back (*reinterpret_cast<ACE_UINT8*> (yytext));
                             --bitfield_counter;
                             if (!bitfield_counter)
@@ -294,7 +297,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_bitfield_payload>
 <state_request_payload>{
 {REQUEST_PAYLOAD}         { ACE_ASSERT (yyleng == 12);
-                            driver->offset (yyleng);
+                            iparser_p->offset (yyleng);
                             yylval->record->request.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -309,7 +312,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_request_payload>
 <state_cancel_payload>{
 {CANCEL_PAYLOAD}          { ACE_ASSERT (yyleng == 12);
-                            driver->offset (yyleng);
+                            iparser_p->offset (yyleng);
                             yylval->record->cancel.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -324,7 +327,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_cancel_payload>
 <state_piece_payload>{
 {PIECE_PAYLOAD}           { ACE_ASSERT (yyleng == 8);
-                            driver->offset (yyleng);
+                            iparser_p->offset (yyleng);
                             yylval->record->piece.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -339,9 +342,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                             *yy_cp = yyg->yy_hold_char;
 
                             // (frame and) skip over piece data
-                            ACE_Message_Block* message_block_p =
-                              driver->buffer ();
-                            message_block_p->rd_ptr (driver->offset ());
+                            message_block_p->rd_ptr (iparser_p->offset ());
 
                             unsigned int bytes_to_skip =
                               yylval->record->length - 9;
@@ -370,13 +371,13 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                               unsigned int skipped_bytes = 0;
                               while (skipped_bytes <= bytes_to_skip)
                               {
-                                if (!driver->switchBuffer ())
+                                if (!iparser_p->switchBuffer ())
                                 {
                                   ACE_DEBUG ((LM_ERROR,
                                               ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                                   yyterminate ();
                                 } // end IF
-                                message_block_p = driver->buffer ();
+                                message_block_p = iparser_p->buffer ();
                                 skipped_bytes += message_block_p->length ();
                               } // end WHILE
                               remainder = (skipped_bytes - bytes_to_skip);
@@ -393,14 +394,14 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                               message_block_p->wr_ptr (message_block_p->rd_ptr () + remainder);
                               ACE_ASSERT (message_block_p->length () == remainder);
                             } // end ELSE
-                            if (!driver->switchBuffer ())
+                            if (!iparser_p->switchBuffer ())
                             {
                               ACE_DEBUG ((LM_ERROR,
                                           ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                               yyterminate ();
                             } // end IF
-                            driver->buffer ()->rd_ptr (remainder);
-                            driver->offset (remainder);
+                            iparser_p->buffer ()->rd_ptr (remainder);
+                            iparser_p->offset (remainder);
 
                             // gobble initial bytes (if any)
                             char c = 0;
@@ -413,11 +414,11 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_piece>
 <<EOF>>                   { yyterminate(); } // *NOTE*: yywrap returned non-zero
 <*>{OCTET}                { /* *TODO*: use (?s:.) ? */
-                            if (!driver->isBlocking ())
+                            if (!iparser_p->isBlocking ())
                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
 
                             // wait for more data fragment(s)
-                            if (!driver->switchBuffer ())
+                            if (!iparser_p->switchBuffer ())
                             { // *NOTE*: most probable reason: connection
                               //         has been closed --> session end
                               ACE_DEBUG ((LM_DEBUG,
@@ -436,14 +437,14 @@ BitTorrent_Scanner_wrap (yyscan_t yyscanner)
   NETWORK_TRACE (ACE_TEXT ("::BitTorrent_Scanner_wrap"));
 
   struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
-  Net_IParser<struct BitTorrent_Record>* driver =
+  BitTorrent_IParser* iparser_p =
       BitTorrent_Scanner_get_extra (yyscanner);
 
   // sanity check(s)
-  ACE_ASSERT (driver);
-  if (!driver->isBlocking ())
+  ACE_ASSERT (iparser_p);
+  if (!iparser_p->isBlocking ())
     return 1; // not enough data, cannot proceed
-  if (driver->hasFinished ())
+  if (iparser_p->hasFinished ())
   {
     BEGIN (INITIAL);
     return 1; // done
@@ -470,7 +471,7 @@ BitTorrent_Scanner_wrap (yyscan_t yyscanner)
   //              the_rest.size ()));
 
   // step2
-  if (!driver->switchBuffer ())
+  if (!iparser_p->switchBuffer ())
   {
     // *NOTE*: most probable reason: received session end message
     ACE_DEBUG ((LM_DEBUG,

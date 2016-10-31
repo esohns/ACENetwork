@@ -35,27 +35,22 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType,
-          typename RecordType>
+          typename SessionMessageType>
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType,
-                     RecordType>::HTTP_Module_Parser_T ()
+                     SessionMessageType>::HTTP_Module_Parser_T ()
  : inherited ()
- , allocator_ (NULL)
+ , inherited2 (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
+               NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
+ , headFragment_ (NULL)
+ , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
  , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
- , driver_ (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
-            NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
- , headFragment_ (NULL)
- , isDriverInitialized_ (false)
  //, lock_ ()
 //, condtion_ (lock_)
- , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
- , dataContainer_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::HTTP_Module_Parser_T"));
 
@@ -66,23 +61,18 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType,
-          typename RecordType>
+          typename SessionMessageType>
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType,
-                     RecordType>::~HTTP_Module_Parser_T ()
+                     SessionMessageType>::~HTTP_Module_Parser_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::~HTTP_Module_Parser_T"));
 
   if (headFragment_)
     headFragment_->release ();
-
-  if (dataContainer_)
-    dataContainer_->decrease ();
 }
 
 template <ACE_SYNCH_DECL,
@@ -90,23 +80,18 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType,
-          typename RecordType>
+          typename SessionMessageType>
 bool
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType,
-                     RecordType>::initialize (const ConfigurationType& configuration_in)
+                     SessionMessageType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::initialize"));
 
   int result = -1;
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_in.streamConfiguration);
 
   if (inherited::isInitialized_)
   {
@@ -119,7 +104,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Queue_Base::activate(): \"%m\", continuing\n")));
 
-    allocator_ = NULL;
+    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
+
     debugScanner_ = NET_PROTOCOL_DEFAULT_LEX_TRACE;
     debugParser_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
     if (headFragment_)
@@ -127,59 +113,18 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       headFragment_->release ();
       headFragment_ = NULL;
     } // end IF
-    isDriverInitialized_ = false;
-
-    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
-    if (dataContainer_)
-    {
-      dataContainer_->decrease ();
-      dataContainer_ = NULL;
-    } // end IF
-
-    inherited::isInitialized_ = false;
   } // end IF
 
-  // *NOTE*: need to clean up timer beyond this point !
+  crunch_ = configuration_in.crunchMessages;
 
-  allocator_ = configuration_in.streamConfiguration->messageAllocator;
   debugScanner_ = configuration_in.traceScanning;
   debugParser_ = configuration_in.traceParsing;
 
-  crunch_ = configuration_in.crunchMessages;
-  DATA_T* data_p = NULL;
-  ACE_NEW_NORETURN (data_p,
-                    DATA_T ());
-  if (!data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-    return false;
-  } // end IF
-  ACE_NEW_NORETURN (data_p->HTTPRecord,
-                    RecordType ());
-  if (!data_p->HTTPRecord)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-
-    // clean up
-    delete data_p;
-
-    return false;
-  } // end IF
-  // *IMPORTANT NOTE*: fire-and-forget API (data_p)
-  ACE_NEW_NORETURN (dataContainer_,
-                    DATA_CONTAINER_T (data_p));
-  if (!dataContainer_)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-
-    // clean up
-    delete data_p;
-
-    return false;
-  } // end IF
+  inherited2::initialize (debugScanner_,
+                          debugParser_,
+                          inherited::msg_queue_,
+                          true,
+                          true);
 
   return inherited::initialize (configuration_in);
 }
@@ -189,25 +134,20 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType,
-          typename RecordType>
+          typename SessionMessageType>
 void
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType,
-                     RecordType>::handleDataMessage (DataMessageType*& message_inout,
-                                                     bool& passMessageDownstream_out)
+                     SessionMessageType>::handleDataMessage (DataMessageType*& message_inout,
+                                                             bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::handleDataMessage"));
 
-  int result = -1;
-  DATA_CONTAINER_T* data_container_p = NULL;
   DataMessageType* message_p = NULL;
-  DataMessageType* message_2 = NULL;
-//  RecordType* record_p = NULL;
+  int result = -1;
   bool release_inbound_message = true; // message_inout
   bool release_message = false; // message_p
 
@@ -228,16 +168,13 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
     if (!headFragment_)
-    {
       headFragment_ = message_inout;
-      //message_2 = headFragment_;
-    } // end IF
     else
     {
-      for (message_2 = headFragment_;
-           message_2->cont ();
-           message_2 = dynamic_cast<DataMessageType*> (message_2->cont ()));
-      message_2->cont (message_inout);
+      for (message_p = headFragment_;
+           message_p->cont ();
+           message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
+      message_p->cont (message_inout);
 
       //// just signal the parser (see below for an explanation)
       //result = condition_.broadcast ();
@@ -246,42 +183,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       //              ACE_TEXT ("%s: failed to ACE_SYNCH_CONDITION::broadcast(): \"%s\", continuing\n"),
       //              inherited::mod_->name ()));
     } // end ELSE
-    //ACE_ASSERT (message_2);
 
     message_p = headFragment_;
-    //  dynamic_cast<DataMessageType*> (message_2->duplicate ());
-    //if (!message_p)
-    //{
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("%s: failed to ACE_Message_Block::duplicate(): \"%s\", returning\n"),
-    //              inherited::mod_->name ()));
-    //  goto error;
-    //} // end IF
-    //release_message = true;
-
-    // sanity check(s)
-    ACE_ASSERT (dataContainer_);
-
-    if (message_p->isInitialized ())
-    {
-      dataContainer_->decrease ();
-      dataContainer_ =
-        &const_cast<DATA_CONTAINER_T&> (message_p->get ());
-      dataContainer_->increase ();
-      DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-      if (!data_r.HTTPRecord)
-      {
-        ACE_NEW_NORETURN (data_r.HTTPRecord,
-                          RecordType ());
-        if (!data_r.HTTPRecord)
-        {
-          ACE_DEBUG ((LM_CRITICAL,
-                      ACE_TEXT ("%s: failed to allocate memory, aborting\n"),
-                      inherited::mod_->name ()));
-          goto error;
-        } // end IF
-      } // end IF
-    } // end IF
   } // end lock scope
   ACE_ASSERT (message_p);
   message_inout = NULL;
@@ -290,26 +193,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   { // *NOTE*: protect scanner/parser state
     //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
-    // sanity check(s)
-    ACE_ASSERT (dataContainer_);
-
-    // initialize driver ?
-    if (!isDriverInitialized_)
-    {
-      DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-      ACE_ASSERT (data_r.HTTPRecord);
-  
-      // *TODO*: find a way to resume parsing after end-of-file to support
-      //         passive parser modules
-      driver_.initialize (*data_r.HTTPRecord,
-                          debugScanner_,
-                          debugParser_,
-                          inherited::msg_queue_,
-                          true,
-                          true);
-      isDriverInitialized_ = true;
-    } // end IF
-
     // OK: parse the message (fragment)
 
     //  ACE_DEBUG ((LM_DEBUG,
@@ -317,34 +200,31 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     //              message_p->id (),
     //              message_p->length ()));
 
-    if (!driver_.parse (message_p))
+    if (!this->parse (message_p))
     { // *NOTE*: most probable reason: connection
       //         has been closed --> session end
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%s: failed to HTTP_ParserDriver::parse() (message ID was: %d), returning\n"),
+                  ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message ID was: %d), returning\n"),
                   inherited::mod_->name (),
                   message_p->id ()));
       goto error;
     } // end IF
     // the message fragment has been parsed successfully
 
-    if (!driver_.hasFinished ())
+    if (!this->hasFinished ())
       goto continue_; // --> wait for more data to arrive
 
-    // set session data
-    // *TODO*: move this somewhere else
-    DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-
+    // set session data format
     // sanity check(s)
-    ACE_ASSERT (data_r.HTTPRecord);
     ACE_ASSERT (inherited::sessionData_);
+    ACE_ASSERT (inherited2::record_);
 
     typename SessionMessageType::DATA_T::DATA_T& session_data_r =
       const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
 
     HTTP_HeadersIterator_t iterator =
-      data_r.HTTPRecord->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
-    if (iterator != data_r.HTTPRecord->headers.end ())
+      inherited2::record_->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
+    if (iterator != inherited2::record_->headers.end ())
     {
       session_data_r.format =
         HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
@@ -355,63 +235,20 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     } // end IF
 
     // make sure the whole fragment chain references the same data record
-    data_container_p = dataContainer_;
-    headFragment_->initialize (data_container_p,
-                               NULL);
-    message_2 = dynamic_cast<DataMessageType*> (headFragment_->cont ());
-    while (message_2)
+    // sanity check(s)
+    ACE_ASSERT (headFragment_->isInitialized ());
+    DATA_CONTAINER_T* data_container_p =
+        &const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
+    DATA_CONTAINER_T* data_container_2 = NULL;
+    message_p = dynamic_cast<DataMessageType*> (headFragment_->cont ());
+    while (message_p)
     {
-      dataContainer_->increase ();
-      data_container_p = dataContainer_;
-      message_2->initialize (data_container_p,
+      data_container_p->increase ();
+      data_container_2 = data_container_p;
+      message_p->initialize (data_container_2,
                              NULL);
-      message_2 = dynamic_cast<DataMessageType*> (message_2->cont ());
-
-      // *NOTE*: new data fragments may have arrived by now
-      if (message_2 == message_p)
-        break;
+      message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
     } // end WHILE
-    isDriverInitialized_ = false;
-    dataContainer_ = NULL;
-
-    // allocate a new data record
-    DATA_T* data_p = NULL;
-    ACE_NEW_NORETURN (data_p,
-                      DATA_T ());
-    if (!data_p)
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("%s: failed to allocate memory, returning\n"),
-                  inherited::mod_->name ()));
-      goto error;
-    } // end IF
-    ACE_NEW_NORETURN (data_p->HTTPRecord,
-                      HTTP_Record ());
-    if (!data_p->HTTPRecord)
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("%s: failed to allocate memory, returning\n"),
-                  inherited::mod_->name ()));
-
-      // clean up
-      delete data_p;
-
-      goto error;
-    } // end IF
-    // *IMPORTANT NOTE*: fire-and-forget API (data_p)
-    ACE_NEW_NORETURN (dataContainer_,
-                      DATA_CONTAINER_T (data_p));
-    if (!dataContainer_)
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("%s: failed to allocate memory, returning\n"),
-                  inherited::mod_->name ()));
-
-      // clean up
-      delete data_p;
-
-      goto error;
-    } // end IF
   } // end lock scope
 
   // *NOTE*: the message has been parsed successfully
@@ -437,7 +274,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
       goto error;
     } // end IF
-    headFragment_ = (message_2 ? message_2 : NULL);
+    headFragment_ = NULL;
   } // end lock scope
 
 continue_:
@@ -460,17 +297,15 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType,
-          typename RecordType>
+          typename SessionMessageType>
 void
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType,
-                     RecordType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                        bool& passMessageDownstream_out)
+                     SessionMessageType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::handleSessionMessage"));
 
@@ -492,6 +327,12 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       //  ACE_DEBUG ((LM_ERROR,
       //              ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
 
+      if (headFragment_)
+      {
+        headFragment_->release ();
+        headFragment_ = NULL;
+      } // end IF
+
       break;
     }
     default:
@@ -499,61 +340,112 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   } // end SWITCH
 }
 
+//template <ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//          typename ConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType>
+//DataMessageType*
+//HTTP_Module_Parser_T<ACE_SYNCH_USE,
+//                     TimePolicyType,
+//                     ConfigurationType,
+//                     ControlMessageType,
+//                     DataMessageType,
+//                     SessionMessageType>::allocateMessage (unsigned int requestedSize_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::allocateMessage"));
+
+//  // initialize return value(s)
+//  DataMessageType* message_p = NULL;
+
+//  if (allocator_)
+//  {
+//allocate:
+//    try {
+//      message_p =
+//        static_cast<DataMessageType*> (allocator_->malloc (requestedSize_in));
+//    } catch (...) {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
+//                  requestedSize_in));
+//      return NULL;
+//    }
+
+//    // keep retrying ?
+//    if (!message_p && !allocator_->block ())
+//      goto allocate;
+//  } // end IF
+//  else
+//    ACE_NEW_NORETURN (message_p,
+//                      DataMessageType (requestedSize_in));
+//  if (!message_p)
+//  {
+//    if (allocator_)
+//    {
+//      if (allocator_->block ())
+//        ACE_DEBUG ((LM_CRITICAL,
+//                    ACE_TEXT ("failed to allocate DataMessageType: \"%m\", aborting\n")));
+//    } // end IF
+//    else
+//      ACE_DEBUG ((LM_CRITICAL,
+//                  ACE_TEXT ("failed to allocate DataMessageType: \"%m\", aborting\n")));
+//  } // end IF
+
+//  return message_p;
+//}
+
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType,
-          typename RecordType>
-DataMessageType*
+          typename SessionMessageType>
+void
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType,
-                     RecordType>::allocateMessage (unsigned int requestedSize_in)
+                     SessionMessageType>::record (struct HTTP_Record*& record_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::allocateMessage"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::record"));
 
-  // initialize return value(s)
-  DataMessageType* message_p = NULL;
+  // sanity check(s)
+  ACE_ASSERT (record_inout);
+  ACE_ASSERT (record_inout == inherited2::record_);
+  ACE_ASSERT (!headFragment_->isInitialized ());
 
-  if (allocator_)
-  {
-allocate:
-    try {
-      message_p =
-        static_cast<DataMessageType*> (allocator_->malloc (requestedSize_in));
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-                  requestedSize_in));
-      return NULL;
-    }
+  // debug info
+  if (inherited2::trace_)
+    ACE_DEBUG ((LM_INFO,
+                ACE_TEXT ("%s"),
+                ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
 
-    // keep retrying ?
-    if (!message_p && !allocator_->block ())
-      goto allocate;
-  } // end IF
-  else
-    ACE_NEW_NORETURN (message_p,
-                      DataMessageType (requestedSize_in));
-  if (!message_p)
-  {
-    if (allocator_)
-    {
-      if (allocator_->block ())
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate DataMessageType: \"%m\", aborting\n")));
-    } // end IF
-    else
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate DataMessageType: \"%m\", aborting\n")));
-  } // end IF
+  const DATA_CONTAINER_T& data_container_r = headFragment_->get ();
+  data_container_r.set (record_inout);
+  record_inout = NULL;
 
-  return message_p;
+  inherited2::finished_ = true;
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+void
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType>::encoding (const std::string& encoding_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::encoding"));
+
+  ACE_UNUSED_ARG (encoding_in);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -570,8 +462,7 @@ template <typename LockType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename RecordType>
+          typename StatisticContainerType>
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
@@ -584,19 +475,16 @@ HTTP_Module_ParserH_T<LockType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType,
-                      RecordType>::HTTP_Module_ParserH_T ()
+                      StatisticContainerType>::HTTP_Module_ParserH_T ()
  : inherited (NULL,  // lock handle
               false, // auto-start ?
               true)  // generate sesssion messages ?
+ , inherited2 (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
+               NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
+ , headFragment_ (NULL)
+ , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
  , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
- , driver_ (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
-            NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
- , headFragment_ (NULL)
- , isDriverInitialized_ (false)
- , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
- , dataContainer_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::HTTP_Module_ParserH_T"));
 
@@ -614,8 +502,7 @@ template <typename LockType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename RecordType>
+          typename StatisticContainerType>
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
                       TimePolicyType,
@@ -628,16 +515,12 @@ HTTP_Module_ParserH_T<LockType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType,
-                      RecordType>::~HTTP_Module_ParserH_T ()
+                      StatisticContainerType>::~HTTP_Module_ParserH_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::~HTTP_Module_ParserH_T"));
 
   if (headFragment_)
     headFragment_->release ();
-
-  if (dataContainer_)
-    dataContainer_->decrease ();
 }
 
 template <typename LockType,
@@ -652,8 +535,7 @@ template <typename LockType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename RecordType>
+          typename StatisticContainerType>
 bool
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
@@ -667,8 +549,7 @@ HTTP_Module_ParserH_T<LockType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType,
-                      RecordType>::initialize (const ConfigurationType& configuration_in)
+                      StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::initialize"));
 
@@ -680,6 +561,8 @@ HTTP_Module_ParserH_T<LockType,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
 
+    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
+
     debugScanner_ = NET_PROTOCOL_DEFAULT_LEX_TRACE;
     debugParser_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
     if (headFragment_)
@@ -687,56 +570,20 @@ HTTP_Module_ParserH_T<LockType,
       headFragment_->release ();
       headFragment_ = NULL;
     } // end IF
-    isDriverInitialized_ = false;
-
-    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
-    if (dataContainer_)
-    {
-      dataContainer_->decrease ();
-      dataContainer_ = NULL;
-    } // end IF
 
     inherited::isInitialized_ = false;
   } // end IF
 
+  crunch_ = configuration_in.crunchMessages;
+
   debugScanner_ = configuration_in.traceScanning;
   debugParser_ = configuration_in.traceParsing;
 
-  crunch_ = configuration_in.crunchMessages;
-  DATA_T* data_p = NULL;
-  ACE_NEW_NORETURN (data_p,
-                    DATA_T ());
-  if (!data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-    return false;
-  } // end IF
-  ACE_NEW_NORETURN (data_p->HTTPRecord,
-                    HTTP_Record ());
-  if (!data_p->HTTPRecord)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-
-    // clean up
-    delete data_p;
-
-    return false;
-  } // end IF
-  // *IMPORTANT NOTE*: fire-and-forget API (data_p)
-  ACE_NEW_NORETURN (dataContainer_,
-                    DATA_CONTAINER_T (data_p));
-  if (!dataContainer_)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, aborting\n")));
-
-    // clean up
-    delete data_p;
-
-    return false;
-  } // end IF
+  inherited2::initialize (debugScanner_,
+                          debugParser_,
+                          inherited::msg_queue_,
+                          true,
+                          true);
 
   return inherited::initialize (configuration_in);
 }
@@ -753,8 +600,7 @@ template <typename LockType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename RecordType>
+          typename StatisticContainerType>
 void
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
@@ -768,17 +614,13 @@ HTTP_Module_ParserH_T<LockType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType,
-                      RecordType>::handleDataMessage (DataMessageType*& message_inout,
-                                                      bool& passMessageDownstream_out)
+                      StatisticContainerType>::handleDataMessage (DataMessageType*& message_inout,
+                                                                  bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleDataMessage"));
 
-  int result = -1;
-  DATA_CONTAINER_T* data_container_p = NULL;
   DataMessageType* message_p = NULL;
-  DataMessageType* message_2 = NULL;
-//  RecordType* record_p = NULL;
+  int result = -1;
   bool release_inbound_message = true; // message_inout
   bool release_message = false; // message_p
 
@@ -799,16 +641,13 @@ HTTP_Module_ParserH_T<LockType,
     //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
     if (!headFragment_)
-    {
       headFragment_ = message_inout;
-      //message_2 = headFragment_;
-    } // end IF
     else
     {
-      for (message_2 = headFragment_;
-           message_2->cont ();
-           message_2 = dynamic_cast<DataMessageType*> (message_2->cont ()));
-      message_2->cont (message_inout);
+      for (message_p = headFragment_;
+           message_p->cont ();
+           message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
+      message_p->cont (message_inout);
 
       //// just signal the parser (see below for an explanation)
       //result = condition_.broadcast ();
@@ -817,42 +656,8 @@ HTTP_Module_ParserH_T<LockType,
       //              ACE_TEXT ("%s: failed to ACE_SYNCH_CONDITION::broadcast(): \"%s\", continuing\n"),
       //              inherited::mod_->name ()));
     } // end ELSE
-    //ACE_ASSERT (message_2);
 
     message_p = headFragment_;
-    //  dynamic_cast<DataMessageType*> (message_2->duplicate ());
-    //if (!message_p)
-    //{
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("%s: failed to ACE_Message_Block::duplicate(): \"%s\", returning\n"),
-    //              inherited::mod_->name ()));
-    //  goto error;
-    //} // end IF
-    //release_message = true;
-
-    // sanity check(s)
-    ACE_ASSERT (dataContainer_);
-
-    if (message_p->isInitialized ())
-    {
-      dataContainer_->decrease ();
-      dataContainer_ =
-        &const_cast<DATA_CONTAINER_T&> (message_p->get ());
-      dataContainer_->increase ();
-      DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-      if (!data_r.HTTPRecord)
-      {
-        ACE_NEW_NORETURN (data_r.HTTPRecord,
-                          RecordType ());
-        if (!data_r.HTTPRecord)
-        {
-          ACE_DEBUG ((LM_CRITICAL,
-                      ACE_TEXT ("%s: failed to allocate memory, aborting\n"),
-                      inherited::mod_->name ()));
-          goto error;
-        } // end IF
-      } // end IF
-    } // end IF
   } // end lock scope
   ACE_ASSERT (message_p);
   message_inout = NULL;
@@ -861,26 +666,6 @@ HTTP_Module_ParserH_T<LockType,
   { // *NOTE*: protect scanner/parser state
     //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
-    // sanity check(s)
-    ACE_ASSERT (dataContainer_);
-
-    // initialize driver ?
-    if (!isDriverInitialized_)
-    {
-      DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-      ACE_ASSERT (data_r.HTTPRecord);
-  
-      // *TODO*: find a way to resume parsing after end-of-file to support
-      //         passive parser modules
-      driver_.initialize (*data_r.HTTPRecord,
-                          debugScanner_,
-                          debugParser_,
-                          inherited::msg_queue_,
-                          true,
-                          true);
-      isDriverInitialized_ = true;
-    } // end IF
-
     // OK: parse the message (fragment)
 
     //  ACE_DEBUG ((LM_DEBUG,
@@ -888,7 +673,7 @@ HTTP_Module_ParserH_T<LockType,
     //              message_p->id (),
     //              message_p->length ()));
 
-    if (!driver_.parse (message_p))
+    if (!this->parse (message_p))
     { // *NOTE*: most probable reason: connection
       //         has been closed --> session end
       ACE_DEBUG ((LM_DEBUG,
@@ -899,23 +684,20 @@ HTTP_Module_ParserH_T<LockType,
     } // end IF
     // the message fragment has been parsed successfully
 
-    if (!driver_.hasFinished ())
+    if (!this->hasFinished ())
       goto continue_; // --> wait for more data to arrive
 
-    // set session data
-    // *TODO*: move this somewhere else
-    DATA_T& data_r = const_cast<DATA_T&> (dataContainer_->get ());
-
+    // set session data format
     // sanity check(s)
-    ACE_ASSERT (data_r.HTTPRecord);
     ACE_ASSERT (inherited::sessionData_);
+    ACE_ASSERT (inherited2::record_);
 
     typename SessionMessageType::DATA_T::DATA_T& session_data_r =
       const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
 
     HTTP_HeadersIterator_t iterator =
-      data_r.HTTPRecord->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
-    if (iterator != data_r.HTTPRecord->headers.end ())
+      inherited2::record_->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
+    if (iterator != inherited2::record_->headers.end ())
     {
       session_data_r.format =
         HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
@@ -926,63 +708,20 @@ HTTP_Module_ParserH_T<LockType,
     } // end IF
 
     // make sure the whole fragment chain references the same data record
-    data_container_p = dataContainer_;
-    headFragment_->initialize (data_container_p,
-                               NULL);
-    message_2 = dynamic_cast<DataMessageType*> (headFragment_->cont ());
-    while (message_2)
+    // sanity check(s)
+    ACE_ASSERT (headFragment_->isInitialized ());
+    DATA_CONTAINER_T* data_container_p =
+        &const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
+    DATA_CONTAINER_T* data_container_2 = NULL;
+    message_p = dynamic_cast<DataMessageType*> (headFragment_->cont ());
+    while (message_p)
     {
-      dataContainer_->increase ();
-      data_container_p = dataContainer_;
-      message_2->initialize (data_container_p,
+      data_container_p->increase ();
+      data_container_2 = data_container_p;
+      message_p->initialize (data_container_2,
                              NULL);
-      message_2 = dynamic_cast<DataMessageType*> (message_2->cont ());
-
-      // *NOTE*: new data fragments may have arrived by now
-      if (message_2 == message_p)
-        break;
+      message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
     } // end WHILE
-    isDriverInitialized_ = false;
-    dataContainer_ = NULL;
-
-    // allocate a new data record
-    DATA_T* data_p = NULL;
-    ACE_NEW_NORETURN (data_p,
-                      DATA_T ());
-    if (!data_p)
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("%s: failed to allocate memory, returning\n"),
-                  inherited::mod_->name ()));
-      goto error;
-    } // end IF
-    ACE_NEW_NORETURN (data_p->HTTPRecord,
-                      HTTP_Record ());
-    if (!data_p->HTTPRecord)
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("%s: failed to allocate memory, returning\n"),
-                  inherited::mod_->name ()));
-
-      // clean up
-      delete data_p;
-
-      goto error;
-    } // end IF
-    // *IMPORTANT NOTE*: fire-and-forget API (data_p)
-    ACE_NEW_NORETURN (dataContainer_,
-                      DATA_CONTAINER_T (data_p));
-    if (!dataContainer_)
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("%s: failed to allocate memory, returning\n"),
-                  inherited::mod_->name ()));
-
-      // clean up
-      delete data_p;
-
-      goto error;
-    } // end IF
   } // end lock scope
 
   // *NOTE*: the message has been parsed successfully
@@ -1008,7 +747,7 @@ HTTP_Module_ParserH_T<LockType,
 
       goto error;
     } // end IF
-    headFragment_ = (message_2 ? message_2 : NULL);
+    headFragment_ = NULL;
   } // end lock scope
 
 continue_:
@@ -1038,8 +777,7 @@ template <typename LockType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename RecordType>
+          typename StatisticContainerType>
 void
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
@@ -1053,9 +791,8 @@ HTTP_Module_ParserH_T<LockType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType,
-                      RecordType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                         bool& passMessageDownstream_out)
+                      StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                     bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleSessionMessage"));
 
@@ -1104,6 +841,12 @@ HTTP_Module_ParserH_T<LockType,
         if (inherited::sessionEndProcessed_) break; // done
         inherited::sessionEndProcessed_ = true;
       } // end lock scope
+
+      if (headFragment_)
+      {
+        headFragment_->release ();
+        headFragment_ = NULL;
+      } // end IF
 
       // *NOTE*: in passive 'concurrent' scenarios, there is no 'worker' thread
       //         running svc()
@@ -1199,8 +942,7 @@ template <typename LockType,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename RecordType>
+          typename StatisticContainerType>
 bool
 HTTP_Module_ParserH_T<LockType,
                       TaskSynchType,
@@ -1214,8 +956,7 @@ HTTP_Module_ParserH_T<LockType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType,
-                      RecordType>::collect (StatisticContainerType& data_out)
+                      StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::collect"));
 
@@ -1239,98 +980,84 @@ HTTP_Module_ParserH_T<LockType,
   return true;
 }
 
-//template <typename LockType,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename DataMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
-//void
-//HTTP_Module_ParserH_T<LockType,
-//                     TaskSynchType,
-//                     TimePolicyType,
-//                     SessionMessageType,
-//                     DataMessageType,
-//                     ConfigurationType,
-//                     StreamStateType,
-//                     SessionDataType,
-//                     SessionDataContainerType,
-//                     StatisticContainerType>::report () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::report"));
-//
-//  ACE_ASSERT (false);
-//  ACE_NOTSUP;
-//  ACE_NOTREACHED (return);
-//}
+template <typename LockType,
+          typename TaskSynchType,
+          typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
+          typename StatisticContainerType>
+void
+HTTP_Module_ParserH_T<LockType,
+                      TaskSynchType,
+                      TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType,
+                      ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType>::record (struct HTTP_Record*& record_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::record"));
 
-//template <typename LockType,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename DataMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
-//bool
-//HTTP_Module_ParserH_T<LockType,
-//                     TaskSynchType,
-//                     TimePolicyType,
-//                     SessionMessageType,
-//                     DataMessageType,
-//                     ConfigurationType,
-//                     StreamStateType,
-//                     SessionDataType,
-//                     SessionDataContainerType,
-//                     StatisticContainerType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::putStatisticMessage"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (inherited::configuration_);
-//  ACE_ASSERT (inherited::configuration_->streamConfiguration);
-//
-////  // step1: initialize session data
-////  IRC_StreamSessionData* session_data_p = NULL;
-////  ACE_NEW_NORETURN (session_data_p,
-////                    IRC_StreamSessionData ());
-////  if (!session_data_p)
-////  {
-////    ACE_DEBUG ((LM_CRITICAL,
-////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-////    return false;
-////  } // end IF
-////  //ACE_OS::memset (data_p, 0, sizeof (IRC_SessionData));
-//  SessionDataType& session_data_r =
-//      const_cast<SessionDataType&> (inherited::sessionData_->get ());
-//  session_data_r.currentStatistic = statisticData_in;
-//
-////  // step2: allocate session data container
-////  IRC_StreamSessionData_t* session_data_container_p = NULL;
-////  // *NOTE*: fire-and-forget stream_session_data_p
-////  ACE_NEW_NORETURN (session_data_container_p,
-////                    IRC_StreamSessionData_t (stream_session_data_p,
-////                                                    true));
-////  if (!session_data_container_p)
-////  {
-////    ACE_DEBUG ((LM_CRITICAL,
-////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//
-////    // clean up
-////    delete stream_session_data_p;
-//
-////    return false;
-////  } // end IF
-//
-//  // step3: send the data downstream
-//  // *NOTE*: fire-and-forget session_data_container_p
-//  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
-//                                       *inherited::sessionData_,
-//                                       inherited::configuration_->streamConfiguration->messageAllocator);
-//}
+  // sanity check(s)
+  ACE_ASSERT (record_inout);
+  ACE_ASSERT (record_inout == inherited2::record_);
+  ACE_ASSERT (!headFragment_->isInitialized ());
+
+  // debug info
+  if (inherited2::trace_)
+    ACE_DEBUG ((LM_INFO,
+                ACE_TEXT ("%s"),
+                ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
+
+  DATA_CONTAINER_T& data_container_r =
+      const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
+//  data_container_r.set (record_inout);
+  record_inout = NULL;
+
+  inherited2::finished_ = true;
+}
+
+template <typename LockType,
+          typename TaskSynchType,
+          typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
+          typename StatisticContainerType>
+void
+HTTP_Module_ParserH_T<LockType,
+                      TaskSynchType,
+                      TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType,
+                      ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType>::encoding (const std::string& encoding_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::encoding"));
+
+  ACE_UNUSED_ARG (encoding_in);
+}

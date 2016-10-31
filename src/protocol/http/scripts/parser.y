@@ -75,8 +75,7 @@
 //#define YYTOKENTYPE
 #undef YYTOKENTYPE
 /* enum yytokentype; */
-template <typename RecordType>
-class Net_IParser;
+class HTTP_IParser;
 struct HTTP_Record;
 //class HTTP_Scanner;
 //struct YYLTYPE;
@@ -101,20 +100,20 @@ extern int HTTP_Export yydebug;
 }
 
 // calling conventions / parameter passing
-%parse-param              { Net_IParser<HTTP_Record>* driver }
+%parse-param              { HTTP_IParser* iparser_p }
 %parse-param              { yyscan_t yyscanner }
 /*%lex-param                { YYSTYPE* yylval }
 %lex-param                { YYLTYPE* yylloc } */
-%lex-param                { Net_IParser<HTTP_Record>* driver }
+%lex-param                { HTTP_IParser* iparser_p }
 %lex-param                { yyscan_t yyscanner }
-/* %param                    { Net_IParser* driver }
+/* %param                    { HTTP_IParser* iparser_p }
 %param                    { yyscan_t yyscanner } */
 
 %initial-action
 {
   // initialize the location
   //@$.initialize (YY_NULLPTR, 1, 1);
-  //@$.begin.filename = @$.end.filename = &driver->file;
+  //@$.begin.filename = @$.end.filename = &iparser_p->file;
   ACE_OS::memset (&@$, 0, sizeof (YYLTYPE));
 
   // initialize the token value container
@@ -150,14 +149,14 @@ using namespace std;
 //                       prevent ace/iosfwd.h from causing any harm
 #define ACE_IOSFWD_H
 
-#include "ace/Log_Msg.h"
-#include "ace/OS.h"
+#include <ace/Log_Msg.h>
+#include <ace/OS.h>
 
 #include "net_macros.h"
 
 #include "http_common.h"
 #include "http_defines.h"
-#include "http_parser_driver.h"
+#include "http_iparser.h"
 #include "http_scanner.h"
 #include "http_tools.h"
 
@@ -191,8 +190,8 @@ using namespace std;
 
 %code provides {
 void HTTP_Export yysetdebug (int);
-void HTTP_Export yyerror (YYLTYPE*, Net_IParser<HTTP_Record>*, yyscan_t, const char*);
-int HTTP_Export yyparse (Net_IParser<HTTP_Record>* driver, yyscan_t yyscanner);
+void HTTP_Export yyerror (YYLTYPE*, HTTP_IParser*, yyscan_t, const char*);
+int HTTP_Export yyparse (HTTP_IParser*, yyscan_t);
 void HTTP_Export yyprint (FILE*, yytokentype, YYSTYPE);
 
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
@@ -203,25 +202,29 @@ void HTTP_Export yyprint (FILE*, yytokentype, YYSTYPE);
 /* %printer                  { yyoutput << $$; } <*>; */
 /* %printer                  { yyoutput << *$$; } <sval>
 %printer                  { debug_stream () << $$; }  <ival> */
-%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*$$).c_str ()); } <sval>
-%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); }             <ival>
+%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT ("\"%s\""), (*$$).c_str ()); } <sval>
+%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT ("%d"), $$); } <ival>
 %destructor               { delete $$; $$ = NULL; } <sval>
-%destructor               { $$ = 0; }               <ival>
+%destructor               { $$ = 0; } <ival>
 /* %destructor               { ACE_DEBUG ((LM_DEBUG,
                                         ACE_TEXT ("discarding tagless symbol...\n"))); } <> */
 
 %%
-%start        message;
+%start              message;
 
 message:            head "delimiter" body            { $$ = $1 + $2 + $3; };
-head:               "method" head_rest1              { $$ = (*$1).size () + $2 + 1;
-                                                       driver->record ()->method =
+head:               "method" head_rest1              { $$ = $1->size () + $2 + 1;
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
+                                                       record_r.method =
                                                          HTTP_Tools::Method2Type (*$1);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set method: \"%s\"\n"),
-//                                                                   ACE_TEXT ((*$1).c_str ())));
+//                                                                   ACE_TEXT ($1->c_str ())));
                                                      };
-                    | "version" head_rest2           { $$ = (*$1).size () + $2 + 1;
+                    | "version" head_rest2           { $$ = $1->size () + $2 + 1;
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
                                                        std::string regex_string =
                                                          ACE_TEXT_ALWAYS_CHAR ("^");
                                                        regex_string +=
@@ -236,34 +239,36 @@ head:               "method" head_rest1              { $$ = (*$1).size () + $2 +
                                                                               std::regex_constants::match_default))
                                                        {
                                                          ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("invalid HTTP version (was: \"%s\"), continuing\n"),
-                                                                     ACE_TEXT ((*$1).c_str ())));
+                                                                     ACE_TEXT ("invalid HTTP version (was: \"%s\"), aborting\n"),
+                                                                     ACE_TEXT ($1->c_str ())));
+                                                         YYABORT;
                                                        } // end IF
-                                                       else
-                                                       {
-                                                         ACE_ASSERT (match_results.ready () && !match_results.empty ());
-                                                         ACE_ASSERT (match_results[1].matched);
+                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
+                                                       ACE_ASSERT (match_results[1].matched);
 
-                                                         driver->record ()->version =
-                                                             HTTP_Tools::Version2Type (match_results[1].str ());
+                                                       record_r.version =
+                                                           HTTP_Tools::Version2Type (match_results[1].str ());
 //                                                         ACE_DEBUG ((LM_DEBUG,
 //                                                                     ACE_TEXT ("set version: \"%s\"\n"),
 //                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
-                                                       } // end ELSE
                                                      };
                     | "end_of_fragment"              { $$ = $1;
                                                        YYACCEPT; };
 head_rest1:         request_line_rest1 headers       { $$ = $1 + $2; };
-request_line_rest1: "uri" request_line_rest2         { $$ = (*$1).size () + $2 + 1;
-                                                       driver->record ()->URI = *$1;
+request_line_rest1: "uri" request_line_rest2         { $$ = $1->size () + $2 + 1;
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
+                                                       record_r.URI = *$1;
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set URI: \"%s\"\n"),
-//                                                                   ACE_TEXT ((*$1).c_str ())));
+//                                                                   ACE_TEXT ($1->c_str ())));
                                                      };
                     | "end_of_fragment"              { $$ = $1;
                                                        YYACCEPT; };
-request_line_rest2: "version"                        { $$ = (*$1).size () + 2;
-                                                       driver->record ()->version =
+request_line_rest2: "version"                        { $$ = $1->size () + 2;
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
+                                                       record_r.version =
                                                          HTTP_Tools::Version2Type (*$1);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set version: \"%s\"\n"),
@@ -272,12 +277,14 @@ request_line_rest2: "version"                        { $$ = (*$1).size () + 2;
                     | "end_of_fragment"              { $$ = $1;
                                                        YYACCEPT; };
 head_rest2:         status_line_rest1 headers        { $$ = $1 + $2; };
-status_line_rest1:  "status" status_line_rest2       { $$ = (*$1).size () + $2 + 1;
+status_line_rest1:  "status" status_line_rest2       { $$ = $1->size () + $2 + 1;
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
                                                        std::istringstream converter;
                                                        converter.str (*$1);
                                                        int status = -1;
                                                        converter >> status;
-                                                       driver->record ()->status =
+                                                       record_r.status =
                                                            static_cast<HTTP_Status_t> (status);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set status: %d\n"),
@@ -285,18 +292,20 @@ status_line_rest1:  "status" status_line_rest2       { $$ = (*$1).size () + $2 +
                                                      };
                     | "end_of_fragment"              { $$ = $1;
                                                        YYACCEPT; };
-status_line_rest2:  "reason"                         { $$ = (*$1).size () + 2;
-                                                       driver->record ()->reason = *$1;
+status_line_rest2:  "reason"                         { $$ = $1->size () + 2;
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
+                                                       record_r.reason = *$1;
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set reason: \"%s\"\n"),
-//                                                                   ACE_TEXT ((*$1).c_str ())));
+//                                                                   ACE_TEXT ($1->c_str ())));
                                                      };
                     | "end_of_fragment"              { $$ = $1;
                                                        YYACCEPT; };
 headers:            headers "header"                 { /* NOTE*: use right-recursion here to force early state reductions
                                                                  (i.e. parse headers). This is required so the scanner can
                                                                  act on any set transfer encoding. */
-                                                       $$ = $1 + (*$2).size ();
+                                                       $$ = $1 + $2->size ();
                                                        /* *TODO*: modify the scanner so it emits the proper fields itself */
                                                        std::string regex_string =
                                                          ACE_TEXT_ALWAYS_CHAR ("^([^:]+):\\s(.+)$");
@@ -309,7 +318,7 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                                                        {
                                                          ACE_DEBUG ((LM_ERROR,
                                                                      ACE_TEXT ("invalid HTTP header (was: \"%s\"), returning\n"),
-                                                                     ACE_TEXT ((*$2).c_str ())));
+                                                                     ACE_TEXT ($2->c_str ())));
                                                          break;
                                                        } // end IF
                                                        ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -317,73 +326,113 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                                                        ACE_ASSERT (match_results[2].matched);
                                                        ACE_ASSERT (!match_results[2].str ().empty ());
 
-                                                       HTTP_Record* record_p = driver->record ();
-                                                       ACE_ASSERT (record_p);
-//                                                       HTTP_HeadersIterator_t iterator =
-//                                                         record_p->headers.find (match_results[1]);
-//                                                       if (iterator != record_p->headers.end ())
-//                                                         ACE_DEBUG ((LM_DEBUG,
-//                                                                     ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
-//                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
-
-                                                       record_p->headers[match_results[1]] =
-                                                         match_results[2];
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
+//                                                     HTTP_HeadersIterator_t iterator =
+//                                                       record_r.headers.find (match_results[1]);
+//                                                     if (iterator != record_r.headers.end ())
 //                                                       ACE_DEBUG ((LM_DEBUG,
-//                                                                   ACE_TEXT ("set header: \"%s\" to \"%s\"\n"),
-//                                                                   ACE_TEXT (match_results[1].str ().c_str ()),
-//                                                                   ACE_TEXT (match_results[2].str ().c_str ())));
-                                                     };
+//                                                                   ACE_TEXT ("duplicate HTTP header (was: \"%s\"), continuing\n"),
+//                                                                   ACE_TEXT (match_results[1].str ().c_str ())));
+
+                                                       record_r.headers[match_results[1]] =
+                                                         match_results[2];
+//                                                     ACE_DEBUG ((LM_DEBUG,
+//                                                                 ACE_TEXT ("set header: \"%s\" to \"%s\"\n"),
+//                                                                 ACE_TEXT (match_results[1].str ().c_str ()),
+//                                                                 ACE_TEXT (match_results[2].str ().c_str ())));
+
+                                                       // upcall ?
+                                                       if (match_results[1] == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING))
+                                                       {
+                                                         try {
+                                                           iparser_p->encoding (match_results[1]);
+                                                         } catch (...) {
+                                                           ACE_DEBUG ((LM_ERROR,
+                                                                       ACE_TEXT ("caught exception in HTTP_IParser::encoding(), continuing\n")));
+                                                         }
+                                                       } };
                     | "end_of_fragment"              { $$ = $1;
                                                        yyclearin;
                                                        YYACCEPT; };
                     |                                { $$ = 0; };
 //                    | %empty                         { $$ = 0; };
 body:               "body" regular_body              { $$ = $1 + $2;
-                                                       HTTP_Record* record_p = driver->record ();
-                                                       ACE_ASSERT (record_p);
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
                                                        HTTP_HeadersIterator_t iterator =
-                                                         record_p->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
-                                                       ACE_ASSERT (iterator != record_p->headers.end ());
+                                                         record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
+                                                       ACE_ASSERT (iterator != record_r.headers.end ());
                                                        std::istringstream converter;
                                                        converter.str ((*iterator).second);
                                                        unsigned int content_length = 0;
                                                        converter >> content_length;
                                                        if ($1 == content_length)
                                                        {
-                                                         driver->finished ();
+                                                         struct HTTP_Record* record_p =
+                                                           &record_r;
+                                                         try {
+                                                           iparser_p->record (record_p);
+                                                         } catch (...) {
+                                                           ACE_DEBUG ((LM_ERROR,
+                                                                       ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                         }
                                                          YYACCEPT;
-                                                       } // end IF
-                                                     };
+                                                       } };
                     | "chunk" chunked_body           { $$ = $1 + $2; };
                     | "end_of_fragment"              { $$ = $1;
                                                        yyclearin;
                                                        YYACCEPT; };
 regular_body:       "body" regular_body              { $$ = $1 + $2;
-                                                       HTTP_Record* record_p = driver->record ();
-                                                       ACE_ASSERT (record_p);
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
                                                        HTTP_HeadersIterator_t iterator =
-                                                         record_p->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
-                                                       ACE_ASSERT (iterator != record_p->headers.end ());
+                                                         record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
+                                                       ACE_ASSERT (iterator != record_r.headers.end ());
                                                        std::istringstream converter;
                                                        converter.str ((*iterator).second);
                                                        unsigned int content_length = 0;
                                                        converter >> content_length;
                                                        if ($1 == content_length)
                                                        {
-                                                         driver->finished ();
+                                                         struct HTTP_Record* record_p =
+                                                           &record_r;
+                                                         try {
+                                                           iparser_p->record (record_p);
+                                                         } catch (...) {
+                                                           ACE_DEBUG ((LM_ERROR,
+                                                                       ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                         }
                                                          YYACCEPT;
-                                                       } // end IF
-                                                     };
+                                                       } };
                     | "end_of_fragment"              { $$ = $1;
                                                        yyclearin;
                                                        YYACCEPT; };
                     |                                { $$ = 0;
-                                                       driver->finished ();
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
+                                                       struct HTTP_Record* record_p =
+                                                           &record_r;
+                                                       try {
+                                                         iparser_p->record (record_p);
+                                                       } catch (...) {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                       }
                                                        YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
 //                    | %empty                         { $$ = 0;
 //                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
 chunked_body:       chunks headers "delimiter"     { $$ = $1 + $2 + $3; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
-                                                     driver->finished ();
+                                                     struct HTTP_Record& record_r =
+                                                       iparser_p->current ();
+                                                     struct HTTP_Record* record_p =
+                                                       &record_r;
+                                                     try {
+                                                       iparser_p->record (record_p);
+                                                     } catch (...) {
+                                                       ACE_DEBUG ((LM_ERROR,
+                                                                   ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                     }
                                                      YYACCEPT; };
                     | "end_of_fragment"              { $$ = $1;
                                                        yyclearin;
@@ -403,7 +452,7 @@ yy::HTTP_Parser::error (const location_type& location_in,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Parser::error"));
 
-  driver->error (location_in, message_in);
+  iparser_p->error (location_in, message_in);
 }
 
 void
@@ -424,7 +473,7 @@ yysetdebug (int debug_in)
 
 void
 yyerror (YYLTYPE* location_in,
-         Net_IParser<HTTP_Record>* driver_in,
+         HTTP_IParser* iparser_in,
          yyscan_t context_in,
          const char* message_in)
 {
@@ -434,9 +483,14 @@ yyerror (YYLTYPE* location_in,
 
   // sanity check(s)
   ACE_ASSERT (location_in);
-  ACE_ASSERT (driver_in);
+  ACE_ASSERT (iparser_in);
 
-  driver_in->error (*location_in, std::string (message_in));
+  try {
+    iparser_in->error (*location_in, std::string (message_in));
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in HTTP_IParser::error(), continuing\n")));
+  }
 }
 
 void

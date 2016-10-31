@@ -51,6 +51,7 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_common.h
      http_defines.h
      http_exports.h
+     http_iparser.h
      http_message.cpp
      http_message.h
      http_parser.cpp
@@ -135,6 +136,7 @@ install (FILES
          http_common.h
          http_defines.h
          http_exports.h
+         http_iparser.h
          http_message.h
          http_parser.h
          http_parser_driver.h

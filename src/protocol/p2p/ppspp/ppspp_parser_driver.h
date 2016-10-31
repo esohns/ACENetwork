@@ -39,7 +39,7 @@ struct YYLTYPE;
 template <typename RecordType,
           typename SessionMessageType>
 class HTTP_ParserDriver
- : public Net_IParser<RecordType>
+// : public Net_IParser<RecordType>
 {
  public:
   HTTP_ParserDriver (bool,  // debug scanning ?

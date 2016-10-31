@@ -132,10 +132,9 @@ Test_U_Message::command () const
     return HTTP_Codes::HTTP_METHOD_INVALID;
   ACE_ASSERT (inherited::data_);
 
-  const Test_U_MessageData& data_r = inherited::data_->get ();
+  const struct HTTP_Record& data_r = inherited::data_->get ();
 
-  return (data_r.HTTPRecord ? data_r.HTTPRecord->method
-                            : HTTP_Codes::HTTP_METHOD_INVALID);
+  return data_r.method;
 }
 
 std::string

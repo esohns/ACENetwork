@@ -1,3 +1,3 @@
 add_subdirectory (bittorrent)
-add_subdirectory (ppspp)
+#add_subdirectory (ppspp)
 

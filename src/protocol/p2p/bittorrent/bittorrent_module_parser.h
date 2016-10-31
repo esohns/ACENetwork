@@ -18,8 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef BITTORRENT_MODULE_PARSER_H
-#define BITTORRENT_MODULE_PARSER_H
+#ifndef BITTORRENT_MODULE_PARSER_T_H
+#define BITTORRENT_MODULE_PARSER_T_H
+
+#include <vector>
 
 #include <ace/Global_Macros.h>
 #include <ace/Synch_Traits.h>
@@ -32,7 +34,7 @@
 #include "bittorrent_parser_driver.h"
 
 // forward declaration(s)
-class Stream_IAllocator;
+class ACE_Message_Block;
 
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
@@ -51,6 +53,7 @@ class BitTorrent_Module_Parser_T
                                   SessionMessageType,
                                   Stream_SessionId_t,
                                   Stream_SessionMessageType>
+ , public BitTorrent_ParserDriver_T<SessionMessageType>
 {
  public:
   BitTorrent_Module_Parser_T ();
@@ -64,6 +67,9 @@ class BitTorrent_Module_Parser_T
                                   bool&);                // return value: pass message downstream ?
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
+
+ protected:
+  DataMessageType* headFragment_;
 
  private:
   typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
@@ -82,25 +88,19 @@ class BitTorrent_Module_Parser_T
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
-  // helper methods
-  DataMessageType* allocateMessage (unsigned int); // requested size
+  // implement (part of) BitTorrent_IParser
+  inline virtual DataMessageType& current () { return headFragment_; };
+  virtual void message (DataMessageType*&); // data message
+  virtual void handshake (struct BitTorrent_PeerHandshake*&); // handshake
 
-  Stream_IAllocator*                          allocator_;
+  // *NOTE*: strips the protocol data from the message buffer, leaving the
+  //         'piece' content. This data is then available only from the message
+  //         record (i.e. DATA_T)
+  bool               crunch_;
 
   // driver
-  bool                                        debugScanner_;
-  bool                                        debugParser_;
-  BitTorrent_ParserDriver<SessionMessageType> driver_;
-  DataMessageType*                            headFragment_;
-  bool                                        isDriverInitialized_;
-  //ACE_SYNCH_MUTEX                       lock_;
-  //ACE_SYNCH_CONDITION                   condition_;
-
-  // *NOTE*: 'strips' the bittorrent protocol data from the message buffer,
-  //         leaving the 'piece' content. The protocol data is then available
-  //         only from the BitTorrent_Record (i.e. DATA_T)
-  bool                                        crunch_;
-  DATA_CONTAINER_T*                           dataContainer_;
+  bool               debugScanner_;
+  bool               debugParser_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -138,6 +138,7 @@ class BitTorrent_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType>
+ , public BitTorrent_ParserDriver_T<SessionMessageType>
 {
  public:
   BitTorrent_Module_ParserH_T ();
@@ -173,6 +174,9 @@ class BitTorrent_Module_ParserH_T
   virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
   //virtual void report () const;
 
+ protected:
+  DataMessageType* headFragment_;
+
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
                                       ACE_SYNCH_USE,
@@ -191,29 +195,23 @@ class BitTorrent_Module_ParserH_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_ParserH_T (const BitTorrent_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_ParserH_T& operator= (const BitTorrent_Module_ParserH_T&))
 
-  // convenience types
+  // implement (part of) BitTorrent_IParser
+  inline virtual DataMessageType& current () { return headFragment_; };
+  virtual void message (DataMessageType*&); // data message
+  virtual void handshake (struct BitTorrent_PeerHandshake*&); // handshake
+
+  // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
-  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
-  typedef BitTorrent_ParserDriver<SessionMessageType> PARSER_T;
+//  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
-  // helper methods
-  //bool putStatisticMessage (const StatisticContainerType&) const;
-  //DataMessageType* allocateMessage (unsigned int); // requested size
-
-  //Stream_IAllocator* allocator_;
+  // *NOTE*: strips the protocol data from the message buffer, leaving the
+  //         'piece' content. This data is then available only from the message
+  //         record (i.e. DATA_T)
+  bool               crunch_;
 
   // driver
-  bool              debugScanner_;
-  bool              debugParser_;
-  PARSER_T          driver_;
-  DataMessageType*  headFragment_;
-  bool              isDriverInitialized_;
-
-  // *NOTE*: 'strips' the bittorrent protocol data from the message buffer,
-  //         leaving the 'piece' content. The protocol data is then available
-  //         only from the BitTorrent_Record (i.e. DATA_T)
-  bool              crunch_;
-  DATA_CONTAINER_T* dataContainer_;
+  bool               debugScanner_;
+  bool               debugParser_;
 };
 
 // include template definition

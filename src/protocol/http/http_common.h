@@ -76,6 +76,8 @@ struct HTTP_Record
    , URI ()
    , version (HTTP_Codes::HTTP_VERSION_INVALID)
   {};
+  inline void operator+= (struct HTTP_Record rhs_in)
+  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
 
   HTTP_Form_t             form; // request
   HTTP_Headers_t          headers;
@@ -85,20 +87,7 @@ struct HTTP_Record
   std::string             URI;
   HTTP_Codes::VersionType version;
 };
-struct HTTP_MessageData
-{
-  inline HTTP_MessageData ()
-   : HTTPRecord (NULL)
-  {};
-  inline ~HTTP_MessageData ()
-  {
-    if (HTTPRecord)
-      delete HTTPRecord;
-  };
-
-  HTTP_Record* HTTPRecord;
-};
-typedef Stream_DataBase_T<HTTP_MessageData> HTTP_MessageData_t;
+typedef Stream_DataBase_T<HTTP_Record> HTTP_MessageData_t;
 
 struct HTTP_ConnectionState
  : Net_ConnectionState

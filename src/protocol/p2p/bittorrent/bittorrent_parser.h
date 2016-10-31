@@ -37,7 +37,7 @@
 # define YYDEBUG 1
 #endif
 #if YYDEBUG
-extern int yydebug;
+//extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
 
@@ -66,8 +66,7 @@ extern int yydebug;
 //#define YYTOKENTYPE
 #undef YYTOKENTYPE
 /* enum yytokentype; */
-template <typename RecordType>
-class Net_IParser;
+class BitTorrent_IParser;
 struct BitTorrent_PeerHandshake;
 struct BitTorrent_Record;
 //class BitTorrent_Scanner;
@@ -148,13 +147,13 @@ struct YYLTYPE
 
 
 
-int yyparse (Net_IParser<BitTorrent_Record>* driver, yyscan_t yyscanner);
+int yyparse (BitTorrent_IParser* iparser_p, yyscan_t yyscanner);
 /* "%code provides" blocks.  */
 
 
 void BitTorrent_Export yysetdebug (int);
-void BitTorrent_Export yyerror (YYLTYPE*, Net_IParser<struct BitTorrent_Record>*, yyscan_t, const char*);
-int BitTorrent_Export yyparse (Net_IParser<struct BitTorrent_Record>* driver, yyscan_t yyscanner);
+void BitTorrent_Export yyerror (YYLTYPE*, BitTorrent_IParser*, yyscan_t, const char*);
+int BitTorrent_Export yyparse (BitTorrent_IParser*, yyscan_t);
 void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);
 
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2

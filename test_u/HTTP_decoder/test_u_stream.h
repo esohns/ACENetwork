@@ -44,14 +44,14 @@ class Test_U_Stream
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
-                        Test_U_StreamState,
-                        Test_U_StreamConfiguration,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
                         HTTP_RuntimeStatistic_t,
-                        Stream_ModuleConfiguration,
-                        Test_U_ModuleHandlerConfiguration,
-                        Test_U_StreamSessionData,   // session data
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_ModuleHandlerConfiguration,
+                        struct Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
                         ACE_Message_Block,
                         Test_U_Message,
@@ -66,9 +66,9 @@ class Test_U_Stream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Test_U_StreamConfiguration&, // configuration
-                           bool = true,                       // setup pipeline ?
-                           bool = true);                      // reset session data ?
+  virtual bool initialize (const struct Test_U_StreamConfiguration&, // configuration
+                           bool = true,                              // setup pipeline ?
+                           bool = true);                             // reset session data ?
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
@@ -83,14 +83,14 @@ class Test_U_Stream
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
-                        Test_U_StreamState,
-                        Test_U_StreamConfiguration,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
                         HTTP_RuntimeStatistic_t,
-                        Stream_ModuleConfiguration,
-                        Test_U_ModuleHandlerConfiguration,
-                        Test_U_StreamSessionData,   // session data
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_ModuleHandlerConfiguration,
+                        struct Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
                         ACE_Message_Block,
                         Test_U_Message,
@@ -100,35 +100,35 @@ class Test_U_Stream
                                        ACE_Message_Block,
                                        Test_U_Message,
                                        Test_U_SessionMessage,
-                                       Test_U_ModuleHandlerConfiguration,
+                                       struct Test_U_ModuleHandlerConfiguration,
                                        int,
-                                       Stream_SessionMessageType,
-                                       Test_U_StreamState,
-                                       Test_U_StreamSessionData,
+                                       enum Stream_SessionMessageType,
+                                       struct Test_U_StreamState,
+                                       struct Test_U_StreamSessionData,
                                        Test_U_StreamSessionData_t,
                                        HTTP_RuntimeStatistic_t,
                                        ACE_INET_Addr,
                                        Test_U_ConnectionManager_t> WRITER_T;
   typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,
-                                       Test_U_ModuleHandlerConfiguration,
+                                       struct Test_U_ModuleHandlerConfiguration,
                                        ACE_Message_Block,
                                        Test_U_Message,
                                        Test_U_SessionMessage,
-                                       Test_U_StreamSessionData,
+                                       struct Test_U_StreamSessionData,
                                        Test_U_StreamSessionData_t,
                                        ACE_INET_Addr,
                                        Test_U_ConnectionManager_t> READER_T;
-  typedef Stream_StreamModule_T<ACE_MT_SYNCH,                      // task synch type
-                                Common_TimePolicy_t,               // time policy
-                                Stream_SessionId_t,                // session id type
-                                Test_U_StreamSessionData,          // session data type
-                                Stream_SessionMessageType,         // session event type
-                                Stream_ModuleConfiguration,        // module configuration type
-                                Test_U_ModuleHandlerConfiguration, // module handler configuration type
-                                Test_U_IStreamNotify_t,            // stream notification interface type
-                                READER_T,                          // reader type
-                                WRITER_T> IO_MODULE_T;             // writer type
+  typedef Stream_StreamModule_T<ACE_MT_SYNCH,                             // task synch type
+                                Common_TimePolicy_t,                      // time policy
+                                Stream_SessionId_t,                       // session id type
+                                struct Test_U_StreamSessionData,          // session data type
+                                enum Stream_SessionMessageType,           // session event type
+                                struct Stream_ModuleConfiguration,        // module configuration type
+                                struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                                Test_U_IStreamNotify_t,                   // stream notification interface type
+                                READER_T,                                 // reader type
+                                WRITER_T> IO_MODULE_T;                    // writer type
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))

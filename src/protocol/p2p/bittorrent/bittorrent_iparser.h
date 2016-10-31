@@ -18,36 +18,26 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef BITTORRENT_TOOLS_H
-#define BITTORRENT_TOOLS_H
+#ifndef BITTORRENT_IPARSER_H
+#define BITTORRENT_IPARSER_H
 
 #include <string>
 
-#include <ace/Global_Macros.h>
+#include "net_iparser.h"
 
 #include "bittorrent_common.h"
-#include "bittorrent_exports.h"
+#include "bittorrent_stream_common.h"
 
-class BitTorrent_Export BitTorrent_Tools
+class BitTorrent_IParser
+ : public Net_IStreamParser_T<BitTorrent_Message_t>
 {
  public:
-  inline virtual ~BitTorrent_Tools () {};
+  inline virtual ~BitTorrent_IParser () {};
 
-  // debug info
-  static std::string Handshake2String (const struct BitTorrent_Handshake&);
-  static std::string Record2String (const struct BitTorrent_Record&);
-
-  static std::string Type2String (enum BitTorrent_MessageType&);
-
-//  static bool parseURL (const std::string&, // URL
-//                        ACE_INET_Addr&,     // return value: host address
-//                        std::string&);      // return value: URI
-
- private:
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())
-  //ACE_UNIMPLEMENTED_FUNC (~BitTorrent_Tools ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools (const BitTorrent_Tools&))
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools& operator= (const BitTorrent_Tools&))
+  ////////////////////////////////////////
+  // callbacks
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual void handshake (struct BitTorrent_PeerHandshake*&) = 0; // handshake
 };
 
 #endif

@@ -22,6 +22,7 @@
 #define NET_IPARSER_H
 
 #include <string>
+#include <vector>
 
 #include "common_idumpstate.h"
 
@@ -32,30 +33,25 @@ struct YYLTYPE;
 class ACE_Message_Block;
 class ACE_Message_Queue_Base;
 
-template <typename RecordType>
 class Net_IParser
  : public Common_IDumpState
 {
  public:
   inline virtual ~Net_IParser () {};
 
-  // target data, needs to be set before invoking parse() !
-  virtual void initialize (RecordType&,                                    // target data record
-                           bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,          // debug scanner ?
+  // needs to be set before invoking parse() !
+  virtual void initialize (bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,          // debug scanner ?
                            bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,         // debug parser ?
                            ACE_Message_Queue_Base* = NULL,                 // data buffer queue (yywrap)
                            bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
                            bool = false) = 0;                              // block in parse() ?
 
   virtual ACE_Message_Block* buffer () = 0;
-  virtual RecordType* record () = 0;
   virtual bool debugScanner () const = 0;
   virtual bool isBlocking () const = 0;
 
   virtual void error (const struct YYLTYPE&,
                       const std::string&) = 0;
-  virtual void finished () = 0;
-  virtual bool hasFinished () const = 0;
 
   // *NOTE*: to be invoked by the scanner (ONLY !)
   virtual void offset (unsigned int) = 0; // offset (increment)
@@ -64,6 +60,46 @@ class Net_IParser
   virtual bool parse (ACE_Message_Block*) = 0; // data buffer handle
   virtual bool switchBuffer () = 0;
   virtual void wait () = 0;
+};
+
+//////////////////////////////////////////
+
+template <typename RecordType>
+class Net_IRecordParser_T
+ : public Net_IParser
+{
+ public:
+  inline virtual ~Net_IRecordParser_T () {};
+
+  virtual RecordType& current () = 0;
+
+  virtual bool hasFinished () const = 0;
+
+  ////////////////////////////////////////
+  // callbacks
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual void record (RecordType*&) = 0; // data record
+};
+
+//////////////////////////////////////////
+
+template <typename DataMessageType>
+class Net_IStreamParser_T
+ : public Net_IParser
+{
+ public:
+  inline virtual ~Net_IStreamParser_T () {};
+
+  // convenient types
+  typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
+  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
+
+  virtual DataMessageType& current () = 0;
+
+  ////////////////////////////////////////
+  // callbacks
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual void message (DataMessageType*&) = 0; // data message
 };
 
 #endif

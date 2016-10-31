@@ -73,8 +73,7 @@
 //#define YYTOKENTYPE
 #undef YYTOKENTYPE
 /* enum yytokentype; */
-template <typename RecordType>
-class Net_IParser;
+class BitTorrent_IParser;
 struct BitTorrent_PeerHandshake;
 struct BitTorrent_Record;
 //class BitTorrent_Scanner;
@@ -100,13 +99,13 @@ extern int BitTorrent_Export yydebug;
 }
 
 // calling conventions / parameter passing
-%parse-param              { Net_IParser<BitTorrent_Record>* driver }
+%parse-param              { BitTorrent_IParser* iparser_p }
 %parse-param              { yyscan_t yyscanner }
 /*%lex-param                { YYSTYPE* yylval }
 %lex-param                { YYLTYPE* yylloc } */
-%lex-param                { Net_IParser<BitTorrent_Record>* driver }
+%lex-param                { BitTorrent_IParser* iparser_p }
 %lex-param                { yyscan_t yyscanner }
-/* %param                    { Net_IParser* driver }
+/* %param                    { BitTorrent_IParser* iparser_p }
 %param                    { yyscan_t yyscanner } */
 
 %initial-action
@@ -186,8 +185,8 @@ using namespace std;
 
 %code provides {
 void BitTorrent_Export yysetdebug (int);
-void BitTorrent_Export yyerror (YYLTYPE*, Net_IParser<struct BitTorrent_Record>*, yyscan_t, const char*);
-int BitTorrent_Export yyparse (Net_IParser<struct BitTorrent_Record>* driver, yyscan_t yyscanner);
+void BitTorrent_Export yyerror (YYLTYPE*, BitTorrent_IParser*, yyscan_t, const char*);
+int BitTorrent_Export yyparse (BitTorrent_IParser*, yyscan_t);
 void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);
 
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
@@ -201,28 +200,123 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);
 %printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), $$->version.c_str ()); } <handshake>
 %printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), BitTorrent_Tools::Type2String ($$->type).c_str ()); } <record>
 %printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); } <size>
-%destructor { delete $$; $$ = NULL; } <handshake>
-%destructor { delete $$; $$ = NULL; } <record>
-%destructor { $$ = 0; }               <size>
+/*%destructor { delete $$; $$ = NULL; } <handshake>*/
+/*%destructor { delete $$; $$ = NULL; } <record>*/
+%destructor { $$ = NULL; } <handshake>
+%destructor { $$ = NULL; } <record>
+%destructor { $$ = 0; } <size>
 /* %destructor               { ACE_DEBUG ((LM_DEBUG,
                                         ACE_TEXT ("discarding tagless symbol...\n"))); } <> */
 
 %%
 %start    session              ;
-session:  "handshake" messages { $$ = 67 + $2; }; // 19 + 8 + 20 + 20
+session:  "handshake" messages { $$ = 67 + $2; // 19 + 8 + 20 + 20
+                                 ACE_ASSERT ($1);
+                                 struct BitTorrent_PeerHandshake* handshake_p =
+                                   const_cast<struct BitTorrent_PeerHandshake*> ($1);
+                                 try {
+                                   iparser_p->handshake (handshake_p);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::handshake(), continuing\n")));
+                                 } };
 messages: message messages     { $$ = $1 + $2; };
           | %empty             { $$ = 0; };
-message:  "bitfield"           { $$ = $1->length + 4; };
-          | "cancel"           { $$ = $1->length + 4; };
-          | "choke"            { $$ = $1->length + 4; };
-          | "have"             { $$ = $1->length + 4; };
-          | "interested"       { $$ = $1->length + 4; };
-          | "keep-alive"       { $$ = $1->length + 4; };
-          | "not_interested"   { $$ = $1->length + 4; };
-          | "piece"            { $$ = $1->length + 4; };
-          | "port"             { $$ = $1->length + 4; };
-          | "request"          { $$ = $1->length + 4; };
-          | "unchoke"          { $$ = $1->length + 4; };
+message:  "bitfield"           { $$ = $1->length + 4;
+                                 ACE_ASSERT ($1);
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 BitTorrent_Message& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_p->get ());
+                                 data_container_r.set (record_p);
+                                 try {
+                                   iparser_p->message (message_p);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } };
+          | "cancel"           { $$ = $1->length + 4;
+                                 ACE_ASSERT ($1);
+                                 try {
+                                   iparser_p->message ($1);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } };
+          | "choke"            { $$ = $1->length + 4;
+                                 ACE_ASSERT ($1);
+                                 try {
+                                   iparser_p->message ($1);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } };
+          | "have"             { $$ = $1->length + 4;
+                                 ACE_ASSERT ($1);
+                                 try {
+                                   iparser_p->message ($1);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } };
+          | "interested"       { $$ = $1->length + 4;
+                                 ACE_ASSERT ($1);
+                                 try {
+                                   iparser_p->message ($1);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } };
+          | "keep-alive"       { $$ = $1->length + 4;
+                                 ACE_ASSERT ($1);
+                                 try {
+                                   iparser_p->message ($1);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } };
+          | "not_interested"   { $$ = $1->length + 4;
+                                 ACE_ASSERT ($1);
+                                 try {
+                                   iparser_p->message ($1);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } };
+          | "piece"            { $$ = $1->length + 4;
+                                 ACE_ASSERT ($1);
+                                 try {
+                                   iparser_p->message ($1);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } };
+          | "port"             { $$ = $1->length + 4;
+                                 ACE_ASSERT ($1);
+                                 try {
+                                   iparser_p->message ($1);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } };
+          | "request"          { $$ = $1->length + 4;
+                                 ACE_ASSERT ($1);
+                                 try {
+                                   iparser_p->message ($1);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } };
+          | "unchoke"          { $$ = $1->length + 4;
+                                 ACE_ASSERT ($1);
+                                 try {
+                                   iparser_p->message ($1);
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
+                                 } };
           | "end_of_fragment"  { $$ = $1;
                                  YYACCEPT; };
 %%
@@ -254,7 +348,7 @@ yysetdebug (int debug_in)
 
 void
 yyerror (YYLTYPE* location_in,
-         Net_IParser<BitTorrent_Record>* driver_in,
+         BitTorrent_IParser* iparser_in,
          yyscan_t context_in,
          const char* message_in)
 {
@@ -264,9 +358,9 @@ yyerror (YYLTYPE* location_in,
 
   // sanity check(s)
   ACE_ASSERT (location_in);
-  ACE_ASSERT (driver_in);
+  ACE_ASSERT (iparser_in);
 
-  driver_in->error (*location_in, std::string (message_in));
+  iparser_in->error (*location_in, std::string (message_in));
 }
 
 void

@@ -30,6 +30,16 @@
 #include "bittorrent_defines.h"
 
 std::string
+BitTorrent_Tools::Handshake2String (const struct BitTorrent_Handshake& handshake_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::Handshake2String"));
+
+  std::string result;
+  std::ostringstream converter;
+
+  return result;
+}
+std::string
 BitTorrent_Tools::Record2String (const struct BitTorrent_Record& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::Record2String"));

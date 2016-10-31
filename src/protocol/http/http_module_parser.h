@@ -29,7 +29,9 @@
 #include "stream_task_base_asynch.h"
 //#include "stream_task_base_synch.h"
 
+#include "http_common.h"
 #include "http_defines.h"
+#include "http_iparser.h"
 #include "http_parser_driver.h"
 
 // forward declaration(s)
@@ -42,9 +44,7 @@ template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType,
-          ////////////////////////////////
-          typename RecordType>
+          typename SessionMessageType>
 class HTTP_Module_Parser_T
  : public Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
@@ -54,6 +54,7 @@ class HTTP_Module_Parser_T
                                   SessionMessageType,
                                   Stream_SessionId_t,
                                   Stream_SessionMessageType>
+ , public HTTP_ParserDriver_T<SessionMessageType>
 {
  public:
   HTTP_Module_Parser_T ();
@@ -68,6 +69,9 @@ class HTTP_Module_Parser_T
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
+ protected:
+  DataMessageType* headFragment_;
+
  private:
   typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
@@ -77,34 +81,27 @@ class HTTP_Module_Parser_T
                                   SessionMessageType,
                                   Stream_SessionId_t,
                                   Stream_SessionMessageType> inherited;
+  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T (const HTTP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T& operator= (const HTTP_Module_Parser_T&))
 
+  // implement (part of) HTTP_IParser
+  virtual void record (struct HTTP_Record*&); // data record
+  virtual void encoding (const std::string&); // encoding
+
   // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
-  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
-
-  // helper methods
-  DataMessageType* allocateMessage (unsigned int); // requested size
-
-  Stream_IAllocator*                    allocator_;
-
-  // driver
-  bool                                  debugScanner_;
-  bool                                  debugParser_;
-  HTTP_ParserDriver<RecordType,
-                    SessionMessageType> driver_;
-  DataMessageType*                      headFragment_;
-  bool                                  isDriverInitialized_;
-  //ACE_SYNCH_MUTEX                       lock_;
-  //ACE_SYNCH_CONDITION                   condition_;
+//  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
   // *NOTE*: 'strips' the http protocol data from the message buffer, leaving
   //         the 'document entity' content. The protocol data is then available
   //         only from the HTTP_Record (i.e. DATA_T)
-  bool                                  crunch_;
-  DATA_CONTAINER_T*                     dataContainer_;
+  bool             crunch_;
+
+  // driver
+  bool             debugScanner_;
+  bool             debugParser_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -127,9 +124,7 @@ template <typename LockType,
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
-          typename StatisticContainerType,
-          ////////////////////////////////
-          typename RecordType>
+          typename StatisticContainerType>
 class HTTP_Module_ParserH_T
  : public Stream_HeadModuleTaskBase_T<LockType,
                                       ACE_SYNCH_USE,
@@ -144,6 +139,7 @@ class HTTP_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType>
+ , public HTTP_ParserDriver_T<SessionMessageType>
 {
  public:
   HTTP_Module_ParserH_T ();
@@ -179,6 +175,9 @@ class HTTP_Module_ParserH_T
   virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
   //virtual void report () const;
 
+ protected:
+  DataMessageType* headFragment_;
+
  private:
   typedef Stream_HeadModuleTaskBase_T<LockType,
                                       ACE_SYNCH_USE,
@@ -193,34 +192,27 @@ class HTTP_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType> inherited;
+  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T (const HTTP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T& operator= (const HTTP_Module_ParserH_T&))
 
+  // implement (part of) HTTP_IParser
+  virtual void record (struct HTTP_Record*&); // data record
+  virtual void encoding (const std::string&); // encoding
+
   // convenience types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
-  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
-  typedef HTTP_ParserDriver<RecordType,
-                            SessionMessageType> PARSER_T;
-
-  // helper methods
-  //bool putStatisticMessage (const StatisticContainerType&) const;
-  //DataMessageType* allocateMessage (unsigned int); // requested size
-
-  //Stream_IAllocator* allocator_;
-
-  // driver
-  bool              debugScanner_;
-  bool              debugParser_;
-  PARSER_T          driver_;
-  DataMessageType*  headFragment_;
-  bool              isDriverInitialized_;
+//  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
   // *NOTE*: 'strips' the http protocol data from the message buffer, leaving
   //         the 'document entity' content. The protocol data is then available
   //         only from the HTTP_Record (i.e. DATA_T)
-  bool              crunch_;
-  DATA_CONTAINER_T* dataContainer_;
+  bool             crunch_;
+
+  // driver
+  bool             debugScanner_;
+  bool             debugParser_;
 };
 
 // include template definition

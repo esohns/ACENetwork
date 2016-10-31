@@ -30,18 +30,16 @@
 #include "http_parser.h"
 #include "http_scanner.h"
 
-template <typename RecordType,
-          typename SessionMessageType>
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::HTTP_ParserDriver (bool traceScanning_in,
-                                                          bool traceParsing_in)
+template <typename SessionMessageType>
+HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (bool traceScanning_in,
+                                                              bool traceParsing_in)
  : finished_ (false)
  , fragment_ (NULL)
  , offset_ (0)
  , record_ (NULL)
+ , trace_ (traceParsing_in)
  , blockInParse_ (false)
  , isFirst_ (true)
- , trace_ (traceParsing_in)
 //, parser_ (this,               // driver
 //           &numberOfMessages_, // counter
 //           scannerState_)      // scanner
@@ -51,7 +49,7 @@ HTTP_ParserDriver<RecordType,
  , useYYScanBuffer_ (HTTP_DEFAULT_USE_YY_SCAN_BUFFER)
  , isInitialized_ (false)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::HTTP_ParserDriver"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::HTTP_ParserDriver_T"));
 
   if (HTTP_Scanner_lex_init_extra (this, &scannerState_))
     ACE_DEBUG ((LM_ERROR,
@@ -70,37 +68,37 @@ HTTP_ParserDriver<RecordType,
 #endif
 }
 
-template <typename RecordType,
-          typename SessionMessageType>
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::~HTTP_ParserDriver ()
+template <typename SessionMessageType>
+HTTP_ParserDriver_T<SessionMessageType>::~HTTP_ParserDriver_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::~HTTP_ParserDriver"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::~HTTP_ParserDriver_T"));
 
   // finalize lex scanner
   if (HTTP_Scanner_lex_destroy (scannerState_))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to yylex_destroy: \"%m\", continuing\n")));
+
+  if (record_)
+    delete record_;
 }
 
-template <typename RecordType,
-          typename SessionMessageType>
+template <typename SessionMessageType>
 void
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::initialize (RecordType& record_in,
-                                                   bool traceScanning_in,
+HTTP_ParserDriver_T<SessionMessageType>::initialize (bool traceScanning_in,
                                                    bool traceParsing_in,
                                                    ACE_Message_Queue_Base* messageQueue_in,
                                                    bool useYYScanBuffer_in,
                                                    bool blockInParse_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::initialize"));
 
   if (isInitialized_)
   {
     finished_ = false;
     fragment_ = NULL;
     offset_ = 0;
+    if (record_)
+      delete record_;
     record_ = NULL;
 
     blockInParse_ = false;
@@ -128,8 +126,6 @@ HTTP_ParserDriver<RecordType,
     isInitialized_ = false;
   } // end IF
 
-  record_ = &record_in;
-
   blockInParse_ = blockInParse_in;
   trace_ = traceParsing_in;
   messageQueue_ = messageQueue_in;
@@ -148,25 +144,12 @@ HTTP_ParserDriver<RecordType,
   isInitialized_ = true;
 }
 
-template <typename RecordType,
-          typename SessionMessageType>
-bool
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::debugScanner () const
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::debugScanner"));
-
-  return (HTTP_Scanner_get_debug (scannerState_) != 0);
-}
-
-template <typename RecordType,
-          typename SessionMessageType>
+template <typename SessionMessageType>
 void
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::error (const YYLTYPE& location_in,
+HTTP_ParserDriver_T<SessionMessageType>::error (const YYLTYPE& location_in,
                                               const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::error"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
 
   // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
   ACE_DEBUG ((LM_ERROR,
@@ -197,13 +180,96 @@ HTTP_ParserDriver<RecordType,
   //std::clog << location_in << ": " << message_in << std::endl;
 }
 
-template <typename RecordType,
-          typename SessionMessageType>
+template <typename SessionMessageType>
 bool
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::switchBuffer ()
+HTTP_ParserDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::switchBuffer"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::parse"));
+
+  // sanity check(s)
+  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (data_in);
+
+  int result = -1;
+  bool do_scan_end = false;
+
+  // retain a handle to the 'current' fragment
+  fragment_ = data_in;
+  offset_ = 0;
+//  if (record_)
+//  {
+//    delete record_;
+//    record_ = NULL;
+//  } // end IF
+  record_ = NULL;
+  ACE_NEW_NORETURN (record_,
+                    struct HTTP_Record);
+  if (!record_)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+
+  if (!scan_begin ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HTTP_ParserDriver_T::scan_begin(), aborting\n")));
+    goto error;
+  } // end IF
+  do_scan_end = true;
+
+  // initialize scanner ?
+  if (isFirst_)
+  {
+    isFirst_ = false;
+    HTTP_Scanner_set_column (1, scannerState_);
+    HTTP_Scanner_set_lineno (1, scannerState_);
+  } // end IF
+
+  // parse data fragment
+  try {
+    result = ::yyparse (this, scannerState_);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
+    result = 1;
+  }
+  switch (result)
+  {
+    case 0:
+      break; // done/need more data
+    case 1:
+    default:
+    { // *NOTE*: most probable reason: connection
+      //         has been closed --> session end
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("failed to parse HTTP PDU (result was: %d), aborting\n"),
+                  result));
+      goto error;
+    }
+  } // end SWITCH
+
+  // finalize buffer/scanner
+  scan_end ();
+  do_scan_end = false;
+
+  goto continue_;
+
+error:
+  if (do_scan_end)
+    scan_end ();
+  fragment_ = NULL;
+
+continue_:
+  return (result == 0);
+}
+
+template <typename SessionMessageType>
+bool
+HTTP_ParserDriver_T<SessionMessageType>::switchBuffer ()
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::switchBuffer"));
 
   // sanity check(s)
   ACE_ASSERT (fragment_);
@@ -220,7 +286,7 @@ HTTP_ParserDriver<RecordType,
     {
       // *NOTE*: most probable reason: received session end
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("no data after HTTP_ParserDriver::wait(), aborting\n")));
+                  ACE_TEXT ("no data after HTTP_ParserDriver_T::wait(), aborting\n")));
       return false;
     } // end IF
   } // end IF
@@ -243,7 +309,7 @@ HTTP_ParserDriver<RecordType,
   if (!scan_begin ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HTTP_ParserDriver::scan_begin(), aborting\n")));
+                ACE_TEXT ("failed to HTTP_ParserDriver_T::scan_begin(), aborting\n")));
     return false;
   } // end IF
 
@@ -253,13 +319,11 @@ HTTP_ParserDriver<RecordType,
   return true;
 }
 
-template <typename RecordType,
-          typename SessionMessageType>
+template <typename SessionMessageType>
 void
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::wait ()
+HTTP_ParserDriver_T<SessionMessageType>::wait ()
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::wait"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::wait"));
 
   int result = -1;
   ACE_Message_Block* message_block_p = NULL;
@@ -337,13 +401,11 @@ HTTP_ParserDriver<RecordType,
   } // end IF
 }
 
-template <typename RecordType,
-          typename SessionMessageType>
+template <typename SessionMessageType>
 void
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::dump_state () const
+HTTP_ParserDriver_T<SessionMessageType>::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::dump_state"));
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
@@ -351,100 +413,12 @@ HTTP_ParserDriver<RecordType,
   ACE_NOTREACHED (return;)
 }
 
-template <typename RecordType,
-          typename SessionMessageType>
-bool
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::parse (ACE_Message_Block* data_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::parse"));
-
-  // sanity check(s)
-  ACE_ASSERT (isInitialized_);
-  ACE_ASSERT (data_in);
-
-  // retain a handle to the 'current' fragment
-  fragment_ = data_in;
-
-  int result = -1;
-  bool do_scan_end = false;
-  if (!scan_begin ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HTTP_ParserDriver::scan_begin(), aborting\n")));
-    goto error;
-  } // end IF
-  do_scan_end = true;
-
-  // initialize scanner ?
-  if (isFirst_)
-  {
-    HTTP_Scanner_set_column (1, scannerState_);
-    HTTP_Scanner_set_lineno (1, scannerState_);
-  } // end IF
-
-  // parse data fragment
-  try {
-    result = ::yyparse (this, scannerState_);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
-    result = 1;
-  }
-  switch (result)
-  {
-    case 0:
-      break; // done/need more data
-    case 1:
-    default:
-    { // *NOTE*: most probable reason: connection
-      //         has been closed --> session end
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("failed to parse HTTP PDU (result was: %d), aborting\n"),
-                  result));
-      goto error;
-    }
-  } // end SWITCH
-
-  // finalize buffer/scanner
-  scan_end ();
-  do_scan_end = false;
-
-  // debug info
-  if (trace_ && finished_)
-  {
-    // sanity check(s)
-    ACE_ASSERT (record_);
-
-    try {
-      ACE_DEBUG ((LM_INFO,
-                  ACE_TEXT ("%s"),
-                  ACE_TEXT (HTTP_Tools::dump (*record_).c_str ())));
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in HTTP_Tools::dump(), continuing\n")));
-    }
-  } // end IF
-
-  goto continue_;
-
-error:
-  if (do_scan_end)
-    scan_end ();
-  fragment_ = NULL;
-
-continue_:
-  return (result == 0);
-}
-
-template <typename RecordType,
-          typename SessionMessageType>
+template <typename SessionMessageType>
 void
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::error (const yy::location& location_in,
-                                              const std::string& message_in)
+HTTP_ParserDriver_T<SessionMessageType>::error (const yy::location& location_in,
+                                                const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::error"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
 
   std::ostringstream converter;
   converter << location_in;
@@ -476,13 +450,11 @@ HTTP_ParserDriver<RecordType,
 //   std::clog << location_in << ": " << message_in << std::endl;
 }
 
-template <typename RecordType,
-          typename SessionMessageType>
+template <typename SessionMessageType>
 void
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::error (const std::string& message_in)
+HTTP_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::error"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
 
   // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
   ACE_DEBUG ((LM_ERROR,
@@ -496,13 +468,11 @@ HTTP_ParserDriver<RecordType,
 //   std::clog << message_in << std::endl;
 }
 
-template <typename RecordType,
-          typename SessionMessageType>
+template <typename SessionMessageType>
 bool
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::scan_begin ()
+HTTP_ParserDriver_T<SessionMessageType>::scan_begin ()
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::scan_begin"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::scan_begin"));
 
 //  static int counter = 1;
 
@@ -545,13 +515,11 @@ HTTP_ParserDriver<RecordType,
   return true;
 }
 
-template <typename RecordType,
-          typename SessionMessageType>
+template <typename SessionMessageType>
 void
-HTTP_ParserDriver<RecordType,
-                  SessionMessageType>::scan_end ()
+HTTP_ParserDriver_T<SessionMessageType>::scan_end ()
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver::scan_end"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::scan_end"));
 
   // sanity check(s)
   ACE_ASSERT (bufferState_);

@@ -11,16 +11,16 @@
 # sanity check(s)
 command -v dirname >/dev/null 2>&1 || { echo "dirname is not installed, aborting" >&2; exit 1; }
 command -v bison >/dev/null 2>&1 || { echo "bison is not installed, aborting" >&2; exit 1; }
-#command -v dot >/dev/null 2>&1 || { echo "graphviz is not installed, aborting" >&2; exit 1; }
 HAS_GRAPHVIZ=0
-$(command -v dot) >/dev/null 2>&1
+command -v dot -V >/dev/null 2>&1
 if [ $? -eq 0 ]; then
  HAS_GRAPHVIZ=1
 else
  echo "graphviz is not installed, continuing" >&2
 fi
+command -v readlink >/dev/null 2>&1 || { echo "readlink is not installed, aborting" >&2; exit 1; }
 
-PROJECT_ROOT=$(dirname $0)/../../../..
+PROJECT_ROOT=$(readlink -e $(dirname $0)/../../../..)
 SCRIPTS_DIRECTORY=${PROJECT_ROOT}/src/protocol/http/scripts
 
 SOURCE_FILE=${SCRIPTS_DIRECTORY}/parser.y

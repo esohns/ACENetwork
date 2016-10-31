@@ -18,18 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef BITTORRENT_PARSER_DRIVER_H
-#define BITTORRENT_PARSER_DRIVER_H
+#ifndef BITTORRENT_PARSER_DRIVER_T_H
+#define BITTORRENT_PARSER_DRIVER_T_H
 
 #include <string>
 
 #include <ace/Global_Macros.h>
 
-#include "net_iparser.h"
-
 #include "location.hh"
 
 #include "bittorrent_defines.h"
+#include "bittorrent_iparser.h"
+#include "bittorrent_scanner.h"
 
 // forward declaration(s)
 class ACE_Message_Block;
@@ -39,35 +39,27 @@ typedef struct yy_buffer_state* YY_BUFFER_STATE;
 struct YYLTYPE;
 
 template <typename SessionMessageType>
-class BitTorrent_ParserDriver
- : public Net_IParser<struct BitTorrent_Record>
+class BitTorrent_ParserDriver_T
+ : public BitTorrent_IParser
 {
  public:
-  BitTorrent_ParserDriver (bool,  // debug scanning ?
-                     bool); // debug parsing ?
-  virtual ~BitTorrent_ParserDriver ();
+  BitTorrent_ParserDriver_T (bool,  // debug scanning ?
+                             bool); // debug parsing ?
+  virtual ~BitTorrent_ParserDriver_T ();
 
-  // implement Net_IParser
-  virtual void initialize (struct BitTorrent_Record&,                    // target data record
-                           bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,        // debug scanner ?
+  // implement (part of) BitTorrent_IParser
+  virtual void initialize (bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,        // debug scanner ?
                            bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,       // debug parser ?
                            ACE_Message_Queue_Base* = NULL,               // data buffer queue (yywrap)
                            bool = BITTORRENT_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
                            bool = false);                                // block in parse() ?
-
   inline virtual ACE_Message_Block* buffer () { return fragment_; };
-  inline virtual struct BitTorrent_Record* record () { return record_; };
-  virtual bool debugScanner () const;
+  inline virtual bool debugScanner () const { return BitTorrent_Scanner_get_debug (scannerState_); };
   inline virtual bool isBlocking () const { return blockInParse_; };
-
   virtual void error (const YYLTYPE&,      // location
                       const std::string&); // message
-  inline virtual void finished () { ACE_ASSERT (false); };
-  inline virtual bool hasFinished () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); };
-
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
   inline virtual unsigned int offset () const { return offset_; };
-
   virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer ();
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
@@ -76,14 +68,14 @@ class BitTorrent_ParserDriver
   virtual void dump_state () const;
 
  protected:
-  ACE_Message_Block*        fragment_;
-  unsigned int              offset_; // parsed fragment bytes
-  struct BitTorrent_Record* record_;
+  ACE_Message_Block*      fragment_;
+  unsigned int            offset_; // parsed fragment bytes
+  bool                    trace_;
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver (const BitTorrent_ParserDriver&))
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver& operator= (const BitTorrent_ParserDriver&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver_T ())
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver_T (const BitTorrent_ParserDriver_T&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver_T& operator= (const BitTorrent_ParserDriver_T&))
 
   // helper methods
   bool scan_begin ();
@@ -94,19 +86,19 @@ class BitTorrent_ParserDriver
               const std::string&); // message
   void error (const std::string&); // message
 
-  bool                      blockInParse_;
-  bool                      trace_;
+  bool                    blockInParse_;
+  bool                    isFirst_;
 
   //// parser
   //yy::BitTorrent_Parser    parser_;
 
   // scanner
-  yyscan_t                  scannerState_;
-  YY_BUFFER_STATE           bufferState_;
-  ACE_Message_Queue_Base*   messageQueue_;
-  bool                      useYYScanBuffer_;
+  yyscan_t                scannerState_;
+  YY_BUFFER_STATE         bufferState_;
+  ACE_Message_Queue_Base* messageQueue_;
+  bool                    useYYScanBuffer_;
 
-  bool                      isInitialized_;
+  bool                    isInitialized_;
 };
 
 // include template definition
