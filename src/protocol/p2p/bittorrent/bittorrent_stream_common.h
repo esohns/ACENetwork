@@ -29,41 +29,48 @@
 #include "stream_imodule.h"
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
+#include "stream_streammodule_base.h"
 
 #include "net_common.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_message.h"
+//#include "bittorrent_module_parser.h"
 #include "bittorrent_sessionmessage.h"
 //#include "bittorrent_stream.h"
 
-struct BitTorrent_MessageData
-{
-  inline BitTorrent_MessageData ()
-   : record (NULL)
-  {};
-  inline ~BitTorrent_MessageData ()
-  {
-    if (record)
-      delete record;
-  };
+typedef Stream_DataBase_T<struct BitTorrent_Record> BitTorrent_MessageData_t;
 
-  struct BitTorrent_Record* record;
-};
-typedef Stream_DataBase_T<struct BitTorrent_MessageData> BitTorrent_MessageData_t;
-
+struct BitTorrent_ProtocolConfiguration;
+struct BitTorrent_StreamConfiguration;
 struct BitTorrent_ModuleHandlerConfiguration
-{};
+{
+  inline BitTorrent_ModuleHandlerConfiguration ()
+   : protocolConfiguration (NULL)
+   , streamConfiguration (NULL)
+  {};
+
+  struct BitTorrent_ProtocolConfiguration* protocolConfiguration;
+  struct BitTorrent_StreamConfiguration*   streamConfiguration;
+};
 
 struct BitTorrent_StreamConfiguration
+ : Stream_Configuration
 {
   inline BitTorrent_StreamConfiguration ()
-   : moduleHandlerConfiguration (NULL)
-  {};
+   : Stream_Configuration ()
+   , moduleHandlerConfiguration (NULL)
+   , trackerModule (NULL)
+  {
+    bufferSize = BITTORRENT_BUFFER_SIZE;
+  };
 
   struct BitTorrent_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+
+  Stream_Module_t*                              trackerModule;
 };
 
+struct BitTorrent_ConnectionState;
 typedef Stream_Statistic BitTorrent_RuntimeStatistic_t;
 struct BitTorrent_SessionData
  : Stream_SessionData
@@ -99,11 +106,14 @@ typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 BitTorrent_Message_t,
                                 BitTorrent_SessionMessage_t> BitTorrent_ControlMessage_t;
 
-//typedef Stream_INotify_T<Stream_SessionMessageType> BitTorrent_INotify_t;
+typedef Stream_INotify_T<Stream_SessionMessageType> BitTorrent_INotify_t;
+
+//////////////////////////////////////////
 
 struct BitTorrent_Configuration;
 struct BitTorrent_ConnectionState;
 struct Net_SocketHandlerConfiguration;
+struct BitTorrent_SessionState;
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
@@ -133,6 +143,16 @@ typedef BitTorrent_PeerStream_T<struct BitTorrent_StreamState,
                                 struct Net_SocketHandlerConfiguration,
                                 struct BitTorrent_SessionState,
                                 struct Common_UI_State> BitTorrent_PeerStream_t;
+
+struct BitTorrent_ProtocolConfiguration
+{
+  inline BitTorrent_ProtocolConfiguration ()
+  {};
+
+};
+
+//////////////////////////////////////////
+
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
@@ -168,5 +188,85 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     enum Stream_SessionMessageType,
                                     BitTorrent_Message_t,
                                     BitTorrent_SessionMessage_t> BitTorrent_IStreamNotify_t;
+
+//////////////////////////////////////////
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename StatisticContainerType,
+          typename ControlMessageType,
+          typename MessageType,
+          typename SessionMessageType,
+          typename SessionDataType,
+          typename StreamType,
+          typename StreamStatusType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename ConnectionStateType,
+          typename SessionStateType,
+          typename CBDataType>
+class BitTorrent_Module_PeerHandler_T;
+
+typedef BitTorrent_Module_PeerHandler_T<ACE_INET_Addr,
+                                        struct BitTorrent_ModuleHandlerConfiguration,
+                                        struct BitTorrent_ConnectionState,
+                                        BitTorrent_RuntimeStatistic_t,
+                                        BitTorrent_ControlMessage_t,
+                                        BitTorrent_Message_t,
+                                        BitTorrent_SessionMessage_t,
+                                        struct Net_SocketConfiguration,
+                                        struct Net_SocketHandlerConfiguration,
+                                        struct BitTorrent_SessionData,
+                                        BitTorrent_PeerStream_t,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct BitTorrent_SessionState,
+                                        struct Common_GTKState> BitTorrent_PeerHandler_t;
+
+DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_SessionData,                // session data
+                                enum Stream_SessionMessageType,               // session event type
+                                struct BitTorrent_ModuleHandlerConfiguration, // module handler configuration type
+                                BitTorrent_INotify_t,                         // stream notification interface type
+                                BitTorrent_PeerHandler_t,                     // writer type
+                                BitTorrent_PeerHandler);                      // name
+
+//----------------------------------------
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename StatisticContainerType,
+          typename ControlMessageType,
+          typename MessageType,
+          typename SessionMessageType,
+          typename SessionDataType,
+          typename StreamType,
+          typename StreamStatusType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename ConnectionStateType,
+          typename SessionStateType,
+          typename CBDataType>
+class BitTorrent_Module_TrackerHandler_T;
+
+typedef BitTorrent_Module_TrackerHandler_T<ACE_INET_Addr,
+                                           struct BitTorrent_ModuleHandlerConfiguration,
+                                           struct BitTorrent_ConnectionState,
+                                           BitTorrent_RuntimeStatistic_t,
+                                           BitTorrent_ControlMessage_t,
+                                           BitTorrent_Message_t,
+                                           BitTorrent_SessionMessage_t,
+                                           struct Net_SocketConfiguration,
+                                           struct Net_SocketHandlerConfiguration,
+                                           struct BitTorrent_SessionData,
+                                           BitTorrent_TrackerStream_t,
+                                           enum Stream_StateMachine_ControlState,
+                                           struct BitTorrent_SessionState,
+                                           struct Common_GTKState> BitTorrent_TrackerHandler_t;
+
+DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_SessionData,                // session data
+                                enum Stream_SessionMessageType,               // session event type
+                                struct BitTorrent_ModuleHandlerConfiguration, // module handler configuration type
+                                BitTorrent_INotify_t,                         // stream notification interface type
+                                BitTorrent_TrackerHandler_t,                  // writer type
+                                BitTorrent_TrackerHandler);                   // name
 
 #endif

@@ -468,7 +468,7 @@ extern int IRC_Scanner_lex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 248 "./../scripts/scanner.l"
+#line 249 "./../scripts/scanner.l"
 
 
 #line 475 "irc_scanner.h"

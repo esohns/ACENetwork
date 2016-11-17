@@ -35,6 +35,7 @@
 #include <ace/Synch_Traits.h>
 
 #include "common_file_tools.h"
+#include <ace/Synch.h>
 #include "common_timer_manager.h"
 
 #include "common_ui_common.h"

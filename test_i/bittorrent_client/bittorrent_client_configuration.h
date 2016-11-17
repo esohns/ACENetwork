@@ -61,7 +61,7 @@ struct BitTorrent_Client_Configuration
    , streamConfiguration ()
    , userData ()
    ///////////////////////////////////////
-//   , protocolConfiguration ()
+   , protocolConfiguration ()
    ///////////////////////////////////////
    , cursesState (NULL)
    , groupID (COMMON_EVENT_THREAD_GROUP_ID)
@@ -78,7 +78,7 @@ struct BitTorrent_Client_Configuration
   struct BitTorrent_Client_StreamConfiguration        streamConfiguration;
   struct BitTorrent_Client_UserData*                  userData;
   // ***************************** protocol ************************************
-//  struct BitTorrent_ProtocolConfiguration             protocolConfiguration;
+  struct BitTorrent_ProtocolConfiguration             protocolConfiguration;
   // ***************************************************************************
   // *TODO*: move this somewhere else
   struct BitTorrent_Client_CursesState*               cursesState;

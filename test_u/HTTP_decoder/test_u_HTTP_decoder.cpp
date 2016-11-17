@@ -46,6 +46,7 @@
 #include "stream_allocatorheap.h"
 #include "stream_macros.h"
 
+#include <ace/Synch.h>
 #include "stream_file_sink.h"
 
 #ifdef HAVE_CONFIG_H
@@ -695,7 +696,8 @@ do_work (unsigned int bufferSize_in,
   ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
   ACE_Time_Value deadline;
   Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
-  Test_U_MessageData* message_data_p = NULL;
+//  Test_U_MessageData* message_data_p = NULL;
+  struct HTTP_Record* record_p = NULL;
   Test_U_MessageData_t* message_data_container_p = NULL;
   Test_U_Message* message_p = NULL;
   ACE_Message_Block* message_block_p = NULL;
@@ -799,22 +801,24 @@ do_work (unsigned int bufferSize_in,
               buffer));
 
   // step2: send HTTP request
-  ACE_NEW_NORETURN (message_data_p,
-                    Test_U_MessageData ());
-  if (!message_data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory, returning\n")));
+//  ACE_NEW_NORETURN (message_data_p,
+//                    Test_U_MessageData ());
+//  if (!message_data_p)
+//  {
+//    ACE_DEBUG ((LM_CRITICAL,
+//                ACE_TEXT ("failed to allocate memory, returning\n")));
 
-    // clean up
-    connection_p->close ();
-    connection_p->decrease ();
+//    // clean up
+//    connection_p->close ();
+//    connection_p->decrease ();
 
-    goto clean_up;
-  } // end IF
-  ACE_NEW_NORETURN (message_data_p->HTTPRecord,
+//    goto clean_up;
+//  } // end IF
+//  ACE_NEW_NORETURN (message_data_p->HTTPRecord,
+  ACE_NEW_NORETURN (record_p,
                     HTTP_Record ());
-  if (!message_data_p->HTTPRecord)
+//  if (!message_data_p->HTTPRecord)
+  if (!record_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
@@ -822,16 +826,18 @@ do_work (unsigned int bufferSize_in,
     // clean up
     connection_p->close ();
     connection_p->decrease ();
-    delete message_data_p;
+//    delete message_data_p;
+    delete record_p;
 
     goto clean_up;
   } // end IF
-  message_data_p->HTTPRecord->method = HTTP_Codes::HTTP_METHOD_GET;
-  message_data_p->HTTPRecord->URI = URL_in;
-  message_data_p->HTTPRecord->version = HTTP_Codes::HTTP_VERSION_1_1;
+  record_p->method = HTTP_Codes::HTTP_METHOD_GET;
+  record_p->URI = URL_in;
+  record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
   ACE_NEW_NORETURN (message_data_container_p,
-                    Test_U_MessageData_t (message_data_p,
+//                    Test_U_MessageData_t (message_data_p,
+                    Test_U_MessageData_t (record_p,
                                           true));
   if (!message_data_container_p)
   {
@@ -841,7 +847,8 @@ do_work (unsigned int bufferSize_in,
     // clean up
     connection_p->close ();
     connection_p->decrease ();
-    delete message_data_p;
+//    delete message_data_p;
+    delete record_p;
 
     goto clean_up;
   } // end IF

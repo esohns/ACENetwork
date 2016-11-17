@@ -21,11 +21,104 @@
 #ifndef BITTORRENT_COMMON_H
 #define BITTORRENT_COMMON_H
 
+#include <list>
 #include <string>
 #include <vector>
 
+#include <ace/Assert.h>
 #include <ace/Basic_Types.h>
+#include <ace/config-macros.h>
 #include <ace/OS.h>
+
+typedef std::vector<std::string> BitTorrent_MetaInfo_List_t;
+typedef BitTorrent_MetaInfo_List_t::const_iterator BitTorrent_MetaInfo_ListIterator_t;
+
+struct BitTorrent_MetaInfo_InfoDictionary_Common
+{
+  inline BitTorrent_MetaInfo_InfoDictionary_Common ()
+   : pieceLength (0)
+   , pieces ()
+   , _private (-1)
+  {};
+
+  unsigned int pieceLength;
+  std::string  pieces;
+  int          _private;
+};
+struct BitTorrent_MetaInfo_InfoDictionary_SingleFile
+ : BitTorrent_MetaInfo_InfoDictionary_Common
+{
+//  inline BitTorrent_MetaInfo_InfoDictionary_SingleFile ()
+//   : BitTorrent_MetaInfo_InfoDictionary_Common ()
+//   , name ()
+//   , length (0)
+//   , md5sum ()
+//  {};
+
+  std::string  name;
+  unsigned int length;
+  std::string  md5sum;
+};
+struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File
+{
+//  inline BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File ()
+//   : length (0)
+//   , md5sum ()
+//   , path ()
+//  {};
+
+  unsigned int length;
+  std::string  md5sum;
+  std::string  path;
+};
+typedef std::vector<struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File> BitTorrent_MetaInfo_InfoDictionary_MultipleFile_Files_t;
+typedef BitTorrent_MetaInfo_InfoDictionary_MultipleFile_Files_t::const_iterator BitTorrent_MetaInfo_InfoDictionary_MultipleFile_FilesIterator_t;
+struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile
+ : BitTorrent_MetaInfo_InfoDictionary_Common
+{
+//  inline BitTorrent_MetaInfo_InfoDictionary_MultipleFile ()
+//   : BitTorrent_MetaInfo_InfoDictionary_Common ()
+//   , name ()
+//   , files ()
+//  {};
+
+  std::string                                             name;
+  BitTorrent_MetaInfo_InfoDictionary_MultipleFile_Files_t files;
+};
+union BitTorrent_MetaInfo_InfoDictionary
+{
+  struct BitTorrent_MetaInfo_InfoDictionary_SingleFile*   single_file;
+  struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile* multiple_file;
+};
+typedef std::list<std::string> BitTorrent_MetaInfo_AnnounceList_t;
+typedef BitTorrent_MetaInfo_AnnounceList_t::const_iterator BitTorrent_MetaInfo_AnnounceListIterator_t;
+typedef std::list<BitTorrent_MetaInfo_AnnounceList_t> BitTorrent_MetaInfo_AnnounceLists_t;
+typedef BitTorrent_MetaInfo_AnnounceLists_t::const_iterator BitTorrent_MetaInfo_AnnounceListsIterator_t;
+struct BitTorrent_MetaInfo
+{
+  inline BitTorrent_MetaInfo ()
+   : singleFileMode (true)
+   , info ()
+   , announce ()
+   , announceList ()
+   , creationDate (0)
+   , comment ()
+   , createdBy ()
+   , encoding ()
+  {};
+
+  bool                                     singleFileMode;
+
+  union BitTorrent_MetaInfo_InfoDictionary info;
+  std::string                              announce;
+  BitTorrent_MetaInfo_AnnounceLists_t      announceList;
+  time_t                                   creationDate;
+  std::string                              comment;
+  std::string                              createdBy;
+  std::string                              encoding;
+};
+
+//////////////////////////////////////////
 
 enum BitTorrent_MessageType
 {
@@ -87,6 +180,8 @@ struct BitTorrent_Record
    : length (0)
    , type (BITTORRENT_MESSAGETYPE_INVALID)
   {};
+ inline void operator+= (struct BitTorrent_Record rhs_in)
+ { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
 
   unsigned int                               length;
   BitTorrent_MessageType                     type;

@@ -19,4 +19,5 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "net_stream_udpsocket_base.h"

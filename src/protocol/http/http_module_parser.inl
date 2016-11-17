@@ -123,7 +123,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   inherited2::initialize (debugScanner_,
                           debugParser_,
                           inherited::msg_queue_,
-                          true,
+//                          true,
                           true);
 
   return inherited::initialize (configuration_in);
@@ -422,7 +422,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
 
-  const DATA_CONTAINER_T& data_container_r = headFragment_->get ();
+  DATA_CONTAINER_T& data_container_r =
+      const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
   data_container_r.set (record_inout);
   record_inout = NULL;
 
@@ -582,7 +583,7 @@ HTTP_Module_ParserH_T<LockType,
   inherited2::initialize (debugScanner_,
                           debugParser_,
                           inherited::msg_queue_,
-                          true,
+//                          true,
                           true);
 
   return inherited::initialize (configuration_in);

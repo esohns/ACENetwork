@@ -42,9 +42,8 @@
 #include "bittorrent_client_tools.h"
 
 #include "bittorrent_client_gui_common.h"
-#include "bittorrent_client_gui_connection.h"
 #include "bittorrent_client_gui_defines.h"
-#include "bittorrent_client_gui_messagehandler.h"
+#include "bittorrent_client_gui_session.h"
 #include "bittorrent_client_gui_tools.h"
 
 #ifdef __cplusplus

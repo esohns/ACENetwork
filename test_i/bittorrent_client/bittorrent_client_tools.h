@@ -21,8 +21,6 @@
 #ifndef BITTORRENT_CLIENT_TOOLS_H
 #define BITTORRENT_CLIENT_TOOLS_H
 
-#include <string>
-
 #include <ace/Global_Macros.h>
 #include <ace/INET_Addr.h>
 
@@ -33,10 +31,6 @@
 class BitTorrent_Client_Tools
 {
  public:
-//  static void parseConfigurationFile (const std::string&,
-//                                      BitTorrent_LoginOptions&,
-//                                      BitTorrent_Client_Connections_t&);
-
   // *NOTE*: iff (delete module == true), fire-and-forget the last argument !
   static ACE_HANDLE connect (BitTorrent_Client_IConnector_t&, // connector handle
                              const ACE_INET_Addr&,            // peer address

@@ -80,6 +80,7 @@ class BitTorrent_Module_Parser_T
                                   SessionMessageType,
                                   Stream_SessionId_t,
                                   Stream_SessionMessageType> inherited;
+  typedef BitTorrent_ParserDriver_T<SessionMessageType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Parser_T (const BitTorrent_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Parser_T& operator= (const BitTorrent_Module_Parser_T&))
@@ -191,6 +192,7 @@ class BitTorrent_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType> inherited;
+  typedef BitTorrent_ParserDriver_T<SessionMessageType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_ParserH_T (const BitTorrent_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_ParserH_T& operator= (const BitTorrent_Module_ParserH_T&))
@@ -202,7 +204,7 @@ class BitTorrent_Module_ParserH_T
 
   // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
-//  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
+  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
   // *NOTE*: strips the protocol data from the message buffer, leaving the
   //         'piece' content. This data is then available only from the message

@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "irc_statemachine_registration.h"
 
 #include <ace/Guard_T.h>

@@ -19,4 +19,5 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "irc_module_parser.h"

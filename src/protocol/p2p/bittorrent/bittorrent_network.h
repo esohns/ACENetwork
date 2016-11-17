@@ -48,12 +48,31 @@
 //#include "bittorrent_configuration.h"
 //#include "bittorrent_stream.h"
 #include "bittorrent_stream_common.h"
+//#include "bittorrent_session.h"
 
 // forward declarations
 struct BitTorrent_Configuration;
 class BitTorrent_IControl;
-template <typename SessionStateType>
+template <typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename StreamStatusType,
+          typename SessionStateType>
 class BitTorrent_ISession_T;
+template <typename ConfigurationType,
+          typename ConnectionStateType,
+          typename PeerStreamType,
+          typename TrackerStreamType,
+          typename StreamStatusType,
+          typename PeerConnectionType,
+          typename TrackerConnectionType,
+          typename ConnectionManagerType,
+          typename StateType>
+class BitTorrent_Session_T;
 
 //////////////////////////////////////////
 
@@ -72,21 +91,18 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 BitTorrent_PeerStream_t,
                                 enum Stream_StateMachine_ControlState> BitTorrent_IPeerStreamConnection_t;
 
-struct BitTorrent_SessionState;
-typedef Net_ISession_T<ACE_INET_Addr,
-                       struct BitTorrent_Configuration,
-                       struct BitTorrent_ConnectionState,
-                       BitTorrent_RuntimeStatistic_t,
-                       struct Net_SocketConfiguration,
-                       struct Net_SocketHandlerConfiguration,
-                       BitTorrent_PeerStream_t,
-                       enum Stream_StateMachine_ControlState,
-                       struct BitTorrent_SessionState> BitTorrent_IPeerSession_t;
-
 //////////////////////////////////////////
 
 struct BitTorrent_SessionState;
-typedef BitTorrent_ISession_T<BitTorrent_SessionState> BitTorrent_ISession_t;
+typedef BitTorrent_ISession_T<ACE_INET_Addr,
+                              struct BitTorrent_Configuration,
+                              struct BitTorrent_ConnectionState,
+                              BitTorrent_RuntimeStatistic_t,
+                              struct Net_SocketConfiguration,
+                              struct Net_SocketHandlerConfiguration,
+                              BitTorrent_PeerStream_t,
+                              enum Stream_StateMachine_ControlState,
+                              struct BitTorrent_SessionState> BitTorrent_ISession_t;
 struct BitTorrent_ConnectionState
  : Net_ConnectionState
 {
@@ -255,5 +271,30 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
 
 typedef ACE_Singleton<BitTorrent_Connection_Manager_t,
                       ACE_SYNCH_MUTEX> BITTORRENT_CONNECTIONMANAGER_SINGLETON;
+
+//////////////////////////////////////////
+
+typedef BitTorrent_Session_T<struct BitTorrent_Configuration,
+                             struct BitTorrent_ConnectionState,
+                             BitTorrent_PeerStream_t,
+                             BitTorrent_TrackerStream_t,
+                             enum Stream_StateMachine_ControlState,
+//                             BitTorrent_IConnection_t,
+//                             BitTorrent_IConnection_t,
+                             BitTorrent_PeerTCPConnection_t,
+                             BitTorrent_TrackerTCPConnection_t,
+                             BitTorrent_IConnection_Manager_t,
+                             struct BitTorrent_SessionState> BitTorrent_Session_t;
+typedef BitTorrent_Session_T<struct BitTorrent_Configuration,
+                             struct BitTorrent_ConnectionState,
+                             BitTorrent_PeerStream_t,
+                             BitTorrent_TrackerStream_t,
+                             enum Stream_StateMachine_ControlState,
+//                             BitTorrent_IConnection_t,
+//                             BitTorrent_IConnection_t,
+                             BitTorrent_PeerAsynchTCPConnection_t,
+                             BitTorrent_TrackerAsynchTCPConnection_t,
+                             BitTorrent_IConnection_Manager_t,
+                             struct BitTorrent_SessionState> BitTorrent_AsynchSession_t;
 
 #endif

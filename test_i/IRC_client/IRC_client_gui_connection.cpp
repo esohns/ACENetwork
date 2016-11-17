@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "IRC_client_gui_connection.h"
 
 #include <sstream>

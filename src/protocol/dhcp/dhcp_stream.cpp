@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "dhcp_stream.h"
 
 #include "dhcp_message.h"

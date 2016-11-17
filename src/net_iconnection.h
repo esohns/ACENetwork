@@ -94,7 +94,7 @@ class Net_IConnection_T
 
 template <typename AddressType,
           typename ConfigurationType,
-          typename ConnectionStateType,
+          typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
           typename SocketConfigurationType,
@@ -102,7 +102,7 @@ template <typename AddressType,
 class Net_ISocketConnection_T
  : virtual public Net_IConnection_T<AddressType,
                                     ConfigurationType,
-                                    ConnectionStateType,
+                                    StateType,
                                     StatisticContainerType>
  , virtual public Net_ITransportLayer_T<SocketConfigurationType>
  // *NOTE*: this next line wouldn't compile (with MSVC)
@@ -125,6 +125,12 @@ class Net_ISocketConnection_T
  , public Common_IInitialize_T<HandlerConfigurationType>
 {
  public:
+  // convenience types
+  typedef Net_IConnection_T<AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StatisticContainerType> ICONNECTION_T;
+
   virtual ~Net_ISocketConnection_T () {};
 
   // *IMPORTANT NOTE*: fire-and-forget API
@@ -138,7 +144,7 @@ class Net_ISocketConnection_T
 
 template <typename AddressType,
           typename ConfigurationType,
-          typename ConnectionStateType,
+          typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
           typename SocketConfigurationType,
@@ -149,7 +155,7 @@ template <typename AddressType,
 class Net_IStreamConnection_T
  : virtual public Net_ISocketConnection_T<AddressType,
                                           ConfigurationType,
-                                          ConnectionStateType,
+                                          StateType,
                                           StatisticContainerType,
                                           SocketConfigurationType,
                                           HandlerConfigurationType>
@@ -173,35 +179,38 @@ template <typename AddressType,
           typename ConnectionStateType,
           typename StatisticContainerType,
           ////////////////////////////////
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          ////////////////////////////////
           typename StreamType,
           typename StreamStatusType,
           ////////////////////////////////
-          typename SocketConfigurationType,
-          ////////////////////////////////
-          typename HandlerConfigurationType,
-          ////////////////////////////////
-          typename SessionStateType>
+          typename StateType>
 class Net_ISession_T
-// : virtual public Net_ISocketConnection_T<AddressType,
-//                                          ConfigurationType,
-//                                          ConnectionStateType,
-//                                          StatisticContainerType,
-//                                          StreamType,
-//                                          StreamStatusType,
-//                                          SocketConfigurationType,
-//                                          HandlerConfigurationType>
 {
  public:
   virtual ~Net_ISession_T () {};
 
-  virtual const SessionStateType& state () const = 0;
+  virtual const StateType& state () const = 0;
+
+  virtual void connect (const AddressType&) = 0; // peer address
+  virtual void disconnect (const AddressType&) = 0; // peer address
 
   ////////////////////////////////////////
   // callbacks
   // *TODO*: remove ASAP
-
   virtual void connect (Net_ConnectionId_t) = 0;    // connection id
   virtual void disconnect (Net_ConnectionId_t) = 0; // connection id
+
+  // convenient types
+  typedef Net_IStreamConnection_T<AddressType,
+                                  ConfigurationType,
+                                  ConnectionStateType,
+                                  StatisticContainerType,
+                                  SocketConfigurationType,
+                                  HandlerConfigurationType,
+                                  StreamType,
+                                  StreamStatusType> ISTREAM_CONNECTION_T;
 };
 
 #endif

@@ -1,8 +1,8 @@
-// A Bison parser, made by GNU Bison 3.0.4.
+// A Bison parser, made by GNU Bison 3.0.2.
 
 // Skeleton interface for Bison LALR(1) parsers in C++
 
-// Copyright (C) 2002-2015 Free Software Foundation, Inc.
+// Copyright (C) 2002-2013 Free Software Foundation, Inc.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,19 +42,62 @@
 // //                    "%code requires" blocks.
 
 
-class HTTP_ParserDriver;
-class HTTP_Scanner;
+// *NOTE*: add double include protection, required for GNU Bison 2.4.2
+// *TODO*: remove this ASAP
+#ifndef HTTP_PARSER_H
+#define HTTP_PARSER_H
+
+#include <cstdio>
+#include <string>
+
+#include "http_exports.h"
+
+/* enum yytokentype
+{
+  END = 0,
+  METHOD = 258,
+  URI = 259,
+  VERSION = 260,
+  HEADER = 261,
+  DELIMITER = 262,
+  STATUS = 263,
+  REASON = 264,
+  BODY = 265,
+  CHUNK = 266
+}; */
+//#define YYTOKENTYPE
+/*#undef YYTOKENTYPE*/
+/* enum yytokentype; */
+class HTTP_IParser;
+struct HTTP_Record;
+//class HTTP_Scanner;
+//struct YYLTYPE;
+
+/* #define YYSTYPE
+typedef union YYSTYPE
+{
+  int          ival;
+  std::string* sval;
+} YYSTYPE; */
+#undef YYSTYPE
+//union YYSTYPE;
 
 typedef void* yyscan_t;
 
+// *NOTE*: on current versions of bison, this needs to be inserted into the
+//         header manually, as there is no way to add the export symbol to
+//         the declaration
+#define YYDEBUG 1
+extern int HTTP_Export yydebug;
+#define YYERROR_VERBOSE 1
 
 
 
-# include <cstdlib> // std::abort
+
+# include <vector>
 # include <iostream>
 # include <stdexcept>
 # include <string>
-# include <vector>
 # include "stack.hh"
 # include "location.hh"
 
@@ -114,7 +157,7 @@ typedef void* yyscan_t;
 
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 0
+# define YYDEBUG 1
 #endif
 
 
@@ -160,23 +203,23 @@ namespace yy {
       {
         END = 0,
         METHOD = 258,
-        VERSION = 259,
-        REQUEST = 260,
-        RESPONSE = 261,
-        HEADER = 262,
-        ENTITY = 263,
-        BODY = 264
+        URI = 259,
+        VERSION = 260,
+        HEADER = 261,
+        DELIMITER = 262,
+        STATUS = 263,
+        REASON = 264,
+        BODY = 265,
+        CHUNK = 266,
+        END_OF_FRAGMENT = 267
       };
     };
 
     /// (External) token type, as returned by yylex.
     typedef token::yytokentype token_type;
 
-    /// Symbol type: an internal symbol number.
+    /// Internal symbol number.
     typedef int symbol_number_type;
-
-    /// The symbol type number to denote an empty symbol.
-    enum { empty_symbol = -2 };
 
     /// Internal symbol number for tokens (subsumed by symbol_number_type).
     typedef unsigned char token_number_type;
@@ -208,14 +251,7 @@ namespace yy {
                     const semantic_type& v,
                     const location_type& l);
 
-      /// Destroy the symbol.
       ~basic_symbol ();
-
-      /// Destroy contents, and record that is empty.
-      void clear ();
-
-      /// Whether empty.
-      bool empty () const;
 
       /// Destructive move, \a s is emptied into this.
       void move (basic_symbol& s);
@@ -246,23 +282,21 @@ namespace yy {
       /// Constructor from (external) token numbers.
       by_type (kind_type t);
 
-      /// Record that this symbol is empty.
-      void clear ();
-
       /// Steal the symbol type from \a that.
       void move (by_type& that);
 
       /// The (internal) type number (corresponding to \a type).
-      /// \a empty when empty.
+      /// -1 when this symbol is empty.
       symbol_number_type type_get () const;
 
       /// The token.
       token_type token () const;
 
+      enum { empty = 0 };
+
       /// The symbol type.
-      /// \a empty_symbol when empty.
-      /// An int, not token_number_type, to be able to store empty_symbol.
-      int type;
+      /// -1 when this symbol is empty.
+      token_number_type type;
     };
 
     /// "External" symbols: returned by the scanner.
@@ -270,12 +304,15 @@ namespace yy {
 
 
     /// Build a parser object.
-    HTTP_Parser (HTTP_ParserDriver* driver_yyarg, yyscan_t yyscanner_yyarg);
+    HTTP_Parser (HTTP_IParser* iparser_p_yyarg, yyscan_t yyscanner_yyarg);
     virtual ~HTTP_Parser ();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
     virtual int parse ();
+
+    // *EDIT*
+    virtual void set (yyscan_t);
 
 #if YYDEBUG
     /// The current debugging stream.
@@ -299,9 +336,6 @@ namespace yy {
     /// Report a syntax error.
     void error (const syntax_error& err);
 
-    // *EDIT*: add a method to set the scanner context
-    void set (yyscan_t);
-
   private:
     /// This class is not copyable.
     HTTP_Parser (const HTTP_Parser&);
@@ -312,9 +346,9 @@ namespace yy {
 
     /// Generate an error message.
     /// \param yystate   the state where the error occurred.
-    /// \param yyla      the lookahead token.
+    /// \param yytoken   the lookahead token type, or yyempty_.
     virtual std::string yysyntax_error_ (state_type yystate,
-                                         const symbol_type& yyla) const;
+                                         symbol_number_type yytoken) const;
 
     /// Compute post-reduction state.
     /// \param yystate   the current state
@@ -354,9 +388,9 @@ namespace yy {
   // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
   // positive, shift that token.  If negative, reduce the rule whose
   // number is the opposite.  If YYTABLE_NINF, syntax error.
-  static const unsigned char yytable_[];
+  static const signed char yytable_[];
 
-  static const unsigned char yycheck_[];
+  static const signed char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -377,7 +411,7 @@ namespace yy {
     static const char* const yytname_[];
 #if YYDEBUG
   // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-  static const unsigned char yyrline_[];
+  static const unsigned short int yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
     virtual void yy_reduce_print_ (int r);
     /// Print the state stack on the debug stream.
@@ -417,21 +451,16 @@ namespace yy {
       /// Copy constructor.
       by_state (const by_state& other);
 
-      /// Record that this symbol is empty.
-      void clear ();
-
       /// Steal the symbol type from \a that.
       void move (by_state& that);
 
       /// The (internal) type number (corresponding to \a state).
-      /// \a empty_symbol when empty.
+      /// "empty" when empty.
       symbol_number_type type_get () const;
 
-      /// The state number used to denote an empty symbol.
-      enum { empty_state = -1 };
+      enum { empty = 0 };
 
       /// The state.
-      /// \a empty when empty.
       state_type state;
     };
 
@@ -472,21 +501,22 @@ namespace yy {
     /// Pop \a n symbols the three stacks.
     void yypop_ (unsigned int n = 1);
 
-    /// Constants.
+    // Constants.
     enum
     {
       yyeof_ = 0,
-      yylast_ = 11,     ///< Last index in yytable_.
-      yynnts_ = 8,  ///< Number of nonterminal symbols.
-      yyfinal_ = 8, ///< Termination state number.
+      yylast_ = 30,     ///< Last index in yytable_.
+      yynnts_ = 14,  ///< Number of nonterminal symbols.
+      yyempty_ = -2,
+      yyfinal_ = 14, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 10  ///< Number of tokens.
+      yyntokens_ = 13  ///< Number of tokens.
     };
 
 
     // User arguments.
-    HTTP_ParserDriver* driver;
+    HTTP_IParser* iparser_p;
     yyscan_t yyscanner;
   };
 
@@ -494,6 +524,19 @@ namespace yy {
 
 } // yy
 
+
+
+// //                    "%code provides" blocks.
+
+
+/*void HTTP_Export yysetdebug (int);
+void HTTP_Export yyerror (YYLTYPE*, HTTP_IParser*, yyscan_t, const char*);
+int HTTP_Export yyparse (HTTP_IParser*, yyscan_t);
+void HTTP_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
+
+// *NOTE*: add double include protection, required for GNU Bison 2.4.2
+// *TODO*: remove this ASAP
+#endif // HTTP_PARSER_H
 
 
 

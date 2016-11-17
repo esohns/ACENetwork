@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "IRC_client_signalhandler.h"
 
 #include <ace/Guard_T.h>

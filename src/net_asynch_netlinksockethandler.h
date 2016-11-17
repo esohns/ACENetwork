@@ -83,7 +83,7 @@ class Net_AsynchNetlinkSocketHandler_T
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
 };
 
-// include template implementation
+// include template definition
 #include "net_asynch_netlinksockethandler.inl"
 #endif
 

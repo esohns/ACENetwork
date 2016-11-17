@@ -24,13 +24,17 @@
 #include <sstream>
 
 #include <ace/Log_Msg.h>
+#include <ace/Message_Block.h>
+
+#include "common_file_tools.h"
 
 #include "net_macros.h"
 
 #include "bittorrent_defines.h"
+#include "bittorrent_metainfo_parser_driver.h"
 
 std::string
-BitTorrent_Tools::Handshake2String (const struct BitTorrent_Handshake& handshake_in)
+BitTorrent_Tools::Handshake2String (const struct BitTorrent_PeerHandshake& peerHandshake_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::Handshake2String"));
 
@@ -187,3 +191,74 @@ BitTorrent_Tools::Type2String (enum BitTorrent_MessageType& type_in)
 
 //  return true;
 //}
+
+bool
+BitTorrent_Tools::parseMetaInfoFile (const std::string& metaInfoFileName_in,
+                                     struct BitTorrent_MetaInfo& metaInfo_out,
+                                     bool traceScanning_in,
+                                     bool traceParsing_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::parseMetaInfoFile"));
+
+  // initialize return value(s)
+  if (metaInfo_out.singleFileMode)
+  {
+    delete metaInfo_out.info.single_file;
+    metaInfo_out.info.single_file = NULL;
+  } // end IF
+  else
+  {
+    delete metaInfo_out.info.multiple_file;
+    metaInfo_out.info.multiple_file = NULL;
+  } // end ELSE
+
+  BitTorrent_MetaInfo_ParserDriver_T<BitTorrent_SessionMessage_t> parser (traceScanning_in,
+                                                                          traceParsing_in);
+  parser.initialize (traceScanning_in, // trace flex scanner ?
+                     traceParsing_in,  // trace bison parser ?
+                     NULL,             // data buffer queue (yywrap)
+                     true);            // block in parse ?
+
+  // slurp the whole file
+  bool result = false;
+
+  // sanity check(s)
+  ACE_ASSERT (Common_File_Tools::isReadable (metaInfoFileName_in));
+
+  unsigned char* data_p = NULL;
+  if (!Common_File_Tools::load (metaInfoFileName_in,
+                                data_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"), aborting\n"),
+                ACE_TEXT (metaInfoFileName_in.c_str ())));
+    return false;
+  } // end IF
+  ACE_ASSERT (data_p);
+  unsigned int size = ACE_OS::strlen (reinterpret_cast<char*> (data_p)) + 1;
+  ACE_Message_Block message_block (reinterpret_cast<char*> (data_p),
+                                   size,
+                                   ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY);
+  message_block.wr_ptr (size);
+
+  if (!parser.parse (&message_block))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ParserBase_T::parse(\"%s\"), aborting\n"),
+                ACE_TEXT (metaInfoFileName_in.c_str ())));
+    goto clean;
+  } // end IF
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("parsed meta-info file \"%s\"...\n"),
+              ACE_TEXT (metaInfoFileName_in.c_str ())));
+
+  metaInfo_out = parser.record_;
+
+  result = true;
+
+clean:
+  delete [] data_p;
+
+  return result;
+}

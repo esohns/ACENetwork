@@ -36,7 +36,7 @@ elseif (WIN32)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
 endif ()
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
+#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../..)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
 #include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
@@ -82,7 +82,10 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_stream.inl
      http_stream_common.h
      http_tools.cpp
-     http_tools.h)
+     http_tools.h
+     location.hh
+     position.hh
+     stack.hh)
 set (${PROJECT_NAME}_Protocol_HTTP_SCRIPTS
      scripts/scanner.l
      scripts/parser.y)
@@ -157,6 +160,9 @@ install (FILES
          http_stream.inl
          http_stream_common.h
          http_tools.h
+         location.hh
+         position.hh
+         stack.hh
          DESTINATION include)
 install (TARGETS ${PROJECT_NAME}_Protocol_HTTP
          EXPORT ${PROJECT_NAME}Targets

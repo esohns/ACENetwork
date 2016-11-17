@@ -32,7 +32,7 @@
 #include "http_defines.h"
 
 std::string
-HTTP_Tools::dump (const HTTP_Record& record_in)
+HTTP_Tools::dump (const struct HTTP_Record& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::dump"));
 
@@ -354,7 +354,7 @@ HTTP_Tools::isHeaderType (const std::string& fieldName_in,
 }
 
 bool
-HTTP_Tools::isRequest (const HTTP_Record& record_in)
+HTTP_Tools::isRequest (const struct HTTP_Record& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::isRequest"));
 

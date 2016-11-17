@@ -38,33 +38,42 @@ fi
 # *TODO*: xsltproc /usr/local/share/bison/xslt/xml2xhtml.xsl gr.xml >gr.html
 
 # move generated file(s) into the project directory
-#mv -f position.hh ./..
-#mv -f stack.hh ./..
-#mv -f location.hh ./..
 # --> these files are static (*CHECK*) and included by default
 #mv -f HTTP_parser.h/.cpp ./..
 # *NOTE*: a specific method needs to be added to the parser class
 # --> copy a pre-patched version (back) into the project directory instead
 # *TODO*: needs to be updated after every change
-#TARGET_DIRECTORY=${PROJECT_ROOT}
-#TARGET_FILE=${TARGET_DIRECTORY}/http_parser.h
-#[ ! -f ${SOURCE_FILE} ] && echo "ERROR: file ${SOURCE_FILE} not found, aborting" && exit 1
-#cp -f ${SOURCE_FILE} ${TARGET_FILE}
-#[ $? -ne 0 ] && echo "ERROR: failed to cp \"${SOURCE_FILE}\", aborting" && exit 1
-#echo "copied \"$SOURCE_FILE\"..."
+TARGET_DIRECTORY=${PROJECT_ROOT}
+TARGET_FILE=${TARGET_DIRECTORY}/http_parser.h
+[ ! -f ${SOURCE_FILE} ] && echo "ERROR: file ${SOURCE_FILE} not found, aborting" && exit 1
+cp -f ${SOURCE_FILE} ${TARGET_FILE}
+[ $? -ne 0 ] && echo "ERROR: failed to cp \"${SOURCE_FILE}\", aborting" && exit 1
+echo "copied \"$SOURCE_FILE\"..."
 # clean up
-#SOURCE_FILE=http_parser.h
-#rm -f ${SOURCE_FILE}
-#[ $? -ne 0 ] && echo "ERROR: failed to rm \"${SOURCE_FILE}\", aborting" && exit 1
+SOURCE_FILE=http_parser.h
+rm -f ${SOURCE_FILE}
+[ $? -ne 0 ] && echo "ERROR: failed to rm \"${SOURCE_FILE}\", aborting" && exit 1
 
-FILES="http_parser.h http_parser.cpp"
-#location.hh
-#position.hh
-#stack.hh"
-# move the files into the project directory
+#FILES="http_parser.h http_parser.cpp"
+FILES="http_parser.cpp"
 for FILE in $FILES
 do
  mv -f $FILE ${SCRIPTS_DIRECTORY}/..
+ if [ $? -ne 0 ]; then
+  echo "ERROR: failed to mv \"$FILE\", aborting"
+  exit 1
+ fi
+ echo "moved \"$FILE\"..."
+done
+
+# move generated file(s) into the project directory
+# --> these files are static (*CHECK*) and included by default
+#TARGET_DIRECTORY=${PROJECT_ROOT}/3rd_party/bison
+FILES="location.hh position.hh stack.hh"
+# move the files into the 3rd_party include directory
+for FILE in $FILES
+do
+ mv -f $FILE ${TARGET_DIRECTORY}
  if [ $? -ne 0 ]; then
   echo "ERROR: failed to mv \"$FILE\", aborting"
   exit 1

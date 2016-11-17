@@ -1,23 +1,24 @@
 %top{
 #include "bittorrent_common.h"
+#include <ace/Synch.h>
 #include "bittorrent_iparser.h"
 #undef YYTOKENTYPE
 #include "bittorrent_parser.h"
 
 /*
-#define YY_DECL                                                             \
-yy::BitTorrent_Parser::token_type                                           \
-BitTorrent_Scanner_lex (yy::BitTorrent_Parser::semantic_type* yylval_param, \
-                        yy::BitTorrent_Parser::location_type* yylloc_param, \
-                        BitTorrent_IParser* iparser_p,                      \
-                        yyscan_t yyscanner)
+#define YY_DECL                                                     \
+yy::BitTorrent_Parser::token_type                                   \
+bittorrent_lex (yy::BitTorrent_Parser::semantic_type* yylval_param, \
+                yy::BitTorrent_Parser::location_type* yylloc_param, \
+                BitTorrent_IParser* iparser_p,                      \
+                yyscan_t yyscanner)
  */
-#define YY_DECL                                        \
-yytokentype                                            \
-BitTorrent_Scanner_lex (YYSTYPE* yylval_param,         \
-                        YYLTYPE* yylloc_param,         \
-                        BitTorrent_IParser* iparser_p, \
-                        yyscan_t yyscanner)
+#define YY_DECL                                \
+yytokentype                                    \
+bittorrent_lex (YYSTYPE* yylval_param,         \
+                YYLTYPE* yylloc_param,         \
+                BitTorrent_IParser* iparser_p, \
+                yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 YY_DECL;
 
@@ -25,7 +26,7 @@ YY_DECL;
 //#define YYLTYPE BitTorrent_Parser::location_type
 //#define YYSTYPE BitTorrent_Parser::semantic_type
 
-void BitTorrent_Scanner_set_column (int, yyscan_t);
+void bittorrent_set_column (int, yyscan_t);
 
 //#define FLEXINT_H
 }
@@ -65,7 +66,7 @@ void BitTorrent_Scanner_set_column (int, yyscan_t);
            --> use --noline and (manually) remove '#line's introduced by %top */
 %option ansi-definitions ansi-prototypes bison-locations
 /* *IMPORTANT NOTE*: 'read' requires 'unistd'(.h) */
-%option reentrant pointer prefix="BitTorrent_Scanner_" nomain
+%option reentrant pointer prefix="bittorrent_" nomain
 /* *TODO*: find out why 'read' does not compile (on Linux, flex 2.5.39) */
 %option align read full
 %option backup debug perf-report perf-report verbose warn
@@ -80,7 +81,6 @@ void BitTorrent_Scanner_set_column (int, yyscan_t);
            - https://wiki.theory.org/BitTorrentSpecification */
 
 OCTET                             [\x00-\xFF]
-ALPHA                             [[:alpha:]]
 DIGIT                             [-[:digit:]]
 /* big-endian */
 BEGIN                             {OCTET}{4}
@@ -91,12 +91,12 @@ URL                               {OCTET}*
 HASH                              {OCTET}{20}
 
 /* this is called 'bencoding' in BitTorrent lingo */
-STRING                            ({DIGIT}+:{ALPHA}+)
+STRING                            ({DIGIT}+:{OCTET}*)
 INTEGER                           (i{DIGIT}+e)
 LIST                              (l({INTEGER}|{STRING})*e)
-DICTIONARY                        (d(({INTEGER}|{STRING}){2})*e)
+DICTIONARY                        (d({STRING}({INTEGER}|{STRING}|{LIST}|{DICTIONARY}))*e)
 
-/* METAINFO_KEY                      (announce|info) */
+/* METAINFO_KEY                      (announce|info)
 METAINFO_KEY                      (announce|announce-list|comment|created by|creation date|encoding|info)
 METAINFO_ANNOUNCE_VALUE           {URL}
 /* METAINFO_INFO_KEY                 (name|piece length|pieces|length|files) */
@@ -110,7 +110,7 @@ METAINFO_KEY_FILES_DICTIONARY_KEY (length|md5sum|path)
 METAINFO_KEY_FILES_VALUE          (ld({METAINFO_KEY_FILES_DICTIONARY_KEY}({INTEGER}|{STRING}))*e)
 
 /* aka '.torrent' files */
-METAINFO_FILE                     {DICTIONARY}
+METAINFO_FILE                     {DICTIONARY}*/
 
 TRACKER_GET_STATUS                (completed|empty|started|stopped)
 /* TRACKER_GET_KEY                   (info_hash|peer_id|ip|port|uploaded|downloaded|left|{TRACKER_GET_STATUS}) */
@@ -172,7 +172,8 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 //#define YY_USER_ACTION yylloc->columns (yyleng);
 %}
 
-%%
+%% /* end of definitions */
+
 %{
   //yylloc->step ();
   //yy_flex_debug = HTTP_Scanner_get_debug (yyscanner);
@@ -432,23 +433,18 @@ extern "C"
 {
 #endif /* __cplusplus */
 int
-BitTorrent_Scanner_wrap (yyscan_t yyscanner)
+bittorrent_wrap (yyscan_t yyscanner)
 {
-  NETWORK_TRACE (ACE_TEXT ("::BitTorrent_Scanner_wrap"));
+  NETWORK_TRACE (ACE_TEXT ("::bittorrent_wrap"));
 
   struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
   BitTorrent_IParser* iparser_p =
-      BitTorrent_Scanner_get_extra (yyscanner);
+      bittorrent_get_extra (yyscanner);
 
   // sanity check(s)
   ACE_ASSERT (iparser_p);
   if (!iparser_p->isBlocking ())
     return 1; // not enough data, cannot proceed
-  if (iparser_p->hasFinished ())
-  {
-    BEGIN (INITIAL);
-    return 1; // done
-  } // end IF
 
   // *NOTE*: there is more data
   // 1. gobble/save the rest

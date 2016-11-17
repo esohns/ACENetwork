@@ -33,6 +33,7 @@
 #include <ace/Init_ACE.h>
 #endif
 #include <ace/Log_Msg.h>
+#include <ace/Synch.h>
 #include <ace/Proactor.h>
 #include <ace/Profile_Timer.h>
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)

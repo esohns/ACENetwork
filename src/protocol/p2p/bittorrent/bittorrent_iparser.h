@@ -28,6 +28,12 @@
 #include "bittorrent_common.h"
 #include "bittorrent_stream_common.h"
 
+//// forward declarations;
+//struct BitTorrent_SessionData;
+//template <typename SessionDataType>
+//class BitTorrent_Message_T;
+//typedef BitTorrent_Message_T<BitTorrent_SessionData> BitTorrent_Message_t;
+
 class BitTorrent_IParser
  : public Net_IStreamParser_T<BitTorrent_Message_t>
 {
@@ -39,5 +45,10 @@ class BitTorrent_IParser
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void handshake (struct BitTorrent_PeerHandshake*&) = 0; // handshake
 };
+
+//////////////////////////////////////////
+
+typedef Net_IRecordParser_T<struct BitTorrent_MetaInfo> BitTorrent_MetaInfo_IParser_t;
+typedef Net_IScanner_T<BitTorrent_MetaInfo_IParser_t> BitTorrent_MetaInfo_IScanner_t;
 
 #endif

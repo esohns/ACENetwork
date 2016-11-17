@@ -8,7 +8,6 @@
 %require                          "2.4.1"
 %skeleton                         "glr.c"
 /* %skeleton                         "lalr1.cc" */
-%token-table
 %verbose
 /* %yacc */
 
@@ -19,8 +18,8 @@
 /* %define location_type */
 /* %define api.location.type         {} */
 /* %define namespace                 {yy} */
-/* %define api.namespace             {yy} */
-%name-prefix                      "yy"
+/*%define api.namespace             {yy}*/
+%name-prefix                      "bittorrent_"
 /* %define api.prefix                {yy} */
 %pure-parser
 /* %define api.pure                  true */
@@ -41,7 +40,7 @@
 /* %define parse.error               verbose */
 /* %define parse.lac                 {full} */
 /* %define parse.lac                 {none} */
-/* %define parser_class_name         {HTTP_Parser} */
+/*%define parser_class_name         {BitTorrent_Parser}*/
 /* *NOTE*: enabling debugging functionality implies inclusion of <iostream> (see
            below). This interferes with ACE (version 6.2.3), when compiled with
            support for traditional iostreams */
@@ -71,7 +70,7 @@
   MESSAGE_REQUEST = 261,
 }; */
 //#define YYTOKENTYPE
-#undef YYTOKENTYPE
+/*#undef YYTOKENTYPE*/
 /* enum yytokentype; */
 class BitTorrent_IParser;
 struct BitTorrent_PeerHandshake;
@@ -91,11 +90,11 @@ typedef union YYSTYPE
 typedef void* yyscan_t;
 
 // *NOTE*: on current versions of bison, this needs to be inserted into the
-//         header manually, as there is no way to add the export symbol to
-//         the declaration
+//         header manually; apparently, there is no easy way to add the export
+//         symbol to the declaration
 #define YYDEBUG 1
 extern int BitTorrent_Export yydebug;
-#define YYERROR_VERBOSE
+#define YYERROR_VERBOSE 1
 }
 
 // calling conventions / parameter passing
@@ -156,12 +155,13 @@ using namespace std;
 
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
+#include <ace/Synch.h>
 #include "bittorrent_parser_driver.h"
 #include "bittorrent_scanner.h"
 #include "bittorrent_tools.h"
 
 // *TODO*: this shouldn't be necessary
-#define yylex BitTorrent_Scanner_lex
+#define yylex bittorrent_lex
 
 //#define YYPRINT(file, type, value) yyprint (file, type, value)
 }
@@ -226,11 +226,12 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
-                                 BitTorrent_Message& message_r =
+                                 BitTorrent_Message_t& message_r =
                                    iparser_p->current ();
                                  typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
-                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_p->get ());
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
                                  data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
                                    iparser_p->message (message_p);
                                  } catch (...) {
@@ -239,80 +240,160 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } };
           | "cancel"           { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ($1);
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
                                  } };
           | "choke"            { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ($1);
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
                                  } };
           | "have"             { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ($1);
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
                                  } };
           | "interested"       { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ($1);
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
                                  } };
           | "keep-alive"       { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ($1);
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
                                  } };
           | "not_interested"   { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ($1);
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
                                  } };
           | "piece"            { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ($1);
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
                                  } };
           | "port"             { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ($1);
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
                                  } };
           | "request"          { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ($1);
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
                                  } };
           | "unchoke"          { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ($1);
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
@@ -354,13 +435,14 @@ yyerror (YYLTYPE* location_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::yyerror"));
 
+  ACE_UNUSED_ARG (location_in);
   ACE_UNUSED_ARG (context_in);
 
   // sanity check(s)
-  ACE_ASSERT (location_in);
   ACE_ASSERT (iparser_in);
 
-  iparser_in->error (*location_in, std::string (message_in));
+//  iparser_in->error (*location_in, std::string (message_in));
+  iparser_in->error (std::string (message_in));
 }
 
 void

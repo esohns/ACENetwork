@@ -23,4 +23,6 @@
 
 #define BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE "bittorrent_client.ini"
 
+#define BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE "test.torrent"
+
 #endif

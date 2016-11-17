@@ -19,6 +19,5 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Condition_Recursive_Thread_Mutex.h"
-//#include "ace/Recursive_Thread_Mutex.h"
+#include <ace/Synch.h>
 #include "net_client_asynchconnector.h"

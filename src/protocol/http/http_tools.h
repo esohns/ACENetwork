@@ -49,7 +49,7 @@ class HTTP_Export HTTP_Tools
 
   static bool isHeaderType (const std::string&,      // field name
                             HTTP_Codes::HeaderType); // header type
-  static bool isRequest (const HTTP_Record&);
+  static bool isRequest (const struct HTTP_Record&);
 
   static enum Stream_Decoder_CompressionFormatType Encoding2CompressionFormat (const std::string&);
 

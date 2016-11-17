@@ -54,10 +54,11 @@ class BitTorrent_ParserDriver_T
                            bool = BITTORRENT_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
                            bool = false);                                // block in parse() ?
   inline virtual ACE_Message_Block* buffer () { return fragment_; };
-  inline virtual bool debugScanner () const { return BitTorrent_Scanner_get_debug (scannerState_); };
+  inline virtual bool debugScanner () const { return bittorrent_get_debug (scannerState_); };
   inline virtual bool isBlocking () const { return blockInParse_; };
-  virtual void error (const YYLTYPE&,      // location
-                      const std::string&); // message
+//  virtual void error (const YYLTYPE&,      // location
+//                      const std::string&); // message
+  virtual void error (const std::string&); // message
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
   inline virtual unsigned int offset () const { return offset_; };
   virtual bool parse (ACE_Message_Block*); // data buffer handle
@@ -80,11 +81,6 @@ class BitTorrent_ParserDriver_T
   // helper methods
   bool scan_begin ();
   void scan_end ();
-
-  // error handling
-  void error (const yy::location&, // location
-              const std::string&); // message
-  void error (const std::string&); // message
 
   bool                    blockInParse_;
   bool                    isFirst_;

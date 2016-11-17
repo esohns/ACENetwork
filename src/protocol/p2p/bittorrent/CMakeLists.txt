@@ -72,7 +72,7 @@ elseif (WIN32)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party)
 endif ()
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party/bison)
+#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../client_server)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../http)
@@ -82,27 +82,20 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../http)
 set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      stdafx.cpp
      stdafx.h
-#     bittorrent_bisector.cpp
-#     bittorrent_bisector.h
+     bencoding_scanner.cpp
+     bencoding_scanner.h
      bittorrent_common.h
      bittorrent_defines.h
      bittorrent_exports.h
      bittorrent_iparser.h
      bittorrent_message.cpp
      bittorrent_message.h
-     bittorrent_parser.cpp
-     bittorrent_parser.h
-     bittorrent_parser_driver.cpp
-     bittorrent_parser_driver.h
-     bittorrent_parser_driver.inl
-     bittorrent_scanner.cpp
-     bittorrent_scanner.h
-     bittorrent_message.cpp
-     bittorrent_message.h
      bittorrent_message.inl
-#     bittorrent_module_bisector.cpp
-#     bittorrent_module_bisector.h
-#     bittorrent_module_bisector.inl
+     bittorrent_metainfo_parser.cpp
+     bittorrent_metainfo_parser.h
+     bittorrent_metainfo_parser_driver.cpp
+     bittorrent_metainfo_parser_driver.h
+     bittorrent_metainfo_parser_driver.inl
      bittorrent_module_handler.cpp
      bittorrent_module_handler.h
      bittorrent_module_handler.inl
@@ -113,6 +106,13 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      bittorrent_module_streamer.h
      bittorrent_module_streamer.inl
      bittorrent_network.h
+     bittorrent_parser.cpp
+     bittorrent_parser.h
+     bittorrent_parser_driver.cpp
+     bittorrent_parser_driver.h
+     bittorrent_parser_driver.inl
+     bittorrent_scanner.cpp
+     bittorrent_scanner.h
      bittorrent_session.cpp
      bittorrent_session.h
      bittorrent_session.inl
@@ -127,8 +127,13 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      bittorrent_streamhandler.h
      bittorrent_streamhandler.inl
      bittorrent_tools.cpp
-     bittorrent_tools.h)
+     bittorrent_tools.h
+     location.hh
+     position.hh
+     stack.hh)
 set (${PROJECT_NAME}_Protocol_BitTorrent_SCRIPTS
+     scripts/bencoding.ll
+     scripts/metainfo_parser.yy
      scripts/scanner.l
      scripts/parser.y)
 
@@ -176,20 +181,14 @@ export (TARGETS ${PROJECT_NAME}_Protocol_BitTorrent
 
 ############### install files ################
 install (FILES
-#         bittorrent_bisector.h
+         bencoding_scanner.h
          bittorrent_common.h
          bittorrent_defines.h
          bittorrent_exports.h
          bittorrent_iparser.h
          bittorrent_message.h
-         bittorrent_parser.h
-         bittorrent_parser_driver.h
-         bittorrent_parser_driver.inl
-         bittorrent_scanner.h
-         bittorrent_message.h
          bittorrent_message.inl
-#         bittorrent_module_bisector.h
-#         bittorrent_module_bisector.inl
+         bittorrent_metainfo_parser.h
          bittorrent_module_handler.h
          bittorrent_module_handler.inl
          bittorrent_module_parser.h
@@ -197,6 +196,10 @@ install (FILES
          bittorrent_module_streamer.h
          bittorrent_module_streamer.inl
          bittorrent_network.h
+         bittorrent_parser.h
+         bittorrent_parser_driver.h
+         bittorrent_parser_driver.inl
+         bittorrent_scanner.h
          bittorrent_session.h
          bittorrent_session.inl
          bittorrent_sessionmessage.h
@@ -207,6 +210,9 @@ install (FILES
          bittorrent_streamhandler.inl
          bittorrent_stream_common.h
          bittorrent_tools.h
+         location.hh
+         position.hh
+         stack.hh
          DESTINATION include)
 install (TARGETS ${PROJECT_NAME}_Protocol_BitTorrent
          EXPORT ${PROJECT_NAME}Targets

@@ -29,6 +29,8 @@
 #include <ace/SOCK_Connector.h>
 #include <ace/Synch_Traits.h>
 
+#include "net_session_base.h"
+
 #include "bittorrent_common.h"
 #include "bittorrent_isession.h"
 #include "bittorrent_stream_common.h"
@@ -37,54 +39,75 @@
 class ACE_Message_Block;
 
 template <typename ConfigurationType,
-          typename StateType,
+          typename ConnectionStateType,
           ////////////////////////////////
-          typename StreamType,
+          typename PeerStreamType,
+          typename TrackerStreamType,
           typename StreamStatusType,
           ////////////////////////////////
-          typename SessionStateType,
-          ////////////////////////////////
           typename PeerConnectionType,
-          typename PeerConnectionManagerType,
-          ////////////////////////////////
           typename TrackerConnectionType,
-          typename TrackerConnectionManagerType>
+          ////////////////////////////////
+          typename ConnectionManagerType,
+          ////////////////////////////////
+          typename StateType>
 class BitTorrent_Session_T
- : public BitTorrent_ISession_T<ACE_INET_Addr,
-                                ConfigurationType,
-                                StateType,
-                                BitTorrent_RuntimeStatistic_t,
-                                struct Net_SocketConfiguration,
-                                struct Net_SocketHandlerConfiguration,
-                                StreamType,
-                                StreamStatusType,
-                                SessionStateType>
+ : public Net_SessionBase_T<ACE_INET_Addr,
+                            ConfigurationType,
+                            ConnectionStateType,
+                            BitTorrent_RuntimeStatistic_t,
+                            struct Net_SocketConfiguration,
+                            struct Net_SocketHandlerConfiguration,
+                            typename PeerConnectionType::ICONNECTION_T,
+                            ConnectionManagerType,
+                            StateType,
+                            BitTorrent_ISession_T<ACE_INET_Addr,
+                                                  ConfigurationType,
+                                                  ConnectionStateType,
+                                                  BitTorrent_RuntimeStatistic_t,
+                                                  struct Net_SocketConfiguration,
+                                                  struct Net_SocketHandlerConfiguration,
+                                                  PeerStreamType,
+                                                  StreamStatusType,
+                                                  StateType> >
 {
  public:
-  BitTorrent_Session_T (PeerConnectionManagerType* = NULL,     // peer connection manager handle
-                        TrackerConnectionManagerType* = NULL); // tracker connection manager handle
+  BitTorrent_Session_T (ConnectionManagerType* = NULL,  // connection manager handle
+                        bool = !NET_EVENT_USE_REACTOR); // asynchronous ?
   virtual ~BitTorrent_Session_T ();
 
-  // implement Net_ISession_T
-  //virtual const BitTorrent_SessionState& state () const;
-
   // implement BitTorrent_ISession_T
-  virtual const SessionStateType& state (); // return value: state handle
-  virtual void trackerConnect (const ACE_INET_Addr&); // peer address
-  virtual void trackerDisconnect (const ACE_INET_Addr&); // peer address
-  virtual void peerConnect (const ACE_INET_Addr&); // peer address
-  virtual void peerDisconnect (const ACE_INET_Addr&); // peer address
+  inline virtual void trackerConnect (const ACE_INET_Addr& address_in) { inherited::connect (address_in); };
+  inline virtual void trackerDisconnect (const ACE_INET_Addr& address_in) { inherited::disconnect (address_in); };
+  inline virtual void trackerConnect (Net_ConnectionId_t id_in) { inherited::connect (id_in); };
+  inline virtual void trackerDisconnect (Net_ConnectionId_t id_in) { inherited::disconnect (id_in); };
   virtual void notify (const struct BitTorrent_Record&, // message record
                        ACE_Message_Block* = NULL);      // data piece (if applicable)
 
  private:
+  typedef Net_SessionBase_T<ACE_INET_Addr,
+                            ConfigurationType,
+                            ConnectionStateType,
+                            BitTorrent_RuntimeStatistic_t,
+                            struct Net_SocketConfiguration,
+                            struct Net_SocketHandlerConfiguration,
+                            typename PeerConnectionType::ICONNECTION_T,
+                            ConnectionManagerType,
+                            StateType,
+                            BitTorrent_ISession_T<ACE_INET_Addr,
+                                                  ConfigurationType,
+                                                  ConnectionStateType,
+                                                  BitTorrent_RuntimeStatistic_t,
+                                                  struct Net_SocketConfiguration,
+                                                  struct Net_SocketHandlerConfiguration,
+                                                  PeerStreamType,
+                                                  StreamStatusType,
+                                                  StateType> > inherited;
+
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Session_T (const BitTorrent_Session_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Session_T& operator= (const BitTorrent_Session_T&))
 
   // convenient types
-  typedef ACE_Connector<PeerConnectionType,
-                        ACE_SOCK_CONNECTOR> PEER_CONNECTOR_T;
-  typedef ACE_Asynch_Connector<PeerConnectionType> PEER_ASYNCH_CONNECTOR_T;
   typedef ACE_Connector<TrackerConnectionType,
                         ACE_SOCK_CONNECTOR> TRACKER_CONNECTOR_T;
   typedef ACE_Asynch_Connector<TrackerConnectionType> TRACKER_ASYNCH_CONNECTOR_T;
@@ -92,8 +115,7 @@ class BitTorrent_Session_T
   void error (const struct BitTorrent_Record&);
   void log (const struct BitTorrent_Record&);
 
-  ACE_SYNCH_MUTEX lock_;
-  bool            logToFile_;
+  bool logToFile_;
 };
 
 // include template definition

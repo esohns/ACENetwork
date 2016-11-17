@@ -29,6 +29,7 @@ using namespace std;
 //                       and prevent ace/iosfwd.h from causing any harm
 #define ACE_IOSFWD_H
 
+#include <ace/Synch.h>
 #include "bittorrent_client_curses.h"
 
 #include <string>
@@ -509,7 +510,7 @@ curses_main (BitTorrent_Client_CursesState& state_in,
 
     // step3bc: get user input
     { // *IMPORTANT NOTE*: release lock while waiting for input
-      ACE_GUARD (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard, reverse_lock);
+      ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard, reverse_lock, false);
 
       ch = wgetch (state_in.input);
     } // end lock scope
@@ -568,25 +569,25 @@ curses_main (BitTorrent_Client_CursesState& state_in,
             (*state_in.activePanel).first.empty ())
           break; // nothing to do
 
-        // step1: send the message
-        {
-          ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_in.sessionState->lock);
+//        // step1: send the message
+//        {
+//          ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_in.sessionState->lock);
 
-          // sanity check (s)
-          if (state_in.sessionState->channel.empty ())
-          {
-            ACE_DEBUG ((LM_DEBUG,
-                        ACE_TEXT ("not in a channel, continuing\n")));
-            break;
-          } // end IF
-        } // end lock scope
-        try {
-          controller_in->send (receivers, message_text);
-        } catch (...) {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in BitTorrent_Client_IIRCControl::send(), aborting\n")));
-          goto clean;
-        }
+//          // sanity check (s)
+//          if (state_in.sessionState->channel.empty ())
+//          {
+//            ACE_DEBUG ((LM_DEBUG,
+//                        ACE_TEXT ("not in a channel, continuing\n")));
+//            break;
+//          } // end IF
+//        } // end lock scope
+//        try {
+//          controller_in->send (receivers, message_text);
+//        } catch (...) {
+//          ACE_DEBUG ((LM_ERROR,
+//                      ACE_TEXT ("caught exception in BitTorrent_Client_IIRCControl::send(), aborting\n")));
+//          goto clean;
+//        }
 
         // step2: echo to the local channel window
         curses_log ((*state_in.activePanel).first,
@@ -717,10 +718,10 @@ curses_stop (const std::string& URI_in,
 
   int result = ERR;
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_in.lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_in.lock, false);
 
   BitTorrent_Client_CursesSessionsIterator_t iterator =
-      state_in.panels.find (channel_in);
+      state_in.panels.find (URI_in);
   ACE_ASSERT (iterator != state_in.panels.end ());
   WINDOW* window_p = (*iterator).second->win;
   result = del_panel ((*iterator).second);

@@ -50,12 +50,17 @@ struct BitTorrent_Client_SessionData
 };
 typedef Stream_SessionData_T<struct BitTorrent_Client_SessionData> BitTorrent_Client_SessionData_t;
 
-class BitTorrent_SessionMessage;
+template <typename SessionDataType>
+class BitTorrent_Message_T;
+typedef BitTorrent_Message_T<struct BitTorrent_Client_SessionData> BitTorrent_Client_Message_t;
+class BitTorrent_Client_SessionMessage;
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     struct BitTorrent_Client_SessionData,
                                     enum Stream_SessionMessageType,
-                                    BitTorrent_Message,
-                                    BitTorrent_SessionMessage> BitTorrent_Client_IStreamNotify_t;
+                                    BitTorrent_Client_Message_t,
+                                    BitTorrent_Client_SessionMessage> BitTorrent_Client_IStreamNotify_t;
+
+struct BitTorrent_Client_StreamConfiguration;
 struct BitTorrent_Client_UserData;
 struct BitTorrent_Client_ModuleHandlerConfiguration
  : BitTorrent_ModuleHandlerConfiguration
@@ -63,13 +68,15 @@ struct BitTorrent_Client_ModuleHandlerConfiguration
   inline BitTorrent_Client_ModuleHandlerConfiguration ()
    : BitTorrent_ModuleHandlerConfiguration ()
    ///////////////////////////////////////
+   , streamConfiguration (NULL)
    , subscriber (NULL)
    , userData (NULL)
   {};
 
-  BitTorrent_Client_IStreamNotify_t* subscriber; // (initial) subscriber
+  struct BitTorrent_Client_StreamConfiguration* streamConfiguration;
+  BitTorrent_Client_IStreamNotify_t*            subscriber; // (initial) subscriber
 
-  struct BitTorrent_Client_UserData* userData;
+  struct BitTorrent_Client_UserData*            userData;
 };
 
 struct BitTorrent_Client_StreamState
@@ -87,34 +94,28 @@ struct BitTorrent_Client_StreamState
 };
 
 struct BitTorrent_Client_StreamConfiguration
- : Stream_Configuration
+ : BitTorrent_StreamConfiguration
 {
   inline BitTorrent_Client_StreamConfiguration ()
-   : Stream_Configuration ()
-   , moduleConfiguration (NULL)
+   : BitTorrent_StreamConfiguration ()
    , moduleHandlerConfiguration (NULL)
    , userData (NULL)
-  {
-    bufferSize = BITTORRENT_BUFFER_SIZE;
-  };
+  {}
 
-  struct Stream_ModuleConfiguration*                   moduleConfiguration;        // stream module configuration
   struct BitTorrent_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
 
   struct BitTorrent_Client_UserData*                   userData;
 };
 
-class BitTorrent_Client_SessionMessage;
-class BitTorrent_Message;
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 struct Stream_AllocatorConfiguration,
-                                BitTorrent_Message,
+                                BitTorrent_Client_Message_t,
                                 BitTorrent_Client_SessionMessage> BitTorrent_Client_ControlMessage_t;
 
 typedef Stream_CachedMessageAllocator_T<struct Stream_AllocatorConfiguration,
                                         BitTorrent_Client_ControlMessage_t,
-                                        BitTorrent_Message,
-                                        BitTorrent_SessionMessage> BitTorrent_Client_MessageAllocator_t;
+                                        BitTorrent_Client_Message_t,
+                                        BitTorrent_Client_SessionMessage> BitTorrent_Client_MessageAllocator_t;
 
 typedef BitTorrent_StreamHandler_T<struct BitTorrent_Client_SessionData,
                                    struct Test_I_GTK_CBData> BitTorrent_StreamHandler_t;

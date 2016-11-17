@@ -40,9 +40,8 @@ HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (bool traceScanning
  , trace_ (traceParsing_in)
  , blockInParse_ (false)
  , isFirst_ (true)
-//, parser_ (this,               // driver
-//           &numberOfMessages_, // counter
-//           scannerState_)      // scanner
+ , parser_ (this,          // driver
+            scannerState_) // scanner
  , scannerState_ (NULL)
  , bufferState_ (NULL)
  , messageQueue_ (NULL)
@@ -55,16 +54,16 @@ HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (bool traceScanning
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to yylex_init_extra: \"%m\", continuing\n")));
   ACE_ASSERT (scannerState_);
-  //parser_.set (scannerState_);
+  parser_.set (scannerState_);
 
   // trace ?
   HTTP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
                           scannerState_);
 #if YYDEBUG
-  //parser_.set_debug_level (traceParsing_in ? 1
-  //                                         : 0); // binary (see bison manual)
-  //yydebug = (trace_ ? 1 : 0);
-  yysetdebug (trace_ ? 1 : 0);
+  parser_.set_debug_level (traceParsing_in ? 1
+                                           : 0); // binary (see bison manual)
+  yydebug = (trace_ ? 1 : 0);
+//  yysetdebug (trace_ ? 1 : 0);
 #endif
 }
 
@@ -85,10 +84,10 @@ HTTP_ParserDriver_T<SessionMessageType>::~HTTP_ParserDriver_T ()
 template <typename SessionMessageType>
 void
 HTTP_ParserDriver_T<SessionMessageType>::initialize (bool traceScanning_in,
-                                                   bool traceParsing_in,
-                                                   ACE_Message_Queue_Base* messageQueue_in,
-                                                   bool useYYScanBuffer_in,
-                                                   bool blockInParse_in)
+                                                     bool traceParsing_in,
+                                                     ACE_Message_Queue_Base* messageQueue_in,
+//                                                     bool useYYScanBuffer_in,
+                                                     bool blockInParse_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::initialize"));
 
@@ -129,15 +128,16 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (bool traceScanning_in,
   blockInParse_ = blockInParse_in;
   trace_ = traceParsing_in;
   messageQueue_ = messageQueue_in;
-  useYYScanBuffer_ = useYYScanBuffer_in;
+//  useYYScanBuffer_ = useYYScanBuffer_in;
+  useYYScanBuffer_ = HTTP_DEFAULT_USE_YY_SCAN_BUFFER;
 
   HTTP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
                           scannerState_);
 #if YYDEBUG
-  //parser_.set_debug_level (traceParsing_in ? 1
-  //                                         : 0); // binary (see bison manual)
-  //yydebug = (trace_ ? 1 : 0);
-  yysetdebug (trace_ ? 1 : 0);
+  parser_.set_debug_level (traceParsing_in ? 1
+                                           : 0); // binary (see bison manual)
+  yydebug = (trace_ ? 1 : 0);
+//  yysetdebug (trace_ ? 1 : 0);
 #endif
 
   // OK
@@ -146,22 +146,27 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (bool traceScanning_in,
 
 template <typename SessionMessageType>
 void
-HTTP_ParserDriver_T<SessionMessageType>::error (const YYLTYPE& location_in,
-                                              const std::string& message_in)
+//HTTP_ParserDriver_T<SessionMessageType>::error (const struct YYLTYPE& location_in,
+//                                                const std::string& message_in)
+HTTP_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
 
+//  std::ostringstream converter;
+//  converter << location_in;
+
   // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
+//  ACE_DEBUG ((LM_ERROR,
+//              ACE_TEXT ("(@%d.%d-%d.%d): %s\n"),
+//              location_in.begin.line, location_in.begin.column,
+//              location_in.end.line, location_in.end.column,
+//              ACE_TEXT (message_in.c_str ())));
   ACE_DEBUG ((LM_ERROR,
-              ACE_TEXT ("(@%d.%d-%d.%d): %s\n"),
-              location_in.first_line, location_in.first_column,
-              location_in.last_line, location_in.last_column,
-              ACE_TEXT (message_in.c_str ())));
-  //   ACE_DEBUG ((LM_ERROR,
-  //               ACE_TEXT ("failed to parse \"%s\" (@%s): \"%s\"\n"),
-  //               std::string (fragment_->rd_ptr (), fragment_->length ()).c_str (),
-  //               converter.str ().c_str (),
-  //               message_in.c_str ()));
+//              ACE_TEXT ("failed to parse \"%s\" (@%s): \"%s\"\n"),
+              ACE_TEXT ("failed to HTTP_Parser::parse(): \"%s\"\n"),
+//              std::string (fragment_->rd_ptr (), fragment_->length ()).c_str (),
+//              converter.str ().c_str (),
+              message_in.c_str ()));
 
   // dump message
   ACE_Message_Block* message_block_p = fragment_;
@@ -179,6 +184,23 @@ HTTP_ParserDriver_T<SessionMessageType>::error (const YYLTYPE& location_in,
 
   //std::clog << location_in << ": " << message_in << std::endl;
 }
+//template <typename SessionMessageType>
+//void
+//HTTP_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
+
+//  // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
+//  ACE_DEBUG ((LM_ERROR,
+//              ACE_TEXT ("\": \"%s\"...\n"),
+//              ACE_TEXT (message_in.c_str ())));
+////   ACE_DEBUG((LM_ERROR,
+////              ACE_TEXT("failed to parse \"%s\": \"%s\"...\n"),
+////              std::string(fragment_->rd_ptr(), fragment_->length()).c_str(),
+////              message_in.c_str()));
+
+////   std::clog << message_in << std::endl;
+//}
 
 template <typename SessionMessageType>
 bool
@@ -229,7 +251,8 @@ HTTP_ParserDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
 
   // parse data fragment
   try {
-    result = ::yyparse (this, scannerState_);
+    parser_.parse ();
+//    result = ::yyparse (this, scannerState_);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
@@ -411,61 +434,6 @@ HTTP_ParserDriver_T<SessionMessageType>::dump_state () const
   ACE_NOTSUP;
 
   ACE_NOTREACHED (return;)
-}
-
-template <typename SessionMessageType>
-void
-HTTP_ParserDriver_T<SessionMessageType>::error (const yy::location& location_in,
-                                                const std::string& message_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
-
-  std::ostringstream converter;
-  converter << location_in;
-  // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
-  ACE_DEBUG ((LM_ERROR,
-              ACE_TEXT ("(@%s): %s\n"),
-              ACE_TEXT (converter.str ().c_str ()),
-              ACE_TEXT (message_in.c_str ())));
-//   ACE_DEBUG((LM_ERROR,
-//              ACE_TEXT("failed to parse \"%s\" (@%s): \"%s\"\n"),
-//              std::string(fragment_->rd_ptr(), fragment_->length()).c_str(),
-//              converter.str().c_str(),
-//              message_in.c_str()));
-
-  // dump message
-  ACE_Message_Block* head = fragment_;
-  while (head->prev ())
-    head = head->prev ();
-  ACE_ASSERT (head);
-  Common_IDumpState* idump_state_p = dynamic_cast<Common_IDumpState*> (head);
-  ACE_ASSERT (idump_state_p);
-  try {
-    idump_state_p->dump_state ();
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
-  }
-
-//   std::clog << location_in << ": " << message_in << std::endl;
-}
-
-template <typename SessionMessageType>
-void
-HTTP_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
-
-  // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
-  ACE_DEBUG ((LM_ERROR,
-              ACE_TEXT ("\": \"%s\"...\n"),
-              ACE_TEXT (message_in.c_str ())));
-//   ACE_DEBUG((LM_ERROR,
-//              ACE_TEXT("failed to parse \"%s\": \"%s\"...\n"),
-//              std::string(fragment_->rd_ptr(), fragment_->length()).c_str(),
-//              message_in.c_str()));
-
-//   std::clog << message_in << std::endl;
 }
 
 template <typename SessionMessageType>

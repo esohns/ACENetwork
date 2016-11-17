@@ -37,8 +37,6 @@ flex --noline ${SCRIPTS_DIRECTORY}/${SCANNER_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/
 
 # append to list
 FILES="${FILES} http_scanner.cpp http_scanner.h"
-
-# move the files into the project directory
 for FILE in $FILES
 do
 mv -f $FILE ${SCRIPTS_DIRECTORY}/..

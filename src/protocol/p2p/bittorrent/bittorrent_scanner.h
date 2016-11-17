@@ -1,26 +1,28 @@
-#ifndef BitTorrent_Scanner_HEADER_H
-#define BitTorrent_Scanner_HEADER_H 1
-#define BitTorrent_Scanner_IN_HEADER 1
+#ifndef bittorrent_HEADER_H
+#define bittorrent_HEADER_H 1
+#define bittorrent_IN_HEADER 1
 
+#line 2 "./../scripts/scanner.l"
 #include "bittorrent_common.h"
+#include <ace/Synch.h>
 #include "bittorrent_iparser.h"
 #undef YYTOKENTYPE
 #include "bittorrent_parser.h"
 
 /*
-#define YY_DECL                                                             \
-yy::BitTorrent_Parser::token_type                                           \
-BitTorrent_Scanner_lex (yy::BitTorrent_Parser::semantic_type* yylval_param, \
-                        yy::BitTorrent_Parser::location_type* yylloc_param, \
-                        BitTorrent_IParser* iparser_p,                      \
-                        yyscan_t yyscanner)
+#define YY_DECL                                                     \
+yy::BitTorrent_Parser::token_type                                   \
+bittorrent_lex (yy::BitTorrent_Parser::semantic_type* yylval_param, \
+                yy::BitTorrent_Parser::location_type* yylloc_param, \
+                BitTorrent_IParser* iparser_p,                      \
+                yyscan_t yyscanner)
  */
-#define YY_DECL                                        \
-yytokentype                                            \
-BitTorrent_Scanner_lex (YYSTYPE* yylval_param,         \
-                        YYLTYPE* yylloc_param,         \
-                        BitTorrent_IParser* iparser_p, \
-                        yyscan_t yyscanner)
+#define YY_DECL                                \
+yytokentype                                    \
+bittorrent_lex (YYSTYPE* yylval_param,         \
+                YYLTYPE* yylloc_param,         \
+                BitTorrent_IParser* iparser_p, \
+                yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 YY_DECL;
 
@@ -28,9 +30,13 @@ YY_DECL;
 //#define YYLTYPE BitTorrent_Parser::location_type
 //#define YYSTYPE BitTorrent_Parser::semantic_type
 
-void BitTorrent_Scanner_set_column (int, yyscan_t);
+void bittorrent_set_column (int, yyscan_t);
 
 //#define FLEXINT_H
+
+
+
+#line 40 "bittorrent_scanner.h"
 
 #define  YY_INT_ALIGNED long int
 
@@ -289,23 +295,23 @@ struct yy_buffer_state
 
 /* %endif */
 
-void BitTorrent_Scanner_restart (FILE *input_file ,yyscan_t yyscanner );
-void BitTorrent_Scanner__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE BitTorrent_Scanner__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void BitTorrent_Scanner__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void BitTorrent_Scanner__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void BitTorrent_Scanner_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void BitTorrent_Scanner_pop_buffer_state (yyscan_t yyscanner );
+void bittorrent_restart (FILE *input_file ,yyscan_t yyscanner );
+void bittorrent__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE bittorrent__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void bittorrent__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void bittorrent__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void bittorrent_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void bittorrent_pop_buffer_state (yyscan_t yyscanner );
 
-YY_BUFFER_STATE BitTorrent_Scanner__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE BitTorrent_Scanner__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE BitTorrent_Scanner__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
+YY_BUFFER_STATE bittorrent__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE bittorrent__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE bittorrent__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
 
 /* %endif */
 
-void *BitTorrent_Scanner_alloc (yy_size_t ,yyscan_t yyscanner );
-void *BitTorrent_Scanner_realloc (void *,yy_size_t ,yyscan_t yyscanner );
-void BitTorrent_Scanner_free (void * ,yyscan_t yyscanner );
+void *bittorrent_alloc (yy_size_t ,yyscan_t yyscanner );
+void *bittorrent_realloc (void *,yy_size_t ,yyscan_t yyscanner );
+void bittorrent_free (void * ,yyscan_t yyscanner );
 
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
@@ -358,9 +364,9 @@ void BitTorrent_Scanner_free (void * ,yyscan_t yyscanner );
 
 /* %if-reentrant */
 
-int BitTorrent_Scanner_lex_init (yyscan_t* scanner);
+int bittorrent_lex_init (yyscan_t* scanner);
 
-int BitTorrent_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int bittorrent_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
 /* %endif */
 
@@ -369,45 +375,45 @@ int BitTorrent_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scan
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int BitTorrent_Scanner_lex_destroy (yyscan_t yyscanner );
+int bittorrent_lex_destroy (yyscan_t yyscanner );
 
-int BitTorrent_Scanner_get_debug (yyscan_t yyscanner );
+int bittorrent_get_debug (yyscan_t yyscanner );
 
-void BitTorrent_Scanner_set_debug (int debug_flag ,yyscan_t yyscanner );
+void bittorrent_set_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE BitTorrent_Scanner_get_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE bittorrent_get_extra (yyscan_t yyscanner );
 
-void BitTorrent_Scanner_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void bittorrent_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
-FILE *BitTorrent_Scanner_get_in (yyscan_t yyscanner );
+FILE *bittorrent_get_in (yyscan_t yyscanner );
 
-void BitTorrent_Scanner_set_in  (FILE * in_str ,yyscan_t yyscanner );
+void bittorrent_set_in  (FILE * in_str ,yyscan_t yyscanner );
 
-FILE *BitTorrent_Scanner_get_out (yyscan_t yyscanner );
+FILE *bittorrent_get_out (yyscan_t yyscanner );
 
-void BitTorrent_Scanner_set_out  (FILE * out_str ,yyscan_t yyscanner );
+void bittorrent_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-yy_size_t BitTorrent_Scanner_get_leng (yyscan_t yyscanner );
+yy_size_t bittorrent_get_leng (yyscan_t yyscanner );
 
-char *BitTorrent_Scanner_get_text (yyscan_t yyscanner );
+char *bittorrent_get_text (yyscan_t yyscanner );
 
-int BitTorrent_Scanner_get_lineno (yyscan_t yyscanner );
+int bittorrent_get_lineno (yyscan_t yyscanner );
 
-void BitTorrent_Scanner_set_lineno (int line_number ,yyscan_t yyscanner );
+void bittorrent_set_lineno (int line_number ,yyscan_t yyscanner );
 
-int BitTorrent_Scanner_get_column  (yyscan_t yyscanner );
+int bittorrent_get_column  (yyscan_t yyscanner );
 
-void BitTorrent_Scanner_set_column (int column_no ,yyscan_t yyscanner );
+void bittorrent_set_column (int column_no ,yyscan_t yyscanner );
 
 /* %if-bison-bridge */
 
-YYSTYPE * BitTorrent_Scanner_get_lval (yyscan_t yyscanner );
+YYSTYPE * bittorrent_get_lval (yyscan_t yyscanner );
 
-void BitTorrent_Scanner_set_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
+void bittorrent_set_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
 
-       YYLTYPE *BitTorrent_Scanner_get_lloc (yyscan_t yyscanner );
+       YYLTYPE *bittorrent_get_lloc (yyscan_t yyscanner );
     
-        void BitTorrent_Scanner_set_lloc (YYLTYPE * yylloc_param ,yyscan_t yyscanner );
+        void bittorrent_set_lloc (YYLTYPE * yylloc_param ,yyscan_t yyscanner );
     
 /* %endif */
 
@@ -417,9 +423,9 @@ void BitTorrent_Scanner_set_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int BitTorrent_Scanner_wrap (yyscan_t yyscanner );
+extern "C" int bittorrent_wrap (yyscan_t yyscanner );
 #else
-extern int BitTorrent_Scanner_wrap (yyscan_t yyscanner );
+extern int bittorrent_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -473,10 +479,10 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #define YY_DECL_IS_OURS 1
 /* %if-c-only Standard (non-C++) definition */
 
-extern int BitTorrent_Scanner_lex \
+extern int bittorrent_lex \
                (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
 
-#define YY_DECL int BitTorrent_Scanner_lex \
+#define YY_DECL int bittorrent_lex \
                (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only C++ definition */
@@ -507,6 +513,6 @@ extern int BitTorrent_Scanner_lex \
 #undef YY_DECL
 #endif
 
-#line 516 "bittorrent_scanner.h"
-#undef BitTorrent_Scanner_IN_HEADER
-#endif /* BitTorrent_Scanner_HEADER_H */
+#line 517 "bittorrent_scanner.h"
+#undef bittorrent_IN_HEADER
+#endif /* bittorrent_HEADER_H */

@@ -1,28 +1,27 @@
 #include "http_common.h"
 #include "http_iparser.h"
-#undef YYTOKENTYPE
+//#undef YYTOKENTYPE
 #include "http_parser.h"
 
-/*
+
 #define YY_DECL                                                 \
 yy::HTTP_Parser::token_type                                     \
 HTTP_Scanner_lex (yy::HTTP_Parser::semantic_type* yylval_param, \
                   yy::HTTP_Parser::location_type* yylloc_param, \
                   HTTP_IParser* iparser_p,                      \
                   yyscan_t yyscanner)
-*/
-#define YY_DECL                            \
-yytokentype                                \
-HTTP_Scanner_lex (YYSTYPE* yylval_param,   \
-                  YYLTYPE* yylloc_param,   \
-                  HTTP_IParser* iparser_p, \
-                  yyscan_t yyscanner)
+//#define YY_DECL                            \
+//yy::HTTP_Parser::token_type                \
+//HTTP_Scanner_lex (YYSTYPE* yylval_param,   \
+//                  YYLTYPE* yylloc_param,   \
+//                  HTTP_IParser* iparser_p, \
+//                  yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 YY_DECL;
 
 //using namespace yy;
-//#define YYLTYPE HTTP_Parser::location_type
-//#define YYSTYPE HTTP_Parser::semantic_type
+#define YYLTYPE yy::location
+#define YYSTYPE yy::HTTP_Parser::semantic_type
 
 void HTTP_Scanner_set_column (int, yyscan_t);
 
@@ -76469,9 +76468,9 @@ static yyconst yy_state_type yy_NUL_trans[2387] =
 
 static yyconst flex_int32_t yy_rule_linenum[23] =
     {   0,
-      346,  350,  356,  369,  382,  395,  405,  415,  425,  433,
-      446,  459,  472,  482,  492,  502,  522,  558,  586,  596,
-      610,  747
+      345,  349,  355,  368,  381,  394,  404,  414,  424,  432,
+      445,  458,  471,  481,  491,  501,  521,  557,  585,  595,
+      609,  748
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -76499,8 +76498,8 @@ static yyconst flex_int32_t yy_rule_linenum[23] =
 /* *NOTE*: instead of the default (int), this HTTP_Scanner_lex returns token_type.
            Unfortunately, yyterminate by default returns 0, which is not of
            token_type. This %define solves that issue. */
-//#define yyterminate() return yy::HTTP_Parser::token::END
-#define yyterminate() return yytokentype::END
+#define yyterminate() return yy::HTTP_Parser::token::END
+//#define yyterminate() return yytokentype::END
 
 /* *NOTE*: YY_DECL is defined elsewhere (needed so the scanner can support
            extra arguments) */
@@ -76593,8 +76592,8 @@ CHARSET        (US-ASCII|ISO-8859-1|ISO-8859-2|ISO-8859-3|ISO-8859-4|ISO-8859-5|
 /*#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
                        yylloc.first_column = yycolumn; yylloc.last_column = yycolumn+yyleng-1; \
                        yycolumn += yyleng; */
-#define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno; \
-                       yylloc->first_column = yycolumn; yylloc->last_column = yycolumn+yyleng-1; \
+#define YY_USER_ACTION yylloc->begin.line = yylloc->end.line = yylineno; \
+                       yylloc->begin.column = yycolumn; yylloc->end.column = yycolumn+yyleng-1; \
                        yycolumn += yyleng;
 //#define YY_USER_ACTION yylloc->columns (yyleng);
 
@@ -77064,8 +77063,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 1);
-                             return yytokentype::METHOD;
-                             /* return yy::HTTP_Parser::token::METHOD; */ }
+//                             return yytokentype::METHOD;
+                             return yy::HTTP_Parser::token::METHOD; }
 	YY_BREAK
 // end <request>
 
@@ -77081,8 +77080,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 1);
-                             return yytokentype::URI;
-                             /* return yy::HTTP_Parser::token::URI; */ }
+//                             return yytokentype::URI;
+                             return yy::HTTP_Parser::token::URI; }
 	YY_BREAK
 // end <uri>
 
@@ -77098,8 +77097,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::VERSION;
-                             /* return yy::HTTP_Parser::token::VERSION; */ }
+//                             return yytokentype::VERSION;
+                             return yy::HTTP_Parser::token::VERSION; }
 	YY_BREAK
 // end <version>
 
@@ -77114,8 +77113,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
@@ -77128,8 +77127,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 	YY_BREAK
 case 8:
 /* rule 8 can match eol */
@@ -77142,8 +77141,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 	YY_BREAK
 case 9:
 /* rule 9 can match eol */
@@ -77152,8 +77151,8 @@ YY_RULE_SETUP
                              iparser_p->offset (yyleng);
                              BEGIN (body);
                              yylval->ival = 2;
-                             return yytokentype::DELIMITER;
-                             /* return yy::HTTP_Parser::token::DELIMITER; */ }
+//                             return yytokentype::DELIMITER;
+                             return yy::HTTP_Parser::token::DELIMITER; }
 	YY_BREAK
 // end <request_headers>
 
@@ -77168,8 +77167,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 1);
-                             return yytokentype::VERSION;
-                             /* return yy::HTTP_Parser::token::VERSION; */ }
+//                             return yytokentype::VERSION;
+                             return yy::HTTP_Parser::token::VERSION; }
 	YY_BREAK
 // end <response>
 
@@ -77184,8 +77183,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 1);
-                             return yytokentype::STATUS;
-                             /* return yy::HTTP_Parser::token::STATUS; */ }
+//                             return yytokentype::STATUS;
+                             return yy::HTTP_Parser::token::STATUS; }
 	YY_BREAK
 // end <status>
 
@@ -77201,8 +77200,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::REASON;
-                             /* return yy::HTTP_Parser::token::REASON; */ }
+//                             return yytokentype::REASON;
+                             return yy::HTTP_Parser::token::REASON; }
 	YY_BREAK
 // end <reason>
 
@@ -77217,8 +77216,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 	YY_BREAK
 case 14:
 /* rule 14 can match eol */
@@ -77231,8 +77230,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 	YY_BREAK
 case 15:
 /* rule 15 can match eol */
@@ -77245,8 +77244,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 	YY_BREAK
 case 16:
 /* rule 16 can match eol */
@@ -77267,8 +77266,8 @@ YY_RULE_SETUP
                              else
                                BEGIN (body);
                              yylval->ival = 2;
-                             return yytokentype::DELIMITER;
-                             /* return yy::HTTP_Parser::token::DELIMITER; */ }
+//                             return yytokentype::DELIMITER;
+                             return yy::HTTP_Parser::token::DELIMITER; }
 	YY_BREAK
 // end <response_headers>
 
@@ -77307,8 +77306,8 @@ YY_RULE_SETUP
                                              ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
                                }
                              } // end IF
-                             return yytokentype::BODY;
-                             /* return yy::HTTP_Parser::token::BODY; */ }
+//                             return yytokentype::BODY;
+                             return yy::HTTP_Parser::token::BODY; }
 	YY_BREAK
 // end <body>
 
@@ -77355,8 +77354,8 @@ YY_RULE_SETUP
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 	YY_BREAK
 case 20:
 /* rule 20 can match eol */
@@ -77371,8 +77370,8 @@ YY_RULE_SETUP
                              }
                              BEGIN (INITIAL);
                              yylval->ival = 2;
-                             return yytokentype::DELIMITER;
-                             /* return yy::HTTP_Parser::token::DELIMITER; */ }
+//                             return yytokentype::DELIMITER;
+                             return yy::HTTP_Parser::token::DELIMITER; }
 	YY_BREAK
 // end <chunked_body>
 
@@ -77430,7 +77429,8 @@ YY_RULE_SETUP
                                else
                                {
                                  if (!iparser_p->isBlocking ())
-                                   return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                                   return yy::HTTP_Parser::token::END_OF_FRAGMENT;
+//                                   return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
 
                                  // wait for (missing) chunk data fragment(s)
                                  while (missing_chunk_bytes)
@@ -77440,7 +77440,8 @@ YY_RULE_SETUP
                                      //         has been closed --> session end
                                      ACE_DEBUG ((LM_DEBUG,
                                                  ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
-                                     return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                                     return yy::HTTP_Parser::token::END_OF_FRAGMENT;
+//                                     return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
                                    } // end IF
                                    message_p = iparser_p->buffer ();
 
@@ -77512,8 +77513,8 @@ YY_RULE_SETUP
                                yylval->ival = yyleng;
                              } // end ELSE
                              BEGIN (chunked_body);
-                             return yytokentype::CHUNK;
-                             /* return yy::HTTP_Parser::token::CHUNK; */ }
+//                             return yytokentype::CHUNK;
+                             return yy::HTTP_Parser::token::CHUNK; }
 	YY_BREAK
 // end <chunk>
 case YY_STATE_EOF(INITIAL):
@@ -77536,7 +77537,8 @@ case 22:
 YY_RULE_SETUP
 { /* *TODO*: use (?s:.) ? */
                              if (!iparser_p->isBlocking ())
-                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                               return yy::HTTP_Parser::token::END_OF_FRAGMENT;
+//                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
 
                              // wait for more data fragment(s)
                              if (!iparser_p->switchBuffer ())
@@ -77544,7 +77546,8 @@ YY_RULE_SETUP
                                //         has been closed --> session end
                                ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
-                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+//                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                               return yy::HTTP_Parser::token::END_OF_FRAGMENT;
                              } // end IF
                              yyless (0); }
 	YY_BREAK

@@ -1,13 +1,13 @@
 %defines                          "http_parser.h"
 /* %file-prefix                      "" */
 /* %language                         "c++" */
-%language                         "C"
+%language                         "c++"
 %locations
 %no-lines
 %output                           "http_parser.cpp"
 %require                          "2.4.1"
-%skeleton                         "glr.c"
-/* %skeleton                         "lalr1.cc" */
+/*%skeleton                         "glr.c"*/
+%skeleton                         "lalr1.cc"
 %token-table
 %verbose
 /* %yacc */
@@ -20,9 +20,9 @@
 /* %define api.location.type         {} */
 /* %define namespace                 {yy} */
 /* %define api.namespace             {yy} */
-%name-prefix                      "yy"
+/*%name-prefix                      "http"*/
 /* %define api.prefix                {yy} */
-%pure-parser
+/*%pure-parser*/
 /* %define api.pure                  true */
 /* *TODO*: implement a push parser */
 /* %define api.push-pull             push */
@@ -37,16 +37,16 @@
 /* %define lr.type                   lalr */
 
 /* %define parse.assert              {true} */
-%error-verbose
-/* %define parse.error               verbose */
+/*%error-verbose*/
+%define parse.error               verbose
 /* %define parse.lac                 {full} */
 /* %define parse.lac                 {none} */
-/* %define parser_class_name         {HTTP_Parser} */
+%define parser_class_name         {HTTP_Parser}
 /* *NOTE*: enabling debugging functionality implies inclusion of <iostream> (see
            below). This interferes with ACE (version 6.2.3), when compiled with
            support for traditional iostreams */
-%debug
-/* %define parse.trace               {true} */
+/*%debug*/
+%define parse.trace               true
 
 %code requires {
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
@@ -73,7 +73,7 @@
   CHUNK = 266
 }; */
 //#define YYTOKENTYPE
-#undef YYTOKENTYPE
+/*#undef YYTOKENTYPE*/
 /* enum yytokentype; */
 class HTTP_IParser;
 struct HTTP_Record;
@@ -96,7 +96,7 @@ typedef void* yyscan_t;
 //         the declaration
 #define YYDEBUG 1
 extern int HTTP_Export yydebug;
-#define YYERROR_VERBOSE
+#define YYERROR_VERBOSE 1
 }
 
 // calling conventions / parameter passing
@@ -189,21 +189,21 @@ using namespace std;
 %type  <ival> status_line_rest1 status_line_rest2
 
 %code provides {
-void HTTP_Export yysetdebug (int);
+/*void HTTP_Export yysetdebug (int);
 void HTTP_Export yyerror (YYLTYPE*, HTTP_IParser*, yyscan_t, const char*);
 int HTTP_Export yyparse (HTTP_IParser*, yyscan_t);
-void HTTP_Export yyprint (FILE*, yytokentype, YYSTYPE);
+void HTTP_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
 // *TODO*: remove this ASAP
 #endif // HTTP_PARSER_H
 }
 
-/* %printer                  { yyoutput << $$; } <*>; */
-/* %printer                  { yyoutput << *$$; } <sval>
-%printer                  { debug_stream () << $$; }  <ival> */
-%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT ("\"%s\""), (*$$).c_str ()); } <sval>
-%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT ("%d"), $$); } <ival>
+/*%printer                  { yyoutput << $$; } <*>;*/
+%printer                  { debug_stream () << *$$; } <sval>
+%printer                  { debug_stream () << $$; }  <ival>
+/*%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT ("\"%s\""), (*$$).c_str ()); } <sval>
+%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT ("%d"), $$); } <ival>*/
 %destructor               { delete $$; $$ = NULL; } <sval>
 %destructor               { $$ = 0; } <ival>
 /* %destructor               { ACE_DEBUG ((LM_DEBUG,
@@ -446,13 +446,16 @@ chunks:             "chunk" chunks                   { $$ = $1 + $2; };
 //                    | %empty                         { $$ = 0; };
 %%
 
-/* void
+void
 yy::HTTP_Parser::error (const location_type& location_in,
                         const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Parser::error"));
 
-  iparser_p->error (location_in, message_in);
+  ACE_UNUSED_ARG (location_in);
+
+/*  iparser_p->error (location_in, message_in);*/
+  iparser_p->error (message_in);
 }
 
 void
@@ -461,9 +464,9 @@ yy::HTTP_Parser::set (yyscan_t context_in)
   NETWORK_TRACE (ACE_TEXT ("HTTP_Parser::set"));
 
   yyscanner = context_in;
-} */
+}
 
-void
+/*void
 yysetdebug (int debug_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::yysetdebug"));
@@ -537,4 +540,4 @@ yyprint (FILE* file_in,
   if (result < 0)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
-}
+}*/

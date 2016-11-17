@@ -25,13 +25,28 @@
 #include <vector>
 
 #include "common_idumpstate.h"
+#include "common_iget.h"
 
 #include "net_defines.h"
 
 // forward declarations
-struct YYLTYPE;
+//struct YYLTYPE;
 class ACE_Message_Block;
 class ACE_Message_Queue_Base;
+
+//////////////////////////////////////////
+
+// *NOTE*: needed by C++ lexers
+// *NOTE*: the template parameter ought to derive from Net_IParser
+template <typename ParserInterfaceType>
+class Net_IScanner_T
+ : public Common_ISetP_T<ParserInterfaceType>
+{
+ public:
+  inline virtual ~Net_IScanner_T () {};
+};
+
+//////////////////////////////////////////
 
 class Net_IParser
  : public Common_IDumpState
@@ -43,15 +58,16 @@ class Net_IParser
   virtual void initialize (bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,          // debug scanner ?
                            bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,         // debug parser ?
                            ACE_Message_Queue_Base* = NULL,                 // data buffer queue (yywrap)
-                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
+//                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
                            bool = false) = 0;                              // block in parse() ?
 
   virtual ACE_Message_Block* buffer () = 0;
   virtual bool debugScanner () const = 0;
   virtual bool isBlocking () const = 0;
 
-  virtual void error (const struct YYLTYPE&,
-                      const std::string&) = 0;
+//  virtual void error (const struct YYLTYPE&,
+//                      const std::string&) = 0;
+  virtual void error (const std::string&) = 0;
 
   // *NOTE*: to be invoked by the scanner (ONLY !)
   virtual void offset (unsigned int) = 0; // offset (increment)

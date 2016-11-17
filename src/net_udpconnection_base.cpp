@@ -19,6 +19,7 @@
 ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "net_udpconnection_base.h"
 
 //#include "net_configuration.h"

@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "irc_sessionmessage.h"
 
 #include <ace/Log_Msg.h>

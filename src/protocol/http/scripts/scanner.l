@@ -1,29 +1,28 @@
 %top{
 #include "http_common.h"
 #include "http_iparser.h"
-#undef YYTOKENTYPE
+//#undef YYTOKENTYPE
 #include "http_parser.h"
 
-/*
+
 #define YY_DECL                                                 \
 yy::HTTP_Parser::token_type                                     \
 HTTP_Scanner_lex (yy::HTTP_Parser::semantic_type* yylval_param, \
                   yy::HTTP_Parser::location_type* yylloc_param, \
                   HTTP_IParser* iparser_p,                      \
                   yyscan_t yyscanner)
-*/
-#define YY_DECL                            \
-yytokentype                                \
-HTTP_Scanner_lex (YYSTYPE* yylval_param,   \
-                  YYLTYPE* yylloc_param,   \
-                  HTTP_IParser* iparser_p, \
-                  yyscan_t yyscanner)
+//#define YY_DECL                            \
+//yy::HTTP_Parser::token_type                \
+//HTTP_Scanner_lex (YYSTYPE* yylval_param,   \
+//                  YYLTYPE* yylloc_param,   \
+//                  HTTP_IParser* iparser_p, \
+//                  yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 YY_DECL;
 
 //using namespace yy;
-//#define YYLTYPE HTTP_Parser::location_type
-//#define YYSTYPE HTTP_Parser::semantic_type
+#define YYLTYPE yy::location
+#define YYSTYPE yy::HTTP_Parser::semantic_type
 
 void HTTP_Scanner_set_column (int, yyscan_t);
 
@@ -48,8 +47,8 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 /* *NOTE*: instead of the default (int), this yylex returns token_type.
            Unfortunately, yyterminate by default returns 0, which is not of
            token_type. This %define solves that issue. */
-//#define yyterminate() return yy::HTTP_Parser::token::END
-#define yyterminate() return yytokentype::END
+#define yyterminate() return yy::HTTP_Parser::token::END
+//#define yyterminate() return yytokentype::END
 
 /* *NOTE*: YY_DECL is defined elsewhere (needed so the scanner can support
            extra arguments) */
@@ -319,8 +318,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 /*#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
                        yylloc.first_column = yycolumn; yylloc.last_column = yycolumn+yyleng-1; \
                        yycolumn += yyleng; */
-#define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno; \
-                       yylloc->first_column = yycolumn; yylloc->last_column = yycolumn+yyleng-1; \
+#define YY_USER_ACTION yylloc->begin.line = yylloc->end.line = yylineno; \
+                       yylloc->begin.column = yycolumn; yylloc->end.column = yycolumn+yyleng-1; \
                        yycolumn += yyleng;
 //#define YY_USER_ACTION yylloc->columns (yyleng);
 %}
@@ -362,8 +361,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 1);
-                             return yytokentype::METHOD;
-                             /* return yy::HTTP_Parser::token::METHOD; */ }
+//                             return yytokentype::METHOD;
+                             return yy::HTTP_Parser::token::METHOD; }
 } // end <request>
 <uri>{
 {REQUEST_URI}{SP}          { message_block_p->rd_ptr (yyleng);
@@ -375,8 +374,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 1);
-                             return yytokentype::URI;
-                             /* return yy::HTTP_Parser::token::URI; */ }
+//                             return yytokentype::URI;
+                             return yy::HTTP_Parser::token::URI; }
 } // end <uri>
 <version>{
 {VERSION}{CRLF}            { message_block_p->rd_ptr (yyleng);
@@ -388,8 +387,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::VERSION;
-                             /* return yy::HTTP_Parser::token::VERSION; */ }
+//                             return yytokentype::VERSION;
+                             return yy::HTTP_Parser::token::VERSION; }
 } // end <version>
 <request_headers>{
 {GENERAL_HEADER}{CRLF}     { message_block_p->rd_ptr (yyleng);
@@ -400,8 +399,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 {REQUEST_HEADER}{CRLF}     { message_block_p->rd_ptr (yyleng);
                              iparser_p->offset (yyleng);
                              yylval->ival = yyleng;
@@ -410,8 +409,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 {ENTITY_HEADER}{CRLF}      { message_block_p->rd_ptr (yyleng);
                              iparser_p->offset (yyleng);
                              yylval->ival = yyleng;
@@ -420,14 +419,14 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 {CRLF}                     { message_block_p->rd_ptr (yyleng);
                              iparser_p->offset (yyleng);
                              BEGIN (body);
                              yylval->ival = 2;
-                             return yytokentype::DELIMITER;
-                             /* return yy::HTTP_Parser::token::DELIMITER; */ }
+//                             return yytokentype::DELIMITER;
+                             return yy::HTTP_Parser::token::DELIMITER; }
 } // end <request_headers>
 <response>{
 {VERSION}{SP}              { message_block_p->rd_ptr (yyleng);
@@ -439,8 +438,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 1);
-                             return yytokentype::VERSION;
-                             /* return yy::HTTP_Parser::token::VERSION; */ }
+//                             return yytokentype::VERSION;
+                             return yy::HTTP_Parser::token::VERSION; }
 } // end <response>
 <status>{
 [[:digit:]]{3}{SP}         { message_block_p->rd_ptr (yyleng);
@@ -452,8 +451,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 1);
-                             return yytokentype::STATUS;
-                             /* return yy::HTTP_Parser::token::STATUS; */ }
+//                             return yytokentype::STATUS;
+                             return yy::HTTP_Parser::token::STATUS; }
 } // end <status>
 <reason>{
 {REASON}{CRLF}             { message_block_p->rd_ptr (yyleng);
@@ -465,8 +464,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::REASON;
-                             /* return yy::HTTP_Parser::token::REASON; */ }
+//                             return yytokentype::REASON;
+                             return yy::HTTP_Parser::token::REASON; }
 } // end <reason>
 <response_headers>{
 {GENERAL_HEADER}{CRLF}     { message_block_p->rd_ptr (yyleng);
@@ -477,8 +476,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 {RESPONSE_HEADER}{CRLF}    { message_block_p->rd_ptr (yyleng);
                              iparser_p->offset (yyleng);
                              yylval->ival = yyleng;
@@ -487,8 +486,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 {ENTITY_HEADER}{CRLF}      { message_block_p->rd_ptr (yyleng);
                              iparser_p->offset (yyleng);
                              yylval->ival = yyleng;
@@ -497,8 +496,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 {CRLF}                     { message_block_p->rd_ptr (yyleng);
                              iparser_p->offset (yyleng);
                              struct HTTP_Record& record_r =
@@ -515,8 +514,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              else
                                BEGIN (body);
                              yylval->ival = 2;
-                             return yytokentype::DELIMITER;
-                             /* return yy::HTTP_Parser::token::DELIMITER; */ }
+//                             return yytokentype::DELIMITER;
+                             return yy::HTTP_Parser::token::DELIMITER; }
 } // end <response_headers>
 <body>{
 {OCTET}*                   {
@@ -551,8 +550,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                              ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
                                }
                              } // end IF
-                             return yytokentype::BODY;
-                             /* return yy::HTTP_Parser::token::BODY; */ }
+//                             return yytokentype::BODY;
+                             return yy::HTTP_Parser::token::BODY; }
 } // end <body>
 <chunked_body>{
 {CHUNK_LINE}{CRLF}         { // *TODO*: let the scanner parse this (it does it anyway)
@@ -591,8 +590,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
-                             return yytokentype::HEADER;
-                             /* return yy::HTTP_Parser::token::HEADER; */ }
+//                             return yytokentype::HEADER;
+                             return yy::HTTP_Parser::token::HEADER; }
 {CRLF}                     { message_block_p->rd_ptr (yyleng);
                              iparser_p->offset (yyleng);
                              try {
@@ -603,8 +602,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              }
                              BEGIN (INITIAL);
                              yylval->ival = 2;
-                             return yytokentype::DELIMITER;
-                             /* return yy::HTTP_Parser::token::DELIMITER; */ }
+//                             return yytokentype::DELIMITER;
+                             return yy::HTTP_Parser::token::DELIMITER; }
 } // end <chunked_body>
 <chunk>{
 {CHUNK_LINE}{CRLF}         { message_block_p->rd_ptr (yyleng);
@@ -658,7 +657,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                else
                                {
                                  if (!iparser_p->isBlocking ())
-                                   return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                                   return yy::HTTP_Parser::token::END_OF_FRAGMENT;
+//                                   return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
 
                                  // wait for (missing) chunk data fragment(s)
                                  while (missing_chunk_bytes)
@@ -668,7 +668,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                      //         has been closed --> session end
                                      ACE_DEBUG ((LM_DEBUG,
                                                  ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
-                                     return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                                     return yy::HTTP_Parser::token::END_OF_FRAGMENT;
+//                                     return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
                                    } // end IF
                                    message_p = iparser_p->buffer ();
 
@@ -740,13 +741,14 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                yylval->ival = yyleng;
                              } // end ELSE
                              BEGIN (chunked_body);
-                             return yytokentype::CHUNK;
-                             /* return yy::HTTP_Parser::token::CHUNK; */ }
+//                             return yytokentype::CHUNK;
+                             return yy::HTTP_Parser::token::CHUNK; }
 } // end <chunk>
 <<EOF>>                    { yyterminate(); } // *NOTE*: yywrap returned non-zero
 <*>{OCTET}                 { /* *TODO*: use (?s:.) ? */
                              if (!iparser_p->isBlocking ())
-                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                               return yy::HTTP_Parser::token::END_OF_FRAGMENT;
+//                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
 
                              // wait for more data fragment(s)
                              if (!iparser_p->switchBuffer ())
@@ -754,7 +756,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                //         has been closed --> session end
                                ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
-                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+//                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                               return yy::HTTP_Parser::token::END_OF_FRAGMENT;
                              } // end IF
                              yyless (0); }
 %%

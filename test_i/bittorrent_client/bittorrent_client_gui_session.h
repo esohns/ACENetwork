@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef BITTORRENT_CLIENT_GUI_CONNECTION_H
-#define BITTORRENT_CLIENT_GUI_CONNECTION_H
+#ifndef BitTorrent_Client_GUI_Session_T_H
+#define BitTorrent_Client_GUI_Session_T_H
 
 #include <map>
 #include <string>
@@ -40,29 +40,27 @@
 
 // forward declaration(s)
 struct Common_UI_GTKState;
-class BitTorrent_Client_GUI_MessageHandler;
 
 /**
   @author Erik Sohns <eriksohns@123mail.org>
 */
-class BitTorrent_Client_GUI_Connection
- : public BitTorrent_Client_ISessionNotify_t
- , public Common_IGet_T<BitTorrent_Client_GTK_ConnectionCBData>
+template <typename ConnectionType>
+class BitTorrent_Client_GUI_Session_T
+ : public BitTorrent_Client_IStreamNotify_t
+ , public Common_IGet_T<struct BitTorrent_Client_GTK_SessionCBData>
 {
-  friend class BitTorrent_Client_GUI_MessageHandler;
-
  public:
-  BitTorrent_Client_GUI_Connection (Common_UI_GTKState*,           // GTK state handle
-                             BitTorrent_Client_GUI_Connections_t*, // connections handle
-                             guint,                         // (statusbar) context ID
-                             const std::string&,            // (server tab) label
-                             const std::string&);           // UI (glade) file directory
+  BitTorrent_Client_GUI_Session_T (Common_UI_GTKState*,               // GTK state handle
+                                   BitTorrent_Client_GUI_Sessions_t*, // sessions handle
+                                   guint,                             // (statusbar) context ID
+                                   const std::string&,                // (server tab) label
+                                   const std::string&);               // UI (glade) file directory
   // *WARNING*: must be called with
   //            BitTorrent_Client_GTK_CBData::Common_UI_GTKState::lock held !
-  virtual ~BitTorrent_Client_GUI_Connection ();
+  virtual ~BitTorrent_Client_GUI_Session_T ();
 
-  void initialize (BitTorrent_Client_SessionState*, // session state handle
-                   IRC_IControl*);           // controller handle
+  void initialize (struct BitTorrent_Client_SessionState*, // session state handle
+                   BitTorrent_IControl*);                  // controller handle
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
   void finalize (bool = true); // locked access ?
   void close ();
@@ -74,43 +72,39 @@ class BitTorrent_Client_GUI_Connection
                        const Stream_SessionMessageType&);
   virtual void end (Stream_SessionId_t);
   virtual void notify (Stream_SessionId_t,
-                       const IRC_Message&);
+                       const BitTorrent_Client_Message_t&);
   virtual void notify (Stream_SessionId_t,
                        const BitTorrent_Client_SessionMessage&);
 
   // implement Common_IGet_T
-  virtual const BitTorrent_Client_GTK_ConnectionCBData& get () const;
-
-  // *NOTE*: a return value of -1 indicates non-existence
-  gint exists (const std::string&, // channel/nick
-               bool = true) const; // locked access (GDK) ?
-  void channels (string_list_t&); // return value: list of active channels
+  virtual const BitTorrent_Client_GTK_SessionCBData& get () const;
 
   // *WARNING*: callers may need protection from:
   //            - the thread(s) servicing the UI (GTK) event loop
   //            - the event dispatch thread(s) (reactor/proactor)
   //void current (std::string&,        // return value: nickname
   //              std::string&) const; // return value: channel / nickname
-  const BitTorrent_Client_SessionState& state () const;
-  BitTorrent_Client_GUI_MessageHandler* getActiveHandler (bool = true,        // locked access ?
-                                                   bool = true) const; // locked access (GDK) ?
-  void createMessageHandler (const std::string&, // channel/nickname
-                             bool = true,        // locked access ?
-                             bool = true);       // locked access (GDK) ?
-  void terminateMessageHandler (const std::string&, // channel/nickname
-                                bool = true);       // locked access ?
+  const struct BitTorrent_Client_SessionState& state () const;
+  ConnectionType* getConnection (bool = true,        // locked access ?
+                                 bool = true) const; // locked access (GDK) ?
+  ConnectionType* getConnection (const std::string&); // id (channel/nickname)
+  void createConnection (const std::string&, // channel/nickname
+                         bool = true,        // locked access ?
+                         bool = true);       // locked access (GDK) ?
+  void terminateConnection (const std::string&, // channel/nickname
+                            bool = true);       // locked access ?
 
   bool closing_;
 
  private:
   typedef std::map<std::string,
-                   BitTorrent_Client_GUI_MessageHandler* > MESSAGE_HANDLERS_T;
-  typedef MESSAGE_HANDLERS_T::const_iterator MESSAGE_HANDLERSCONSTITERATOR_T;
-  typedef MESSAGE_HANDLERS_T::iterator MESSAGE_HANDLERSITERATOR_T;
+                   ConnectionType* > CONNECTIONS_T;
+  typedef CONNECTIONS_T::const_iterator CONNECTIONS_CONSTITERATOR_T;
+  typedef CONNECTIONS_T::iterator CONNECTIONS_ITERATOR_T;
 
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Connection ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Connection (const BitTorrent_Client_GUI_Connection&))
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Connection& operator= (const BitTorrent_Client_GUI_Connection&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Session_T ())
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Session_T (const BitTorrent_Client_GUI_Session_T&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Session_T& operator= (const BitTorrent_Client_GUI_Session_T&))
 
   // helper methods
   void forward (const std::string&,  // channel/nickname
@@ -120,16 +114,14 @@ class BitTorrent_Client_GUI_Connection
   void error (const IRC_Record&,
               bool = true); // locked access ?
 
-  BitTorrent_Client_GUI_MessageHandler* getHandler (const std::string&); // id (channel/nickname)
+  struct BitTorrent_Client_GTK_SessionCBData CBData_;
+  guint                                      contextID_;
+  bool                                       isFirstUsersMsg_;
+  struct BitTorrent_Client_SessionState      sessionState_;
+  std::string                                UIFileDirectory_;
 
-  BitTorrent_Client_GTK_ConnectionCBData CBData_;
-  guint                           contextID_;
-  bool                            isFirstUsersMsg_;
-  BitTorrent_Client_SessionState*        sessionState_;
-  std::string                     UIFileDirectory_;
-
-  mutable ACE_SYNCH_MUTEX         lock_;
-  MESSAGE_HANDLERS_T              messageHandlers_;
+  mutable ACE_SYNCH_MUTEX                    lock_;
+  CONNECTIONS_T                              messageHandlers_;
 };
 
 #endif

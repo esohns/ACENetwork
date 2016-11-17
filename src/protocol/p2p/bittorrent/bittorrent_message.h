@@ -26,6 +26,7 @@
 #include <ace/Global_Macros.h>
 
 #include "stream_control_message.h"
+#include "stream_data_base.h"
 #include "stream_data_message_base.h"
 
 #include "bittorrent_common.h"
@@ -36,6 +37,7 @@
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
+typedef Stream_DataBase_T<struct BitTorrent_Record> BitTorrent_MessageData_t;
 template <typename SessionDataType>
 class BitTorrent_SessionMessage_T;
 template <typename AllocatorConfigurationType,
@@ -55,7 +57,7 @@ class BitTorrent_Message_T
                                                            BitTorrent_Message_T<SessionDataType>,
                                                            BitTorrent_SessionMessage_T<SessionDataType> >,
                                    BitTorrent_SessionMessage_T<SessionDataType>,
-                                   struct BitTorrent_Record,
+                                   BitTorrent_MessageData_t,
                                    enum BitTorrent_MessageType>
 {
   // enable access to specific private ctors
@@ -124,7 +126,7 @@ class BitTorrent_Message_T
                                                            BitTorrent_Message_T<SessionDataType>,
                                                            BitTorrent_SessionMessage_T<SessionDataType> >,
                                    BitTorrent_SessionMessage_T<SessionDataType>,
-                                   struct BitTorrent_Record,
+                                   BitTorrent_MessageData_t,
                                    enum BitTorrent_MessageType> inherited;
 
   // convenient types

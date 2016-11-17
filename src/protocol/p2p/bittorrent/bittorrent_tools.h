@@ -25,6 +25,8 @@
 
 #include <ace/Global_Macros.h>
 
+#include "net_defines.h"
+
 #include "bittorrent_common.h"
 #include "bittorrent_exports.h"
 
@@ -34,7 +36,7 @@ class BitTorrent_Export BitTorrent_Tools
   inline virtual ~BitTorrent_Tools () {};
 
   // debug info
-  static std::string Handshake2String (const struct BitTorrent_Handshake&);
+  static std::string Handshake2String (const struct BitTorrent_PeerHandshake&);
   static std::string Record2String (const struct BitTorrent_Record&);
 
   static std::string Type2String (enum BitTorrent_MessageType&);
@@ -42,6 +44,10 @@ class BitTorrent_Export BitTorrent_Tools
 //  static bool parseURL (const std::string&, // URL
 //                        ACE_INET_Addr&,     // return value: host address
 //                        std::string&);      // return value: URI
+  static bool parseMetaInfoFile (const std::string&,          // metainfo (aka .bittorrent) file
+                                 struct BitTorrent_MetaInfo&, // return value: metainfo
+                                 bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,
+                                 bool = NET_PROTOCOL_DEFAULT_YACC_TRACE);
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())

@@ -115,18 +115,23 @@ if (UNIX)
  include_directories (${PKG_CURSES_INCLUDE_DIRS})
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/dec)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/dev)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/misc)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/dec)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/dev)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
 endif ()
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/bison)
+#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/http)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/p2p/bittorrent)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
@@ -230,11 +235,12 @@ set (bittorrent_client_gui_SRCS
      bittorrent_client_gui_callbacks.cpp
      bittorrent_client_gui_callbacks.h
      bittorrent_client_gui_common.h
-     bittorrent_client_gui_connection.cpp
-     bittorrent_client_gui_connection.h
      bittorrent_client_gui_defines.h
      bittorrent_client_gui_messagehandler.cpp
      bittorrent_client_gui_messagehandler.h
+     bittorrent_client_gui_session.cpp
+     bittorrent_client_gui_session.h
+     bittorrent_client_gui_session.inl
      bittorrent_client_gui_tools.cpp
      bittorrent_client_gui_tools.h
      bittorrent_client_network.h

@@ -29,6 +29,7 @@
 #include "net_macros.h"
 
 #include "irc_defines.h"
+#include <ace/Synch.h>
 #include "irc_record.h"
 #include "irc_parser.h"
 #include "irc_scanner.h"
@@ -117,7 +118,7 @@ IRC_ParserDriver::parse (ACE_Message_Block* data_in,
   // *TODO*: yyrestart(), yy_create_buffer/yy_switch_to_buffer, YY_INPUT...
   int result = -1;
 //   do
-//   { // init scan buffer
+//   { // initialize scan buffer
     if (!scan_begin (useYYScanBuffer_in))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -130,7 +131,7 @@ IRC_ParserDriver::parse (ACE_Message_Block* data_in,
       return false;
     } // end IF
 
-    // parse our data
+    // parse data
     result = parser_.parse ();
     if (result)
       ACE_DEBUG ((LM_ERROR,
@@ -146,12 +147,9 @@ IRC_ParserDriver::parse (ACE_Message_Block* data_in,
     // debug info
     if (debug_level)
     {
-      try
-      {
+      try {
         record_->dump_state ();
-      }
-      catch (...)
-      {
+      } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
       }

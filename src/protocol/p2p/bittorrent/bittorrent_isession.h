@@ -31,7 +31,7 @@ class ACE_Message_Block;
 
 template <typename AddressType,
           typename ConfigurationType,
-          typename StateType,
+          typename ConnectionStateType,
           typename StatisticContainerType,
           ////////////////////////////////
           typename SocketConfigurationType,
@@ -40,25 +40,27 @@ template <typename AddressType,
           typename StreamType,
           typename StreamStatusType,
           ////////////////////////////////
-          typename SessionStateType>
+          typename StateType>
 class BitTorrent_ISession_T
  : public Net_ISession_T<AddressType,
                          ConfigurationType,
-                         StateType,
+                         ConnectionStateType,
                          StatisticContainerType,
                          SocketConfigurationType,
                          HandlerConfigurationType,
                          StreamType,
                          StreamStatusType,
-                         SessionStateType>
+                         StateType>
 {
  public:
   inline virtual ~BitTorrent_ISession_T () {};
 
+  virtual void trackerConnect (const AddressType&) = 0; // tracker address
+  virtual void trackerDisconnect (const AddressType&) = 0; // tracker address
+
   ////////////////////////////////////////
   // callbacks
   // *TODO*: remove ASAP
-
   virtual void trackerConnect (Net_ConnectionId_t) = 0;    // connection id
   virtual void trackerDisconnect (Net_ConnectionId_t) = 0; // connection id
 

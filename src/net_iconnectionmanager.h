@@ -78,7 +78,7 @@ class Net_IConnectionManager_T
   virtual CONNECTION_T* operator[] (unsigned int) const = 0; // index
   virtual CONNECTION_T* get (ACE_HANDLE) const = 0; // socket handle
   virtual CONNECTION_T* get (const AddressType&,     // address
-                             bool = true) const = 0; // peer ?
+                             bool = true) const = 0; // peer address ? : local address
 
   // *NOTE*: 'register' is a reserved keyword
   virtual bool registerc (CONNECTION_T*) = 0; // connection handle

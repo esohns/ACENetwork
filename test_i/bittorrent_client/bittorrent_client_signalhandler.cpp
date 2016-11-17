@@ -31,6 +31,7 @@
 
 #include "net_macros.h"
 
+#include <ace/Synch.h>
 #include "bittorrent_client_curses.h"
 #include "bittorrent_client_network.h"
 
@@ -54,10 +55,10 @@ BitTorrent_Client_SignalHandler::handle (int signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SignalHandler::handleSignal"));
 
-  int result = -1;
+//  int result = -1;
 
   bool abort = false;
-  bool connect = false;
+//  bool connect = false;
   bool shutdown = false;
   switch (signal_in)
   {
@@ -87,8 +88,8 @@ BitTorrent_Client_SignalHandler::handle (int signal_in)
   case SIGBREAK:
 #endif
     {
-      // (try to) connect
-      connect = true;
+//      // (try to) connect
+//      connect = true;
 
       break;
     }
@@ -117,56 +118,6 @@ BitTorrent_Client_SignalHandler::handle (int signal_in)
   // ...abort ?
   if (abort)
     BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
-
-  // ...connect ?
-  if (connect)
-  {
-    if (!inherited::configuration_)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("not configured: cannot connect, continuing\n")));
-      goto done_connect;
-    } // end IF
-    if (!inherited::configuration_->connector)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("no connector: cannot connect, continuing\n")));
-      goto done_connect;
-    } // end IF
-
-    ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    try {
-      handle =
-        inherited::configuration_->connector->connect (inherited::configuration_->peerAddress);
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_Client_IConnector_t::connect(): \"%m\", continuing\n")));
-    }
-    if (handle == ACE_INVALID_HANDLE)
-    {
-      ACE_TCHAR buffer[BUFSIZ];
-      ACE_OS::memset(buffer, 0, sizeof (buffer));
-      result =
-        inherited::configuration_->peerAddress.addr_to_string (buffer,
-                                                               sizeof (buffer));
-      if (result == -1)
-      {
-        // *PORTABILITY*: tracing in a signal handler context is not portable
-        // *TODO*
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-      } // end IF
-      // *PORTABILITY*: tracing in a signal handler context is not portable
-      // *TODO*
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Client_IConnector_t::connect(\"%s\"): \"%m\", continuing\n"),
-                  buffer));
-
-      // release an existing connection, maybe that helps...
-      BitTorrent_Client_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
-    } // end IF
-  } // end IF
-done_connect:
 
   // ...shutdown ?
   if (shutdown)

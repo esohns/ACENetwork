@@ -40,24 +40,27 @@ template <typename SessionDataType>
 class BitTorrent_SessionMessage_T;
 template <typename AddressType,
           typename ConfigurationType,
-          typename StateType,
+          typename ConnectionStateType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename SessionStateType>
+          typename StateType>
 class BitTorrent_ISession_T;
 
 template <typename AddressType,
           typename ConfigurationType,
-          typename StateType, // connection-
           typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
+          typename ControlMessageType,
+          typename MessageType,
+          typename SessionMessageType,
           typename SessionDataType,
           typename StreamType,
           typename StreamStatusType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename ConnectionStateType,
           typename SessionStateType,
           ////////////////////////////////
           typename CBDataType> // gtk ui feedback
@@ -65,19 +68,16 @@ class BitTorrent_Module_PeerHandler_T
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          ConfigurationType,
-                                         Stream_ControlMessage_T<enum Stream_ControlType,
-                                                                 struct Stream_AllocatorConfiguration,
-                                                                 BitTorrent_Message_T<SessionDataType>,
-                                                                 BitTorrent_SessionMessage_T<SessionDataType> >,
-                                         BitTorrent_Message_T<SessionDataType>,
-                                         BitTorrent_SessionMessage_T<SessionDataType>,
+                                         ControlMessageType,
+                                         MessageType,
+                                         SessionMessageType,
                                          Stream_SessionId_t,
                                          SessionDataType>
  , public Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                       SessionDataType,
                                       enum Stream_SessionMessageType,
-                                      BitTorrent_Message_T<SessionDataType>,
-                                      BitTorrent_SessionMessage_T<SessionDataType> >
+                                      MessageType,
+                                      SessionMessageType>
 {
  public:
   BitTorrent_Module_PeerHandler_T ();
@@ -89,10 +89,10 @@ class BitTorrent_Module_PeerHandler_T
   virtual bool initialize (const ConfigurationType&);
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (BitTorrent_Message_T<SessionDataType>*&, // data message handle
-                                  bool&);                                  // return value: pass message downstream ?
-  virtual void handleSessionMessage (BitTorrent_SessionMessage_T<SessionDataType>*&, // session message handle
-                                     bool&);                                         // return value: pass message downstream ?
+  virtual void handleDataMessage (MessageType*&, // data message handle
+                                  bool&);        // return value: pass message downstream ?
+  virtual void handleSessionMessage (SessionMessageType*&, // session message handle
+                                     bool&);               // return value: pass message downstream ?
 
   // implement Common_IClone_T
   virtual ACE_Task<ACE_MT_SYNCH,
@@ -104,21 +104,18 @@ class BitTorrent_Module_PeerHandler_T
   virtual void notify (Stream_SessionId_t,
                        const enum Stream_SessionMessageType&);
   virtual void end (Stream_SessionId_t); // session id
-  virtual void notify (Stream_SessionId_t,                            // session id
-                       const BitTorrent_Message_T<SessionDataType>&); // (protocol) message
-  virtual void notify (Stream_SessionId_t,                                   // session id
-                       const BitTorrent_SessionMessage_T<SessionDataType>&); // session message
+  virtual void notify (Stream_SessionId_t,  // session id
+                       const MessageType&); // (protocol) message
+  virtual void notify (Stream_SessionId_t,         // session id
+                       const SessionMessageType&); // session message
 
  private:
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          ConfigurationType,
-                                         Stream_ControlMessage_T<enum Stream_ControlType,
-                                                                 struct Stream_AllocatorConfiguration,
-                                                                 BitTorrent_Message_T<SessionDataType>,
-                                                                 BitTorrent_SessionMessage_T<SessionDataType> >,
-                                         BitTorrent_Message_T<SessionDataType>,
-                                         BitTorrent_SessionMessage_T<SessionDataType>,
+                                         ControlMessageType,
+                                         MessageType,
+                                         SessionMessageType,
                                          Stream_SessionId_t,
                                          SessionDataType> inherited;
 
@@ -138,18 +135,21 @@ class BitTorrent_Module_PeerHandler_T
   // convenient types
   typedef BitTorrent_Module_PeerHandler_T<AddressType,
                                           ConfigurationType,
-                                          StateType,
                                           StatisticContainerType,
-                                          SocketConfigurationType,
-                                          HandlerConfigurationType,
+                                          ControlMessageType,
+                                          MessageType,
+                                          SessionMessageType,
                                           SessionDataType,
                                           StreamType,
                                           StreamStatusType,
+                                          SocketConfigurationType,
+                                          HandlerConfigurationType,
+                                          ConnectionStateType,
                                           SessionStateType,
                                           CBDataType> OWN_TYPE_T;
   typedef BitTorrent_ISession_T<AddressType,
                                 ConfigurationType,
-                                StateType,
+                                ConnectionStateType,
                                 StatisticContainerType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
@@ -172,13 +172,16 @@ class BitTorrent_Module_PeerHandler_T
 
 template <typename AddressType,
           typename ConfigurationType,
-          typename StateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
+          typename ControlMessageType,
+          typename MessageType,
+          typename SessionMessageType,
           typename SessionDataType,
           typename StreamType,
           typename StreamStatusType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename ConnectionStateType,
           typename SessionStateType,
           ////////////////////////////////
           typename CBDataType> // gtk ui feedback
@@ -186,19 +189,16 @@ class BitTorrent_Module_TrackerHandler_T
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          ConfigurationType,
-                                         Stream_ControlMessage_T<enum Stream_ControlType,
-                                                                 struct Stream_AllocatorConfiguration,
-                                                                 BitTorrent_Message_T<SessionDataType>,
-                                                                 BitTorrent_SessionMessage_T<SessionDataType> >,
-                                         BitTorrent_Message_T<SessionDataType>,
-                                         BitTorrent_SessionMessage_T<SessionDataType>,
+                                         ControlMessageType,
+                                         MessageType,
+                                         SessionMessageType,
                                          Stream_SessionId_t,
                                          SessionDataType>
  , public Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                       SessionDataType,
                                       enum Stream_SessionMessageType,
-                                      BitTorrent_Message_T<SessionDataType>,
-                                      BitTorrent_SessionMessage_T<SessionDataType> >
+                                      MessageType,
+                                      SessionMessageType>
 {
  public:
   BitTorrent_Module_TrackerHandler_T ();
@@ -210,10 +210,10 @@ class BitTorrent_Module_TrackerHandler_T
   virtual bool initialize (const ConfigurationType&);
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (BitTorrent_Message_T<SessionDataType>*&, // data message handle
-                                  bool&);                                  // return value: pass message downstream ?
-  virtual void handleSessionMessage (BitTorrent_SessionMessage_T<SessionDataType>*&, // session message handle
-                                     bool&);                                         // return value: pass message downstream ?
+  virtual void handleDataMessage (MessageType*&, // data message handle
+                                  bool&);        // return value: pass message downstream ?
+  virtual void handleSessionMessage (SessionMessageType*&, // session message handle
+                                     bool&);               // return value: pass message downstream ?
 
   // implement Common_IClone_T
   virtual ACE_Task<ACE_MT_SYNCH,
@@ -225,21 +225,18 @@ class BitTorrent_Module_TrackerHandler_T
   virtual void notify (Stream_SessionId_t,
                        const enum Stream_SessionMessageType&);
   virtual void end (Stream_SessionId_t); // session id
-  virtual void notify (Stream_SessionId_t,                            // session id
-                       const BitTorrent_Message_T<SessionDataType>&); // (protocol) message
-  virtual void notify (Stream_SessionId_t,                                   // session id
-                       const BitTorrent_SessionMessage_T<SessionDataType>&); // session message
+  virtual void notify (Stream_SessionId_t,  // session id
+                       const MessageType&); // (protocol) message
+  virtual void notify (Stream_SessionId_t,         // session id
+                       const SessionMessageType&); // session message
 
  private:
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          ConfigurationType,
-                                         Stream_ControlMessage_T<enum Stream_ControlType,
-                                                                 struct Stream_AllocatorConfiguration,
-                                                                 BitTorrent_Message_T<SessionDataType>,
-                                                                 BitTorrent_SessionMessage_T<SessionDataType> >,
-                                         BitTorrent_Message_T<SessionDataType>,
-                                         BitTorrent_SessionMessage_T<SessionDataType>,
+                                         ControlMessageType,
+                                         MessageType,
+                                         SessionMessageType,
                                          Stream_SessionId_t,
                                          SessionDataType> inherited;
 
@@ -259,18 +256,21 @@ class BitTorrent_Module_TrackerHandler_T
   // convenient types
   typedef BitTorrent_Module_TrackerHandler_T<AddressType,
                                              ConfigurationType,
-                                             StateType,
                                              StatisticContainerType,
-                                             SocketConfigurationType,
-                                             HandlerConfigurationType,
+                                             ControlMessageType,
+                                             MessageType,
+                                             SessionMessageType,
                                              SessionDataType,
                                              StreamType,
                                              StreamStatusType,
+                                             SocketConfigurationType,
+                                             HandlerConfigurationType,
+                                             ConnectionStateType,
                                              SessionStateType,
                                              CBDataType> OWN_TYPE_T;
   typedef BitTorrent_ISession_T<AddressType,
                                 ConfigurationType,
-                                StateType,
+                                ConnectionStateType,
                                 StatisticContainerType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,

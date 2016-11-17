@@ -17,21 +17,21 @@ PROJECT_ROOT=$(dirname $0)/..
 #[ ! -d ./${PROJECT_ROOT} ] && echo "ERROR: invalid directory (was: ${PROJECT_ROOT}), aborting" && exit 1
 SCRIPTS_DIRECTORY=${PROJECT_ROOT}/scripts
 [ ! -d ${SCRIPTS_DIRECTORY} ] && echo "ERROR: invalid directory (was: ${SCRIPTS_DIRECTORY}), aborting" && exit 1
-BISECT_L=bisector.l
-[ ! -f ${SCRIPTS_DIRECTORY}/${BISECT_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${BISECT_L}), aborting" && exit 1
+BENCODING_LL=bencoding.ll
+[ ! -f ${SCRIPTS_DIRECTORY}/${BENCODING_LL} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${BENCODING_LL}), aborting" && exit 1
 SCANNER_L=scanner.l
 [ ! -f ${SCRIPTS_DIRECTORY}/${SCANNER_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${SCANNER_L}), aborting" && exit 1
 
-# generate a scanner for bisecting HTTP messages from the input stream
-#flex ${SCRIPTS_DIRECTORY}/${BISECT_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bisector_report.txt
-#[ $? -ne 0 ] && echo "ERROR: failed to flex \"${BISECT_L}\", aborting" && exit 1
+# generate a scanner for use by the bittorrent metainfo file parser
+flex --noline ${SCRIPTS_DIRECTORY}/${BENCODING_LL} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bencoding_report.txt
+[ $? -ne 0 ] && echo "ERROR: failed to flex \"${BENCODING_LL}\", aborting" && exit 1
 
 # list generated files
-#FILES="bittorrent_bisector.cpp bittorrent_bisector.h"
+FILES="bencoding_scanner.cpp bencoding_scanner.h"
 
 # -------------------------------------------------------------------
 
-# generate a scanner for use by the BitTorrent message parser
+# generate a scanner for use by the bittorrent message parser
 flex --noline ${SCRIPTS_DIRECTORY}/${SCANNER_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/scanner_report.txt
 [ $? -ne 0 ] && echo "ERROR: failed to flex \"${SCANNER_L}\", aborting" && exit 1
 

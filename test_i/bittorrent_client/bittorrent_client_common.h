@@ -21,6 +21,8 @@
 #ifndef BITTORRENT_CLIENT_COMMON_H
 #define BITTORRENT_CLIENT_COMMON_H
 
+#include <string>
+
 #include "common.h"
 
 #include "net_defines.h"
@@ -47,6 +49,7 @@ struct BitTorrent_Client_ThreadData
    , groupID (-1)
    , moduleHandlerConfiguration (NULL)
    , useReactor (NET_EVENT_USE_REACTOR)
+   , URI ()
   {};
 
   struct BitTorrent_Client_Configuration*              configuration;
@@ -54,6 +57,7 @@ struct BitTorrent_Client_ThreadData
   int                                                  groupID;
   struct BitTorrent_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
   bool                                                 useReactor;
+  std::string                                          URI;
 };
 
 #endif

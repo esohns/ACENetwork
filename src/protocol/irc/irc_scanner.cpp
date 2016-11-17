@@ -1950,9 +1950,9 @@ static yyconst struct yy_trans_info *yy_start_state_list[17] =
 
 static yyconst flex_int32_t yy_rule_linenum[23] =
     {   0,
-      129,  133,  138,  142,  146,  150,  157,  161,  167,  175,
-      179,  187,  191,  197,  204,  207,  211,  213,  220,  222,
-      233,  239
+      130,  134,  139,  143,  147,  151,  158,  162,  168,  176,
+      180,  188,  192,  198,  205,  208,  212,  214,  221,  223,
+      234,  240
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -1987,6 +1987,7 @@ static yyconst flex_int32_t yy_rule_linenum[23] =
 #include "ace/ace_wchar.h"
 #include "ace/OS_Memory.h"
 
+#include <ace/Synch.h>
 #include "irc_module_parser.h"
 #include "irc_parser_driver.h"
 
@@ -2048,13 +2049,13 @@ And so on...
 
 
 
-#line 113 "./../scripts/scanner.l"
+#line 114 "./../scripts/scanner.l"
 #define YY_USER_ACTION yylloc->columns(yyleng);
 /* *NOTE*: it seems that the following "exceptions" are allowed:
            - the trailing param does NOT need a ':' prefix IF it doesn't contain
              <SPACE>s...
 */
-#line 2058 "irc_scanner.cpp"
+#line 2059 "irc_scanner.cpp"
 
 #define INITIAL 0
 #define prefix 1
@@ -2243,7 +2244,7 @@ static int input (yyscan_t yyscanner );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -2256,7 +2257,7 @@ static int input (yyscan_t yyscanner );
 	else \
 		{ \
 		errno=0; \
-		while ( (result = fread(buf, 1, max_size, yyin))==0 && ferror(yyin)) \
+		while ( (result = fread(buf, 1, (yy_size_t) max_size, yyin)) == 0 && ferror(yyin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -2386,7 +2387,7 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 121 "./../scripts/scanner.l"
+#line 122 "./../scripts/scanner.l"
 
 
   yylloc->step();
@@ -2394,7 +2395,7 @@ YY_DECL
   std::stringstream converter;
 
 
-#line 2398 "irc_scanner.cpp"
+#line 2399 "irc_scanner.cpp"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -2471,7 +2472,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 129 "./../scripts/scanner.l"
+#line 130 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(prefix);
                              yylval->ival = 1;
@@ -2479,7 +2480,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 133 "./../scripts/scanner.l"
+#line 134 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(end_of_frame);
                              yylval->ival = 1; }
@@ -2488,7 +2489,7 @@ YY_RULE_SETUP
 
 case 3:
 YY_RULE_SETUP
-#line 138 "./../scripts/scanner.l"
+#line 139 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(command);
                              yylval->ival = yyleng;
@@ -2496,7 +2497,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 142 "./../scripts/scanner.l"
+#line 143 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(user);
                              yylval->ival = 1;
@@ -2504,7 +2505,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 146 "./../scripts/scanner.l"
+#line 147 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(host);
                              yylval->ival = 1;
@@ -2512,7 +2513,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 150 "./../scripts/scanner.l"
+#line 151 "./../scripts/scanner.l"
 { yylloc->step();
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
@@ -2523,7 +2524,7 @@ YY_RULE_SETUP
 
 case 7:
 YY_RULE_SETUP
-#line 157 "./../scripts/scanner.l"
+#line 158 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(command);
                              yylval->ival = yyleng;
@@ -2531,7 +2532,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 161 "./../scripts/scanner.l"
+#line 162 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(host);
                              yylval->ival = 1;
@@ -2541,7 +2542,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 167 "./../scripts/scanner.l"
+#line 168 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(prefix);
                              ACE_NEW_NORETURN(yylval->sval,
@@ -2553,7 +2554,7 @@ YY_RULE_SETUP
 
 case 10:
 YY_RULE_SETUP
-#line 175 "./../scripts/scanner.l"
+#line 176 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(command);
                              yylval->ival = yyleng;
@@ -2561,7 +2562,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 179 "./../scripts/scanner.l"
+#line 180 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(prefix);
                              ACE_NEW_NORETURN(yylval->sval,
@@ -2573,7 +2574,7 @@ YY_RULE_SETUP
 
 case 12:
 YY_RULE_SETUP
-#line 187 "./../scripts/scanner.l"
+#line 188 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(params);
                              yylval->ival = yyleng;
@@ -2581,7 +2582,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 191 "./../scripts/scanner.l"
+#line 192 "./../scripts/scanner.l"
 { yylloc->step();
                              converter.str(ACE_TEXT_ALWAYS_CHAR(""));
                              converter.clear();
@@ -2591,7 +2592,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 197 "./../scripts/scanner.l"
+#line 198 "./../scripts/scanner.l"
 { yylloc->step();
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
@@ -2602,14 +2603,14 @@ YY_RULE_SETUP
 
 case 15:
 YY_RULE_SETUP
-#line 204 "./../scripts/scanner.l"
+#line 205 "./../scripts/scanner.l"
 { yylloc->step();
                              yylval->ival = yyleng;
                              return yy::IRC_Parser::token::SPACE; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 207 "./../scripts/scanner.l"
+#line 208 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(trailing);
                              yylval->ival = 1;
@@ -2617,13 +2618,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 211 "./../scripts/scanner.l"
+#line 212 "./../scripts/scanner.l"
 { yylloc->step(); /* *NOTE*: non-compliant (see above) */
                              BEGIN(end_of_frame); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 213 "./../scripts/scanner.l"
+#line 214 "./../scripts/scanner.l"
 { yylloc->step();
                              ACE_NEW_NORETURN(yylval->sval,
                                               std::string);
@@ -2634,13 +2635,13 @@ YY_RULE_SETUP
 
 case 19:
 YY_RULE_SETUP
-#line 220 "./../scripts/scanner.l"
+#line 221 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(end_of_frame); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 222 "./../scripts/scanner.l"
+#line 223 "./../scripts/scanner.l"
 { yylloc->step();
                              if (yyleng > 0)
                              {
@@ -2656,7 +2657,7 @@ YY_RULE_SETUP
 case 21:
 /* rule 21 can match eol */
 YY_RULE_SETUP
-#line 233 "./../scripts/scanner.l"
+#line 234 "./../scripts/scanner.l"
 { yylloc->step();
                              BEGIN(INITIAL);
                              yylval->ival = 2;
@@ -2671,13 +2672,13 @@ case YY_STATE_EOF(command):
 case YY_STATE_EOF(params):
 case YY_STATE_EOF(trailing):
 case YY_STATE_EOF(end_of_frame):
-#line 238 "./../scripts/scanner.l"
+#line 239 "./../scripts/scanner.l"
 { yyterminate(); }
 	YY_BREAK
 case 22:
 /* rule 22 can match eol */
 YY_RULE_SETUP
-#line 239 "./../scripts/scanner.l"
+#line 240 "./../scripts/scanner.l"
 { /* *TODO*: use (?s:.) ? */
                              yylloc->step();
 
@@ -2691,10 +2692,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 249 "./../scripts/scanner.l"
+#line 250 "./../scripts/scanner.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 2698 "irc_scanner.cpp"
+#line 2699 "irc_scanner.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2893,7 +2894,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 	else
 		{
-			yy_size_t num_to_read =
+			int num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
@@ -3928,7 +3929,7 @@ void IRC_Scanner_free (void * ptr , yyscan_t yyscanner)
 
 /* %ok-for-header */
 
-#line 248 "./../scripts/scanner.l"
+#line 249 "./../scripts/scanner.l"
 
 
 

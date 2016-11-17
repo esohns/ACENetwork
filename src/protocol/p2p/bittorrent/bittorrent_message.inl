@@ -27,9 +27,9 @@
 
 #include "net_macros.h"
 
+#include "bittorrent_common.h"
 #include "bittorrent_defines.h"
 #include "bittorrent_tools.h"
-
 
 template <typename SessionDataType>
 BitTorrent_Message_T<SessionDataType>::BitTorrent_Message_T (unsigned int requestedSize_in)

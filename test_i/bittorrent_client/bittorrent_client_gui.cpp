@@ -58,8 +58,12 @@
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
 
+#include "test_i_defines.h"
+
+#include "bittorrent_client_configuration.h"
 #include "bittorrent_client_defines.h"
 #include "bittorrent_client_gui_callbacks.h"
+#include <ace/Synch.h>
 #include "bittorrent_client_gui_common.h"
 #include "bittorrent_client_gui_defines.h"
 #include "bittorrent_client_network.h"
@@ -93,22 +97,22 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_TEXT (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
+  path += ACE_TEXT (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILENAME]   : configuration file [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d              : debug [")
-            << (IRC_DEFAULT_LEX_TRACE || IRC_DEFAULT_YACC_TRACE)
+            << (NET_PROTOCOL_DEFAULT_LEX_TRACE || NET_PROTOCOL_DEFAULT_YACC_TRACE)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_TEXT (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
+  path += ACE_TEXT (BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g [FILENAME]   : GTK rc file [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
@@ -123,19 +127,19 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_TEXT (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
+  path += ACE_TEXT (BITTORRENT_CLIENT_GUI_DEF_FILE_PHONEBOOK);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-p[FILENAME]    : phonebook file [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r              : use reactor [")
-            << IRC_CLIENT_DEFAULT_USE_REACTOR
+            << NET_EVENT_USE_REACTOR
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]      : reporting interval (seconds) [0: off] [")
-            << IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL
+            << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t              : trace information [")
@@ -144,7 +148,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-u [DIRECTORY]  : UI file directory [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
@@ -154,7 +158,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]      : #thread pool threads [")
-            << IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS
+            << TEST_I_DEFAULT_NUMBER_OF_TP_THREADS
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 } // end print_usage
@@ -193,21 +197,21 @@ do_processArguments (int argc_in,
   configurationFile_out          = configuration_path;
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
 
   debug_out                      =
-    (IRC_DEFAULT_LEX_TRACE || IRC_DEFAULT_YACC_TRACE);
+    (NET_PROTOCOL_DEFAULT_LEX_TRACE || NET_PROTOCOL_DEFAULT_YACC_TRACE);
 
   UIRCFile_out                   = configuration_path;
   UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIRCFile_out                  +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIRCFile_out                  +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE);
 
   useThreadpool_out              = NET_EVENT_USE_THREAD_POOL;
 
@@ -217,25 +221,25 @@ do_processArguments (int argc_in,
   phonebookFile_out              = configuration_path;
   phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebookFile_out             +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebookFile_out             +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
-  useReactor_out                 = IRC_CLIENT_DEFAULT_USE_REACTOR;
+  useReactor_out                 = NET_EVENT_USE_REACTOR;
 
   statisticReportingInterval_out =
-    IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    BITTORRENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
 
   traceInformation_out           = false;
 
   UIDefinitionFileDirectory_out  = configuration_path;
   UIDefinitionFileDirectory_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitionFileDirectory_out +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
 
   printVersionAndExit_out        = false;
-  numThreadPoolThreads_out       = IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
+  numThreadPoolThreads_out       = TEST_I_DEFAULT_NUMBER_OF_TP_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
@@ -441,12 +445,12 @@ do_initializeSignals (bool useReactor_in,
 void
 do_work (bool useThreadPool_in,
          unsigned int numberOfDispatchThreads_in,
-         IRC_Client_GTK_CBData& userData_in,
+         BitTorrent_Client_GTK_CBData& userData_in,
          const std::string& UIDefinitionFile_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
-         IRC_Client_SignalHandler& signalHandler_in)
+         BitTorrent_Client_SignalHandler& signalHandler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
@@ -462,26 +466,16 @@ do_work (bool useThreadPool_in,
       &userData_in.configuration->moduleHandlerConfiguration;
   userData_in.configuration->streamConfiguration.moduleConfiguration =
       &userData_in.configuration->moduleConfiguration;
-  IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
-                                                   NULL,
-                                                   true);
-  IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
-  IRCHandler_impl_p =
-    dynamic_cast<IRC_Client_Module_IRCHandler*> (IRC_handler.writer ());
-  if (!IRCHandler_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
-    return;
-  } // end IF
-  if (!IRCHandler_impl_p->initialize (userData_in.configuration->moduleHandlerConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::initialize(), returning\n")));
-    return;
-  } // end IF
-  userData_in.configuration->streamConfiguration.module = &IRC_handler;
+  BitTorrent_Client_PeerHandler_Module peer_handler (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
+                                                     NULL,
+                                                     true);
+  BitTorrent_Client_TrackerHandler_Module tracker_handler (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
+                                                           NULL,
+                                                           true);
+  userData_in.configuration->streamConfiguration.module = &peer_handler;
   userData_in.configuration->streamConfiguration.cloneModule = true;
+  userData_in.configuration->streamConfiguration.trackerModule =
+      &tracker_handler;
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData thread_data;
@@ -500,8 +494,8 @@ do_work (bool useThreadPool_in,
   } // end IF
 
   // step3a: initialize connection manager
-  IRC_Client_Connection_Manager_t* connection_manager_p =
-      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  BitTorrent_Client_Connection_Manager_t* connection_manager_p =
+      BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   connection_manager_p->set (*userData_in.configuration,
@@ -516,11 +510,11 @@ do_work (bool useThreadPool_in,
   timer_manager_p->start ();
 
   // step4: initialize signal handling
-  IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
+  BitTorrent_Client_SignalHandlerConfiguration signal_handler_configuration;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_SignalHandler::initialize(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to BITTORRENT_CLIENT_SignalHandler::initialize(): \"%m\", returning\n")));
 
     // clean up
     timer_manager_p->stop ();
@@ -595,8 +589,8 @@ do_work (bool useThreadPool_in,
   timer_manager_p->stop ();
 
   // wait for connection processing to complete
-  IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
-  IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->wait ();
+  connection_manager_p->abort ();
+  connection_manager_p->wait ();
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -604,7 +598,7 @@ do_work (bool useThreadPool_in,
 
 void
 do_parsePhonebookFile (const std::string& phonebookFilename_in,
-                       IRC_Client_PhoneBook& phoneBook_out)
+                       BitTorrent_Client_PhoneBook& phoneBook_out)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_parsePhonebookFile"));
 
@@ -637,14 +631,14 @@ do_parsePhonebookFile (const std::string& phonebookFilename_in,
   ACE_Configuration_Section_Key section_key;
   result =
     configuration_heap.open_section (configuration_heap.root_section (),
-                                     ACE_TEXT (IRC_CLIENT_CNF_TIMESTAMP_SECTION_HEADER),
+                                     ACE_TEXT (BITTORRENT_CLIENT_CNF_TIMESTAMP_SECTION_HEADER),
                                      0, // MUST exist !
                                      section_key);
   if (result == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(\"%s\"), returning\n"),
-                ACE_TEXT (IRC_CLIENT_CNF_TIMESTAMP_SECTION_HEADER)));
+                ACE_TEXT (BITTORRENT_CLIENT_CNF_TIMESTAMP_SECTION_HEADER)));
     return;
   } // end IF
 
@@ -675,7 +669,7 @@ do_parsePhonebookFile (const std::string& phonebookFilename_in,
 //                val_name.c_str(),
 //                val_type));
 
-    if (item_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DATE_SECTION_HEADER))
+    if (item_name == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DATE_SECTION_HEADER))
     {
       std::string time_stamp = ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
       // parse timestamp
@@ -768,14 +762,14 @@ do_parsePhonebookFile (const std::string& phonebookFilename_in,
   // step2: find/open "networks" section...
   result =
     configuration_heap.open_section (configuration_heap.root_section (),
-                                     ACE_TEXT (IRC_CLIENT_CNF_NETWORKS_SECTION_HEADER),
+                                     ACE_TEXT (BITTORRENT_CLIENT_CNF_NETWORKS_SECTION_HEADER),
                                      0, // MUST exist !
                                      section_key);
   if (result == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(\"%s\"), returning\n"),
-                ACE_TEXT (IRC_CLIENT_CNF_NETWORKS_SECTION_HEADER)));
+                ACE_TEXT (BITTORRENT_CLIENT_CNF_NETWORKS_SECTION_HEADER)));
     return;
   } // end IF
 
@@ -810,22 +804,22 @@ do_parsePhonebookFile (const std::string& phonebookFilename_in,
   // step3: find/open "servers" section...
   result =
     configuration_heap.open_section (configuration_heap.root_section (),
-                                     ACE_TEXT (IRC_CLIENT_CNF_SERVERS_SECTION_HEADER),
+                                     ACE_TEXT (BITTORRENT_CLIENT_CNF_SERVERS_SECTION_HEADER),
                                      0, // MUST exist !
                                      section_key);
   if (result == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(\"%s\"), returning\n"),
-                ACE_TEXT (IRC_CLIENT_CNF_SERVERS_SECTION_HEADER)));
+                ACE_TEXT (BITTORRENT_CLIENT_CNF_SERVERS_SECTION_HEADER)));
     return;
   } // end IF
 
   // import values...
   index = 0;
-  IRC_Client_ConnectionEntry entry;
+  BitTorrent_Client_ConnectionEntry entry;
   std::string entry_name;
-  IRC_Client_PortRange_t port_range;
+  BitTorrent_Client_PortRange_t port_range;
   bool no_range = false;
   while (configuration_heap.enumerate_values (section_key,
                                               index,
@@ -862,7 +856,7 @@ do_parsePhonebookFile (const std::string& phonebookFilename_in,
     std::string::size_type last_position = std::string::npos;
 #endif
     current_position =
-      line_string.find (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_PHONEBOOK_KEYWORD_SERVER), 0);
+      line_string.find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_PHONEBOOK_KEYWORD_SERVER), 0);
 // *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
 #if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
     if (current_position == -1)
@@ -908,7 +902,7 @@ do_parsePhonebookFile (const std::string& phonebookFilename_in,
     std::string::size_type next_comma = std::string::npos;
 #endif
     std::string::size_type group =
-      line_string.find (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_PHONEBOOK_KEYWORD_GROUP),
+      line_string.find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_PHONEBOOK_KEYWORD_GROUP),
                         current_position + 1);
 // *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
 #if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
@@ -990,14 +984,14 @@ do_parsePhonebookFile (const std::string& phonebookFilename_in,
               phoneBook_out.networks.size ()));
 
   // add localhost
-  entry.hostName = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEFAULT_SERVER_HOSTNAME);
+  entry.hostName = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_SERVER_HOSTNAME);
   entry.ports.clear ();
-  entry.ports.push_back (std::make_pair (IRC_DEFAULT_SERVER_PORT,
-                                         IRC_DEFAULT_SERVER_PORT));
+  entry.ports.push_back (std::make_pair (BITTORRENT_DEFAULT_SERVER_PORT,
+                                         BITTORRENT_DEFAULT_SERVER_PORT));
   entry.netWork.clear ();
   phoneBook_out.servers.insert (std::make_pair (entry.hostName, entry));
 
-  //   for (IRC_Client_NetworksIterator_t iterator = phoneBook_out.networks.begin ();
+  //   for (BITTORRENT_CLIENT_NetworksIterator_t iterator = phoneBook_out.networks.begin ();
   //        iterator != phoneBook_out.networks.end ();
   //        iterator++)
   //     ACE_DEBUG ((LM_DEBUG,
@@ -1108,21 +1102,21 @@ ACE_TMAIN (int argc_in,
   std::string configuration_file_name        = configuration_path;
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
 
   bool debug                                 =
-    (IRC_DEFAULT_LEX_TRACE || IRC_DEFAULT_YACC_TRACE);
+    (NET_PROTOCOL_DEFAULT_LEX_TRACE || NET_PROTOCOL_DEFAULT_YACC_TRACE);
 
-  std::string UIRC_file_name                 = configuration_path;
-  UIRC_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIRC_file_name                            +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
-  UIRC_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIRC_file_name                            +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
+  std::string rc_file_name                 = configuration_path;
+  rc_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  rc_file_name                            +=
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  rc_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  rc_file_name                            +=
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE);
 
   bool use_thread_pool                       = NET_EVENT_USE_THREAD_POOL;
   bool log_to_file                           = false;
@@ -1131,31 +1125,31 @@ ACE_TMAIN (int argc_in,
   std::string phonebook_file_name            = configuration_path;
   phonebook_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebook_file_name                       +=
-      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
   phonebook_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebook_file_name                       +=
-      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
+      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
-  bool use_reactor                           = IRC_CLIENT_DEFAULT_USE_REACTOR;
+  bool use_reactor                           = NET_EVENT_USE_REACTOR;
 
   unsigned int reporting_interval            =
-    IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
 
   bool trace_information                     = false;
 
   std::string UIDefinitionFile_directory     = configuration_path;
   UIDefinitionFile_directory                += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitionFile_directory                +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
 
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads =
-      IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
+      TEST_I_DEFAULT_NUMBER_OF_TP_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
                             configuration_file_name,
                             debug,
-                            UIRC_file_name,
+                            rc_file_name,
                             use_thread_pool,
                             log_to_file,
                             load_phonebook,
@@ -1167,7 +1161,6 @@ ACE_TMAIN (int argc_in,
                             print_version_and_exit,
                             number_of_thread_pool_threads))
   {
-    // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
     // *PORTABILITY*: on Windows, fini ACE...
@@ -1185,7 +1178,7 @@ ACE_TMAIN (int argc_in,
   std::string ui_definition_file_name = UIDefinitionFile_directory;
   ui_definition_file_name += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   ui_definition_file_name +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_MAIN_FILE);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_MAIN_FILE);
 
   // step2b: validate argument(s)
   if (!Common_File_Tools::isReadable (configuration_file_name) ||
@@ -1278,7 +1271,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  IRC_Client_SignalHandler signal_handler (use_reactor);
+  BitTorrent_Client_SignalHandler signal_handler (use_reactor);
 
   // step5: handle specific program modes
   if (print_version_and_exit)
@@ -1304,12 +1297,12 @@ ACE_TMAIN (int argc_in,
 
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                              IRC_BUFFER_SIZE);
-  IRC_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                   &heap_allocator);
+                                                                              BITTORRENT_BUFFER_SIZE);
+  BitTorrent_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                          &heap_allocator);
 
-  IRC_Client_Configuration configuration;
-  IRC_Client_UserData user_data;
+  BitTorrent_Client_Configuration configuration;
+  BitTorrent_Client_UserData user_data;
 
   user_data.configuration = &configuration;
 
@@ -1325,13 +1318,13 @@ ACE_TMAIN (int argc_in,
       reporting_interval;
   configuration.userData = &user_data;
 
-  IRC_Client_GTK_CBData cb_user_data;
+  BitTorrent_Client_GTK_CBData cb_user_data;
   cb_user_data.configuration = &configuration;
   cb_user_data.UIFileDirectory = UIDefinitionFile_directory;
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
   cb_user_data.configuration->protocolConfiguration.loginOptions.nickName =
-      ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
+      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_NICKNAME);
 //   userData.loginOptions.user.username = ;
   std::string host_name;
   if (!Net_Common_Tools::getHostname (host_name))
@@ -1353,30 +1346,30 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (IRC_PRT_USERMSG_TRADITIONAL)
+  if (BITTORRENT_PRT_USERMSG_TRADITIONAL)
   {
     configuration.protocolConfiguration.loginOptions.user.hostName.discriminator =
-      IRC_LoginOptions::User::Hostname::STRING;
+      BitTorrent_LoginOptions::User::Hostname::STRING;
     configuration.protocolConfiguration.loginOptions.user.hostName.string =
       &host_name;
   } // end IF
   else
   {
     configuration.protocolConfiguration.loginOptions.user.hostName.discriminator =
-      IRC_LoginOptions::User::Hostname::MODE;
+      BitTorrent_LoginOptions::User::Hostname::MODE;
     // *NOTE*: hybrid-7.2.3 seems to have a bug: 4 --> +i
     configuration.protocolConfiguration.loginOptions.user.hostName.mode =
-      IRC_DEFAULT_USERMODE;
+      BITTORRENT_DEFAULT_USERMODE;
   } // end ELSE
   configuration.protocolConfiguration.loginOptions.user.serverName =
-    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_SERVERNAME);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_SERVERNAME);
   configuration.protocolConfiguration.loginOptions.channel =
-    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_CHANNEL);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_CHANNEL);
   // populate user/realname
   Common_Tools::getCurrentUserName (configuration.protocolConfiguration.loginOptions.user.userName,
                                     configuration.protocolConfiguration.loginOptions.user.realName);
 
-  cb_user_data.GTKState.RCFiles.push_back (UIRC_file_name);
+  cb_user_data.GTKState.RCFiles.push_back (rc_file_name);
 
   // step7: parse configuration file(s) (if any)
   if (load_phonebook)
@@ -1384,13 +1377,13 @@ ACE_TMAIN (int argc_in,
                            cb_user_data.phoneBook);
   if (!configuration_file_name.empty ())
   {
-    IRC_Client_Connections_t connections;
-    IRC_Client_Tools::parseConfigurationFile (configuration_file_name,
-                                              configuration.protocolConfiguration.loginOptions,
-                                              connections);
+    BitTorrent_Client_Connections_t connections;
+    BitTorrent_Client_Tools::parseConfigurationFile (configuration_file_name,
+                                                     configuration.protocolConfiguration.loginOptions,
+                                                     connections);
 
     // add connections to phonebook
-    for (IRC_Client_ConnectionsIterator_t iterator = connections.begin ();
+    for (BitTorrent_Client_ConnectionsIterator_t iterator = connections.begin ();
          iterator != connections.end ();
          ++iterator)
       cb_user_data.phoneBook.servers.insert (std::make_pair ((*iterator).hostName,

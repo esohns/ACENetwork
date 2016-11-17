@@ -95,29 +95,30 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
   // --> create the appropriate bytestream corresponding to its elements
   const typename DataMessageType::DATA_T& data_container_r =
       message_inout->get ();
-  const typename DataMessageType::DATA_T::DATA_T& data_r =
-        data_container_r.get ();
+  typename DataMessageType::DATA_T::DATA_T& data_r =
+        const_cast<typename DataMessageType::DATA_T::DATA_T&> (data_container_r.get ());
   std::string buffer;
   bool is_request = true;
   std::ostringstream converter;
   HTTP_HeadersIterator_t iterator;
   std::string content_buffer;
   // *TODO*: remove type inferences
-  if (HTTP_Tools::isRequest (data_r))
+  struct HTTP_Record& record_r = static_cast<struct HTTP_Record&> (data_r);
+  if (HTTP_Tools::isRequest (record_r))
   {
-    buffer = HTTP_Tools::Method2String (data_r.method);
+    buffer = HTTP_Tools::Method2String (record_r.method);
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    buffer += data_r.URI;
+    buffer += record_r.URI;
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
     buffer += ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
-    buffer += HTTP_Tools::Version2String (data_r.version);
+    buffer += HTTP_Tools::Version2String (record_r.version);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
 
     // prepare content ?
-    if (data_r.method == HTTP_Codes::HTTP_METHOD_POST)
+    if (record_r.method == HTTP_Codes::HTTP_METHOD_POST)
     {
-      for (HTTP_FormIterator_t iterator_2 = data_r.form.begin ();
-           iterator_2 != data_r.form.end ();
+      for (HTTP_FormIterator_t iterator_2 = record_r.form.begin ();
+           iterator_2 != record_r.form.end ();
            ++iterator_2)
       {
         content_buffer += (*iterator_2).first;
@@ -129,19 +130,20 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
       converter << content_buffer.size ();
 
       iterator =
-        data_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
-      if (iterator == data_r.headers.end ())
-        data_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING),
-                                               converter.str ()));
+        record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
+      if (iterator == record_r.headers.end ())
+        record_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING),
+                                                 converter.str ()));
       else
         (*iterator).second = converter.str ();
       iterator =
-        data_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING));
-      if (iterator == data_r.headers.end ())
-        data_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING),
-          ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING)));
+        record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING));
+      if (iterator == record_r.headers.end ())
+        record_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING),
+                                                 ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING)));
       else
-        (*iterator).second = ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING);
+        (*iterator).second =
+          ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING);
     } // end IF
   } // end IF
   else
@@ -149,18 +151,18 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
     is_request = false;
 
     buffer = ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
-    buffer += HTTP_Tools::Version2String (data_r.version);
+    buffer += HTTP_Tools::Version2String (record_r.version);
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    converter << data_r.status;
+    converter << record_r.status;
     buffer += converter.str ();
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    buffer += HTTP_Tools::Status2Reason (data_r.status);
+    buffer += HTTP_Tools::Status2Reason (record_r.status);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end ELSE
 
   // insert headers
-  for (iterator = data_r.headers.begin ();
-       iterator != data_r.headers.end ();
+  for (iterator = record_r.headers.begin ();
+       iterator != record_r.headers.end ();
        ++iterator)
   {
     if (!HTTP_Tools::isHeaderType ((*iterator).first,
@@ -173,8 +175,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end FOR
 
-  for (iterator = data_r.headers.begin ();
-       iterator != data_r.headers.end ();
+  for (iterator = record_r.headers.begin ();
+       iterator != record_r.headers.end ();
        ++iterator)
   {
     if (!HTTP_Tools::isHeaderType ((*iterator).first,
@@ -188,8 +190,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end FOR
 
-  for (iterator = data_r.headers.begin ();
-       iterator != data_r.headers.end ();
+  for (iterator = record_r.headers.begin ();
+       iterator != record_r.headers.end ();
        ++iterator)
   {
     if (!HTTP_Tools::isHeaderType ((*iterator).first,

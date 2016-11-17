@@ -1,10 +1,61 @@
-#ifndef HTTP_Bisector_HEADER_H
-#define HTTP_Bisector_HEADER_H 1
-#define HTTP_Bisector_IN_HEADER 1
+#ifndef Net_Bencoding_HEADER_H
+#define Net_Bencoding_HEADER_H 1
+#define Net_Bencoding_IN_HEADER 1
 
-#line 6 "http_bisector.h"
+  #include <ace/Synch.h>
+  #include "bittorrent_iparser.h"
+  #include "bittorrent_metainfo_parser.h"
 
-#line 8 "http_bisector.h"
+#if defined (Net_Bencoding_IN_HEADER)
+/* This disables inclusion of unistd.h, which is not available using MSVC. The
+ * C++ scanner uses STL streams instead. */
+#define YY_NO_UNISTD_H
+
+  #include <FlexLexer.h>
+
+  #include "location.hh"
+
+  class Net_BencodingScanner
+   : public yyFlexLexer
+   , public BitTorrent_MetaInfo_IScanner_t
+  {
+   public:
+    Net_BencodingScanner (std::istream* in = NULL,
+                          std::ostream* out = NULL)
+     : yyFlexLexer (in, out)
+     , location_ ()
+     , parser_ (NULL)
+    {};
+    virtual ~Net_BencodingScanner () {};
+
+    // implement BitTorrent_MetaInfo_IScanner_t
+    inline virtual void set (BitTorrent_MetaInfo_IParser_t* parser_in) { parser_ = parser_in; };
+
+    // override yyFlexLexer::yylex()
+//    virtual int yylex ();
+    virtual yy::BitTorrent_MetaInfo_Parser::symbol_type yylex (BitTorrent_MetaInfo_IParser_t*);
+
+    yy::location                   location_;
+
+   private:
+    BitTorrent_MetaInfo_IParser_t* parser_;
+  };
+#else
+#define YY_STRUCT_YY_BUFFER_STATE
+  #include "bencoding_scanner.h"
+#undef YY_STRUCT_YY_BUFFER_STATE
+#endif
+
+#define YY_DECL                             \
+yy::BitTorrent_MetaInfo_Parser::symbol_type \
+Net_BencodingScanner::yylex (BitTorrent_MetaInfo_IParser_t* parser)
+// ... and declare it for the parser's sake
+//YY_DECL;
+
+//#define YYLTYPE yy::location
+//#define YYSTYPE yy::BitTorrent_MetaInfo_Parser::semantic_type
+
+#define YY_EXTRA_TYPE
 
 #define  YY_INT_ALIGNED long int
 
@@ -15,30 +66,31 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 35
+#define YY_FLEX_SUBMINOR_VERSION 39
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
 
 /* %if-c++-only */
+    /* The c++ scanner is a mess. The FlexLexer.h header file relies on the
+     * following macro. This is required in order to pass the c++-multiple-scanners
+     * test in the regression suite. We get reports that it breaks inheritance.
+     * We will address this in a future release of flex, or omit the C++ scanner
+     * altogether.
+     */
+    #define yyFlexLexer Net_Bencoding_FlexLexer
 /* %endif */
 
 /* %if-c-only */
-    
 /* %endif */
 
 /* %if-c-only */
-
 /* %endif */
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
 
 /* begin standard C headers. */
 /* %if-c-only */
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <stdlib.h>
 /* %endif */
 
 /* %if-tables-serialization */
@@ -56,7 +108,7 @@
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
- * if you want the limit (max/min) macros for int types. 
+ * if you want the limit (max/min) macros for int types.
  */
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
@@ -73,7 +125,7 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t; 
+typedef unsigned char flex_uint8_t;
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
 
@@ -113,6 +165,13 @@ typedef unsigned int flex_uint32_t;
 /* %endif */
 
 /* %if-c++-only */
+/* begin standard C++ headers. */
+#include <iostream>
+#include <errno.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+/* end standard C++ headers. */
 /* %endif */
 
 #ifdef __cplusplus
@@ -141,27 +200,10 @@ typedef unsigned int flex_uint32_t;
 /* %not-for-header */
 
 /* %if-reentrant */
-
-/* An opaque pointer. */
-#ifndef YY_TYPEDEF_YY_SCANNER_T
-#define YY_TYPEDEF_YY_SCANNER_T
-typedef void* yyscan_t;
-#endif
-
-/* For convenience, these vars (plus the bison vars far below)
-   are macros in the reentrant scanner. */
-#define yyin yyg->yyin_r
-#define yyout yyg->yyout_r
-#define yyextra yyg->yyextra_r
-#define yyleng yyg->yyleng_r
-#define yytext yyg->yytext_r
-#define yylineno (YY_CURRENT_BUFFER_LVALUE->yy_bs_lineno)
-#define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
-#define yy_flex_debug yyg->yy_flex_debug_r
-
 /* %endif */
 
 /* %if-not-reentrant */
+
 /* %endif */
 
 /* Size of default input buffer. */
@@ -182,73 +224,74 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-/* %if-not-reentrant */
-/* %endif */
-
-/* %if-c-only */
-/* %if-not-reentrant */
-/* %endif */
-/* %endif */
-
 #ifndef YY_TYPEDEF_YY_SIZE_T
 #define YY_TYPEDEF_YY_SIZE_T
 typedef size_t yy_size_t;
 #endif
 
+/* %if-not-reentrant */
+extern yy_size_t yyleng;
+/* %endif */
+
+/* %if-c-only */
+/* %if-not-reentrant */
+/* %endif */
+/* %endif */
+
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
 struct yy_buffer_state
-	{
+  {
 /* %if-c-only */
-	FILE *yy_input_file;
 /* %endif */
 
 /* %if-c++-only */
+  std::istream* yy_input_file;
 /* %endif */
 
-	char *yy_ch_buf;		/* input buffer */
-	char *yy_buf_pos;		/* current position in input buffer */
+  char *yy_ch_buf;		/* input buffer */
+  char *yy_buf_pos;		/* current position in input buffer */
 
-	/* Size of input buffer in bytes, not including room for EOB
-	 * characters.
-	 */
-	yy_size_t yy_buf_size;
+  /* Size of input buffer in bytes, not including room for EOB
+   * characters.
+   */
+  yy_size_t yy_buf_size;
 
-	/* Number of characters read into yy_ch_buf, not including EOB
-	 * characters.
-	 */
-	int yy_n_chars;
+  /* Number of characters read into yy_ch_buf, not including EOB
+   * characters.
+   */
+  yy_size_t yy_n_chars;
 
-	/* Whether we "own" the buffer - i.e., we know we created it,
-	 * and can realloc() it to grow it, and should free() it to
-	 * delete it.
-	 */
-	int yy_is_our_buffer;
+  /* Whether we "own" the buffer - i.e., we know we created it,
+   * and can realloc() it to grow it, and should free() it to
+   * delete it.
+   */
+  int yy_is_our_buffer;
 
-	/* Whether this is an "interactive" input source; if so, and
-	 * if we're using stdio for input, then we want to use getc()
-	 * instead of fread(), to make sure we stop fetching input after
-	 * each newline.
-	 */
-	int yy_is_interactive;
+  /* Whether this is an "interactive" input source; if so, and
+   * if we're using stdio for input, then we want to use getc()
+   * instead of fread(), to make sure we stop fetching input after
+   * each newline.
+   */
+  int yy_is_interactive;
 
-	/* Whether we're considered to be at the beginning of a line.
-	 * If so, '^' rules will be active on the next match, otherwise
-	 * not.
-	 */
-	int yy_at_bol;
+  /* Whether we're considered to be at the beginning of a line.
+   * If so, '^' rules will be active on the next match, otherwise
+   * not.
+   */
+  int yy_at_bol;
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
-	/* Whether to try to fill the input buffer when we reach the
-	 * end of it.
-	 */
-	int yy_fill_buffer;
 
-	int yy_buffer_status;
+  /* Whether to try to fill the input buffer when we reach the
+   * end of it.
+   */
+  int yy_fill_buffer;
 
-	};
+  int yy_buffer_status;
+
+  };
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
 /* %if-c-only Standard (non-C++) definition */
@@ -257,47 +300,45 @@ struct yy_buffer_state
 /* %endif */
 
 /* %if-c-only Standard (non-C++) definition */
-
 /* %if-not-reentrant */
 /* %not-for-header */
 
 /* %endif */
-
-void HTTP_Bisector_restart (FILE *input_file ,yyscan_t yyscanner );
-void HTTP_Bisector__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Bisector__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void HTTP_Bisector__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void HTTP_Bisector__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void HTTP_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void HTTP_Bisector_pop_buffer_state (yyscan_t yyscanner );
-
-YY_BUFFER_STATE HTTP_Bisector__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Bisector__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Bisector__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
-
 /* %endif */
 
-void *HTTP_Bisector_alloc (yy_size_t ,yyscan_t yyscanner );
-void *HTTP_Bisector_realloc (void *,yy_size_t ,yyscan_t yyscanner );
-void HTTP_Bisector_free (void * ,yyscan_t yyscanner );
+void *Net_Bencoding_alloc (yy_size_t  );
+void *Net_Bencoding_realloc (void *,yy_size_t  );
+void Net_Bencoding_free (void *  );
 
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
-
-#define HTTP_Bisector_wrap(n) 1
 #define YY_SKIP_YYWRAP
 
 #define FLEX_DEBUG
 
-#define yytext_ptr yytext_r
+#define yytext_ptr yytext
+
+//#include <FlexLexer.h>
+
+//int yyFlexLexer::yywrap() { return 1; }
+//int yyFlexLexer::yylex()
+//	{
+//	LexerError( "yyFlexLexer::yylex invoked but %option yyclass used" );
+//	return 0;
+//	}
+
+//#define YY_DECL int Net_BencodingScanner::yylex()
 
 /* %if-c-only Standard (non-C++) definition */
-
 /* %endif */
 
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
-#define end_of_frame 1
+#define state_string 1
+#define state_integer 2
+#define state_list 3
+#define state_dictionary_key 4
+#define state_dictionary_value 5
 
 #endif
 
@@ -307,9 +348,9 @@ void HTTP_Bisector_free (void * ,yyscan_t yyscanner );
  * The user has a chance to override it with an option.
  */
 /* %if-c-only */
-#include <unistd.h>
 /* %endif */
 /* %if-c++-only */
+#include <unistd.h>
 /* %endif */
 #endif
 
@@ -319,75 +360,23 @@ void HTTP_Bisector_free (void * ,yyscan_t yyscanner );
 
 /* %if-c-only Reentrant structure and macros (non-C++). */
 /* %if-reentrant */
-
 /* %if-c-only */
-
 /* %endif */
-
 /* %if-reentrant */
-
-int HTTP_Bisector_lex_init (yyscan_t* scanner);
-
-int HTTP_Bisector_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
-
 /* %endif */
-
 /* %endif End reentrant structures and macros. */
-
-/* Accessor methods to globals.
-   These are made visible to non-reentrant scanners for convenience. */
-
-int HTTP_Bisector_lex_destroy (yyscan_t yyscanner );
-
-int HTTP_Bisector_get_debug (yyscan_t yyscanner );
-
-void HTTP_Bisector_set_debug (int debug_flag ,yyscan_t yyscanner );
-
-YY_EXTRA_TYPE HTTP_Bisector_get_extra (yyscan_t yyscanner );
-
-void HTTP_Bisector_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
-
-FILE *HTTP_Bisector_get_in (yyscan_t yyscanner );
-
-void HTTP_Bisector_set_in  (FILE * in_str ,yyscan_t yyscanner );
-
-FILE *HTTP_Bisector_get_out (yyscan_t yyscanner );
-
-void HTTP_Bisector_set_out  (FILE * out_str ,yyscan_t yyscanner );
-
-int HTTP_Bisector_get_leng (yyscan_t yyscanner );
-
-char *HTTP_Bisector_get_text (yyscan_t yyscanner );
-
-int HTTP_Bisector_get_lineno (yyscan_t yyscanner );
-
-void HTTP_Bisector_set_lineno (int line_number ,yyscan_t yyscanner );
-
 /* %if-bison-bridge */
 /* %endif */
-
-/* Macros after this point can all be overridden by user definitions in
- * section 1.
- */
-
-#ifndef YY_SKIP_YYWRAP
-#ifdef __cplusplus
-extern "C" int HTTP_Bisector_wrap (yyscan_t yyscanner );
-#else
-extern int HTTP_Bisector_wrap (yyscan_t yyscanner );
-#endif
-#endif
-
 /* %not-for-header */
 
 /* %endif */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
+static void yy_flex_strncpy (char *,yyconst char *,int );
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
+static int yy_flex_strlen (yyconst char * );
 #endif
 
 #ifndef YY_NO_INPUT
@@ -398,7 +387,6 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #endif
 
 /* %if-c-only */
-
 /* %endif */
 
 /* Amount of stuff to slurp up with each read. */
@@ -427,12 +415,9 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 /* %if-c-only Standard (non-C++) definition */
-
-extern int HTTP_Bisector_lex (yyscan_t yyscanner);
-
-#define YY_DECL int HTTP_Bisector_lex (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only C++ definition */
+#define YY_DECL int yyFlexLexer::yylex()
 /* %endif */
 #endif /* !YY_DECL */
 
@@ -460,9 +445,5 @@ extern int HTTP_Bisector_lex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 69 "./../scripts/bisector.l"
-
-
-#line 467 "http_bisector.h"
-#undef HTTP_Bisector_IN_HEADER
-#endif /* HTTP_Bisector_HEADER_H */
+#undef Net_Bencoding_IN_HEADER
+#endif /* Net_Bencoding_HEADER_H */

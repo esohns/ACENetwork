@@ -19,4 +19,5 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "bittorrent_module_bisector.h"
+#include <ace/Synch.h>
+#include "net_parser_base.h"

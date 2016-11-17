@@ -53,6 +53,11 @@
 
 
 
+/* Substitute the variable and function names.  */
+#define yyparse bittorrent_parse
+#define yylex   bittorrent_lex
+#define yyerror bittorrent_error
+#define yydebug bittorrent_debug
 
 
 /* First part of user declarations.  */
@@ -118,12 +123,13 @@ using namespace std;
 
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
+#include <ace/Synch.h>
 #include "bittorrent_parser_driver.h"
 #include "bittorrent_scanner.h"
 #include "bittorrent_tools.h"
 
 // *TODO*: this shouldn't be necessary
-#define yylex BitTorrent_Scanner_lex
+#define yylex bittorrent_lex
 
 //#define YYPRINT(file, type, value) yyprint (file, type, value)
 
@@ -294,8 +300,8 @@ static const unsigned char yytranslate[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short int yyrline[] =
 {
-       0,   213,   213,   223,   224,   225,   240,   248,   256,   264,
-     272,   280,   288,   296,   304,   312,   320
+       0,   213,   213,   223,   224,   225,   241,   257,   273,   289,
+     305,   321,   337,   353,   369,   385,   401
 };
 #endif
 
@@ -461,7 +467,10 @@ static const short int yyconfl[] =
 #define yylval (yystackp->yyval)
 #undef yylloc
 #define yylloc (yystackp->yyloc)
-
+#define bittorrent_nerrs yynerrs
+#define bittorrent_char yychar
+#define bittorrent_lval yylval
+#define bittorrent_lloc yylloc
 
 static const int YYEOF = 0;
 static const int YYEMPTY = -2;
@@ -1060,11 +1069,12 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
                                  ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
-                                 BitTorrent_Message& message_r =
+                                 BitTorrent_Message_t& message_r =
                                    iparser_p->current ();
-                                 typename BitTorrent_Message::DATA_T& data_container_r =
-                                   const_cast<typename BitTorrent_Message::DATA_T&> (message_p->get ());
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
                                  data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
                                    iparser_p->message (message_p);
                                  } catch (...) {
@@ -1078,8 +1088,16 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
     { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
                                  ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
@@ -1091,8 +1109,16 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
     { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
                                  ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
@@ -1104,8 +1130,16 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
     { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
                                  ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
@@ -1117,8 +1151,16 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
     { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
                                  ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
@@ -1130,8 +1172,16 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
     { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
                                  ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
@@ -1143,8 +1193,16 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
     { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
                                  ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
@@ -1156,8 +1214,16 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
     { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
                                  ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
@@ -1169,8 +1235,16 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
     { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
                                  ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
@@ -1182,8 +1256,16 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
     { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
                                  ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
@@ -1195,8 +1277,16 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
     { ((*yyvalp).size) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record)->length + 4;
                                  ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 struct BitTorrent_Record* record_p =
+                                   const_cast<struct BitTorrent_Record*> ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                 BitTorrent_Message_t& message_r =
+                                   iparser_p->current ();
+                                 typename BitTorrent_IParser::DATA_CONTAINER_T& data_container_r =
+                                   const_cast<typename BitTorrent_IParser::DATA_CONTAINER_T&> (message_r.get ());
+                                 data_container_r.set (record_p);
+                                 BitTorrent_Message_t* message_p = &message_r;
                                  try {
-                                   iparser_p->message ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.record));
+                                   iparser_p->message (message_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::message(), continuing\n")));
@@ -3104,7 +3194,15 @@ yypdumpstack (yyGLRStack* yystackp)
 #undef yynerrs
 #undef yylloc
 
-
+/* Substitute the variable and function names.  */
+#define yyparse bittorrent_parse
+#define yylex   bittorrent_lex
+#define yyerror bittorrent_error
+#define yylval  bittorrent_lval
+#define yychar  bittorrent_char
+#define yydebug bittorrent_debug
+#define yynerrs bittorrent_nerrs
+#define yylloc  bittorrent_lloc
 
 
 
@@ -3142,13 +3240,14 @@ yyerror (YYLTYPE* location_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::yyerror"));
 
+  ACE_UNUSED_ARG (location_in);
   ACE_UNUSED_ARG (context_in);
 
   // sanity check(s)
-  ACE_ASSERT (location_in);
   ACE_ASSERT (iparser_in);
 
-  iparser_in->error (*location_in, std::string (message_in));
+//  iparser_in->error (*location_in, std::string (message_in));
+  iparser_in->error (std::string (message_in));
 }
 
 void

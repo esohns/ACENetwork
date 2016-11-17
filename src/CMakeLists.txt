@@ -144,16 +144,19 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_netlinksockethandler.h
      net_netlinksockethandler.inl
      net_packet_headers.h
+     net_parser_base.cpp
+     net_parser_base.h
+     net_parser_base.inl
      net_protocol_layer.cpp
      net_protocol_layer.h
      net_remote_comm.h
+     net_session_base.cpp
+     net_session_base.h
+     net_session_base.inl
      net_sock_acceptor.cpp
      net_sock_acceptor.h
      net_sock_connector.cpp
      net_sock_connector.h
-#     net_socketconnection_base.cpp
-#     net_socketconnection_base.h
-#     net_socketconnection_base.inl
      net_sockethandler_base.cpp
      net_sockethandler_base.h
      net_sockethandler_base.inl
@@ -262,12 +265,14 @@ install (FILES
          net_netlinksockethandler.h
          net_netlinksockethandler.inl
          net_packet_headers.h
+         net_parser_base.h
+         net_parser_base.inl
          net_protocol_layer.h
          net_remote_comm.h
+         net_session_base.h
+         net_session_base.inl
          net_sock_acceptor.h
          net_sock_connector.h
-#         net_socketconnection_base.h
-#         net_socketconnection_base.inl
          net_sockethandler_base.h
          net_sockethandler_base.inl
          net_streamconnection_base.h

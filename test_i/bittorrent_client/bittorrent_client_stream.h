@@ -36,48 +36,96 @@
 
 #include "test_i_gtk_common.h"
 
-class BitTorrent_Client_Stream
- : public BitTorrent_Stream_T<struct BitTorrent_Client_StreamState,
-                              struct BitTorrent_Client_StreamConfiguration,
-                              BitTorrent_RuntimeStatistic_t,
-                              struct BitTorrent_Client_ModuleHandlerConfiguration,
-                              struct BitTorrent_Client_SessionData,
-                              BitTorrent_Client_SessionData_t,
-                              BitTorrent_Client_ControlMessage_t,
-                              BitTorrent_Message,
-                              BitTorrent_Client_SessionMessage,
-                              Test_I_GTK_CBData>
+class BitTorrent_Client_PeerStream
+ : public BitTorrent_PeerStream_T<struct BitTorrent_Client_StreamState,
+                                  struct BitTorrent_Client_StreamConfiguration,
+                                  BitTorrent_RuntimeStatistic_t,
+                                  struct BitTorrent_Client_ModuleHandlerConfiguration,
+                                  struct BitTorrent_Client_SessionData,
+                                  BitTorrent_Client_SessionData_t,
+                                  BitTorrent_Client_ControlMessage_t,
+                                  BitTorrent_Client_Message_t,
+                                  BitTorrent_Client_SessionMessage,
+                                  struct BitTorrent_Client_Configuration,
+                                  struct BitTorrent_Client_ConnectionState,
+                                  struct BitTorrent_Client_SocketHandlerConfiguration,
+                                  struct BitTorrent_Client_SessionState,
+                                  Test_I_GTK_CBData>
 {
  public:
-  BitTorrent_Client_Stream (const std::string&); // name
-  virtual ~BitTorrent_Client_Stream ();
+  BitTorrent_Client_PeerStream (const std::string&); // name
+  virtual ~BitTorrent_Client_PeerStream ();
 
-  // implement Common_IInitialize_T
-  virtual bool initialize (const struct BitTorrent_Client_StreamConfiguration&, // configuration
-                           bool = true,                                         // setup pipeline ?
-                           bool = true);                                        // reset session data ?
-
-  //// implement Common_IStatistic_T
-  //// *NOTE*: delegate this to rntimeStatistic_
-  //virtual bool collect (BitTorrent_RuntimeStatistic_t&); // return value: statistic data
-  //// this is just a dummy (use statisticsReportingInterval instead)
-  //virtual void report () const;
+//  // implement (part of) Stream_IStreamControlBase
+//  virtual bool load (Stream_ModuleList_t&, // return value: module list
+//                     bool&);               // return value: delete modules ?
 
  private:
-  typedef BitTorrent_Stream_T<struct BitTorrent_Client_StreamState,
-                              struct BitTorrent_Client_StreamConfiguration,
-                              BitTorrent_RuntimeStatistic_t,
-                              struct BitTorrent_Client_ModuleHandlerConfiguration,
-                              struct BitTorrent_Client_SessionData,
-                              BitTorrent_Client_SessionData_t,
-                              BitTorrent_Client_ControlMessage_t,
-                              BitTorrent_Message,
-                              BitTorrent_Client_SessionMessage,
-                              Test_I_GTK_CBData> inherited;
+  typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_StreamState,
+                                  struct BitTorrent_Client_StreamConfiguration,
+                                  BitTorrent_RuntimeStatistic_t,
+                                  struct BitTorrent_Client_ModuleHandlerConfiguration,
+                                  struct BitTorrent_Client_SessionData,
+                                  BitTorrent_Client_SessionData_t,
+                                  BitTorrent_Client_ControlMessage_t,
+                                  BitTorrent_Client_Message_t,
+                                  BitTorrent_Client_SessionMessage,
+                                  struct BitTorrent_Client_Configuration,
+                                  struct BitTorrent_Client_ConnectionState,
+                                  struct BitTorrent_Client_SocketHandlerConfiguration,
+                                  struct BitTorrent_Client_SessionState,
+                                  Test_I_GTK_CBData> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_Stream ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_Stream (const BitTorrent_Client_Stream&))
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_Stream& operator= (const BitTorrent_Client_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStream ())
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStream (const BitTorrent_Client_PeerStream&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStream& operator= (const BitTorrent_Client_PeerStream&))
+};
+
+//////////////////////////////////////////
+
+class BitTorrent_Client_TrackerStream
+ : public BitTorrent_TrackerStream_T<struct BitTorrent_Client_StreamState,
+                                     struct BitTorrent_Client_StreamConfiguration,
+                                     BitTorrent_RuntimeStatistic_t,
+                                     struct BitTorrent_Client_ModuleHandlerConfiguration,
+                                     struct BitTorrent_Client_SessionData,
+                                     BitTorrent_Client_SessionData_t,
+                                     BitTorrent_Client_ControlMessage_t,
+                                     BitTorrent_Client_Message_t,
+                                     BitTorrent_Client_SessionMessage,
+                                     struct BitTorrent_Client_Configuration,
+                                     struct BitTorrent_Client_ConnectionState,
+                                     struct BitTorrent_Client_SocketHandlerConfiguration,
+                                     struct BitTorrent_Client_SessionState,
+                                     Test_I_GTK_CBData>
+{
+ public:
+  BitTorrent_Client_TrackerStream (const std::string&); // name
+  virtual ~BitTorrent_Client_TrackerStream ();
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ModuleList_t&, // return value: module list
+                     bool&);               // return value: delete modules ?
+
+ private:
+  typedef BitTorrent_TrackerStream_T<struct BitTorrent_Client_StreamState,
+                                     struct BitTorrent_Client_StreamConfiguration,
+                                     BitTorrent_RuntimeStatistic_t,
+                                     struct BitTorrent_Client_ModuleHandlerConfiguration,
+                                     struct BitTorrent_Client_SessionData,
+                                     BitTorrent_Client_SessionData_t,
+                                     BitTorrent_Client_ControlMessage_t,
+                                     BitTorrent_Client_Message_t,
+                                     BitTorrent_Client_SessionMessage,
+                                     struct BitTorrent_Client_Configuration,
+                                     struct BitTorrent_Client_ConnectionState,
+                                     struct BitTorrent_Client_SocketHandlerConfiguration,
+                                     struct BitTorrent_Client_SessionState,
+                                     Test_I_GTK_CBData> inherited;
+
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStream ())
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStream (const BitTorrent_Client_TrackerStream&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStream& operator= (const BitTorrent_Client_TrackerStream&))
 };
 
 #endif

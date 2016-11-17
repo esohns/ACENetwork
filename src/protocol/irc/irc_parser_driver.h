@@ -38,9 +38,9 @@ class IRC_Record;
 
 class IRC_Export IRC_ParserDriver
 {
-  // allow access to our internals (i.e. the current message)
+  // allow access to internals (i.e. the current message)
   friend class yy::IRC_Parser;
-  // allow access to our internals (i.e. error reporting)
+  // allow access to internals (i.e. error reporting)
 //   friend class IRC_Scanner;
 
  public:

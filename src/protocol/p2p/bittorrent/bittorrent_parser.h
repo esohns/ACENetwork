@@ -30,14 +30,14 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_BITTORRENT_PARSER_H_INCLUDED
-# define YY_YY_BITTORRENT_PARSER_H_INCLUDED
+#ifndef YY_BITTORRENT_BITTORRENT_PARSER_H_INCLUDED
+# define YY_BITTORRENT_BITTORRENT_PARSER_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 1
 #endif
 #if YYDEBUG
-//extern int yydebug;
+extern int bittorrent_debug;
 #endif
 /* "%code requires" blocks.  */
 
@@ -64,7 +64,7 @@
   MESSAGE_REQUEST = 261,
 }; */
 //#define YYTOKENTYPE
-#undef YYTOKENTYPE
+/*#undef YYTOKENTYPE*/
 /* enum yytokentype; */
 class BitTorrent_IParser;
 struct BitTorrent_PeerHandshake;
@@ -84,11 +84,11 @@ typedef union YYSTYPE
 typedef void* yyscan_t;
 
 // *NOTE*: on current versions of bison, this needs to be inserted into the
-//         header manually, as there is no way to add the export symbol to
-//         the declaration
+//         header manually; apparently, there is no easy way to add the export
+//         symbol to the declaration
 #define YYDEBUG 1
 extern int BitTorrent_Export yydebug;
-#define YYERROR_VERBOSE
+#define YYERROR_VERBOSE 1
 
 
 
@@ -147,7 +147,7 @@ struct YYLTYPE
 
 
 
-int yyparse (BitTorrent_IParser* iparser_p, yyscan_t yyscanner);
+int bittorrent_parse (BitTorrent_IParser* iparser_p, yyscan_t yyscanner);
 /* "%code provides" blocks.  */
 
 
@@ -162,4 +162,4 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);
 
 
 
-#endif /* !YY_YY_BITTORRENT_PARSER_H_INCLUDED  */
+#endif /* !YY_BITTORRENT_BITTORRENT_PARSER_H_INCLUDED  */

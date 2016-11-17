@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 2.8)
-
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -32,7 +30,7 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
 endif ()
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
+#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../..)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
 #include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
@@ -84,7 +82,10 @@ set (${PROJECT_NAME}_Protocol_IRC_SRCS
      irc_stream.inl
      irc_stream_common.h
      irc_tools.cpp
-     irc_tools.h)
+     irc_tools.h
+     location.hh
+     position.hh
+     stack.hh)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/libACENetwork/protocol/irc")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS -DIRC_BUILD_DLL)
@@ -149,6 +150,9 @@ install (FILES
          irc_stream.inl
          irc_stream_common.h
          irc_tools.h
+         location.hh
+         position.hh
+         stack.hh
          DESTINATION include)
 install (TARGETS ${PROJECT_NAME}_Protocol_IRC
          EXPORT ${PROJECT_NAME}Targets

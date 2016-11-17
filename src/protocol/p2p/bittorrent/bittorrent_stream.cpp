@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "bittorrent_stream.h"
 
 #include "bittorrent_message.h"

@@ -35,7 +35,7 @@ class ACE_Message_Block;
 class ACE_Message_Queue_Base;
 typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
-struct YYLTYPE;
+//struct YYLTYPE;
 
 template <typename SessionMessageType>
 class HTTP_ParserDriver_T
@@ -50,13 +50,14 @@ class HTTP_ParserDriver_T
   virtual void initialize (bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,          // debug scanner ?
                            bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,         // debug parser ?
                            ACE_Message_Queue_Base* = NULL,                 // data buffer queue (yywrap)
-                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
+//                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
                            bool = false);                                  // block in parse() ?
   inline virtual ACE_Message_Block* buffer () { return fragment_; };
   inline virtual bool debugScanner () const { return HTTP_Scanner_get_debug (scannerState_); };
   inline virtual bool isBlocking () const { return blockInParse_; };
-  virtual void error (const YYLTYPE&,      // location
-                      const std::string&); // message
+//  virtual void error (const struct YYLTYPE&, // location
+//                      const std::string&);   // message
+  virtual void error (const std::string&); // message
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
   inline virtual unsigned int offset () const { return offset_; };
   virtual bool parse (ACE_Message_Block*); // data buffer handle
@@ -85,16 +86,11 @@ class HTTP_ParserDriver_T
   bool scan_begin ();
   void scan_end ();
 
-  // error handling
-  void error (const yy::location&, // location
-              const std::string&); // message
-  void error (const std::string&); // message
-
   bool                    blockInParse_;
   bool                    isFirst_;
 
   //// parser
-  //yy::HTTP_Parser    parser_;
+  yy::HTTP_Parser         parser_;
 
   // scanner
   yyscan_t                scannerState_;

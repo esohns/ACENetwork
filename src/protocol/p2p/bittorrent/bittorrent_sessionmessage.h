@@ -23,12 +23,14 @@
 
 #include <ace/Global_Macros.h>
 
+#include "stream_common.h"
+#include "stream_control_message.h"
 #include "stream_session_message_base.h"
 #include "stream_session_data.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_exports.h"
-#include "bittorrent_stream_common.h"
+//#include "bittorrent_stream_common.h"
 
 // forward declarations
 class ACE_Allocator;

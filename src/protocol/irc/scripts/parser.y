@@ -1,34 +1,67 @@
-%require                  "2.4.1"
-/* *NOTE*: enabling debugging functionality implies inclusion of <iostream> (see
- *         below). This interferes with ACE (version 6.2.3), when compiled with
- *         support for traditional iostreams */
-/* %debug */
-%language                 "c++"
+%defines                          "irc_parser.h"
+/* %file-prefix                      "" */
+/* %language                         "c++" */
+%language                         "c++"
 %locations
-%name-prefix              "yy"
 %no-lines
-%skeleton                 "lalr1.cc"
-/* %skeleton         "glr.c" */
-%token-table
+%output                           "irc_parser.cpp"
+%require                          "2.4.1"
+/*%skeleton                         "glr.c"*/
+%skeleton                         "lalr1.cc"
+%verbose
+/* %yacc */
+
 %code top {
 #include "stdafx.h"
 }
-%defines                  "irc_parser.h"
-%output                   "irc_parser.cpp"
-/* %define           api.pure */
-/* %define           api.push_pull */
-/* %define           parse.lac full */
-/* %define api.namespace     {yy} */
-%define api.namespace     "yy"
-%error-verbose
-/* %define parser_class_name {IRC_Parser} */
-%define parser_class_name "IRC_Parser"
+
+/*%define location_type*/
+/*%define api.location.type         {location}*/
+/*%define namespace                 {irc}*/
+/*%define api.namespace             {irc}*/
+/*%name-prefix                      "irc"*/
+/* %define api.prefix                {yy} */
+/*%pure-parser*/
+/*%define api.pure                  true*/
+/* *TODO*: implement a push parser */
+/* %define api.push-pull             push */
+/* %define api.token.constructor */
+/* %define api.token.prefix          {} */
+%token-table
+/* %define api.value.type            variant */
+/* %define api.value.union.name      YYSTYPE */
+/* %define lr.default-reduction      most */
+/* %define lr.default-reduction      accepting */
+/* %define lr.keep-unreachable-state false */
+/* %define lr.type                   lalr */
+
+/*%define parse.assert              true*/
+/*%error-verbose*/
+%define parse.error               verbose
+/* %define parse.lac                 {full} */
+/* %define parse.lac                 {none} */
+%define parser_class_name         {IRC_Parser}
+/* *NOTE*: enabling debugging functionality implies inclusion of <iostream> (see
+           below). This interferes with ACE (version 6.2.3), when compiled with
+           support for traditional iostreams */
+/*%debug*/
+%define parse.trace               true
 
 %code requires {
+#include "irc_exports.h"
+
+/*class std::string;*/
 class IRC_ParserDriver;
 class IRC_Scanner;
 
 typedef void* yyscan_t;
+
+// *NOTE*: on current versions of bison, this needs to be inserted into the
+//         header manually; apparently, there is no easy way to add the export
+//         symbol to the declaration
+/*#define YYDEBUG 1*/
+/*extern int IRC_Export irc_debug;*/
+/*#define YYERROR_VERBOSE 1*/
 }
 
 // calling conventions / parameter passing
@@ -57,7 +90,7 @@ typedef void* yyscan_t;
 };
 
 %code {
-// *NOTE*: necessary only if %debug is set in the definition file (see: IRCparser.y)
+// *NOTE*: necessary only if %debug is set in the definition file (see above)
 #if defined (YYDEBUG)
 #include <iostream>
 #endif
@@ -72,10 +105,11 @@ using namespace std;
 //                       prevent ace/iosfwd.h from causing any harm
 #define ACE_IOSFWD_H
 
-#include "ace/Log_Msg.h"
+#include <ace/Log_Msg.h>
 
 #include "net_macros.h"
 
+#include <ace/Synch.h>
 #include "irc_message.h"
 #include "irc_module_parser.h"
 #include "irc_parser_driver.h"
@@ -93,6 +127,13 @@ using namespace std;
 %token <sval> PARAM       "param"
 %token        END 0       "end_of_message"
 /* %type  <sval> message prefix ext_prefix command params trailing */
+
+%code provides {
+/*void IRC_Export yysetdebug (int);
+void IRC_Export yyerror (YYLTYPE*, IRC_IParser*, yyscan_t, const char*);
+int IRC_Export yyparse (IRC_IParser*, yyscan_t);
+void IRC_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
+}
 
 %printer                  { debug_stream () << *$$; } <sval>
 %destructor               { delete $$; $$ = NULL; }   <sval>

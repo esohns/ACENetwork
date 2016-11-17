@@ -627,25 +627,25 @@ BitTorrent_Module_ParserH_T<LockType,
     if (!this->hasFinished ())
       goto continue_; // --> wait for more data to arrive
 
-    // set session data format
-    // sanity check(s)
-    ACE_ASSERT (inherited::sessionData_);
-    ACE_ASSERT (inherited2::record_);
+//    // set session data format
+//    // sanity check(s)
+//    ACE_ASSERT (inherited::sessionData_);
+//    ACE_ASSERT (inherited2::record_);
 
-    typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+//    typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+//      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
 
-    HTTP_HeadersIterator_t iterator =
-      inherited2::record_->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
-    if (iterator != inherited2::record_->headers.end ())
-    {
-      session_data_r.format =
-        HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%s: set compression format: \"%s\"\n"),
-                  inherited::mod_->name (),
-                  ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (session_data_r.format).c_str ())));
-    } // end IF
+//    HTTP_HeadersIterator_t iterator =
+//      inherited2::record_->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
+//    if (iterator != inherited2::record_->headers.end ())
+//    {
+//      session_data_r.format =
+//        HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("%s: set compression format: \"%s\"\n"),
+//                  inherited::mod_->name (),
+//                  ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (session_data_r.format).c_str ())));
+//    } // end IF
 
     // make sure the whole fragment chain references the same data record
     // sanity check(s)

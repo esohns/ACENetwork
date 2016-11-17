@@ -21,11 +21,7 @@ SOURCE_FILE=${SCRIPTS_DIRECTORY}/parser.y
 bison --verbose --graph=parser_graph.txt --xml=parser_graph.xml ${SOURCE_FILE} --report=all --report-file=parser_report.txt --warnings=all
 [ $? -ne 0 ] && echo "ERROR: \"${SOURCE_FILE}\" failed (status was: $?), aborting" && exit 1
 
-# move generated file(s) into the project directory
-#mv -f position.hh ./..
-#mv -f stack.hh ./..
-#mv -f location.hh ./..
-# --> these files are static (*CHECK*) and included by default
+# move the files into the project directory
 #mv -f irc_parser.h/.cpp ./..
 # *NOTE*: a specific method needs to be added to the parser class
 #         --> copy a pre-patched version (back) into the project directory
@@ -43,11 +39,11 @@ SOURCE_FILE=irc_parser.h
 rm -f ${SOURCE_FILE}
 [ $? -ne 0 ] && echo "ERROR: failed to rm \"${SOURCE_FILE}\", aborting" && exit 1
 
+#FILES="irc_parser.cpp irc_parser.h"
 FILES="irc_parser.cpp"
-# move the files into the project directory
 for FILE in $FILES
 do
- mv -f $FILE ${PROJECT_ROOT}
+ mv -f $FILE ${TARGET_DIRECTORY}
  if [ $? -ne 0 ]; then
   echo "ERROR: failed to mv \"$FILE\", aborting"
   exit 1
@@ -55,7 +51,9 @@ do
  echo "moved \"$FILE\"..."
 done
 
-TARGET_DIRECTORY=${PROJECT_ROOT}/3rd_party/bison
+# move generated file(s) into the project directory
+# --> these files are static (*CHECK*) and included by default
+#TARGET_DIRECTORY=${PROJECT_ROOT}/3rd_party/bison
 FILES="location.hh position.hh stack.hh"
 # move the files into the 3rd_party include directory
 for FILE in $FILES
@@ -67,4 +65,3 @@ do
  fi
  echo "moved \"$FILE\"..."
 done
-
